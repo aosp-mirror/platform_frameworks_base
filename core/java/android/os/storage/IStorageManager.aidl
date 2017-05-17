@@ -295,4 +295,5 @@ interface IStorageManager {
     long getCacheSizeBytes(String volumeUuid, int uid) = 76;
     long getAllocatableBytes(String volumeUuid, int flags) = 77;
     void allocateBytes(String volumeUuid, long bytes, int flags) = 78;
+    void secdiscard(in String path) = 79;
 }

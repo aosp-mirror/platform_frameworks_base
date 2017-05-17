@@ -492,6 +492,8 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tamat masa cap jari dicapai. Cuba lagi."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Pengendalian cap jari dibatalkan."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Terlalu banyak percubaan. Cuba sebentar lagi."</string>
+    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
+    <skip />
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Cuba lagi."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Jari <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">

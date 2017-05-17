@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ਬੰਦ"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ਪਾਵਰ ਸੂਚਨਾ ਕੰਟਰੋਲਾਂ ਨਾਲ, ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਦੀਆਂ ਸੂਚਨਾਵਾਂ ਲਈ ਮਹੱਤਤਾ ਪੱਧਰ ਨੂੰ 0 ਤੋਂ 5 ਤੱਕ ਸੈੱਟ ਕਰ ਸਕਦੇ ਹੋ। \n\n"<b>"ਪੱਧਰ 5"</b>" \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਸਿਖਰ \'ਤੇ ਵਿਖਾਓ \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਦੀ ਆਗਿਆ ਦਿਓ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਵਿਖਾਓ \n\n"<b>"ਪੱਧਰ 4"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਵਿਖਾਓ \n\n"<b>"ਪੱਧਰ 3"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਵਿਖਾਓ \n\n"<b>"ਪੱਧਰ 2"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਵਿਖਾਓ \n- ਕਦੇ ਵੀ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n\n"<b>"ਪੱੱਧਰ 1"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਵਿਖਾਓ \n- ਕਦੇ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n- ਲੌਕ ਸਕ੍ਰੀਨ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਤੋਂ ਲੁਕਾਓ \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਹੇਠਾਂ ਵਿਖਾਓ \n\n"<b>"ਪੱਧਰ 0"</b>" \n- ਐਪ ਤੋਂ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬਲੌਕ ਕਰੋ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ਸੂਚਨਾਵਾਂ"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"ਤੁਸੀਂ ਹੁਣ ਇਹ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਨਹੀਂ ਕਰੋਂਗੇ।"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"ਤੁਹਾਨੂੰ ਹੁਣ ਇਹ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਨਹੀਂ ਹੋਣਗੀਆਂ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> ਸੂਚਨਾ ਸ਼੍ਰੇਣੀਆਂ"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ਇਸ ਐਪ ਵਿੱਚ ਸੂਚਨਾ ਸ਼੍ਰੇਣੀਆਂ ਨਹੀਂ ਹਨ"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -700,7 +700,7 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> ਸੂਚਨਾ: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨੂੰ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ।"</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ \'ਤੇ ਕੰਮ ਨਾ ਕਰ ਸਕੇ।"</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ \'ਤੇ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇਆਂ \'ਤੇ ਲਾਂਚ ਕਰਨ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ।"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ।"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਨੂੰ ਖੋਲ੍ਹੋ।"</string>

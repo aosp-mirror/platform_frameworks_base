@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ක්‍රියාවිරහිතයි"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"බල දැනුම්දීම් පාලන සමගින්, ඔබට යෙදුමක දැනුම්දීම් සඳහා වැදගත්කම 0 සිට 5 දක්වා සැකසිය හැකිය. \n\n"<b>"5 මට්ටම"</b>" \n- දැනුම්දීම් ලැයිස්තුවේ ඉහළින්ම පෙන්වන්න \n- පූර්ණ තිර බාධාවට ඉඩ දෙන්න \n- සැම විට එබී බලන්න \n\n"<b>"4 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- සැම විට එබී බලන්න \n\n"<b>"3 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n\n"<b>"2 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n\n"<b>"1 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n- අගුලු තිරය සහ තත්ත්ව තීරුව වෙතින් සඟවන්න \n- දැනුම්දීම් ලැයිස්තුවේ පහළින්ම පෙන්වන්න \n\n"<b>"0 මට්ටම"</b>" \n- යෙදුම වෙතින් වන සියලු දැනුම් දීම් සඟවන්න."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"දැනුම් දීම්"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"ඔබ තවදුරටත් මෙම දැනුම්දීම් නොලැබෙනු ඇත."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"ඔබට තවදුරටත් මෙම දැනුම්දීම් නොලැබෙනු ඇත"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"දැනුම්දීම් කාණ්ඩ <xliff:g id="NUMBER">%d</xliff:g>ක්"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"මෙම යෙදුම හට දැනුම්දීම් ප්‍රවර්ග නොමැත"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

@@ -96,7 +96,7 @@ class TaskChangeNotificationController {
     };
 
     private final TaskStackConsumer mNotifyActivityPinned = (l, m) -> {
-        l.onActivityPinned((String) m.obj);
+        l.onActivityPinned((String) m.obj, m.arg1);
     };
 
     private final TaskStackConsumer mNotifyActivityUnpinned = (l, m) -> {
@@ -279,10 +279,10 @@ class TaskChangeNotificationController {
     }
 
     /** Notifies all listeners when an Activity is pinned. */
-    void notifyActivityPinned(String packageName) {
+    void notifyActivityPinned(String packageName, int taskId) {
         mHandler.removeMessages(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG);
         final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG,
-                packageName);
+                taskId, 0, packageName);
         forAllLocalListeners(mNotifyActivityPinned, msg);
         msg.sendToTarget();
     }

@@ -18,6 +18,8 @@ package com.android.mtp;
 
 import android.annotation.NonNull;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,10 +29,21 @@ import com.android.internal.util.Preconditions;
  * Sends intent to MtpDocumentsService.
  */
 class ServiceIntentSender {
+    private final static String CHANNEL_ID = "device_notification_channel";
     private Context mContext;
 
     ServiceIntentSender(Context context) {
         mContext = context;
+
+        // Create notification channel.
+        final NotificationChannel mChannel = new NotificationChannel(
+                CHANNEL_ID,
+                context.getResources().getString(
+                        com.android.internal.R.string.default_notification_channel_label),
+                NotificationManager.IMPORTANCE_LOW);
+        final NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.createNotificationChannel(mChannel);
     }
 
     /**
@@ -60,12 +73,11 @@ class ServiceIntentSender {
         final String title = context.getResources().getString(
                 R.string.accessing_notification_title,
                 device.name);
-        return new Notification.Builder(context)
+        return new Notification.Builder(context, CHANNEL_ID)
                 .setLocalOnly(true)
                 .setContentTitle(title)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_data_usb)
                 .setCategory(Notification.CATEGORY_SYSTEM)
-                .setPriority(Notification.PRIORITY_LOW)
                 .setFlag(Notification.FLAG_NO_CLEAR, true)
                 .build();
     }

@@ -547,7 +547,8 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * Converts a string representing a file mode, such as "rw", into a bitmask suitable for use
      * with {@link #open}.
      * <p>
-     * @param mode The string representation of the file mode.
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt".
      * @return A bitmask representing the given file mode.
      * @throws IllegalArgumentException if the given string does not match a known file mode.
      */

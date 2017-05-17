@@ -30,7 +30,7 @@ oneway interface ITaskStackListener {
     void onTaskStackChanged();
 
     /** Called whenever an Activity is moved to the pinned stack from another stack. */
-    void onActivityPinned(String packageName);
+    void onActivityPinned(String packageName, int taskId);
 
     /** Called whenever an Activity is moved from the pinned stack to another stack. */
     void onActivityUnpinned();

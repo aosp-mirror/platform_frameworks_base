@@ -22,6 +22,8 @@ import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.util.Slog;
 
+import java.util.List;
+
 class Tuner extends ITuner.Stub {
     // TODO(b/36863239): rename to RadioService.Tuner when native service goes away
     private static final String TAG = "RadioServiceJava.Tuner";
@@ -65,6 +67,12 @@ class Tuner extends ITuner.Stub {
     private native void nativeCancel(long nativeContext);
 
     private native RadioManager.ProgramInfo nativeGetProgramInformation(long nativeContext);
+    private native boolean nativeStartBackgroundScan(long nativeContext);
+    private native List<RadioManager.ProgramInfo> nativeGetProgramList(long nativeContext,
+            String filter);
+
+    private native boolean nativeIsAnalogForced(long nativeContext);
+    private native void nativeSetAnalogForced(long nativeContext, boolean isForced);
 
     @Override
     public void close() {
@@ -166,6 +174,38 @@ class Tuner extends ITuner.Stub {
         synchronized (mLock) {
             checkNotClosedLocked();
             return nativeGetProgramInformation(mNativeContext);
+        }
+    }
+
+    public boolean startBackgroundScan() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return nativeStartBackgroundScan(mNativeContext);
+        }
+    }
+
+    public List<RadioManager.ProgramInfo> getProgramList(String filter) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            List<RadioManager.ProgramInfo> list = nativeGetProgramList(mNativeContext, filter);
+            if (list == null) {
+                throw new IllegalStateException("Program list is not ready");
+            }
+            return list;
+        }
+    }
+
+    public boolean isAnalogForced() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return nativeIsAnalogForced(mNativeContext);
+        }
+    }
+
+    public void setAnalogForced(boolean isForced) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            nativeSetAnalogForced(mNativeContext, isForced);
         }
     }
 }

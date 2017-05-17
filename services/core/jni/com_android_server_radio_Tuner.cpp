@@ -48,6 +48,11 @@ static Mutex gContextMutex;
 
 static struct {
     struct {
+        jclass clazz;
+        jmethodID cstor;
+        jmethodID add;
+    } ArrayList;
+    struct {
         jfieldID nativeContext;
         jfieldID region;
         jfieldID tunerCallback;
@@ -235,6 +240,83 @@ static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativ
     return convert::ProgramInfoFromHal(env, halInfo).release();
 }
 
+static bool nativeStartBackgroundScan(JNIEnv *env, jobject obj, jlong nativeContext) {
+    ALOGV("nativeStartBackgroundScan()");
+    auto halTuner = getHalTuner11(nativeContext);
+    if (halTuner == nullptr) {
+        ALOGI("Background scan is not supported with HAL < 1.1");
+        return false;
+    }
+
+    auto halResult = halTuner->startBackgroundScan();
+
+    if (halResult.isOk() && halResult == ProgramListResult::UNAVAILABLE) return false;
+    return !convert::ThrowIfFailed(env, halResult);
+}
+
+static jobject nativeGetProgramList(JNIEnv *env, jobject obj, jlong nativeContext, jstring jFilter) {
+    ALOGV("nativeGetProgramList()");
+    EnvWrapper wrap(env);
+    auto halTuner = getHalTuner11(nativeContext);
+    if (halTuner == nullptr) {
+        ALOGI("Program list is not supported with HAL < 1.1");
+        return nullptr;
+    }
+
+    JavaRef<jobject> jList;
+    ProgramListResult halResult = ProgramListResult::NOT_INITIALIZED;
+    auto filter = env->GetStringUTFChars(jFilter, nullptr);
+    auto hidlResult = halTuner->getProgramList(filter,
+            [&](ProgramListResult result, const hidl_vec<V1_1::ProgramInfo>& programList) {
+        halResult = result;
+        if (halResult != ProgramListResult::OK) return;
+
+        jList = wrap(env->NewObject(gjni.ArrayList.clazz, gjni.ArrayList.cstor));
+        for (auto& program : programList) {
+            auto jProgram = convert::ProgramInfoFromHal(env, program);
+            env->CallBooleanMethod(jList.get(), gjni.ArrayList.add, jProgram.get());
+        }
+    });
+
+    if (convert::ThrowIfFailed(env, hidlResult, halResult)) return nullptr;
+
+    return jList.release();
+}
+
+static bool nativeIsAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext) {
+    ALOGV("nativeIsAnalogForced()");
+    auto halTuner = getHalTuner11(nativeContext);
+    if (halTuner == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Forced analog switch is not supported with HAL < 1.1");
+        return false;
+    }
+
+    bool isForced;
+    Result halResult;
+    auto hidlResult = halTuner->isAnalogForced([&](Result result, bool isForcedRet) {
+        halResult = result;
+        isForced = isForcedRet;
+    });
+
+    if (convert::ThrowIfFailed(env, hidlResult, halResult)) return false;
+
+    return isForced;
+}
+
+static void nativeSetAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext, bool isForced) {
+    ALOGV("nativeSetAnalogForced()");
+    auto halTuner = getHalTuner11(nativeContext);
+    if (halTuner == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Forced analog switch is not supported with HAL < 1.1");
+        return;
+    }
+
+    auto halResult = halTuner->setAnalogForced(isForced);
+    convert::ThrowIfFailed(env, halResult);
+}
+
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "(I)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
@@ -249,6 +331,11 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeCancel", "(J)V", (void*)nativeCancel },
     { "nativeGetProgramInformation", "(J)Landroid/hardware/radio/RadioManager$ProgramInfo;",
             (void*)nativeGetProgramInformation },
+    { "nativeStartBackgroundScan", "(J)Z", (void*)nativeStartBackgroundScan },
+    { "nativeGetProgramList", "(JLjava/lang/String;)Ljava/util/List;",
+            (void*)nativeGetProgramList },
+    { "nativeIsAnalogForced", "(J)Z", (void*)nativeIsAnalogForced },
+    { "nativeSetAnalogForced", "(JZ)V", (void*)nativeSetAnalogForced },
 };
 
 } // namespace Tuner
@@ -265,6 +352,11 @@ void register_android_server_radio_Tuner(JavaVM *vm, JNIEnv *env) {
     gjni.Tuner.region = GetFieldIDOrDie(env, tunerClass, "mRegion", "I");
     gjni.Tuner.tunerCallback = GetFieldIDOrDie(env, tunerClass, "mTunerCallback",
             "Lcom/android/server/radio/TunerCallback;");
+
+    auto arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
+    gjni.ArrayList.clazz = MakeGlobalRefOrDie(env, arrayListClass);
+    gjni.ArrayList.cstor = GetMethodIDOrDie(env, arrayListClass, "<init>", "()V");
+    gjni.ArrayList.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
     auto res = jniRegisterNativeMethods(env, "com/android/server/radio/Tuner",
             gTunerMethods, NELEM(gTunerMethods));

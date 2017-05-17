@@ -85,6 +85,17 @@ public final class UsageStats implements Parcelable {
         mChooserCounts = stats.mChooserCounts;
     }
 
+    /**
+     * {@hide}
+     */
+    public UsageStats getObfuscatedForInstantApp() {
+        final UsageStats ret = new UsageStats(this);
+
+        ret.mPackageName = UsageEvents.INSTANT_APP_PACKAGE_NAME;
+
+        return ret;
+    }
+
     public String getPackageName() {
         return mPackageName;
     }

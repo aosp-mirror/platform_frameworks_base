@@ -177,7 +177,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
             UserInfo info = users.get(i);
             List<UsageStats> stats =
                     mUsageStats.queryUsageStatsForUser(info.id, UsageStatsManager.INTERVAL_BEST,
-                            oneYearAgo, timeNow);
+                            oneYearAgo, timeNow, /*obfuscateInstantApps=*/ false);
             if (stats == null) {
                 continue;
             }

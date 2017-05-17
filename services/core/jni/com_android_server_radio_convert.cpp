@@ -37,6 +37,7 @@ using V1_0::Direction;
 using V1_0::MetadataType;
 using V1_0::Result;
 using V1_0::Rds;
+using V1_1::ProgramListResult;
 
 static struct {
     struct {
@@ -80,8 +81,7 @@ static struct {
     } RadioMetadata;
 } gjni;
 
-template <typename T>
-static bool ThrowIfFailedHidl(JNIEnv *env, const Return<T> &hidlResult) {
+bool __ThrowIfFailedHidl(JNIEnv *env, const hardware::details::return_status &hidlResult) {
     if (hidlResult.isOk()) return false;
 
     jniThrowExceptionFmt(env, "java/lang/RuntimeException",
@@ -89,7 +89,7 @@ static bool ThrowIfFailedHidl(JNIEnv *env, const Return<T> &hidlResult) {
     return true;
 }
 
-static bool ThrowIfFailed(JNIEnv *env, const Result halResult) {
+bool __ThrowIfFailed(JNIEnv *env, const Result halResult) {
     switch (halResult) {
         case Result::OK:
             return false;
@@ -113,13 +113,20 @@ static bool ThrowIfFailed(JNIEnv *env, const Result halResult) {
     }
 }
 
-bool ThrowIfFailed(JNIEnv *env, const Return<void> &hidlResult, Result halResult) {
-    return ThrowIfFailedHidl(env, hidlResult) || ThrowIfFailed(env, halResult);
-}
-
-bool ThrowIfFailed(JNIEnv *env, const Return<Result> &hidlResult) {
-    return ThrowIfFailedHidl(env, hidlResult)
-            || ThrowIfFailed(env, static_cast<Result>(hidlResult));
+bool __ThrowIfFailed(JNIEnv *env, const ProgramListResult halResult) {
+    switch (halResult) {
+        case ProgramListResult::NOT_READY:
+            jniThrowException(env, "java/lang/IllegalStateException", "Scan is in progress");
+            return true;
+        case ProgramListResult::NOT_STARTED:
+            jniThrowException(env, "java/lang/IllegalStateException", "Scan has not been started");
+            return true;
+        case ProgramListResult::UNAVAILABLE:
+            jniThrowRuntimeException(env, "ProgramListResult::UNAVAILABLE (unexpected here)");
+            return true;
+        default:
+            return __ThrowIfFailed(env, static_cast<Result>(halResult));
+    }
 }
 
 static Rds RdsForRegion(bool rds, Region region) {

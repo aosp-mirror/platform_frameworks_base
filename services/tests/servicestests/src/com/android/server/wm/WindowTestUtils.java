@@ -115,11 +115,11 @@ public class WindowTestUtils {
         }
 
         WindowState getFirstChild() {
-            return mChildren.getFirst();
+            return mChildren.peekFirst();
         }
 
         WindowState getLastChild() {
-            return mChildren.getLast();
+            return mChildren.peekLast();
         }
 
         int positionInParent() {

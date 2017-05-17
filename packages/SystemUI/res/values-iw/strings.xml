@@ -552,7 +552,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"כבוי"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"בעזרת פקדים של הודעות הפעלה, תוכל להגדיר רמת חשיבות מ-0 עד 5 להודעות אפליקציה. \n\n"<b>"רמה 5"</b>" \n- הצג בראש רשימת ההודעות \n- אפשר הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 4"</b>" \n- מנע הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 3"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n\n"<b>"רמה 2"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n\n"<b>"רמה 1"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n- הסתר ממסך הנעילה ומשורת הסטטוס \n- הצג בתחתית רשימת ההודעות \n\n"<b>"רמה 0"</b>" \n- חסום את כל ההודעות מהאפליקציה"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"הודעות"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"לא תקבל את ההודעות האלה יותר."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"לא תקבל את ההודעות האלה יותר"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> קטגוריות של התראות"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"האפליקציה הזו לא תומכת בקטגוריות של הודעות"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

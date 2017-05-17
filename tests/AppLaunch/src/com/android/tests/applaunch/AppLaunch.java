@@ -111,7 +111,6 @@ public class AppLaunch extends InstrumentationTestCase {
 
 
     private Map<String, Intent> mNameToIntent;
-    private Map<String, String> mNameToProcess;
     private List<LaunchOrder> mLaunchOrderList = new ArrayList<LaunchOrder>();
     private Map<String, String> mNameToResultKey;
     private Map<String, List<Long>> mNameToLaunchTime;
@@ -431,7 +430,6 @@ public class AppLaunch extends InstrumentationTestCase {
 
     private void createMappings() {
         mNameToIntent = new LinkedHashMap<String, Intent>();
-        mNameToProcess = new LinkedHashMap<String, String>();
 
         PackageManager pm = getInstrumentation().getContext()
                 .getPackageManager();
@@ -459,8 +457,9 @@ public class AppLaunch extends InstrumentationTestCase {
                         ri.activityInfo.name);
                 String appName = ri.loadLabel(pm).toString();
                 if (appName != null) {
+                    // Support launching intent using package name or app name
+                    mNameToIntent.put(ri.activityInfo.packageName, startIntent);
                     mNameToIntent.put(appName, startIntent);
-                    mNameToProcess.put(appName, ri.activityInfo.processName);
                 }
             }
         }

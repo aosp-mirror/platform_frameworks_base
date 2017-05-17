@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"På"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Med aviseringsinställningarna kan du ange prioritetsnivå från 0 till 5 för aviseringar från en app. \n\n"<b>"Nivå 5"</b>" \n– Visa högst upp i aviseringslistan\n– Tillåt avbrott i helskärmsläge \n– Snabbvisa alltid \n\n"<b>"Nivå 4"</b>" \n– Tillåt inte avbrott i helskärmsläge \n– Snabbvisa alltid \n\n"<b>"Nivå 3"</b>" \n- Tillåt inte avbrott i helskärmsläge \n– Snabbvisa aldrig \n\n"<b>"Nivå 2"</b>" \n– Tillåt inte avbrott i helskärmsläge \n– Snabbvisa aldrig \n– Aldrig med ljud eller vibration \n\n"<b>"Nivå 1"</b>" \n– Tillåt inte avbrott i helskärmsläge \n– Snabbvisa aldrig \n– Aldrig med ljud eller vibration \n– Visa inte på låsskärmen och i statusfältet \n– Visa längst ned i aviseringslistan \n\n"<b>"Nivå 0"</b>" \n– Blockera alla aviseringar från appen"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Aviseringar"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Inga fler aviseringar av det här slaget visas."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Inga fler aviseringar av det här slaget visas"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> aviseringskategorier"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Det finns inga aviseringskategorier i appen"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

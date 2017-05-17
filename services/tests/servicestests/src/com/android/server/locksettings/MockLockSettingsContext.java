@@ -21,19 +21,23 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 
 public class MockLockSettingsContext extends ContextWrapper {
 
     private UserManager mUserManager;
     private NotificationManager mNotificationManager;
     private DevicePolicyManager mDevicePolicyManager;
+    private StorageManager mStorageManager;
 
     public MockLockSettingsContext(Context base, UserManager userManager,
-            NotificationManager notificationManager, DevicePolicyManager devicePolicyManager) {
+            NotificationManager notificationManager, DevicePolicyManager devicePolicyManager,
+            StorageManager storageManager) {
         super(base);
         mUserManager = userManager;
         mNotificationManager = notificationManager;
         mDevicePolicyManager = devicePolicyManager;
+        mStorageManager = storageManager;
     }
 
     @Override
@@ -44,6 +48,8 @@ public class MockLockSettingsContext extends ContextWrapper {
             return mNotificationManager;
         } else if (DEVICE_POLICY_SERVICE.equals(name)) {
             return mDevicePolicyManager;
+        } else if (STORAGE_SERVICE.equals(name)) {
+            return mStorageManager;
         } else {
             throw new RuntimeException("System service not mocked: " + name);
         }

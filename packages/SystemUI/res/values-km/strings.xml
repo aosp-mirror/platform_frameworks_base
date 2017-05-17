@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"បិទ"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ជាមួយអង្គគ្រប់គ្រងការជូនដំណឹងថាមពល អ្នកអាចកំណត់កម្រិតសំខាន់ពី 0 ទៅ 5 សម្រាប់ការជូនដំណឹងរបស់កម្មវិធី។ \n\n"<b>"កម្រិត 5"</b>" \n- បង្ហាញនៅផ្នែកខាងលើបញ្ជីជូនដំណឹង \n- អនុញ្ញាតការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 4"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 3"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 2"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n\n"<b>"កម្រិត 1"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n- លាក់ពីអេក្រង់ចាក់សោ និងរបារស្ថានភាព \n- បង្ហាញនៅផ្នែកខាងក្រោមបញ្ជីជូនដំណឹង \n\n"<b>"កម្រិត 0"</b>" \n- រារាំងការជូនដំណឹងទាំងអស់ពីកម្មវិធី"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ការ​ជូនដំណឹង"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"អ្នក​នឹង​មិន​ទទួល​បាន​ការ​ជូនដំណឹង​ទាំងនេះ​ទៀត​ទេ។"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"អ្នក​នឹង​មិន​ទទួល​បានការ​ជូនដំណឹង​ទាំងនេះ​ទៀត​ទេ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"ប្រភេទនៃការជូនដំណឹងចំនួន <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"កម្មវិធីនេះ​មិនមាន​ប្រភេទនៃ​ការជូនដំណឹង​ទេ"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

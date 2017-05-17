@@ -560,6 +560,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // with it will be removed as soon as their animations are complete
             mAppAnimator.clearAnimation();
             mAppAnimator.animating = false;
+            if (stack != null) {
+                stack.mExitingAppTokens.remove(this);
+            }
             removeIfPossible();
         }
 

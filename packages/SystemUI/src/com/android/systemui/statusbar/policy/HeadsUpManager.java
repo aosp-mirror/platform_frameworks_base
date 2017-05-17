@@ -257,6 +257,12 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mEntryPool.release(remove);
     }
 
+    public void removeAllHeadsUpEntries() {
+        for (String key : mHeadsUpEntries.keySet()) {
+            removeHeadsUpEntry(mHeadsUpEntries.get(key).entry);
+        }
+    }
+
     private void updatePinnedMode() {
         boolean hasPinnedNotification = hasPinnedNotificationInternal();
         if (hasPinnedNotification == mHasPinnedNotification) {

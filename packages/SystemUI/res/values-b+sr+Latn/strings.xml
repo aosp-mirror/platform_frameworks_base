@@ -550,7 +550,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Isključeno"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Pomoću naprednih kontrola za obaveštenja možete da podesite nivo važnosti od 0. do 5. za obaveštenja aplikacije. \n\n"<b>"5. nivo"</b>" \n– Prikazuju se u vrhu liste obaveštenja \n- Dozvoli prekid režima celog ekrana \n– Uvek zaviruj \n\n"<b>"4. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Uvek zaviruj \n\n"<b>"3. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Nikada ne zaviruj \n\n"<b>"2. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Nikada ne zaviruj \n– Nikada ne proizvodi zvuk ili vibraciju \n\n"<b>"1. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Nikada ne zaviruj \n– Nikada ne proizvodi zvuk ili vibraciju \n– Sakrij na zaključanom ekranu i statusnoj traci \n– Prikazuju se u dnu liste obaveštenja \n\n"<b>"0. nivo"</b>" \n– Blokiraj sva obaveštenja iz aplikacije"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Obaveštenja"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Više nećete da dobijate ova obaveštenja."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Više nećete dobijati ova obaveštenja"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Kategorija obaveštenja: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Ova aplikacija nema kategorije obaveštenja"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

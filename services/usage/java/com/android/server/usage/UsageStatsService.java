@@ -39,6 +39,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
@@ -80,6 +81,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.File;
@@ -137,6 +139,7 @@ public class UsageStatsService extends SystemService implements
     AppOpsManager mAppOps;
     UserManager mUserManager;
     PackageManager mPackageManager;
+    PackageManagerInternal mPackageManagerInternal;
     AppWidgetManager mAppWidgetManager;
     IDeviceIdleController mDeviceIdleController;
     private DisplayManager mDisplayManager;
@@ -179,6 +182,7 @@ public class UsageStatsService extends SystemService implements
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mPackageManager = getContext().getPackageManager();
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mHandler = new H(BackgroundThread.get().getLooper());
 
         File systemDataDir = new File(Environment.getDataDirectory(), "system");
@@ -405,6 +409,10 @@ public class UsageStatsService extends SystemService implements
                 }
             }
         }
+    }
+
+    private boolean shouldObfuscateInstantAppsForCaller(int callingUid) {
+        return !mPackageManagerInternal.canAccessInstantApps(callingUid);
     }
 
     void clearAppIdleForPackage(String packageName, int userId) {
@@ -704,6 +712,11 @@ public class UsageStatsService extends SystemService implements
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             convertToSystemTimeLocked(event);
 
+            if (event.getPackageName() != null
+                    && mPackageManagerInternal.isPackageEphemeral(userId, event.getPackageName())) {
+                event.mFlags |= Event.FLAG_IS_PACKAGE_INSTANT_APP;
+            }
+
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             service.reportEvent(event);
@@ -807,7 +820,8 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
-    List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime) {
+    List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime,
+            boolean obfuscateInstantApps) {
         synchronized (mLock) {
             final long timeNow = checkAndGetTimeLocked();
             if (!validRange(timeNow, beginTime, endTime)) {
@@ -816,7 +830,20 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
-            return service.queryUsageStats(bucketType, beginTime, endTime);
+            List<UsageStats> list = service.queryUsageStats(bucketType, beginTime, endTime);
+
+            // Mangle instant app names *using their current state (not whether they were ephemeral
+            // when the data was recorded)*.
+            if (obfuscateInstantApps) {
+                for (int i = list.size() - 1; i >= 0; i--) {
+                    final UsageStats stats = list.get(i);
+                    if (mPackageManagerInternal.isPackageEphemeral(userId, stats.mPackageName)) {
+                        list.set(i, stats.getObfuscatedForInstantApp());
+                    }
+                }
+            }
+
+            return list;
         }
     }
 
@@ -840,7 +867,8 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
-    UsageEvents queryEvents(int userId, long beginTime, long endTime) {
+    UsageEvents queryEvents(int userId, long beginTime, long endTime,
+            boolean shouldObfuscateInstantApps) {
         synchronized (mLock) {
             final long timeNow = checkAndGetTimeLocked();
             if (!validRange(timeNow, beginTime, endTime)) {
@@ -849,7 +877,7 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
-            return service.queryEvents(beginTime, endTime);
+            return service.queryEvents(beginTime, endTime, shouldObfuscateInstantApps);
         }
     }
 
@@ -884,8 +912,13 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    boolean isAppIdleFilteredOrParoled(String packageName, int userId, long elapsedRealtime) {
+    boolean isAppIdleFilteredOrParoled(String packageName, int userId, long elapsedRealtime,
+            boolean shouldObfuscateInstantApps) {
         if (isParoledOrCharging()) {
+            return false;
+        }
+        if (shouldObfuscateInstantApps &&
+                mPackageManagerInternal.isPackageEphemeral(userId, packageName)) {
             return false;
         }
         return isAppIdleFiltered(packageName, getAppId(packageName), userId, elapsedRealtime);
@@ -1353,11 +1386,14 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
+                    Binder.getCallingUid());
+
             final int userId = UserHandle.getCallingUserId();
             final long token = Binder.clearCallingIdentity();
             try {
                 final List<UsageStats> results = UsageStatsService.this.queryUsageStats(
-                        userId, bucketType, beginTime, endTime);
+                        userId, bucketType, beginTime, endTime, obfuscateInstantApps);
                 if (results != null) {
                     return new ParceledListSlice<>(results);
                 }
@@ -1395,10 +1431,14 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
+                    Binder.getCallingUid());
+
             final int userId = UserHandle.getCallingUserId();
             final long token = Binder.clearCallingIdentity();
             try {
-                return UsageStatsService.this.queryEvents(userId, beginTime, endTime);
+                return UsageStatsService.this.queryEvents(userId, beginTime, endTime,
+                        obfuscateInstantApps);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1412,10 +1452,12 @@ public class UsageStatsService extends SystemService implements
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
+                    Binder.getCallingUid());
             final long token = Binder.clearCallingIdentity();
             try {
                 return UsageStatsService.this.isAppIdleFilteredOrParoled(packageName, userId,
-                        SystemClock.elapsedRealtime());
+                        SystemClock.elapsedRealtime(), obfuscateInstantApps);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1647,9 +1689,10 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public List<UsageStats> queryUsageStatsForUser(
-                int userId, int intervalType, long beginTime, long endTime) {
+                int userId, int intervalType, long beginTime, long endTime,
+                boolean obfuscateInstantApps) {
             return UsageStatsService.this.queryUsageStats(
-                    userId, intervalType, beginTime, endTime);
+                    userId, intervalType, beginTime, endTime, obfuscateInstantApps);
         }
     }
 }

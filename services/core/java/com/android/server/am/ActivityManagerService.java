@@ -5432,7 +5432,35 @@ public class ActivityManagerService extends IActivityManager.Stub
             return null;
         }
 
-        dumpStackTraces(tracesPath, firstPids, processCpuTracker, lastPids, nativePids);
+        ArrayList<Integer> extraPids = null;
+
+        // Lastly, measure CPU usage.
+        if (processCpuTracker != null) {
+            processCpuTracker.init();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ignored) {
+            }
+
+            processCpuTracker.update();
+
+            // We'll take the stack crawls of just the top apps using CPU.
+            final int N = processCpuTracker.countWorkingStats();
+            extraPids = new ArrayList<>();
+            for (int i = 0; i < N && extraPids.size() < 5; i++) {
+                ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
+                if (lastPids.indexOfKey(stats.pid) >= 0) {
+                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + stats.pid);
+
+                    extraPids.add(stats.pid);
+                } else if (DEBUG_ANR) {
+                    Slog.d(TAG, "Skipping next CPU consuming process, not a java proc: "
+                            + stats.pid);
+                }
+            }
+        }
+
+        dumpStackTraces(tracesPath, firstPids, nativePids, extraPids);
         return tracesFile;
     }
 
@@ -5494,8 +5522,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private static void dumpStackTraces(String tracesPath, ArrayList<Integer> firstPids,
-            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
-            ArrayList<Integer> nativePids) {
+            ArrayList<Integer> nativePids, ArrayList<Integer> extraPids) {
         // Use a FileObserver to detect when traces finish writing.
         // The order of traces is considered important to maintain for legibility.
         DumpStackFileObserver observer = new DumpStackFileObserver(tracesPath);
@@ -5551,43 +5578,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            // Lastly, measure CPU usage.
-            if (processCpuTracker != null) {
-                processCpuTracker.init();
-                System.gc();
-                processCpuTracker.update();
-                try {
-                    synchronized (processCpuTracker) {
-                        processCpuTracker.wait(500); // measure over 1/2 second.
-                    }
-                } catch (InterruptedException e) {
-                }
-                processCpuTracker.update();
+            // Lastly, dump stacks for all extra PIDs from the CPU tracker.
+            if (extraPids != null) {
+                for (int pid : extraPids) {
+                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + pid);
 
-                // We'll take the stack crawls of just the top apps using CPU.
-                final int N = processCpuTracker.countWorkingStats();
-                int numProcs = 0;
-                for (int i=0; i<N && numProcs<5; i++) {
-                    ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
-                    if (lastPids.indexOfKey(stats.pid) >= 0) {
-                        numProcs++;
-
-                        if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + stats.pid);
-
-                        final long timeTaken = observer.dumpWithTimeout(stats.pid, remainingTime);
-                        remainingTime -= timeTaken;
-                        if (remainingTime <= 0) {
-                            Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + stats.pid +
+                    final long timeTaken = observer.dumpWithTimeout(pid, remainingTime);
+                    remainingTime -= timeTaken;
+                    if (remainingTime <= 0) {
+                        Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + pid +
                                 "); deadline exceeded.");
-                            return;
-                        }
+                        return;
+                    }
 
-                        if (DEBUG_ANR) {
-                            Slog.d(TAG, "Done with extra pid " + stats.pid + " in " + timeTaken + "ms");
-                        }
-                    } else if (DEBUG_ANR) {
-                        Slog.d(TAG, "Skipping next CPU consuming process, not a java proc: "
-                                + stats.pid);
+                    if (DEBUG_ANR) {
+                        Slog.d(TAG, "Done with extra pid " + pid + " in " + timeTaken + "ms");
                     }
                 }
             }
@@ -5639,7 +5644,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (app != null) {
                 ArrayList<Integer> firstPids = new ArrayList<Integer>();
                 firstPids.add(app.pid);
-                dumpStackTraces(tracesPath, firstPids, null, null, null);
+                dumpStackTraces(tracesPath, firstPids, null, null);
             }
 
             File lastTracesFile = null;

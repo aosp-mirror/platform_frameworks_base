@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Mati"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Dengan kawalan pemberitahuan berkuasa, anda boleh menetapkan tahap kepentingan dari 0 hingga 5 untuk pemberitahuan apl. \n\n"<b>"Tahap 5"</b>" \n- Tunjukkan pada bahagian atas senarai pemberitahuan \n- Benarkan gangguan skrin penuh \n- Sentiasa intai \n\n"<b>"Tahap 4"</b>" \n- Halang gangguan skrin penuh \n- Sentiasa intai \n\n"<b>"Tahap 3"</b>" \n- Halang gangguan skrin penuh \n- Jangan intai \n\n"<b>"Tahap 2"</b>" \n- Halang gangguan skrin penuh \n- Jangan intai \n- Jangan berbunyi dan bergetar \n\n"<b>"Tahap 1"</b>" \n- Halang gangguan skrin penuh \n- Jangan intai \n- Jangan berbunyi atau bergetar \n- Sembunyikan daripada skrin kunci dan bar status \n- Tunjukkan di bahagian bawah senarai pemberitahuan \n\n"<b>"Tahap 0"</b>" \n- Sekat semua pemberitahuan daripada apl"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Pemberitahuan"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Anda tidak akan menerima pemberitahuan ini lagi."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Anda tidak akan menerima pemberitahuan ini lagi"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> kategori pemberitahuan"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Apl ini tiada kategori pemberitahuan"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">

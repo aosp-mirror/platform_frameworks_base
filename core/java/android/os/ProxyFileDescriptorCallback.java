@@ -22,7 +22,23 @@ import android.system.OsConstants;
 /**
  * Callback that handles file system requests from ProxyFileDescriptor.
  *
- * @see android.os.storage.StorageManager#openProxyFileDescriptor(int, ProxyFileDescriptorCallback)
+ * All callback methods except for onRelease should throw {@link android.system.ErrnoException}
+ * with proper errno on errors. See
+ * <a href="http://man7.org/linux/man-pages/man3/errno.3.html">errno(3)</a> and
+ * {@link android.system.OsConstants}.
+ *
+ * Typical errnos are
+ *
+ * <ul>
+ * <li>{@link android.system.OsConstants#EIO} for general I/O issues
+ * <li>{@link android.system.OsConstants#ENOENT} when the file is not found
+ * <li>{@link android.system.OsConstants#EBADF} if the file doesn't allow read/write operations
+ *     based on how it was opened.  (For example, trying to write a file that was opened read-only.)
+ * <li>{@link android.system.OsConstants#ENOSPC} if you cannot handle a write operation to
+ *     space/quota limitations.
+ * </ul>
+ * @see android.os.storage.StorageManager#openProxyFileDescriptor(int, ProxyFileDescriptorCallback,
+ *     Handler)
  */
 public abstract class ProxyFileDescriptorCallback {
     /**

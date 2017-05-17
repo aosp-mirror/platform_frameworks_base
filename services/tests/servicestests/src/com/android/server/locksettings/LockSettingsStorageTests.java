@@ -28,6 +28,7 @@ import android.content.pm.UserInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.FileUtils;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.test.AndroidTestCase;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -69,7 +70,8 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         when(mockUserManager.getProfileParent(eq(3))).thenReturn(new UserInfo(0, "name", 0));
 
         MockLockSettingsContext context = new MockLockSettingsContext(getContext(), mockUserManager,
-                mock(NotificationManager.class), mock(DevicePolicyManager.class));
+                mock(NotificationManager.class), mock(DevicePolicyManager.class),
+                mock(StorageManager.class));
         mStorage = new LockSettingsStorageTestable(context,
                 new File(getContext().getFilesDir(), "locksettings"));
         mStorage.setDatabaseOnCreateCallback(new LockSettingsStorage.Callback() {
@@ -336,7 +338,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertArrayEquals(data, mStorage.readSyntheticPasswordState(10, 1234L, "state"));
         assertEquals(null, mStorage.readSyntheticPasswordState(0, 1234L, "state"));
 
-        mStorage.deleteSyntheticPasswordState(10, 1234L, "state", true);
+        mStorage.deleteSyntheticPasswordState(10, 1234L, "state");
         assertEquals(null, mStorage.readSyntheticPasswordState(10, 1234L, "state"));
     }
 

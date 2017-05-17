@@ -21,6 +21,7 @@ import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -46,12 +47,14 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.testng.Assert.assertThrows;
 
 /**
  * A test for broadcast radio API.
  */
 @RunWith(AndroidJUnit4.class)
 public class RadioTest {
+    private static final String TAG = "RadioTest";
 
     public final Context mContext = InstrumentationRegistry.getContext();
 
@@ -61,6 +64,7 @@ public class RadioTest {
 
     private RadioManager mRadioManager;
     private RadioTuner mRadioTuner;
+    private RadioManager.ModuleProperties mModule;
     private final List<RadioManager.ModuleProperties> mModules = new ArrayList<>();
     @Mock private RadioTuner.Callback mCallback;
 
@@ -111,8 +115,8 @@ public class RadioTest {
         assertNull(mRadioTuner);
 
         // find FM band and build its config
-        RadioManager.ModuleProperties module = mModules.get(0);
-        for (RadioManager.BandDescriptor band : module.getBands()) {
+        mModule = mModules.get(0);
+        for (RadioManager.BandDescriptor band : mModule.getBands()) {
             if (band.getType() == RadioManager.BAND_AM) {
                 mAmBandDescriptor = (RadioManager.AmBandDescriptor)band;
             }
@@ -125,7 +129,7 @@ public class RadioTest {
         mAmBandConfig = new RadioManager.AmBandConfig.Builder(mAmBandDescriptor).build();
         mFmBandConfig = new RadioManager.FmBandConfig.Builder(mFmBandDescriptor).build();
 
-        mRadioTuner = mRadioManager.openTuner(module.getId(),
+        mRadioTuner = mRadioManager.openTuner(mModule.getId(),
                 mFmBandConfig, withAudio, mCallback, null);
         assertNotNull(mRadioTuner);
         verify(mCallback, timeout(kConfigCallbackTimeoutMs)).onConfigurationChanged(any());
@@ -317,5 +321,56 @@ public class RadioTest {
 
         verify(mCallback, after(kCancelTimeoutMs).atMost(1)).onError(RadioTuner.ERROR_CANCELLED);
         verify(mCallback, atMost(1)).onProgramInfoChanged(any());
+    }
+
+    @Test
+    public void testStartBackgroundScan() {
+        openTuner();
+        checkAntenna();
+
+        boolean ret = mRadioTuner.startBackgroundScan();
+        boolean isSupported = mModule.isBackgroundScanningSupported();
+        assertEquals(isSupported, ret);
+    }
+
+    @Test
+    public void testGetProgramList() {
+        openTuner();
+        checkAntenna();
+
+        try {
+            List<RadioManager.ProgramInfo> list = mRadioTuner.getProgramList(null);
+            assertNotNull(list);
+        } catch (IllegalStateException e) {
+            // the list may or may not be ready at this point
+            Log.i(TAG, "Background list is not ready");
+        }
+    }
+
+    @Test
+    public void testForcedAnalog() {
+        openTuner();
+
+        boolean isSupported = true;
+        boolean isForced;
+        try {
+            isForced = mRadioTuner.isAnalogForced();
+            assertFalse(isForced);
+        } catch (IllegalStateException ex) {
+            Log.i(TAG, "Forced analog switch is not supported by this tuner");
+            isSupported = false;
+        }
+
+        if (isSupported) {
+            mRadioTuner.setAnalogForced(true);
+            isForced = mRadioTuner.isAnalogForced();
+            assertTrue(isForced);
+
+            mRadioTuner.setAnalogForced(false);
+            isForced = mRadioTuner.isAnalogForced();
+            assertFalse(isForced);
+        } else {
+            assertThrows(IllegalStateException.class, () -> mRadioTuner.setAnalogForced(true));
+        }
     }
 }

@@ -1158,6 +1158,9 @@ public class RankingHelper implements RankingConfig {
 
     public boolean badgingEnabled(UserHandle userHandle) {
         int userId = userHandle.getIdentifier();
+        if (userId == UserHandle.USER_ALL) {
+            return false;
+        }
         if (mBadgingEnabled.indexOfKey(userId) < 0) {
             mBadgingEnabled.put(userId,
                     Secure.getIntForUser(mContext.getContentResolver(),
