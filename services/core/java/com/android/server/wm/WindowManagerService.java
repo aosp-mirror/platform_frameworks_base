@@ -1521,7 +1521,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Try using the target SDK of the root window
         if (attachedWindow != null) {
             return attachedWindow.mAppToken != null
-                    && attachedWindow.mAppToken.mTargetSdk > Build.VERSION_CODES.N_MR1;
+                    && attachedWindow.mAppToken.mTargetSdk >= Build.VERSION_CODES.O;
         } else {
             // Otherwise, look at the package
             try {
@@ -1532,7 +1532,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new SecurityException("Package " + packageName + " not in UID "
                             + callingUid);
                 }
-                if (appInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1) {
+                if (appInfo.targetSdkVersion >= Build.VERSION_CODES.O) {
                     return true;
                 }
             } catch (PackageManager.NameNotFoundException e) {

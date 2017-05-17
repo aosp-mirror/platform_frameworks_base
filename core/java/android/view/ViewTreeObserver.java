@@ -334,7 +334,7 @@ public final class ViewTreeObserver {
      */
     ViewTreeObserver(Context context) {
         sIllegalOnDrawModificationIsFatal =
-                context.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.N_MR1;
+                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.O;
     }
 
     /**

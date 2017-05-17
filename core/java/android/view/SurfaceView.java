@@ -856,7 +856,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
      */
     @Deprecated
     public void setWindowType(int type) {
-        if (getContext().getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.N_MR1) {
+        if (getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.O) {
             throw new UnsupportedOperationException(
                     "SurfaceView#setWindowType() has never been a public API.");
         }
