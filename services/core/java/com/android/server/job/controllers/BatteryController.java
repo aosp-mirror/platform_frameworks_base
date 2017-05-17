@@ -93,34 +93,31 @@ public class BatteryController extends StateController {
         }
     }
 
-    private void maybeReportNewChargingState() {
+    private void maybeReportNewChargingStateLocked() {
         final boolean stablePower = mChargeTracker.isOnStablePower();
         final boolean batteryNotLow = mChargeTracker.isBatteryNotLow();
         if (DEBUG) {
-            Slog.d(TAG, "maybeReportNewChargingState: " + stablePower);
+            Slog.d(TAG, "maybeReportNewChargingStateLocked: " + stablePower);
         }
         boolean reportChange = false;
-        synchronized (mLock) {
-            for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
-                final JobStatus ts = mTrackedTasks.valueAt(i);
-                boolean previous = ts.setChargingConstraintSatisfied(stablePower);
-                if (previous != stablePower) {
-                    reportChange = true;
-                }
-                previous = ts.setBatteryNotLowConstraintSatisfied(batteryNotLow);
-                if (previous != batteryNotLow) {
-                    reportChange = true;
-                }
+        for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
+            final JobStatus ts = mTrackedTasks.valueAt(i);
+            boolean previous = ts.setChargingConstraintSatisfied(stablePower);
+            if (previous != stablePower) {
+                reportChange = true;
+            }
+            previous = ts.setBatteryNotLowConstraintSatisfied(batteryNotLow);
+            if (previous != batteryNotLow) {
+                reportChange = true;
             }
         }
-        // Let the scheduler know that state has changed. This may or may not result in an
-        // execution.
-        if (reportChange) {
-            mStateChangedListener.onControllerStateChanged();
-        }
-        // Also tell the scheduler that any ready jobs should be flushed.
         if (stablePower || batteryNotLow) {
+            // If one of our conditions has been satisfied, always schedule any newly ready jobs.
             mStateChangedListener.onRunJobNow(null);
+        } else if (reportChange) {
+            // Otherwise, just let the job scheduler know the state has changed and take care of it
+            // as it thinks is best.
+            mStateChangedListener.onControllerStateChanged();
         }
     }
 
@@ -201,38 +198,42 @@ public class BatteryController extends StateController {
 
         @VisibleForTesting
         public void onReceiveInternal(Intent intent) {
-            final String action = intent.getAction();
-            if (Intent.ACTION_BATTERY_LOW.equals(action)) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Battery life too low to do work. @ "
-                            + SystemClock.elapsedRealtime());
+            synchronized (mLock) {
+                final String action = intent.getAction();
+                if (Intent.ACTION_BATTERY_LOW.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Battery life too low to do work. @ "
+                                + SystemClock.elapsedRealtime());
+                    }
+                    // If we get this action, the battery is discharging => it isn't plugged in so
+                    // there's no work to cancel. We track this variable for the case where it is
+                    // charging, but hasn't been for long enough to be healthy.
+                    mBatteryHealthy = false;
+                    maybeReportNewChargingStateLocked();
+                } else if (Intent.ACTION_BATTERY_OKAY.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Battery life healthy enough to do work. @ "
+                                + SystemClock.elapsedRealtime());
+                    }
+                    mBatteryHealthy = true;
+                    maybeReportNewChargingStateLocked();
+                } else if (BatteryManager.ACTION_CHARGING.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Received charging intent, fired @ "
+                                + SystemClock.elapsedRealtime());
+                    }
+                    mCharging = true;
+                    maybeReportNewChargingStateLocked();
+                } else if (BatteryManager.ACTION_DISCHARGING.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Disconnected from power.");
+                    }
+                    mCharging = false;
+                    maybeReportNewChargingStateLocked();
                 }
-                // If we get this action, the battery is discharging => it isn't plugged in so
-                // there's no work to cancel. We track this variable for the case where it is
-                // charging, but hasn't been for long enough to be healthy.
-                mBatteryHealthy = false;
-            } else if (Intent.ACTION_BATTERY_OKAY.equals(action)) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Battery life healthy enough to do work. @ "
-                            + SystemClock.elapsedRealtime());
-                }
-                mBatteryHealthy = true;
-                maybeReportNewChargingState();
-            } else if (BatteryManager.ACTION_CHARGING.equals(action)) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Received charging intent, fired @ "
-                            + SystemClock.elapsedRealtime());
-                }
-                mCharging = true;
-                maybeReportNewChargingState();
-            } else if (BatteryManager.ACTION_DISCHARGING.equals(action)) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Disconnected from power.");
-                }
-                mCharging = false;
-                maybeReportNewChargingState();
+                mLastBatterySeq = intent.getIntExtra(BatteryManager.EXTRA_SEQUENCE,
+                        mLastBatterySeq);
             }
-            mLastBatterySeq = intent.getIntExtra(BatteryManager.EXTRA_SEQUENCE, mLastBatterySeq);
         }
     }
 
