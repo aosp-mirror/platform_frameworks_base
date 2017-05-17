@@ -145,7 +145,7 @@ static bool LoadInputFilesFromDir(IAaptContext* context, const CompileOptions& o
   const std::string& root_dir = options.res_dir.value();
   std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
   if (!d) {
-    context->GetDiagnostics()->Error(DiagMessage()
+    context->GetDiagnostics()->Error(DiagMessage(root_dir) << "failed to open directory: "
                                      << android::base::SystemErrorCodeToString(errno));
     return false;
   }
@@ -164,7 +164,7 @@ static bool LoadInputFilesFromDir(IAaptContext* context, const CompileOptions& o
 
     std::unique_ptr<DIR, decltype(closedir)*> subdir(opendir(prefix_path.data()), closedir);
     if (!subdir) {
-      context->GetDiagnostics()->Error(DiagMessage()
+      context->GetDiagnostics()->Error(DiagMessage(prefix_path) << "failed to open directory: "
                                        << android::base::SystemErrorCodeToString(errno));
       return false;
     }
@@ -180,7 +180,7 @@ static bool LoadInputFilesFromDir(IAaptContext* context, const CompileOptions& o
       std::string err_str;
       Maybe<ResourcePathData> path_data = ExtractResourcePathData(full_path, &err_str);
       if (!path_data) {
-        context->GetDiagnostics()->Error(DiagMessage() << err_str);
+        context->GetDiagnostics()->Error(DiagMessage(full_path) << err_str);
         return false;
       }
 
@@ -198,6 +198,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     std::ifstream fin(path_data.source.path, std::ifstream::binary);
     if (!fin) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
+                                       << "failed to open file: "
                                        << android::base::SystemErrorCodeToString(errno));
       return false;
     }
@@ -395,6 +396,7 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
     std::ifstream fin(path_data.source.path, std::ifstream::binary);
     if (!fin) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
+                                       << "failed to open file: "
                                        << android::base::SystemErrorCodeToString(errno));
       return false;
     }
@@ -480,6 +482,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     std::string content;
     if (!android::base::ReadFileToString(path_data.source.path, &content)) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
+                                       << "failed to open file: "
                                        << android::base::SystemErrorCodeToString(errno));
       return false;
     }
