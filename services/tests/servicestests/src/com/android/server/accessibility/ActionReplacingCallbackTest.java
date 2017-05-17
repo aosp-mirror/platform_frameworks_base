@@ -25,6 +25,9 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -45,12 +48,13 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
@@ -63,14 +67,49 @@ public class ActionReplacingCallbackTest {
     private static final int NON_ROOT_NODE_ID = 0xAAAA5555;
     private static final long INTERROGATING_TID = 0x1234FACE;
 
-    private static final AccessibilityAction[] ACTIONS_FROM_REPLACER =
-            {ACTION_CLICK, ACTION_EXPAND};
-    private static final AccessibilityAction[] A11Y_FOCUS_ACTIONS =
-            {ACTION_ACCESSIBILITY_FOCUS, ACTION_CLEAR_ACCESSIBILITY_FOCUS};
     // We expect both the replacer actions and a11y focus actions to appear
     private static final AccessibilityAction[] REQUIRED_ACTIONS_ON_ROOT_TO_SERVICE =
             {ACTION_CLICK, ACTION_EXPAND, ACTION_ACCESSIBILITY_FOCUS,
                     ACTION_CLEAR_ACCESSIBILITY_FOCUS};
+
+    private static final Matcher<AccessibilityNodeInfo> HAS_NO_ACTIONS =
+            new BaseMatcher<AccessibilityNodeInfo>() {
+        @Override
+        public boolean matches(Object o) {
+            AccessibilityNodeInfo node = (AccessibilityNodeInfo) o;
+            if (!node.getActionList().isEmpty()) return false;
+            return (!node.isScrollable() && !node.isLongClickable() && !node.isClickable()
+                    && !node.isContextClickable() && !node.isDismissable() && !node.isFocusable());
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Has no actions");
+        }
+    };
+
+    private static final Matcher<AccessibilityNodeInfo> HAS_EXPECTED_ACTIONS_ON_ROOT =
+            new BaseMatcher<AccessibilityNodeInfo>() {
+                @Override
+                public boolean matches(Object o) {
+                    AccessibilityNodeInfo node = (AccessibilityNodeInfo) o;
+                    List<AccessibilityAction> actions = node.getActionList();
+                    if ((actions.size() != 4) || !actions.contains(ACTION_CLICK)
+                            || !actions.contains(ACTION_EXPAND)
+                            || !actions.contains(ACTION_ACCESSIBILITY_FOCUS)) {
+                        return false;
+                    }
+                    return (!node.isScrollable() && !node.isLongClickable()
+                            && !node.isLongClickable() && node.isClickable()
+                            && !node.isContextClickable() && !node.isDismissable()
+                            && !node.isFocusable());
+                }
+
+                @Override
+                public void describeTo(Description description) {
+                    description.appendText("Has only 4 actions expected on root");
+                }
+            };
 
     @Mock IAccessibilityInteractionConnectionCallback mMockServiceCallback;
     @Mock IAccessibilityInteractionConnection mMockReplacerConnection;
@@ -118,9 +157,10 @@ public class ActionReplacingCallbackTest {
                 eq(INTERACTION_ID));
         AccessibilityNodeInfo infoSentToService = mInfoCaptor.getValue();
         assertEquals(AccessibilityNodeInfo.ROOT_NODE_ID, infoSentToService.getSourceNodeId());
-        assertInfoHasExactlyTheseActions(infoSentToService, REQUIRED_ACTIONS_ON_ROOT_TO_SERVICE);
+        assertThat(infoSentToService, HAS_EXPECTED_ACTIONS_ON_ROOT);
     }
 
+    @Test
     public void testCallbacks_singleNonrootNodeThenReplacer_returnsNodeWithNoActions()
             throws RemoteException {
         AccessibilityNodeInfo infoFromApp = AccessibilityNodeInfo.obtain();
@@ -136,9 +176,10 @@ public class ActionReplacingCallbackTest {
                 eq(INTERACTION_ID));
         AccessibilityNodeInfo infoSentToService = mInfoCaptor.getValue();
         assertEquals(NON_ROOT_NODE_ID, infoSentToService.getSourceNodeId());
-        assertTrue(infoSentToService.getActionList().isEmpty());
+        assertThat(infoSentToService, HAS_NO_ACTIONS);
     }
 
+    @Test
     public void testCallbacks_replacerThenSingleRootNode_returnsNodeWithReplacedActions()
             throws RemoteException {
         mActionReplacingCallback.setFindAccessibilityNodeInfosResult(getReplacerNodes(),
@@ -154,9 +195,10 @@ public class ActionReplacingCallbackTest {
                 eq(INTERACTION_ID));
         AccessibilityNodeInfo infoSentToService = mInfoCaptor.getValue();
         assertEquals(AccessibilityNodeInfo.ROOT_NODE_ID, infoSentToService.getSourceNodeId());
-        assertInfoHasExactlyTheseActions(infoSentToService, REQUIRED_ACTIONS_ON_ROOT_TO_SERVICE);
+        assertThat(infoSentToService, HAS_EXPECTED_ACTIONS_ON_ROOT);
     }
 
+    @Test
     public void testCallbacks_multipleNodesThenReplacer_clearsActionsAndAddsSomeToRoot()
             throws RemoteException {
         mActionReplacingCallback
@@ -173,11 +215,11 @@ public class ActionReplacingCallbackTest {
                 mInfoListCaptor.getValue(), AccessibilityNodeInfo.ROOT_NODE_ID);
         AccessibilityNodeInfo otherInfoSentToService = getNodeWithIdFromList(
                 mInfoListCaptor.getValue(), NON_ROOT_NODE_ID);
-        assertInfoHasExactlyTheseActions(
-                rootInfoSentToService, REQUIRED_ACTIONS_ON_ROOT_TO_SERVICE);
-        assertTrue(otherInfoSentToService.getActionList().isEmpty());
+        assertThat(rootInfoSentToService, HAS_EXPECTED_ACTIONS_ON_ROOT);
+        assertThat(otherInfoSentToService, HAS_NO_ACTIONS);
     }
 
+    @Test
     public void testCallbacks_replacerThenMultipleNodes_clearsActionsAndAddsSomeToRoot()
             throws RemoteException {
         mActionReplacingCallback.setFindAccessibilityNodeInfosResult(getReplacerNodes(),
@@ -194,18 +236,18 @@ public class ActionReplacingCallbackTest {
                 mInfoListCaptor.getValue(), AccessibilityNodeInfo.ROOT_NODE_ID);
         AccessibilityNodeInfo otherInfoSentToService = getNodeWithIdFromList(
                 mInfoListCaptor.getValue(), NON_ROOT_NODE_ID);
-        assertInfoHasExactlyTheseActions(
-                rootInfoSentToService, REQUIRED_ACTIONS_ON_ROOT_TO_SERVICE);
-        assertTrue(otherInfoSentToService.getActionList().isEmpty());
+        assertThat(rootInfoSentToService, HAS_EXPECTED_ACTIONS_ON_ROOT);
+        assertThat(otherInfoSentToService, HAS_NO_ACTIONS);
     }
 
+    @Test
     public void testConstructor_actionReplacerThrowsException_passesDataToService()
             throws RemoteException {
         doThrow(RemoteException.class).when(mMockReplacerConnection)
                 .findAccessibilityNodeInfoByAccessibilityId(eq(AccessibilityNodeInfo.ROOT_NODE_ID),
-                        (Region) anyObject(), mInteractionIdCaptor.capture(),
-                        eq(mActionReplacingCallback), eq(0), eq(INTERROGATING_PID),
-                        eq(INTERROGATING_TID), (MagnificationSpec) anyObject(), eq(null));
+                        (Region) anyObject(), anyInt(), (ActionReplacingCallback) anyObject(),
+                        eq(0),  eq(INTERROGATING_PID), eq(INTERROGATING_TID),
+                        (MagnificationSpec) anyObject(), eq(null));
         ActionReplacingCallback actionReplacingCallback = new ActionReplacingCallback(
                 mMockServiceCallback, mMockReplacerConnection, INTERACTION_ID, INTERROGATING_PID,
                 INTERROGATING_TID);
@@ -214,16 +256,17 @@ public class ActionReplacingCallbackTest {
         AccessibilityNodeInfo infoFromApp = AccessibilityNodeInfo.obtain();
         infoFromApp.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID, APP_WINDOW_ID);
         infoFromApp.addAction(ACTION_CONTEXT_CLICK);
+        infoFromApp.setContextClickable(true);
         actionReplacingCallback.setFindAccessibilityNodeInfoResult(infoFromApp, INTERACTION_ID);
 
         verify(mMockServiceCallback).setFindAccessibilityNodeInfoResult(mInfoCaptor.capture(),
                 eq(INTERACTION_ID));
         AccessibilityNodeInfo infoSentToService = mInfoCaptor.getValue();
         assertEquals(AccessibilityNodeInfo.ROOT_NODE_ID, infoSentToService.getSourceNodeId());
-        assertEquals(1, infoSentToService.getActionList().size());
-        assertEquals(ACTION_CONTEXT_CLICK, infoSentToService.getActionList().get(0));
+        assertThat(infoSentToService, HAS_NO_ACTIONS);
     }
 
+    @Test
     public void testSetPerformAccessibilityActionResult_actsAsPassThrough() throws RemoteException {
         mActionReplacingCallback.setPerformAccessibilityActionResult(true, INTERACTION_ID);
         verify(mMockServiceCallback).setPerformAccessibilityActionResult(true, INTERACTION_ID);
@@ -236,9 +279,9 @@ public class ActionReplacingCallbackTest {
         AccessibilityNodeInfo root = AccessibilityNodeInfo.obtain();
         root.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID,
                 AccessibilityWindowInfo.PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID);
-        for (AccessibilityAction action : ACTIONS_FROM_REPLACER) {
-            root.addAction(action);
-        }
+        root.addAction(ACTION_CLICK);
+        root.addAction(ACTION_EXPAND);
+        root.setClickable(true);
 
         // Second node should have no effect
         AccessibilityNodeInfo other = AccessibilityNodeInfo.obtain();
@@ -247,13 +290,6 @@ public class ActionReplacingCallbackTest {
         other.addAction(ACTION_COLLAPSE);
 
         return Arrays.asList(root, other);
-    }
-
-    private void assertInfoHasExactlyTheseActions(
-            AccessibilityNodeInfo info, AccessibilityAction[] actions) {
-        List<AccessibilityAction> nodeActions = info.getActionList();
-        assertEquals(new HashSet<AccessibilityAction>(nodeActions),
-                new HashSet<AccessibilityAction>(Arrays.asList(actions)));
     }
 
     private AccessibilityNodeInfo getNodeWithIdFromList(

@@ -26,6 +26,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -96,7 +97,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
                 mNodeFromOriginalWindow = info;
             } else {
                 Slog.e(LOG_TAG, "Callback with unexpected interactionId");
-                throw new RuntimeException("Callback with unexpected interactionId"); // Remove
+                return;
             }
 
             mSingleNodeCallbackHappened = true;
@@ -119,7 +120,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
                 mNodesWithReplacementActions = infos;
             } else {
                 Slog.e(LOG_TAG, "Callback with unexpected interactionId");
-                throw new RuntimeException("Callback with unexpected interactionId"); // Remove
+                return;
             }
             callbackForSingleNode = mSingleNodeCallbackHappened;
             callbackForMultipleNodes = mMultiNodeCallbackHappened;
@@ -147,7 +148,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Extra callback");
                 }
-                throw new RuntimeException("Extra callback"); // Replace with return before submit
+                return;
             }
             if (mNodeFromOriginalWindow != null) {
                 replaceActionsOnInfoLocked(mNodeFromOriginalWindow);
@@ -172,7 +173,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Extra callback");
                 }
-                throw new RuntimeException("Extra callback"); // Replace with return before submit
+                return;
             }
             if (mNodesFromOriginalWindow != null) {
                 for (int i = 0; i < mNodesFromOriginalWindow.size(); i++) {
@@ -180,7 +181,8 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
                 }
             }
             recycleReplaceActionNodesLocked();
-            nodesToReturn = mNodesFromOriginalWindow;
+            nodesToReturn = (mNodesFromOriginalWindow == null)
+                    ? null : new ArrayList<>(mNodesFromOriginalWindow);
             mDone = true;
         }
         try {
@@ -195,6 +197,12 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
     @GuardedBy("mLock")
     private void replaceActionsOnInfoLocked(AccessibilityNodeInfo info) {
         info.removeAllActions();
+        info.setClickable(false);
+        info.setFocusable(false);
+        info.setContextClickable(false);
+        info.setScrollable(false);
+        info.setLongClickable(false);
+        info.setDismissable(false);
         // We currently only replace actions for the root node
         if ((info.getSourceNodeId() == AccessibilityNodeInfo.ROOT_NODE_ID)
                 && mNodesWithReplacementActions != null) {
@@ -213,6 +221,12 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
                         info.addAction(AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS);
                         info.addAction(AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
                     }
+                    info.setClickable(nodeWithReplacementActions.isClickable());
+                    info.setFocusable(nodeWithReplacementActions.isFocusable());
+                    info.setContextClickable(nodeWithReplacementActions.isContextClickable());
+                    info.setScrollable(nodeWithReplacementActions.isScrollable());
+                    info.setLongClickable(nodeWithReplacementActions.isLongClickable());
+                    info.setDismissable(nodeWithReplacementActions.isDismissable());
                 }
             }
         }
@@ -220,6 +234,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
 
     @GuardedBy("mLock")
     private void recycleReplaceActionNodesLocked() {
+        if (mNodesWithReplacementActions == null) return;
         for (int i = mNodesWithReplacementActions.size() - 1; i >= 0; i--) {
             AccessibilityNodeInfo nodeWithReplacementAction = mNodesWithReplacementActions.get(i);
             nodeWithReplacementAction.recycle();
