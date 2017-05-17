@@ -491,8 +491,6 @@ public class DynamicLayout extends Layout
      * An index is associated to each block (which will be used by display lists),
      * this class simply invalidates the index of blocks overlapping a modification.
      *
-     * This method is package private and not private so that it can be tested.
-     *
      * @param startLine the first line of the range of modified lines
      * @param endLine the last line of the range, possibly equal to startLine, lower
      * than getLineCount()
@@ -613,16 +611,20 @@ public class DynamicLayout extends Layout
     }
 
     /**
-     * This package private method is used for test purposes only
+     * This method is used for test purposes only.
      * @hide
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public void setBlocksDataForTest(int[] blockEndLines, int[] blockIndices, int numberOfBlocks) {
+    public void setBlocksDataForTest(int[] blockEndLines, int[] blockIndices, int numberOfBlocks,
+            int totalLines) {
         mBlockEndLines = new int[blockEndLines.length];
         mBlockIndices = new int[blockIndices.length];
         System.arraycopy(blockEndLines, 0, mBlockEndLines, 0, blockEndLines.length);
         System.arraycopy(blockIndices, 0, mBlockIndices, 0, blockIndices.length);
         mNumberOfBlocks = numberOfBlocks;
+        while (mInts.size() < totalLines) {
+            mInts.insertAt(mInts.size(), new int[COLUMNS_NORMAL]);
+        }
     }
 
     /**
