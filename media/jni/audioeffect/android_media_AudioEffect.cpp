@@ -86,6 +86,7 @@ static jint translateError(int code) {
     case NO_MEMORY:
         return AUDIOEFFECT_ERROR_NO_MEMORY;
     case DEAD_OBJECT:
+    case FAILED_TRANSACTION: // Hidl crash shows as FAILED_TRANSACTION: -2147483646
         return AUDIOEFFECT_ERROR_DEAD_OBJECT;
     default:
         return AUDIOEFFECT_ERROR;
