@@ -67,6 +67,10 @@ public final class PlaybackActivityMonitor
                     .createIfNeeded()
                     .build();
 
+    // like a PLAY_CREATE_IF_NEEDED operation but with a skip to the end of the ramp
+    private static final VolumeShaper.Operation PLAY_SKIP_RAMP =
+            new VolumeShaper.Operation.Builder(PLAY_CREATE_IF_NEEDED).setXOffset(1.0f).build();
+
     private final ArrayList<PlayMonitorClient> mClients = new ArrayList<PlayMonitorClient>();
     // a public client is one that needs an anonymized version of the playback configurations, we
     // keep track of whether there is at least one to know when we need to create the list of
@@ -487,17 +491,19 @@ public final class PlaybackActivityMonitor
     private static final class DuckingManager {
         private final HashMap<Integer, DuckedApp> mDuckers = new HashMap<Integer, DuckedApp>();
 
-        void duckUid(int uid, ArrayList<AudioPlaybackConfiguration> apcsToDuck) {
+        synchronized void duckUid(int uid, ArrayList<AudioPlaybackConfiguration> apcsToDuck) {
+            if (DEBUG) {  Log.v(TAG, "DuckingManager: duckUid() uid:"+ uid); }
             if (!mDuckers.containsKey(uid)) {
                 mDuckers.put(uid, new DuckedApp(uid));
             }
             final DuckedApp da = mDuckers.get(uid);
             for (AudioPlaybackConfiguration apc : apcsToDuck) {
-                da.addDuck(apc);
+                da.addDuck(apc, false /*skipRamp*/);
             }
         }
 
-        void unduckUid(int uid, HashMap<Integer, AudioPlaybackConfiguration> players) {
+        synchronized void unduckUid(int uid, HashMap<Integer, AudioPlaybackConfiguration> players) {
+            if (DEBUG) {  Log.v(TAG, "DuckingManager: unduckUid() uid:"+ uid); }
             final DuckedApp da = mDuckers.remove(uid);
             if (da == null) {
                 return;
@@ -506,25 +512,27 @@ public final class PlaybackActivityMonitor
         }
 
         // pre-condition: apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED
-        void checkDuck(@NonNull AudioPlaybackConfiguration apc) {
+        synchronized void checkDuck(@NonNull AudioPlaybackConfiguration apc) {
+            if (DEBUG) {  Log.v(TAG, "DuckingManager: checkDuck() player piid:"
+                    + apc.getPlayerInterfaceId()+ " uid:"+ apc.getClientUid()); }
             final DuckedApp da = mDuckers.get(apc.getClientUid());
             if (da == null) {
                 return;
             }
-            // FIXME here the player needs to be put in a state that is the same as if it
-            //   had been ducked as it starts. At the moment, this works already for linked
-            //   players, as is the case in gapless playback.
-            da.addDuck(apc);
+            da.addDuck(apc, true /*skipRamp*/);
         }
 
-        void dump(PrintWriter pw) {
+        synchronized void dump(PrintWriter pw) {
             for (DuckedApp da : mDuckers.values()) {
                 da.dump(pw);
             }
         }
 
-        void removeReleased(@NonNull AudioPlaybackConfiguration apc) {
-            final DuckedApp da = mDuckers.get(apc.getClientUid());
+        synchronized void removeReleased(@NonNull AudioPlaybackConfiguration apc) {
+            final int uid = apc.getClientUid();
+            if (DEBUG) {  Log.v(TAG, "DuckingManager: removedReleased() player piid: "
+                    + apc.getPlayerInterfaceId() + " uid:" + uid); }
+            final DuckedApp da = mDuckers.get(uid);
             if (da == null) {
                 return;
             }
@@ -550,20 +558,21 @@ public final class PlaybackActivityMonitor
             // pre-conditions:
             //  * apc != null
             //  * apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED
-            void addDuck(@NonNull AudioPlaybackConfiguration apc) {
+            void addDuck(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp) {
                 final int piid = new Integer(apc.getPlayerInterfaceId());
                 if (mDuckedPlayers.contains(piid)) {
-                    if (DEBUG) { Log.v(TAG, "player " + piid + " already ducked"); }
+                    if (DEBUG) { Log.v(TAG, "player piid:" + piid + " already ducked"); }
                     return;
                 }
                 try {
-                    Log.v(TAG, "ducking player " + apc.getPlayerInterfaceId() + " uid:" + mUid);
+                    Log.v(TAG, "ducking (skipRamp=" + skipRamp + ") player piid:"
+                            + apc.getPlayerInterfaceId() + " uid:" + mUid);
                     apc.getPlayerProxy().applyVolumeShaper(
                             DUCK_VSHAPE,
-                            PLAY_CREATE_IF_NEEDED);
+                            skipRamp ? PLAY_SKIP_RAMP : PLAY_CREATE_IF_NEEDED);
                     mDuckedPlayers.add(piid);
                 } catch (Exception e) {
-                    Log.e(TAG, "Error ducking player " + piid + " uid:" + mUid, e);
+                    Log.e(TAG, "Error ducking player piid:" + piid + " uid:" + mUid, e);
                 }
             }
 
@@ -577,13 +586,13 @@ public final class PlaybackActivityMonitor
                                     DUCK_ID,
                                     VolumeShaper.Operation.REVERSE);
                         } catch (Exception e) {
-                            Log.e(TAG, "Error unducking player " + piid + " uid:" + mUid, e);
+                            Log.e(TAG, "Error unducking player piid:" + piid + " uid:" + mUid, e);
                         }
                     } else {
                         // this piid was in the list of ducked players, but wasn't found
                         if (DEBUG) {
-                            Log.v(TAG, "Error unducking player " + piid + ", player not found for"
-                                    + " uid " + mUid);
+                            Log.v(TAG, "Error unducking player piid:" + piid
+                                    + ", player not found for uid " + mUid);
                         }
                     }
                 }
