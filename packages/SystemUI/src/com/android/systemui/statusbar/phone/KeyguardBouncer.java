@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
@@ -55,6 +56,7 @@ public class KeyguardBouncer {
     protected final ViewGroup mContainer;
     private final FalsingManager mFalsingManager;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
+    private final Handler mHandler;
     protected KeyguardHostView mKeyguardView;
     protected ViewGroup mRoot;
     private boolean mShowingSoon;
@@ -66,6 +68,7 @@ public class KeyguardBouncer {
                     mBouncerPromptReason = mCallback.getBouncerPromptReason();
                 }
             };
+    private final Runnable mRemoveViewRunnable = this::removeView;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
@@ -77,6 +80,7 @@ public class KeyguardBouncer {
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
         mFalsingManager = FalsingManager.getInstance(mContext);
         mDismissCallbackRegistry = dismissCallbackRegistry;
+        mHandler = new Handler();
     }
 
     public void show(boolean resetSecuritySelection) {
@@ -179,10 +183,14 @@ public class KeyguardBouncer {
             mKeyguardView.cancelDismissAction();
             mKeyguardView.cleanUp();
         }
-        if (destroyView) {
-            removeView();
-        } else if (mRoot != null) {
+        if (mRoot != null) {
             mRoot.setVisibility(View.INVISIBLE);
+            if (destroyView) {
+
+                // We have a ViewFlipper that unregisters a broadcast when being detached, which may
+                // be slow because of AM lock contention during unlocking. We can delay it a bit.
+                mHandler.postDelayed(mRemoveViewRunnable, 50);
+            }
         }
     }
 
@@ -226,6 +234,7 @@ public class KeyguardBouncer {
     }
 
     protected void ensureView() {
+        mHandler.removeCallbacks(mRemoveViewRunnable);
         if (mRoot == null) {
             inflateView();
         }
@@ -233,6 +242,7 @@ public class KeyguardBouncer {
 
     protected void inflateView() {
         removeView();
+        mHandler.removeCallbacks(mRemoveViewRunnable);
         mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
         mKeyguardView = (KeyguardHostView) mRoot.findViewById(R.id.keyguard_host_view);
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);

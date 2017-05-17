@@ -280,7 +280,7 @@ public class KeyguardIndicationController {
             }
 
             KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-            int userId = ActivityManager.getCurrentUser();
+            int userId = KeyguardUpdateMonitor.getCurrentUser();
             String trustIndication = getTrustIndication();
             if (!mUserManager.isUserUnlocked(userId)) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
@@ -379,6 +379,9 @@ public class KeyguardIndicationController {
     };
 
     public void setDozing(boolean dozing) {
+        if (mDozing == dozing) {
+            return;
+        }
         mDozing = dozing;
         updateIndication();
         updateDisclosure();

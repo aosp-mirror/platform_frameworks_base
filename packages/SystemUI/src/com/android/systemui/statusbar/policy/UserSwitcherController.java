@@ -872,7 +872,14 @@ public class UserSwitcherController {
     private final KeyguardMonitor.Callback mCallback = new KeyguardMonitor.Callback() {
         @Override
         public void onKeyguardShowingChanged() {
-            notifyAdapters();
+
+            // When Keyguard is going away, we don't need to update our items immediately which
+            // helps making the transition faster.
+            if (!mKeyguardMonitor.isShowing()) {
+                mHandler.post(UserSwitcherController.this::notifyAdapters);
+            } else {
+                notifyAdapters();
+            }
         }
     };
 

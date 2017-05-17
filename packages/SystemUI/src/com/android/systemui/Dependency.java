@@ -272,6 +272,8 @@ public class Dependency extends SystemUI {
 
         mProviders.put(TunablePaddingService.class, () -> new TunablePaddingService());
 
+        mProviders.put(UiOffloadThread.class, UiOffloadThread::new);
+
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
     }
