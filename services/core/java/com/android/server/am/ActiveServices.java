@@ -780,7 +780,8 @@ public final class ActiveServices {
                 smap.removeMessages(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);
                 if (nextUpdateTime < Long.MAX_VALUE) {
                     Message msg = smap.obtainMessage();
-                    smap.sendMessageAtTime(msg, nextUpdateTime);
+                    smap.sendMessageAtTime(msg, nextUpdateTime
+                            + SystemClock.uptimeMillis() - SystemClock.elapsedRealtime());
                 }
             }
             if (!smap.mActiveForegroundAppsChanged) {
@@ -811,30 +812,35 @@ public final class ActiveServices {
             Intent intent;
             String title;
             String msg;
+            String[] pkgs;
             if (active.size() == 1) {
                 intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                 intent.setData(Uri.fromParts("package", active.get(0).mPackageName, null));
                 title = context.getString(
                         R.string.foreground_service_app_in_background, active.get(0).mLabel);
                 msg = context.getString(R.string.foreground_service_tap_for_details);
+                pkgs = new String[] { active.get(0).mPackageName };
             } else {
                 intent = new Intent(Settings.ACTION_FOREGROUND_SERVICES_SETTINGS);
-                String[] pkgs = new String[active.size()];
+                pkgs = new String[active.size()];
                 for (int i = 0; i < active.size(); i++) {
                     pkgs[i] = active.get(i).mPackageName;
                 }
                 intent.putExtra("packages", pkgs);
                 title = context.getString(
                         R.string.foreground_service_apps_in_background, active.size());
-                msg =  active.get(0).mLabel.toString();
+                msg = active.get(0).mLabel.toString();
                 for (int i = 1; i < active.size(); i++) {
                     msg = context.getString(R.string.foreground_service_multiple_separator,
                             msg, active.get(i).mLabel);
                 }
             }
+            Bundle notificationBundle = new Bundle();
+            notificationBundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, pkgs);
             Notification.Builder n =
                     new Notification.Builder(context,
                             SystemNotificationChannels.FOREGROUND_SERVICE)
+                            .addExtras(notificationBundle)
                             .setSmallIcon(R.drawable.ic_check_circle_24px)
                             .setOngoing(true)
                             .setShowWhen(false)
@@ -854,10 +860,11 @@ public final class ActiveServices {
         }
     }
 
-    private void requestUpdateActiveForegroundAppsLocked(ServiceMap smap, long time) {
+    private void requestUpdateActiveForegroundAppsLocked(ServiceMap smap, long timeElapsed) {
         Message msg = smap.obtainMessage(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);
-        if (time != 0) {
-            smap.sendMessageAtTime(msg, time);
+        if (timeElapsed != 0) {
+            smap.sendMessageAtTime(msg,
+                    timeElapsed + SystemClock.uptimeMillis() - SystemClock.elapsedRealtime());
         } else {
             smap.mActiveForegroundAppsChanged = true;
             smap.sendMessage(msg);
@@ -909,6 +916,9 @@ public final class ActiveServices {
                     if (changed) {
                         requestUpdateActiveForegroundAppsLocked(smap,
                                 nowElapsed + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME);
+                    } else if (smap.mActiveForegroundApps.size() > 0) {
+                        // Just being paranoid.
+                        requestUpdateActiveForegroundAppsLocked(smap, 0);
                     }
                 }
             }
