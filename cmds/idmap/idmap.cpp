@@ -16,6 +16,7 @@ SYNOPSIS \n\
       idmap --scan target-package-name-to-look-for path-to-target-apk dir-to-hold-idmaps \\\
                    dir-to-scan [additional-dir-to-scan [additional-dir-to-scan [...]]]\n\
       idmap --inspect idmap \n\
+      idmap --verify target overlay fd \n\
 \n\
 DESCRIPTION \n\
       Idmap files play an integral part in the runtime resource overlay framework. An idmap \n\
@@ -56,6 +57,9 @@ OPTIONS \n\
 \n\
       --inspect: decode the binary format of 'idmap' (path) and display the contents in a \n\
                  debug-friendly format. \n\
+\n\
+      --verify: verify if idmap corresponding to file descriptor 'fd' (integer) is made from \n\
+                target package 'target' (path to apk) and overlay package 'overlay'. \n\
 \n\
 EXAMPLES \n\
       Create an idmap file: \n\
@@ -167,6 +171,29 @@ NOTES \n\
         return idmap_create_path(target_apk_path, overlay_apk_path, idmap_path);
     }
 
+    int maybe_verify_fd(const char *target_apk_path, const char *overlay_apk_path,
+            const char *idmap_str)
+    {
+        char *endptr;
+        int idmap_fd = strtol(idmap_str, &endptr, 10);
+        if (*endptr != '\0') {
+            fprintf(stderr, "error: failed to parse file descriptor argument %s\n", idmap_str);
+            return -1;
+        }
+
+        if (!verify_file_readable(target_apk_path)) {
+            ALOGD("error: failed to read apk %s: %s\n", target_apk_path, strerror(errno));
+            return -1;
+        }
+
+        if (!verify_file_readable(overlay_apk_path)) {
+            ALOGD("error: failed to read apk %s: %s\n", overlay_apk_path, strerror(errno));
+            return -1;
+        }
+
+        return idmap_verify_fd(target_apk_path, overlay_apk_path, idmap_fd);
+    }
+
     int maybe_scan(const char *target_package_name, const char *target_apk_path,
             const char *idmap_dir, const android::Vector<const char *> *overlay_dirs)
     {
@@ -233,6 +260,10 @@ int main(int argc, char **argv)
 
     if (argc == 5 && !strcmp(argv[1], "--path")) {
         return maybe_create_path(argv[2], argv[3], argv[4]);
+    }
+
+    if (argc == 5 && !strcmp(argv[1], "--verify")) {
+        return maybe_verify_fd(argv[2], argv[3], argv[4]);
     }
 
     if (argc >= 6 && !strcmp(argv[1], "--scan")) {

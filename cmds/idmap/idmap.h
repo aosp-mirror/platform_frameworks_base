@@ -25,6 +25,8 @@ int idmap_create_path(const char *target_apk_path, const char *overlay_apk_path,
 
 int idmap_create_fd(const char *target_apk_path, const char *overlay_apk_path, int fd);
 
+int idmap_verify_fd(const char *target_apk_path, const char *overlay_apk_path, int fd);
+
 // Regarding target_package_name: the idmap_scan implementation should
 // be able to extract this from the manifest in target_apk_path,
 // simplifying the external API.

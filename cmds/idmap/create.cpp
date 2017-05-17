@@ -221,3 +221,9 @@ int idmap_create_fd(const char *target_apk_path, const char *overlay_apk_path, i
     return create_and_write_idmap(target_apk_path, overlay_apk_path, fd, true) == 0 ?
         EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+int idmap_verify_fd(const char *target_apk_path, const char *overlay_apk_path, int fd)
+{
+    return !is_idmap_stale_fd(target_apk_path, overlay_apk_path, fd) ?
+            EXIT_SUCCESS : EXIT_FAILURE;
+}
