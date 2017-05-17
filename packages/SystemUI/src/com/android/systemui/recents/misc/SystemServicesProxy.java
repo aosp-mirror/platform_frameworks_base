@@ -58,20 +58,22 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IRemoteCallback;
-import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
+import android.service.dreams.DreamService;
+import android.service.dreams.IDreamManager;
 import android.util.ArraySet;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.MutableBoolean;
-import android.view.AppTransitionAnimationSpec;
 import android.view.Display;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
@@ -91,7 +93,6 @@ import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.ThumbnailData;
-import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecComposer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -130,6 +131,8 @@ public class SystemServicesProxy {
     PackageManager mPm;
     IconDrawableFactory mDrawableFactory;
     IPackageManager mIpm;
+    private final IDreamManager mDreamManager;
+    private final Context mContext;
     AssistUtils mAssistUtils;
     WindowManager mWm;
     IWindowManager mIwm;
@@ -285,6 +288,7 @@ public class SystemServicesProxy {
 
     /** Private constructor */
     private SystemServicesProxy(Context context) {
+        mContext = context.getApplicationContext();
         mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManager.getService();
@@ -296,6 +300,8 @@ public class SystemServicesProxy {
         mIwm = WindowManagerGlobal.getWindowManagerService();
         mKgm = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         mUm = UserManager.get(context);
+        mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
         mHasFreeformWorkspaceSupport =
@@ -1127,6 +1133,11 @@ public class SystemServicesProxy {
         }
     }
 
+    public void startActivityAsUserAsync(Intent intent, ActivityOptions opts) {
+        mOnewayExecutor.submit(() -> mContext.startActivityAsUser(intent,
+                opts != null ? opts.toBundle() : null, UserHandle.CURRENT));
+    }
+
     /** Starts an activity from recents. */
     public void startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
             ActivityOptions options, int stackId,
@@ -1281,6 +1292,33 @@ public class SystemServicesProxy {
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to reach window manager", e);
         }
+    }
+
+    public boolean isDreaming() {
+        try {
+            return mDreamManager.isDreaming();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query dream manager.", e);
+        }
+        return false;
+    }
+
+    public void awakenDreamsAsync() {
+        mOnewayExecutor.submit(() -> {
+            try {
+                mDreamManager.awaken();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void updateOverviewLastStackActiveTimeAsync(long newLastStackActiveTime,
+            int currentUserId) {
+        mOnewayExecutor.submit(() -> {
+            Settings.Secure.putLongForUser(mContext.getContentResolver(),
+                    Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, newLastStackActiveTime, currentUserId);
+        });
     }
 
     public interface StartActivityFromRecentsResultListener {
