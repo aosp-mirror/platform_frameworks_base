@@ -828,9 +828,11 @@ public final class SystemServer {
             // because it need to connect to SensorManager. This have to start
             // after START_SENSOR_SERVICE is done.
             SystemServerInitThreadPool.get().submit(() -> {
-                traceBeginAndSlog(START_HIDL_SERVICES);
+                TimingsTraceLog traceLog = new TimingsTraceLog(
+                        SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+                traceLog.traceBegin(START_HIDL_SERVICES);
                 startHidlServices();
-                traceEnd();
+                traceLog.traceEnd();
             }, START_HIDL_SERVICES);
 
             if (!disableVrManager) {
