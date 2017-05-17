@@ -56,6 +56,8 @@ import android.support.test.runner.AndroidJUnit4;
 import android.telephony.CarrierConfigManager;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
+import com.android.server.connectivity.tethering.OffloadHardwareInterface;
+import com.android.server.connectivity.tethering.TetheringDependencies;
 
 import org.junit.After;
 import org.junit.Before;
@@ -78,7 +80,9 @@ public class TetheringTest {
     @Mock private INetworkStatsService mStatsService;
     @Mock private INetworkPolicyManager mPolicyManager;
     @Mock private MockableSystemProperties mSystemProperties;
+    @Mock private OffloadHardwareInterface mOffloadHardwareInterface;
     @Mock private Resources mResources;
+    @Mock private TetheringDependencies mTetheringDependencies;
     @Mock private UsbManager mUsbManager;
     @Mock private WifiManager mWifiManager;
     @Mock private CarrierConfigManager mCarrierConfigManager;
@@ -138,8 +142,11 @@ public class TetheringTest {
         };
         mServiceContext.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
+        when(mTetheringDependencies.getOffloadHardwareInterface())
+                .thenReturn(mOffloadHardwareInterface);
         mTethering = new Tethering(mServiceContext, mNMService, mStatsService, mPolicyManager,
-                                   mLooper.getLooper(), mSystemProperties);
+                                   mLooper.getLooper(), mSystemProperties,
+                                   mTetheringDependencies);
     }
 
     @After

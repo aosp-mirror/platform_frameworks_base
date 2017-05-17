@@ -18,10 +18,12 @@ package com.android.server.connectivity.tethering;
 
 import android.net.LinkProperties;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * A wrapper around hardware offload interface.
+ * A class to encapsulate the business logic of programming the tethering
+ * hardware offload interface.
  *
  * @hide
  */
@@ -29,25 +31,48 @@ public class OffloadController {
     private static final String TAG = OffloadController.class.getSimpleName();
 
     private final Handler mHandler;
+    private final OffloadHardwareInterface mHwInterface;
+    private boolean mConfigInitialized;
+    private boolean mControlInitialized;
     private LinkProperties mUpstreamLinkProperties;
 
-    public OffloadController(Handler h) {
+    public OffloadController(Handler h, OffloadHardwareInterface hwi) {
         mHandler = h;
+        mHwInterface = hwi;
     }
 
     public void start() {
-        // TODO: initOffload() and configure callbacks to be handled on our
-        // preferred Handler.
-        Log.d(TAG, "tethering offload not supported");
+        if (started()) return;
+
+        if (!mConfigInitialized) {
+            mConfigInitialized = mHwInterface.initOffloadConfig();
+            if (!mConfigInitialized) {
+                Log.d(TAG, "tethering offload config not supported");
+                return;
+            }
+        }
+
+        // TODO: Create and register ITetheringOffloadCallback.
+        mControlInitialized = mHwInterface.initOffloadControl();
     }
 
     public void stop() {
-        // TODO: stopOffload().
         mUpstreamLinkProperties = null;
+        mHwInterface.stopOffloadControl();
+        mControlInitialized = false;
+        mConfigInitialized = false;
     }
 
     public void setUpstreamLinkProperties(LinkProperties lp) {
+        if (!started()) return;
+
         // TODO: setUpstreamParameters().
         mUpstreamLinkProperties = lp;
+    }
+
+    // TODO: public void addDownStream(...)
+
+    private boolean started() {
+        return mConfigInitialized && mControlInitialized;
     }
 }
