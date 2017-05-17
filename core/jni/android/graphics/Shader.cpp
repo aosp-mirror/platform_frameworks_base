@@ -60,17 +60,14 @@ static void Shader_safeUnref(JNIEnv* env, jobject o, jlong shaderHandle) {
 static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jobject jbitmap,
         jint tileModeX, jint tileModeY) {
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
-    sk_sp<SkImage> image;
+    SkBitmap bitmap;
     if (jbitmap) {
         // Only pass a valid SkBitmap object to the constructor if the Bitmap exists. Otherwise,
         // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
-        image = android::bitmap::toBitmap(env, jbitmap).makeImage(nullptr);
+        android::bitmap::toBitmap(env, jbitmap).getSkBitmapForShaders(&bitmap);
     }
 
-    if (!image.get()) {
-        SkBitmap bitmap;
-        image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
-    }
+    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
     sk_sp<SkShader> baseShader = image->makeShader(
             (SkShader::TileMode)tileModeX, (SkShader::TileMode)tileModeY);
 

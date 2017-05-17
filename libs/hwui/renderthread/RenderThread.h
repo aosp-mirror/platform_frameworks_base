@@ -33,7 +33,6 @@
 
 namespace android {
 
-class Bitmap;
 class DisplayEventReceiver;
 
 namespace uirenderer {
@@ -104,8 +103,6 @@ public:
     void setGrContext(GrContext* cxt) { mGrContext.reset(cxt); }
 
     VulkanManager& vulkanManager() { return *mVkManager; }
-
-    sk_sp<SkImage> makeTextureImage(Bitmap* bitmap);
 
 protected:
     virtual bool threadLoop() override;

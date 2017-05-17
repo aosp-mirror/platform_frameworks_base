@@ -16,7 +16,6 @@
 #include "Bitmap.h"
 
 #include "Caches.h"
-#include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderThread.h"
 #include "renderthread/RenderProxy.h"
@@ -35,14 +34,10 @@
 #include <private/gui/ComposerService.h>
 #include <binder/IServiceManager.h>
 #include <ui/PixelFormat.h>
-#include <GrTexture.h>
 
 #include <SkCanvas.h>
-#include <SkImagePriv.h>
 
 namespace android {
-
-Mutex Bitmap::gLock;
 
 static bool computeAllocationSize(size_t rowBytes, int height, size_t* size) {
     int32_t rowBytes32 = SkToS32(rowBytes);
@@ -316,7 +311,8 @@ sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
         return nullptr;
     }
     SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
-            kRGBA_8888_SkColorType, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+            kRGBA_8888_SkColorType, kPremul_SkAlphaType,
+            SkColorSpace::MakeSRGB());
     return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info));
 }
 
@@ -396,7 +392,6 @@ Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
         , mPixelStorageType(PixelStorageType::Hardware) {
     mPixelStorage.hardware.buffer = buffer;
     buffer->incStrong(buffer);
-    setImmutable(); // HW bitmaps are always immutable
 }
 
 Bitmap::~Bitmap() {
@@ -479,13 +474,7 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
     if (isHardware()) {
-        if (uirenderer::Properties::isSkiaEnabled()) {
-            // TODO: add color correctness for Skia pipeline - pass null color space for now
-            outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
-                    info().colorType(), info().alphaType(), nullptr));
-        } else {
-            outBitmap->allocPixels(info());
-        }
+        outBitmap->allocPixels(info());
         uirenderer::renderthread::RenderProxy::copyGraphicBufferInto(graphicBuffer(), outBitmap);
         return;
     }
@@ -509,30 +498,6 @@ GraphicBuffer* Bitmap::graphicBuffer() {
         return mPixelStorage.hardware.buffer;
     }
     return nullptr;
-}
-
-sk_sp<SkImage> Bitmap::makeImage(const uirenderer::renderthread::RenderThread* renderThread) {
-    AutoMutex _lock(gLock); //TODO: implement lock free solution
-    auto image = mImage;
-    //TODO: use new API SkImage::isValid() instead of SkImage::getTexture()->getContext()
-    if (!image.get() || (image->getTexture() && nullptr == image->getTexture()->getContext())) {
-        if (isHardware() && uirenderer::RenderPipelineType::SkiaGL
-                == uirenderer::Properties::getRenderPipelineType()) {
-            //TODO: add Vulkan support
-            if (renderThread) {
-                image = uirenderer::skiapipeline::SkiaOpenGLPipeline::makeTextureImage(
-                        *renderThread, this);
-            } else {
-                image = uirenderer::renderthread::RenderProxy::makeTextureImage(this);
-            }
-        } else {
-            SkBitmap skiaBitmap;
-            getSkBitmapForShaders(&skiaBitmap);
-            image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
-        }
-        mImage = image;
-    }
-    return image;
 }
 
 } // namespace android

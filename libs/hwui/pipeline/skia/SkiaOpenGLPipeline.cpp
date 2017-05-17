@@ -28,8 +28,6 @@
 
 #include <cutils/properties.h>
 #include <strings.h>
-#include <SkImagePriv.h>
-#include <gl/GrGLTypes.h>
 
 using namespace android::uirenderer::renderthread;
 
@@ -197,87 +195,6 @@ void SkiaOpenGLPipeline::invokeFunctor(const RenderThread& thread, Functor* func
     if (mode != DrawGlInfo::kModeProcessNoContext) {
         thread.getGrContext()->resetContext();
     }
-}
-
-static void deleteImageTexture(void* context) {
-     EGLImageKHR EGLimage = reinterpret_cast<EGLImageKHR>(context);
-     if (EGLimage != EGL_NO_IMAGE_KHR) {
-        EGLDisplay display = eglGetCurrentDisplay();
-        if (EGL_NO_DISPLAY == display) {
-            display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-        }
-        eglDestroyImageKHR(display, EGLimage);
-     }
-}
-
-sk_sp<SkImage> SkiaOpenGLPipeline::makeTextureImage(
-        const uirenderer::renderthread::RenderThread& renderThread, Bitmap* bitmap) {
-    renderThread.eglManager().initialize();
-
-    GraphicBuffer* buffer = bitmap->graphicBuffer();
-    EGLDisplay display = eglGetCurrentDisplay();
-    if (EGL_NO_DISPLAY == display) {
-        display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    }
-    LOG_ALWAYS_FATAL_IF(!bitmap->isHardware(),
-                "Texture image requires a HW bitmap.");
-    // We use an EGLImage to access the content of the GraphicBuffer
-    // The EGL image is later bound to a 2D texture
-    EGLClientBuffer clientBuffer = (EGLClientBuffer) buffer->getNativeBuffer();
-    EGLint imageAttrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
-    EGLImageKHR EGLimage = eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
-            clientBuffer, imageAttrs);
-    if (EGLimage == EGL_NO_IMAGE_KHR) {
-        ALOGW("Could not create EGL image, err =%s",
-                uirenderer::renderthread::EglManager::eglErrorString());
-        return nullptr;
-    }
-
-    GLuint textureId = 0;
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_EXTERNAL_OES, textureId);
-    glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, EGLimage);
-
-    GLenum status = GL_NO_ERROR;
-    while ((status = glGetError()) != GL_NO_ERROR) {
-        ALOGW("glEGLImageTargetTexture2DOES failed (%#x)", status);
-        eglDestroyImageKHR(display, EGLimage);
-        return nullptr;
-    }
-
-    sk_sp<GrContext> grContext = sk_ref_sp(renderThread.getGrContext());
-    grContext->resetContext();
-
-    GrGLTextureInfo textureInfo;
-    textureInfo.fTarget = GL_TEXTURE_EXTERNAL_OES;
-    textureInfo.fID = textureId;
-
-    GrBackendTextureDesc textureDescription;
-    textureDescription.fWidth = bitmap->info().width();
-    textureDescription.fHeight = bitmap->info().height();
-    textureDescription.fOrigin = kTopLeft_GrSurfaceOrigin;
-    textureDescription.fTextureHandle = reinterpret_cast<GrBackendObject>(&textureInfo);
-    PixelFormat format = buffer->getPixelFormat();
-    switch (format) {
-    case PIXEL_FORMAT_RGBA_8888:
-        textureDescription.fConfig = kRGBA_8888_GrPixelConfig;
-        break;
-    case PIXEL_FORMAT_RGBA_FP16:
-        textureDescription.fConfig = kRGBA_half_GrPixelConfig;
-        break;
-    default:
-        eglDestroyImageKHR(display, EGLimage);
-        return nullptr;
-    }
-
-    // TODO: add color correctness - pass null color space for now
-    sk_sp<SkImage> image = SkImage::MakeFromTexture(grContext.get(), textureDescription,
-                bitmap->info().alphaType(), nullptr, deleteImageTexture, EGLimage);
-    if (!image.get()) {
-        eglDestroyImageKHR(display, EGLimage);
-        return nullptr;
-    }
-    return image;
 }
 
 } /* namespace skiapipeline */
