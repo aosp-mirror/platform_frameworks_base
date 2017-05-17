@@ -24,7 +24,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.graphics.ColorUtils;
 import android.support.v7.graphics.Palette;
 import android.util.LayoutDirection;
 
@@ -41,10 +40,31 @@ public class MediaNotificationProcessor {
     /**
      * The fraction below which we select the vibrant instead of the light/dark vibrant color
      */
-    private static final float POPULATION_FRACTION_FOR_MORE_VIBRANT = 0.75f;
+    private static final float POPULATION_FRACTION_FOR_MORE_VIBRANT = 1.0f;
+
+    /**
+     * Minimum saturation that a muted color must have if there exists if deciding between two
+     * colors
+     */
+    private static final float MIN_SATURATION_WHEN_DECIDING = 0.19f;
+
+    /**
+     * Minimum fraction that any color must have to be picked up as a text color
+     */
+    private static final double MINIMUM_IMAGE_FRACTION = 0.002;
+
+    /**
+     * The population fraction to select the dominant color as the text color over a the colored
+     * ones.
+     */
+    private static final float POPULATION_FRACTION_FOR_DOMINANT = 0.01f;
+
+    /**
+     * The population fraction to select a white or black color as the background over a color.
+     */
     private static final float POPULATION_FRACTION_FOR_WHITE_OR_BLACK = 2.5f;
     private static final float BLACK_MAX_LIGHTNESS = 0.08f;
-    private static final float WHITE_MIN_LIGHTNESS = 0.92f;
+    private static final float WHITE_MIN_LIGHTNESS = 0.90f;
     private static final int RESIZE_BITMAP_AREA = 150 * 150;
     private final ImageGradientColorizer mColorizer;
     private final Context mContext;
@@ -109,8 +129,11 @@ public class MediaNotificationProcessor {
                         .resizeBitmapArea(RESIZE_BITMAP_AREA);
                 Palette palette = paletteBuilder.generate();
                 backgroundColor = findBackgroundColorAndFilter(palette);
-                // we want the full region again
-                paletteBuilder.setRegion(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                // we want most of the full region again, slightly shifted to the right
+                float textColorStartWidthFraction = 0.4f;
+                paletteBuilder.setRegion((int) (bitmap.getWidth() * textColorStartWidthFraction), 0,
+                        bitmap.getWidth(),
+                        bitmap.getHeight());
                 if (mFilteredBackgroundHsl != null) {
                     paletteBuilder.addFilter((rgb, hsl) -> {
                         // at least 10 degrees hue difference
@@ -120,78 +143,7 @@ public class MediaNotificationProcessor {
                 }
                 paletteBuilder.addFilter(mBlackWhiteFilter);
                 palette = paletteBuilder.generate();
-                int foregroundColor;
-                if (NotificationColorUtil.isColorLight(backgroundColor)) {
-                    Palette.Swatch first = palette.getDarkVibrantSwatch();
-                    Palette.Swatch second = palette.getVibrantSwatch();
-                    if (first != null && second != null) {
-                        int firstPopulation = first.getPopulation();
-                        int secondPopulation = second.getPopulation();
-                        if (firstPopulation / secondPopulation
-                                < POPULATION_FRACTION_FOR_MORE_VIBRANT) {
-                            foregroundColor = second.getRgb();
-                        } else {
-                            foregroundColor = first.getRgb();
-                        }
-                    } else if (first != null) {
-                        foregroundColor = first.getRgb();
-                    } else if (second != null) {
-                        foregroundColor = second.getRgb();
-                    } else {
-                        first = palette.getMutedSwatch();
-                        second = palette.getDarkMutedSwatch();
-                        if (first != null && second != null) {
-                            float firstSaturation = first.getHsl()[1];
-                            float secondSaturation = second.getHsl()[1];
-                            if (firstSaturation > secondSaturation) {
-                                foregroundColor = first.getRgb();
-                            } else {
-                                foregroundColor = second.getRgb();
-                            }
-                        } else if (first != null) {
-                            foregroundColor = first.getRgb();
-                        } else if (second != null) {
-                            foregroundColor = second.getRgb();
-                        } else {
-                            foregroundColor = Color.BLACK;
-                        }
-                    }
-                } else {
-                    Palette.Swatch first = palette.getLightVibrantSwatch();
-                    Palette.Swatch second = palette.getVibrantSwatch();
-                    if (first != null && second != null) {
-                        int firstPopulation = first.getPopulation();
-                        int secondPopulation = second.getPopulation();
-                        if (firstPopulation / secondPopulation
-                                < POPULATION_FRACTION_FOR_MORE_VIBRANT) {
-                            foregroundColor = second.getRgb();
-                        } else {
-                            foregroundColor = first.getRgb();
-                        }
-                    } else if (first != null) {
-                        foregroundColor = first.getRgb();
-                    } else if (second != null) {
-                        foregroundColor = second.getRgb();
-                    } else {
-                        first = palette.getMutedSwatch();
-                        second = palette.getLightMutedSwatch();
-                        if (first != null && second != null) {
-                            float firstSaturation = first.getHsl()[1];
-                            float secondSaturation = second.getHsl()[1];
-                            if (firstSaturation > secondSaturation) {
-                                foregroundColor = first.getRgb();
-                            } else {
-                                foregroundColor = second.getRgb();
-                            }
-                        } else if (first != null) {
-                            foregroundColor = first.getRgb();
-                        } else if (second != null) {
-                            foregroundColor = second.getRgb();
-                        } else {
-                            foregroundColor = Color.WHITE;
-                        }
-                    }
-                }
+                int foregroundColor = selectForegroundColor(backgroundColor, palette);
                 builder.setColorPalette(backgroundColor, foregroundColor);
             } else {
                 int id = mIsLowPriority
@@ -204,6 +156,95 @@ public class MediaNotificationProcessor {
                             LayoutDirection.RTL);
             builder.setLargeIcon(Icon.createWithBitmap(colorized));
         }
+    }
+
+    private int selectForegroundColor(int backgroundColor, Palette palette) {
+        if (NotificationColorUtil.isColorLight(backgroundColor)) {
+            return selectForegroundColorForSwatches(palette.getDarkVibrantSwatch(),
+                    palette.getVibrantSwatch(),
+                    palette.getDarkMutedSwatch(),
+                    palette.getMutedSwatch(),
+                    palette.getDominantSwatch(),
+                    Color.BLACK);
+        } else {
+            return selectForegroundColorForSwatches(palette.getLightVibrantSwatch(),
+                    palette.getVibrantSwatch(),
+                    palette.getLightMutedSwatch(),
+                    palette.getMutedSwatch(),
+                    palette.getDominantSwatch(),
+                    Color.WHITE);
+        }
+    }
+
+    private int selectForegroundColorForSwatches(Palette.Swatch moreVibrant,
+            Palette.Swatch vibrant, Palette.Swatch moreMutedSwatch, Palette.Swatch mutedSwatch,
+            Palette.Swatch dominantSwatch, int fallbackColor) {
+        Palette.Swatch coloredCandidate = selectVibrantCandidate(moreVibrant, vibrant);
+        if (coloredCandidate == null) {
+            coloredCandidate = selectMutedCandidate(mutedSwatch, moreMutedSwatch);
+        }
+        if (coloredCandidate != null) {
+            if (dominantSwatch == coloredCandidate) {
+                return coloredCandidate.getRgb();
+            } else if ((float) coloredCandidate.getPopulation() / dominantSwatch.getPopulation()
+                    < POPULATION_FRACTION_FOR_DOMINANT
+                    && dominantSwatch.getHsl()[1] > MIN_SATURATION_WHEN_DECIDING) {
+                return dominantSwatch.getRgb();
+            } else {
+                return coloredCandidate.getRgb();
+            }
+        } else if (hasEnoughPopulation(dominantSwatch)) {
+            return dominantSwatch.getRgb();
+        } else {
+            return fallbackColor;
+        }
+    }
+
+    private Palette.Swatch selectMutedCandidate(Palette.Swatch first,
+            Palette.Swatch second) {
+        boolean firstValid = hasEnoughPopulation(first);
+        boolean secondValid = hasEnoughPopulation(second);
+        if (firstValid && secondValid) {
+            float firstSaturation = first.getHsl()[1];
+            float secondSaturation = second.getHsl()[1];
+            float populationFraction = first.getPopulation() / (float) second.getPopulation();
+            if (firstSaturation * populationFraction > secondSaturation) {
+                return first;
+            } else {
+                return second;
+            }
+        } else if (firstValid) {
+            return first;
+        } else if (secondValid) {
+            return second;
+        }
+        return null;
+    }
+
+    private Palette.Swatch selectVibrantCandidate(Palette.Swatch first, Palette.Swatch second) {
+        boolean firstValid = hasEnoughPopulation(first);
+        boolean secondValid = hasEnoughPopulation(second);
+        if (firstValid && secondValid) {
+            int firstPopulation = first.getPopulation();
+            int secondPopulation = second.getPopulation();
+            if (firstPopulation / (float) secondPopulation
+                    < POPULATION_FRACTION_FOR_MORE_VIBRANT) {
+                return second;
+            } else {
+                return first;
+            }
+        } else if (firstValid) {
+            return first;
+        } else if (secondValid) {
+            return second;
+        }
+        return null;
+    }
+
+    private boolean hasEnoughPopulation(Palette.Swatch swatch) {
+        // We want a fraction that is at least 1% of the image
+        return swatch != null
+                && (swatch.getPopulation() / (float) RESIZE_BITMAP_AREA > MINIMUM_IMAGE_FRACTION);
     }
 
     private int findBackgroundColorAndFilter(Palette palette) {
