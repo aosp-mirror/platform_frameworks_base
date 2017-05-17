@@ -17,15 +17,18 @@
 package com.android.server.backup.utils;
 
 import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.util.Slog;
 import android.util.StringBuilderPrinter;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -55,6 +58,10 @@ public class FullBackupUtils {
             while (chunkTotal > 0) {
                 int toRead = (chunkTotal > buffer.length) ? buffer.length : chunkTotal;
                 int nRead = in.read(buffer, 0, toRead);
+                if (nRead < 0) {
+                    Slog.e(TAG, "Unexpectedly reached end of file while reading data");
+                    throw new EOFException();
+                }
                 out.write(buffer, 0, nRead);
                 chunkTotal -= nRead;
             }
