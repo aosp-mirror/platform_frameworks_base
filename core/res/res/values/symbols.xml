@@ -3011,7 +3011,7 @@
   <java-symbol type="bool" name="enable_pbap_pce_profile" />
 
   <java-symbol type="integer" name="default_data_warning_level_mb" />
-
+  <java-symbol type="bool" name="config_useVideoPauseWorkaround" />
   <java-symbol type="bool" name="config_sendPackageName" />
   <java-symbol type="string" name="config_helpPackageNameKey" />
   <java-symbol type="string" name="config_helpPackageNameValue" />
