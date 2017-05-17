@@ -167,4 +167,12 @@ public abstract class UserManagerInternal {
      * Remove user's running state
      */
     public abstract void removeUserState(int userId);
+
+    /**
+     * Returns an array of user ids. This array is cached in UserManagerService and passed as a
+     * reference, so do not modify the returned array.
+     *
+     * @return the array of user ids.
+     */
+    public abstract int[] getUserIds();
 }
