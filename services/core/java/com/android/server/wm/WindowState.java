@@ -1306,7 +1306,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      *         otherwise.
      */
     boolean wouldBeVisibleIfPolicyIgnored() {
-        return mHasSurface && mPolicyVisibility && !isParentWindowHidden()
+        return mHasSurface && !isParentWindowHidden()
                 && !mAnimatingExit && !mDestroying && (!mIsWallpaper || mWallpaperVisible);
     }
 
