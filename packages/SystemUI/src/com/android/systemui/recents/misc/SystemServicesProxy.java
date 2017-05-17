@@ -1029,7 +1029,12 @@ public class SystemServicesProxy {
      * Returns the current user id.
      */
     public int getCurrentUser() {
-        return KeyguardUpdateMonitor.getCurrentUser();
+        if (mAm == null) return 0;
+
+        // This must call through ActivityManager, as the SystemServicesProxy can be called in a
+        // secondary user's SystemUI process, and KeyguardUpdateMonitor is only updated in the
+        // primary user's SystemUI process
+        return mAm.getCurrentUser();
     }
 
     /**
