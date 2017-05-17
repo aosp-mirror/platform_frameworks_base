@@ -17445,17 +17445,24 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-            // Do not run PackageDexOptimizer through the local performDexOpt
-            // method because `pkg` may not be in `mPackages` yet.
-            //
-            // Also, don't fail application installs if the dexopt step fails.
-            mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
-                    null /* instructionSets */, false /* checkProfiles */,
-                    getCompilerFilterForReason(REASON_INSTALL),
-                    getOrCreateCompilerPackageStats(pkg),
-                    mDexManager.isUsedByOtherApps(pkg.packageName));
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            // dexopt can take some time to complete, so, for instant apps, we skip this
+            // step during installation. Instead, we'll take extra time the first time the
+            // instant app starts. It's preferred to do it this way to provide continuous
+            // progress to the user instead of mysteriously blocking somewhere in the
+            // middle of running an instant app.
+            if (!instantApp) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+                // Do not run PackageDexOptimizer through the local performDexOpt
+                // method because `pkg` may not be in `mPackages` yet.
+                //
+                // Also, don't fail application installs if the dexopt step fails.
+                mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
+                        null /* instructionSets */, false /* checkProfiles */,
+                        getCompilerFilterForReason(REASON_INSTALL),
+                        getOrCreateCompilerPackageStats(pkg),
+                        mDexManager.isUsedByOtherApps(pkg.packageName));
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
 
             // Notify BackgroundDexOptService that the package has been changed.
             // If this is an update of a package which used to fail to compile,
