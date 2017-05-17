@@ -38,6 +38,43 @@ void AxisConfigFilter::AddConfig(ConfigDescription config) {
   config_mask_ |= diff_mask;
 }
 
+// Returns true if the locale script of the config should be considered matching
+// the locale script of entry.
+//
+// If both the scripts are empty, the scripts are considered matching for
+// backward compatibility reasons.
+//
+// If only one script is empty, we try to compute it based on the provided
+// language and country. If we could not compute it, we assume it's either a
+// new language we don't know about, or a private use language. We return true
+// since we don't know any better and they might as well be a match.
+//
+// Finally, when we have two scripts (one of which could be computed), we return
+// true if and only if they are an exact match.
+static bool ScriptsMatch(const ConfigDescription& config, const ConfigDescription& entry) {
+  const char* config_script = config.localeScript;
+  const char* entry_script = entry.localeScript;
+  if (config_script[0] == '\0' && entry_script[0] == '\0') {
+    return true;  // both scripts are empty. We match for backward compatibility reasons.
+  }
+
+  char script_buffer[sizeof(config.localeScript)];
+  if (config_script[0] == '\0') {
+    android::localeDataComputeScript(script_buffer, config.language, config.country);
+    if (script_buffer[0] == '\0') {  // We can't compute the script, so we match.
+      return true;
+    }
+    config_script = script_buffer;
+  } else if (entry_script[0] == '\0') {
+    android::localeDataComputeScript(script_buffer, entry.language, entry.country);
+    if (script_buffer[0] == '\0') {  // We can't compute the script, so we match.
+      return true;
+    }
+    entry_script = script_buffer;
+  }
+  return memcmp(config_script, entry_script, sizeof(config.localeScript)) == 0;
+}
+
 bool AxisConfigFilter::Match(const ConfigDescription& config) const {
   const uint32_t mask = ConfigDescription::DefaultConfig().diff(config);
   if ((config_mask_ & mask) == 0) {
@@ -57,12 +94,16 @@ bool AxisConfigFilter::Match(const ConfigDescription& config) const {
       // If the locales differ, but the languages are the same and
       // the locale we are matching only has a language specified,
       // we match.
-      if (config.language[0] &&
-          memcmp(config.language, target.language, sizeof(config.language)) ==
-              0) {
-        if (config.country[0] == 0) {
-          matched_axis |= android::ResTable_config::CONFIG_LOCALE;
-        }
+      //
+      // Exception: we won't match if a script is specified for at least
+      // one of the locales and it's different from the other locale's
+      // script. (We will compute the other script if at least one of the
+      // scripts were explicitly set. In cases we can't compute an script,
+      // we match.)
+      if (config.language[0] != '\0' && config.country[0] == '\0' &&
+          config.localeVariant[0] == '\0' && config.language[0] == entry.first.language[0] &&
+          config.language[1] == entry.first.language[1] && ScriptsMatch(config, entry.first)) {
+        matched_axis |= android::ResTable_config::CONFIG_LOCALE;
       }
     } else if ((diff & diff_mask) ==
                android::ResTable_config::CONFIG_SMALLEST_SCREEN_SIZE) {
