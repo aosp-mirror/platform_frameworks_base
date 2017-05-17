@@ -1050,6 +1050,15 @@ class ActivityStarter {
 
             reusedActivity = setTargetStackAndMoveToFrontIfNeeded(reusedActivity);
 
+            final ActivityRecord outResult =
+                    outActivity != null && outActivity.length > 0 ? outActivity[0] : null;
+
+            // When there is a reused activity and the current result is a trampoline activity,
+            // set the reused activity as the result.
+            if (outResult != null && (outResult.finishing || outResult.noDisplay)) {
+                outActivity[0] = reusedActivity;
+            }
+
             if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
                 // We don't need to start a new activity, and the client said not to do anything
                 // if that is the case, so this is it!  And for paranoia, make sure we have
