@@ -627,6 +627,17 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         wrapper.release();
     }
 
+    /**
+     * For all tasks at or below this container call the callback.
+     *
+     * @param callback Callback to be called for every task.
+     */
+    void forAllTasks(Consumer<Task> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).forAllTasks(callback);
+        }
+    }
+
     WindowState getWindow(Predicate<WindowState> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState w = mChildren.get(i).getWindow(callback);

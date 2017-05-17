@@ -203,6 +203,7 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManagerPolicy.PointerEventListener;
+import android.view.WindowManagerPolicy.ScreenOffListener;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 
@@ -2808,6 +2809,11 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void notifyKeyguardTrustedChanged() {
         mH.sendEmptyMessage(H.NOTIFY_KEYGUARD_TRUSTED_CHANGED);
+    }
+
+    @Override
+    public void screenTurningOff(ScreenOffListener listener) {
+        mTaskSnapshotController.screenTurningOff(listener);
     }
 
     /**

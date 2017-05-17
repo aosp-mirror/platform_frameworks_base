@@ -366,6 +366,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public void screenTurningOff(ScreenOffListener screenOffListener) {
+
+    }
+
+    @Override
     public void screenTurnedOff() {
 
     }
