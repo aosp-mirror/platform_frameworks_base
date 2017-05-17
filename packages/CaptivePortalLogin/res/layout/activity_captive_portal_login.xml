@@ -4,31 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.android.captiveportallogin.CaptivePortalLoginActivity"
-    tools:ignore="MergeRootFrame">
+    tools:ignore="MergeRootFrame" >
+
     <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/url_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:singleLine="true" />
+      <FrameLayout
+          android:layout_width="match_parent"
+          android:layout_height="4dp" >
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyleHorizontal" />
+        <!-- Eliminates ProgressBar padding by boxing it into a 4dp high container -->
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="@android:style/Widget.Material.Light.ProgressBar.Horizontal"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="0"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+      </FrameLayout>
 
-    <WebView
-        android:id="@+id/webview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentBottom="false"
-        android:layout_alignParentRight="false" />
+      <WebView
+          android:id="@+id/webview"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_alignParentBottom="false"
+          android:layout_alignParentRight="false" />
 
-</LinearLayout>
+    </LinearLayout>
 </FrameLayout>
