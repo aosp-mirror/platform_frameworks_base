@@ -145,6 +145,7 @@ import com.android.server.connectivity.NetworkNotificationManager.NotificationTy
 import com.android.server.connectivity.PacManager;
 import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.Tethering;
+import com.android.server.connectivity.tethering.TetheringDependencies;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.LockdownVpnTracker;
@@ -802,8 +803,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mTestMode = mSystemProperties.get("cm.test.mode").equals("true")
                 && mSystemProperties.get("ro.build.type").equals("eng");
 
-        mTethering = new Tethering(mContext, mNetd, statsService, mPolicyManager,
-                                   IoThread.get().getLooper(), new MockableSystemProperties());
+        mTethering = makeTethering();
 
         mPermissionMonitor = new PermissionMonitor(mContext, mNetd);
 
@@ -851,6 +851,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mMultinetworkPolicyTracker = createMultinetworkPolicyTracker(
                 mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
         mMultinetworkPolicyTracker.start();
+    }
+
+    private Tethering makeTethering() {
+        // TODO: Move other elements into @Overridden getters.
+        final TetheringDependencies deps = new TetheringDependencies();
+        return new Tethering(mContext, mNetd, mStatsService, mPolicyManager,
+                IoThread.get().getLooper(), new MockableSystemProperties(),
+                deps);
     }
 
     private NetworkRequest createInternetRequestForTransport(

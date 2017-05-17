@@ -18,9 +18,17 @@ LOCAL_SRC_FILES += \
 LOCAL_AIDL_INCLUDES += \
     system/netd/server/binder
 
-LOCAL_JAVA_LIBRARIES := services.net
-LOCAL_STATIC_JAVA_LIBRARIES := tzdata_shared2 tzdata_update2
 LOCAL_PROTOC_OPTIMIZE_TYPE := nano
+
+LOCAL_JAVA_LIBRARIES := \
+    services.net \
+    android.hidl.manager-V1.0-java \
+
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    tzdata_shared2 \
+    tzdata_update2 \
+    android.hidl.base-V1.0-java-static \
+    android.hardware.tetheroffload.control-V1.0-java-static \
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
