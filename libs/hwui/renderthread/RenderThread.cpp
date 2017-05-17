@@ -17,7 +17,6 @@
 #include "RenderThread.h"
 
 #include "../renderstate/RenderState.h"
-#include "../pipeline/skia/SkiaOpenGLPipeline.h"
 #include "../pipeline/skia/SkiaOpenGLReadback.h"
 #include "CanvasContext.h"
 #include "EglManager.h"
@@ -432,24 +431,6 @@ RenderTask* RenderThread::nextTask(nsecs_t* nextWakeup) {
         *nextWakeup = mNextWakeup;
     }
     return next;
-}
-
-sk_sp<SkImage> RenderThread::makeTextureImage(Bitmap* bitmap) {
-    auto renderType = Properties::getRenderPipelineType();
-    sk_sp<SkImage> hardwareImage;
-    switch (renderType) {
-        case RenderPipelineType::SkiaGL:
-            hardwareImage = skiapipeline::SkiaOpenGLPipeline::makeTextureImage(*this, bitmap);
-            break;
-        case RenderPipelineType::SkiaVulkan:
-            //TODO: add Vulkan support
-            break;
-        default:
-            LOG_ALWAYS_FATAL("makeTextureImage: canvas context type %d not supported",
-                    (int32_t) renderType);
-            break;
-    }
-    return hardwareImage;
 }
 
 } /* namespace renderthread */
