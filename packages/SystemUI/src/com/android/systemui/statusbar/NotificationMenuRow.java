@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.service.notification.StatusBarNotification;
 import android.view.LayoutInflater;
@@ -44,7 +45,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 
-public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnClickListener {
+public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnClickListener,
+        ExpandableNotificationRow.LayoutListener {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "swipe";
@@ -107,7 +109,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
         mIconPadding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
-        mHandler = new Handler();
+        mHandler = new Handler(Looper.getMainLooper());
         mMenuItems = new ArrayList<>();
         mSnoozeItem = createSnoozeItem(context);
         mInfoItem = createInfoItem(context);
@@ -163,6 +165,18 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             return;
         }
         createMenuViews();
+    }
+
+    @Override
+    public void onConfigurationChanged() {
+        mParent.setLayoutListener(this);
+    }
+
+    @Override
+    public void onLayout() {
+        mIconsPlaced = false; // Force icons to be re-placed
+        setMenuLocation();
+        mParent.removeListener();
     }
 
     private void createMenuViews() {
@@ -459,22 +473,17 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     private void setMenuLocation() {
         boolean showOnLeft = mTranslation > 0;
-        if ((mIconsPlaced && showOnLeft == mOnLeft) || mSnapping || mParent == null) {
+        if ((mIconsPlaced && showOnLeft == mOnLeft) || mSnapping
+                || !mMenuContainer.isAttachedToWindow()) {
             // Do nothing
             return;
         }
-        final boolean isRtl = mParent.isLayoutRtl();
         final int count = mMenuContainer.getChildCount();
-        final int width = mParent.getWidth();
         for (int i = 0; i < count; i++) {
             final View v = mMenuContainer.getChildAt(i);
-            final float left = isRtl
-                    ? -(width - mHorizSpaceForIcon * (i + 1))
-                    : i * mHorizSpaceForIcon;
-            final float right = isRtl
-                    ? -i * mHorizSpaceForIcon
-                    : width - (mHorizSpaceForIcon * (i + 1));
-            v.setTranslationX(showOnLeft ? left : right);
+            final float left = i * mHorizSpaceForIcon;
+            final float right = mParent.getWidth() - (mHorizSpaceForIcon * (i + 1));
+            v.setX(showOnLeft ? left : right);
         }
         mOnLeft = showOnLeft;
         mIconsPlaced = true;

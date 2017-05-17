@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static com.android.internal.util.NotificationColorUtil.satisfiesTextContrast;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -44,6 +46,7 @@ import android.net.Uri;
 import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -70,6 +73,7 @@ import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.util.Preconditions;
@@ -833,6 +837,22 @@ public class Notification implements Parcelable
      * @hide
      */
     public ArraySet<PendingIntent> allPendingIntents;
+
+    /**
+     * Token identifying the notification that is applying doze/bgcheck whitelisting to the
+     * pending intents inside of it, so only those will get the behavior.
+     *
+     * @hide
+     */
+    static public IBinder whitelistToken;
+
+    /**
+     * Must be set by a process to start associating tokens with Notification objects
+     * coming in to it.  This is set by NotificationManagerService.
+     *
+     * @hide
+     */
+    static public IBinder processWhitelistToken;
 
     /**
      * {@link #extras} key: this is the title of the notification,
@@ -1823,6 +1843,13 @@ public class Notification implements Parcelable
     {
         int version = parcel.readInt();
 
+        whitelistToken = parcel.readStrongBinder();
+        if (whitelistToken == null) {
+            whitelistToken = processWhitelistToken;
+        }
+        // Propagate this token to all pending intents that are unmarshalled from the parcel.
+        parcel.setClassCookie(PendingIntent.class, whitelistToken);
+
         when = parcel.readLong();
         creationTime = parcel.readLong();
         if (parcel.readInt() != 0) {
@@ -1929,6 +1956,7 @@ public class Notification implements Parcelable
      * @hide
      */
     public void cloneInto(Notification that, boolean heavy) {
+        that.whitelistToken = this.whitelistToken;
         that.when = this.when;
         that.creationTime = this.creationTime;
         that.mSmallIcon = this.mSmallIcon;
@@ -2158,6 +2186,7 @@ public class Notification implements Parcelable
     private void writeToParcelImpl(Parcel parcel, int flags) {
         parcel.writeInt(1);
 
+        parcel.writeStrongBinder(whitelistToken);
         parcel.writeLong(when);
         parcel.writeLong(creationTime);
         if (mSmallIcon == null && icon != 0) {
@@ -2494,9 +2523,8 @@ public class Notification implements Parcelable
         }
     }
 
-    /**
-     * Returns the id of the channel this notification posts to.
-     */
+    /** @removed */
+    @Deprecated
     public String getChannel() {
         return mChannelId;
     }
@@ -2508,10 +2536,8 @@ public class Notification implements Parcelable
         return mChannelId;
     }
 
-    /**
-     * Returns the time at which this notification should be canceled by the system, if it's not
-     * canceled already.
-     */
+    /** @removed */
+    @Deprecated
     public long getTimeout() {
         return mTimeout;
     }
@@ -2646,6 +2672,19 @@ public class Notification implements Parcelable
         private static final boolean USE_ONLY_TITLE_IN_LOW_PRIORITY_SUMMARY =
                 SystemProperties.getBoolean("notifications.only_title", true);
 
+        /**
+         * The lightness difference that has to be added to the primary text color to obtain the
+         * secondary text color when the background is light.
+         */
+        private static final int LIGHTNESS_TEXT_DIFFERENCE_LIGHT = 20;
+
+        /**
+         * The lightness difference that has to be added to the primary text color to obtain the
+         * secondary text color when the background is dark.
+         * A bit less then the above value, since it looks better on dark backgrounds.
+         */
+        private static final int LIGHTNESS_TEXT_DIFFERENCE_DARK = -10;
+
         private Context mContext;
         private Notification mN;
         private Bundle mUserExtras = new Bundle();
@@ -2678,6 +2717,8 @@ public class Notification implements Parcelable
         private int mActionBarColor = COLOR_INVALID;
         private int mBackgroundColor = COLOR_INVALID;
         private int mForegroundColor = COLOR_INVALID;
+        private int mBackgroundColorHint = COLOR_INVALID;
+        private boolean mRebuildStyledRemoteViews;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -2811,9 +2852,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        /**
-         * Specifies the channel the notification should be delivered on.
-         */
+        /** @removed */
+        @Deprecated
         public Builder setChannel(String channelId) {
             mN.mChannelId = channelId;
             return this;
@@ -2827,10 +2867,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        /**
-         * Specifies a duration in milliseconds after which this notification should be canceled,
-         * if it is not already canceled.
-         */
+        /** @removed */
+        @Deprecated
         public Builder setTimeout(long durationMs) {
             mN.mTimeout = durationMs;
             return this;
@@ -3813,9 +3851,24 @@ public class Notification implements Parcelable
             contentView.setTextColor(id, mPrimaryTextColor);
         }
 
-        private int getPrimaryTextColor() {
+        /**
+         * @return the primary text color
+         * @hide
+         */
+        @VisibleForTesting
+        public int getPrimaryTextColor() {
             ensureColors();
             return mPrimaryTextColor;
+        }
+
+        /**
+         * @return the secondary text color
+         * @hide
+         */
+        @VisibleForTesting
+        public int getSecondaryTextColor() {
+            ensureColors();
+            return mSecondaryTextColor;
         }
 
         private int getActionBarColor() {
@@ -3845,21 +3898,33 @@ public class Notification implements Parcelable
                             backgroundColor);
                     mSecondaryTextColor = NotificationColorUtil.resolveSecondaryColor(mContext,
                             backgroundColor);
+                    if (backgroundColor != COLOR_DEFAULT
+                            && (mBackgroundColorHint != COLOR_INVALID || isColorized())) {
+                        mPrimaryTextColor = NotificationColorUtil.findAlphaToMeetContrast(
+                                mPrimaryTextColor, backgroundColor, 4.5);
+                        mSecondaryTextColor = NotificationColorUtil.findAlphaToMeetContrast(
+                                mSecondaryTextColor, backgroundColor, 4.5);
+                    }
                 } else {
                     double backLum = NotificationColorUtil.calculateLuminance(backgroundColor);
                     double textLum = NotificationColorUtil.calculateLuminance(mForegroundColor);
                     double contrast = NotificationColorUtil.calculateContrast(mForegroundColor,
                             backgroundColor);
-                    boolean textDark = backLum > textLum;
+                    // We only respect the given colors if worst case Black or White still has
+                    // contrast
+                    boolean backgroundLight = backLum > textLum
+                                    && satisfiesTextContrast(backgroundColor, Color.BLACK)
+                            || backLum <= textLum
+                                    && !satisfiesTextContrast(backgroundColor, Color.WHITE);
                     if (contrast < 4.5f) {
-                        if (textDark) {
+                        if (backgroundLight) {
                             mSecondaryTextColor = NotificationColorUtil.findContrastColor(
                                     mForegroundColor,
                                     backgroundColor,
                                     true /* findFG */,
                                     4.5f);
                             mPrimaryTextColor = NotificationColorUtil.changeColorLightness(
-                                    mSecondaryTextColor, -20);
+                                    mSecondaryTextColor, -LIGHTNESS_TEXT_DIFFERENCE_LIGHT);
                         } else {
                             mSecondaryTextColor =
                                     NotificationColorUtil.findContrastColorAgainstDark(
@@ -3868,16 +3933,17 @@ public class Notification implements Parcelable
                                     true /* findFG */,
                                     4.5f);
                             mPrimaryTextColor = NotificationColorUtil.changeColorLightness(
-                                    mSecondaryTextColor, 10);
+                                    mSecondaryTextColor, -LIGHTNESS_TEXT_DIFFERENCE_DARK);
                         }
                     } else {
                         mPrimaryTextColor = mForegroundColor;
                         mSecondaryTextColor = NotificationColorUtil.changeColorLightness(
-                                mPrimaryTextColor, textDark ? 10 : -20);
+                                mPrimaryTextColor, backgroundLight ? LIGHTNESS_TEXT_DIFFERENCE_LIGHT
+                                        : LIGHTNESS_TEXT_DIFFERENCE_DARK);
                         if (NotificationColorUtil.calculateContrast(mSecondaryTextColor,
                                 backgroundColor) < 4.5f) {
                             // oh well the secondary is not good enough
-                            if (textDark) {
+                            if (backgroundLight) {
                                 mSecondaryTextColor = NotificationColorUtil.findContrastColor(
                                         mSecondaryTextColor,
                                         backgroundColor,
@@ -3892,7 +3958,9 @@ public class Notification implements Parcelable
                                         4.5f);
                             }
                             mPrimaryTextColor = NotificationColorUtil.changeColorLightness(
-                                    mSecondaryTextColor, textDark ? -20 : 10);
+                                    mSecondaryTextColor, backgroundLight
+                                            ? -LIGHTNESS_TEXT_DIFFERENCE_LIGHT
+                                            : -LIGHTNESS_TEXT_DIFFERENCE_DARK);
                         }
                     }
                 }
@@ -4222,7 +4290,7 @@ public class Notification implements Parcelable
          *   @hide
          */
         public RemoteViews createContentView(boolean increasedHeight) {
-            if (mN.contentView != null && (mStyle == null || !mStyle.displayCustomViewInline())) {
+            if (mN.contentView != null && useExistingRemoteView()) {
                 return mN.contentView;
             } else if (mStyle != null) {
                 final RemoteViews styleView = mStyle.makeContentView(increasedHeight);
@@ -4233,13 +4301,17 @@ public class Notification implements Parcelable
             return applyStandardTemplate(getBaseLayoutResource());
         }
 
+        private boolean useExistingRemoteView() {
+            return mStyle == null || (!mStyle.displayCustomViewInline()
+                    && !mRebuildStyledRemoteViews);
+        }
+
         /**
          * Construct a RemoteViews for the final big notification layout.
          */
         public RemoteViews createBigContentView() {
             RemoteViews result = null;
-            if (mN.bigContentView != null
-                    && (mStyle == null || !mStyle.displayCustomViewInline())) {
+            if (mN.bigContentView != null && useExistingRemoteView()) {
                 return mN.bigContentView;
             } else if (mStyle != null) {
                 result = mStyle.makeBigContentView();
@@ -4255,15 +4327,17 @@ public class Notification implements Parcelable
          * Construct a RemoteViews for the final notification header only. This will not be
          * colorized.
          *
+         * @param ambient if true, generate the header for the ambient display layout.
          * @hide
          */
-        public RemoteViews makeNotificationHeader() {
+        public RemoteViews makeNotificationHeader(boolean ambient) {
             Boolean colorized = (Boolean) mN.extras.get(EXTRA_COLORIZED);
             mN.extras.putBoolean(EXTRA_COLORIZED, false);
             RemoteViews header = new BuilderRemoteViews(mContext.getApplicationInfo(),
-                    R.layout.notification_template_header);
+                    ambient ? R.layout.notification_template_ambient_header
+                            : R.layout.notification_template_header);
             resetNotificationHeader(header);
-            bindNotificationHeader(header, false /* ambient */);
+            bindNotificationHeader(header, ambient);
             if (colorized != null) {
                 mN.extras.putBoolean(EXTRA_COLORIZED, colorized);
             } else {
@@ -4312,8 +4386,7 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews createHeadsUpContentView(boolean increasedHeight) {
-            if (mN.headsUpContentView != null
-                    && (mStyle == null ||  !mStyle.displayCustomViewInline())) {
+            if (mN.headsUpContentView != null && useExistingRemoteView()) {
                 return mN.headsUpContentView;
             } else if (mStyle != null) {
                 final RemoteViews styleView = mStyle.makeHeadsUpContentView(increasedHeight);
@@ -4364,6 +4437,8 @@ public class Notification implements Parcelable
             mN.mLargeIcon = null;
             Bitmap largeIconLegacy = mN.largeIcon;
             mN.largeIcon = null;
+            ArrayList<Action> actions = mActions;
+            mActions = new ArrayList<>();
             Bundle publicExtras = new Bundle();
             publicExtras.putBoolean(EXTRA_SHOW_WHEN,
                     savedBundle.getBoolean(EXTRA_SHOW_WHEN));
@@ -4379,6 +4454,7 @@ public class Notification implements Parcelable
             mN.extras = savedBundle;
             mN.mLargeIcon = largeIcon;
             mN.largeIcon = largeIconLegacy;
+            mActions = actions;
             mStyle = style;
             return view;
         }
@@ -4402,7 +4478,7 @@ public class Notification implements Parcelable
                 }
             }
 
-            RemoteViews header = makeNotificationHeader();
+            RemoteViews header = makeNotificationHeader(false /* ambient */);
             header.setBoolean(R.id.notification_header, "setAcceptAllTouches", true);
             if (summary != null) {
                 mN.extras.putCharSequence(EXTRA_SUB_TEXT, summary);
@@ -4665,10 +4741,26 @@ public class Notification implements Parcelable
             if (mCachedContrastColorIsFor == mN.color && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
             }
-            final int contrasted = NotificationColorUtil.resolveContrastColor(mContext, mN.color);
 
+            int color;
+            int background = mBackgroundColorHint;
+            if (mBackgroundColorHint == COLOR_INVALID) {
+                background = mContext.getColor(
+                        com.android.internal.R.color.notification_material_background_color);
+            }
+            if (mN.color == COLOR_DEFAULT) {
+                ensureColors();
+                color = mSecondaryTextColor;
+            } else {
+                color = NotificationColorUtil.resolveContrastColor(mContext, mN.color,
+                        background);
+            }
+            if (Color.alpha(color) < 255) {
+                // alpha doesn't go well for color filters, so let's blend it manually
+                color = NotificationColorUtil.compositeColors(color, background);
+            }
             mCachedContrastColorIsFor = mN.color;
-            return mCachedContrastColor = contrasted;
+            return mCachedContrastColor = color;
         }
 
         int resolveAmbientColor() {
@@ -4756,7 +4848,7 @@ public class Notification implements Parcelable
             }
 
             if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
-                    && (mStyle == null || !mStyle.displayCustomViewInline())) {
+                    && (useExistingRemoteView())) {
                 if (mN.contentView == null) {
                     mN.contentView = createContentView();
                     mN.extras.putInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT,
@@ -4885,7 +4977,8 @@ public class Notification implements Parcelable
             if (isColorized()) {
                 return mBackgroundColor != COLOR_INVALID ? mBackgroundColor : mN.color;
             } else {
-                return COLOR_DEFAULT;
+                return mBackgroundColorHint != COLOR_INVALID ? mBackgroundColorHint
+                        : COLOR_DEFAULT;
             }
         }
 
@@ -4915,6 +5008,30 @@ public class Notification implements Parcelable
             mForegroundColor = foregroundColor;
             mTextColorsAreForBackground = COLOR_INVALID;
             ensureColors();
+        }
+
+        /**
+         * Sets the background color for this notification to be a different one then the default.
+         * This is mainly used to calculate contrast and won't necessarily be applied to the
+         * background.
+         *
+         * @hide
+         */
+        public void setBackgroundColorHint(int backgroundColor) {
+            mBackgroundColorHint = backgroundColor;
+        }
+
+
+        /**
+         * Forces all styled remoteViews to be built from scratch and not use any cached
+         * RemoteViews.
+         * This is needed for legacy apps that are baking in their remoteviews into the
+         * notification.
+         *
+         * @hide
+         */
+        public void setRebuildStyledRemoteViews(boolean rebuild) {
+            mRebuildStyledRemoteViews = rebuild;
         }
     }
 
@@ -8040,9 +8157,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        /**
-         * Returns the id of the channel this notification posts to on TV.
-         */
+        /** @removed */
+        @Deprecated
         public String getChannel() {
             return mChannelId;
         }

@@ -131,7 +131,7 @@ public final class SharedLibraryInfo implements Parcelable {
      *
      * @return The version.
      */
-    public @IntRange(from = -1) long getVersion() {
+    public @IntRange(from = -1) int getVersion() {
         return mVersion;
     }
 

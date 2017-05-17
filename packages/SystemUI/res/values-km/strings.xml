@@ -298,7 +298,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"វ៉ាយហ្វាយ​បានបិទ"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi បានបើក"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"គ្មានបណ្តាញ Wi-Fi ទេ"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ខាស"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ភ្ជាប់"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ការ​ចាត់​ថ្នាក់"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ឧបករណ៍​​ដែល​មិន​មាន​ឈ្មោះ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ត្រៀម​រួចរាល់​ដើម្បី​ចាត់​ថ្នាក់"</string>
@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"អ្នកត្រូវបានភ្ជាប់ទៅ <xliff:g id="APPLICATION">%1$s</xliff:g> ដែលអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រាប់បញ្ចូលទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រ។"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"កម្រង​ព័ត៌មាន​ការងារ​របស់អ្នក​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ។ កម្រងព័ត៌មាន​នេះត្រូវ​បាន​ភ្ជាប់ទៅ <xliff:g id="APPLICATION">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​របស់​អ្នក។"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​ស្ថិតក្រោម​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ។ កម្រង​ព័ត៌មាននេះ​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។\n\nអ្នកក៏ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​ផ្ទាល់ខ្លួន​របស់​អ្នក។"</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"បាន​ដោះសោ​សម្រាប់ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ឧបករណ៍​នឹង​ចាក់​សោ​រហូត​ដល់​អ្នក​ដោះ​សោ​ដោយ​ដៃ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ទទួល​បាន​ការ​ជូន​ដំណឹង​កាន់តែ​លឿន"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ឃើញ​ពួកវា​មុន​ពេល​ដោះ​សោ"</string>
@@ -549,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"បិទ"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ជាមួយអង្គគ្រប់គ្រងការជូនដំណឹងថាមពល អ្នកអាចកំណត់កម្រិតសំខាន់ពី 0 ទៅ 5 សម្រាប់ការជូនដំណឹងរបស់កម្មវិធី។ \n\n"<b>"កម្រិត 5"</b>" \n- បង្ហាញនៅផ្នែកខាងលើបញ្ជីជូនដំណឹង \n- អនុញ្ញាតការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 4"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 3"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 2"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n\n"<b>"កម្រិត 1"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n- លាក់ពីអេក្រង់ចាក់សោ និងរបារស្ថានភាព \n- បង្ហាញនៅផ្នែកខាងក្រោមបញ្ជីជូនដំណឹង \n\n"<b>"កម្រិត 0"</b>" \n- រារាំងការជូនដំណឹងទាំងអស់ពីកម្មវិធី"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ការ​ជូនដំណឹង"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"អ្នក​នឹង​មិន​ទទួល​បាន​ការ​ជូនដំណឹង​ទាំងនេះ​ទៀត​ទេ។"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"អ្នក​នឹង​មិន​ទទួល​បានការ​ជូនដំណឹង​ទាំងនេះ​ទៀត​ទេ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"ប្រភេទនៃការជូនដំណឹងចំនួន <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"កម្មវិធីនេះ​មិនមាន​ប្រភេទនៃ​ការជូនដំណឹង​ទេ"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -702,7 +701,7 @@
     <string name="dock_forced_resizable" msgid="5914261505436217520">"កម្មវិធីអាចនឹងមិនដំណើរការនៅលើអេក្រង់បំបែកទេ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"កម្មវិធីមិនគាំទ្រអេក្រង់បំបែកជាពីរទេ"</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"កម្មវិធីនេះ​ប្រហែល​ជាមិនដំណើរការ​នៅលើ​អេក្រង់បន្ទាប់បន្សំទេ។"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"កម្មវិធី​នេះមិន​អាច​ចាប់ផ្តើម​បានទេ ដោយសារ​អេក្រង់បន្ទាប់បន្សំមិនស្គាល់វា។"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"កម្មវិធី​នេះមិន​អាច​ចាប់ផ្តើម​នៅលើ​អេក្រង់បន្ទាប់បន្សំបានទេ។"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"បើកការកំណត់"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"បើកការកំណត់រហ័ស"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"បិទការកំណត់រហ័ស"</string>
@@ -763,4 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"រហូត​ដល់ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"រក្សានៅ​ដដែល"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ជំនួស"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"កម្មវិធីដែលកំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"ចុចដើម្បីមើលព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ទិន្នន័យ និងថ្ម"</string>
 </resources>

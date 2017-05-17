@@ -77,6 +77,7 @@ public class PipMotionHelper {
     private SurfaceFlingerVsyncChoreographer mVsyncChoreographer;
     private Handler mHandler;
 
+    private PipMenuActivityController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
     private FlingAnimationUtils mFlingAnimationUtils;
 
@@ -93,10 +94,12 @@ public class PipMotionHelper {
             };
 
     public PipMotionHelper(Context context, IActivityManager activityManager,
-            PipSnapAlgorithm snapAlgorithm, FlingAnimationUtils flingAnimationUtils) {
+            PipMenuActivityController menuController, PipSnapAlgorithm snapAlgorithm,
+            FlingAnimationUtils flingAnimationUtils) {
         mContext = context;
         mHandler = BackgroundThread.getHandler();
         mActivityManager = activityManager;
+        mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFlingAnimationUtils = flingAnimationUtils;
         mVsyncChoreographer = new SurfaceFlingerVsyncChoreographer(mHandler, mContext.getDisplay(),
@@ -140,14 +143,26 @@ public class PipMotionHelper {
      * Resizes the pinned stack back to fullscreen.
      */
     void expandPip() {
+        expandPip(false /* skipAnimation */);
+    }
+
+    /**
+     * Resizes the pinned stack back to fullscreen.
+     */
+    void expandPip(boolean skipAnimation) {
         cancelAnimations();
+        mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
-                mActivityManager.resizeStack(PINNED_STACK_ID, null /* bounds */,
-                        true /* allowResizeInDockedMode */, true /* preserveWindows */,
-                        true /* animate */, EXPAND_STACK_TO_FULLSCREEN_DURATION);
+                if (skipAnimation) {
+                    mActivityManager.moveTasksToFullscreenStack(PINNED_STACK_ID, true /* onTop */);
+                } else {
+                    mActivityManager.resizeStack(PINNED_STACK_ID, null /* bounds */,
+                            true /* allowResizeInDockedMode */, true /* preserveWindows */,
+                            true /* animate */, EXPAND_STACK_TO_FULLSCREEN_DURATION);
+                }
             } catch (RemoteException e) {
-                Log.e(TAG, "Error showing PiP menu activity", e);
+                Log.e(TAG, "Error expanding PiP activity", e);
             }
         });
     }
@@ -157,6 +172,7 @@ public class PipMotionHelper {
      */
     void dismissPip() {
         cancelAnimations();
+        mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
                 mActivityManager.removeStack(PINNED_STACK_ID);

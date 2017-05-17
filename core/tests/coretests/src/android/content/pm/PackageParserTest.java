@@ -220,41 +220,41 @@ public class PackageParserTest {
      * Unit test for PackageParser.getActivityConfigChanges().
      * If the bit is 1 in the original configChanges, it is still 1 in the final configChanges.
      * If the bit is 0 in the original configChanges and the bit is not set to 1 in
-     * restartOnConfigChanges, the bit is changed to 1 in the final configChanges by default.
+     * recreateOnConfigChanges, the bit is changed to 1 in the final configChanges by default.
      */
     @Test
     public void testGetActivityConfigChanges() {
-        // Not set in either configChanges or restartOnConfigChanges.
+        // Not set in either configChanges or recreateOnConfigChanges.
         int configChanges = 0x0000; // 00000000.
-        int restartOnConfigChanges = 0x0000; // 00000000.
+        int recreateOnConfigChanges = 0x0000; // 00000000.
         int finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, restartOnConfigChanges);
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should be 00000011.
 
-        // Not set in configChanges, but set in restartOnConfigChanges.
+        // Not set in configChanges, but set in recreateOnConfigChanges.
         configChanges = 0x0000; // 00000000.
-        restartOnConfigChanges = 0x0003; // 00000011.
+        recreateOnConfigChanges = 0x0003; // 00000011.
         finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, restartOnConfigChanges);
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0000, finalConfigChanges); // Should be 00000000.
 
         // Set in configChanges.
         configChanges = 0x0003; // 00000011.
-        restartOnConfigChanges = 0X0000; // 00000000.
+        recreateOnConfigChanges = 0X0000; // 00000000.
         finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, restartOnConfigChanges);
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should be 00000011.
 
-        restartOnConfigChanges = 0x0003; // 00000011.
+        recreateOnConfigChanges = 0x0003; // 00000011.
         finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, restartOnConfigChanges);
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should still be 00000011.
 
         // Other bit set in configChanges.
         configChanges = 0x0080; // 10000000, orientation.
-        restartOnConfigChanges = 0x0000; // 00000000.
+        recreateOnConfigChanges = 0x0000; // 00000000.
         finalConfigChanges =
-                PackageParser.getActivityConfigChanges(configChanges, restartOnConfigChanges);
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0083, finalConfigChanges); // Should be 10000011.
     }
 }

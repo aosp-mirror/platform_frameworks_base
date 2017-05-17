@@ -550,15 +550,11 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         boolean kept = true;
         if (updatedConfig) {
             final ActivityRecord r = topRunningActivityLocked();
-            if (r != null) {
+            if (r != null && !deferResume) {
                 kept = r.ensureActivityConfigurationLocked(0 /* globalChanges */, preserveWindow);
-
-                if (!deferResume) {
-                    // All other activities must be made visible with their correct configuration.
-                    mService.mStackSupervisor.ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
-                    if (!kept) {
-                        mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                    }
+                mService.mStackSupervisor.ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
+                if (!kept) {
+                    mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
         }
@@ -2234,12 +2230,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             return mStack.mBounds;
         }
         return mLastNonFullscreenBounds;
-    }
-
-    boolean canMatchRootAffinity() {
-        // We don't allow root affinity matching on the pinned stack as no other task should
-        // be launching in it based on affinity.
-        return rootAffinity != null && getStackId() != PINNED_STACK_ID;
     }
 
     void addStartingWindowsForVisibleActivities(boolean taskSwitch) {

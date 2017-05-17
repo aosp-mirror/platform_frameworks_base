@@ -1172,6 +1172,7 @@
         </activity>
         <activity android:name="com.android.internal.app.ChooserWrapperActivity"/>
         <activity android:name="com.android.internal.app.ResolverWrapperActivity"/>
+        <activity android:name="com.android.internal.app.IntentForwarderActivityTest$IntentForwarderWrapperActivity"/>
 
         <receiver android:name="android.app.activity.AbortReceiver">
             <intent-filter android:priority="1">

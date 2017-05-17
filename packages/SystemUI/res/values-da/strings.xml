@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Du har forbindelse til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåge din private netværksaktivitet, bl.a. e-mails, apps og websites."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profilen har forbindelse til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites.\n\nKontakt din administrator for at få flere oplysninger."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profilen har forbindelse til <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. mails, apps og websites.\n\nDu har også forbindelse til <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan overvåge din personlige netværksaktivitet."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Låst op for <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheden vil forblive låst, indtil du manuelt låser den op"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Modtag underretninger hurtigere"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Se dem, før du låser op"</string>
@@ -549,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Fra"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Med kontrolelementer til underretninger om strøm kan du konfigurere et vigtighedsniveau fra 0 til 5 for en apps underretninger. \n\n"<b>"Niveau 5"</b>\n"- Vis øverst på listen over underretninger \n- Tillad afbrydelse af fuld skærm \n- Se altid smugkig \n\n"<b>"Niveau 4"</b>\n"- Ingen afbrydelse af fuld skærm \n- Se altid smugkig \n\n"<b>"Niveau 3"</b>\n"- Ingen afbrydelse af fuld skærm \n- Se aldrig smugkig \n\n"<b>"Niveau 2"</b>\n"- Ingen afbrydelse af fuld skærm \n Se aldrig smugkig \n- Ingen lyd og vibration \n\n"<b>"Niveau 1"</b>\n"- Ingen afbrydelse af fuld skærm \n- Se aldrig smugkig \n- Ingen lyd eller vibration \n- Skjul fra låseskærm og statusbjælke \n- Vis nederst på listen over underretninger \n\n"<b>"Niveau 0"</b>\n"- Bloker alle underretninger fra appen."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Underretninger"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Du modtager ikke længere disse underretninger."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Du modtager ikke længere disse underretninger"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> underretningskategorier"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Denne app har ingen underretningskategorier"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -701,8 +700,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-underretning: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Appen fungerer muligvis ikke i delt skærm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Appen understøtter ikke delt skærm."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Appen fungerer muligvis ikke på en sekundær skærm."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Appen kan ikke åbnes på en sekundær skærm."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Appen fungerer muligvis ikke på sekundære skærme."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Appen kan ikke åbnes på sekundære skærme."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Åbn Indstillinger."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Åbn Hurtige indstillinger."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Luk Hurtige indstillinger."</string>
@@ -718,8 +717,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Luk"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Træk nedad for at afvise"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Billede i billede-menu"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> vises i billede i billede"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Menu for integreret billede"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> vises som integreret billede"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Hvis du ikke ønsker, at <xliff:g id="NAME">%s</xliff:g> skal benytte denne funktion, kan du åbne indstillingerne og deaktivere den."</string>
     <string name="pip_play" msgid="1417176722760265888">"Afspil"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Sæt på pause"</string>
@@ -763,4 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Indtil <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Behold"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Erstat"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Apps, der kører i baggrunden"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tryk for at se oplysninger om batteri- og dataforbrug"</string>
 </resources>

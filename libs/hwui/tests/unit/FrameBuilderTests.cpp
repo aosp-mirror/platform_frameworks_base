@@ -819,7 +819,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, deferColorOp_unbounded) {
     EXPECT_EQ(1, renderer.getIndex()) << "ColorOp should not be rejected";
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, renderNode) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, renderNode) {
     class RenderNodeTestRenderer : public TestRendererBase {
     public:
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
@@ -2321,7 +2321,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, clip_replace) {
     EXPECT_EQ(1, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectedInMiddle) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectedInMiddle) {
     /* R is backward projected on B
                 A
                / \
@@ -2351,7 +2351,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectedInMiddle) {
     EXPECT_EQ(3, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectLast) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectLast) {
     /* R is backward projected on E
                   A
                 / | \
@@ -2383,7 +2383,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectLast) {
     EXPECT_EQ(4, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderNoReceivable) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderNoReceivable) {
     /* R is backward projected without receiver
                 A
                / \
@@ -2412,7 +2412,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderNoReceivable) {
     EXPECT_EQ(2, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderParentReceivable) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderParentReceivable) {
     /* R is backward projected on C
                 A
                / \
@@ -2441,7 +2441,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderParentReceivable) {
     EXPECT_EQ(3, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderSameNodeReceivable) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderSameNodeReceivable) {
      auto nodeA = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         drawOrderedNode(&canvas, 0, nullptr); //nodeB
@@ -2464,7 +2464,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderSameNodeReceivable) {
     EXPECT_EQ(2, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectedSibling) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectedSibling) {
     //TODO: this test together with the next "projectionReorderProjectedSibling2" likely expose a
     //bug in HWUI. First test draws R, while the second test does not draw R for a nearly identical
     //tree setup. The correct behaviour is to not draw R, because the receiver cannot be a sibling
@@ -2497,7 +2497,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectedSibling) {
     EXPECT_EQ(3, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectedSibling2) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectedSibling2) {
     /* R is set to project on B, but R is not drawn because projecting on a sibling is not allowed.
                 A
                 |
@@ -2530,7 +2530,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderProjectedSibling2) {
     EXPECT_EQ(3, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderGrandparentReceivable) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderGrandparentReceivable) {
     /* R is backward projected on B
                 A
                 |
@@ -2562,7 +2562,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderGrandparentReceivable) {
     EXPECT_EQ(3, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderTwoReceivables) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderTwoReceivables) {
     /* B and G are receivables, R is backward projected
                 A
                / \
@@ -2595,7 +2595,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderTwoReceivables) {
     EXPECT_EQ(4, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderTwoReceivablesLikelyScenario) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderTwoReceivablesLikelyScenario) {
     /* B and G are receivables, G is backward projected
                 A
                / \
@@ -2628,7 +2628,7 @@ OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderTwoReceivablesLikelyScenario
     EXPECT_EQ(4, renderer.getIndex());
 }
 
-OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderTwoReceivablesDeeper) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, projectionReorderTwoReceivablesDeeper) {
     /* B and G are receivables, R is backward projected
                 A
                / \

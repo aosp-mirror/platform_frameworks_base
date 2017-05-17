@@ -279,6 +279,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        long injectUptimeMillis() {
+            return mInjectedCurrentTimeMillis - START_TIME - mDeepSleepTime;
+        }
+
+        @Override
         int injectBinderCallingUid() {
             return mInjectedCallingUid;
         }
@@ -557,6 +562,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected boolean mSafeMode;
 
     protected long mInjectedCurrentTimeMillis;
+    protected long mDeepSleepTime; // Used to calculate "uptimeMillis".
 
     protected boolean mInjectedIsLowRamDevice;
 
@@ -1707,7 +1713,17 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         if (si == null) {
             return null;
         }
+        mService.waitForBitmapSavesForTest();
         return new File(si.getBitmapPath()).getName();
+    }
+
+    protected String getBitmapAbsPath(int userId, String packageName, String shortcutId) {
+        final ShortcutInfo si = mService.getPackageShortcutForTest(packageName, shortcutId, userId);
+        if (si == null) {
+            return null;
+        }
+        mService.waitForBitmapSavesForTest();
+        return new File(si.getBitmapPath()).getAbsolutePath();
     }
 
     /**
@@ -1826,6 +1842,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     protected boolean bitmapDirectoryExists(String packageName, int userId) {
+        mService.waitForBitmapSavesForTest();
         final File path = new File(mService.getUserBitmapFilePath(userId), packageName);
         return path.isDirectory();
     }

@@ -370,15 +370,6 @@ public class AccountManager {
         "android.accounts.action.VISIBLE_ACCOUNTS_CHANGED";
 
     /**
-     * Key to set default visibility for applications targeting API level
-     * {@link android.os.Build.VERSION_CODES#O} or above and don't have the same signature as
-     * authenticator See {@link #getAccountVisibility}. If the value was not set by authenticator
-     * {@link #VISIBILITY_USER_MANAGED_NOT_VISIBLE} is used.
-     */
-    public static final String PACKAGE_NAME_KEY_LEGACY_VISIBLE =
-        "android:accounts:key_legacy_visible";
-
-    /**
      * Key to set visibility for applications which satisfy one of the following conditions:
      * <ul>
      * <li>Target API level below {@link android.os.Build.VERSION_CODES#O} and have
@@ -393,6 +384,14 @@ public class AccountManager {
      * </ul>
      * See {@link #getAccountVisibility}. If the value was not set by authenticator
      * {@link #VISIBILITY_USER_MANAGED_VISIBLE} is used.
+     */
+    public static final String PACKAGE_NAME_KEY_LEGACY_VISIBLE =
+        "android:accounts:key_legacy_visible";
+
+    /**
+     * Key to set default visibility for applications which don't satisfy conditions in
+     * {@link PACKAGE_NAME_KEY_LEGACY_VISIBLE}. If the value was not set by authenticator
+     * {@link #VISIBILITY_USER_MANAGED_NOT_VISIBLE} is used.
      */
     public static final String PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE =
             "android:accounts:key_legacy_not_visible";
@@ -608,14 +607,17 @@ public class AccountManager {
     }
 
     /**
-     * Returns the accounts visible to the specified package, in an environment where some apps are
+     * Returns the accounts visible to the specified package in an environment where some apps are
      * not authorized to view all accounts. This method can only be called by system apps and
-     * authenticators managing the type
+     * authenticators managing the type.
+     * Beginning API level {@link android.os.Build.VERSION_CODES#O} it also return accounts
+     * which user can make visible to the application (see {@link VISIBILITY_USER_MANAGED_VISIBLE}).
      *
      * @param type The type of accounts to return, null to retrieve all accounts
      * @param packageName The package name of the app for which the accounts are to be returned
      * @return An array of {@link Account}, one per matching account. Empty (never null) if no
-     *         accounts of the specified type have been added.
+     *         accounts of the specified type can be accessed by the package.
+     *
      */
     @NonNull
     public Account[] getAccountsByTypeForPackage(String type, String packageName) {
@@ -644,7 +646,10 @@ public class AccountManager {
      *
      * <p>
      * Caller targeting API level {@link android.os.Build.VERSION_CODES#O} and above, will get list
-     * of accounts made visible to it by user or AbstractAcccountAuthenticator and
+     * of accounts made visible to it by user
+     * (see {@link #newChooseAccountIntent(Account, List, String[], String,
+     * String, String[], Bundle)}) or AbstractAcccountAuthenticator
+     * using {@link setAccountVisibility}.
      * {@link android.Manifest.permission#GET_ACCOUNTS} permission is not used.
      *
      * <p>
@@ -787,7 +792,10 @@ public class AccountManager {
      *
      * <p>
      * Caller targeting API level {@link android.os.Build.VERSION_CODES#O} and above, will get list
-     * of accounts made visible to it by user or AbstractAcccountAuthenticator and
+     * of accounts made visible to it by user
+     * (see {@link #newChooseAccountIntent(Account, List, String[], String,
+     * String, String[], Bundle)}) or AbstractAcccountAuthenticator
+     * using {@link setAccountVisibility}.
      * {@link android.Manifest.permission#GET_ACCOUNTS} permission is not used.
      *
      * <p>
@@ -869,7 +877,7 @@ public class AccountManager {
     }
 
     /**
-     * Adds an account directly to the AccountManager. Additionally it specifies Account visiblity
+     * Adds an account directly to the AccountManager. Additionally it specifies Account visibility
      * for given list of packages.
      * <p>
      * Normally used by sign-up wizards associated with authenticators, not directly by
@@ -2663,8 +2671,8 @@ public class AccountManager {
      *
      * <p>
      * This method gets a list of the accounts matching specific type and feature set which are
-     * visible to the caller or for which user can grant access (see {@link #getAccountsByType} for
-     * details); if there is exactly one already visible account, it is used; if there are some
+     * visible to the caller (see {@link #getAccountsByType} for details);
+     * if there is exactly one already visible account, it is used; if there are some
      * accounts for which user grant visibility, the user is prompted to pick one; if there are
      * none, the user is prompted to add one. Finally, an auth token is acquired for the chosen
      * account.
@@ -2735,6 +2743,9 @@ public class AccountManager {
      * <p>
      * On success the activity returns a Bundle with the account name and type specified using
      * keys {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE}.
+     * Chosen account is marked as {@link #VISIBILITY_USER_MANAGED_VISIBLE} to the caller
+     * (see {@link setAccountVisibility}) and will be returned to it in consequent
+     * {@link #getAccountsByType}) calls.
      * <p>
      * The most common case is to call this with one account type, e.g.:
      * <p>
@@ -2787,6 +2798,9 @@ public class AccountManager {
      * <p>
      * On success the activity returns a Bundle with the account name and type specified using
      * keys {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE}.
+     * Chosen account is marked as {@link #VISIBILITY_USER_MANAGED_VISIBLE} to the caller
+     * (see {@link setAccountVisibility}) and will be returned to it in consequent
+     * {@link #getAccountsByType}) calls.
      * <p>
      * The most common case is to call this with one account type, e.g.:
      * <p>

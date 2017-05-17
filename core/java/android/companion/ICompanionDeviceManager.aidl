@@ -30,6 +30,9 @@ interface ICompanionDeviceManager {
     void associate(in AssociationRequest request,
         in IFindDeviceCallback callback,
         in String callingPackage);
+    void stopScan(in AssociationRequest request,
+        in IFindDeviceCallback callback,
+        in String callingPackage);
 
     List<String> getAssociations(String callingPackage, int userId);
     void disassociate(String deviceMacAddress, String callingPackage);

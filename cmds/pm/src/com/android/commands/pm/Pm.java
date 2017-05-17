@@ -51,6 +51,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -347,7 +348,7 @@ public final class Pm {
 
         private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
-            public void send(int code, Intent intent, String resolvedType,
+            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
                     IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
                 try {
                     mResult.offer(intent, 5, TimeUnit.SECONDS);
@@ -1441,10 +1442,10 @@ public final class Pm {
             System.err.println("Error: no size specified");
             return showUsage();
         }
-        int len = size.length();
         long multiplier = 1;
-        if (len > 1) {
-            char c = size.charAt(len-1);
+        int len = size.length();
+        char c = size.charAt(len - 1);
+        if (c < '0' || c > '9') {
             if (c == 'K' || c == 'k') {
                 multiplier = 1024L;
             } else if (c == 'M' || c == 'm') {

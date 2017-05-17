@@ -708,18 +708,20 @@ public class VideoView extends SurfaceView
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (isInPlaybackState() && mMediaController != null) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN
+                && isInPlaybackState() && mMediaController != null) {
             toggleMediaControlsVisiblity();
         }
-        return false;
+        return super.onTouchEvent(ev);
     }
 
     @Override
     public boolean onTrackballEvent(MotionEvent ev) {
-        if (isInPlaybackState() && mMediaController != null) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN
+                && isInPlaybackState() && mMediaController != null) {
             toggleMediaControlsVisiblity();
         }
-        return false;
+        return super.onTrackballEvent(ev);
     }
 
     @Override

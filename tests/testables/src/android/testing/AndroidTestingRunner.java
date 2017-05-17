@@ -35,6 +35,8 @@ import java.util.List;
 
 /**
  * A runner with support for extra annotations provided by the Testables library.
+ * @see UiThreadTest
+ * @see TestableLooper.RunWithLooper
  */
 public class AndroidTestingRunner extends BlockJUnit4ClassRunner {
 

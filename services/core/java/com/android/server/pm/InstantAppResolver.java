@@ -22,6 +22,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_RESOLUTION_DELAY_MS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_INSTANT_APP_RESOLUTION_STATUS;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -50,20 +51,37 @@ import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.server.pm.EphemeralResolverConnection.ConnectionException;
 import com.android.server.pm.EphemeralResolverConnection.PhaseTwoCallback;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 /** @hide */
 public abstract class InstantAppResolver {
     private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
     private static final String TAG = "PackageManager";
 
-    private static int RESOLUTION_SUCCESS = 0;
-    private static int RESOLUTION_FAILURE = 1;
+    private static final int RESOLUTION_SUCCESS = 0;
+    private static final int RESOLUTION_FAILURE = 1;
+    /** Binding to the external service timed out */
+    private static final int RESOLUTION_BIND_TIMEOUT = 2;
+    /** The call to retrieve an instant application response timed out */
+    private static final int RESOLUTION_CALL_TIMEOUT = 3;
+
+    @IntDef(flag = true, prefix = { "RESOLUTION_" }, value = {
+            RESOLUTION_SUCCESS,
+            RESOLUTION_FAILURE,
+            RESOLUTION_BIND_TIMEOUT,
+            RESOLUTION_CALL_TIMEOUT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ResolutionStatus {}
 
     private static MetricsLogger sMetricsLogger;
     private static MetricsLogger getLogger() {
@@ -78,29 +96,43 @@ public abstract class InstantAppResolver {
         final long startTime = System.currentTimeMillis();
         final String token = UUID.randomUUID().toString();
         if (DEBUG_EPHEMERAL) {
-            Log.d(TAG, "[" + token + "] Resolving phase 1");
+            Log.d(TAG, "[" + token + "] Phase1; resolving");
         }
         final Intent intent = requestObj.origIntent;
         final InstantAppDigest digest =
                 new InstantAppDigest(intent.getData().getHost(), 5 /*maxDigests*/);
         final int[] shaPrefix = digest.getDigestPrefix();
-        final List<InstantAppResolveInfo> instantAppResolveInfoList =
-                connection.getInstantAppResolveInfoList(shaPrefix, token);
-
-        if (instantAppResolveInfoList == null || instantAppResolveInfoList.size() == 0) {
-            // No hash prefix match; there are no instant apps for this domain.
-            if (DEBUG_EPHEMERAL) {
-                Log.d(TAG, "[" + token + "] No results returned");
+        AuxiliaryResolveInfo resolveInfo = null;
+        @ResolutionStatus int resolutionStatus = RESOLUTION_SUCCESS;
+        try {
+            final List<InstantAppResolveInfo> instantAppResolveInfoList =
+                    connection.getInstantAppResolveInfoList(shaPrefix, token);
+            if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
+                resolveInfo = InstantAppResolver.filterInstantAppIntent(
+                        instantAppResolveInfoList, intent, requestObj.resolvedType,
+                        requestObj.userId, intent.getPackage(), digest, token);
             }
-            return null;
+        } catch (ConnectionException e) {
+            if (e.failure == ConnectionException.FAILURE_BIND) {
+                resolutionStatus = RESOLUTION_BIND_TIMEOUT;
+            } else if (e.failure == ConnectionException.FAILURE_CALL) {
+                resolutionStatus = RESOLUTION_CALL_TIMEOUT;
+            } else {
+                resolutionStatus = RESOLUTION_FAILURE;
+            }
         }
-        final AuxiliaryResolveInfo resolveInfo = InstantAppResolver.filterInstantAppIntent(
-                instantAppResolveInfoList, intent, requestObj.resolvedType, requestObj.userId,
-                intent.getPackage(), digest, token);
         logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE, startTime, token,
-                RESOLUTION_SUCCESS);
+                resolutionStatus);
         if (DEBUG_EPHEMERAL && resolveInfo == null) {
-            Log.d(TAG, "[" + token + "] No results matched");
+            if (resolutionStatus == RESOLUTION_BIND_TIMEOUT) {
+                Log.d(TAG, "[" + token + "] Phase1; bind timed out");
+            } else if (resolutionStatus == RESOLUTION_CALL_TIMEOUT) {
+                Log.d(TAG, "[" + token + "] Phase1; call timed out");
+            } else if (resolutionStatus != RESOLUTION_SUCCESS) {
+                Log.d(TAG, "[" + token + "] Phase1; service connection error");
+            } else {
+                Log.d(TAG, "[" + token + "] Phase1; No results matched");
+            }
         }
         return resolveInfo;
     }
@@ -111,7 +143,7 @@ public abstract class InstantAppResolver {
         final long startTime = System.currentTimeMillis();
         final String token = requestObj.responseObj.token;
         if (DEBUG_EPHEMERAL) {
-            Log.d(TAG, "[" + token + "] Resolving phase 2");
+            Log.d(TAG, "[" + token + "] Phase2; resolving");
         }
         final Intent intent = requestObj.origIntent;
         final String hostName = intent.getData().getHost();
@@ -125,6 +157,7 @@ public abstract class InstantAppResolver {
                 final String packageName;
                 final String splitName;
                 final int versionCode;
+                final Intent failureIntent;
                 if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                     final AuxiliaryResolveInfo instantAppIntentInfo =
                             InstantAppResolver.filterInstantAppIntent(
@@ -135,18 +168,22 @@ public abstract class InstantAppResolver {
                         packageName = instantAppIntentInfo.resolveInfo.getPackageName();
                         splitName = instantAppIntentInfo.splitName;
                         versionCode = instantAppIntentInfo.resolveInfo.getVersionCode();
+                        failureIntent = instantAppIntentInfo.failureIntent;
                     } else {
                         packageName = null;
                         splitName = null;
                         versionCode = -1;
+                        failureIntent = null;
                     }
                 } else {
                     packageName = null;
                     splitName = null;
                     versionCode = -1;
+                    failureIntent = null;
                 }
                 final Intent installerIntent = buildEphemeralInstallerIntent(
                         requestObj.origIntent,
+                        failureIntent,
                         requestObj.callingPackage,
                         requestObj.verificationBundle,
                         requestObj.resolvedType,
@@ -165,14 +202,32 @@ public abstract class InstantAppResolver {
                 context.startActivity(installerIntent);
             }
         };
-        connection.getInstantAppIntentFilterList(
-                shaPrefix, token, hostName, callback, callbackHandler, startTime);
+        try {
+            connection.getInstantAppIntentFilterList(
+                    shaPrefix, token, hostName, callback, callbackHandler, startTime);
+        } catch (ConnectionException e) {
+            @ResolutionStatus int resolutionStatus = RESOLUTION_FAILURE;
+            if (e.failure == ConnectionException.FAILURE_BIND) {
+                resolutionStatus = RESOLUTION_BIND_TIMEOUT;
+            }
+            logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_TWO, startTime, token,
+                    resolutionStatus);
+            if (DEBUG_EPHEMERAL) {
+                if (resolutionStatus == RESOLUTION_BIND_TIMEOUT) {
+                    Log.d(TAG, "[" + token + "] Phase2; bind timed out");
+                } else {
+                    Log.d(TAG, "[" + token + "] Phase2; service connection error");
+                }
+            }
+        }
     }
 
     /**
      * Builds and returns an intent to launch the instant installer.
      */
-    public static Intent buildEphemeralInstallerIntent(@NonNull Intent origIntent,
+    public static Intent buildEphemeralInstallerIntent(
+            @NonNull Intent origIntent,
+            @NonNull Intent failureIntent,
             @NonNull String callingPackage,
             @Nullable Bundle verificationBundle,
             @NonNull String resolvedType,
@@ -200,22 +255,21 @@ public abstract class InstantAppResolver {
         // We have all of the data we need; just start the installer without a second phase
         if (!needsPhaseTwo) {
             // Intent that is launched if the package couldn't be installed for any reason.
-            final Intent failureIntent = new Intent(origIntent);
-            failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
-            failureIntent.setLaunchToken(token);
-            try {
-                final IIntentSender failureIntentTarget = ActivityManager.getService()
-                        .getIntentSender(
-                                ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                                null /*token*/, null /*resultWho*/, 1 /*requestCode*/,
-                                new Intent[] { failureIntent },
-                                new String[] { resolvedType },
-                                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
-                                        | PendingIntent.FLAG_IMMUTABLE,
-                                null /*bOptions*/, userId);
-                intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE,
-                        new IntentSender(failureIntentTarget));
-            } catch (RemoteException ignore) { /* ignore; same process */ }
+            if (failureIntent != null) {
+                try {
+                    final IIntentSender failureIntentTarget = ActivityManager.getService()
+                            .getIntentSender(
+                                    ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                                    null /*token*/, null /*resultWho*/, 1 /*requestCode*/,
+                                    new Intent[] { failureIntent },
+                                    new String[] { resolvedType },
+                                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                                            | PendingIntent.FLAG_IMMUTABLE,
+                                    null /*bOptions*/, userId);
+                    intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE,
+                            new IntentSender(failureIntentTarget));
+                } catch (RemoteException ignore) { /* ignore; same process */ }
+            }
 
             // Intent that is launched if the package was installed successfully.
             final Intent successIntent = new Intent(origIntent);
@@ -248,10 +302,13 @@ public abstract class InstantAppResolver {
 
     private static AuxiliaryResolveInfo filterInstantAppIntent(
             List<InstantAppResolveInfo> instantAppResolveInfoList,
-            Intent intent, String resolvedType, int userId, String packageName,
+            Intent origIntent, String resolvedType, int userId, String packageName,
             InstantAppDigest digest, String token) {
         final int[] shaPrefix = digest.getDigestPrefix();
         final byte[][] digestBytes = digest.getDigestBytes();
+        final Intent failureIntent = new Intent(origIntent);
+        failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
+        failureIntent.setLaunchToken(token);
         // Go in reverse order so we match the narrowest scope first.
         for (int i = shaPrefix.length - 1; i >= 0 ; --i) {
             for (InstantAppResolveInfo instantAppInfo : instantAppResolveInfoList) {
@@ -271,7 +328,8 @@ public abstract class InstantAppResolver {
                     }
                     return new AuxiliaryResolveInfo(instantAppInfo,
                             new IntentFilter(Intent.ACTION_VIEW) /*intentFilter*/,
-                            null /*splitName*/, token, true /*needsPhase2*/);
+                            null /*splitName*/, token, true /*needsPhase2*/,
+                            null /*failureIntent*/);
                 }
                 // We have a domain match; resolve the filters to see if anything matches.
                 final PackageManagerService.EphemeralIntentResolver instantAppResolver =
@@ -286,12 +344,12 @@ public abstract class InstantAppResolver {
                         final AuxiliaryResolveInfo intentInfo =
                                 new AuxiliaryResolveInfo(instantAppInfo,
                                         splitFilters.get(k), instantAppFilter.getSplitName(),
-                                        token, false /*needsPhase2*/);
+                                        token, false /*needsPhase2*/, failureIntent);
                         instantAppResolver.addFilter(intentInfo);
                     }
                 }
                 List<AuxiliaryResolveInfo> matchedResolveInfoList = instantAppResolver.queryIntent(
-                        intent, resolvedType, false /*defaultOnly*/, userId);
+                        origIntent, resolvedType, false /*defaultOnly*/, userId);
                 if (!matchedResolveInfoList.isEmpty()) {
                     if (DEBUG_EPHEMERAL) {
                         final AuxiliaryResolveInfo info = matchedResolveInfoList.get(0);
@@ -312,7 +370,8 @@ public abstract class InstantAppResolver {
         return null;
     }
 
-    private static void logMetrics(int action, long startTime, String token, int status) {
+    private static void logMetrics(int action, long startTime, String token,
+            @ResolutionStatus int status) {
         final LogMaker logMaker = new LogMaker(action)
                 .setType(MetricsProto.MetricsEvent.TYPE_ACTION)
                 .addTaggedData(FIELD_INSTANT_APP_RESOLUTION_DELAY_MS,

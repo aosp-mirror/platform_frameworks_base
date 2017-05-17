@@ -35,7 +35,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -51,7 +50,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationComparatorTest {
+public class NotificationComparatorTest extends NotificationTestCase {
     @Mock Context mContext;
     @Mock TelecomManager mTm;
     @Mock RankingHandler handler;
@@ -76,17 +75,15 @@ public class NotificationComparatorTest {
     private NotificationRecord mRecordUrgent;
     private NotificationRecord mRecordCheater;
     private NotificationRecord mRecordCheaterColorized;
-
+    private NotificationRecord mNoMediaSessionMedia;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         int userId = UserHandle.myUserId();
 
-        when(mContext.getResources()).thenReturn(
-                InstrumentationRegistry.getTargetContext().getResources());
-        when(mContext.getContentResolver()).thenReturn(
-                InstrumentationRegistry.getTargetContext().getContentResolver());
+        when(mContext.getResources()).thenReturn(getContext().getResources());
+        when(mContext.getContentResolver()).thenReturn(getContext().getContentResolver());
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getSystemService(eq(Context.TELECOM_SERVICE))).thenReturn(mTm);
         when(mTm.getDefaultDialerPackage()).thenReturn(callPkg);
@@ -124,7 +121,6 @@ public class NotificationComparatorTest {
         Notification n3 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MediaStyle()
                         .setMediaSession(new MediaSession.Token(null)))
-                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
         mRecordDefaultMedia = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "media", uid2, uid2, n3, new UserHandle(userId),
@@ -192,6 +188,16 @@ public class NotificationComparatorTest {
                 pkg2, 1, "cheater", uid2, uid2, n11, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
         mRecordCheaterColorized.setUserImportance(NotificationManager.IMPORTANCE_LOW);
+
+        Notification n12 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setColorized(true)
+                .setStyle(new Notification.MediaStyle())
+                .build();
+        mNoMediaSessionMedia = new NotificationRecord(mContext, new StatusBarNotification(
+                pkg2, pkg2, 1, "cheater", uid2, uid2, n12, new UserHandle(userId),
+                "", 9258), getDefaultChannel());
+        mNoMediaSessionMedia.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
     }
 
     @Test
@@ -205,6 +211,7 @@ public class NotificationComparatorTest {
         expected.add(mRecordContact);
         expected.add(mRecordEmail);
         expected.add(mRecordUrgent);
+        expected.add(mNoMediaSessionMedia);
         expected.add(mRecordCheater);
         expected.add(mRecordCheaterColorized);
         expected.add(mRecordMinCall);

@@ -968,10 +968,8 @@ class WindowStateAnimator {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
 
-            //TODO (multidisplay): Magnification is supported only for the default display.
-            if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
-                MagnificationSpec spec = mService.mAccessibilityController
-                        .getMagnificationSpecForWindowLocked(mWin);
+            MagnificationSpec spec = getMagnificationSpec();
+            if (spec != null) {
                 applyMagnificationSpec(spec, tmpMatrix);
             }
 
@@ -1058,11 +1056,7 @@ class WindowStateAnimator {
                 TAG, "computeShownFrameLocked: " + this +
                 " not attached, mAlpha=" + mAlpha);
 
-        MagnificationSpec spec = null;
-        //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
-            spec = mService.mAccessibilityController.getMagnificationSpecForWindowLocked(mWin);
-        }
+        MagnificationSpec spec = getMagnificationSpec();
         if (spec != null) {
             final Rect frame = mWin.mFrame;
             final float tmpFloats[] = mService.mTmpFloats;
@@ -1099,6 +1093,14 @@ class WindowStateAnimator {
         }
     }
 
+    private MagnificationSpec getMagnificationSpec() {
+        //TODO (multidisplay): Magnification is supported only for the default display.
+        if (mService.mAccessibilityController != null && mWin.getDisplayId() == DEFAULT_DISPLAY) {
+            return mService.mAccessibilityController.getMagnificationSpecForWindowLocked(mWin);
+        }
+        return null;
+    }
+
     /**
      * In some scenarios we use a screen space clip rect (so called, final clip rect)
      * to crop to stack bounds. Generally because it's easier to deal with while
@@ -1132,7 +1134,31 @@ class WindowStateAnimator {
         // Task is non-null per shouldCropToStackBounds
         final TaskStack stack = w.getTask().mStack;
         stack.getDimBounds(finalClipRect);
-        w.expandForSurfaceInsets(finalClipRect);
+
+        if (StackId.tasksAreFloating(stack.mStackId)) {
+            w.expandForSurfaceInsets(finalClipRect);
+        }
+
+        // We may be applying a magnification spec to all windows,
+        // simulating a transformation in screen space, in which case
+        // we need to transform all other screen space values...including
+        // the final crop. This is kind of messed up and we should look
+        // in to actually transforming screen-space via a parent-layer.
+        // b/38322835
+        MagnificationSpec spec = getMagnificationSpec();
+        if (spec != null && !spec.isNop()) {
+            Matrix transform = mWin.mTmpMatrix;
+            RectF finalCrop = mService.mTmpRectF;
+            transform.reset();
+            transform.postScale(spec.scale, spec.scale);
+            transform.postTranslate(-spec.offsetX, -spec.offsetY);
+            transform.mapRect(finalCrop);
+            finalClipRect.top = (int)finalCrop.top;
+            finalClipRect.left = (int)finalCrop.left;
+            finalClipRect.right = (int)finalClipRect.right;
+            finalClipRect.bottom = (int)finalClipRect.bottom;
+        }
+
         return true;
     }
 
@@ -1307,6 +1333,10 @@ class WindowStateAnimator {
     }
 
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
+        if (mSurfaceController == null) {
+            return;
+        }
+
         final WindowState w = mWin;
         final LayoutParams attrs = mWin.getAttrs();
         final Task task = w.getTask();
@@ -1367,7 +1397,23 @@ class WindowStateAnimator {
             int posX = mTmpSize.left;
             int posY = mTmpSize.top;
             task.mStack.getDimBounds(mTmpStackBounds);
+
+            boolean allowStretching = false;
             task.mStack.getFinalAnimationSourceHintBounds(mTmpSourceBounds);
+            // If we don't have source bounds, we can attempt to use the content insets
+            // in the following scenario:
+            //    1. We have content insets.
+            //    2. We are not transitioning to full screen
+            // We have to be careful to check "lastAnimatingBoundsWasToFullscreen" rather than
+            // the mBoundsAnimating state, as we may have already left it and only be here
+            // because of the force-scale until resize state.
+            if (mTmpSourceBounds.isEmpty() && (mWin.mLastRelayoutContentInsets.width() > 0
+                    || mWin.mLastRelayoutContentInsets.height() > 0)
+                        && !task.mStack.lastAnimatingBoundsWasToFullscreen()) {
+                mTmpSourceBounds.set(task.mStack.mPreAnimationBounds);
+                mTmpSourceBounds.inset(mWin.mLastRelayoutContentInsets);
+                allowStretching = true;
+            }
             if (!mTmpSourceBounds.isEmpty()) {
                 // Get the final target stack bounds, if we are not animating, this is just the
                 // current stack bounds
@@ -1377,14 +1423,24 @@ class WindowStateAnimator {
                 // and source bounds
                 float finalWidth = mTmpAnimatingBounds.width();
                 float initialWidth = mTmpSourceBounds.width();
-                float t = (surfaceContentWidth - mTmpStackBounds.width())
+                float tw = (surfaceContentWidth - mTmpStackBounds.width())
                         / (surfaceContentWidth - mTmpAnimatingBounds.width());
-                mExtraHScale = (initialWidth + t * (finalWidth - initialWidth)) / initialWidth;
-                mExtraVScale = mExtraHScale;
+                float th = tw;
+                mExtraHScale = (initialWidth + tw * (finalWidth - initialWidth)) / initialWidth;
+                if (allowStretching) {
+                    float finalHeight = mTmpAnimatingBounds.height();
+                    float initialHeight = mTmpSourceBounds.height();
+                    th = (surfaceContentHeight - mTmpStackBounds.height())
+                        / (surfaceContentHeight - mTmpAnimatingBounds.height());
+                    mExtraVScale = (initialHeight + tw * (finalHeight - initialHeight))
+                            / initialHeight;
+                } else {
+                    mExtraVScale = mExtraHScale;
+                }
 
                 // Adjust the position to account for the inset bounds
-                posX -= (int) (t * mExtraHScale * mTmpSourceBounds.left);
-                posY -= (int) (t * mExtraVScale * mTmpSourceBounds.top);
+                posX -= (int) (tw * mExtraHScale * mTmpSourceBounds.left);
+                posY -= (int) (th * mExtraVScale * mTmpSourceBounds.top);
 
                 // Always clip to the stack bounds since the surface can be larger with the current
                 // scale

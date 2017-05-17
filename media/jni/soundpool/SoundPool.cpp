@@ -30,9 +30,9 @@
 #include "SoundPool.h"
 #include "SoundPoolThread.h"
 #include <media/AudioPolicyHelper.h>
-#include <ndk/NdkMediaCodec.h>
-#include <ndk/NdkMediaExtractor.h>
-#include <ndk/NdkMediaFormat.h>
+#include <media/NdkMediaCodec.h>
+#include <media/NdkMediaExtractor.h>
+#include <media/NdkMediaFormat.h>
 
 namespace android
 {

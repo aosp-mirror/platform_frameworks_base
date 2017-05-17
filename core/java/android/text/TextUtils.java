@@ -40,6 +40,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LocaleSpan;
 import android.text.style.MetricAffectingSpan;
+import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.ReplacementSpan;
@@ -56,6 +57,7 @@ import android.text.style.TtsSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+import android.text.style.UpdateAppearance;
 import android.util.Log;
 import android.util.Printer;
 import android.view.View;
@@ -1518,6 +1520,18 @@ public class TextUtils {
     /**
      * Returns a CharSequence concatenating the specified CharSequences,
      * retaining their spans if any.
+     *
+     * If there are no parameters, an empty string will be returned.
+     *
+     * If the number of parameters is exactly one, that parameter is returned as output, even if it
+     * is null.
+     *
+     * If the number of parameters is at least two, any null CharSequence among the parameters is
+     * treated as if it was the string <code>"null"</code>.
+     *
+     * If there are paragraph spans in the source CharSequences that satisfy paragraph boundary
+     * requirements in the sources but would no longer satisfy them in the concatenated
+     * CharSequence, they may get extended in the resulting CharSequence or not retained.
      */
     public static CharSequence concat(CharSequence... text) {
         if (text.length == 0) {
@@ -1529,35 +1543,29 @@ public class TextUtils {
         }
 
         boolean spanned = false;
-        for (int i = 0; i < text.length; i++) {
-            if (text[i] instanceof Spanned) {
+        for (CharSequence piece : text) {
+            if (piece instanceof Spanned) {
                 spanned = true;
                 break;
             }
         }
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < text.length; i++) {
-            sb.append(text[i]);
-        }
-
-        if (!spanned) {
+        if (spanned) {
+            final SpannableStringBuilder ssb = new SpannableStringBuilder();
+            for (CharSequence piece : text) {
+                // If a piece is null, we append the string "null" for compatibility with the
+                // behavior of StringBuilder and the behavior of the concat() method in earlier
+                // versions of Android.
+                ssb.append(piece == null ? "null" : piece);
+            }
+            return new SpannedString(ssb);
+        } else {
+            final StringBuilder sb = new StringBuilder();
+            for (CharSequence piece : text) {
+                sb.append(piece);
+            }
             return sb.toString();
         }
-
-        SpannableString ss = new SpannableString(sb);
-        int off = 0;
-        for (int i = 0; i < text.length; i++) {
-            int len = text[i].length();
-
-            if (text[i] instanceof Spanned) {
-                copySpansFrom((Spanned) text[i], 0, len, Object.class, ss, off);
-            }
-
-            off += len;
-        }
-
-        return new SpannedString(ss);
     }
 
     /**
@@ -1901,6 +1909,38 @@ public class TextUtils {
      */
     public static CharSequence formatSelectedCount(int count) {
         return Resources.getSystem().getQuantityString(R.plurals.selected_count, count, count);
+    }
+
+    /**
+     * Returns whether or not the specified spanned text has a style span.
+     * @hide
+     */
+    public static boolean hasStyleSpan(@NonNull Spanned spanned) {
+        Preconditions.checkArgument(spanned != null);
+        final Class<?>[] styleClasses = {
+                CharacterStyle.class, ParagraphStyle.class, UpdateAppearance.class};
+        for (Class<?> clazz : styleClasses) {
+            if (spanned.nextSpanTransition(-1, spanned.length(), clazz) < spanned.length()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * If the {@code charSequence} is instance of {@link Spanned}, creates a new copy and
+     * {@link NoCopySpan}'s are removed from the copy. Otherwise the given {@code charSequence} is
+     * returned as it is.
+     *
+     * @hide
+     */
+    @Nullable
+    public static CharSequence trimNoCopySpans(@Nullable CharSequence charSequence) {
+        if (charSequence != null && charSequence instanceof Spanned) {
+            // SpannableStringBuilder copy constructor trims NoCopySpans.
+            return new SpannableStringBuilder(charSequence);
+        }
+        return charSequence;
     }
 
     private static Object sLock = new Object();

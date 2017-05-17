@@ -16,11 +16,12 @@
 
 package android.telephony.mbms.vendor;
 
+import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.telephony.mbms.IMbmsStreamingManagerCallback;
 import android.telephony.mbms.IStreamingServiceCallback;
-import android.telephony.mbms.StreamingService;
+import android.telephony.mbms.MbmsException;
 
 import java.util.List;
 
@@ -29,43 +30,81 @@ import java.util.List;
  * TODO: future systemapi
  */
 public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
-
+    /**
+     * Initialize streaming service for this app and subId, registering the listener.
+     *
+     * May throw an {@link IllegalArgumentException} or a {@link SecurityException}
+     *
+     * @param listener The callback to use to communicate with the app.
+     * @param appName The app name as negotiated with the wireless carrier.
+     * @param subscriptionId The subscription ID to use.
+     * @return {@link MbmsException#SUCCESS} or {@link MbmsException#ERROR_ALREADY_INITIALIZED}
+     */
     @Override
-    public int initialize(IMbmsStreamingManagerCallback listener, String appName, int subId)
-            throws RemoteException {
+    public int initialize(IMbmsStreamingManagerCallback listener, String appName,
+            int subscriptionId) throws RemoteException {
         return 0;
     }
 
+    /**
+     * Registers serviceClasses of interest with the appName/subId key.
+     * Starts async fetching data on streaming services of matching classes to be reported
+     * later via {@link IMbmsStreamingManagerCallback#streamingServicesUpdated(List)}
+     *
+     * Note that subsequent calls with the same uid, appName and subId will replace
+     * the service class list.
+     *
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
+     *
+     * @param appName The app name as negotiated with the wireless carrier.
+     * @param subscriptionId The subscription id to use.
+     * @param serviceClasses The service classes that the app wishes to get info on. The strings
+     *                       may contain arbitrary data as negotiated between the app and the
+     *                       carrier.
+     * @return One of {@link MbmsException#SUCCESS},
+     *         {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND},
+     *         {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
+     */
     @Override
-    public int getStreamingServices(String appName, int subId, List<String> serviceClasses)
-            throws RemoteException {
+    public int getStreamingServices(String appName, int subscriptionId,
+            List<String> serviceClasses) throws RemoteException {
         return 0;
     }
 
+    /**
+     * Starts streaming on a particular service. This method may perform asynchronous work. When
+     * the middleware is ready to send bits to the frontend, it should inform the app via
+     * {@link IStreamingServiceCallback#streamStateChanged(int)}.
+     *
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
+     *
+     * @param appName The app name as negotiated with the wireless carrier.
+     * @param subscriptionId The subscription id to use.
+     * @param serviceId The ID of the streaming service that the app has requested.
+     * @param listener The listener object on which the app wishes to receive updates.
+     * @return TODO: document possible errors
+     */
     @Override
-    public StreamingService startStreaming(String appName, int subId,
+    public int startStreaming(String appName, int subscriptionId,
             String serviceId, IStreamingServiceCallback listener) throws RemoteException {
-        return null;
-    }
-
-    @Override
-    public int getActiveStreamingServices(String appName, int subId) throws RemoteException {
         return 0;
     }
 
+    /**
+     * Retrieves the streaming URI for a particular service. If the middleware is not yet ready to
+     * stream the service, this method may return null.
+     *
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
+     *
+     * @param appName The app name as negotiated with the wireless carrier.
+     * @param subscriptionId The subscription id to use.
+     * @param serviceId The ID of the streaming service that the app has requested.
+     * @return An opaque {@link Uri} to be passed to a video player that understands the format.
+     */
     @Override
-    public Uri getPlaybackUri(String appName, int subId, String serviceId) throws RemoteException {
-        return null;
-    }
-
-    @Override
-    public void switchStreams(String appName, int subId, String oldServiceId, String newServiceId)
+    public @Nullable Uri getPlaybackUri(String appName, int subscriptionId, String serviceId)
             throws RemoteException {
-    }
-
-    @Override
-    public int getState(String appName, int subId, String serviceId) throws RemoteException {
-        return 0;
+        return null;
     }
 
     @Override

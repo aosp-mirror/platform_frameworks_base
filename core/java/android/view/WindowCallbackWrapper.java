@@ -109,11 +109,6 @@ public class WindowCallbackWrapper implements Window.Callback {
     }
 
     @Override
-    public void onBeforeAttachedToWindow() {
-        mWrapped.onBeforeAttachedToWindow();
-    }
-
-    @Override
     public void onAttachedToWindow() {
         mWrapped.onAttachedToWindow();
     }

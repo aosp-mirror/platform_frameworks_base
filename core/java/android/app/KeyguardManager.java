@@ -362,28 +362,7 @@ public class KeyguardManager {
         }
     }
 
-    /**
-     * If the device is currently locked (see {@link #isKeyguardLocked()}, requests the Keyguard to
-     * be dismissed.
-     * <p>
-     * If the Keyguard is not secure or the device is currently in a trusted state, calling this
-     * method will immediately dismiss the Keyguard without any user interaction.
-     * <p>
-     * If the Keyguard is secure and the device is not in a trusted state, this will bring up the
-     * UI so the user can enter their credentials.
-     *
-     * @param activity The activity requesting the dismissal. The activity must be either visible
-     *                 by using {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} or must be in a state in
-     *                 which it would be visible if Keyguard would not be hiding it. If that's not
-     *                 the case, the request will fail immediately and
-     *                 {@link KeyguardDismissCallback#onDismissError} will be invoked.
-     * @param callback The callback to be called if the request to dismiss Keyguard was successful
-     *                 or {@code null} if the caller isn't interested in knowing the result.
-     * @param handler The handler to invoke the callback on, or {@code null} to use the main
-     *                handler.
-     *
-     * TO BE REMOVED
-     */
+    /** @removed */
     @Deprecated
     public void dismissKeyguard(@NonNull Activity activity,
             @Nullable KeyguardDismissCallback callback, @Nullable Handler handler) {

@@ -618,6 +618,10 @@ public class ShortcutManager {
     /**
      * Return all dynamic shortcuts from the caller app.
      *
+     * <p>This API is intended to be used for examining what shortcuts are currently published.
+     * Re-publishing returned {@link ShortcutInfo}s via APIs such as
+     * {@link #setDynamicShortcuts(List)} may cause loss of information such as icons.
+     *
      * @throws IllegalStateException when the user is locked.
      */
     @NonNull
@@ -632,6 +636,10 @@ public class ShortcutManager {
 
     /**
      * Return all static (manifest) shortcuts from the caller app.
+     *
+     * <p>This API is intended to be used for examining what shortcuts are currently published.
+     * Re-publishing returned {@link ShortcutInfo}s via APIs such as
+     * {@link #setDynamicShortcuts(List)} may cause loss of information such as icons.
      *
      * @throws IllegalStateException when the user is locked.
      */
@@ -696,6 +704,10 @@ public class ShortcutManager {
 
     /**
      * Return all pinned shortcuts from the caller app.
+     *
+     * <p>This API is intended to be used for examining what shortcuts are currently published.
+     * Re-publishing returned {@link ShortcutInfo}s via APIs such as
+     * {@link #setDynamicShortcuts(List)} may cause loss of information such as icons.
      *
      * @throws IllegalStateException when the user is locked.
      */
@@ -874,6 +886,11 @@ public class ShortcutManager {
 
     /**
      * Return the max width for icons, in pixels.
+     *
+     * <p> Note that this method returns max width of icon's visible part. Hence, it does not take
+     * into account the inset introduced by {@link AdaptiveIconDrawable}. To calculate bitmap image
+     * to function as {@link AcaptiveIconDrawable}, multiply
+     * 1 + 2 * {@link AdaptiveIconDrawable#getExtraInsetFraction()} to the returned size.
      */
     public int getIconMaxWidth() {
         try {

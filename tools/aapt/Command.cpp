@@ -762,6 +762,15 @@ int doDump(Bundle* bundle)
         return 1;
     }
 
+    // Now add any dependencies passed in.
+    for (size_t i = 0; i < bundle->getPackageIncludes().size(); i++) {
+      const String8& assetPath = bundle->getPackageIncludes()[i];
+      if (!assets.addAssetPath(assetPath, NULL)) {
+        fprintf(stderr, "ERROR: included asset path %s could not be loaded\n", assetPath.string());
+        return 1;
+      }
+    }
+
     // Make a dummy config for retrieving resources...  we need to supply
     // non-default values for some configs so that we can retrieve resources
     // in the app that don't have a default.  The most important of these is

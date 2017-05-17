@@ -454,10 +454,12 @@ public class JobStore {
                 synchronized (mLock) {
                     jobs = readJobMapImpl(fis);
                     if (jobs != null) {
+                        long now = SystemClock.elapsedRealtime();
                         IActivityManager am = ActivityManager.getService();
                         for (int i=0; i<jobs.size(); i++) {
                             JobStatus js = jobs.get(i);
                             js.prepareLocked(am);
+                            js.enqueueTime = now;
                             this.jobSet.add(js);
                         }
                     }
@@ -807,7 +809,7 @@ public class JobStore {
             ArrayList<JobStatus> result = new ArrayList<JobStatus>();
             for (int i = mJobs.size() - 1; i >= 0; i--) {
                 if (UserHandle.getUserId(mJobs.keyAt(i)) == userId) {
-                    ArraySet<JobStatus> jobs = mJobs.get(i);
+                    ArraySet<JobStatus> jobs = mJobs.valueAt(i);
                     if (jobs != null) {
                         result.addAll(jobs);
                     }

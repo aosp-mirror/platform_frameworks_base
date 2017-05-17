@@ -169,7 +169,8 @@ public abstract class ActivityManagerInternal {
      *  Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
      *  such as Power Save mode.
      */
-    public abstract void setPendingIntentWhitelistDuration(IIntentSender target, long duration);
+    public abstract void setPendingIntentWhitelistDuration(IIntentSender target,
+            IBinder whitelistToken, long duration);
 
     /**
      * Allow DeviceIdleController to tell us about what apps are whitelisted.
@@ -244,8 +245,8 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Called after virtual display Id is updated by
-     * {@link com.android.server.vr.CompatibilityDisplay} with a specific
-     * {@param compatibilityDisplayId}.
+     * {@link com.android.server.vr.Vr2dDisplay} with a specific
+     * {@param vr2dDisplayId}.
      */
-    public abstract void setVrCompatibilityDisplayId(int vrCompatibilityDisplayId);
+    public abstract void setVr2dDisplayId(int vr2dDisplayId);
 }

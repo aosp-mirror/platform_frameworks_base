@@ -32,6 +32,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.FloatProperty;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -91,6 +92,19 @@ public class NotificationPanelView extends PanelView implements
     private static final Rect mDummyDirtyRect = new Rect(0, 0, 1, 1);
 
     public static final long DOZE_ANIMATION_DURATION = 700;
+
+    private static final FloatProperty<NotificationPanelView> SET_DARK_AMOUNT_PROPERTY =
+            new FloatProperty<NotificationPanelView>("mDarkAmount") {
+                @Override
+                public void setValue(NotificationPanelView object, float value) {
+                    object.setDarkAmount(value);
+                }
+
+                @Override
+                public Float get(NotificationPanelView object) {
+                    return object.mDarkAmount;
+                }
+            };
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -185,6 +199,7 @@ public class NotificationPanelView extends PanelView implements
     private int mQsFalsingThreshold;
 
     private float mKeyguardStatusBarAnimateAlpha = 1f;
+    private float mQsClockAlphaOverride = 1f;
     private int mOldLayoutDirection;
     private HeadsUpTouchHelper mHeadsUpTouchHelper;
     private boolean mIsExpansionFromHeadsUp;
@@ -213,9 +228,10 @@ public class NotificationPanelView extends PanelView implements
     private int mIndicationBottomPadding;
     private int mAmbientIndicationBottomPadding;
     private boolean mIsFullWidth;
-    private boolean mDark;
+    private float mDarkAmount;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mNoVisibleNotifications = true;
+    private ValueAnimator mDarkAnimator;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -401,7 +417,7 @@ public class NotificationPanelView extends PanelView implements
                     mKeyguardStatusView.getHeight(),
                     mEmptyDragAmount,
                     mKeyguardStatusView.getClockBottom(),
-                    mDark);
+                    mDarkAmount);
             mClockPositionAlgorithm.run(mClockPositionResult);
             if (animate || mClockAnimator != null) {
                 startClockAnimation(mClockPositionResult.clockY);
@@ -500,7 +516,7 @@ public class NotificationPanelView extends PanelView implements
 
     private void updateClock(float alpha, float scale) {
         if (!mKeyguardStatusViewAnimating) {
-            mKeyguardStatusView.setAlpha(alpha);
+            mKeyguardStatusView.setAlpha(alpha * mQsClockAlphaOverride);
         }
         mKeyguardStatusView.setScaleX(scale);
         mKeyguardStatusView.setScaleY(scale);
@@ -528,7 +544,8 @@ public class NotificationPanelView extends PanelView implements
             mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
         }
         closeQs();
-        mStatusBar.dismissPopups();
+        mStatusBar.closeAndSaveGuts(true /* leavebehind */, true /* force */,
+                true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
         mNotificationStackScroller.setOverScrollAmount(0f, true /* onTop */, false /* animate */,
                 true /* cancelAnimators */);
         mNotificationStackScroller.resetScrollPosition();
@@ -1019,6 +1036,7 @@ public class NotificationPanelView extends PanelView implements
         float height = mQsExpansionHeight - overscrollAmount;
         setQsExpansion(height);
         requestPanelHeightUpdate();
+        mNotificationStackScroller.checkSnoozeLeavebehind();
     }
 
     private void setQsExpanded(boolean expanded) {
@@ -1250,6 +1268,15 @@ public class NotificationPanelView extends PanelView implements
             mQsNavbarScrim.setAlpha(getQsExpansionFraction());
         }
 
+        // Fade clock when QS is on top of it
+        float newClockAlpha = (height - mKeyguardStatusView.getY()) /
+                mKeyguardStatusView.getHeight();
+        newClockAlpha = 1 - MathUtils.constrain(newClockAlpha, 0, 1);
+        if (newClockAlpha != mQsClockAlphaOverride) {
+            mQsClockAlphaOverride = Interpolators.ALPHA_OUT.getInterpolation(newClockAlpha);
+            updateClock(mClockPositionResult.clockAlpha, mClockPositionResult.clockScale);
+        }
+
         // Upon initialisation when we are not layouted yet we don't want to announce that we are
         // fully expanded, hence the != 0.0f check.
         if (height != 0.0f && mQsFullyExpanded && !mLastAnnouncementWasQuickSettings) {
@@ -1385,6 +1412,7 @@ public class NotificationPanelView extends PanelView implements
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                mNotificationStackScroller.resetCheckSnoozeLeavebehind();
                 mQsExpansionAnimator = null;
                 if (onFinishRunnable != null) {
                     onFinishRunnable.run();
@@ -1972,6 +2000,18 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    protected void onUnlockHintFinished() {
+        super.onUnlockHintFinished();
+        mNotificationStackScroller.setUnlockHintRunning(false);
+    }
+
+    @Override
+    protected void onUnlockHintStarted() {
+        super.onUnlockHintStarted();
+        mNotificationStackScroller.setUnlockHintRunning(true);
+    }
+
+    @Override
     public KeyguardAffordanceView getLeftIcon() {
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
                 ? mKeyguardBottomArea.getRightView()
@@ -2350,6 +2390,8 @@ public class NotificationPanelView extends PanelView implements
             mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP;
         } else if (source == StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE) {
             mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_WIGGLE;
+        } else if (source == StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER) {
+            mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER;
         } else {
 
             // Default.
@@ -2467,9 +2509,35 @@ public class NotificationPanelView extends PanelView implements
         }
     };
 
-    public void setDark(boolean dark) {
-        mDark = dark;
-        mKeyguardStatusView.setDark(dark);
+    @Override
+    public void setTouchDisabled(boolean disabled) {
+        super.setTouchDisabled(disabled);
+        if (disabled && mAffordanceHelper.isSwipingInProgress() && !mIsLaunchTransitionRunning) {
+            mAffordanceHelper.resetImmediately();
+        }
+    }
+
+    public void setDark(boolean dark, boolean animate) {
+        float darkAmount = dark ? 1 : 0;
+        if (mDarkAmount == darkAmount) {
+            return;
+        }
+        if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
+            mDarkAnimator.cancel();
+        }
+        if (animate) {
+            mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, darkAmount);
+            mDarkAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            mDarkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
+            mDarkAnimator.start();
+        } else {
+            setDarkAmount(darkAmount);
+        }
+    }
+
+    private void setDarkAmount(float amount) {
+        mDarkAmount = amount;
+        mKeyguardStatusView.setDark(amount == 1);
         positionClockAndNotifications();
     }
 

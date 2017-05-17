@@ -629,6 +629,9 @@
     <!-- Text shown when viewing channel settings for notifications related to network alerts -->
     <string name="notification_channel_network_alerts">Network alerts</string>
 
+    <!-- Text shown when viewing the channel settings for notification about open nearby wireless networks. -->
+    <string name="notification_channel_network_available">Network available</string>
+
     <!-- Text shown when viewing channel settings for notifications related to vpn status -->
     <string name="notification_channel_vpn">VPN status</string>
 
@@ -644,8 +647,10 @@
     <!-- Text shown when viewing channel settings for notifications related to a usb connection -->
     <string name="notification_channel_usb">USB connection</string>
 
-    <!-- Text shown when viewing channel settings for notifications related to running foreground
-        services [CHAR LIMIT=NONE] -->
+    <!-- This is the label for the notification channel settings that controls the behavior
+        of the notification about applications that are running in the background (that is,
+        perhaps confusingly, running foreground services but not the foreground UI on the screen).
+        [CHAR LIMIT=NONE] -->
     <string name="notification_channel_foreground_service">Apps running in background</string>
 
     <!-- Label for foreground service notification when one app is running. [CHAR LIMIT=NONE] -->
@@ -663,7 +668,10 @@
         data usage</string>
 
     <!-- Separator for foreground service notification content listing all apps when there
-        are multiple apps running [CHAR LIMIT=NONE] -->
+        are multiple apps running.  The left and right side may both already be compound
+        (constructed using this separator).  Should be kept as short as possible, this is
+        for summary text in the notification where there is not a lot of space.
+        [CHAR LIMIT=NONE] -->
     <string name="foreground_service_multiple_separator"><xliff:g id="left_side">%1$s</xliff:g>,
         <xliff:g id="right_side">%2$s</xliff:g></string>
 
@@ -1327,6 +1335,8 @@
     <string name="fingerprint_error_canceled">Fingerprint operation canceled.</string>
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
     <string name="fingerprint_error_lockout">Too many attempts. Try again later.</string>
+    <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
+    <string name="fingerprint_error_lockout_permanent">Too many attempts. Fingerprint sensor disabled.</string>
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
     <string name="fingerprint_error_unable_to_process">Try again.</string>
 
@@ -2696,10 +2706,10 @@
     <string name="dial">Phone</string>
 
     <!-- Label for item in the text selection menu to trigger a Map app [CHAR LIMIT=20] -->
-    <string name="map">Map</string>
+    <string name="map">Maps</string>
 
     <!-- Label for item in the text selection menu to trigger a Browser app [CHAR LIMIT=20] -->
-    <string name="browse">Browse</string>
+    <string name="browse">Browser</string>
 
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Storage space running out</string>
@@ -2988,6 +2998,17 @@
     <!-- If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, t his is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this woudl be shown for ringtones on that SD card. -->
     <string name="ringtone_unknown">Unknown</string>
 
+    <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's title. -->
+    <plurals name="wifi_available">
+        <item quantity="one">Wi-Fi network available</item>
+        <item quantity="other">Wi-Fi networks available</item>
+    </plurals>
+    <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's message. -->
+    <plurals name="wifi_available_detailed">
+        <item quantity="one">Open Wi-Fi network available</item>
+        <item quantity="other">Open Wi-Fi networks available</item>
+    </plurals>
+
     <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
     <string name="wifi_available_sign_in">Sign in to Wi-Fi network</string>
 
@@ -3155,6 +3176,11 @@
     <string name="usb_accessory_notification_title">Connected to a USB accessory</string>
     <!-- See USB_PREFERENCES. This is the message. -->
     <string name="usb_notification_message">Tap for more options.</string>
+    <!-- USB_PREFERENCES: Notification for when a type-c USB audio accessory is attached but not supported.  This is the title -->
+    <string name="usb_unsupported_audio_accessory_title">Audio accessory not supported</string>
+    <!-- Message of notification shown when a type-c USB audio accessory is attached but not supported. -->
+    <string name="usb_unsupported_audio_accessory_message">Tap for more info</string>
+
 
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_title">USB debugging connected</string>
@@ -3204,7 +3230,7 @@
     <skip />
     <!-- Name of notification channel the system post notification to inform the use about apps
          that are drawing ui on-top of other apps (alert-windows) [CHAR LIMIT=NONE] -->
-    <string name="alert_windows_notification_channel_name"><xliff:g id="name" example="Google Maps">%s</xliff:g> displaying over other apps</string>
+    <string name="alert_windows_notification_channel_name">App activity</string>
     <!-- Notification title when an application is displaying ui on-top of other apps
          [CHAR LIMIT=30] -->
     <string name="alert_windows_notification_title"><xliff:g id="name" example="Google Maps">%s</xliff:g> is displaying over other apps</string>
@@ -4479,7 +4505,7 @@
         <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> selected</item>
     </plurals>
 
-    <string name="default_notification_channel_label">Miscellaneous</string>
+    <string name="default_notification_channel_label">Uncategorized</string>
 
     <string name="importance_from_user">You set the importance of these notifications.</string>
     <string name="importance_from_person">This is important because of the people involved.</string>
@@ -4623,6 +4649,15 @@
 
     <!-- Toast message shown when user manually request autofill but service could not figure out the data that would autofill the screen contents. [CHAR LIMIT=NONE] -->
     <string name="autofill_error_cannot_autofill">Contents can\u2019t be autofilled</string>
+
+    <!-- Accessibility string to announce there are no autofill suggestions in the autofill picker. [CHAR LIMIT=NONE] -->
+    <string name="autofill_picker_no_suggestions">No autofill suggestions</string>
+
+    <!-- Accessibility string to announce there are some autofill suggestions in the autofill picker. [CHAR LIMIT=NONE] -->
+    <plurals name="autofill_picker_some_suggestions">
+        <item quantity="one">One autofill suggestion</item>
+        <item quantity="other"><xliff:g id="count" example="Two">%1$s</xliff:g> autofill suggestions</item>
+    </plurals>
 
     <!-- Title for the autofill save dialog shown when the the contents of the activity can be saved
          by an autofill service, but the service does not know what the activity represents [CHAR LIMIT=NONE] -->

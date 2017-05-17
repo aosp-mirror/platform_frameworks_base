@@ -640,7 +640,7 @@ final class UiModeManagerService extends SystemService {
                     int result = ActivityManager.getService().startActivityWithConfig(
                             null, null, homeIntent, null, null, null, 0, 0,
                             mConfiguration, null, UserHandle.USER_CURRENT);
-                    if (result >= ActivityManager.START_SUCCESS) {
+                    if (ActivityManager.isStartResultSuccessful(result)) {
                         dockAppStarted = true;
                     } else if (result != ActivityManager.START_INTENT_NOT_RESOLVED) {
                         Slog.e(TAG, "Could not start dock app: " + homeIntent

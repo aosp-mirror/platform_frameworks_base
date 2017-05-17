@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Έχετε συνδεθεί στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα του προσωπικού σας δικτύου, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστοτόπων."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Ο οργανισμός <xliff:g id="ORGANIZATION">%1$s</xliff:g> διαχειρίζεται το προφίλ εργασίας σας. Το προφίλ είναι συνδεδεμένο στην εφαρμογή <xliff:g id="APPLICATION">%2$s</xliff:g>, η οποία μπορεί να παρακολουθήσει τη δραστηριότητα του δικτύου εργασίας σας, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστοτόπων.\n\nΓια περισσότερες πληροφορίες, επικοινωνήστε με τον διαχειριστή σας."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Ο οργανισμός <xliff:g id="ORGANIZATION">%1$s</xliff:g> διαχειρίζεται το προφίλ εργασίας σας. Το προφίλ συνδέεται με την εφαρμογή <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα του δικτύου της εργασίας σας, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστοτόπων.\n\nΕπίσης, είστε συνδεδεμένοι στην εφαρμογή <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, που έχει τη δυνατότητα παρακολούθησης της δραστηριότητας του προσωπικού σας δικτύου."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Ξεκλειδώθηκε για τον χρήστη <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Η συσκευή θα παραμείνει κλειδωμένη μέχρι να την ξεκλειδώσετε μη αυτόματα"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Λάβετε ειδοποιήσεις γρηγορότερα"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Εμφάνιση πριν το ξεκλείδωμα"</string>
@@ -549,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Ανενεργή"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Με τα στοιχεία ελέγχου ειδοποίησης ισχύος, μπορείτε να ορίσετε ένα επίπεδο βαρύτητας από 0 έως 5 για τις ειδοποιήσεις μιας εφαρμογής. \n\n"<b>"Επίπεδο 5"</b>" \n- Εμφάνιση στην κορυφή της λίστας ειδοποιήσεων \n- Να επιτρέπεται η διακοπή πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 4"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 3"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n\n"<b>"Επίπεδο 2"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n\n"<b>"Επίπεδο 1"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n- Απόκρυψη από την οθόνη κλειδώματος και τη γραμμή κατάστασης \n- Εμφάνιση στο κάτω μέρος της λίστας ειδοποιήσεων \n\n"<b>"Επίπεδο 0"</b>" \n- Αποκλεισμός όλων των ειδοποιήσεων από την εφαρμογή"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Ειδοποιήσεις"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Δεν θα λαμβάνεται πλέον αυτές τις ειδοποιήσεις."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Δεν θα λαμβάνετε πλέον αυτές τις ειδοποιήσεις"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> κατηγορίες ειδοποιήσεων"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Αυτή η εφαρμογή δεν διαθέτει κατηγορίες ειδοποιήσεων"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -701,7 +700,7 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Ειδοποίηση <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Δεν είναι δυνατή η λειτουργία της εφαρμογής με διαχωρισμό οθόνης."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Η εφαρμογή δεν υποστηρίζει διαχωρισμό οθόνης."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Η εφαρμογή μπορεί να λειτουργεί σε μια δευτερεύουσα οθόνη."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Η εφαρμογή ίσως να μην λειτουργήσει σε δευτερεύουσα οθόνη."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Η εφαρμογή δεν υποστηρίζει την εκκίνηση σε δευτερεύουσες οθόνες."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Άνοιγμα ρυθμίσεων."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Άνοιγμα γρήγορων ρυθμίσεων."</string>
@@ -763,4 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Έως τις <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Διατήρηση"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Αντικατάσταση"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Εφαρμογές που εκτελούνται στο παρασκήνιο"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Πατήστε για λεπτομέρειες σχετικά με τη χρήση μπαταρίας και δεδομένων"</string>
 </resources>

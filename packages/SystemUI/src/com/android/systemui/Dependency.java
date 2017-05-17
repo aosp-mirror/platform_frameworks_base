@@ -77,12 +77,16 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
+import com.android.systemui.tuner.TunablePadding;
+import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerServiceImpl;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
+
+import com.google.android.colorextraction.ColorExtractor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -248,7 +252,7 @@ public class Dependency extends SystemUI {
                 new FragmentService(mContext));
 
         mProviders.put(ExtensionController.class, () ->
-                new ExtensionControllerImpl());
+                new ExtensionControllerImpl(mContext));
 
         mProviders.put(PluginDependencyProvider.class, () ->
                 new PluginDependencyProvider(get(PluginManager.class)));
@@ -263,6 +267,10 @@ public class Dependency extends SystemUI {
 
         mProviders.put(AccessibilityManagerWrapper.class,
                 () -> new AccessibilityManagerWrapper(mContext));
+
+        mProviders.put(ColorExtractor.class, () -> new ColorExtractor(mContext));
+
+        mProviders.put(TunablePaddingService.class, () -> new TunablePaddingService());
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

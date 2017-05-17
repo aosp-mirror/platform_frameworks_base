@@ -144,9 +144,8 @@ public abstract class UtteranceProgressListener {
         onUtteranceRangeStart(utteranceId, start, end);
     }
 
-    /**
-     * @deprecated Due to internal API changes. Remove when apps catch up.
-     */
+    /** @removed */
+    @Deprecated
     public void onUtteranceRangeStart(String utteranceId, int start, int end) {
     }
 

@@ -17,6 +17,7 @@
 package com.android.server.autofill;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -46,23 +47,25 @@ final class ViewState {
     private static final String TAG = "ViewState";
 
     // NOTE: state constants must be public because of flagstoString().
-    public static final int STATE_UNKNOWN = 0x00;
+    public static final int STATE_UNKNOWN = 0x000;
     /** Initial state. */
-    public static final int STATE_INITIAL = 0x01;
+    public static final int STATE_INITIAL = 0x001;
     /** View id is present in a dataset returned by the service. */
-    public static final int STATE_FILLABLE = 0x02;
+    public static final int STATE_FILLABLE = 0x002;
     /** View was autofilled after user selected a dataset. */
-    public static final int STATE_AUTOFILLED = 0x04;
+    public static final int STATE_AUTOFILLED = 0x004;
     /** View value was changed, but not by the service. */
-    public static final int STATE_CHANGED = 0x08;
+    public static final int STATE_CHANGED = 0x008;
     /** Set only in the View that started a session. */
-    public static final int STATE_STARTED_SESSION = 0x10;
+    public static final int STATE_STARTED_SESSION = 0x010;
     /** View that started a new partition when focused on. */
-    public static final int STATE_STARTED_PARTITION = 0x20;
+    public static final int STATE_STARTED_PARTITION = 0x020;
     /** User select a dataset in this view, but service must authenticate first. */
-    public static final int STATE_WAITING_DATASET_AUTH = 0x40;
-    // TODO(b/37424539): temporary workaround until partitioning supports auth
-    public static final int STATE_WAITING_RESPONSE_AUTH = 0x80;
+    public static final int STATE_WAITING_DATASET_AUTH = 0x040;
+    /** Service does not care about this view. */
+    public static final int STATE_IGNORED = 0x080;
+    /** User manually request autofill in this view, after it was already autofilled. */
+    public static final int STATE_RESTARTED_SESSION = 0x100;
 
     public final AutofillId id;
 
@@ -109,7 +112,7 @@ final class ViewState {
         return mAutofilledValue;
     }
 
-    void setAutofilledValue(AutofillValue value) {
+    void setAutofilledValue(@Nullable AutofillValue value) {
         mAutofilledValue = value;
     }
 
@@ -177,15 +180,9 @@ final class ViewState {
         }
         // First try the current response associated with this View.
         if (mResponse != null) {
-            if (mResponse.getDatasets() != null) {
+            if (mResponse.getDatasets() != null || mResponse.getAuthentication() != null) {
                 mListener.onFillReady(mResponse, this.id, mCurrentValue);
             }
-            return;
-        }
-        // Then checks if the session has a response waiting authentication; if so, uses it instead.
-        final FillResponse responseWaitingAuth = mSession.getResponseWaitingAuth();
-        if (responseWaitingAuth != null) {
-            mListener.onFillReady(responseWaitingAuth, this.id, mCurrentValue);
         }
     }
 
@@ -199,7 +196,16 @@ final class ViewState {
     void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("id:" ); pw.println(this.id);
         pw.print(prefix); pw.print("state:" ); pw.println(getStateAsString());
-        pw.print(prefix); pw.print("has response:" ); pw.println(mResponse != null);
+        pw.print(prefix); pw.print("response:");
+        if (mResponse == null) {
+            pw.println("N/A");
+        } else {
+            if (sVerbose) {
+                pw.println(mResponse);
+            } else {
+                pw.println(mResponse.getRequestId());
+            }
+        }
         pw.print(prefix); pw.print("initialValue:" ); pw.println(mInitialValue);
         pw.print(prefix); pw.print("currentValue:" ); pw.println(mCurrentValue);
         pw.print(prefix); pw.print("autofilledValue:" ); pw.println(mAutofilledValue);

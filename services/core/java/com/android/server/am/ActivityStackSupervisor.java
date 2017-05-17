@@ -1333,7 +1333,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         r.startFreezingScreenLocked(app, 0);
-        r.setVisibility(true);
+        if (r.getStack().checkKeyguardVisibility(r, true /* shouldBeVisible */, true /* isTop */)) {
+            // We only set the visibility to true if the activity is allowed to be visible based on
+            // keyguard state. This avoids setting this into motion in window manager that is later
+            // cancelled due to later calls to ensure visible activities that set visibility back to
+            // false.
+            r.setVisibility(true);
+        }
 
         // schedule launch ticks to collect information about slow apps.
         r.startLaunchTickingLocked();
@@ -1356,6 +1362,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         if (mKeyguardController.isKeyguardLocked()) {
             r.notifyUnknownVisibilityLaunched();
+        }
+        final int applicationInfoUid =
+                (r.info.applicationInfo != null) ? r.info.applicationInfo.uid : -1;
+        if ((r.userId != app.userId) || (r.appInfo.uid != applicationInfoUid)) {
+            Slog.wtf(TAG,
+                    "User ID for activity changing for " + r
+                            + " appInfo.uid=" + r.appInfo.uid
+                            + " info.ai.uid=" + applicationInfoUid
+                            + " old=" + r.app + " new=" + app);
         }
 
         r.app = app;
@@ -1491,6 +1506,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // This is the first time we failed -- restart process and
             // retry.
+            r.launchFailed = true;
             app.activities.remove(r);
             throw e;
         }
@@ -2503,7 +2519,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                                 tempRect /* outStackBounds */,
                                 otherTaskRect /* outTempTaskBounds */, true /* ignoreVisibility */);
 
-                        resizeStackLocked(i, tempRect,
+                        resizeStackLocked(i, !tempRect.isEmpty() ? tempRect : null,
                                 !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,
                                 tempOtherTaskInsetBounds, preserveWindows,
                                 true /* allowResizeInDockedMode */, deferResume);
@@ -2982,7 +2998,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         stack.animateResizePinnedStack(sourceHintBounds, destBounds, -1 /* animationDuration */,
                 true /* schedulePipModeChangedOnAnimationEnd */);
-        mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName);
+        mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName,
+                r.getTask().taskId);
     }
 
     /** Move activity with its stack to front and make the stack focused. */
@@ -3043,11 +3060,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     if (!mTmpFindTaskResult.matchedByRootAffinity) {
                         return mTmpFindTaskResult.r;
                     } else if (mTmpFindTaskResult.r.getDisplayId() == displayId) {
+                        // Note: since the traversing through the stacks is top down, the floating
+                        // tasks should always have lower priority than any affinity-matching tasks
+                        // in the fullscreen stacks
                         affinityMatch = mTmpFindTaskResult.r;
                     }
                 }
             }
         }
+
         if (DEBUG_TASKS && affinityMatch == null) Slog.d(TAG_TASKS, "No task found");
         return affinityMatch;
     }
@@ -3494,6 +3515,23 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     boolean isCurrentProfileLocked(int userId) {
         if (userId == mCurrentUser) return true;
         return mService.mUserController.isCurrentProfileLocked(userId);
+    }
+
+    /**
+     * Returns whether a stopping activity is present that should be stopped after visible, rather
+     * than idle.
+     * @return {@code true} if such activity is present. {@code false} otherwise.
+     */
+    boolean isStoppingNoHistoryActivity() {
+        // Activities that are marked as nohistory should be stopped immediately after the resumed
+        // activity has become visible.
+        for (ActivityRecord record : mStoppingActivities) {
+            if (record.isNoHistory()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(ActivityRecord idleActivity,
@@ -4688,7 +4726,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             checkEmbeddedAllowedInner(userId, pendingIntent.key.requestIntent,
                     pendingIntent.key.requestResolvedType);
 
-            return pendingIntent.sendInner(0, null, null, null, null, null, null, 0,
+            return pendingIntent.sendInner(0, null, null, null, null, null, null, null, 0,
                     FORCE_NEW_TASK_FLAGS, FORCE_NEW_TASK_FLAGS, null, this);
         }
 
@@ -4945,10 +4983,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         VirtualActivityDisplay(int width, int height, int density) {
             DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-            mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, null,
-                    VIRTUAL_DISPLAY_BASE_NAME, width, height, density, null,
+            mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, null /* projection */,
+                    VIRTUAL_DISPLAY_BASE_NAME, width, height, density, null /* surface */,
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY, null, null);
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY, null /* callback */,
+                    null /* handler */, null /* uniqueId */);
 
             init(mVirtualDisplay.getDisplay());
 

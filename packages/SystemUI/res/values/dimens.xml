@@ -57,6 +57,11 @@
     <!-- The amount to scale each of the status bar icons by. A value of 1 means no scaling. -->
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.0</item>
 
+    <dimen name="group_overflow_number_size">@*android:dimen/notification_text_size</dimen>
+    <dimen name="group_overflow_number_size_dark">16sp</dimen>
+    <dimen name="group_overflow_number_padding">@*android:dimen/notification_content_margin_end</dimen>
+    <dimen name="group_overflow_number_extra_padding_dark">@*android:dimen/notification_extra_margin_ambient</dimen>
+
     <!-- max height of a notification such that the content can still fade out when closing -->
     <dimen name="max_notification_fadeout_height">100dp</dimen>
 
@@ -129,6 +134,9 @@
 
     <!-- size at which Notification icons will be drawn in the status bar -->
     <dimen name="status_bar_icon_drawing_size">17dp</dimen>
+
+    <!-- size at which Notification icons will be drawn on Ambient Display -->
+    <dimen name="status_bar_icon_drawing_size_dark">@*android:dimen/notification_header_icon_size_ambient</dimen>
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
     <item type="dimen" name="status_bar_icon_drawing_alpha">90%</item>
@@ -207,8 +215,6 @@
 
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
-
-    <dimen name="volume_dialog_panel_width">@dimen/standard_notification_panel_width</dimen>
 
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
@@ -328,6 +334,19 @@
 
     <!-- The corner radius of the shadow behind the notification. -->
     <dimen name="notification_shadow_radius">0dp</dimen>
+
+    <!-- The alpha of the dividing line between child notifications of a notification group. -->
+    <item name="notification_divider_alpha" format="float" type="dimen">0.5</item>
+
+    <!-- The height of the divider between the individual notifications in a notification
+         group. -->
+    <dimen name="notification_children_container_divider_height">@dimen/notification_divider_height</dimen>
+
+    <!-- The height of the header for a container containing child notifications. -->
+    <dimen name="notification_children_container_header_height">53dp</dimen>
+
+    <!-- The top margin for the notification children container in its non-expanded form. -->
+    <dimen name="notification_children_container_margin_top">@*android:dimen/notification_content_margin_top</dimen>
 
     <!-- The height of a notification header -->
     <dimen name="notification_header_height">53dp</dimen>
@@ -753,7 +772,7 @@
     <dimen name="recents_fast_fling_velocity">600dp</dimen>
 
     <!-- The height of the gradient indicating the dismiss edge when moving a PIP. -->
-    <dimen name="pip_dismiss_gradient_height">196dp</dimen>
+    <dimen name="pip_dismiss_gradient_height">176dp</dimen>
 
     <!-- The bottom margin of the PIP drag to dismiss info text shown when moving a PIP. -->
     <dimen name="pip_dismiss_text_bottom_margin">24dp</dimen>
@@ -773,11 +792,28 @@
 
     <!-- The bottom margin of the expand container when there are actions.
          Equal to pip_action_size - pip_action_padding. -->
-    <dimen name="pip_expand_container_edge_margin">36dp</dimen>
+    <dimen name="pip_expand_container_edge_margin">30dp</dimen>
 
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
     <dimen name="signal_icon_size">17dp</dimen>
+
+    <dimen name="hwui_edge_margin">16dp</dimen>
+
+    <dimen name="volume_dialog_panel_width">315dp</dimen>
+    <dimen name="global_actions_panel_width">125dp</dimen>
+
+    <dimen name="global_actions_top_padding">100dp</dimen>
+
+    <dimen name="corner_size">16dp</dimen>
+    <dimen name="top_padding">0dp</dimen>
+    <dimen name="bottom_padding">48dp</dimen>
+    <dimen name="edge_margin">16dp</dimen>
+
+    <dimen name="rounded_corner_radius">0dp</dimen>
+    <dimen name="rounded_corner_content_padding">0dp</dimen>
+
+    <dimen name="qs_gutter_height">6dp</dimen>
 
 </resources>

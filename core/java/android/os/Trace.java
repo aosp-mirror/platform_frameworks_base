@@ -16,6 +16,8 @@
 
 package android.os;
 
+import com.android.internal.os.Zygote;
+
 import dalvik.annotation.optimization.FastNative;
 
 /**
@@ -94,6 +96,8 @@ public final class Trace {
     // Must be volatile to avoid word tearing.
     private static volatile long sEnabledTags = TRACE_TAG_NOT_READY;
 
+    private static int sZygoteDebugFlags = 0;
+
     private static native long nativeGetEnabledTags();
     private static native void nativeSetAppTracingAllowed(boolean allowed);
     private static native void nativeSetTracingEnabled(boolean allowed);
@@ -118,9 +122,10 @@ public final class Trace {
         // The system provides ordering through a priority level.  Callbacks made through
         // SystemProperties.addChangeCallback currently have a negative priority, while
         // our native code is using a priority of zero.
-        SystemProperties.addChangeCallback(new Runnable() {
-            @Override public void run() {
-                cacheEnabledTags();
+        SystemProperties.addChangeCallback(() -> {
+            cacheEnabledTags();
+            if ((sZygoteDebugFlags & Zygote.DEBUG_JAVA_DEBUGGABLE) != 0) {
+                traceCounter(TRACE_TAG_ALWAYS, "java_debuggable", 1);
             }
         });
     }
@@ -201,8 +206,9 @@ public final class Trace {
      *
      * @hide
      */
-    public static void setTracingEnabled(boolean enabled) {
+    public static void setTracingEnabled(boolean enabled, int debugFlags) {
         nativeSetTracingEnabled(enabled);
+        sZygoteDebugFlags = debugFlags;
 
         // Setting whether tracing is enabled may change the tags, so we update the cached tags
         // here.

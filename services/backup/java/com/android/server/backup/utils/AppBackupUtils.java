@@ -1,12 +1,30 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
 package com.android.server.backup.utils;
+
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
 import android.os.Process;
 import android.util.Slog;
-
-import com.android.server.backup.RefactoredBackupManagerService;
 
 /**
  * Utility methods wrapping operations on ApplicationInfo and PackageInfo.
@@ -36,7 +54,7 @@ public class AppBackupUtils {
         }
 
         // 3. it is the special shared-storage backup package used for 'adb backup'
-        if (app.packageName.equals(RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE)) {
+        if (app.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE)) {
             return false;
         }
 
@@ -75,6 +93,7 @@ public class AppBackupUtils {
     /**
      * Old style: directly match the stored vs on device signature blocks.
      */
+    // TODO(b/37977154): Resolve questionable policies.
     public static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
         if (target == null) {
             return false;
@@ -86,29 +105,28 @@ public class AppBackupUtils {
         // partition will be signed with the device's platform certificate, so on
         // different phones the same system app will have different signatures.)
         if ((target.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.v(RefactoredBackupManagerService.TAG,
-                        "System app " + target.packageName + " - skipping sig check");
+            if (MORE_DEBUG) {
+                Slog.v(TAG, "System app " + target.packageName + " - skipping sig check");
             }
             return true;
         }
 
         // Allow unsigned apps, but not signed on one device and unsigned on the other
-        // !!! TODO: is this the right policy?
+        // TODO(b/37977154): is this the right policy?
         Signature[] deviceSigs = target.signatures;
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.v(RefactoredBackupManagerService.TAG, "signaturesMatch(): stored=" + storedSigs
-                    + " device=" + deviceSigs);
+        if (MORE_DEBUG) {
+            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs + " device=" + deviceSigs);
         }
         if ((storedSigs == null || storedSigs.length == 0)
                 && (deviceSigs == null || deviceSigs.length == 0)) {
             return true;
         }
+        // TODO(b/37977154): This allows empty stored signature, is this right?
         if (storedSigs == null || deviceSigs == null) {
             return false;
         }
 
-        // !!! TODO: this demands that every stored signature match one
+        // TODO(b/37977154): this demands that every stored signature match one
         // that is present on device, and does not demand the converse.
         // Is this this right policy?
         int nStored = storedSigs.length;

@@ -124,4 +124,12 @@ public final class BitUtils {
         buffer.put(bytes);
         buffer.position(original);
     }
+
+    public static boolean isBitSet(long flags, int bitIndex) {
+        return (flags & bitAt(bitIndex)) != 0;
+    }
+
+    public static long bitAt(int bitIndex) {
+        return 1L << bitIndex;
+    }
 }

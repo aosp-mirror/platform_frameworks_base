@@ -2770,6 +2770,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
      *       1                           PFLAG3_NO_REVEAL_ON_FOCUS
+     *      1                            PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT
      * |-------|-------|-------|-------|
      */
 
@@ -3041,6 +3042,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getRevealOnFocusHint()
      */
     private static final int PFLAG3_NO_REVEAL_ON_FOCUS = 0x4000000;
+
+    /**
+     * Flag indicating that when layout is completed we should notify
+     * that the view was entered for autofill purposes. To minimize
+     * showing autofill for views not visible to the user we evaluate
+     * user visibility which cannot be done until the view is laid out.
+     */
+    static final int PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT = 0x8000000;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -4462,6 +4471,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sIgnoreMeasureCache = targetSdkVersion < Build.VERSION_CODES.KITKAT;
 
             Canvas.sCompatibilityRestore = targetSdkVersion < Build.VERSION_CODES.M;
+            Canvas.sCompatibilitySetBitmap = targetSdkVersion < Build.VERSION_CODES.O;
 
             // In M and newer, our widgets can pass a "hint" value in the size
             // for UNSPECIFIED MeasureSpecs. This lets child views of scrolling containers
@@ -6495,7 +6505,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             if (mParent != null) {
                 mParent.requestChildFocus(this, this);
-                setFocusedInCluster();
+                updateFocusedInCluster(oldFocus, direction);
             }
 
             if (mAttachInfo != null) {
@@ -6845,7 +6855,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
                 if (enter && hasWindowFocus() && isFocused()) {
-                    afm.notifyViewEntered(this);
+                    // We have not been laid out yet, hence cannot evaluate
+                    // whether this view is visible to the user, we will do
+                    // the evaluation once layout is complete.
+                    if (!isLaidOut()) {
+                        mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
+                    } else if (isVisibleToUser()) {
+                        afm.notifyViewEntered(this);
+                    }
                 } else if (!hasWindowFocus() || !isFocused()) {
                     afm.notifyViewExited(this);
                 }
@@ -7237,44 +7254,53 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         RectF position = mAttachInfo.mTmpTransformRect;
         position.set(0, 0, mRight - mLeft, mBottom - mTop);
+        mapRectFromViewToScreenCoords(position, clipToParent);
+        outRect.set(Math.round(position.left), Math.round(position.top),
+                Math.round(position.right), Math.round(position.bottom));
+    }
 
+    /**
+     * Map a rectangle from view-relative coordinates to screen-relative coordinates
+     *
+     * @param rect The rectangle to be mapped
+     * @param clipToParent Whether to clip child bounds to the parent ones.
+     * @hide
+     */
+    public void mapRectFromViewToScreenCoords(RectF rect, boolean clipToParent) {
         if (!hasIdentityMatrix()) {
-            getMatrix().mapRect(position);
+            getMatrix().mapRect(rect);
         }
 
-        position.offset(mLeft, mTop);
+        rect.offset(mLeft, mTop);
 
         ViewParent parent = mParent;
         while (parent instanceof View) {
             View parentView = (View) parent;
 
-            position.offset(-parentView.mScrollX, -parentView.mScrollY);
+            rect.offset(-parentView.mScrollX, -parentView.mScrollY);
 
             if (clipToParent) {
-                position.left = Math.max(position.left, 0);
-                position.top = Math.max(position.top, 0);
-                position.right = Math.min(position.right, parentView.getWidth());
-                position.bottom = Math.min(position.bottom, parentView.getHeight());
+                rect.left = Math.max(rect.left, 0);
+                rect.top = Math.max(rect.top, 0);
+                rect.right = Math.min(rect.right, parentView.getWidth());
+                rect.bottom = Math.min(rect.bottom, parentView.getHeight());
             }
 
             if (!parentView.hasIdentityMatrix()) {
-                parentView.getMatrix().mapRect(position);
+                parentView.getMatrix().mapRect(rect);
             }
 
-            position.offset(parentView.mLeft, parentView.mTop);
+            rect.offset(parentView.mLeft, parentView.mTop);
 
             parent = parentView.mParent;
         }
 
         if (parent instanceof ViewRootImpl) {
             ViewRootImpl viewRootImpl = (ViewRootImpl) parent;
-            position.offset(0, -viewRootImpl.mCurScrollY);
+            rect.offset(0, -viewRootImpl.mCurScrollY);
         }
 
-        position.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
-
-        outRect.set(Math.round(position.left), Math.round(position.top),
-                Math.round(position.right), Math.round(position.bottom));
+        rect.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
     }
 
     /**
@@ -7295,7 +7321,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * fills in all data that can be inferred from the view itself.
      */
     public void onProvideStructure(ViewStructure structure) {
-        onProvideStructureForAssistOrAutofill(structure, false);
+        onProvideStructureForAssistOrAutofill(structure, false, 0);
     }
 
     /**
@@ -7309,6 +7335,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>It must set fields such {@link ViewStructure#setText(CharSequence)},
      * {@link ViewStructure#setAutofillOptions(CharSequence[])},
      * or {@link ViewStructure#setWebDomain(String)}.
+     *   <li> The {@code left} and {@code top} values set in
+     * {@link ViewStructure#setDimens(int, int, int, int, int, int)} need to be relative to the next
+     * {@link ViewGroup#isImportantForAutofill() included} parent in the structure.
      * </ul>
      *
      * @param structure Fill in with structured view data. The default implementation
@@ -7317,12 +7346,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
      */
-    public void onProvideAutofillStructure(ViewStructure structure, int flags) {
-        onProvideStructureForAssistOrAutofill(structure, true);
+    public void onProvideAutofillStructure(ViewStructure structure, @AutofillFlags int flags) {
+        onProvideStructureForAssistOrAutofill(structure, true, flags);
     }
 
     private void onProvideStructureForAssistOrAutofill(ViewStructure structure,
-            boolean forAutofill) {
+            boolean forAutofill, @AutofillFlags int flags) {
         final int id = mID;
         if (id != NO_ID && !isViewIdGenerated(id)) {
             String pkg, type, entry;
@@ -7350,11 +7379,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight - mLeft, mBottom - mTop);
-        if (!hasIdentityMatrix()) {
-            structure.setTransformation(getMatrix());
+        int ignoredParentLeft = 0;
+        int ignoredParentTop = 0;
+        if (forAutofill && (flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) == 0) {
+            View parentGroup = null;
+
+            ViewParent viewParent = getParent();
+            if (viewParent instanceof View) {
+                parentGroup = (View) viewParent;
+            }
+
+            while (parentGroup != null && !parentGroup.isImportantForAutofill()) {
+                ignoredParentLeft += parentGroup.mLeft;
+                ignoredParentTop += parentGroup.mTop;
+
+                viewParent = parentGroup.getParent();
+                if (viewParent instanceof View) {
+                    parentGroup = (View) viewParent;
+                } else {
+                    break;
+                }
+            }
         }
-        structure.setElevation(getZ());
+
+        structure.setDimens(ignoredParentLeft + mLeft, ignoredParentTop + mTop, mScrollX, mScrollY,
+                mRight - mLeft, mBottom - mTop);
+        if (!forAutofill) {
+            if (!hasIdentityMatrix()) {
+                structure.setTransformation(getMatrix());
+            }
+            structure.setElevation(getZ());
+        }
         structure.setVisibility(getVisibility());
         structure.setEnabled(isEnabled());
         if (isClickable()) {
@@ -7434,10 +7489,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>Call {@link AutofillManager#cancel()} ()} when the autofill context
      * of the view structure changed and you want the current autofill interaction if such
      * to be cancelled.
+     * <li> The {@code left} and {@code top} values set in
+     * {@link ViewStructure#setDimens(int, int, int, int, int, int)} need to be relative to the next
+     * {@link ViewGroup#isImportantForAutofill() included} parent in the structure.
      * </ol>
      *
      * @param structure Fill in with structured view data.
-     * @param flags optional flags (currently {@code 0}).
+     * @param flags optional flags.
+     *
+     * @see #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
      */
     public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
     }
@@ -7695,7 +7755,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean isAutofillable() {
-        return getAutofillType() != AUTOFILL_TYPE_NONE && isImportantForAutofill();
+        return getAutofillType() != AUTOFILL_TYPE_NONE && isImportantForAutofill()
+                && getAccessibilityViewId() > LAST_APP_ACCESSIBILITY_ID;
     }
 
     private void populateVirtualStructure(ViewStructure structure,
@@ -7760,7 +7821,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #onProvideVirtualStructure}.
      */
     public void dispatchProvideStructure(ViewStructure structure) {
-        dispatchProvideStructureForAssistOrAutofill(structure, false);
+        dispatchProvideStructureForAssistOrAutofill(structure, false, 0);
     }
 
     /**
@@ -7793,16 +7854,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void dispatchProvideAutofillStructure(@NonNull ViewStructure structure,
             @AutofillFlags int flags) {
-        dispatchProvideStructureForAssistOrAutofill(structure, true);
+        dispatchProvideStructureForAssistOrAutofill(structure, true, flags);
     }
 
     private void dispatchProvideStructureForAssistOrAutofill(ViewStructure structure,
-            boolean forAutofill) {
+            boolean forAutofill, @AutofillFlags int flags) {
         if (forAutofill) {
             structure.setAutofillId(getAutofillId());
-            // NOTE: flags are not currently supported, hence 0
-            onProvideAutofillStructure(structure, 0);
-            onProvideAutofillVirtualStructure(structure, 0);
+            onProvideAutofillStructure(structure, flags);
+            onProvideAutofillVirtualStructure(structure, flags);
         } else if (!isAssistBlocked()) {
             onProvideStructure(structure);
             onProvideVirtualStructure(structure);
@@ -9868,19 +9928,44 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public final void setFocusedInCluster() {
-        View top = findKeyboardNavigationCluster();
-        if (top == this) {
+        setFocusedInCluster(findKeyboardNavigationCluster());
+    }
+
+    private void setFocusedInCluster(View cluster) {
+        if (this instanceof ViewGroup) {
+            ((ViewGroup) this).mFocusedInCluster = null;
+        }
+        if (cluster == this) {
             return;
         }
         ViewParent parent = mParent;
         View child = this;
         while (parent instanceof ViewGroup) {
-            ((ViewGroup) parent).setFocusedInCluster(child);
-            if (parent == top) {
-                return;
+            ((ViewGroup) parent).mFocusedInCluster = child;
+            if (parent == cluster) {
+                break;
             }
             child = (View) parent;
             parent = parent.getParent();
+        }
+    }
+
+    private void updateFocusedInCluster(View oldFocus, @FocusDirection int direction) {
+        if (oldFocus != null) {
+            View oldCluster = oldFocus.findKeyboardNavigationCluster();
+            View cluster = findKeyboardNavigationCluster();
+            if (oldCluster != cluster) {
+                // Going from one cluster to another, so save last-focused.
+                // This covers cluster jumps because they are always FOCUS_DOWN
+                oldFocus.setFocusedInCluster(oldCluster);
+                if (direction == FOCUS_FORWARD || direction == FOCUS_BACKWARD) {
+                    // This is a result of ordered navigation so consider navigation through
+                    // the previous cluster "complete" and clear its last-focused memory.
+                    if (oldFocus.mParent instanceof ViewGroup) {
+                        ((ViewGroup) oldFocus.mParent).clearFocusedInCluster(oldFocus);
+                    }
+                }
+            }
         }
     }
 
@@ -17222,15 +17307,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * item in a list view.
      *
      * @return Returns a Parcelable object containing the view's current dynamic
-     *         state, or null if there is nothing interesting to save. The
-     *         default implementation returns null.
+     *         state, or null if there is nothing interesting to save.
      * @see #onRestoreInstanceState(android.os.Parcelable)
      * @see #saveHierarchyState(android.util.SparseArray)
      * @see #dispatchSaveInstanceState(android.util.SparseArray)
      * @see #setSaveEnabled(boolean)
      */
     @CallSuper
-    protected Parcelable onSaveInstanceState() {
+    @Nullable protected Parcelable onSaveInstanceState() {
         mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
         if (mStartActivityRequestWho != null || isAutofilled()
                 || mAccessibilityViewId > LAST_APP_ACCESSIBILITY_ID) {
@@ -19261,6 +19345,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mPrivateFlags &= ~PFLAG_FORCE_LAYOUT;
         mPrivateFlags3 |= PFLAG3_IS_LAID_OUT;
+
+        if ((mPrivateFlags3 & PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT) != 0) {
+            mPrivateFlags3 &= ~PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
+            notifyEnterOrExitForAutoFillIfNeeded(true);
+        }
     }
 
     /**
@@ -20417,11 +20506,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @throws IllegalStateException if the drawable could not be found.
      */
     @Nullable private Drawable getAutofilledDrawable() {
+        if (mAttachInfo == null) {
+            return null;
+        }
         // Lazily load the isAutofilled drawable.
         if (mAttachInfo.mAutofilledDrawable == null) {
-            TypedArray a = mContext.getTheme().obtainStyledAttributes(AUTOFILL_HIGHLIGHT_ATTR);
+            Context rootContext = getRootView().getContext();
+            TypedArray a = rootContext.getTheme().obtainStyledAttributes(AUTOFILL_HIGHLIGHT_ATTR);
             int attributeResourceId = a.getResourceId(0, 0);
-            mAttachInfo.mAutofilledDrawable = mContext.getDrawable(attributeResourceId);
+            mAttachInfo.mAutofilledDrawable = rootContext.getDrawable(attributeResourceId);
             a.recycle();
         }
 

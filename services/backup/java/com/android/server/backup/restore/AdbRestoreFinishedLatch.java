@@ -16,6 +16,10 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+
 import android.util.Slog;
 
 import com.android.server.backup.BackupRestoreTask;
@@ -44,8 +48,7 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
     void await() {
         boolean latched = false;
         try {
-            latched = mLatch.await(RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
-                    TimeUnit.MILLISECONDS);
+            latched = mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Slog.w(TAG, "Interrupted!");
         }
@@ -58,7 +61,7 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
 
     @Override
     public void operationComplete(long result) {
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
+        if (MORE_DEBUG) {
             Slog.w(TAG, "adb onRestoreFinished() complete");
         }
         mLatch.countDown();
@@ -67,7 +70,7 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
 
     @Override
     public void handleCancel(boolean cancelAll) {
-        if (RefactoredBackupManagerService.DEBUG) {
+        if (DEBUG) {
             Slog.w(TAG, "adb onRestoreFinished() timed out");
         }
         mLatch.countDown();

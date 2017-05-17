@@ -740,6 +740,8 @@ class AppErrors {
         }
         // If we've created a crash dialog, show it without the lock held
         if(data.proc.crashDialog != null) {
+            Slog.i(TAG, "Showing crash dialog for package " + data.proc.info.packageName
+                    + " u" + data.proc.userId);
             data.proc.crashDialog.show();
         }
     }

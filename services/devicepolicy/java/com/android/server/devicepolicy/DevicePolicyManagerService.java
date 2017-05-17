@@ -141,6 +141,7 @@ import android.os.storage.StorageManager;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
@@ -253,6 +254,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String TAG_PASSWORD_TOKEN_HANDLE = "password-token";
 
+    private static final String TAG_PASSWORD_VALIDITY = "password-validity";
+
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
     private static final long MS_PER_DAY = TimeUnit.DAYS.toMillis(1);
@@ -364,6 +367,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final UserManagerInternal mUserManagerInternal;
     final TelephonyManager mTelephonyManager;
     private final LockPatternUtils mLockPatternUtils;
+    private final DevicePolicyConstants mConstants;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
 
     /**
@@ -476,6 +480,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public static class DevicePolicyData {
         @NonNull PasswordMetrics mActivePasswordMetrics = new PasswordMetrics();
         int mFailedPasswordAttempts = 0;
+        boolean mPasswordStateHasBeenSetSinceBoot = false;
+        boolean mPasswordValidAtLastCheckpoint = false;
 
         int mUserHandle;
         int mPasswordOwner = -1;
@@ -1447,7 +1453,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void handlePackagesChanged(@Nullable String packageName, int userHandle) {
         boolean removedAdmin = false;
-        if (VERBOSE_LOG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
+        if (VERBOSE_LOG) {
+            Slog.d(LOG_TAG, "Handling package changes package " + packageName
+                    + " for user " + userHandle);
+        }
         DevicePolicyData policy = getUserData(userHandle);
         synchronized (this) {
             for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
@@ -1760,6 +1769,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return Settings.Global.getInt(mContext.getContentResolver(), name, def);
         }
 
+        String settingsGlobalGetString(String name) {
+            return Settings.Global.getString(mContext.getContentResolver(), name);
+        }
+
         void settingsGlobalPutInt(String name, int value) {
             Settings.Global.putInt(mContext.getContentResolver(), name, value);
         }
@@ -1801,6 +1814,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mInjector = injector;
         mContext = Preconditions.checkNotNull(injector.mContext);
         mHandler = new Handler(Preconditions.checkNotNull(injector.getMyLooper()));
+        mConstants = DevicePolicyConstants.loadFromString(
+                mInjector.settingsGlobalGetString(Global.DEVICE_POLICY_CONSTANTS));
+
         mOwners = Preconditions.checkNotNull(injector.newOwners());
 
         mUserManager = Preconditions.checkNotNull(injector.getUserManager());
@@ -1823,7 +1839,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Needed when mHasFeature == false, because it controls the certificate warning text.
         mCertificateMonitor = new CertificateMonitor(this, mInjector, mBackgroundHandler);
 
-        mDeviceAdminServiceController = new DeviceAdminServiceController(this);
+        mDeviceAdminServiceController = new DeviceAdminServiceController(this, mConstants);
 
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -2562,19 +2578,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, "failed-password-attempts");
             }
 
-            // Don't save metrics for FBE devices
-            final PasswordMetrics metrics = policy.mActivePasswordMetrics;
-            if (!mInjector.storageManagerIsFileBasedEncryptionEnabled() && !metrics.isDefault()) {
-                out.startTag(null, "active-password");
-                out.attribute(null, "quality", Integer.toString(metrics.quality));
-                out.attribute(null, "length", Integer.toString(metrics.length));
-                out.attribute(null, "uppercase", Integer.toString(metrics.upperCase));
-                out.attribute(null, "lowercase", Integer.toString(metrics.lowerCase));
-                out.attribute(null, "letters", Integer.toString(metrics.letters));
-                out.attribute(null, "numeric", Integer.toString(metrics.numeric));
-                out.attribute(null, "symbols", Integer.toString(metrics.symbols));
-                out.attribute(null, "nonletter", Integer.toString(metrics.nonLetter));
-                out.endTag(null, "active-password");
+            // For FDE devices only, we save this flag so we can report on password sufficiency
+            // before the user enters their password for the first time after a reboot.  For
+            // security reasons, we don't want to store the full set of active password metrics.
+            if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
+                out.startTag(null, TAG_PASSWORD_VALIDITY);
+                out.attribute(null, ATTR_VALUE,
+                        Boolean.toString(policy.mPasswordValidAtLastCheckpoint));
+                out.endTag(null, TAG_PASSWORD_VALIDITY);
             }
 
             for (int i = 0; i < policy.mAcceptedCaCertificates.size(); i++) {
@@ -2852,19 +2863,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_INITIALIZATION_BUNDLE.equals(tag)) {
                     policy.mInitBundle = PersistableBundle.restoreFromXml(parser);
                 } else if ("active-password".equals(tag)) {
-                    if (mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
-                        // Remove this from FBE devices
-                        needsRewrite = true;
-                    } else {
-                        final PasswordMetrics m = policy.mActivePasswordMetrics;
-                        m.quality = Integer.parseInt(parser.getAttributeValue(null, "quality"));
-                        m.length = Integer.parseInt(parser.getAttributeValue(null, "length"));
-                        m.upperCase = Integer.parseInt(parser.getAttributeValue(null, "uppercase"));
-                        m.lowerCase = Integer.parseInt(parser.getAttributeValue(null, "lowercase"));
-                        m.letters = Integer.parseInt(parser.getAttributeValue(null, "letters"));
-                        m.numeric = Integer.parseInt(parser.getAttributeValue(null, "numeric"));
-                        m.symbols = Integer.parseInt(parser.getAttributeValue(null, "symbols"));
-                        m.nonLetter = Integer.parseInt(parser.getAttributeValue(null, "nonletter"));
+                    // Remove password metrics from saved settings, as we no longer wish to store
+                    // these on disk
+                    needsRewrite = true;
+                } else if (TAG_PASSWORD_VALIDITY.equals(tag)) {
+                    if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
+                        // This flag is only used for FDE devices
+                        policy.mPasswordValidAtLastCheckpoint = Boolean.parseBoolean(
+                                parser.getAttributeValue(null, ATTR_VALUE));
                     }
                 } else if (TAG_PASSWORD_TOKEN_HANDLE.equals(tag)) {
                     policy.mPasswordTokenHandle = Long.parseLong(
@@ -3441,9 +3447,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.minimumPasswordMetrics.quality != quality) {
                 ap.minimumPasswordMetrics.quality = quality;
+                updatePasswordValidityCheckpointLocked(mInjector.userHandleGetCallingUserId());
                 saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
+    }
+
+    /**
+     * Updates flag in memory that tells us whether the user's password currently satisfies the
+     * requirements set by all of the user's active admins.  This should be called before
+     * {@link #saveSettingsLocked} whenever the password or the admin policies have changed.
+     */
+    @GuardedBy("DevicePolicyManagerService.this")
+    private void updatePasswordValidityCheckpointLocked(int userHandle) {
+        DevicePolicyData policy = getUserData(userHandle);
+        policy.mPasswordValidAtLastCheckpoint = isActivePasswordSufficientForUserLocked(
+                policy, policy.mUserHandle, false);
     }
 
     @Override
@@ -3528,6 +3547,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.minimumPasswordMetrics.length != length) {
                 ap.minimumPasswordMetrics.length = length;
+                updatePasswordValidityCheckpointLocked(mInjector.userHandleGetCallingUserId());
                 saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
@@ -3572,6 +3592,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.passwordHistoryLength != length) {
                 ap.passwordHistoryLength = length;
+                updatePasswordValidityCheckpointLocked(mInjector.userHandleGetCallingUserId());
                 saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
@@ -3784,6 +3805,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.minimumPasswordMetrics.upperCase != length) {
                 ap.minimumPasswordMetrics.upperCase = length;
+                updatePasswordValidityCheckpointLocked(mInjector.userHandleGetCallingUserId());
                 saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
@@ -3825,6 +3847,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.minimumPasswordMetrics.lowerCase != length) {
                 ap.minimumPasswordMetrics.lowerCase = length;
+                updatePasswordValidityCheckpointLocked(mInjector.userHandleGetCallingUserId());
                 saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
@@ -3869,6 +3892,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.minimumPasswordMetrics.letters != length) {
                 ap.minimumPasswordMetrics.letters = length;
+                updatePasswordValidityCheckpointLocked(mInjector.userHandleGetCallingUserId());
                 saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
@@ -3916,6 +3940,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.minimumPasswordMetrics.numeric != length) {
                 ap.minimumPasswordMetrics.numeric = length;
+                updatePasswordValidityCheckpointLocked(mInjector.userHandleGetCallingUserId());
                 saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
@@ -3963,6 +3988,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.minimumPasswordMetrics.symbols != length) {
                 ap.minimumPasswordMetrics.symbols = length;
+                updatePasswordValidityCheckpointLocked(mInjector.userHandleGetCallingUserId());
                 saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
@@ -4010,6 +4036,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.minimumPasswordMetrics.nonLetter != length) {
                 ap.minimumPasswordMetrics.nonLetter = length;
+                updatePasswordValidityCheckpointLocked(mInjector.userHandleGetCallingUserId());
                 saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
@@ -4080,6 +4107,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean isActivePasswordSufficientForUserLocked(
             DevicePolicyData policy, int userHandle, boolean parent) {
         enforceUserUnlocked(userHandle, parent);
+
+        if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()
+                && !policy.mPasswordStateHasBeenSetSinceBoot) {
+            // Before user enters their password for the first time after a reboot, return the
+            // value of this flag, which tells us whether the password was valid the last time
+            // settings were saved.  If DPC changes password requirements on boot so that the
+            // current password no longer meets the requirements, this value will be stale until
+            // the next time the password is entered.
+            return policy.mPasswordValidAtLastCheckpoint;
+        }
 
         final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
         if (policy.mActivePasswordMetrics.quality < requiredPasswordQuality) {
@@ -5424,6 +5461,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DevicePolicyData policy = getUserData(userHandle);
         synchronized (this) {
             policy.mActivePasswordMetrics = metrics;
+            policy.mPasswordStateHasBeenSetSinceBoot = true;
         }
     }
 
@@ -5448,6 +5486,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             synchronized (this) {
                 policy.mFailedPasswordAttempts = 0;
+                updatePasswordValidityCheckpointLocked(userId);
                 saveSettingsLocked(userId);
                 updatePasswordExpirationsLocked(userId);
                 setExpirationAlarmCheckLocked(mContext, userId, /* parent */ false);
@@ -7354,6 +7393,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (this) {
             pw.println("Current Device Policy Manager state:");
+
             mOwners.dump("  ", pw);
             mDeviceAdminServiceController.dump("  ", pw);
             int userCount = mUserData.size();
@@ -7380,7 +7420,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pw.print("    mPasswordOwner="); pw.println(policy.mPasswordOwner);
             }
             pw.println();
-            pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
+            mConstants.dump("  ", pw);
+            pw.println();
+            pw.println("  Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
         }
     }
 

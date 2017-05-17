@@ -468,8 +468,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Ir izveidots savienojums ar lietotni <xliff:g id="APPLICATION">%1$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās privātās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profils ir saistīts ar lietotni <xliff:g id="APPLICATION">%2$s</xliff:g>, kura var pārraudzīt jūsu tīklā veiktās darbības, tostarp saņemtos un nosūtītos e-pasta ziņojumus, izmantotās lietotnes un apmeklētās tīmekļa vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profils ir saistīts ar lietotni <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, kura var pārraudzīt jūsu tīklā veiktās darbības, tostarp saņemtos un nosūtītos e-pasta ziņojumus, instalētās lietotnes un apmeklētās tīmekļa vietnes.\n\nIr izveidots savienojums ar lietotni <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās privātās darbības, tostarp saņemtos un nosūtītos e-pasta ziņojumus, instalētās lietotnes un apmeklētās tīmekļa vietnes."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Atbloķēta lietotājam <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Ierīce būs bloķēta, līdz to manuāli atbloķēsiet."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Saņemiet paziņojumus ātrāk"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Skatiet tos pirms atbloķēšanas."</string>
@@ -551,7 +550,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Izslēgts"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Izmantojot barošanas paziņojumu vadīklas, varat lietotnes paziņojumiem iestatīt svarīguma līmeni (no 0 līdz 5). \n\n"<b>"5. līmenis"</b>" \n- Tiek rādīts paziņojumu saraksta augšdaļā \n- Tiek atļauta pilnekrāna režīma pārtraukšana \n- Ieskats vienmēr atļauts \n\n"<b>"4. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats vienmēr atļauts \n\n"<b>"3. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n\n"<b>"2. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n- Nav atļautas skaņas un vibrosignāls \n\n"<b>"1. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n- Nav atļautas skaņas un vibrosignāls \n- Paziņojumi tiek paslēpti bloķēšanas ekrānā un statusa joslā \n- Paziņojumi tiek rādīti paziņojumu saraksta apakšdaļā \n\n"<b>"0. līmenis"</b>" \n- Visi lietotnes paziņojumi tiek bloķēti"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Paziņojumi"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Jūs vairs nesaņemsiet šos paziņojumus."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Jūs vairs nesaņemsiet šos paziņojumus"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> paziņojumu kategorijas"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Paziņojumu kategorijas šajā lietotnē nav pieejamas."</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -767,4 +766,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Līdz: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Paturēt"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Aizstāt"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Lietotnes, kas darbojas fonā"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Pieskarieties, lai skatītu detalizētu informāciju par akumulatora un datu lietojumu"</string>
 </resources>

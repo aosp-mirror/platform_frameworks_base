@@ -60,6 +60,7 @@ public class AmbientState {
     private boolean mExpansionChanging;
     private boolean mPanelFullWidth;
     private boolean mPulsing;
+    private boolean mUnlockHintRunning;
 
     public AmbientState(Context context) {
         reload(context);
@@ -304,5 +305,13 @@ public class AmbientState {
 
     public void setPanelFullWidth(boolean panelFullWidth) {
         mPanelFullWidth = panelFullWidth;
+    }
+
+    public void setUnlockHintRunning(boolean unlockHintRunning) {
+        mUnlockHintRunning = unlockHintRunning;
+    }
+
+    public boolean isUnlockHintRunning() {
+        return mUnlockHintRunning;
     }
 }

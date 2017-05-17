@@ -404,4 +404,55 @@ public class AccessPointTest {
         assertThat(ap.getPasspointFqdn()).isEqualTo(fqdn);
         assertThat(ap.getConfigName()).isEqualTo(providerFriendlyName);
     }
+
+    @Test
+    public void testUpdateNetworkInfo_returnsTrue() {
+        int networkId = 123;
+        int rssi = -55;
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(networkId);
+        wifiInfo.setRssi(rssi);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTING, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(networkId)
+                .setRssi(rssi)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        NetworkInfo newInfo = new NetworkInfo(networkInfo);
+        newInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "", "");
+        assertThat(ap.update(config, wifiInfo, newInfo)).isTrue();
+    }
+
+    @Test
+    public void testUpdateNetworkInfoWithSameInfo_returnsFalse() {
+        int networkId = 123;
+        int rssi = -55;
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(networkId);
+        wifiInfo.setRssi(rssi);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTING, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(networkId)
+                .setRssi(rssi)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        NetworkInfo newInfo = new NetworkInfo(networkInfo); // same values
+        assertThat(ap.update(config, wifiInfo, newInfo)).isFalse();
+    }
 }

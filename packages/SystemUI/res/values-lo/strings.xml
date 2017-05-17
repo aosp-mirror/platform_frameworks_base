@@ -305,7 +305,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"​ບໍ່​ມີ​ອຸ​ປະ​ກອນ​ທີ່​ສາ​ມາດ​ໃຊ້​ໄດ້"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ຄວາມແຈ້ງ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ອັດຕະໂນມັດ"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"​ສະ​ລັບ​ສີ"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"ສະຫຼັບສີ"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"ໂໝດການແກ້ໄຂສີ"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"ແລ້ວໆ"</string>
@@ -354,7 +354,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"ເລື່ອນໄປທາງຊ້າຍເພື່ອ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"ທ່ານ​ຈະ​ບໍ່​ຖືກ​ລົບ​ກວນ​ຈາກ​ສຽງ ແລະ​ການ​ສັ່ນ, ຍົກ​ເວັ້ນ​ຈາກ​ໂມງ​ປຸກ, ການ​ເຕືອນ, ເຫດ​ການ, ແລະ​ຜູ້​ໂທ​ທີ່​ທ່ານ​ລະ​ບຸ."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ປັບແຕ່ງ"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ອັນ​ນີ້ບ​ລັອກ​ທຸກ​ສຽງ ແລະ​ການ​ສັ່ນ, ລວມ​ທັງ​ຈາກ​ໂມງ​ປຸກ, ເພງ, ວິ​ດີ​ໂອ, ແລະ​ເກມ. ທ່ານ​ຍັງ​ຈະ​ສາ​ມາດ​ໂທ​ລະ​ສັບ​ໄດ້."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ນີ້ຈະເປັນການປິດສຽງ ແລະ ການສັ່ນທັງໝົດ ຮວມທັງສຽງໂມງປຸກ, ເພງ, ວິດີໂອ ແລະ ເກມນຳ. ແຕ່ທ່ານຍັງສາມາດໂທລະສັບໄດ້ປົກກະຕິ."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ອັນ​ນີ້ບ​ລັອກ​ທຸກ​ສຽງ ແລະ​ການ​ສັ່ນ, ລວມ​ທັງ​ຈາກ​ໂມງ​ປຸກ, ເພງ, ວິ​ດີ​ໂອ, ແລະ​ເກມ."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ການ​ແຈ້ງເຕືອນ​ທີ່​ສຳຄັນ​ໜ້ອຍ​ກວ່າ​ຢູ່​ດ້ານ​ລຸ່ມ"</string>
@@ -548,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ປິດ"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ດ້ວຍການຄວບຄຸມການແຈ້ງເຕືອນ, ທ່ານສາມາດຕັ້ງລະດັບຄວາມສຳຄັນຈາກ 0 ຮອດ 5 ໃຫ້ກັບການແຈ້ງເຕືອນແອັບໃດໜຶ່ງໄດ້. \n\n"<b>"ລະດັບ 5"</b>" \n- ສະແດງຢູ່ເທິງສຸດຂອງລາຍການແຈ້ງເຕືອນ \n- ອະນຸຍາດໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 4"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 3"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n\n"<b>"ລະດັບ 2"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n\n"<b>"ລະດັບ 1"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n- ເຊື່ອງຈາກໜ້າຈໍລັອກ ແລະ ແຖບສະຖານະ \n- ສະແດງຢູ່ລຸ່ມສຸດຂອງລາຍການແຈ້ງເຕືອນ \n\n"<b>"ລະດັບ 0"</b>" \n- ປິດກັ້ນການແຈ້ງເຕືອນທັງໝົດຈາກແອັບ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ການແຈ້ງເຕືອນ"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນເຫຼົ່ານີ້ອີກຕໍ່ໄປ."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນເຫຼົ່ານີ້ອີກຕໍ່ໄປ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> ໝວດໝູ່ການແຈ້ງເຕືອນ"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ແອັບນີ້ບໍ່ມີໝວດໝູ່ການແຈ້ງເຕືອນ"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -700,7 +700,7 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"ການແຈ້ງເຕືອນ <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ແອັບອາດໃຊ້ບໍ່ໄດ້ກັບການແບ່ງໜ້າຈໍ."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ແອັບບໍ່ຮອງຮັບໜ້າຈໍແບບແຍກກັນ."</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ແອັບອາດຮອງຮັບການເປີດໃນໜ້າຈໍທີສອງ."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ແອັບອາດບໍ່ສາມາດໃຊ້ໄດ້ໃນໜ້າຈໍທີສອງ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"ແອັບບໍ່ຮອງຮັບການເປີດໃນໜ້າຈໍທີສອງ."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ເປີດການຕັ້ງຄ່າ."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ເປີດການຕັ້ງຄ່າດ່ວນ."</string>
@@ -762,4 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"ຈົນຮອດ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"ເກັບໄວ້"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ແທນທີ່"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"ແອັບທີ່ກຳລັງເຮັດວຽກໃນພື້ນຫຼັງ"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"ແຕະເພື່ອເບິ່ງລາຍລະອຽດການນຳໃຊ້ແບັດເຕີຣີ ແລະ ອິນເຕີເນັດ"</string>
 </resources>

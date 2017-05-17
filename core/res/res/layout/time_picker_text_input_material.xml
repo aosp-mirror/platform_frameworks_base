@@ -37,7 +37,8 @@
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:inputType="number"
-            android:textAppearance="@style/TextAppearance.Material.TimePicker.InputField" />
+            android:textAppearance="@style/TextAppearance.Material.TimePicker.InputField"
+            android:imeOptions="actionNext"/>
         <TextView
             android:id="@+id/label_hour"
             android:layout_width="wrap_content"

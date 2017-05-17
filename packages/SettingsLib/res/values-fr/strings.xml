@@ -31,9 +31,9 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Hors de portée"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Reconnexion automatique impossible"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Aucun accès à Internet"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Enregistré par <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Enregistré par : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Connecté automatiquement via %1$s"</string>
-    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Connecté automatiquement via un fournisseur d\'avis sur le réseau"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Connecté automatiquement via un fournisseur d\'évaluation de l\'état du réseau"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Connecté via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Connecté, aucun accès à Internet"</string>
@@ -324,7 +324,7 @@
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - encore environ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – Temps restant : <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> avant une charge complète"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la charge complète"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Batterie en charge"</string>

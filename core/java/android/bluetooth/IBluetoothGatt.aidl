@@ -43,10 +43,10 @@ import android.bluetooth.le.IScannerCallback;
 interface IBluetoothGatt {
     List<BluetoothDevice> getDevicesMatchingConnectionStates(in int[] states);
 
-    void registerScanner(in IScannerCallback callback);
+    void registerScanner(in IScannerCallback callback, in WorkSource workSource);
     void unregisterScanner(in int scannerId);
     void startScan(in int scannerId, in ScanSettings settings, in List<ScanFilter> filters,
-                   in WorkSource workSource, in List scanStorages, in String callingPackage);
+                   in List scanStorages, in String callingPackage);
     void startScanForIntent(in PendingIntent intent, in ScanSettings settings, in List<ScanFilter> filters,
                             in String callingPackage);
     void stopScanForIntent(in PendingIntent intent, in String callingPackage);
@@ -80,6 +80,7 @@ interface IBluetoothGatt {
     void clientReadPhy(in int clientIf, in String address);
     void refreshDevice(in int clientIf, in String address);
     void discoverServices(in int clientIf, in String address);
+    void discoverServiceByUuid(in int clientIf, in String address, in ParcelUuid uuid);
     void readCharacteristic(in int clientIf, in String address, in int handle, in int authReq);
     void readUsingCharacteristicUuid(in int clientIf, in String address, in ParcelUuid uuid,
                            in int startHandle, in int endHandle, in int authReq);

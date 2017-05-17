@@ -151,9 +151,12 @@ public class ActivityTestsBase {
      * setup not available in the test environment. Also specifies an injector for
      */
     protected static class TestActivityStackSupervisor extends ActivityStackSupervisor {
+        private final ActivityDisplay mDisplay;
+
         public TestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
             super(service, looper);
             mWindowManager = prepareMockWindowManager();
+            mDisplay = new ActivityDisplay();
         }
 
         // No home stack is set.
@@ -185,9 +188,8 @@ public class ActivityTestsBase {
 
         public <T extends ActivityStack> T createTestStack(ActivityManagerService service,
                 int stackId, boolean onTop) {
-            final ActivityDisplay display = new ActivityDisplay();
             final TestActivityContainer container =
-                    new TestActivityContainer(service, stackId, display, onTop);
+                    new TestActivityContainer(service, stackId, mDisplay, onTop);
             mActivityContainers.put(stackId, container);
             return (T) container.getStack();
         }

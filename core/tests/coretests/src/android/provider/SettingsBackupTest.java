@@ -37,8 +37,6 @@ import org.junit.runner.RunWith;
 
 /** Tests that ensure appropriate settings are backed up. */
 @RunWith(AndroidJUnit4.class)
-// TODO(b/37684646): Can re-enable pre-submit once test is fixed.
-//@Presubmit
 @SmallTest
 public class SettingsBackupTest {
 
@@ -110,6 +108,8 @@ public class SettingsBackupTest {
                     Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
+                    Settings.Global.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX,
                     Settings.Global.BLUETOOTH_DISABLED_PROFILES,
                     Settings.Global.BLUETOOTH_HEADSET_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX,
@@ -166,6 +166,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
                     Settings.Global.DEVICE_NAME,
+                    Settings.Global.DEVICE_POLICY_CONSTANTS,
                     Settings.Global.DEVICE_PROVISIONED,
                     Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
                     Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
@@ -307,6 +308,7 @@ public class SettingsBackupTest {
                     Settings.Global.SETUP_PREPAID_DETECTION_REDIR_HOST,
                     Settings.Global.SETUP_PREPAID_DETECTION_TARGET_URL,
                     Settings.Global.SHORTCUT_MANAGER_CONSTANTS,
+                    Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SMART_SELECTION_UPDATE_CONTENT_URL,
                     Settings.Global.SMART_SELECTION_UPDATE_METADATA_URL,
@@ -370,11 +372,14 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_REENABLE_DELAY_MS,
                     Settings.Global.WIFI_SAVED_STATE,
                     Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
+                    Settings.Global.WIFI_SCAN_BACKGROUND_THROTTLE_INTERVAL_MS,
+                    Settings.Global.WIFI_SCAN_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
                     Settings.Global.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS,
                     Settings.Global.WIFI_SLEEP_POLICY,
                     Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
                     Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED,
                     Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
+                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
                     Settings.Global.WIFI_WATCHDOG_ON,
                     Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                     Settings.Global.WINDOW_ANIMATION_SCALE,
@@ -394,8 +399,11 @@ public class SettingsBackupTest {
                  Settings.Secure.ANR_SHOW_BACKGROUND,
                  Settings.Secure.ASSISTANT,
                  Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
+                 Settings.Secure.ASSIST_GESTURE_ENABLED_KEYGUARD,
+                 Settings.Secure.ASSIST_GESTURE_ENABLED_SLEEP,
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
+                 Settings.Secure.AUTOFILL_SERVICE_SEARCH_URI,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
@@ -403,7 +411,6 @@ public class SettingsBackupTest {
                  Settings.Secure.BACKUP_ENABLED,
                  Settings.Secure.BACKUP_PROVISIONED,
                  Settings.Secure.BACKUP_TRANSPORT,
-                 Settings.Secure.BLUETOOTH_HCI_LOG,
                  Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED, // Candidate for backup?
                  Settings.Secure.CARRIER_APPS_HANDLED,
                  Settings.Secure.CMAS_ADDITIONAL_BROADCAST_PKG,

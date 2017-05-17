@@ -31,21 +31,22 @@ using android::StringPiece;
 
 namespace aapt {
 
-void DumpCompiledFile(const pb::CompiledFile& pb_file, const void* data, size_t len,
+bool DumpCompiledFile(const pb::CompiledFile& pb_file, const void* data, size_t len,
                       const Source& source, IAaptContext* context) {
   std::unique_ptr<ResourceFile> file =
       DeserializeCompiledFileFromPb(pb_file, source, context->GetDiagnostics());
   if (!file) {
     context->GetDiagnostics()->Warn(DiagMessage() << "failed to read compiled file");
-    return;
+    return false;
   }
 
   std::cout << "Resource: " << file->name << "\n"
             << "Config:   " << file->config << "\n"
             << "Source:   " << file->source << "\n";
+  return true;
 }
 
-void TryDumpFile(IAaptContext* context, const std::string& file_path) {
+bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
   std::unique_ptr<ResourceTable> table;
 
   std::string err;
@@ -57,18 +58,18 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
       if (!data) {
         context->GetDiagnostics()->Error(DiagMessage(file_path)
                                          << "failed to open resources.arsc.flat");
-        return;
+        return false;
       }
 
       pb::ResourceTable pb_table;
       if (!pb_table.ParseFromArray(data->data(), data->size())) {
         context->GetDiagnostics()->Error(DiagMessage(file_path) << "invalid resources.arsc.flat");
-        return;
+        return false;
       }
 
       table = DeserializeTableFromPb(pb_table, Source(file_path), context->GetDiagnostics());
       if (!table) {
-        return;
+        return false;
       }
     }
 
@@ -79,14 +80,14 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
         if (!data) {
           context->GetDiagnostics()->Error(DiagMessage(file_path)
                                            << "failed to open resources.arsc");
-          return;
+          return false;
         }
 
         table = util::make_unique<ResourceTable>();
         BinaryResourceParser parser(context, table.get(), Source(file_path), data->data(),
                                     data->size());
         if (!parser.Parse()) {
-          return;
+          return false;
         }
       }
     }
@@ -96,7 +97,7 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
     Maybe<android::FileMap> file = file::MmapPath(file_path, &err);
     if (!file) {
       context->GetDiagnostics()->Error(DiagMessage(file_path) << err);
-      return;
+      return false;
     }
 
     android::FileMap* file_map = &file.value();
@@ -113,24 +114,26 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
 
       uint32_t num_files = 0;
       if (!input.ReadLittleEndian32(&num_files)) {
-        return;
+        return false;
       }
 
       for (uint32_t i = 0; i < num_files; i++) {
         pb::CompiledFile compiled_file;
         if (!input.ReadCompiledFile(&compiled_file)) {
           context->GetDiagnostics()->Warn(DiagMessage() << "failed to read compiled file");
-          return;
+          return false;
         }
 
         uint64_t offset, len;
         if (!input.ReadDataMetaData(&offset, &len)) {
           context->GetDiagnostics()->Warn(DiagMessage() << "failed to read meta data");
-          return;
+          return false;
         }
 
         const void* data = static_cast<const uint8_t*>(file_map->getDataPtr()) + offset;
-        DumpCompiledFile(compiled_file, data, len, Source(file_path), context);
+        if (!DumpCompiledFile(compiled_file, data, len, Source(file_path), context)) {
+          return false;
+        }
       }
     }
   }
@@ -140,6 +143,8 @@ void TryDumpFile(IAaptContext* context, const std::string& file_path) {
     options.show_sources = true;
     Debug::PrintTable(table.get(), options);
   }
+
+  return true;
 }
 
 class DumpContext : public IAaptContext {
@@ -203,8 +208,11 @@ int Dump(const std::vector<StringPiece>& args) {
   context.SetVerbose(verbose);
 
   for (const std::string& arg : flags.GetArgs()) {
-    TryDumpFile(&context, arg);
+    if (!TryDumpFile(&context, arg)) {
+      return 1;
+    }
   }
+
   return 0;
 }
 

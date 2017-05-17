@@ -347,7 +347,7 @@ public class TrustAgentService extends Service {
      * <p>Agents that support configuration options should overload this method and return 'true'.
      *
      * @param options The aggregated list of options or an empty list if no restrictions apply.
-     * @return true if the {@link } supports configuration options.
+     * @return true if it supports configuration options.
      */
     public boolean onConfigure(List<PersistableBundle> options) {
         return false;

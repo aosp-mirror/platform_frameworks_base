@@ -157,7 +157,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     }
 
     @Override
-    protected LogMaker populate(LogMaker logMaker) {
+    public LogMaker populate(LogMaker logMaker) {
         return super.populate(logMaker).setComponentName(mComponent);
     }
 
@@ -275,7 +275,6 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         } catch (RemoteException e) {
             // Called through wrapper, won't happen here.
         }
-        MetricsLogger.action(mContext, getMetricsCategory(), mComponent.getPackageName());
     }
 
     @Override

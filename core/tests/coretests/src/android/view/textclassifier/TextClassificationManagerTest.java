@@ -40,6 +40,7 @@ import java.util.Locale;
 public class TextClassificationManagerTest {
 
     private static final LocaleList LOCALES = LocaleList.forLanguageTags("en");
+    private static final String NO_TYPE = null;
 
     private TextClassificationManager mTcm;
     private TextClassifier mClassifier;
@@ -102,6 +103,19 @@ public class TextClassificationManagerTest {
     }
 
     @Test
+    public void testSmartSelection_withEmoji() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "\uD83D\uDE02 Hello.";
+        String selected = "Hello";
+        int startIndex = text.indexOf(selected);
+        int endIndex = startIndex + selected.length();
+
+        assertThat(mClassifier.suggestSelection(text, startIndex, endIndex, LOCALES),
+                isTextSelection(startIndex, endIndex, NO_TYPE));
+    }
+
+    @Test
     public void testClassifyText() {
         if (isTextClassifierDisabled()) return;
 
@@ -110,19 +124,40 @@ public class TextClassificationManagerTest {
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
         assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
-                isTextClassification(classifiedText, TextClassifier.TYPE_EMAIL));
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_EMAIL,
+                        "mailto:" + classifiedText));
     }
 
     @Test
     public void testTextClassifyText_url() {
         if (isTextClassifierDisabled()) return;
 
-        String text = "Visit http://www.android.com for more information";
-        String classifiedText = "http://www.android.com";
+        String text = "Visit www.android.com for more information";
+        String classifiedText = "www.android.com";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
         assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
-                isTextClassification(classifiedText, TextClassifier.TYPE_URL));
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_URL,
+                        "http://" + classifiedText));
+    }
+
+    @Test
+    public void testTextClassifyText_url_inCaps() {
+        if (isTextClassifierDisabled()) return;
+
+        String text = "Visit HTTP://ANDROID.COM for more information";
+        String classifiedText = "HTTP://ANDROID.COM";
+        int startIndex = text.indexOf(classifiedText);
+        int endIndex = startIndex + classifiedText.length();
+        assertThat(mClassifier.classifyText(text, startIndex, endIndex, LOCALES),
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_URL,
+                        "http://ANDROID.COM"));
     }
 
     @Test
@@ -135,7 +170,10 @@ public class TextClassificationManagerTest {
         int endIndex = startIndex + classifiedText.length();
         LocaleList nullLocales = null;
         assertThat(mClassifier.classifyText(text, startIndex, endIndex, nullLocales),
-                isTextClassification(classifiedText, TextClassifier.TYPE_EMAIL));
+                isTextClassification(
+                        classifiedText,
+                        TextClassifier.TYPE_EMAIL,
+                        "mailto:" + classifiedText));
     }
 
     @Test
@@ -172,10 +210,15 @@ public class TextClassificationManagerTest {
                     TextSelection selection = (TextSelection) o;
                     return startIndex == selection.getSelectionStartIndex()
                             && endIndex == selection.getSelectionEndIndex()
-                            && selection.getEntityCount() > 0
-                            && type.equals(selection.getEntity(0));
+                            && typeMatches(selection, type);
                 }
                 return false;
+            }
+
+            private boolean typeMatches(TextSelection selection, String type) {
+                return type == null
+                        || (selection.getEntityCount() > 0
+                                && type.trim().equalsIgnoreCase(selection.getEntity(0)));
             }
 
             @Override
@@ -187,15 +230,33 @@ public class TextClassificationManagerTest {
     }
 
     private static Matcher<TextClassification> isTextClassification(
-            final String text, final String type) {
+            final String text, final String type, final String intentUri) {
         return new BaseMatcher<TextClassification>() {
             @Override
             public boolean matches(Object o) {
                 if (o instanceof TextClassification) {
                     TextClassification result = (TextClassification) o;
-                    return text.equals(result.getText())
+                    final boolean typeRequirementSatisfied;
+                    String scheme;
+                    switch (type) {
+                        case TextClassifier.TYPE_EMAIL:
+                            scheme = result.getIntent().getData().getScheme();
+                            typeRequirementSatisfied = "mailto".equals(scheme);
+                            break;
+                        case TextClassifier.TYPE_URL:
+                            scheme = result.getIntent().getData().getScheme();
+                            typeRequirementSatisfied = "http".equals(scheme)
+                                    || "https".equals(scheme);
+                            break;
+                        default:
+                            typeRequirementSatisfied = true;
+                    }
+
+                    return typeRequirementSatisfied
+                            && text.equals(result.getText())
                             && result.getEntityCount() > 0
-                            && type.equals(result.getEntity(0));
+                            && type.equals(result.getEntity(0))
+                            && intentUri.equals(result.getIntent().getDataString());
                     // TODO: Include other properties.
                 }
                 return false;
@@ -204,7 +265,8 @@ public class TextClassificationManagerTest {
             @Override
             public void describeTo(Description description) {
                 description.appendText("text=").appendValue(text)
-                        .appendText(", type=").appendValue(type);
+                        .appendText(", type=").appendValue(type)
+                        .appendText(", intent.data=").appendValue(intentUri);
             }
         };
     }

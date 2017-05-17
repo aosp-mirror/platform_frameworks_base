@@ -16,7 +16,6 @@
 
 package android.bluetooth;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -156,7 +155,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 }
                 mClientIf = clientIf;
                 if (status != GATT_SUCCESS) {
-                    mHandler.post(new Runnable() {
+                    runOrQueueCallback(new Runnable() {
                         @Override
                         public void run() {
                             if (mCallback != null) {
@@ -191,7 +190,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     return;
                 }
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -213,7 +212,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     return;
                 }
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -238,7 +237,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 int profileState = connected ? BluetoothProfile.STATE_CONNECTED :
                                                BluetoothProfile.STATE_DISCONNECTED;
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -300,7 +299,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     }
                 }
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -352,7 +351,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                 if (status == 0) characteristic.setValue(value);
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -401,7 +400,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                 mAuthRetryState = AUTH_RETRY_STATE_IDLE;
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -430,7 +429,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                 characteristic.setValue(value);
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -477,7 +476,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                 mAuthRetryState = AUTH_RETRY_STATE_IDLE;
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -523,7 +522,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
                 mAuthRetryState = AUTH_RETRY_STATE_IDLE;
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -549,7 +548,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     mDeviceBusy = false;
                 }
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -570,7 +569,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (!address.equals(mDevice.getAddress())) {
                     return;
                 }
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -592,7 +591,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     return;
                 }
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -616,7 +615,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     return;
                 }
 
-                mHandler.post(new Runnable() {
+                runOrQueueCallback(new Runnable() {
                     @Override
                     public void run() {
                         if (mCallback != null) {
@@ -700,6 +699,22 @@ public final class BluetoothGatt implements BluetoothProfile {
             }
         }
         return null;
+    }
+
+    /**
+     * Queue the runnable on a {@link Handler} provided by the user, or execute the runnable
+     * immediately if no Handler was provided.
+     */
+    private void runOrQueueCallback(final Runnable cb) {
+        if (mHandler == null) {
+          try {
+            cb.run();
+          } catch (Exception ex) {
+            Log.w(TAG, "Unhandled exception in callback", ex);
+          }
+        } else {
+          mHandler.post(cb);
+        }
     }
 
     /**
@@ -907,6 +922,31 @@ public final class BluetoothGatt implements BluetoothProfile {
             return false;
         }
 
+        return true;
+    }
+
+    /**
+     * Discovers a service by UUID. This is exposed only for passing PTS tests.
+     * It should never be used by real applications. The service is not searched
+     * for characteristics and descriptors, or returned in any callback.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @return true, if the remote service discovery has been started
+     * @hide
+     */
+    public boolean discoverServiceByUuid(UUID uuid) {
+        if (DBG) Log.d(TAG, "discoverServiceByUuid() - device: " + mDevice.getAddress());
+        if (mService == null || mClientIf == 0) return false;
+
+        mServices.clear();
+
+        try {
+            mService.discoverServiceByUuid(mClientIf, mDevice.getAddress(), new ParcelUuid(uuid));
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return false;
+        }
         return true;
     }
 

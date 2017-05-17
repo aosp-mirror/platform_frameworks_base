@@ -26,7 +26,9 @@ import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
@@ -69,6 +71,7 @@ import android.util.ArraySet;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.MutableBoolean;
+import android.view.AppTransitionAnimationSpec;
 import android.view.Display;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
@@ -88,6 +91,7 @@ import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.ThumbnailData;
+import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecComposer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,6 +99,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -143,6 +149,7 @@ public class SystemServicesProxy {
     Canvas mBgProtectionCanvas;
 
     private final Handler mHandler = new H();
+    private final ExecutorService mOnewayExecutor = Executors.newSingleThreadExecutor();
 
     /**
      * An abstract class to track task stack changes.
@@ -156,9 +163,9 @@ public class SystemServicesProxy {
         public void onTaskStackChangedBackground() { }
         public void onTaskStackChanged() { }
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
-        public void onActivityPinned(String packageName) { }
+        public void onActivityPinned(String packageName, int taskId) { }
         public void onActivityUnpinned() { }
-        public void onPinnedActivityRestartAttempt() { }
+        public void onPinnedActivityRestartAttempt(boolean clearedTask) { }
         public void onPinnedStackAnimationStarted() { }
         public void onPinnedStackAnimationEnded() { }
         public void onActivityForcedResizable(String packageName, int taskId, int reason) { }
@@ -211,9 +218,9 @@ public class SystemServicesProxy {
         }
 
         @Override
-        public void onActivityPinned(String packageName) throws RemoteException {
+        public void onActivityPinned(String packageName, int taskId) throws RemoteException {
             mHandler.removeMessages(H.ON_ACTIVITY_PINNED);
-            mHandler.obtainMessage(H.ON_ACTIVITY_PINNED, packageName).sendToTarget();
+            mHandler.obtainMessage(H.ON_ACTIVITY_PINNED, taskId, 0, packageName).sendToTarget();
         }
 
         @Override
@@ -223,10 +230,11 @@ public class SystemServicesProxy {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt()
+        public void onPinnedActivityRestartAttempt(boolean clearedTask)
                 throws RemoteException{
             mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
-            mHandler.sendEmptyMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
+            mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT, clearedTask ? 1 : 0, 0)
+                    .sendToTarget();
         }
 
         @Override
@@ -441,9 +449,18 @@ public class SystemServicesProxy {
      * Returns the top running task.
      */
     public ActivityManager.RunningTaskInfo getRunningTask() {
-        List<ActivityManager.RunningTaskInfo> tasks = mAm.getRunningTasks(1);
+        // Note: The set of running tasks from the system is ordered by recency
+        List<ActivityManager.RunningTaskInfo> tasks = mAm.getRunningTasks(10);
         if (tasks != null && !tasks.isEmpty()) {
-            return tasks.get(0);
+            // Find the first task in a valid stack, we ignore everything from the Recents and PiP
+            // stacks
+            for (int i = 0; i < tasks.size(); i++) {
+                ActivityManager.RunningTaskInfo task = tasks.get(i);
+                int stackId = task.stackId;
+                if (stackId != RECENTS_STACK_ID && stackId != PINNED_STACK_ID) {
+                    return task;
+                }
+            }
         }
         return null;
     }
@@ -465,13 +482,20 @@ public class SystemServicesProxy {
         if (mIam == null) return false;
 
         try {
-            ActivityManager.StackInfo homeStackInfo = mIam.getStackInfo(
-                    ActivityManager.StackId.HOME_STACK_ID);
-            ActivityManager.StackInfo fullscreenStackInfo = mIam.getStackInfo(
-                    ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID);
-            ActivityManager.StackInfo recentsStackInfo = mIam.getStackInfo(
-                    ActivityManager.StackId.RECENTS_STACK_ID);
-
+            List<StackInfo> stackInfos = mIam.getAllStackInfos();
+            ActivityManager.StackInfo homeStackInfo = null;
+            ActivityManager.StackInfo fullscreenStackInfo = null;
+            ActivityManager.StackInfo recentsStackInfo = null;
+            for (int i = 0; i < stackInfos.size(); i++) {
+                StackInfo stackInfo = stackInfos.get(i);
+                if (stackInfo.stackId == HOME_STACK_ID) {
+                    homeStackInfo = stackInfo;
+                } else if (stackInfo.stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+                    fullscreenStackInfo = stackInfo;
+                } else if (stackInfo.stackId == RECENTS_STACK_ID) {
+                    recentsStackInfo = stackInfo;
+                }
+            }
             boolean homeStackVisibleNotOccluded = isStackNotOccluded(homeStackInfo,
                     fullscreenStackInfo);
             boolean recentsStackVisibleNotOccluded = isStackNotOccluded(recentsStackInfo,
@@ -754,10 +778,12 @@ public class SystemServicesProxy {
      * Sends a message to close other system windows.
      */
     public void sendCloseSystemWindows(String reason) {
-        try {
-            mIam.closeSystemDialogs(reason);
-        } catch (RemoteException e) {
-        }
+        mOnewayExecutor.submit(() -> {
+            try {
+                mIam.closeSystemDialogs(reason);
+            } catch (RemoteException e) {
+            }
+        });
     }
 
     /**
@@ -997,9 +1023,7 @@ public class SystemServicesProxy {
      * Returns the current user id.
      */
     public int getCurrentUser() {
-        if (mAm == null) return 0;
-
-        return mAm.getCurrentUser();
+        return KeyguardUpdateMonitor.getCurrentUser();
     }
 
     /**
@@ -1104,31 +1128,44 @@ public class SystemServicesProxy {
     }
 
     /** Starts an activity from recents. */
-    public boolean startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
-            ActivityOptions options, int stackId) {
-        if (mIam != null) {
-            try {
-                if (taskKey.stackId == DOCKED_STACK_ID) {
-                    // We show non-visible docked tasks in Recents, but we always want to launch
-                    // them in the fullscreen stack.
-                    if (options == null) {
-                        options = ActivityOptions.makeBasic();
-                    }
-                    options.setLaunchStackId(FULLSCREEN_WORKSPACE_STACK_ID);
-                } else if (stackId != INVALID_STACK_ID){
-                    if (options == null) {
-                        options = ActivityOptions.makeBasic();
-                    }
-                    options.setLaunchStackId(stackId);
-                }
-                mIam.startActivityFromRecents(
-                        taskKey.id, options == null ? null : options.toBundle());
-                return true;
-            } catch (Exception e) {
-                Log.e(TAG, context.getString(R.string.recents_launch_error_message, taskName), e);
-            }
+    public void startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
+            ActivityOptions options, int stackId,
+            @Nullable final StartActivityFromRecentsResultListener resultListener) {
+        if (mIam == null) {
+            return;
         }
-        return false;
+        if (taskKey.stackId == DOCKED_STACK_ID) {
+            // We show non-visible docked tasks in Recents, but we always want to launch
+            // them in the fullscreen stack.
+            if (options == null) {
+                options = ActivityOptions.makeBasic();
+            }
+            options.setLaunchStackId(FULLSCREEN_WORKSPACE_STACK_ID);
+        } else if (stackId != INVALID_STACK_ID) {
+            if (options == null) {
+                options = ActivityOptions.makeBasic();
+            }
+            options.setLaunchStackId(stackId);
+        }
+        final ActivityOptions finalOptions = options;
+
+        // Execute this from another thread such that we can do other things (like caching the
+        // bitmap for the thumbnail) while AM is busy starting our activity.
+        mOnewayExecutor.submit(() -> {
+            try {
+                mIam.startActivityFromRecents(
+                        taskKey.id, finalOptions == null ? null : finalOptions.toBundle());
+                if (resultListener != null) {
+                    mHandler.post(() -> resultListener.onStartActivityResult(true));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, context.getString(
+                        R.string.recents_launch_error_message, taskName), e);
+                if (resultListener != null) {
+                    mHandler.post(() -> resultListener.onStartActivityResult(false));
+                }
+            }
+        });
     }
 
     /** Starts an in-place animation on the front most application windows. */
@@ -1246,6 +1283,10 @@ public class SystemServicesProxy {
         }
     }
 
+    public interface StartActivityFromRecentsResultListener {
+        void onStartActivityResult(boolean succeeded);
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
@@ -1282,7 +1323,7 @@ public class SystemServicesProxy {
                     }
                     case ON_ACTIVITY_PINNED: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityPinned((String) msg.obj);
+                            mTaskStackListeners.get(i).onActivityPinned((String) msg.obj, msg.arg1);
                         }
                         break;
                     }
@@ -1294,7 +1335,8 @@ public class SystemServicesProxy {
                     }
                     case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedActivityRestartAttempt();
+                            mTaskStackListeners.get(i).onPinnedActivityRestartAttempt(
+                                    msg.arg1 != 0);
                         }
                         break;
                     }

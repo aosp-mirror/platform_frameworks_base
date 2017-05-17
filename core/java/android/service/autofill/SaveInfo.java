@@ -174,6 +174,7 @@ public final class SaveInfo implements Parcelable {
                SAVE_DATA_TYPE_PASSWORD,
                SAVE_DATA_TYPE_ADDRESS,
                SAVE_DATA_TYPE_CREDIT_CARD,
+               SAVE_DATA_TYPE_USERNAME,
                SAVE_DATA_TYPE_EMAIL_ADDRESS})
     @Retention(RetentionPolicy.SOURCE)
     @interface SaveDataType{}
@@ -322,15 +323,6 @@ public final class SaveInfo implements Parcelable {
         public @NonNull Builder setDescription(@Nullable CharSequence description) {
             throwIfDestroyed();
             mDescription = description;
-            return this;
-        }
-
-        /** @hide */
-        // TODO (b/37563972): Remove when callers migrate
-        public @NonNull Builder setNegativeAction(@Nullable CharSequence title,
-                @Nullable IntentSender listener) {
-            throwIfDestroyed();
-            setNegativeAction(NEGATIVE_BUTTON_STYLE_CANCEL, listener);
             return this;
         }
 

@@ -13,7 +13,6 @@ LOCAL_SRC_FILES += \
     ../../../../system/netd/server/binder/android/net/INetd.aidl \
     ../../../../system/netd/server/binder/android/net/metrics/INetdEventListener.aidl \
     ../../../native/cmds/installd/binder/android/os/IInstalld.aidl \
-    ../../../native/services/vr/vr_window_manager/aidl/android/service/vr/IVrWindowManager.aidl \
 
 LOCAL_AIDL_INCLUDES += \
     system/netd/server/binder
@@ -32,6 +31,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android.hardware.weaver-V1.0-java-static \
     android.hardware.biometrics.fingerprint-V2.1-java-static \
     android.hardware.oemlock-V1.0-java-static \
+    android.hardware.tetheroffload.control-V1.0-java-static \
     android.hardware.vibrator-V1.0-java-constants \
 
 ifneq ($(INCREMENTAL_BUILDS),)

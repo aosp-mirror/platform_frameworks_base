@@ -300,10 +300,10 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi isključen"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi uključen"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nema dostupnih Wi-Fi mreža"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Prebacivanje"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emitiranje"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Prebacivanje"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Neimenovani uređaj"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Spreman za prebacivanje"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Spreman za emitiranje"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Nema dostupnih uređaja"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Osvjetljenje"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
@@ -354,7 +354,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Pretraživanje"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Povucite gore za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Povucite lijevo za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Zvukovi i vibracije vas neće uznemiravati, osim alarma, podsjetnika, događaja i pozivalaca koje odredite."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Neće vas ometati zvukovi i vibracije, osim alarma, podsjetnika, događaja i pozivalaca koje odredite."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prilagodi"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ovim se blokiraju SVI zvukovi i vibracije, uključujući alarme, muziku, videozapise i igre. I dalje ćete moći obavljati pozive."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ovim se blokiraju SVI zvukovi i vibracije, uključujući alarme, muziku, video zapise i igre."</string>
@@ -468,8 +468,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Povezani ste na aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g>, koja može pratiti vaše privatne aktivnosti na mreži, uključujući e-poštu, aplikacije i web stranice."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Vašim radnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil je povezan s aplikacijom <xliff:g id="APPLICATION">%2$s</xliff:g>, koja može pratiti vašu aktivnost na radnoj mreži, uključujući e-poruke, aplikacije i web lokacije.\n\nZa više informacija, obratite se svom administratoru."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Radnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil je povezan s aplikacijom <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, koja može pratiti vašu aktivnost na radnoj mreži, uključujući e-poruke, aplikacije i web lokacije.\n\nPovezani ste i sa aplikacijom <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, koja može pratiti vašu aktivnost na privatnoj mreži."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Otključano za korisnika <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Uređaj će ostati zaključan dok ga ručno ne otključate"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Brže primaj obavještenja"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Vidi ih prije otključavanja"</string>
@@ -553,7 +552,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Isključeno"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Uz kontrolu obavještenja o napajanju, možete postaviti nivo značaja obavještenja iz aplikacije, i to od nivoa 0 do 5. \n\n"<b>"Nivo 5"</b>" \n- Prikaži na vrhu liste obavještenja \n- Dopusti prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nvio 4"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nivo 3"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n\n"<b>"Nivo 2"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n\n"<b>"Nivo 1"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikada ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n- Sakrij sa ekrana za zaključavanje i statusne trake \n- Prikaži na dnu liste obavještenja \n\n"<b>"Nivo 0"</b>" \n- Blokiraj sva obavještenja iz aplikacije"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Obavještenja"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Nećete više primati ova obavještenja."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Nećete više primati ova obavještenja"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Kategorije obavještenja: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Ova aplikacija nema kategorije obavještenja"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -582,7 +581,7 @@
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 sat"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"OPOZOVI"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Odgođeno za <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Upotreba baterije"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Potrošnja baterije"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ušteda baterije je isključena prilikom punjenja"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ušteda baterije"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Ograničava rad i prijenos podataka u pozadini"</string>
@@ -651,7 +650,7 @@
     <item msgid="1545641631806817203">"Međumemorija"</item>
     <item msgid="5742013440802239414">"Kôd tipke"</item>
     <item msgid="8802889973626281575">"Prebacivač tastatura"</item>
-    <item msgid="8175437057325747277">"Nema"</item>
+    <item msgid="8175437057325747277">"Ništa"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normalna"</item>
@@ -661,7 +660,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"Prebacivač tastatura"</string>
     <string name="save" msgid="2311877285724540644">"Sačuvaj"</string>
-    <string name="reset" msgid="2448168080964209908">"Vrati na zadano"</string>
+    <string name="reset" msgid="2448168080964209908">"Vraćanje na zadano"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Podesite širinu dugmeta"</string>
     <string name="clipboard" msgid="1313879395099896312">"Međumemorija"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Prilagođeno dugme za navigaciju"</string>
@@ -669,7 +668,7 @@
     <string name="right_keycode" msgid="708447961000848163">"Kôd tipke desno"</string>
     <string name="left_icon" msgid="3096287125959387541">"Ikona lijevo"</string>
     <string name="right_icon" msgid="3952104823293824311">"Ikona desno"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Povucite da dodate polja"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Prevucite da dodate pločice"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Prevucite ovdje za uklanjanje"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Uredi"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vrijeme"</string>
@@ -769,4 +768,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Do <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Zadrži"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Zamijeni"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacije koje rade u pozadini"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
 </resources>

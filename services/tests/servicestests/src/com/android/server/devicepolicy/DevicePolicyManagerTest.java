@@ -26,6 +26,7 @@ import android.app.NotificationManager;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.PasswordMetrics;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -3834,6 +3835,80 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(mContext.lockPatternUtils.removeEscrowToken(eq(handle), eq(UserHandle.USER_SYSTEM)))
                 .thenReturn(true);
         assertTrue(dpm.clearResetPasswordToken(admin1));
+    }
+
+    public void testIsActivePasswordSufficient() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        mContext.packageName = admin1.getPackageName();
+        setupDeviceOwner();
+
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+        dpm.setPasswordMinimumLength(admin1, 8);
+        dpm.setPasswordMinimumLetters(admin1, 6);
+        dpm.setPasswordMinimumLowerCase(admin1, 3);
+        dpm.setPasswordMinimumUpperCase(admin1, 1);
+        dpm.setPasswordMinimumNonLetter(admin1, 1);
+        dpm.setPasswordMinimumNumeric(admin1, 1);
+        dpm.setPasswordMinimumSymbols(admin1, 0);
+
+        PasswordMetrics passwordMetricsNoSymbols = new PasswordMetrics(
+                DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, 9,
+                8, 2,
+                6, 1,
+                0, 1);
+
+        setActivePasswordState(passwordMetricsNoSymbols);
+        assertTrue(dpm.isActivePasswordSufficient());
+
+        initializeDpms();
+        reset(mContext.spiedContext);
+        assertTrue(dpm.isActivePasswordSufficient());
+
+        // This call simulates the user entering the password for the first time after a reboot.
+        // This causes password metrics to be reloaded into memory.  Until this happens,
+        // dpm.isActivePasswordSufficient() will continue to return its last checkpointed value,
+        // even if the DPC changes password requirements so that the password no longer meets the
+        // requirements.  This is a known limitation of the current implementation of
+        // isActivePasswordSufficient() - see b/34218769.
+        setActivePasswordState(passwordMetricsNoSymbols);
+        assertTrue(dpm.isActivePasswordSufficient());
+
+        dpm.setPasswordMinimumSymbols(admin1, 1);
+        // This assertion would fail if we had not called setActivePasswordState() again after
+        // initializeDpms() - see previous comment.
+        assertFalse(dpm.isActivePasswordSufficient());
+
+        initializeDpms();
+        reset(mContext.spiedContext);
+        assertFalse(dpm.isActivePasswordSufficient());
+
+        PasswordMetrics passwordMetricsWithSymbols = new PasswordMetrics(
+                DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, 9,
+                7, 2,
+                5, 1,
+                1, 2);
+
+        setActivePasswordState(passwordMetricsWithSymbols);
+        assertTrue(dpm.isActivePasswordSufficient());
+    }
+
+    private void setActivePasswordState(PasswordMetrics passwordMetrics) {
+        int userHandle = UserHandle.getUserId(mContext.binder.callingUid);
+        final long ident = mContext.binder.clearCallingIdentity();
+        try {
+            dpm.setActivePasswordState(passwordMetrics, userHandle);
+            dpm.reportPasswordChanged(userHandle);
+
+            final Intent intent = new Intent(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED);
+            intent.setComponent(admin1);
+            intent.putExtra(Intent.EXTRA_USER, UserHandle.of(mContext.binder.callingUid));
+
+            verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
+                    MockUtils.checkIntent(intent),
+                    MockUtils.checkUserHandle(userHandle));
+        } finally {
+            mContext.binder.restoreCallingIdentity(ident);
+        }
     }
 
     public void testIsCurrentInputMethodSetByOwnerForDeviceOwner() throws Exception {

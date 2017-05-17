@@ -33,7 +33,6 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
@@ -43,7 +42,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.statusbar.notification.InflationException;
-import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -86,7 +84,7 @@ public class NotificationData {
         public List<SnoozeCriterion> snoozeCriteria;
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
-        private ArraySet<AsyncTask> mRunningTasks = new ArraySet();
+        private Abortable mRunningTask = null;
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();
@@ -203,13 +201,15 @@ public class NotificationData {
             }
         }
 
-        public int getContrastedColor(Context context, boolean ambient) {
-            int rawColor = ambient ? Notification.COLOR_DEFAULT :
+        public int getContrastedColor(Context context, boolean isLowPriority,
+                int backgroundColor) {
+            int rawColor = isLowPriority ? Notification.COLOR_DEFAULT :
                     notification.getNotification().color;
             if (mCachedContrastColorIsFor == rawColor && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
             }
-            final int contrasted = NotificationColorUtil.resolveContrastColor(context, rawColor);
+            final int contrasted = NotificationColorUtil.resolveContrastColor(context, rawColor,
+                    backgroundColor);
             mCachedContrastColorIsFor = rawColor;
             mCachedContrastColor = contrasted;
             return mCachedContrastColor;
@@ -218,24 +218,26 @@ public class NotificationData {
         /**
          * Abort all existing inflation tasks
          */
-        public void abortInflation() {
-            for (AsyncTask task : mRunningTasks) {
-                task.cancel(true /* mayInterruptIfRunning */);
+        public void abortTask() {
+            if (mRunningTask != null) {
+                mRunningTask.abort();
+                mRunningTask = null;
             }
-            mRunningTasks.clear();
         }
 
-        public void addInflationTask(AsyncTask asyncInflationTask) {
-            mRunningTasks.add(asyncInflationTask);
+        public void setInflationTask(Abortable abortableTask) {
+            // abort any existing inflation
+            abortTask();
+            mRunningTask = abortableTask;
         }
 
-        public void onInflationTaskFinished(AsyncTask asyncInflationTask) {
-            mRunningTasks.remove(asyncInflationTask);
+        public void onInflationTaskFinished() {
+           mRunningTask = null;
         }
 
         @VisibleForTesting
-        public ArraySet<AsyncTask> getRunningTasks() {
-            return mRunningTasks;
+        public Abortable getRunningTask() {
+            return mRunningTask;
         }
     }
 

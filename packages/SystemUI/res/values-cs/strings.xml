@@ -472,8 +472,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nDalší informace vám poskytne administrátor."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nTaké jste připojeni k aplikaci <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Odemknuto pro uživatele <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Zařízení zůstane uzamčeno, dokud je ručně neodemknete"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Čtěte si oznámení rychleji"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Můžete si je přečíst před odemčením obrazovky."</string>
@@ -555,7 +554,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Vypnuto"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt z obrazovky uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Oznámení"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Tato oznámení již nebudete dostávat."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Tato oznámení již nebudete dostávat"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Kategorie oznámení: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Tato aplikace nemá kategorie oznámení"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -773,4 +772,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Do <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Zachovat"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Nahradit"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikace běžící na pozadí"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Klepnutím zobrazíte podrobnosti o využití baterie a dat"</string>
 </resources>

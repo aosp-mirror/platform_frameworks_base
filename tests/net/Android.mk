@@ -52,7 +52,6 @@ LOCAL_JNI_SHARED_LIBRARIES := libframeworksnettestsjni \
     libtinyxml2 \
     libvintf \
     libhwbinder \
-    android.hidl.base@1.0 \
     android.hidl.token@1.0
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk

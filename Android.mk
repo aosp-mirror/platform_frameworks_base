@@ -114,6 +114,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/backup/IRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreSession.aidl \
 	core/java/android/app/backup/ISelectBackupTransportCallback.aidl \
+	core/java/android/app/timezone/ICallback.aidl \
+	core/java/android/app/timezone/IRulesManager.aidl \
 	core/java/android/app/usage/ICacheQuotaService.aidl \
 	core/java/android/app/usage/IStorageStatsManager.aidl \
 	core/java/android/app/usage/IUsageStatsManager.aidl \
@@ -157,6 +159,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/ISyncServiceAdapter.aidl \
 	core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/om/IOverlayManager.aidl \
+	core/java/android/content/pm/IDexModuleRegisterCallback.aidl \
 	core/java/android/content/pm/ILauncherApps.aidl \
 	core/java/android/content/pm/IOnAppsChangedListener.aidl \
 	core/java/android/content/pm/IOnPermissionsChangeListener.aidl \
@@ -280,10 +283,17 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/carrier/ICarrierService.aidl \
 	core/java/android/service/carrier/ICarrierMessagingCallback.aidl \
 	core/java/android/service/carrier/ICarrierMessagingService.aidl \
+	core/java/android/service/euicc/IDeleteSubscriptionCallback.aidl \
 	core/java/android/service/euicc/IDownloadSubscriptionCallback.aidl \
+	core/java/android/service/euicc/IEraseSubscriptionsCallback.aidl \
 	core/java/android/service/euicc/IEuiccService.aidl \
+	core/java/android/service/euicc/IGetDefaultDownloadableSubscriptionListCallback.aidl \
 	core/java/android/service/euicc/IGetDownloadableSubscriptionMetadataCallback.aidl \
 	core/java/android/service/euicc/IGetEidCallback.aidl \
+	core/java/android/service/euicc/IGetEuiccInfoCallback.aidl \
+	core/java/android/service/euicc/IGetEuiccProfileInfoListCallback.aidl \
+	core/java/android/service/euicc/ISwitchToSubscriptionCallback.aidl \
+	core/java/android/service/euicc/IUpdateSubscriptionNicknameCallback.aidl \
 	core/java/android/service/gatekeeper/IGateKeeperService.aidl \
 	core/java/android/service/notification/INotificationListener.aidl \
 	core/java/android/service/notification/IStatusBarNotificationHolder.aidl \
@@ -329,7 +339,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/chooser/IChooserTargetResult.aidl \
 	core/java/android/service/resolver/IResolverRankerService.aidl \
 	core/java/android/service/resolver/IResolverRankerResult.aidl \
-	core/java/android/text/ITextClassificationService.aidl \
 	core/java/android/view/accessibility/IAccessibilityInteractionConnection.aidl\
 	core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl\
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
@@ -626,7 +635,6 @@ aidl_files := \
         frameworks/base/telephony/java/android/telephony/mbms/FileInfo.aidl \
         frameworks/base/telephony/java/android/telephony/mbms/FileServiceInfo.aidl \
         frameworks/base/telephony/java/android/telephony/mbms/ServiceInfo.aidl \
-	frameworks/base/telephony/java/android/telephony/mbms/StreamingService.aidl \
         frameworks/base/telephony/java/android/telephony/mbms/StreamingServiceInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/android/telephony/SubscriptionInfo.aidl \
@@ -637,6 +645,7 @@ aidl_files := \
 	frameworks/base/telephony/java/android/telephony/ModemActivityInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/UiccAccessRule.aidl \
 	frameworks/base/telephony/java/android/telephony/euicc/DownloadableSubscription.aidl \
+	frameworks/base/telephony/java/android/telephony/euicc/EuiccInfo.aidl \
 	frameworks/base/location/java/android/location/Location.aidl \
 	frameworks/base/location/java/android/location/Address.aidl \
 	frameworks/base/location/java/android/location/Criteria.aidl \
@@ -750,8 +759,14 @@ aidl_files := \
 	frameworks/base/core/java/android/view/textservice/SuggestionsInfo.aidl \
 	frameworks/base/core/java/android/service/carrier/CarrierIdentifier.aidl \
 	frameworks/base/core/java/android/service/carrier/MessagePdu.aidl \
+	frameworks/base/core/java/android/service/euicc/DeleteResult.aidl \
 	frameworks/base/core/java/android/service/euicc/DownloadResult.aidl \
+	frameworks/base/core/java/android/service/euicc/EraseResult.aidl \
+	frameworks/base/core/java/android/service/euicc/GetDefaultDownloadableSubscriptionListResult.aidl \
 	frameworks/base/core/java/android/service/euicc/GetDownloadableSubscriptionMetadataResult.aidl \
+	frameworks/base/core/java/android/service/euicc/GetEuiccProfileInfoListResult.aidl \
+	frameworks/base/core/java/android/service/euicc/SwitchResult.aidl \
+	frameworks/base/core/java/android/service/euicc/UpdateNicknameResult.aidl \
 	frameworks/base/core/java/android/service/notification/Adjustment.aidl \
 	frameworks/base/core/java/android/service/notification/Condition.aidl \
 	frameworks/base/core/java/android/service/notification/SnoozeCriterion.aidl \
@@ -1088,6 +1103,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-showAnnotation android.annotation.SystemApi \
 		-api $(INTERNAL_PLATFORM_SYSTEM_API_FILE) \
 		-removedApi $(INTERNAL_PLATFORM_SYSTEM_REMOVED_API_FILE) \
+		-exactApi $(INTERNAL_PLATFORM_SYSTEM_EXACT_API_FILE) \
 		-nodocs
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
@@ -1124,6 +1140,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
                -showAnnotation android.annotation.TestApi \
                -api $(INTERNAL_PLATFORM_TEST_API_FILE) \
                -removedApi $(INTERNAL_PLATFORM_TEST_REMOVED_API_FILE) \
+               -exactApi $(INTERNAL_PLATFORM_TEST_EXACT_API_FILE) \
                -nodocs
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
@@ -1277,8 +1294,6 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
 include $(BUILD_DROIDDOC)
 
 # ==== docs for the web (on the androiddevdocs app engine server) =======================
-# TODO: Fix the System API docs build.
-ifneq ($(filter online-system-api-sdk-docs,$(MAKECMDGOALS)),)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
@@ -1309,11 +1324,10 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-samplesdir $(samples_dir)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
-# Don't build by default
+
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
-endif  # online-system-api-sdk-docs in make command line.
 
 # ==== docs for the web (on the devsite app engine server) =======================
 include $(CLEAR_VARS)
@@ -1476,35 +1490,6 @@ ifneq ($(INCREMENTAL_BUILDS),)
 endif
 
 include $(BUILD_JAVA_LIBRARY)
-
-# ====  c++ proto device library  ==============================
-include $(CLEAR_VARS)
-LOCAL_MODULE := libplatformprotos
-# b/34740546, work around clang-tidy segmentation fault.
-LOCAL_TIDY_CHECKS := -modernize*
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite
-LOCAL_PROTOC_FLAGS := \
-    --include_source_info \
-    -Iexternal/protobuf/src
-LOCAL_SRC_FILES := \
-    $(call all-proto-files-under, core/proto) \
-    $(call all-proto-files-under, libs/incident/proto)
-include $(BUILD_STATIC_LIBRARY)
-
-# ====  c++ proto host library  ==============================
-include $(CLEAR_VARS)
-LOCAL_MODULE := libplatformprotos
-# b/34740546, work around clang-tidy segmentation fault.
-LOCAL_TIDY_CHECKS := -modernize*
-LOCAL_PROTOC_OPTIMIZE_TYPE := full
-LOCAL_PROTOC_FLAGS := \
-    --include_source_info \
-    -Iexternal/protobuf/src
-LOCAL_SRC_FILES := \
-    $(call all-proto-files-under, core/proto) \
-    $(call all-proto-files-under, libs/incident/proto)
-include $(BUILD_HOST_SHARED_LIBRARY)
-
 
 # ====  java proto host library  ==============================
 include $(CLEAR_VARS)

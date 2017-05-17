@@ -119,7 +119,11 @@ static jlong android_os_Parcel_setDataSize(JNIEnv* env, jclass clazz, jlong nati
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     if (parcel != NULL) {
         const status_t err = parcel->setDataSize(size);
-        if (err != NO_ERROR) {
+        //STOPSHIP: check for BADFLO is for a temporary debug using wtf. Remove once bug resolved.
+        if (err == UNKNOWN_ERROR + 0xBADF10) {
+            jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                         "Attempt to resize (size = %d) Parcel would corrupt object memory", size);
+        } else if (err != NO_ERROR) {
             signalExceptionForError(env, clazz, err);
         }
         return parcel->getOpenAshmemSize();
@@ -164,8 +168,8 @@ static void android_os_Parcel_restoreAllowFds(JNIEnv* env, jclass clazz, jlong n
     }
 }
 
-static void android_os_Parcel_writeNative(JNIEnv* env, jclass clazz, jlong nativePtr, jobject data,
-                                          jint offset, jint length)
+static void android_os_Parcel_writeByteArray(JNIEnv* env, jclass clazz, jlong nativePtr,
+                                             jobject data, jint offset, jint length)
 {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     if (parcel == NULL) {
@@ -343,6 +347,28 @@ static jbyteArray android_os_Parcel_createByteArray(JNIEnv* env, jclass clazz, j
         }
     }
 
+    return ret;
+}
+
+static jboolean android_os_Parcel_readByteArray(JNIEnv* env, jclass clazz, jlong nativePtr,
+                                                jobject dest, jint destLen)
+{
+    jboolean ret = JNI_FALSE;
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel == NULL) {
+        return ret;
+    }
+
+    int32_t len = parcel->readInt32();
+    if (len >= 0 && len <= (int32_t)parcel->dataAvail() && len == destLen) {
+        jbyte* ar = (jbyte*)env->GetPrimitiveArrayCritical((jarray)dest, 0);
+        if (ar) {
+            const void* data = parcel->readInplace(len);
+            memcpy(ar, data, len);
+            env->ReleasePrimitiveArrayCritical((jarray)dest, ar, 0);
+            ret = JNI_TRUE;
+        }
+    }
     return ret;
 }
 
@@ -757,7 +783,7 @@ static const JNINativeMethod gParcelMethods[] = {
     // @FastNative
     {"nativeRestoreAllowFds",     "(JZ)V", (void*)android_os_Parcel_restoreAllowFds},
 
-    {"nativeWriteByteArray",      "(J[BII)V", (void*)android_os_Parcel_writeNative},
+    {"nativeWriteByteArray",      "(J[BII)V", (void*)android_os_Parcel_writeByteArray},
     {"nativeWriteBlob",           "(J[BII)V", (void*)android_os_Parcel_writeBlob},
     // @FastNative
     {"nativeWriteInt",            "(JI)V", (void*)android_os_Parcel_writeInt},
@@ -772,6 +798,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"nativeWriteFileDescriptor", "(JLjava/io/FileDescriptor;)J", (void*)android_os_Parcel_writeFileDescriptor},
 
     {"nativeCreateByteArray",     "(J)[B", (void*)android_os_Parcel_createByteArray},
+    {"nativeReadByteArray",       "(J[BI)Z", (void*)android_os_Parcel_readByteArray},
     {"nativeReadBlob",            "(J)[B", (void*)android_os_Parcel_readBlob},
     // @FastNative
     {"nativeReadInt",             "(J)I", (void*)android_os_Parcel_readInt},

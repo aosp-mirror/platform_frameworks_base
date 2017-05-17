@@ -78,6 +78,10 @@ import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
+import android.system.StructStat;
 import android.util.ArrayMap;
 import android.util.IconDrawableFactory;
 import android.util.LauncherIcons;
@@ -478,7 +482,7 @@ public class ApplicationPackageManager extends PackageManager {
     public @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(int flags, int userId) {
         try {
             ParceledListSlice<SharedLibraryInfo> sharedLibs = mPM.getSharedLibraries(
-                    flags, userId);
+                    mContext.getOpPackageName(), flags, userId);
             if (sharedLibs == null) {
                 return Collections.emptyList();
             }
@@ -1696,15 +1700,27 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public int installExistingPackage(String packageName) throws NameNotFoundException {
-        return installExistingPackageAsUser(packageName, mContext.getUserId());
+        return installExistingPackage(packageName, PackageManager.INSTALL_REASON_UNKNOWN);
+    }
+
+    @Override
+    public int installExistingPackage(String packageName, int installReason)
+            throws NameNotFoundException {
+        return installExistingPackageAsUser(packageName, installReason, mContext.getUserId());
     }
 
     @Override
     public int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException {
+        return installExistingPackageAsUser(packageName, PackageManager.INSTALL_REASON_UNKNOWN,
+                userId);
+    }
+
+    private int installExistingPackageAsUser(String packageName, int installReason, int userId)
+            throws NameNotFoundException {
         try {
             int res = mPM.installExistingPackageAsUser(packageName, userId, 0 /*installFlags*/,
-                    PackageManager.INSTALL_REASON_UNKNOWN);
+                    installReason);
             if (res == INSTALL_FAILED_INVALID_URI) {
                 throw new NameNotFoundException("Package " + packageName + " doesn't exist");
             }
@@ -2658,6 +2674,80 @@ public class ApplicationPackageManager extends PackageManager {
     public String getInstantAppAndroidId(String packageName, UserHandle user) {
         try {
             return mPM.getInstantAppAndroidId(packageName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    private static class DexModuleRegisterResult {
+        final String dexModulePath;
+        final boolean success;
+        final String message;
+
+        private DexModuleRegisterResult(String dexModulePath, boolean success, String message) {
+            this.dexModulePath = dexModulePath;
+            this.success = success;
+            this.message = message;
+        }
+    }
+
+    private static class DexModuleRegisterCallbackDelegate
+            extends android.content.pm.IDexModuleRegisterCallback.Stub
+            implements Handler.Callback {
+        private static final int MSG_DEX_MODULE_REGISTERED = 1;
+        private final DexModuleRegisterCallback callback;
+        private final Handler mHandler;
+
+        DexModuleRegisterCallbackDelegate(@NonNull DexModuleRegisterCallback callback) {
+            this.callback = callback;
+            mHandler = new Handler(Looper.getMainLooper(), this);
+        }
+
+        @Override
+        public void onDexModuleRegistered(@NonNull String dexModulePath, boolean success,
+                @Nullable String message)throws RemoteException {
+            mHandler.obtainMessage(MSG_DEX_MODULE_REGISTERED,
+                    new DexModuleRegisterResult(dexModulePath, success, message)).sendToTarget();
+        }
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            if (msg.what != MSG_DEX_MODULE_REGISTERED) {
+                return false;
+            }
+            DexModuleRegisterResult result = (DexModuleRegisterResult)msg.obj;
+            callback.onDexModuleRegistered(result.dexModulePath, result.success, result.message);
+            return true;
+        }
+    }
+
+    @Override
+    public void registerDexModule(@NonNull String dexModule,
+            @Nullable DexModuleRegisterCallback callback) {
+        // Check if this is a shared module by looking if the others can read it.
+        boolean isSharedModule = false;
+        try {
+            StructStat stat = Os.stat(dexModule);
+            if ((OsConstants.S_IROTH & stat.st_mode) != 0) {
+                isSharedModule = true;
+            }
+        } catch (ErrnoException e) {
+            callback.onDexModuleRegistered(dexModule, false,
+                    "Could not get stat the module file: " + e.getMessage());
+            return;
+        }
+
+        // Module path is ok.
+        // Create the callback delegate to be passed to package manager service.
+        DexModuleRegisterCallbackDelegate callbackDelegate = null;
+        if (callback != null) {
+            callbackDelegate = new DexModuleRegisterCallbackDelegate(callback);
+        }
+
+        // Invoke the package manager service.
+        try {
+            mPM.registerDexModule(mContext.getPackageName(), dexModule,
+                    isSharedModule, callbackDelegate);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

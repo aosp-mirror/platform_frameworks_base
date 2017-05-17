@@ -158,11 +158,11 @@ public class PasspointConfigurationTest {
         config.setTrustRootCertList(trustRootCertList);
         config.setUpdateIdentifier(1);
         config.setCredentialPriority(120);
-        config.setSubscriptionCreationTimeInMs(231200);
-        config.setSubscriptionExpirationTimeInMs(2134232);
+        config.setSubscriptionCreationTimeInMillis(231200);
+        config.setSubscriptionExpirationTimeInMillis(2134232);
         config.setSubscriptionType("Gold");
         config.setUsageLimitUsageTimePeriodInMinutes(3600);
-        config.setUsageLimitStartTimeInMs(124214213);
+        config.setUsageLimitStartTimeInMillis(124214213);
         config.setUsageLimitDataLimit(14121);
         config.setUsageLimitTimeLimitInMinutes(78912);
         return config;

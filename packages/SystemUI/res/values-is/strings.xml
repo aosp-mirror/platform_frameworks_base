@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Þú ert með tengingu við <xliff:g id="APPLICATION">%1$s</xliff:g>, sem getur fylgst með persónulegri netnotkun þinni, þ. á m. tölvupósti, forritum og vefsvæðum."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Vinnusniðinu þínu er stýrt af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Sniðið er tengt <xliff:g id="APPLICATION">%2$s</xliff:g>, sem getur fylgst með netnotkun þinni, þ. á m. tölvupósti, forritum og vefsvæðum\n\nFrekari upplýsingar fást hjá kerfisstjóra."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Vinnusniðinu þínu er stýrt af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Sniðið er tengt <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, sem getur fylgst með netnotkun þinni, þ. á m. tölvupósti, forritum og vefsvæðum\n\nÞú ert einnig með tengingu við <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, sem getur fylgst með persónulegri netnotkun þinni."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Opnað fyrir <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Tækið verður læst þar til þú opnar það handvirkt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Fáðu tilkynningar hraðar"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Sjáðu þær áður en þú opnar"</string>
@@ -549,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Slökkt"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Með orkutilkynningastýringum geturðu stillt mikilvægi frá 0 upp í 5 fyrir tilkynningar forrita. \n\n"<b>"Stig 5"</b>" \n- Sýna efst á tilkynningalista \n- Leyfa truflun þegar birt er á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 4"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 3"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n\n"<b>"Stig 2"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n\n"<b>"Stig 1"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n- Fela á lásskjá og stöðustiku \n- Sýna neðst á tilkynningalista \n\n"<b>"Stig 0"</b>" \n- Setja allar tilkynningar frá forriti á bannlista"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Tilkynningar"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Þú færð þessar tilkynningar ekki framar."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Þú færð þessar tilkynningar ekki framar"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> tilkynningaflokkar"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Þetta forrit er ekki með tilkynningaflokka"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -763,4 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Þar til <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Halda"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Skipta út"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Forrit sem keyra í bakgrunni"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Ýttu til að fá upplýsingar um rafhlöðu- og gagnanotkun"</string>
 </resources>

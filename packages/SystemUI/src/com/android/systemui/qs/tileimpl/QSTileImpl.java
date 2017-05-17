@@ -175,7 +175,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         mHandler.sendEmptyMessage(H.LONG_CLICK);
     }
 
-    protected LogMaker populate(LogMaker logMaker) {
+    public LogMaker populate(LogMaker logMaker) {
         if (mState instanceof BooleanState) {
             logMaker.addTaggedData(FIELD_QS_VALUE, ((BooleanState) mState).value ? 1 : 0);
         }
@@ -340,10 +340,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         switch (state) {
             case Tile.STATE_UNAVAILABLE:
                 return Utils.getDisabled(context,
-                        Utils.getColorAttr(context, android.R.attr.textColorPrimary));
-            case Tile.STATE_INACTIVE:
-                return Utils.getDisabled(context,
                         Utils.getColorAttr(context, android.R.attr.colorForeground));
+            case Tile.STATE_INACTIVE:
+                return Utils.getColorAttr(context, android.R.attr.textColorHint);
             case Tile.STATE_ACTIVE:
                 return Utils.getColorAttr(context, android.R.attr.textColorPrimary);
             default:

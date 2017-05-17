@@ -18,6 +18,8 @@ import android.os.PooledStringReader;
 import android.os.PooledStringWriter;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.service.autofill.FillContext;
+import android.service.autofill.FillRequest;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -493,7 +495,7 @@ public class AssistStructure implements Parcelable {
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             if ((root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 if (forAutoFill) {
-                    final int autofillFlags = (flags & AutofillManager.FLAG_MANUAL_REQUEST) != 0
+                    final int autofillFlags = (flags & FillRequest.FLAG_MANUAL_REQUEST) != 0
                             ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
                     view.onProvideAutofillStructure(builder, autofillFlags);
                 } else {
@@ -505,7 +507,7 @@ public class AssistStructure implements Parcelable {
                 }
             }
             if (forAutoFill) {
-                final int autofillFlags = (flags & AutofillManager.FLAG_MANUAL_REQUEST) != 0
+                final int autofillFlags = (flags & FillRequest.FLAG_MANUAL_REQUEST) != 0
                         ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
                 view.dispatchProvideAutofillStructure(builder, autofillFlags);
             } else {
@@ -860,10 +862,10 @@ public class AssistStructure implements Parcelable {
                 out.writeInt(mAutofillType);
                 out.writeStringArray(mAutofillHints);
                 final AutofillValue sanitizedValue;
-                if (mAutofillOverlay != null && mAutofillOverlay.value != null) {
-                    sanitizedValue = mAutofillOverlay.value;
-                } else if (writeSensitive) {
+                if (writeSensitive) {
                     sanitizedValue = mAutofillValue;
+                } else if (mAutofillOverlay != null && mAutofillOverlay.value != null) {
+                    sanitizedValue = mAutofillOverlay.value;
                 } else {
                     sanitizedValue = null;
                 }
@@ -1103,6 +1105,9 @@ public class AssistStructure implements Parcelable {
          * Returns the transformation that has been applied to this view, such as a translation
          * or scaling.  The returned Matrix object is owned by ViewNode; do not modify it.
          * Returns null if there is no transformation applied to the view.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public Matrix getTransformation() {
             return mMatrix;
@@ -1112,6 +1117,9 @@ public class AssistStructure implements Parcelable {
          * Returns the visual elevation of the view, used for shadowing and other visual
          * characterstics, as set by {@link ViewStructure#setElevation
          * ViewStructure.setElevation(float)}.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public float getElevation() {
             return mElevation;
@@ -1121,6 +1129,9 @@ public class AssistStructure implements Parcelable {
          * Returns the alpha transformation of the view, used to reduce the overall opacity
          * of the view's contents, as set by {@link ViewStructure#setAlpha
          * ViewStructure.setAlpha(float)}.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public float getAlpha() {
             return mAlpha;
@@ -1289,6 +1300,9 @@ public class AssistStructure implements Parcelable {
 
         /**
          * If {@link #getText()} is non-null, this is where the current selection starts.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public int getTextSelectionStart() {
             return mText != null ? mText.mTextSelectionStart : -1;
@@ -1298,6 +1312,9 @@ public class AssistStructure implements Parcelable {
          * If {@link #getText()} is non-null, this is where the current selection starts.
          * If there is no selection, returns the same value as {@link #getTextSelectionStart()},
          * indicating the cursor position.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public int getTextSelectionEnd() {
             return mText != null ? mText.mTextSelectionEnd : -1;
@@ -1319,6 +1336,9 @@ public class AssistStructure implements Parcelable {
          * If there is no text background color, {@link #TEXT_COLOR_UNDEFINED} is returned.
          * Note that the text may also contain style spans that modify the color of specific
          * parts of the text.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public int getTextBackgroundColor() {
             return mText != null ? mText.mTextBackgroundColor : TEXT_COLOR_UNDEFINED;
@@ -1329,6 +1349,9 @@ public class AssistStructure implements Parcelable {
          * with it.
          * Note that the text may also contain style spans that modify the size of specific
          * parts of the text.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public float getTextSize() {
             return mText != null ? mText.mTextSize : 0;
@@ -1341,6 +1364,9 @@ public class AssistStructure implements Parcelable {
          * {@link #TEXT_STYLE_UNDERLINE}.
          * Note that the text may also contain style spans that modify the style of specific
          * parts of the text.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public int getTextStyle() {
             return mText != null ? mText.mTextStyle : 0;
@@ -1351,6 +1377,9 @@ public class AssistStructure implements Parcelable {
          * in the array is a formatted line of text, and the value it contains is the offset
          * into the text string where that line starts.  May return null if there is no line
          * information.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public int[] getTextLineCharOffsets() {
             return mText != null ? mText.mLineCharOffsets : null;
@@ -1361,6 +1390,9 @@ public class AssistStructure implements Parcelable {
          * in the array is a formatted line of text, and the value it contains is the baseline
          * where that text appears in the view.  May return null if there is no line
          * information.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
+         * not for Autofill purposes.
          */
         public int[] getTextLineBaselines() {
             return mText != null ? mText.mLineBaselines : null;
@@ -1559,14 +1591,14 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setText(CharSequence text) {
             ViewNodeText t = getNodeText();
-            t.mText = text;
+            t.mText = TextUtils.trimNoCopySpans(text);
             t.mTextSelectionStart = t.mTextSelectionEnd = -1;
         }
 
         @Override
         public void setText(CharSequence text, int selectionStart, int selectionEnd) {
             ViewNodeText t = getNodeText();
-            t.mText = text;
+            t.mText = TextUtils.trimNoCopySpans(text);
             t.mTextSelectionStart = selectionStart;
             t.mTextSelectionEnd = selectionEnd;
         }
@@ -1737,13 +1769,6 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setUrl(String url) {
-            if (url == null) return;
-
-            setWebDomain(url);
-        }
-
-        @Override
         public void setWebDomain(@Nullable String domain) {
             if (domain == null) {
                 mNode.mWebDomain = null;
@@ -1911,7 +1936,7 @@ public class AssistStructure implements Parcelable {
     }
 
     /** @hide */
-    public void dump() {
+    public void dump(boolean showSensitive) {
         if (mActivityComponent == null) {
             Log.i(TAG, "dump(): calling ensureData() first");
             ensureData();
@@ -1924,11 +1949,11 @@ public class AssistStructure implements Parcelable {
             WindowNode node = getWindowNodeAt(i);
             Log.i(TAG, "Window #" + i + " [" + node.getLeft() + "," + node.getTop()
                     + " " + node.getWidth() + "x" + node.getHeight() + "]" + " " + node.getTitle());
-            dump("  ", node.getRootViewNode());
+            dump("  ", node.getRootViewNode(), showSensitive);
         }
     }
 
-    void dump(String prefix, ViewNode node) {
+    void dump(String prefix, ViewNode node, boolean showSensitive) {
         Log.i(TAG, prefix + "View [" + node.getLeft() + "," + node.getTop()
                 + " " + node.getWidth() + "x" + node.getHeight() + "]" + " " + node.getClassName());
         int id = node.getId();
@@ -1967,12 +1992,15 @@ public class AssistStructure implements Parcelable {
         }
         CharSequence text = node.getText();
         if (text != null) {
+            final String safeText = node.isSanitized() || showSensitive ? text.toString()
+                    : "REDACTED[" + text.length() + " chars]";
             Log.i(TAG, prefix + "  Text (sel " + node.getTextSelectionStart() + "-"
-                    + node.getTextSelectionEnd() + "): " + text);
+                    + node.getTextSelectionEnd() + "): " + safeText);
             Log.i(TAG, prefix + "  Text size: " + node.getTextSize() + " , style: #"
                     + node.getTextStyle());
             Log.i(TAG, prefix + "  Text color fg: #" + Integer.toHexString(node.getTextColor())
                     + ", bg: #" + Integer.toHexString(node.getTextBackgroundColor()));
+            Log.i(TAG, prefix + "  Input type: " + node.getInputType());
         }
         String webDomain = node.getWebDomain();
         if (webDomain != null) {
@@ -2006,7 +2034,6 @@ public class AssistStructure implements Parcelable {
             Log.i(TAG, prefix + "Autofill info: id= " + autofillId
                     + ", type=" + node.getAutofillType()
                     + ", options=" + Arrays.toString(node.getAutofillOptions())
-                    + ", inputType=" + node.getInputType()
                     + ", hints=" + Arrays.toString(node.getAutofillHints())
                     + ", value=" + node.getAutofillValue()
                     + ", sanitized=" + node.isSanitized());
@@ -2018,7 +2045,7 @@ public class AssistStructure implements Parcelable {
             String cprefix = prefix + "    ";
             for (int i=0; i<NCHILDREN; i++) {
                 ViewNode cnode = node.getChildAt(i);
-                dump(cprefix, cnode);
+                dump(cprefix, cnode, showSensitive);
             }
         }
     }

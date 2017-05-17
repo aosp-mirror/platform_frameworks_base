@@ -34,6 +34,7 @@ import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
 import android.telephony.RadioAccessFamily;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
 import com.android.ims.internal.IImsServiceController;
@@ -370,7 +371,7 @@ interface ITelephony {
     /**
      * Report whether data connectivity is possible.
      */
-    boolean isDataConnectivityPossible();
+    boolean isDataConnectivityPossible(int subId);
 
     Bundle getCellLocation(String callingPkg);
 
@@ -1317,12 +1318,12 @@ interface ITelephony {
     List<ClientRequestStats> getClientRequestStats(String callingPackage, int subid);
 
     /**
-     * Set SIM card power state. Request is equivalent to inserting or removing the card.
+     * Set SIM card power state.
      * @param slotIndex SIM slot id
-     * @param powerUp True if powering up the SIM, otherwise powering down
+     * @param state  State of SIM (power down, power up, pass through)
      * @hide
      * */
-    void setSimPowerStateForSlot(int slotIndex, boolean powerUp);
+    void setSimPowerStateForSlot(int slotIndex, int state);
 
     /**
      * Returns a list of Forbidden PLMNs from the specified SIM App
@@ -1343,4 +1344,15 @@ interface ITelephony {
      * @hide
      */
     boolean getEmergencyCallbackMode(int subId);
+
+    /**
+     * Get the most recently available signal strength information.
+     *
+     * Get the most recent SignalStrength information reported by the modem. Due
+     * to power saving this information may not always be current.
+     * @param subId Subscription index
+     * @return the most recent cached signal strength info from the modem
+     * @hide
+     */
+    SignalStrength getSignalStrength(int subId);
 }

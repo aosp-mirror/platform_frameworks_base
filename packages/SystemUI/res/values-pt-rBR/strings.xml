@@ -269,7 +269,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"Protetor de tela"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Não perturbe"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Só prioridade"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Somente prioridade"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Somente alarmes"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Silêncio total"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -369,7 +369,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Deslize a partir do ícone da câmera"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Silêncio total. Isso também silenciará os leitores de tela."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Silêncio total"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Só prioridade"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Somente prioridade"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Somente alarmes"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silêncio\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Somente\nprioridade"</string>
@@ -468,8 +468,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Você está conectado a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pode monitorar sua atividade pessoal na rede, incluindo e-mails, apps e websites."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Seu perfil de trabalho é gerenciado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>. O perfil está conectado a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pode monitorar sua atividade profissional de rede, incluindo e-mails, apps e websites.\n\nPara saber mais informações, entre em contato com seu administrador."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Seu perfil de trabalho é gerenciado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>. O perfil está conectado a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pode monitorar sua atividade profissional de rede, incluindo e-mails, apps e websites.\n\nVocê também está conectado a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que pode monitorar sua atividade pessoal de rede."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Desbloqueado para <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"O dispositivo permanecerá bloqueado até que você o desbloqueie manualmente"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Receba notificações mais rápido"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Veja-as antes de desbloquear"</string>
@@ -551,7 +550,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Desativado"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Com controles de ativação de notificações, é possível definir o nível de importância de 0 a 5 para as notificações de um app. \n\n"<b>"Nível 5"</b>" \n- Exibir na parte superior da lista de notificações \n- Permitir interrupção em tela cheia \n- Sempre exibir \n\n"<b>"Nível 4"</b>" \n- Impedir interrupções em tela cheia \n- Sempre exibir \n\n"<b>"Nível 3"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n\n"<b>"Nível 2"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n- Nunca emitir som ou vibrar \n\n"<b>"Nível 1"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n- Nunca emitir som ou vibrar \n- Ocultar da tela de bloqueio e barra de status \n- Exibir na parte inferior da lista de notificações \n\n"<b>"Nível 0"</b>" \n- Bloquear todas as notificações do app"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notificações"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Você deixará de receber essas notificações."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Você deixará de receber essas notificações"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> categorias de notificação"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Este app não tem categorias de notificação"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -765,4 +764,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Até <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Manter"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Substituir"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Apps sendo executados em segundo plano"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tocar para ver detalhes sobre a bateria e o uso de dados"</string>
 </resources>

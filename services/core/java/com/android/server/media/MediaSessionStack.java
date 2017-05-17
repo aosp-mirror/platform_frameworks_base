@@ -124,9 +124,7 @@ class MediaSessionStack {
             // When the media button session is removed, nullify the media button session and do not
             // search for the alternative media session within the app. It's because the alternative
             // media session might be a dummy which isn't able to handle the media key events.
-            mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
-                    mMediaButtonSession, null);
-            mMediaButtonSession = null;
+            updateMediaButtonSession(null);
         }
         clearCache(record.getUserId());
     }
@@ -163,9 +161,7 @@ class MediaSessionStack {
             MediaSessionRecord newMediaButtonSession =
                     findMediaButtonSession(mMediaButtonSession.getUid());
             if (newMediaButtonSession != mMediaButtonSession) {
-                mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
-                        mMediaButtonSession, newMediaButtonSession);
-                mMediaButtonSession = newMediaButtonSession;
+                updateMediaButtonSession(newMediaButtonSession);
             }
         }
     }
@@ -199,9 +195,7 @@ class MediaSessionStack {
                 // Found the media button session.
                 mAudioPlaybackMonitor.cleanUpAudioPlaybackUids(mediaButtonSession.getUid());
                 if (mMediaButtonSession != mediaButtonSession) {
-                    mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
-                            mMediaButtonSession, mediaButtonSession);
-                    mMediaButtonSession = mediaButtonSession;
+                    updateMediaButtonSession(mediaButtonSession);
                 }
                 return;
             }
@@ -219,11 +213,7 @@ class MediaSessionStack {
     private MediaSessionRecord findMediaButtonSession(int uid) {
         MediaSessionRecord mediaButtonSession = null;
         for (MediaSessionRecord session : mSessions) {
-            // Since the media buttons come with the headset/speaker, users will expect changes in
-            // the headset/speaker when they press media buttons. So only consider local playback
-            // for the media button session.
-            if (uid == session.getUid()
-                    && session.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
+            if (uid == session.getUid()) {
                 if (session.isPlaybackActive() ==
                         mAudioPlaybackMonitor.isPlaybackActive(session.getUid())) {
                     // If there's a media session whose PlaybackState matches
@@ -264,6 +254,13 @@ class MediaSessionStack {
      */
     public MediaSessionRecord getMediaButtonSession() {
         return mMediaButtonSession;
+    }
+
+    private void updateMediaButtonSession(MediaSessionRecord newMediaButtonSession) {
+        MediaSessionRecord oldMediaButtonSession = mMediaButtonSession;
+        mMediaButtonSession = newMediaButtonSession;
+        mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
+                oldMediaButtonSession, newMediaButtonSession);
     }
 
     public MediaSessionRecord getDefaultVolumeSession() {

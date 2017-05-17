@@ -22,11 +22,8 @@ import android.app.AppGlobals;
 import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
-import android.app.IInstrumentationWatcher;
 import android.app.IStopUserCallback;
-import android.app.Instrumentation;
 import android.app.ProfilerInfo;
-import android.app.UiAutomationConnection;
 import android.app.WaitResult;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
@@ -37,7 +34,6 @@ import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
-import android.content.pm.InstrumentationInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -251,6 +247,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runUpdateApplicationInfo(pw);
                 case "no-home-screen":
                     return runNoHomeScreen(pw);
+                case "wait-for-broadcast-idle":
+                    return runWaitForBroadcastIdle(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2416,6 +2414,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
         pw.println(res.getBoolean(com.android.internal.R.bool.config_noHomeScreen));
+        return 0;
+    }
+
+    int runWaitForBroadcastIdle(PrintWriter pw) throws RemoteException {
+        mInternal.waitForBroadcastIdle(pw);
         return 0;
     }
 

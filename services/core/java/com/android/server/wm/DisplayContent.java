@@ -520,8 +520,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
                 w.mLayoutNeeded = false;
                 w.prelayout();
+                final boolean firstLayout = !w.isLaidOut();
                 mService.mPolicy.layoutWindowLw(w, null);
                 w.mLayoutSeq = mService.mLayoutSeq;
+
+                // If this is the first layout, we need to initialize the last inset values as
+                // otherwise we'd immediately cause an unnecessary resize.
+                if (firstLayout) {
+                    w.updateLastInsetValues();
+                }
 
                 // Window frames may have changed. Update dim layer with the new bounds.
                 final Task task = w.getTask();
@@ -759,16 +766,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return token.asAppWindowToken();
     }
 
-    void addWindowToken(IBinder binder, WindowToken token) {
+    private void addWindowToken(IBinder binder, WindowToken token) {
         final DisplayContent dc = mService.mRoot.getWindowTokenDisplay(token);
         if (dc != null) {
             // We currently don't support adding a window token to the display if the display
             // already has the binder mapped to another token. If there is a use case for supporting
             // this moving forward we will either need to merge the WindowTokens some how or have
             // the binder map to a list of window tokens.
-            throw new IllegalArgumentException("Can't map token=" + token + " to display=" + this
-                    + " already mapped to display=" + dc + " tokens=" + dc.mTokenMap);
+            throw new IllegalArgumentException("Can't map token=" + token + " to display="
+                    + getName() + " already mapped to display=" + dc + " tokens=" + dc.mTokenMap);
         }
+        if (binder == null) {
+            throw new IllegalArgumentException("Can't map token=" + token + " to display="
+                    + getName() + " binder is null");
+        }
+        if (token == null) {
+            throw new IllegalArgumentException("Can't map null token to display="
+                    + getName() + " binder=" + binder);
+        }
+
         mTokenMap.put(binder, token);
 
         if (token.asAppWindowToken() == null) {
@@ -1793,7 +1809,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // events to be intercepted and used to change focus. This would likely cause a
             // disappearance of the input method.
             inputMethod.getTouchableRegion(mTmpRegion);
-            mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
+            if (inputMethod.getDisplayId() == mDisplayId) {
+                mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
+            } else {
+                // IME is on a different display, so we need to update its tap detector.
+                // TODO(multidisplay): Remove when IME will always appear on same display.
+                inputMethod.getDisplayContent().setTouchExcludeRegion(null /* focusedTask */);
+            }
         }
         for (int i = mTapExcludedWindows.size() - 1; i >= 0; i--) {
             WindowState win = mTapExcludedWindows.get(i);
@@ -2479,7 +2501,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void startKeyguardExitOnNonAppWindows(boolean onWallpaper, boolean goingToShade) {
         final WindowManagerPolicy policy = mService.mPolicy;
         forAllWindows(w -> {
-            if (w.mAppToken == null && policy.canBeHiddenByKeyguardLw(w)) {
+            if (w.mAppToken == null && policy.canBeHiddenByKeyguardLw(w)
+                    && w.wouldBeVisibleIfPolicyIgnored() && !w.isVisible()) {
                 w.mWinAnimator.setAnimation(
                         policy.createHiddenByKeyguardExit(onWallpaper, goingToShade));
             }
@@ -2871,21 +2894,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final Rect frame = new Rect();
         final Rect stackBounds = new Rect();
 
-        boolean includeImeInScreenshot;
-        synchronized(mService.mWindowMap) {
-            final AppWindowToken imeTargetAppToken = mService.mInputMethodTarget != null
-                    ? mService.mInputMethodTarget.mAppToken : null;
-            // We only include the Ime in the screenshot if the app we are screenshoting is the IME
-            // target and isn't in multi-window mode. We don't screenshot the IME in multi-window
-            // mode because the frame of the IME might not overlap with that of the app.
-            // E.g. IME target app at the top in split-screen mode and the IME at the bottom
-            // overlapping with the bottom app.
-            includeImeInScreenshot = imeTargetAppToken != null
-                    && imeTargetAppToken.appToken != null
-                    && imeTargetAppToken.appToken.asBinder() == appToken
-                    && !mService.mInputMethodTarget.isInMultiWindowMode();
-        }
-
         final int aboveAppLayer = (mService.mPolicy.getWindowLayerFromTypeLw(TYPE_APPLICATION) + 1)
                 * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
         final MutableBoolean mutableIncludeFullDisplay = new MutableBoolean(includeFullDisplay);
@@ -2903,9 +2911,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     return false;
                 }
                 if (w.mIsImWindow) {
-                    if (!includeImeInScreenshot) {
-                        return false;
-                    }
+                    return false;
                 } else if (w.mIsWallpaper) {
                     // If this is the wallpaper layer and we're only looking for the wallpaper layer
                     // then the target window state is this one.
@@ -2945,27 +2951,29 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
 
                 // Don't include wallpaper in bounds calculation
-                if (!mutableIncludeFullDisplay.value && includeDecor) {
-                    final TaskStack stack = w.getStack();
-                    if (stack != null) {
-                        stack.getBounds(frame);
-                    }
+                if (!w.mIsWallpaper && !mutableIncludeFullDisplay.value) {
+                    if (includeDecor) {
+                        final TaskStack stack = w.getStack();
+                        if (stack != null) {
+                            stack.getBounds(frame);
+                        }
 
-                    // We want to screenshot with the exact bounds of the surface of the app. Thus,
-                    // intersect it with the frame.
-                    frame.intersect(w.mFrame);
-                }else if (!mutableIncludeFullDisplay.value && !w.mIsWallpaper) {
-                    final Rect wf = w.mFrame;
-                    final Rect cr = w.mContentInsets;
-                    int left = wf.left + cr.left;
-                    int top = wf.top + cr.top;
-                    int right = wf.right - cr.right;
-                    int bottom = wf.bottom - cr.bottom;
-                    frame.union(left, top, right, bottom);
-                    w.getVisibleBounds(stackBounds);
-                    if (!Rect.intersects(frame, stackBounds)) {
-                        // Set frame empty if there's no intersection.
-                        frame.setEmpty();
+                        // We want to screenshot with the exact bounds of the surface of the app. Thus,
+                        // intersect it with the frame.
+                        frame.intersect(w.mFrame);
+                    } else {
+                        final Rect wf = w.mFrame;
+                        final Rect cr = w.mContentInsets;
+                        int left = wf.left + cr.left;
+                        int top = wf.top + cr.top;
+                        int right = wf.right - cr.right;
+                        int bottom = wf.bottom - cr.bottom;
+                        frame.union(left, top, right, bottom);
+                        w.getVisibleBounds(stackBounds);
+                        if (!Rect.intersects(frame, stackBounds)) {
+                            // Set frame empty if there's no intersection.
+                            frame.setEmpty();
+                        }
                     }
                 }
 

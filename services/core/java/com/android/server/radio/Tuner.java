@@ -22,6 +22,8 @@ import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.util.Slog;
 
+import java.util.List;
+
 class Tuner extends ITuner.Stub {
     // TODO(b/36863239): rename to RadioService.Tuner when native service goes away
     private static final String TAG = "RadioServiceJava.Tuner";
@@ -31,11 +33,18 @@ class Tuner extends ITuner.Stub {
      */
     private final long mNativeContext;
 
-    private int mRegion;
+    @NonNull private final TunerCallback mTunerCallback;
+    private final Object mLock = new Object();
+    private boolean mIsClosed = false;
+    private boolean mIsMuted = false;
+    private int mRegion;  // TODO(b/36863239): find better solution to manage regions
+    private final boolean mWithAudio;
 
-    Tuner(@NonNull ITunerCallback clientCallback, int region) {
+    Tuner(@NonNull ITunerCallback clientCallback, int halRev, int region, boolean withAudio) {
+        mTunerCallback = new TunerCallback(this, clientCallback, halRev);
         mRegion = region;
-        mNativeContext = nativeInit(clientCallback);
+        mWithAudio = withAudio;
+        mNativeContext = nativeInit(halRev);
     }
 
     @Override
@@ -44,18 +53,159 @@ class Tuner extends ITuner.Stub {
         super.finalize();
     }
 
-    private native long nativeInit(ITunerCallback clientCallback);
+    private native long nativeInit(int halRev);
     private native void nativeFinalize(long nativeContext);
     private native void nativeClose(long nativeContext);
 
+    private native void nativeSetConfiguration(long nativeContext,
+            @NonNull RadioManager.BandConfig config);
+    private native RadioManager.BandConfig nativeGetConfiguration(long nativeContext, int region);
+
+    private native void nativeStep(long nativeContext, boolean directionDown, boolean skipSubChannel);
+    private native void nativeScan(long nativeContext, boolean directionDown, boolean skipSubChannel);
+    private native void nativeTune(long nativeContext, int channel, int subChannel);
+    private native void nativeCancel(long nativeContext);
+
+    private native RadioManager.ProgramInfo nativeGetProgramInformation(long nativeContext);
+    private native boolean nativeStartBackgroundScan(long nativeContext);
+    private native List<RadioManager.ProgramInfo> nativeGetProgramList(long nativeContext,
+            String filter);
+
+    private native boolean nativeIsAnalogForced(long nativeContext);
+    private native void nativeSetAnalogForced(long nativeContext, boolean isForced);
+
     @Override
     public void close() {
-        nativeClose(mNativeContext);
+        synchronized (mLock) {
+            if (mIsClosed) return;
+            mTunerCallback.detach();
+            nativeClose(mNativeContext);
+            mIsClosed = true;
+        }
+    }
+
+    private void checkNotClosedLocked() {
+        if (mIsClosed) {
+            throw new IllegalStateException("Tuner is closed, no further operations are allowed");
+        }
     }
 
     @Override
-    public int getProgramInformation(RadioManager.ProgramInfo[] infoOut) {
-        Slog.d(TAG, "getProgramInformation()");
-        return RadioManager.STATUS_INVALID_OPERATION;
+    public void setConfiguration(RadioManager.BandConfig config) {
+        if (config == null) {
+            throw new IllegalArgumentException("The argument must not be a null pointer");
+        }
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            nativeSetConfiguration(mNativeContext, config);
+            mRegion = config.getRegion();
+        }
+    }
+
+    @Override
+    public RadioManager.BandConfig getConfiguration() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return nativeGetConfiguration(mNativeContext, mRegion);
+        }
+    }
+
+    @Override
+    public void setMuted(boolean mute) {
+        if (!mWithAudio) {
+            throw new IllegalStateException("Can't operate on mute - no audio requested");
+        }
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            if (mIsMuted == mute) return;
+            mIsMuted = mute;
+
+            // TODO(b/34348946): notifify audio policy manager of media activity on radio audio
+            // device. This task is pulled directly from previous implementation of native service.
+        }
+    }
+
+    @Override
+    public boolean isMuted() {
+        if (!mWithAudio) {
+            Slog.w(TAG, "Tuner did not request audio, pretending it was muted");
+            return true;
+        }
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return mIsMuted;
+        }
+    }
+
+    @Override
+    public void step(boolean directionDown, boolean skipSubChannel) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            nativeStep(mNativeContext, directionDown, skipSubChannel);
+        }
+    }
+
+    @Override
+    public void scan(boolean directionDown, boolean skipSubChannel) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            nativeScan(mNativeContext, directionDown, skipSubChannel);
+        }
+    }
+
+    @Override
+    public void tune(int channel, int subChannel) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            nativeTune(mNativeContext, channel, subChannel);
+        }
+    }
+
+    @Override
+    public void cancel() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            nativeCancel(mNativeContext);
+        }
+    }
+
+    @Override
+    public RadioManager.ProgramInfo getProgramInformation() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return nativeGetProgramInformation(mNativeContext);
+        }
+    }
+
+    public boolean startBackgroundScan() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return nativeStartBackgroundScan(mNativeContext);
+        }
+    }
+
+    public List<RadioManager.ProgramInfo> getProgramList(String filter) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            List<RadioManager.ProgramInfo> list = nativeGetProgramList(mNativeContext, filter);
+            if (list == null) {
+                throw new IllegalStateException("Program list is not ready");
+            }
+            return list;
+        }
+    }
+
+    public boolean isAnalogForced() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return nativeIsAnalogForced(mNativeContext);
+        }
+    }
+
+    public void setAnalogForced(boolean isForced) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            nativeSetAnalogForced(mNativeContext, isForced);
+        }
     }
 }

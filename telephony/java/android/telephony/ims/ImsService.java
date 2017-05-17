@@ -111,10 +111,11 @@ public class ImsService extends Service {
         }
 
         @Override
-        public void removeImsFeature(int slotId, int feature) throws RemoteException {
+        public void removeImsFeature(int slotId, int feature,  IImsFeatureStatusCallback c)
+                throws RemoteException {
             synchronized (mFeatures) {
                 enforceCallingOrSelfPermission(MODIFY_PHONE_STATE, "removeImsFeature");
-                onRemoveImsFeatureInternal(slotId, feature);
+                onRemoveImsFeatureInternal(slotId, feature, c);
             }
         }
 
@@ -364,7 +365,7 @@ public class ImsService extends Service {
         if (f != null) {
             f.setContext(this);
             f.setSlotId(slotId);
-            f.setImsFeatureStatusCallback(c);
+            f.addImsFeatureStatusCallback(c);
             featureMap.put(featureType, f);
         }
 
@@ -377,7 +378,8 @@ public class ImsService extends Service {
      * defined in {@link ImsFeature}.
      */
     // Be sure to lock on mFeatures before accessing this method
-    private void onRemoveImsFeatureInternal(int slotId, int featureType) {
+    private void onRemoveImsFeatureInternal(int slotId, int featureType,
+            IImsFeatureStatusCallback c) {
         SparseArray<ImsFeature> featureMap = mFeatures.get(slotId);
         if (featureMap == null) {
             return;
@@ -388,7 +390,7 @@ public class ImsService extends Service {
             featureMap.remove(featureType);
             featureToRemove.notifyFeatureRemoved(slotId);
             // Remove reference to Binder
-            featureToRemove.setImsFeatureStatusCallback(null);
+            featureToRemove.removeImsFeatureStatusCallback(c);
         }
     }
 

@@ -468,8 +468,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 개인 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 프로필이 <xliff:g id="APPLICATION">%2$s</xliff:g>에 연결되어 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용을 확인하려면 관리자에게 문의하세요."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 이 프로필은 <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>에 연결되어 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n개인 네트워크 활동을 모니터링할 수 있는 <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>에도 연결됩니다."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g>님 잠금 해제됨"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"수동으로 잠금 해제할 때까지 기기가 잠금 상태로 유지됩니다."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"알림을 더욱 빠르게 받기"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"잠금 해제하기 전에 알림을 봅니다."</string>
@@ -551,7 +550,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"사용 안함"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"전원 알림 컨트롤을 사용하면 앱 알림 관련 중요도를 0부터 5까지로 설정할 수 있습니다. \n\n"<b>"레벨 5"</b>" \n- 알림 목록 상단에 표시 \n- 전체 화면일 경우 알림 표시 허용 \n- 항상 엿보기 표시 \n\n"<b>"레벨 4"</b>" \n- 전체 화면에 알림 표시 금지 \n- 항상 엿보기 표시 \n\n"<b>"레벨 3"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n\n"<b>"레벨 2"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n\n"<b>"레벨 1"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n- 잠금 화면 및 상태 표시줄에서 숨김 \n- 알림 목록 하단에 표시 \n\n"<b>"레벨 0"</b>" \n- 앱의 모든 알림 차단"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"알림"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"더 이상 다음의 알림을 받지 않습니다."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"더 이상 다음의 알림을 받지 않습니다."</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"알림 카테고리 <xliff:g id="NUMBER">%d</xliff:g>개"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"이 앱에는 알림 카테고리가 없습니다."</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -765,4 +764,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g>까지"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"유지"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"바꾸기"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"백그라운드에서 실행 중인 앱"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"탭하여 배터리 및 데이터 사용량 확인"</string>
 </resources>

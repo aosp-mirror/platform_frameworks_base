@@ -23,24 +23,8 @@
 
 namespace android {
 
-JavaRef make_javaref(JNIEnv *env, jobject ref) {
-    ALOGV("wrapping %p", ref);
-    ALOGE_IF(env == nullptr, "Environment is a nullptr");
-
-    return JavaRef(ref, [env](jobject ref) {
-        ALOGV("deleting %p", ref);
-        if (env && ref) {
-            env->DeleteLocalRef(ref);
-        }
-    });
-}
-
 EnvWrapper::EnvWrapper(JNIEnv *env) : mEnv(env) {
     ALOGE_IF(env == nullptr, "Environment is a nullptr");
-}
-
-JavaRef EnvWrapper::operator() (jobject ref) const {
-    return make_javaref(mEnv, ref);
 }
 
 } // namespace android

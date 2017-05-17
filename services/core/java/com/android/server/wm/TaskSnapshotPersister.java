@@ -24,6 +24,7 @@ import android.annotation.TestApi;
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -59,6 +60,8 @@ class TaskSnapshotPersister {
     private final ArrayDeque<WriteQueueItem> mWriteQueue = new ArrayDeque<>();
     @GuardedBy("mLock")
     private boolean mQueueIdling;
+    @GuardedBy("mLock")
+    private boolean mPaused;
     private boolean mStarted;
     private final Object mLock = new Object();
     private final DirectoryResolver mDirectoryResolver;
@@ -126,6 +129,15 @@ class TaskSnapshotPersister {
         }
     }
 
+    void setPaused(boolean paused) {
+        synchronized (mLock) {
+            mPaused = paused;
+            if (!paused) {
+                mLock.notifyAll();
+            }
+        }
+    }
+
     @TestApi
     void waitForQueueEmpty() {
         while (true) {
@@ -141,7 +153,9 @@ class TaskSnapshotPersister {
     @GuardedBy("mLock")
     private void sendToQueueLocked(WriteQueueItem item) {
         mWriteQueue.offer(item);
-        mLock.notifyAll();
+        if (!mPaused) {
+            mLock.notifyAll();
+        }
     }
 
     private File getDirectory(int userId) {
@@ -184,18 +198,23 @@ class TaskSnapshotPersister {
             while (true) {
                 WriteQueueItem next;
                 synchronized (mLock) {
-                    next = mWriteQueue.poll();
+                    if (mPaused) {
+                        next = null;
+                    } else {
+                        next = mWriteQueue.poll();
+                    }
                 }
                 if (next != null) {
                     next.write();
                     SystemClock.sleep(DELAY_MS);
                 }
                 synchronized (mLock) {
-                    if (!mWriteQueue.isEmpty()) {
+                    final boolean writeQueueEmpty = mWriteQueue.isEmpty();
+                    if (!writeQueueEmpty && !mPaused) {
                         continue;
                     }
                     try {
-                        mQueueIdling = true;
+                        mQueueIdling = writeQueueEmpty;
                         mLock.wait();
                         mQueueIdling = false;
                     } catch (InterruptedException e) {
@@ -266,12 +285,13 @@ class TaskSnapshotPersister {
             final File file = getBitmapFile(mTaskId, mUserId);
             final File reducedFile = getReducedResolutionBitmapFile(mTaskId, mUserId);
             final Bitmap bitmap = Bitmap.createHardwareBitmap(mSnapshot.getSnapshot());
-            final Bitmap reduced = Bitmap.createScaledBitmap(bitmap,
+            final Bitmap swBitmap = bitmap.copy(Config.ARGB_8888, false /* isMutable */);
+            final Bitmap reduced = Bitmap.createScaledBitmap(swBitmap,
                     (int) (bitmap.getWidth() * REDUCED_SCALE),
                     (int) (bitmap.getHeight() * REDUCED_SCALE), true /* filter */);
             try {
                 FileOutputStream fos = new FileOutputStream(file);
-                bitmap.compress(JPEG, QUALITY, fos);
+                swBitmap.compress(JPEG, QUALITY, fos);
                 fos.close();
                 FileOutputStream reducedFos = new FileOutputStream(reducedFile);
                 reduced.compress(JPEG, QUALITY, reducedFos);

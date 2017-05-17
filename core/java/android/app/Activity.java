@@ -25,6 +25,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 
 import android.annotation.CallSuper;
@@ -130,6 +131,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static android.os.Build.VERSION_CODES.O;
 import static java.lang.Character.MIN_VALUE;
 
 /**
@@ -973,6 +975,18 @@ public class Activity extends ContextThemeWrapper
     @CallSuper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
+
+        if (getApplicationInfo().targetSdkVersion > O && mActivityInfo.isFixedOrientation()) {
+            final TypedArray ta = obtainStyledAttributes(com.android.internal.R.styleable.Window);
+            final boolean isTranslucentOrFloating = ActivityInfo.isTranslucentOrFloating(ta);
+            ta.recycle();
+
+            if (isTranslucentOrFloating) {
+                throw new IllegalStateException(
+                        "Only fullscreen opaque activities can request orientation");
+            }
+        }
+
         if (mLastNonConfigurationInstances != null) {
             mFragments.restoreLoaderNonConfig(mLastNonConfigurationInstances.loaders);
         }
@@ -2050,20 +2064,10 @@ public class Activity extends ContextThemeWrapper
         enterPictureInPictureMode(new PictureInPictureParams.Builder().build());
     }
 
-    /**
-     * TO BE REMOVED
-     */
+    /** @removed */
     @Deprecated
     public boolean enterPictureInPictureMode(@NonNull PictureInPictureArgs args) {
-        try {
-            if (args == null) {
-                throw new IllegalArgumentException("Expected non-null picture-in-picture args");
-            }
-            updatePictureInPictureParamsForContentInsets(args);
-            return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, args);
-        } catch (RemoteException e) {
-            return false;
-        }
+        return enterPictureInPictureMode(PictureInPictureArgs.convert(args));
     }
 
     /**
@@ -2088,18 +2092,16 @@ public class Activity extends ContextThemeWrapper
             if (params == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture params");
             }
-            updatePictureInPictureParamsForContentInsets(params);
             return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, params);
         } catch (RemoteException e) {
             return false;
         }
     }
 
-    /**
-     * TO BE REMOVED
-     */
+    /** @removed */
+    @Deprecated
     public void setPictureInPictureArgs(@NonNull PictureInPictureArgs args) {
-        setPictureInPictureParams(args);
+        setPictureInPictureParams(PictureInPictureArgs.convert(args));
     }
 
     /**
@@ -2113,7 +2115,6 @@ public class Activity extends ContextThemeWrapper
             if (params == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture params");
             }
-            updatePictureInPictureParamsForContentInsets(params);
             ActivityManagerNative.getDefault().setPictureInPictureParams(mToken, params);
         } catch (RemoteException e) {
         }
@@ -2130,21 +2131,6 @@ public class Activity extends ContextThemeWrapper
             return ActivityManagerNative.getDefault().getMaxNumPictureInPictureActions(mToken);
         } catch (RemoteException e) {
             return 0;
-        }
-    }
-
-    /**
-     * Updates the provided {@param params} with the last known content insets for this activity, to
-     * be used with the source hint rect for the transition into PiP.
-     */
-    private void updatePictureInPictureParamsForContentInsets(PictureInPictureParams params) {
-        if (params != null && params.hasSourceBoundsHint() && getWindow() != null &&
-                getWindow().peekDecorView() != null &&
-                getWindow().peekDecorView().getViewRootImpl() != null) {
-            params.setSourceRectHintInsets(
-                    getWindow().peekDecorView().getViewRootImpl().getLastContentInsets());
-        } else {
-            params.setSourceRectHintInsets(null);
         }
     }
 
@@ -3155,19 +3141,6 @@ public class Activity extends ContextThemeWrapper
      * @see View#onWindowFocusChanged(boolean)
      */
     public void onWindowFocusChanged(boolean hasFocus) {
-    }
-
-    /**
-     * Called before {@link #onAttachedToWindow}.
-     *
-     * @hide
-     */
-    @CallSuper
-    public void onBeforeAttachedToWindow() {
-        if (mAutoFillResetNeeded) {
-            getAutofillManager().onAttachedToWindow(
-                    getWindow().getDecorView().getRootView().getWindowToken());
-        }
     }
 
     /**
@@ -7284,7 +7257,7 @@ public class Activity extends ContextThemeWrapper
             }
         } else if (who.startsWith(AUTO_FILL_AUTH_WHO_PREFIX)) {
             Intent resultData = (resultCode == Activity.RESULT_OK) ? data : null;
-            getAutofillManager().onAuthenticationResult(resultData);
+            getAutofillManager().onAuthenticationResult(requestCode, resultData);
         } else {
             Fragment frag = mFragments.findFragmentByWho(who);
             if (frag != null) {
@@ -7429,10 +7402,11 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    final public void autofillCallbackAuthenticate(IntentSender intent, Intent fillInIntent) {
+    final public void autofillCallbackAuthenticate(int authenticationId, IntentSender intent,
+            Intent fillInIntent) {
         try {
             startIntentSenderForResultInner(intent, AUTO_FILL_AUTH_WHO_PREFIX,
-                    0, fillInIntent, 0, 0, null);
+                    authenticationId, fillInIntent, 0, 0, null);
         } catch (IntentSender.SendIntentException e) {
             Log.e(TAG, "authenticate() failed for intent:" + intent, e);
         }
@@ -7448,14 +7422,6 @@ public class Activity extends ContextThemeWrapper
     @Override
     final public boolean autofillCallbackRequestShowFillUi(@NonNull View anchor, int width,
             int height, @Nullable Rect anchorBounds, IAutofillWindowPresenter presenter) {
-        final Rect actualAnchorBounds = new Rect();
-        anchor.getBoundsOnScreen(actualAnchorBounds);
-
-        final int offsetX = (anchorBounds != null)
-                ? anchorBounds.left - actualAnchorBounds.left : 0;
-        int offsetY = (anchorBounds != null)
-                ? anchorBounds.top - actualAnchorBounds.top : 0;
-
         final boolean wasShowing;
 
         if (mAutofillPopupWindow == null) {
@@ -7464,8 +7430,7 @@ public class Activity extends ContextThemeWrapper
         } else {
             wasShowing = mAutofillPopupWindow.isShowing();
         }
-        mAutofillPopupWindow.update(anchor, offsetX, offsetY, width, height, anchorBounds,
-                actualAnchorBounds);
+        mAutofillPopupWindow.update(anchor, 0, 0, width, height, anchorBounds);
 
         return !wasShowing && mAutofillPopupWindow.isShowing();
     }
@@ -7482,45 +7447,62 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
+    @NonNull public View[] findViewsByAccessibilityIdTraversal(@NonNull int[] viewIds) {
+        final View[] views = new View[viewIds.length];
+        final ArrayList<ViewRootImpl> roots =
+                WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
+
+        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
+            final View rootView = roots.get(rootNum).getView();
+
+            if (rootView != null) {
+                for (int viewNum = 0; viewNum < viewIds.length; viewNum++) {
+                    if (views[viewNum] == null) {
+                        views[viewNum] = rootView.findViewByAccessibilityIdTraversal(
+                                viewIds[viewNum]);
+                    }
+                }
+            }
+        }
+
+        return views;
+    }
+
+    /** @hide */
     @Override
-    public boolean getViewVisibility(int viewId) {
-        Window window = getWindow();
-        if (window == null) {
-            Log.i(TAG, "no window");
-            return false;
-        }
+    @NonNull public boolean[] getViewVisibility(@NonNull int[] viewIds) {
+        final boolean[] isVisible = new boolean[viewIds.length];
+        final View views[] = findViewsByAccessibilityIdTraversal(viewIds);
 
-        View decorView = window.peekDecorView();
-        if (decorView == null) {
-            Log.i(TAG, "no decorView");
-            return false;
-        }
-
-        View view = decorView.findViewByAccessibilityIdTraversal(viewId);
-        if (view == null) {
-            Log.i(TAG, "cannot find view");
-            return false;
-        }
-
-        // Check if the view is visible by checking all parents
-        while (view != null) {
-            if (view == decorView) {
-                break;
+        for (int i = 0; i < viewIds.length; i++) {
+            View view = views[i];
+            if (view == null) {
+                isVisible[i] = false;
+                continue;
             }
 
-            if (view.getVisibility() != View.VISIBLE) {
-                Log.i(TAG, view + " is not visible");
-                return false;
-            }
+            isVisible[i] = true;
 
-            if (view.getParent() instanceof View) {
-                view = (View) view.getParent();
-            } else {
-                break;
+            // Check if the view is visible by checking all parents
+            while (true) {
+                if (view instanceof DecorView && view.getViewRootImpl() == view.getParent()) {
+                    break;
+                }
+
+                if (view.getVisibility() != View.VISIBLE) {
+                    isVisible[i] = false;
+                    break;
+                }
+
+                if (view.getParent() instanceof View) {
+                    view = (View) view.getParent();
+                } else {
+                    break;
+                }
             }
         }
 
-        return true;
+        return isVisible;
     }
 
     /** @hide */

@@ -23,6 +23,7 @@ import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -50,7 +51,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private static final int BACKGROUND_ANIMATION_LENGTH_MS = 220;
     private static final int ACTIVATE_ANIMATION_LENGTH = 220;
-    private static final int DARK_ANIMATION_LENGTH = 170;
+    private static final long DARK_ANIMATION_LENGTH = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
 
     /**
      * The amount of width, which is kept in the end when performing a disappear animation (also
@@ -177,6 +178,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * Similar to mDimmed but is also true if it's not dimmable but should be
      */
     private boolean mNeedsDimming;
+    private int mDimmedAlpha;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -214,6 +216,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundDimmed = findViewById(R.id.backgroundDimmed);
         mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
         mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
+        mDimmedAlpha = Color.alpha(mContext.getColor(
+                R.color.notification_material_background_dimmed_color));
         updateBackground();
         updateBackgroundTint();
         updateOutlineAlpha();
@@ -418,7 +422,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
         mDark = dark;
         updateBackground();
-        updateBackgroundTint(fade);
+        updateBackgroundTint(false);
         if (!dark && fade && !shouldHideBackground()) {
             fadeInFromDark(delay);
         }
@@ -492,10 +496,21 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      *                       used and the background color not at all.
      */
     public void setOverrideTintColor(int color, float overrideAmount) {
+        if (mDark) {
+            color = NO_COLOR;
+            overrideAmount = 0;
+        }
         mOverrideTint = color;
         mOverrideAmount = overrideAmount;
         int newColor = calculateBgColor();
         setBackgroundTintColor(newColor);
+        if (!isDimmable() && mNeedsDimming) {
+           mBackgroundNormal.setDrawableAlpha((int) NotificationUtils.interpolate(255,
+                   mDimmedAlpha,
+                   overrideAmount));
+        } else {
+            mBackgroundNormal.setDrawableAlpha(255);
+        }
     }
 
     protected void updateBackgroundTint() {
@@ -555,23 +570,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         final View background = mDimmed ? mBackgroundDimmed : mBackgroundNormal;
         background.setAlpha(0f);
         mBackgroundVisibilityUpdater.onAnimationUpdate(null);
-        background.setPivotX(mBackgroundDimmed.getWidth() / 2f);
-        background.setPivotY(getActualHeight() / 2f);
-        background.setScaleX(DARK_EXIT_SCALE_START);
-        background.setScaleY(DARK_EXIT_SCALE_START);
         background.animate()
                 .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
                 .setDuration(DARK_ANIMATION_LENGTH)
                 .setStartDelay(delay)
-                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
+                .setInterpolator(Interpolators.ALPHA_IN)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationCancel(Animator animation) {
                         // Jump state if we are cancelled
-                        background.setScaleX(1f);
-                        background.setScaleY(1f);
                         background.setAlpha(1f);
                     }
                 })
@@ -891,7 +898,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * @return the calculated background color
      */
     private int calculateBgColor(boolean withTint, boolean withOverRide) {
-        if (mDark) {
+        if (withTint && mDark) {
             return getContext().getColor(R.color.notification_material_background_dark_color);
         }
         if (withOverRide && mOverrideTint != NO_COLOR) {

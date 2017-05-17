@@ -69,8 +69,8 @@ TEST_F(AttributeResolutionTest, Theme) {
   ResTable::Theme theme(table_);
   ASSERT_EQ(NO_ERROR, theme.applyStyle(R::style::StyleTwo));
 
-  std::array<uint32_t, 4> attrs{
-      {R::attr::attr_one, R::attr::attr_two, R::attr::attr_three, R::attr::attr_four}};
+  std::array<uint32_t, 5> attrs{{R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
+                                 R::attr::attr_four, R::attr::attr_empty}};
   std::array<uint32_t, attrs.size() * STYLE_NUM_ENTRIES> values;
 
   ASSERT_TRUE(ResolveAttrs(&theme, 0 /*def_style_attr*/, 0 /*def_style_res*/,
@@ -109,11 +109,21 @@ TEST_F(AttributeResolutionTest, Theme) {
   EXPECT_EQ(uint32_t(-1), values_cursor[STYLE_ASSET_COOKIE]);
   EXPECT_EQ(0u, values_cursor[STYLE_DENSITY]);
   EXPECT_EQ(0u, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
+
+  // @empty comes from the theme, so it has the same asset cookie and changing configurations flags
+  // as the theme.
+  values_cursor += STYLE_NUM_ENTRIES;
+  EXPECT_EQ(Res_value::TYPE_NULL, values_cursor[STYLE_TYPE]);
+  EXPECT_EQ(Res_value::DATA_NULL_EMPTY, values_cursor[STYLE_DATA]);
+  EXPECT_EQ(0u, values_cursor[STYLE_RESOURCE_ID]);
+  EXPECT_EQ(1u, values_cursor[STYLE_ASSET_COOKIE]);
+  EXPECT_EQ(0u, values_cursor[STYLE_DENSITY]);
+  EXPECT_EQ(public_flag, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
 }
 
 TEST_F(AttributeResolutionXmlTest, XmlParser) {
-  std::array<uint32_t, 4> attrs{
-      {R::attr::attr_one, R::attr::attr_two, R::attr::attr_three, R::attr::attr_four}};
+  std::array<uint32_t, 5> attrs{{R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
+                                 R::attr::attr_four, R::attr::attr_empty}};
   std::array<uint32_t, attrs.size() * STYLE_NUM_ENTRIES> values;
 
   ASSERT_TRUE(RetrieveAttributes(&table_, &xml_parser_, attrs.data(), attrs.size(), values.data(),
@@ -121,7 +131,7 @@ TEST_F(AttributeResolutionXmlTest, XmlParser) {
 
   uint32_t* values_cursor = values.data();
   EXPECT_EQ(Res_value::TYPE_NULL, values_cursor[STYLE_TYPE]);
-  EXPECT_EQ(0u, values_cursor[STYLE_DATA]);
+  EXPECT_EQ(Res_value::DATA_NULL_EMPTY, values_cursor[STYLE_DATA]);
   EXPECT_EQ(0u, values_cursor[STYLE_RESOURCE_ID]);
   EXPECT_EQ(uint32_t(-1), values_cursor[STYLE_ASSET_COOKIE]);
   EXPECT_EQ(0u, values_cursor[STYLE_DENSITY]);
@@ -150,16 +160,24 @@ TEST_F(AttributeResolutionXmlTest, XmlParser) {
   EXPECT_EQ(uint32_t(-1), values_cursor[STYLE_ASSET_COOKIE]);
   EXPECT_EQ(0u, values_cursor[STYLE_DENSITY]);
   EXPECT_EQ(0u, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
+
+  values_cursor += STYLE_NUM_ENTRIES;
+  EXPECT_EQ(Res_value::TYPE_NULL, values_cursor[STYLE_TYPE]);
+  EXPECT_EQ(Res_value::DATA_NULL_UNDEFINED, values_cursor[STYLE_DATA]);
+  EXPECT_EQ(0u, values_cursor[STYLE_RESOURCE_ID]);
+  EXPECT_EQ(uint32_t(-1), values_cursor[STYLE_ASSET_COOKIE]);
+  EXPECT_EQ(0u, values_cursor[STYLE_DENSITY]);
+  EXPECT_EQ(0u, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
 }
 
 TEST_F(AttributeResolutionXmlTest, ThemeAndXmlParser) {
   ResTable::Theme theme(table_);
   ASSERT_EQ(NO_ERROR, theme.applyStyle(R::style::StyleTwo));
 
-  std::array<uint32_t, 5> attrs{{R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
-                                 R::attr::attr_four, R::attr::attr_five}};
+  std::array<uint32_t, 6> attrs{{R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
+                                 R::attr::attr_four, R::attr::attr_five, R::attr::attr_empty}};
   std::array<uint32_t, attrs.size() * STYLE_NUM_ENTRIES> values;
-  std::array<uint32_t, attrs.size()> indices;
+  std::array<uint32_t, attrs.size() + 1> indices;
 
   ApplyStyle(&theme, &xml_parser_, 0 /*def_style_attr*/, 0 /*def_style_res*/, attrs.data(),
              attrs.size(), values.data(), indices.data());
@@ -167,12 +185,12 @@ TEST_F(AttributeResolutionXmlTest, ThemeAndXmlParser) {
   const uint32_t public_flag = ResTable_typeSpec::SPEC_PUBLIC;
 
   uint32_t* values_cursor = values.data();
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, values_cursor[STYLE_TYPE]);
-  EXPECT_EQ(1u, values_cursor[STYLE_DATA]);
+  EXPECT_EQ(Res_value::TYPE_NULL, values_cursor[STYLE_TYPE]);
+  EXPECT_EQ(Res_value::DATA_NULL_EMPTY, values_cursor[STYLE_DATA]);
   EXPECT_EQ(0u, values_cursor[STYLE_RESOURCE_ID]);
-  EXPECT_EQ(1u, values_cursor[STYLE_ASSET_COOKIE]);
+  EXPECT_EQ(uint32_t(-1), values_cursor[STYLE_ASSET_COOKIE]);
   EXPECT_EQ(0u, values_cursor[STYLE_DENSITY]);
-  EXPECT_EQ(public_flag, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
+  EXPECT_EQ(0u, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
 
   values_cursor += STYLE_NUM_ENTRIES;
   EXPECT_EQ(Res_value::TYPE_STRING, values_cursor[STYLE_TYPE]);
@@ -203,6 +221,20 @@ TEST_F(AttributeResolutionXmlTest, ThemeAndXmlParser) {
   EXPECT_EQ(1u, values_cursor[STYLE_ASSET_COOKIE]);
   EXPECT_EQ(0u, values_cursor[STYLE_DENSITY]);
   EXPECT_EQ(public_flag, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
+
+  // @empty comes from the theme, so it has the same asset cookie and changing configurations flags
+  // as the theme.
+  values_cursor += STYLE_NUM_ENTRIES;
+  EXPECT_EQ(Res_value::TYPE_NULL, values_cursor[STYLE_TYPE]);
+  EXPECT_EQ(Res_value::DATA_NULL_EMPTY, values_cursor[STYLE_DATA]);
+  EXPECT_EQ(0u, values_cursor[STYLE_RESOURCE_ID]);
+  EXPECT_EQ(1u, values_cursor[STYLE_ASSET_COOKIE]);
+  EXPECT_EQ(0u, values_cursor[STYLE_DENSITY]);
+  EXPECT_EQ(public_flag, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
+
+  // The first element of indices contains the number of indices.
+  std::array<uint32_t, 7> expected_indices = {{6u, 0u, 1u, 2u, 3u, 4u, 5u}};
+  EXPECT_EQ(expected_indices, indices);
 }
 
 } // namespace android

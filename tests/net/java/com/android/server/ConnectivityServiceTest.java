@@ -39,10 +39,12 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
+import android.net.ConnectivityManager.TooManyRequestsException;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.IpPrefix;
@@ -77,6 +79,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
@@ -121,7 +124,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private static final int TIMEOUT_MS = 500;
     private static final int TEST_LINGER_DELAY_MS = 120;
 
-    private BroadcastInterceptingContext mServiceContext;
+    private MockContext mServiceContext;
     private WrappedConnectivityService mService;
     private WrappedConnectivityManager mCm;
     private MockNetworkAgent mWiFiNetworkAgent;
@@ -152,6 +155,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         private final MockContentResolver mContentResolver;
 
         @Spy private Resources mResources;
+        private final LinkedBlockingQueue<Intent> mStartedActivities = new LinkedBlockingQueue<>();
 
         MockContext(Context base) {
             super(base);
@@ -166,6 +170,27 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
             mContentResolver = new MockContentResolver();
             mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        }
+
+        @Override
+        public void startActivityAsUser(Intent intent, UserHandle handle) {
+            mStartedActivities.offer(intent);
+        }
+
+        public Intent expectStartActivityIntent(int timeoutMs) {
+            Intent intent = null;
+            try {
+                intent = mStartedActivities.poll(timeoutMs, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {}
+            assertNotNull("Did not receive sign-in intent after " + timeoutMs + "ms", intent);
+            return intent;
+        }
+
+        public void expectNoStartActivityIntent(int timeoutMs) {
+            try {
+                assertNull("Received unexpected Intent to start activity",
+                        mStartedActivities.poll(timeoutMs, TimeUnit.MILLISECONDS));
+            } catch (InterruptedException e) {}
         }
 
         @Override
@@ -1830,6 +1855,52 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testCaptivePortalApp() {
+        final TestNetworkCallback captivePortalCallback = new TestNetworkCallback();
+        final NetworkRequest captivePortalRequest = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_CAPTIVE_PORTAL).build();
+        mCm.registerNetworkCallback(captivePortalRequest, captivePortalCallback);
+
+        final TestNetworkCallback validatedCallback = new TestNetworkCallback();
+        final NetworkRequest validatedRequest = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_VALIDATED).build();
+        mCm.registerNetworkCallback(validatedRequest, validatedCallback);
+
+        // Bring up wifi.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        validatedCallback.expectAvailableAndValidatedCallbacks(mWiFiNetworkAgent);
+        Network wifiNetwork = mWiFiNetworkAgent.getNetwork();
+
+        // Check that calling startCaptivePortalApp does nothing.
+        final int fastTimeoutMs = 100;
+        mCm.startCaptivePortalApp(wifiNetwork);
+        mServiceContext.expectNoStartActivityIntent(fastTimeoutMs);
+
+        // Turn into a captive portal.
+        mWiFiNetworkAgent.getWrappedNetworkMonitor().gen204ProbeResult = 302;
+        mCm.reportNetworkConnectivity(wifiNetwork, false);
+        captivePortalCallback.expectAvailableCallbacks(mWiFiNetworkAgent);
+        validatedCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+
+        // Check that startCaptivePortalApp sends the expected intent.
+        mCm.startCaptivePortalApp(wifiNetwork);
+        Intent intent = mServiceContext.expectStartActivityIntent(TIMEOUT_MS);
+        assertEquals(ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN, intent.getAction());
+        assertEquals(wifiNetwork, intent.getExtra(ConnectivityManager.EXTRA_NETWORK));
+
+        // Have the app report that the captive portal is dismissed, and check that we revalidate.
+        mWiFiNetworkAgent.getWrappedNetworkMonitor().gen204ProbeResult = 204;
+        CaptivePortal c = (CaptivePortal) intent.getExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL);
+        c.reportCaptivePortalDismissed();
+        validatedCallback.expectAvailableCallbacks(mWiFiNetworkAgent);
+        captivePortalCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+
+        mCm.unregisterNetworkCallback(validatedCallback);
+        mCm.unregisterNetworkCallback(captivePortalCallback);
+    }
+
+    @SmallTest
     public void testAvoidOrIgnoreCaptivePortals() {
         final TestNetworkCallback captivePortalCallback = new TestNetworkCallback();
         final NetworkRequest captivePortalRequest = new NetworkRequest.Builder()
@@ -2985,7 +3056,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 networkCallbacks.add(networkCallback);
             }
             fail("Registering " + MAX_REQUESTS + " NetworkRequests did not throw exception");
-        } catch (IllegalArgumentException expected) {}
+        } catch (TooManyRequestsException expected) {}
         for (NetworkCallback networkCallback : networkCallbacks) {
             mCm.unregisterNetworkCallback(networkCallback);
         }
@@ -2998,7 +3069,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 networkCallbacks.add(networkCallback);
             }
             fail("Registering " + MAX_REQUESTS + " NetworkCallbacks did not throw exception");
-        } catch (IllegalArgumentException expected) {}
+        } catch (TooManyRequestsException expected) {}
         for (NetworkCallback networkCallback : networkCallbacks) {
             mCm.unregisterNetworkCallback(networkCallback);
         }
@@ -3014,7 +3085,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             }
             fail("Registering " + MAX_REQUESTS +
                     " PendingIntent NetworkRequests did not throw exception");
-        } catch (IllegalArgumentException expected) {}
+        } catch (TooManyRequestsException expected) {}
         for (PendingIntent pendingIntent : pendingIntents) {
             mCm.unregisterNetworkCallback(pendingIntent);
         }
@@ -3029,7 +3100,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             }
             fail("Registering " + MAX_REQUESTS +
                     " PendingIntent NetworkCallbacks did not throw exception");
-        } catch (IllegalArgumentException expected) {}
+        } catch (TooManyRequestsException expected) {}
         for (PendingIntent pendingIntent : pendingIntents) {
             mCm.unregisterNetworkCallback(pendingIntent);
         }

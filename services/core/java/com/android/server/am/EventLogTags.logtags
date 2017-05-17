@@ -34,7 +34,7 @@ option java_package com.android.server.am
 # Application process bound to work
 30010 am_proc_bound (User|1|5),(PID|1|5),(Process Name|3)
 # Application process died
-30011 am_proc_died (User|1|5),(PID|1|5),(Process Name|3)
+30011 am_proc_died (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(ProcState|1|5)
 # The Activity Manager failed to pause the given activity.
 30012 am_failed_to_pause (User|1|5),(Token|1|5),(Wanting to pause|3),(Currently pausing|3)
 # Attempting to pause the current activity
@@ -114,3 +114,14 @@ option java_package com.android.server.am
 
 # UserState has changed
 30051 am_user_state_changed (id|1|5),(state|1|5)
+
+# Note when any processes of a uid have started running
+30052 am_uid_running (UID|1|5)
+# Note when all processes of a uid have stopped.
+30053 am_uid_stopped (UID|1|5)
+# Note when the state of a uid has become active.
+30054 am_uid_active (UID|1|5)
+# Note when the state of a uid has become idle (background check enforced).
+30055 am_uid_idle (UID|1|5)
+# Note when a service is being forcibly stopped because its app went idle.
+30056 am_stop_idle_service (UID|1|5),(Component Name|3)

@@ -16,45 +16,40 @@
 
 package android.text.format;
 
+import static org.junit.Assert.assertEquals;
+
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.LocaleList;
 import android.support.test.filters.SmallTest;
-
-import junit.framework.TestCase;
+import android.support.test.runner.AndroidJUnit4;
 
 import java.util.Locale;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class DateUtilsTest extends TestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class DateUtilsTest {
 
     private static final LocaleList LOCALE_LIST_US = new LocaleList(Locale.US);
     private LocaleList mOriginalLocales;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() {
         mOriginalLocales = Resources.getSystem().getConfiguration().getLocales();
         setLocales(LOCALE_LIST_US);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void teardown() {
         setLocales(mOriginalLocales);
-        super.tearDown();
     }
 
-    private void setLocales(LocaleList locales) {
-        final Resources systemResources = Resources.getSystem();
-        final Configuration config = new Configuration(systemResources.getConfiguration());
-        config.setLocales(locales);
-        // This is not very safe to call, but since DateUtils.formatDuration() is a static method
-        // (it gets its format strings from the system resources), we can't pass a modified Context
-        // to it.
-        systemResources.updateConfiguration(config, null);
-    }
-
-    @SmallTest
-    public void test_formatDuration_seconds() throws Exception {
+    @Test
+    public void test_formatDuration_seconds() {
         assertEquals("0 seconds", DateUtils.formatDuration(0));
         assertEquals("0 seconds", DateUtils.formatDuration(1));
         assertEquals("0 seconds", DateUtils.formatDuration(499));
@@ -75,8 +70,8 @@ public class DateUtilsTest extends TestCase {
         assertEquals("2s", DateUtils.formatDuration(1500, DateUtils.LENGTH_SHORTEST));
     }
 
-    @SmallTest
-    public void test_formatDuration_Minutes() throws Exception {
+    @Test
+    public void test_formatDuration_Minutes() {
         assertEquals("59 seconds", DateUtils.formatDuration(59000));
         assertEquals("60 seconds", DateUtils.formatDuration(59500));
         assertEquals("1 minute", DateUtils.formatDuration(60000));
@@ -92,8 +87,8 @@ public class DateUtilsTest extends TestCase {
         assertEquals("2m", DateUtils.formatDuration(120000, DateUtils.LENGTH_SHORTEST));
     }
 
-    @SmallTest
-    public void test_formatDuration_Hours() throws Exception {
+    @Test
+    public void test_formatDuration_Hours() {
         assertEquals("59 minutes", DateUtils.formatDuration(3540000));
         assertEquals("1 hour", DateUtils.formatDuration(3600000));
         assertEquals("48 hours", DateUtils.formatDuration(172800000));
@@ -107,4 +102,15 @@ public class DateUtilsTest extends TestCase {
         assertEquals("1h", DateUtils.formatDuration(3600000, DateUtils.LENGTH_SHORTEST));
         assertEquals("48h", DateUtils.formatDuration(172800000, DateUtils.LENGTH_SHORTEST));
     }
+
+    private void setLocales(LocaleList locales) {
+        final Resources systemResources = Resources.getSystem();
+        final Configuration config = new Configuration(systemResources.getConfiguration());
+        config.setLocales(locales);
+        // This is not very safe to call, but since DateUtils.formatDuration() is a static method
+        // (it gets its format strings from the system resources), we can't pass a modified Context
+        // to it.
+        systemResources.updateConfiguration(config, null);
+    }
+
 }

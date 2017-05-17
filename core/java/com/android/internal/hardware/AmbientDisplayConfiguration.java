@@ -20,6 +20,7 @@ import com.android.internal.R;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
 
@@ -75,13 +76,13 @@ public class AmbientDisplayConfiguration {
     }
 
     public boolean alwaysOnEnabled(int user) {
-        return boolSettingDefaultOff(Settings.Secure.DOZE_ALWAYS_ON, user)
+        return boolSettingDefaultOn(Settings.Secure.DOZE_ALWAYS_ON, user)
                 && alwaysOnAvailable();
     }
 
     public boolean alwaysOnAvailable() {
-        // TODO: introduce config_dozeAlwaysOnAvailable. For now just debuggable builds.
-        return Build.IS_DEBUGGABLE && ambientDisplayAvailable();
+        return (alwaysOnDisplayDebuggingEnabled() || alwaysOnDisplayAvailable())
+                && ambientDisplayAvailable();
     }
 
     public String ambientDisplayComponent() {
@@ -91,6 +92,15 @@ public class AmbientDisplayConfiguration {
     private boolean ambientDisplayAvailable() {
         return !TextUtils.isEmpty(ambientDisplayComponent());
     }
+
+    private boolean alwaysOnDisplayAvailable() {
+        return mContext.getResources().getBoolean(R.bool.config_dozeAlwaysOnDisplayAvailable);
+    }
+
+    private boolean alwaysOnDisplayDebuggingEnabled() {
+        return SystemProperties.getBoolean("debug.doze.aod", false) && Build.IS_DEBUGGABLE;
+    }
+
 
     private boolean boolSettingDefaultOn(String name, int user) {
         return boolSetting(name, user, 1);

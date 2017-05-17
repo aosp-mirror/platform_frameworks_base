@@ -696,6 +696,12 @@ class SettingsProtoDumpUtil {
                 Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
                 GlobalSettingsProto.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX);
         dumpSetting(s, p,
+                Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
+                GlobalSettingsProto.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX);
+        dumpSetting(s, p,
+                Settings.Global.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX,
+                GlobalSettingsProto.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX);
+        dumpSetting(s, p,
                 Settings.Global.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX,
                 GlobalSettingsProto.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX);
         dumpSetting(s, p,
@@ -978,9 +984,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_SERVICE,
                 SecureSettingsProto.AUTOFILL_SERVICE);
-        dumpSetting(s, p,
-                Settings.Secure.BLUETOOTH_HCI_LOG,
-                SecureSettingsProto.BLUETOOTH_HCI_LOG);
         dumpSetting(s, p,
                 Settings.Secure.USER_SETUP_COMPLETE,
                 SecureSettingsProto.USER_SETUP_COMPLETE);
@@ -1431,6 +1434,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.DEVICE_PAIRED,
                 SecureSettingsProto.DEVICE_PAIRED);
+        dumpSetting(s, p,
+                Settings.Secure.NOTIFICATION_BADGING,
+                SecureSettingsProto.NOTIFICATION_BADGING);
     }
 
     private static void dumpProtoSystemSettingsLocked(

@@ -40,6 +40,7 @@ import java.util.Stack;
 public class StackStateAnimator {
 
     public static final int ANIMATION_DURATION_STANDARD = 360;
+    public static final int ANIMATION_DURATION_WAKEUP = 200;
     public static final int ANIMATION_DURATION_GO_TO_FULL_SHADE = 448;
     public static final int ANIMATION_DURATION_APPEAR_DISAPPEAR = 464;
     public static final int ANIMATION_DURATION_DIMMED_ACTIVATED = 220;
@@ -49,7 +50,6 @@ public class StackStateAnimator {
     public static final int ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
     public static final int ANIMATION_DELAY_PER_ELEMENT_MANUAL = 32;
     public static final int ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE = 48;
-    public static final int ANIMATION_DELAY_PER_ELEMENT_DARK = 24;
     public static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE = 2;
     public static final int ANIMATION_DELAY_HEADS_UP = 120;
 
@@ -219,9 +219,6 @@ public class StackStateAnimator {
 
     private long calculateChildAnimationDelay(ExpandableViewState viewState,
             StackScrollState finalState) {
-        if (mAnimationFilter.hasDarkEvent) {
-            return calculateDelayDark(viewState);
-        }
         if (mAnimationFilter.hasGoToFullShadeEvent) {
             return calculateDelayGoToFullShade(viewState);
         }
@@ -276,20 +273,6 @@ public class StackStateAnimator {
             }
         }
         return minDelay;
-    }
-
-    private long calculateDelayDark(ExpandableViewState viewState) {
-        int referenceIndex;
-        if (mAnimationFilter.darkAnimationOriginIndex ==
-                NotificationStackScrollLayout.AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE) {
-            referenceIndex = 0;
-        } else if (mAnimationFilter.darkAnimationOriginIndex ==
-                NotificationStackScrollLayout.AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_BELOW) {
-            referenceIndex = mHostLayout.getNotGoneChildCount() - 1;
-        } else {
-            referenceIndex = mAnimationFilter.darkAnimationOriginIndex;
-        }
-        return Math.abs(referenceIndex - viewState.notGoneIndex) * ANIMATION_DELAY_PER_ELEMENT_DARK;
     }
 
     private long calculateDelayGoToFullShade(ExpandableViewState viewState) {

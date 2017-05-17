@@ -29,6 +29,8 @@ import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 import com.android.internal.textservice.ITextServicesSessionListener;
 
+import dalvik.system.CloseGuard;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -98,7 +100,7 @@ public class SpellCheckerSession {
     private final SpellCheckerSessionListener mSpellCheckerSessionListener;
     private final SpellCheckerSessionListenerImpl mSpellCheckerSessionListenerImpl;
 
-    private boolean mIsUsed;
+    private final CloseGuard mGuard = CloseGuard.get();
 
     /** Handler that will execute the main tasks */
     private final Handler mHandler = new Handler() {
@@ -128,8 +130,9 @@ public class SpellCheckerSession {
         mSpellCheckerSessionListenerImpl = new SpellCheckerSessionListenerImpl(mHandler);
         mInternalListener = new InternalListener(mSpellCheckerSessionListenerImpl);
         mTextServicesManager = tsm;
-        mIsUsed = true;
         mSpellCheckerSessionListener = listener;
+
+        mGuard.open("finishSession");
     }
 
     /**
@@ -160,7 +163,7 @@ public class SpellCheckerSession {
      * checker.
      */
     public void close() {
-        mIsUsed = false;
+        mGuard.close();
         try {
             mSpellCheckerSessionListenerImpl.close();
             mTextServicesManager.finishSpellCheckerService(mSpellCheckerSessionListenerImpl);
@@ -542,11 +545,14 @@ public class SpellCheckerSession {
 
     @Override
     protected void finalize() throws Throwable {
-        super.finalize();
-        if (mIsUsed) {
-            Log.e(TAG, "SpellCheckerSession was not finished properly." +
-                    "You should call finishSession() when you finished to use a spell checker.");
-            close();
+        try {
+            // Note that mGuard will be null if the constructor threw.
+            if (mGuard != null) {
+                mGuard.warnIfOpen();
+                close();
+            }
+        } finally {
+            super.finalize();
         }
     }
 

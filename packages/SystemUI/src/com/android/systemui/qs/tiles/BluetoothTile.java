@@ -114,6 +114,10 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 || mController.getBluetoothState() == BluetoothAdapter.STATE_TURNING_ON;
         state.dualTarget = true;
         state.value = enabled;
+        if (state.slash == null) {
+            state.slash = new SlashState();
+        }
+        state.slash.isSlashed = !enabled;
         if (enabled) {
             state.label = null;
             if (connected) {
@@ -137,7 +141,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             }
             state.state = Tile.STATE_ACTIVE;
         } else {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_off);
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_on);
             state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_bluetooth_off);

@@ -35,6 +35,7 @@ import android.annotation.XmlRes;
 import android.app.Activity;
 import android.app.assist.AssistStructure;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -1638,12 +1639,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean canInputOrMove = (mMovement != null || getKeyListener() != null);
         boolean clickable = canInputOrMove || isClickable();
         boolean longClickable = canInputOrMove || isLongClickable();
+        int focusable = getFocusable();
 
         n = a.getIndexCount();
         for (int i = 0; i < n; i++) {
             int attr = a.getIndex(i);
 
             switch (attr) {
+                case com.android.internal.R.styleable.View_focusable:
+                    TypedValue val = new TypedValue();
+                    if (a.getValue(attr, val)) {
+                        focusable = (val.type == TypedValue.TYPE_INT_BOOLEAN)
+                                ? (val.data == 0 ? NOT_FOCUSABLE : FOCUSABLE)
+                                : val.data;
+                    }
+
                 case com.android.internal.R.styleable.View_clickable:
                     clickable = a.getBoolean(attr, clickable);
                     break;
@@ -1655,6 +1665,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         a.recycle();
 
+        // Some apps were relying on the undefined behavior of focusable winning over
+        // focusableInTouchMode != focusable in TextViews if both were specified in XML (usually
+        // when starting with EditText and setting only focusable=false). To keep those apps from
+        // breaking, re-apply the focusable attribute here.
+        if (focusable != getFocusable()) {
+            setFocusable(focusable);
+        }
         setClickable(clickable);
         setLongClickable(longClickable);
 
@@ -10135,7 +10152,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (lineCount <= 1) {
                 // Simple case: this is a single line.
                 final CharSequence text = getText();
-                structure.setText(text, getSelectionStart(), getSelectionEnd());
+                if (forAutofill) {
+                    structure.setText(text);
+                } else {
+                    structure.setText(text, getSelectionStart(), getSelectionEnd());
+                }
             } else {
                 // Complex case: multi-line, could be scrolled or within a scroll container
                 // so some lines are not visible.
@@ -10171,9 +10192,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (expandedBottomLine >= lineCount) {
                     expandedBottomLine = lineCount - 1;
                 }
+
                 // Convert lines into character offsets.
                 int expandedTopChar = layout.getLineStart(expandedTopLine);
                 int expandedBottomChar = layout.getLineEnd(expandedBottomLine);
+
                 // Take into account selection -- if there is a selection, we need to expand
                 // the text we are returning to include that selection.
                 final int selStart = getSelectionStart();
@@ -10186,48 +10209,57 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         expandedBottomChar = selEnd;
                     }
                 }
+
                 // Get the text and trim it to the range we are reporting.
                 CharSequence text = getText();
                 if (expandedTopChar > 0 || expandedBottomChar < text.length()) {
                     text = text.subSequence(expandedTopChar, expandedBottomChar);
                 }
-                structure.setText(text, selStart - expandedTopChar, selEnd - expandedTopChar);
-                final int[] lineOffsets = new int[bottomLine - topLine + 1];
-                final int[] lineBaselines = new int[bottomLine - topLine + 1];
-                final int baselineOffset = getBaselineOffset();
-                for (int i = topLine; i <= bottomLine; i++) {
-                    lineOffsets[i - topLine] = layout.getLineStart(i);
-                    lineBaselines[i - topLine] = layout.getLineBaseline(i) + baselineOffset;
+
+                if (forAutofill) {
+                    structure.setText(text);
+                } else {
+                    structure.setText(text, selStart - expandedTopChar, selEnd - expandedTopChar);
+
+                    final int[] lineOffsets = new int[bottomLine - topLine + 1];
+                    final int[] lineBaselines = new int[bottomLine - topLine + 1];
+                    final int baselineOffset = getBaselineOffset();
+                    for (int i = topLine; i <= bottomLine; i++) {
+                        lineOffsets[i - topLine] = layout.getLineStart(i);
+                        lineBaselines[i - topLine] = layout.getLineBaseline(i) + baselineOffset;
+                    }
+                    structure.setTextLines(lineOffsets, lineBaselines);
                 }
-                structure.setTextLines(lineOffsets, lineBaselines);
             }
 
-            // Extract style information that applies to the TextView as a whole.
-            int style = 0;
-            int typefaceStyle = getTypefaceStyle();
-            if ((typefaceStyle & Typeface.BOLD) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
-            }
-            if ((typefaceStyle & Typeface.ITALIC) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_ITALIC;
-            }
+            if (!forAutofill) {
+                // Extract style information that applies to the TextView as a whole.
+                int style = 0;
+                int typefaceStyle = getTypefaceStyle();
+                if ((typefaceStyle & Typeface.BOLD) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
+                }
+                if ((typefaceStyle & Typeface.ITALIC) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_ITALIC;
+                }
 
-            // Global styles can also be set via TextView.setPaintFlags().
-            int paintFlags = mTextPaint.getFlags();
-            if ((paintFlags & Paint.FAKE_BOLD_TEXT_FLAG) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
-            }
-            if ((paintFlags & Paint.UNDERLINE_TEXT_FLAG) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_UNDERLINE;
-            }
-            if ((paintFlags & Paint.STRIKE_THRU_TEXT_FLAG) != 0) {
-                style |= AssistStructure.ViewNode.TEXT_STYLE_STRIKE_THRU;
-            }
+                // Global styles can also be set via TextView.setPaintFlags().
+                int paintFlags = mTextPaint.getFlags();
+                if ((paintFlags & Paint.FAKE_BOLD_TEXT_FLAG) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_BOLD;
+                }
+                if ((paintFlags & Paint.UNDERLINE_TEXT_FLAG) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_UNDERLINE;
+                }
+                if ((paintFlags & Paint.STRIKE_THRU_TEXT_FLAG) != 0) {
+                    style |= AssistStructure.ViewNode.TEXT_STYLE_STRIKE_THRU;
+                }
 
-            // TextView does not have its own text background color. A background is either part
-            // of the View (and can be any drawable) or a BackgroundColorSpan inside the text.
-            structure.setTextStyle(getTextSize(), getCurrentTextColor(),
-                    AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
+                // TextView does not have its own text background color. A background is either part
+                // of the View (and can be any drawable) or a BackgroundColorSpan inside the text.
+                structure.setTextStyle(getTextSize(), getCurrentTextColor(),
+                        AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
+            }
         }
         structure.setHint(getHint());
         structure.setInputType(getInputType());
@@ -10384,14 +10416,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     positionInfoStartIndex + positionInfoLength,
                     viewportToContentHorizontalOffset(), viewportToContentVerticalOffset());
             CursorAnchorInfo cursorAnchorInfo = builder.setMatrix(null).build();
-            int[] locationOnScreen = getLocationOnScreen();
             for (int i = 0; i < positionInfoLength; i++) {
                 int flags = cursorAnchorInfo.getCharacterBoundsFlags(positionInfoStartIndex + i);
                 if ((flags & FLAG_HAS_VISIBLE_REGION) == FLAG_HAS_VISIBLE_REGION) {
                     RectF bounds = cursorAnchorInfo
                             .getCharacterBounds(positionInfoStartIndex + i);
                     if (bounds != null) {
-                        bounds.offset(locationOnScreen[0], locationOnScreen[1]);
+                        mapRectFromViewToScreenCoords(bounds, true);
                         boundingRects[i] = bounds;
                     }
                 }
@@ -10578,7 +10609,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         Selection.setSelection((Spannable) text, start, end);
                         // Make sure selection mode is engaged.
                         if (mEditor != null) {
-                            mEditor.startSelectionActionMode();
+                            mEditor.startSelectionActionModeAsync(false);
                         }
                         return true;
                     }
@@ -10741,7 +10772,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (id) {
             case ID_SELECT_ALL:
+                final boolean hadSelection = hasSelection();
                 selectAllText();
+                if (mEditor != null && hadSelection) {
+                    mEditor.invalidateActionModeAsync();
+                }
                 return true;
 
             case ID_UNDO:
@@ -11040,6 +11075,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 && getSelectionEnd() >= 0
                 && ((ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE))
                         .hasPrimaryClip());
+    }
+
+    boolean canPasteAsPlainText() {
+        if (!canPaste()) {
+            return false;
+        }
+
+        final ClipData clipData =
+                ((ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE))
+                        .getPrimaryClip();
+        final ClipDescription description = clipData.getDescription();
+        final boolean isPlainType = description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
+        final CharSequence text = clipData.getItemAt(0).getText();
+        if (isPlainType && (text instanceof Spanned)) {
+            Spanned spanned = (Spanned) text;
+            if (TextUtils.hasStyleSpan(spanned)) {
+                return true;
+            }
+        }
+        return description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML);
     }
 
     boolean canProcessText() {
@@ -11803,7 +11858,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         + " before=" + before + " after=" + after + ": " + buffer);
             }
 
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            if (AccessibilityManager.getInstance(mContext).isEnabled()
+                    && !isPasswordInputType(getInputType()) && !hasPasswordTransformationMethod()) {
                 mBeforeText = buffer.toString();
             }
 

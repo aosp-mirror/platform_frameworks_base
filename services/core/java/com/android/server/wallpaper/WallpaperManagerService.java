@@ -52,14 +52,17 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Process;
@@ -165,6 +168,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String WALLPAPER_LOCK_ORIG = "wallpaper_lock_orig";
     static final String WALLPAPER_LOCK_CROP = "wallpaper_lock";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
+    static final int MAX_WALLPAPER_EXTRACTION_AREA = 112 * 112;
 
     // All the various per-user state files we need to be aware of
     static final String[] sPerUserFiles = new String[] {
@@ -376,43 +380,89 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    /**
+     * We can easily extract colors from an ImageWallpaper since it's only a bitmap.
+     * In this case, using the crop is more than enough.
+     *
+     * In case of a live wallpaper, the best we can do is to extract colors from its
+     * preview image. Anyway, the live wallpaper can also implement the wallpaper colors API
+     * to report when colors change.
+     *
+     * @param wallpaper a wallpaper representation
+     */
     private void extractColors(WallpaperData wallpaper) {
         String cropFile = null;
+        Drawable thumbnail = null;
+        // This represents a maximum pixel count in an image.
+        // It prevents color extraction on big bitmaps.
         int wallpaperId = -1;
-        synchronized (mLock) {
-            // Only extract colors of ImageWallpaper or lock wallpapers (null)
-            final boolean supportedComponent = mImageWallpaper.equals(wallpaper.wallpaperComponent)
-                    || wallpaper.wallpaperComponent == null;
-            if (!supportedComponent)
-                return;
 
-            if (wallpaper.cropFile != null && wallpaper.cropFile.exists()) {
-                cropFile = wallpaper.cropFile.getAbsolutePath();
+        synchronized (mLock) {
+            final boolean imageWallpaper = mImageWallpaper.equals(wallpaper.wallpaperComponent)
+                    || wallpaper.wallpaperComponent == null;
+            if (imageWallpaper) {
+                if (wallpaper.cropFile != null && wallpaper.cropFile.exists()) {
+                    cropFile = wallpaper.cropFile.getAbsolutePath();
+                }
+            } else {
+                if (wallpaper.connection == null) {
+                    Slog.w(TAG, "Can't extract colors, wallpaper not connected. " +
+                            wallpaper.wallpaperId);
+                    return;
+                }
+                WallpaperInfo info = wallpaper.connection.mInfo;
+                if (info == null) {
+                    Slog.w(TAG, "Something is really wrong, live wallpaper doesn't have " +
+                           "a WallpaperInfo object! " + wallpaper.wallpaperId);
+                    return;
+                }
+                thumbnail = info.loadThumbnail(mContext.getPackageManager());
             }
+
             wallpaperId = wallpaper.wallpaperId;
         }
 
+        Bitmap bitmap = null;
         if (cropFile != null) {
-            final Bitmap bitmap = BitmapFactory.decodeFile(cropFile);
-            if (bitmap == null) {
-                Slog.w(TAG, "Cannot extract colors because wallpaper file could not be read.");
-                return;
+            bitmap = BitmapFactory.decodeFile(cropFile);
+        } else if (thumbnail != null) {
+            // Calculate how big the bitmap needs to be.
+            // This avoids unnecessary processing and allocation inside Palette.
+            final int requestedArea = thumbnail.getIntrinsicWidth() *
+                    thumbnail.getIntrinsicHeight();
+            double scale = 1;
+            if (requestedArea > MAX_WALLPAPER_EXTRACTION_AREA) {
+                scale = Math.sqrt(MAX_WALLPAPER_EXTRACTION_AREA / (double) requestedArea);
             }
-            Palette palette = Palette.from(bitmap).generate();
-            bitmap.recycle();
+            bitmap = Bitmap.createBitmap((int) (thumbnail.getIntrinsicWidth() * scale),
+                    (int) (thumbnail.getIntrinsicHeight() * scale), Bitmap.Config.ARGB_8888);
+            final Canvas bmpCanvas = new Canvas(bitmap);
+            thumbnail.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+            thumbnail.draw(bmpCanvas);
+        }
 
-            final List<Pair<Color, Integer>> colors = new ArrayList<>();
-            for (Palette.Swatch swatch : palette.getSwatches()) {
-                colors.add(new Pair<>(Color.valueOf(swatch.getRgb()),
-                        swatch.getPopulation()));
-            }
+        if (bitmap == null) {
+            Slog.w(TAG, "Cannot extract colors because wallpaper could not be read.");
+            return;
+        }
 
-            synchronized (mLock) {
-                if (wallpaper.wallpaperId == wallpaperId) {
-                    wallpaper.primaryColors = new WallpaperColors(colors);
-                } else {
-                    Slog.w(TAG, "Not setting primary colors since wallpaper changed");
-                }
+        Palette palette = Palette
+                .from(bitmap)
+                .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
+                .generate();
+        bitmap.recycle();
+
+        final List<Pair<Color, Integer>> colors = new ArrayList<>();
+        for (Palette.Swatch swatch : palette.getSwatches()) {
+            colors.add(new Pair<>(Color.valueOf(swatch.getRgb()),
+                    swatch.getPopulation()));
+        }
+
+        synchronized (mLock) {
+            if (wallpaper.wallpaperId == wallpaperId) {
+                wallpaper.primaryColors = new WallpaperColors(colors);
+            } else {
+                Slog.w(TAG, "Not setting primary colors since wallpaper changed");
             }
         }
     }
@@ -768,13 +818,35 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             synchronized (mLock) {
+                Slog.w(TAG, "Wallpaper service gone: " + name);
+                if (!Objects.equals(name, mWallpaper.wallpaperComponent)) {
+                    Slog.e(TAG, "Does not match expected wallpaper component "
+                            + mWallpaper.wallpaperComponent);
+                }
                 mService = null;
                 mEngine = null;
                 if (mWallpaper.connection == this) {
-                    // The wallpaper disappeared.  If this isn't a system-default one, track
-                    // crashes and fall back to default if it continues to misbehave.
+                    // There is an inherent ordering race between this callback and the
+                    // package monitor that receives notice that a package is being updated,
+                    // so we cannot quite trust at this moment that we know for sure that
+                    // this is not an update.  If we think this is a genuine non-update
+                    // wallpaper outage, we do our "wait for reset" work as a continuation,
+                    // a short time in the future, specifically to allow any pending package
+                    // update message on this same looper thread to be processed.
+                    if (!mWallpaper.wallpaperUpdating) {
+                        mContext.getMainThreadHandler().postDelayed(() -> processDisconnect(this),
+                                1000);
+                    }
+                }
+            }
+        }
+
+        private void processDisconnect(final ServiceConnection connection) {
+            synchronized (mLock) {
+                // The wallpaper disappeared.  If this isn't a system-default one, track
+                // crashes and fall back to default if it continues to misbehave.
+                if (connection == mWallpaper.connection) {
                     final ComponentName wpService = mWallpaper.wallpaperComponent;
-                    Slog.w(TAG, "Wallpaper service gone: " + wpService);
                     if (!mWallpaper.wallpaperUpdating
                             && mWallpaper.userId == mCurrentUserId
                             && !Objects.equals(mDefaultWallpaperComponent, wpService)
@@ -787,7 +859,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         // during {@link #MIN_WALLPAPER_CRASH_TIME} millis.
                         if (mWallpaper.lastDiedTime != 0
                                 && mWallpaper.lastDiedTime + MIN_WALLPAPER_CRASH_TIME
-                                    > SystemClock.uptimeMillis()) {
+                                > SystemClock.uptimeMillis()) {
                             Slog.w(TAG, "Reverting to built-in wallpaper!");
                             clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId, null);
                         } else {
@@ -795,17 +867,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
                             // If we didn't reset it right away, do so after we couldn't connect to
                             // it for an extended amount of time to avoid having a black wallpaper.
-                            FgThread.getHandler().removeCallbacks(mResetRunnable);
-                            FgThread.getHandler().postDelayed(mResetRunnable,
-                                    WALLPAPER_RECONNECT_TIMEOUT_MS);
+                            final Handler fgHandler = FgThread.getHandler();
+                            fgHandler.removeCallbacks(mResetRunnable);
+                            fgHandler.postDelayed(mResetRunnable, WALLPAPER_RECONNECT_TIMEOUT_MS);
                             if (DEBUG_LIVE) {
                                 Slog.i(TAG, "Started wallpaper reconnect timeout for " + wpService);
                             }
                         }
-                        final String flattened = name.flattenToString();
+                        final String flattened = wpService.flattenToString();
                         EventLog.writeEvent(EventLogTags.WP_WALLPAPER_CRASHED,
                                 flattened.substring(0, Math.min(flattened.length(),
                                         MAX_WALLPAPER_COMPONENT_LOG_LENGTH)));
+                    }
+                } else {
+                    if (DEBUG_LIVE) {
+                        Slog.i(TAG, "Wallpaper changed during disconnect tracking; ignoring");
                     }
                 }
             }
@@ -817,6 +893,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
          */
         @Override
         public void onWallpaperColorsChanged(WallpaperColors primaryColors) {
+            // Do not override default color extraction if API isn't implemented.
+            if (primaryColors == null) {
+                return;
+            }
+
             int which;
             synchronized (mLock) {
                 // Do not broadcast changes on ImageWallpaper since it's handled
@@ -1262,13 +1343,22 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "clearWallpaper", null);
 
+        WallpaperData data = null;
         synchronized (mLock) {
             clearWallpaperLocked(false, which, userId, null);
+
+            if (which == FLAG_LOCK) {
+                data = mLockWallpaperMap.get(userId);
+            }
+            if (which == FLAG_SYSTEM || data == null) {
+                data = mWallpaperMap.get(userId);
+            }
         }
 
         // When clearing a wallpaper, broadcast new valid colors
-        WallpaperData data = getWallpaperSafeLocked(mCurrentUserId, which);
-        notifyWallpaperColorsChanged(data, which);
+        if (data != null) {
+            notifyWallpaperColorsChanged(data, which);
+        }
     }
 
     void clearWallpaperLocked(boolean defaultFailed, int which, int userId, IRemoteCallback reply) {

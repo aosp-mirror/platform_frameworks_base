@@ -162,14 +162,18 @@ public final class Dataset implements Parcelable {
          *
          * <p>When a user triggers autofill, the system launches the provided intent
          * whose extras will have the {@link
-         * android.view.autofill.AutofillManager#EXTRA_ASSIST_STRUCTURE screen content}. Once
-         * you complete your authentication flow you should set the activity result to {@link
-         * android.app.Activity#RESULT_OK} and provide the fully populated {@link Dataset
-         * dataset} by setting it to the {@link
-         * android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra. For example,
-         * if you provided credit card information without the CVV for the data set in the
-         * {@link FillResponse response} then the returned data set should contain the
-         * CVV entry.</p>
+         * android.view.autofill.AutofillManager#EXTRA_ASSIST_STRUCTURE screen content},
+         * and your {@link android.view.autofill.AutofillManager#EXTRA_CLIENT_STATE client
+         * state}. Once you complete your authentication flow you should set the activity
+         * result to {@link android.app.Activity#RESULT_OK} and provide the fully populated
+         * {@link Dataset dataset} or a fully-populated {@link FillResponse response} by
+         * setting it to the {@link
+         * android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra. If you
+         * provide a dataset in the result, it will replace the authenticated dataset and
+         * will be immediately filled in. If you provide a response, it will replace the
+         * current response and the UI will be refreshed. For example, if you provided
+         * credit card information without the CVV for the data set in the {@link FillResponse
+         * response} then the returned data set should contain the CVV entry.
          *
          * <p></><strong>Note:</strong> Do not make the provided pending intent
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
@@ -210,12 +214,15 @@ public final class Dataset implements Parcelable {
          *
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
-         * @param value value to be auto filled.
+         * @param value value to be auto filled. Pass {@code null} if you do not have the value
+         *        but the target view is a logical part of the dataset. For example, if
+         *        the dataset needs an authentication and you have no access to the value.
+         *        Filtering matches any user typed string to {@code null} values.
          * @return This builder.
          * @throws IllegalStateException if the builder was constructed without a presentation
          * ({@link RemoteViews}).
          */
-        public @NonNull Builder setValue(@NonNull AutofillId id, @NonNull AutofillValue value) {
+        public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value) {
             throwIfDestroyed();
             if (mPresentation == null) {
                 throw new IllegalStateException("Dataset presentation not set on constructor");
@@ -229,11 +236,14 @@ public final class Dataset implements Parcelable {
          *
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
-         * @param value value to be auto filled.
+         * @param value value to be auto filled. Pass {@code null} if you do not have the value
+         *        but the target view is a logical part of the dataset. For example, if
+         *        the dataset needs an authentication and you have no access to the value.
+         *        Filtering matches any user typed string to {@code null} values.
          * @param presentation The presentation used to visualize this field.
          * @return This builder.
          */
-        public @NonNull Builder setValue(@NonNull AutofillId id, @NonNull AutofillValue value,
+        public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
                 @NonNull RemoteViews presentation) {
             throwIfDestroyed();
             Preconditions.checkNotNull(presentation, "presentation cannot be null");
@@ -244,7 +254,6 @@ public final class Dataset implements Parcelable {
         private void setValueAndPresentation(AutofillId id, AutofillValue value,
                 RemoteViews presentation) {
             Preconditions.checkNotNull(id, "id cannot be null");
-            Preconditions.checkNotNull(value, "value cannot be null");
             if (mFieldIds != null) {
                 final int existingIdx = mFieldIds.indexOf(id);
                 if (existingIdx >= 0) {

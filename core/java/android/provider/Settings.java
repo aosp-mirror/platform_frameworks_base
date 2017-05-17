@@ -5176,13 +5176,6 @@ public final class Settings {
         public static final String AUTOFILL_SERVICE = "autofill_service";
 
         /**
-         * bluetooth HCI snoop log configuration
-         * @hide
-         */
-        public static final String BLUETOOTH_HCI_LOG =
-                "bluetooth_hci_log";
-
-        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVICE_PROVISIONED} instead
          */
         @Deprecated
@@ -6811,7 +6804,8 @@ public final class Settings {
          * Represented as milliseconds from midnight (e.g. 79200000 == 10pm).
          * @hide
          */
-        public static final String NIGHT_DISPLAY_CUSTOM_START_TIME = "night_display_custom_start_time";
+        public static final String NIGHT_DISPLAY_CUSTOM_START_TIME =
+                "night_display_custom_start_time";
 
         /**
          * Custom time when Night display is scheduled to deactivate.
@@ -6819,6 +6813,14 @@ public final class Settings {
          * @hide
          */
         public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
+
+        /**
+         * Time in milliseconds (since epoch) when Night display was last activated. Use to decide
+         * whether to apply the current activated state after a reboot or user change.
+         * @hide
+         */
+        public static final String NIGHT_DISPLAY_LAST_ACTIVATED_TIME =
+                "night_display_last_activated_time";
 
         /**
          * Names of the service components that the current user has explicitly allowed to
@@ -6966,6 +6968,13 @@ public final class Settings {
         public static final String CMAS_ADDITIONAL_BROADCAST_PKG = "cmas_additional_broadcast_pkg";
 
         /**
+         * Whether the launcher should show any notification badges.
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String NOTIFICATION_BADGING = "notification_badging";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -7046,6 +7055,7 @@ public final class Settings {
             NIGHT_DISPLAY_CUSTOM_END_TIME,
             NIGHT_DISPLAY_COLOR_TEMPERATURE,
             NIGHT_DISPLAY_AUTO_MODE,
+            NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
             NIGHT_DISPLAY_ACTIVATED,
             SYNC_PARENT_SOUNDS,
             CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
@@ -7059,7 +7069,8 @@ public final class Settings {
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             ASSIST_GESTURE_ENABLED,
             ASSIST_GESTURE_SENSITIVITY,
-            VR_DISPLAY_MODE
+            VR_DISPLAY_MODE,
+            NOTIFICATION_BADGING
         };
 
         /**
@@ -7639,6 +7650,21 @@ public final class Settings {
         * @hide
         */
        public static final String FORCE_ALLOW_ON_EXTERNAL = "force_allow_on_external";
+
+        /**
+         * The default SM-DP+ configured for this device.
+         *
+         * <p>An SM-DP+ is used by an LPA (see {@link android.service.euicc.EuiccService}) to
+         * download profiles. If this value is set, the LPA will query this server for any profiles
+         * available to this device. If any are available, they may be downloaded during device
+         * provisioning or in settings without needing the user to enter an activation code.
+         *
+         * @see android.service.euicc.EuiccService
+         * @hide
+         *
+         * TODO(b/35851809): Make this a SystemApi.
+         */
+        public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
 
         /**
          * Whether any activity can be resized. When this is true, any
@@ -8334,6 +8360,17 @@ public final class Settings {
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
         /**
+         * Value to specify if Wi-Fi Wakeup is available.
+         *
+         * Wi-Fi Wakeup will only operate if it's available
+         * and {@link #WIFI_WAKEUP_ENABLED} is true.
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String WIFI_WAKEUP_AVAILABLE = "wifi_wakeup_available";
+
+        /**
          * Value to specify whether network quality scores and badging should be shown in the UI.
          *
          * Type: int (0 for false, 1 for true)
@@ -8993,6 +9030,12 @@ public final class Settings {
         public static final String
                 BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX = "bluetooth_a2dp_src_priority_";
         /** {@hide} */
+        public static final String BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX =
+                "bluetooth_a2dp_supports_optional_codecs_";
+        /** {@hide} */
+        public static final String BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX =
+                "bluetooth_a2dp_optional_codecs_enabled_";
+        /** {@hide} */
         public static final String
                 BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX = "bluetooth_input_device_priority_";
         /** {@hide} */
@@ -9235,6 +9278,23 @@ public final class Settings {
         public static final String SHORTCUT_MANAGER_CONSTANTS = "shortcut_manager_constants";
 
         /**
+         * DevicePolicyManager specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * <pre>
+         * das_died_service_reconnect_backoff_sec       (long)
+         * das_died_service_reconnect_backoff_increase  (float)
+         * das_died_service_reconnect_max_backoff_sec   (long)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * see also com.android.server.devicepolicy.DevicePolicyConstants
+         */
+        public static final String DEVICE_POLICY_CONSTANTS = "device_policy_constants";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */
@@ -9256,6 +9316,25 @@ public final class Settings {
          */
         public static final String getBluetoothA2dpSrcPriorityKey(String address) {
             return BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth a2dp device's ability to support optional codecs.
+         * @hide
+         */
+        public static final String getBluetoothA2dpSupportsOptionalCodecsKey(String address) {
+            return BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX +
+                    address.toUpperCase(Locale.ROOT);
+        }
+
+        /**
+         * Get the key that retrieves whether a bluetooth a2dp device should have optional codecs
+         * enabled.
+         * @hide
+         */
+        public static final String getBluetoothA2dpOptionalCodecsEnabledKey(String address) {
+            return BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX +
+                    address.toUpperCase(Locale.ROOT);
         }
 
         /**
@@ -9921,7 +10000,8 @@ public final class Settings {
             CALL_AUTO_RETRY,
             DOCK_AUDIO_MEDIA_ENABLED,
             ENCODED_SURROUND_OUTPUT,
-            LOW_POWER_MODE_TRIGGER_LEVEL
+            LOW_POWER_MODE_TRIGGER_LEVEL,
+            BLUETOOTH_ON
         };
 
         private static final ContentProviderHolder sProviderHolder =
@@ -10407,6 +10487,15 @@ public final class Settings {
          * @hide
          */
         public static final String MAX_NOTIFICATION_ENQUEUE_RATE = "max_notification_enqueue_rate";
+
+        /**
+         * Displays toasts when an app posts a notification that does not specify a valid channel.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String SHOW_NOTIFICATION_CHANNEL_WARNINGS =
+                "show_notification_channel_warnings";
 
         /**
          * Whether cell is enabled/disabled

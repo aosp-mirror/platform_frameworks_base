@@ -63,6 +63,12 @@
         <!-- Drawable to be drawn over the view to mark it as autofilled-->
         <attr name="autofilledHighlight" format="reference" />
 
+        <!-- Max width of the autofill data set picker as a fraction of the screen width -->
+        <attr name="autofillDatasetPickerMaxWidth" format="reference" />
+
+        <!-- Max height of the autofill data set picker as a fraction of the screen height -->
+        <attr name="autofillDatasetPickerMaxHeight" format="reference" />
+
         <!-- Default disabled alpha for widgets that set enabled/disabled alpha programmatically. -->
         <attr name="disabledAlpha" format="float" />
         <!-- The alpha applied to the foreground color to create the primary text color. -->

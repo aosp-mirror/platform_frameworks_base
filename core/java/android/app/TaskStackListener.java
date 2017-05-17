@@ -31,7 +31,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onActivityPinned(String packageName) throws RemoteException {
+    public void onActivityPinned(String packageName, int taskId) throws RemoteException {
     }
 
     @Override
@@ -39,7 +39,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onPinnedActivityRestartAttempt() throws RemoteException {
+    public void onPinnedActivityRestartAttempt(boolean clearedTask) throws RemoteException {
     }
 
     @Override

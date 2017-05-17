@@ -23,7 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Result of a {@link EuiccService#downloadSubscription} operation.
+ * Result of a {@link EuiccService#onDownloadSubscription} operation.
  * @hide
  *
  * TODO(b/35851809): Make this a SystemApi.

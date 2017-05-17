@@ -30,6 +30,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageDexOptimizer;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
 
@@ -41,6 +42,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
 import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 
@@ -60,6 +62,7 @@ public class DexManager {
     // Maps package name to code locations.
     // It caches the code locations for the installed packages. This allows for
     // faster lookups (no locks) when finding what package owns the dex file.
+    @GuardedBy("mPackageCodeLocationsCache")
     private final Map<String, PackageCodeLocations> mPackageCodeLocationsCache;
 
     // PackageDexUsage handles the actual I/O operations. It is responsible to
@@ -204,7 +207,7 @@ public class DexManager {
         // In case there was an update, write the package use info to disk async.
         // Note that we do the writing here and not in PackageDexUsage in order to be
         // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
-        // multiple updates in PackaeDexUsage before writing it).
+        // multiple updates in PackageDexUsage before writing it).
         if (mPackageDexUsage.clearUsedByOtherApps(packageName)) {
             mPackageDexUsage.maybeWriteAsync();
         }
@@ -224,7 +227,7 @@ public class DexManager {
         // In case there was an update, write the package use info to disk async.
         // Note that we do the writing here and not in PackageDexUsage in order to be
         // consistent with other methods in DexManager (e.g. reconcileSecondaryDexFiles performs
-        // multiple updates in PackaeDexUsage before writing it).
+        // multiple updates in PackageDexUsage before writing it).
         if (updated) {
             mPackageDexUsage.maybeWriteAsync();
         }
@@ -243,17 +246,22 @@ public class DexManager {
 
     private void cachePackageCodeLocation(String packageName, String baseCodePath,
             String[] splitCodePaths, String[] dataDirs, int userId) {
-        PackageCodeLocations pcl = putIfAbsent(mPackageCodeLocationsCache, packageName,
-                new PackageCodeLocations(packageName, baseCodePath, splitCodePaths));
-        pcl.updateCodeLocation(baseCodePath, splitCodePaths);
-        if (dataDirs != null) {
-            for (String dataDir : dataDirs) {
-                // The set of data dirs includes deviceProtectedDataDir and
-                // credentialProtectedDataDir which might be null for shared
-                // libraries. Currently we don't track these but be lenient
-                // and check in case we ever decide to store their usage data.
-                if (dataDir != null) {
-                    pcl.mergeAppDataDirs(dataDir, userId);
+        synchronized (mPackageCodeLocationsCache) {
+            PackageCodeLocations pcl = putIfAbsent(mPackageCodeLocationsCache, packageName,
+                    new PackageCodeLocations(packageName, baseCodePath, splitCodePaths));
+            // TODO(calin): We are forced to extend the scope of this synchronization because
+            // the values of the cache (PackageCodeLocations) are updated in place.
+            // Make PackageCodeLocations immutable to simplify the synchronization reasoning.
+            pcl.updateCodeLocation(baseCodePath, splitCodePaths);
+            if (dataDirs != null) {
+                for (String dataDir : dataDirs) {
+                    // The set of data dirs includes deviceProtectedDataDir and
+                    // credentialProtectedDataDir which might be null for shared
+                    // libraries. Currently we don't track these but be lenient
+                    // and check in case we ever decide to store their usage data.
+                    if (dataDir != null) {
+                        pcl.mergeAppDataDirs(dataDir, userId);
+                    }
                 }
             }
         }
@@ -431,6 +439,52 @@ public class DexManager {
         }
     }
 
+    public RegisterDexModuleResult registerDexModule(ApplicationInfo info, String dexPath,
+            boolean isUsedByOtherApps, int userId) {
+        // Find the owning package record.
+        DexSearchResult searchResult = getDexPackage(info, dexPath, userId);
+
+        if (searchResult.mOutcome == DEX_SEARCH_NOT_FOUND) {
+            return new RegisterDexModuleResult(false, "Package not found");
+        }
+        if (!info.packageName.equals(searchResult.mOwningPackageName)) {
+            return new RegisterDexModuleResult(false, "Dex path does not belong to package");
+        }
+        if (searchResult.mOutcome == DEX_SEARCH_FOUND_PRIMARY ||
+                searchResult.mOutcome == DEX_SEARCH_FOUND_SPLIT) {
+            return new RegisterDexModuleResult(false, "Main apks cannot be registered");
+        }
+
+        // We found the package. Now record the usage for all declared ISAs.
+        boolean update = false;
+        Set<String> isas = new HashSet<>();
+        for (String isa : getAppDexInstructionSets(info)) {
+            isas.add(isa);
+            boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
+                dexPath, userId, isa, isUsedByOtherApps, /*primaryOrSplit*/ false);
+            update |= newUpdate;
+        }
+        if (update) {
+            mPackageDexUsage.maybeWriteAsync();
+        }
+
+        // Try to optimize the package according to the install reason.
+        String compilerFilter = PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                PackageManagerService.REASON_INSTALL);
+        int result = mPackageDexOptimizer.dexOptSecondaryDexPath(info, dexPath, isas,
+                compilerFilter, isUsedByOtherApps);
+
+        // If we fail to optimize the package log an error but don't propagate the error
+        // back to the app. The app cannot do much about it and the background job
+        // will rety again when it executes.
+        // TODO(calin): there might be some value to return the error here but it may
+        // cause red herrings since that doesn't mean the app cannot use the module.
+        if (result != PackageDexOptimizer.DEX_OPT_FAILED) {
+            Slog.e(TAG, "Failed to optimize dex module " + dexPath);
+        }
+        return new RegisterDexModuleResult(true, "Dex module registered successfully");
+    }
+
     /**
      * Return all packages that contain records of secondary dex files.
      */
@@ -479,10 +533,12 @@ public class DexManager {
         // The loadingPackage does not own the dex file.
         // Perform a reverse look-up in the cache to detect if any package has ownership.
         // Note that we can have false negatives if the cache falls out of date.
-        for (PackageCodeLocations pcl : mPackageCodeLocationsCache.values()) {
-            outcome = pcl.searchDex(dexPath, userId);
-            if (outcome != DEX_SEARCH_NOT_FOUND) {
-                return new DexSearchResult(pcl.mPackageName, outcome);
+        synchronized (mPackageCodeLocationsCache) {
+            for (PackageCodeLocations pcl : mPackageCodeLocationsCache.values()) {
+                outcome = pcl.searchDex(dexPath, userId);
+                if (outcome != DEX_SEARCH_NOT_FOUND) {
+                    return new DexSearchResult(pcl.mPackageName, outcome);
+                }
             }
         }
 
@@ -508,6 +564,20 @@ public class DexManager {
     private static <K,V> V putIfAbsent(Map<K,V> map, K key, V newValue) {
         V existingValue = map.putIfAbsent(key, newValue);
         return existingValue == null ? newValue : existingValue;
+    }
+
+    public static class RegisterDexModuleResult {
+        public RegisterDexModuleResult() {
+            this(false, null);
+        }
+
+        public RegisterDexModuleResult(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+
+        public final boolean success;
+        public final String message;
     }
 
     /**
@@ -589,6 +659,4 @@ public class DexManager {
             return mOwningPackageName + "-" + mOutcome;
         }
     }
-
-
 }

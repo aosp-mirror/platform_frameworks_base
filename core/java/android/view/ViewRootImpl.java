@@ -98,6 +98,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PhoneFallbackEventHandler;
+import com.android.internal.util.Preconditions;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.SurfaceCallbackHelper;
@@ -1560,16 +1561,6 @@ public final class ViewRootImpl implements ViewParent,
         host.dispatchApplyWindowInsets(getWindowInsets(true /* forceConstruct */));
     }
 
-    /**
-     * @return the last content insets for use in adjusting the source hint rect for the
-     * picture-in-picture transition.
-     *
-     * @hide
-     */
-    public Rect getLastContentInsets() {
-        return mAttachInfo.mContentInsets;
-    }
-
     private static boolean shouldUseDisplaySize(final WindowManager.LayoutParams lp) {
         return lp.type == TYPE_STATUS_BAR_PANEL
                 || lp.type == TYPE_INPUT_METHOD
@@ -2410,6 +2401,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void performMeasure(int childWidthMeasureSpec, int childHeightMeasureSpec) {
+        if (mView == null) {
+            return;
+        }
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "measure");
         try {
             mView.measure(childWidthMeasureSpec, childHeightMeasureSpec);
@@ -7195,7 +7189,7 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType) {
-        postSendWindowContentChangedCallback(source, changeType);
+        postSendWindowContentChangedCallback(Preconditions.checkNotNull(source), changeType);
     }
 
     @Override

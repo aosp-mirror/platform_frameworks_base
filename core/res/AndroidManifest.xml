@@ -377,8 +377,6 @@
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_PROGRESS" />
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_DONE" />
 
-    <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_SUBSCRIPTION_CHANGED" />
-    <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.ACTION_SUBINFO_CONTENT_CHANGE" />
@@ -446,6 +444,8 @@
     <protected-broadcast android:name="android.telecom.action.PHONE_ACCOUNT_UNREGISTERED" />
     <protected-broadcast android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
     <protected-broadcast android:name="android.telephony.action.CARRIER_CONFIG_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION" />
 
     <protected-broadcast android:name="com.android.bluetooth.btservice.action.ALARM_WAKEUP" />
@@ -827,16 +827,6 @@
         android:description="@string/permdesc_callPhone"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to manage its own calls, but rely on the system to route focus to the
-         currently active call.
-        <p>Protection level: dangerous
-    -->
-    <permission android:name="android.permission.MANAGE_OWN_CALLS"
-        android:permissionGroup="android.permission-group.PHONE"
-        android:label="@string/permlab_manageOwnCalls"
-        android:description="@string/permdesc_manageOwnCalls"
-        android:protectionLevel="dangerous" />
-
     <!-- Allows an application to access the IMS call service: making and
          modifying a call
         <p>Protection level: signature|privileged
@@ -924,6 +914,16 @@
         android:description="@string/permdesc_answerPhoneCalls"
         android:protectionLevel="dangerous|runtime" />
 
+    <!-- Allows a calling application which manages it own calls through the self-managed
+         {@link android.telecom.ConnectionService} APIs.  See
+         {@link android.telecom.PhoneAccount#CAPABILITY_SELF_MANAGED for more information on the
+         self-managed ConnectionService APIs.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.MANAGE_OWN_CALLS"
+                android:label="@string/permlab_manageOwnCalls"
+                android:description="@string/permdesc_manageOwnCalls"
+                android:protectionLevel="normal" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device microphone                        -->
@@ -1313,6 +1313,13 @@
          @hide This should only be used by Connectivity and Wifi Services.
     -->
     <permission android:name="android.permission.NETWORK_STACK"
+        android:protectionLevel="signature" />
+
+    <!-- Allows Settings and SystemUI to call methods in Networking services
+         <p>Not for use by third-party or privileged applications.
+         @hide This should only be used by Settings and SystemUI.
+    -->
+    <permission android:name="android.permission.NETWORK_SETTINGS"
         android:protectionLevel="signature" />
 
     <!-- ======================================= -->
@@ -1900,20 +1907,20 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows a companion app to run in the background.
-         <p>Protection level: signature
+         <p>Protection level: normal
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND"
                 android:label="@string/permlab_runInBackground"
                 android:description="@string/permdesc_runInBackground"
-                android:protectionLevel="signature" />
+                android:protectionLevel="normal" />
 
     <!-- Allows a companion app to use data in the background.
-         <p>Protection level: signature
+         <p>Protection level: normal
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND"
                 android:label="@string/permlab_useDataInBackground"
                 android:description="@string/permdesc_useDataInBackground"
-                android:protectionLevel="signature" />
+                android:protectionLevel="normal" />
 
 
     <!-- ================================== -->
@@ -2208,6 +2215,22 @@
          @hide -->
     <permission android:name="android.permission.UPDATE_CONFIG"
         android:protectionLevel="signature|privileged" />
+
+    <!-- Allows a time zone rule updater application to request
+         the system installs / uninstalls timezone rules.
+         <p>An application requesting this permission is responsible for
+         verifying the source and integrity of the update before passing
+         it off to the installer components.
+         @hide -->
+    <permission android:name="android.permission.UPDATE_TIME_ZONE_RULES"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- Must be required by a time zone rule updater application,
+         to ensure that only the system can trigger it.
+         @hide -->
+    <permission android:name="android.permission.TRIGGER_TIME_ZONE_RULES_CHECK"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.TRIGGER_TIME_ZONE_RULES_CHECK"/>
 
     <!-- Allows the system to reset throttling in shortcut manager.
          @hide -->
@@ -2741,6 +2764,13 @@
     <!-- Allows an application to use InputFlinger's low level features.
          @hide -->
     <permission android:name="android.permission.ACCESS_INPUT_FLINGER"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to disable/enable input devices.
+         Could be used to prevent unwanted touch events
+         on a touchscreen, for example during swimming or rain.
+         @hide -->
+    <permission android:name="android.permission.DISABLE_INPUT_DEVICE"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to configure and connect to Wifi displays
@@ -3374,6 +3404,8 @@
         android:protectionLevel="signature" />
 
     <!-- Must be required by system apps when accessing restricted VR APIs.
+         @hide
+         @SystemApi
          <p>Protection level: signature -->
     <permission android:name="android.permission.RESTRICTED_VR_ACCESS"
         android:protectionLevel="signature|preinstalled" />

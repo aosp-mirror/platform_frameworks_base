@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include <android/hardware/power/1.0/IPower.h>
+#include <android/hardware/power/1.1/IPower.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <jni.h>
 
@@ -46,6 +47,8 @@ using android::hardware::power::V1_0::IPower;
 using android::hardware::power::V1_0::PowerStatePlatformSleepState;
 using android::hardware::power::V1_0::PowerStateVoter;
 using android::hardware::power::V1_0::Status;
+using android::hardware::power::V1_1::PowerStateSubsystem;
+using android::hardware::power::V1_1::PowerStateSubsystemSleepState;
 using android::hardware::hidl_vec;
 
 namespace android
@@ -263,9 +266,105 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
     return total_added;
 }
 
+static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject outBuf) {
+    char *output = (char*)env->GetDirectBufferAddress(outBuf);
+    char *offset = output;
+    int remaining = (int)env->GetDirectBufferCapacity(outBuf);
+    int total_added = -1;
+
+	//This is a IPower 1.1 API
+    sp<android::hardware::power::V1_1::IPower> gPowerHal_1_1 = nullptr;
+
+    if (outBuf == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", "null argument");
+        return -1;
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(gPowerHalMutex);
+        if (!getPowerHal()) {
+            ALOGE("Power Hal not loaded");
+            return -1;
+        }
+
+        //Trying to cast to 1.1, this will succeed only for devices supporting 1.1
+        gPowerHal_1_1 = android::hardware::power::V1_1::IPower::castFrom(gPowerHal);
+    	if (gPowerHal_1_1 == nullptr) {
+            //This device does not support IPower@1.1, exiting gracefully
+            return 0;
+    	}
+
+        Return<void> ret = gPowerHal_1_1->getSubsystemLowPowerStats(
+           [&offset, &remaining, &total_added](hidl_vec<PowerStateSubsystem> subsystems,
+                Status status) {
+
+            if (status != Status::SUCCESS)
+                return;
+
+            for (size_t i = 0; i < subsystems.size(); i++) {
+                int added;
+                const PowerStateSubsystem &subsystem = subsystems[i];
+
+                added = snprintf(offset, remaining,
+                                 "subsystem_%zu name=%s ", i + 1, subsystem.name.c_str());
+                if (added < 0) {
+                    break;
+                }
+
+                if (added > remaining) {
+                    added = remaining;
+                }
+
+                offset += added;
+                remaining -= added;
+                total_added += added;
+
+                for (size_t j = 0; j < subsystem.states.size(); j++) {
+                    const PowerStateSubsystemSleepState& state = subsystem.states[j];
+                    added = snprintf(offset, remaining,
+                                     "state_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " last entry TS(ms)=%" PRIu64 " ",
+                                     j + 1, state.name.c_str(), state.residencyInMsecSinceBoot,
+                                     state.totalTransitions, state.lastEntryTimestampMs);
+                    if (added < 0) {
+                        break;
+                    }
+
+                    if (added > remaining) {
+                        added = remaining;
+                    }
+
+                    offset += added;
+                    remaining -= added;
+                    total_added += added;
+                }
+
+                if (remaining <= 0) {
+                    /* rewrite NULL character*/
+                    offset--;
+                    total_added--;
+                    ALOGE("PowerHal: buffer not enough");
+                    break;
+                }
+            }
+        }
+        );
+
+        if (!ret.isOk()) {
+            ALOGE("getSubsystemLowPowerStats() failed: power HAL service not available");
+            gPowerHal = nullptr;
+            return -1;
+        }
+    }
+
+    *offset = 0;
+    total_added += 1;
+    return total_added;
+}
+
 static const JNINativeMethod method_table[] = {
     { "nativeWaitWakeup", "(Ljava/nio/ByteBuffer;)I", (void*)nativeWaitWakeup },
     { "getPlatformLowPowerStats", "(Ljava/nio/ByteBuffer;)I", (void*)getPlatformLowPowerStats },
+    { "getSubsystemLowPowerStats", "(Ljava/nio/ByteBuffer;)I", (void*)getSubsystemLowPowerStats },
 };
 
 int register_android_server_BatteryStatsService(JNIEnv *env)

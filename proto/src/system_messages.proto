@@ -180,6 +180,9 @@ message SystemMessage {
     // Package: android
     NOTE_FOREGROUND_SERVICES = 40;
 
+    // Inform the user that the connected audio accessory is not supported
+    NOTE_USB_AUDIO_ACCESSORY_NOT_SUPPORTED = 41;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
@@ -211,6 +214,10 @@ message SystemMessage {
     // Confirm that the user wants to log out of the device.
     // Package: com.android.systemui
     NOTE_LOGOUT_USER = 1011;
+
+    // Notify the user that a TV PIP is running.
+    // Package: com.android.systemui
+    NOTE_TV_PIP = 1100;
 
     // Communicate to the user about remote bugreports.
     // Package: android

@@ -35,7 +35,6 @@ import android.widget.FrameLayout;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
 import com.android.keyguard.LatencyTracker;
@@ -221,8 +220,11 @@ public abstract class PanelView extends FrameLayout {
 
     public void setTouchDisabled(boolean disabled) {
         mTouchDisabled = disabled;
-        if (mTouchDisabled && mTracking) {
-            onTrackingStopped(true /* expanded */);
+        if (mTouchDisabled) {
+            cancelHeightAnimator();
+            if (mTracking) {
+                onTrackingStopped(true /* expanded */);
+            }
         }
     }
 
@@ -1017,12 +1019,20 @@ public abstract class PanelView extends FrameLayout {
             @Override
             public void run() {
                 notifyExpandingFinished();
-                mStatusBar.onHintFinished();
+                onUnlockHintFinished();
                 mHintAnimationRunning = false;
             }
         });
-        mStatusBar.onUnlockHintStarted();
+        onUnlockHintStarted();
         mHintAnimationRunning = true;
+    }
+
+    protected void onUnlockHintFinished() {
+        mStatusBar.onHintFinished();
+    }
+
+    protected void onUnlockHintStarted() {
+        mStatusBar.onUnlockHintStarted();
     }
 
     /**

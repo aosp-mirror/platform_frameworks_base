@@ -154,10 +154,10 @@ public class Editor {
     private static final int MENU_ITEM_ORDER_COPY = 5;
     private static final int MENU_ITEM_ORDER_PASTE = 6;
     private static final int MENU_ITEM_ORDER_SHARE = 7;
-    private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 8;
-    private static final int MENU_ITEM_ORDER_SELECT_ALL = 9;
-    private static final int MENU_ITEM_ORDER_REPLACE = 10;
-    private static final int MENU_ITEM_ORDER_AUTOFILL = 11;
+    private static final int MENU_ITEM_ORDER_SELECT_ALL = 8;
+    private static final int MENU_ITEM_ORDER_REPLACE = 9;
+    private static final int MENU_ITEM_ORDER_AUTOFILL = 10;
+    private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 11;
     private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
 
     // Each Editor manages its own undo stack.
@@ -841,7 +841,7 @@ public class Editor {
      * Adjusts selection to the word under last touch offset. Return true if the operation was
      * successfully performed.
      */
-    private boolean selectCurrentWord() {
+    boolean selectCurrentWord() {
         if (!mTextView.canSelectText()) {
             return false;
         }
@@ -1404,6 +1404,11 @@ public class Editor {
             // or double-clicks that could "dismiss" the floating toolbar.
             int delay = ViewConfiguration.getDoubleTapTimeout();
             mTextView.postDelayed(mShowFloatingToolbar, delay);
+
+            // This classifies the text and most likely returns before the toolbar is actually
+            // shown. If not, it will update the toolbar with the result when classification
+            // returns. We would rather not wait for a long running classification process.
+            invalidateActionModeAsync();
         }
     }
 
@@ -1853,7 +1858,7 @@ public class Editor {
             mInsertionPointCursorController.invalidateHandle();
         }
         if (mTextActionMode != null) {
-            invalidateActionModeAsync();
+            invalidateActionMode();
         }
     }
 
@@ -1945,12 +1950,12 @@ public class Editor {
                 if (mRestartActionModeOnNextRefresh) {
                     // To avoid distraction, newly start action mode only when selection action
                     // mode is being restarted.
-                    startSelectionActionMode();
+                    startSelectionActionModeAsync(false);
                 }
             } else if (selectionController == null || !selectionController.isActive()) {
                 // Insertion action mode is active. Avoid dismissing the selection.
                 stopTextActionModeWithPreservingSelection();
-                startSelectionActionMode();
+                startSelectionActionModeAsync(false);
             } else {
                 mTextActionMode.invalidateContentRect();
             }
@@ -2004,22 +2009,24 @@ public class Editor {
     /**
      * Asynchronously starts a selection action mode using the TextClassifier.
      */
-    void startSelectionActionModeAsync() {
-        getSelectionActionModeHelper().startActionModeAsync();
-    }
-
-    /**
-     * Synchronously starts a selection action mode without the TextClassifier.
-     */
-    void startSelectionActionMode() {
-        getSelectionActionModeHelper().startActionMode();
+    void startSelectionActionModeAsync(boolean adjustSelection) {
+        getSelectionActionModeHelper().startActionModeAsync(adjustSelection);
     }
 
     /**
      * Asynchronously invalidates an action mode using the TextClassifier.
      */
-    private void invalidateActionModeAsync() {
+    void invalidateActionModeAsync() {
         getSelectionActionModeHelper().invalidateActionModeAsync();
+    }
+
+    /**
+     * Synchronously invalidates an action mode without the TextClassifier.
+     */
+    private void invalidateActionMode() {
+        if (mTextActionMode != null) {
+            mTextActionMode.invalidate();
+        }
     }
 
     private SelectionActionModeHelper getSelectionActionModeHelper() {
@@ -2075,7 +2082,7 @@ public class Editor {
         }
         if (mTextActionMode != null) {
             // Text action mode is already started
-            invalidateActionModeAsync();
+            invalidateActionMode();
             return false;
         }
 
@@ -2186,7 +2193,7 @@ public class Editor {
     }
 
     void onTouchUpEvent(MotionEvent event) {
-        if (getSelectionActionModeHelper().resetOriginalSelection(
+        if (getSelectionActionModeHelper().resetSelection(
                 getTextView().getOffsetForPosition(event.getX(), event.getY()))) {
             return;
         }
@@ -2634,9 +2641,9 @@ public class Editor {
                 .setAlphabeticShortcut('v')
                 .setEnabled(mTextView.canPaste())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_PASTE, MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+        menu.add(Menu.NONE, TextView.ID_PASTE_AS_PLAIN_TEXT, MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
                 com.android.internal.R.string.paste_as_plain_text)
-                .setEnabled(mTextView.canPaste())
+                .setEnabled(mTextView.canPasteAsPlainText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
         menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
                 com.android.internal.R.string.share)
@@ -3775,7 +3782,6 @@ public class Editor {
             mode.setSubtitle(null);
             mode.setTitleOptionalHint(true);
             populateMenuWithItems(menu);
-            updateAssistMenuItem(menu);
 
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
@@ -3843,8 +3849,18 @@ public class Editor {
                         .setShowAsAction(mode);
             }
 
+            if (mTextView.canPasteAsPlainText()) {
+                menu.add(
+                        Menu.NONE,
+                        TextView.ID_PASTE_AS_PLAIN_TEXT,
+                        MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+                        com.android.internal.R.string.paste_as_plain_text)
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            }
+
             updateSelectAllItem(menu);
             updateReplaceItem(menu);
+            updateAssistMenuItem(menu);
         }
 
         @Override
@@ -3909,6 +3925,8 @@ public class Editor {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            getSelectionActionModeHelper().onSelectionAction();
+
             if (mProcessTextIntentActionsHandler.performMenuItemAction(item)) {
                 return true;
             }
@@ -4694,7 +4712,7 @@ public class Editor {
             }
             positionAtCursorOffset(offset, false);
             if (mTextActionMode != null) {
-                invalidateActionModeAsync();
+                invalidateActionMode();
             }
         }
 
@@ -4778,7 +4796,7 @@ public class Editor {
             }
             updateDrawable();
             if (mTextActionMode != null) {
-                invalidateActionModeAsync();
+                invalidateActionMode();
             }
         }
 
@@ -5405,13 +5423,8 @@ public class Editor {
                     resetDragAcceleratorState();
 
                     if (mTextView.hasSelection()) {
-                        // Do not invoke the text assistant if this was a drag selection.
-                        if (mHaventMovedEnoughToStartDrag) {
-                            startSelectionActionModeAsync();
-                        } else {
-                            startSelectionActionMode();
-                        }
-
+                        // Drag selection should not be adjusted by the text classifier.
+                        startSelectionActionModeAsync(mHaventMovedEnoughToStartDrag);
                     }
                     break;
             }

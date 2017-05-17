@@ -67,6 +67,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -105,6 +106,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_UNLOCK_USER = 11;
     private static final int MSG_STOP_USER = 12;
     private static final int MSG_DISPATCH_UNLOCK_LOCKOUT = 13;
+    private static final int MSG_REFRESH_DEVICE_LOCKED_FOR_USER = 14;
 
     private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
 
@@ -124,8 +126,12 @@ public class TrustManagerService extends SystemService {
     @GuardedBy("mDeviceLockedForUser")
     private final SparseBooleanArray mDeviceLockedForUser = new SparseBooleanArray();
 
-    @GuardedBy("mDeviceLockedForUser")
+    @GuardedBy("mTrustUsuallyManagedForUser")
     private final SparseBooleanArray mTrustUsuallyManagedForUser = new SparseBooleanArray();
+
+    // set to true only if user can skip bouncer
+    @GuardedBy("mUsersUnlockedByFingerprint")
+    private SparseBooleanArray mUsersUnlockedByFingerprint = new SparseBooleanArray();
 
     private final StrongAuthTracker mStrongAuthTracker;
 
@@ -326,8 +332,6 @@ public class TrustManagerService extends SystemService {
                     agentInfo.label = resolveInfo.loadLabel(pm);
                     agentInfo.icon = resolveInfo.loadIcon(pm);
                     agentInfo.settings = getSettingsAttrs(pm, resolveInfo);
-                    agentInfo.agent = new TrustAgentWrapper(mContext, this,
-                            new Intent().setComponent(name), userInfo.getUserHandle());
                 } else {
                     int index = mActiveAgents.indexOf(agentInfo);
                     agentInfo = mActiveAgents.valueAt(index);
@@ -362,6 +366,11 @@ public class TrustManagerService extends SystemService {
                             continue;
                         }
                     }
+                }
+
+                if (agentInfo.agent == null) {
+                    agentInfo.agent = new TrustAgentWrapper(mContext, this,
+                            new Intent().setComponent(name), userInfo.getUserHandle());
                 }
 
                 if (!mActiveAgents.contains(agentInfo)) {
@@ -405,7 +414,6 @@ public class TrustManagerService extends SystemService {
                     + " must be USER_ALL or a specific user.", new Throwable("here"));
             userId = UserHandle.USER_ALL;
         }
-
         List<UserInfo> userInfos;
         if (userId == UserHandle.USER_ALL) {
             userInfos = mUserManager.getUsers(true /* excludeDying */);
@@ -428,13 +436,19 @@ public class TrustManagerService extends SystemService {
             boolean secure = mLockPatternUtils.isSecure(id);
             boolean trusted = aggregateIsTrusted(id);
             boolean showingKeyguard = true;
+            boolean fingerprintAuthenticated = false;
+
             if (mCurrentUser == id) {
+                synchronized(mUsersUnlockedByFingerprint) {
+                    fingerprintAuthenticated = mUsersUnlockedByFingerprint.get(id, false);
+                }
                 try {
                     showingKeyguard = wm.isKeyguardLocked();
                 } catch (RemoteException e) {
                 }
             }
-            boolean deviceLocked = secure && showingKeyguard && !trusted;
+            boolean deviceLocked = secure && showingKeyguard && !trusted &&
+                    !fingerprintAuthenticated;
             setDeviceLockedForUser(id, deviceLocked);
         }
     }
@@ -575,20 +589,22 @@ public class TrustManagerService extends SystemService {
     }
 
     private void maybeEnableFactoryTrustAgents(LockPatternUtils utils, int userId) {
-        if (0 != Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.TRUST_AGENTS_INITIALIZED, 0, userId)) {
-            return;
-        }
-        PackageManager pm = mContext.getPackageManager();
-        List<ResolveInfo> resolveInfos = resolveAllowedTrustAgents(pm, userId);
         ComponentName defaultAgent = getDefaultFactoryTrustAgent(mContext);
         boolean shouldUseDefaultAgent = defaultAgent != null;
-        ArraySet<ComponentName> discoveredAgents = new ArraySet<>();
 
         if (shouldUseDefaultAgent) {
-            discoveredAgents.add(defaultAgent);
             Log.i(TAG, "Enabling " + defaultAgent + " because it is a default agent.");
+            utils.setEnabledTrustAgents(Collections.singleton(defaultAgent), userId);
         } else { // A default agent is not set; perform regular trust agent discovery
+            if (0 != Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.TRUST_AGENTS_INITIALIZED, 0, userId)) {
+                return;
+            }
+            PackageManager pm = mContext.getPackageManager();
+            List<ResolveInfo> resolveInfos = resolveAllowedTrustAgents(pm, userId);
+
+            ArraySet<ComponentName> discoveredAgents = new ArraySet<>();
+
             for (ResolveInfo resolveInfo : resolveInfos) {
                 ComponentName componentName = getComponentName(resolveInfo);
                 int applicationInfoFlags = resolveInfo.serviceInfo.applicationInfo.flags;
@@ -599,13 +615,13 @@ public class TrustManagerService extends SystemService {
                 }
                 discoveredAgents.add(componentName);
             }
-        }
 
-        List<ComponentName> previouslyEnabledAgents = utils.getEnabledTrustAgents(userId);
-        if (previouslyEnabledAgents != null) {
-            discoveredAgents.addAll(previouslyEnabledAgents);
+            List<ComponentName> previouslyEnabledAgents = utils.getEnabledTrustAgents(userId);
+            if (previouslyEnabledAgents != null) {
+                discoveredAgents.addAll(previouslyEnabledAgents);
+            }
+            utils.setEnabledTrustAgents(discoveredAgents, userId);
         }
-        utils.setEnabledTrustAgents(discoveredAgents, userId);
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.TRUST_AGENTS_INITIALIZED, 1, userId);
     }
@@ -980,6 +996,26 @@ public class TrustManagerService extends SystemService {
                     "query trust state");
             return isTrustUsuallyManagedInternal(userId);
         }
+
+        @Override
+        public void unlockedByFingerprintForUser(int userId) {
+            enforceReportPermission();
+            synchronized(mUsersUnlockedByFingerprint) {
+                mUsersUnlockedByFingerprint.put(userId, true);
+            }
+            mHandler.obtainMessage(MSG_REFRESH_DEVICE_LOCKED_FOR_USER, userId,
+                    0 /* arg2 */).sendToTarget();
+        }
+
+        @Override
+        public void clearAllFingerprints() {
+            enforceReportPermission();
+            synchronized(mUsersUnlockedByFingerprint) {
+                mUsersUnlockedByFingerprint.clear();
+            }
+            mHandler.obtainMessage(MSG_REFRESH_DEVICE_LOCKED_FOR_USER, UserHandle.USER_ALL,
+                    0 /* arg2 */).sendToTarget();
+        }
     };
 
     private boolean isTrustUsuallyManagedInternal(int userId) {
@@ -1067,6 +1103,9 @@ public class TrustManagerService extends SystemService {
                         }
                     }
                     break;
+                case MSG_REFRESH_DEVICE_LOCKED_FOR_USER:
+                    refreshDeviceLockedForUser(msg.arg1);
+                    break;
             }
         }
     };
@@ -1125,6 +1164,9 @@ public class TrustManagerService extends SystemService {
                     }
                     synchronized (mTrustUsuallyManagedForUser) {
                         mTrustUsuallyManagedForUser.delete(userId);
+                    }
+                    synchronized (mUsersUnlockedByFingerprint) {
+                        mUsersUnlockedByFingerprint.delete(userId);
                     }
                     refreshAgentList(userId);
                     refreshDeviceLockedForUser(userId);

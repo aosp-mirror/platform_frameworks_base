@@ -157,6 +157,7 @@ public abstract class PackageManager {
             MATCH_DISABLED_COMPONENTS,
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
             MATCH_INSTANT,
+            MATCH_STATIC_SHARED_LIBRARIES,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
     })
@@ -177,6 +178,7 @@ public abstract class PackageManager {
             MATCH_SYSTEM_ONLY,
             MATCH_UNINSTALLED_PACKAGES,
             MATCH_INSTANT,
+            MATCH_STATIC_SHARED_LIBRARIES,
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
@@ -473,6 +475,16 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int MATCH_EXPLICITLY_VISIBLE_ONLY = 0x02000000;
+
+    /**
+     * Internal {@link PackageInfo} flag: include static shared libraries.
+     * Apps that depend on static shared libs can always access the version
+     * of the lib they depend on. System/shell/root can access all shared
+     * libs regardless of dependency but need to explicitly ask for them
+     * via this flag.
+     * @hide
+     */
+    public static final int MATCH_STATIC_SHARED_LIBRARIES = 0x04000000;
 
     /**
      * Internal flag used to indicate that a system component has done their
@@ -2269,6 +2281,14 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WIFI_AWARE = "android.hardware.wifi.aware";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports Wi-Fi Passpoint.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -4646,6 +4666,14 @@ public abstract class PackageManager {
 
     /**
      * If there is already an application with the given package name installed
+     * on the system for other users, also install it for the calling user.
+     * @hide
+     */
+    public abstract int installExistingPackage(String packageName, @InstallReason int installReason)
+            throws NameNotFoundException;
+
+    /**
+     * If there is already an application with the given package name installed
      * on the system for other users, also install it for the specified user.
      * @hide
      */
@@ -5725,4 +5753,48 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract String getInstantAppAndroidId(String packageName, @NonNull UserHandle user);
+
+    /**
+     * Callback use to notify the callers of module registration that the operation
+     * has finished.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static abstract class DexModuleRegisterCallback {
+        public abstract void onDexModuleRegistered(String dexModulePath, boolean success,
+                String message);
+    }
+
+    /**
+     * Register an application dex module with the package manager.
+     * The package manager will keep track of the given module for future optimizations.
+     *
+     * Dex module optimizations will disable the classpath checking at runtime. The client bares
+     * the responsibility to ensure that the static assumptions on classes in the optimized code
+     * hold at runtime (e.g. there's no duplicate classes in the classpath).
+     *
+     * Note that the package manager already keeps track of dex modules loaded with
+     * {@link dalvik.system.DexClassLoader} and {@link dalvik.system.PathClassLoader}.
+     * This can be called for an eager registration.
+     *
+     * The call might take a while and the results will be posted on the main thread, using
+     * the given callback.
+     *
+     * If the module is intended to be shared with other apps, make sure that the file
+     * permissions allow for it.
+     * If at registration time the permissions allow for others to read it, the module would
+     * be marked as a shared module which might undergo a different optimization strategy.
+     * (usually shared modules will generated larger optimizations artifacts,
+     * taking more disk space).
+     *
+     * @param dexModulePath the absolute path of the dex module.
+     * @param callback if not null, {@link DexModuleRegisterCallback#onDexModuleRegistered} will
+     *                 be called once the registration finishes.
+     *
+     * @hide
+     */
+    @SystemApi
+    public abstract void registerDexModule(String dexModulePath,
+            @Nullable DexModuleRegisterCallback callback);
 }

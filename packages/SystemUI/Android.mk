@@ -31,13 +31,15 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-Iaidl-files-unde
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     SystemUIPluginLib \
+    android-support-v4 \
     android-support-v7-recyclerview \
     android-support-v7-preference \
     android-support-v7-appcompat \
     android-support-v7-mediarouter \
     android-support-v7-palette \
     android-support-v14-preference \
-    android-support-v17-leanback
+    android-support-v17-leanback \
+    colorextraction
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     SystemUI-tags \

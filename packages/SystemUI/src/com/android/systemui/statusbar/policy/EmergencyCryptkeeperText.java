@@ -47,6 +47,11 @@ public class EmergencyCryptkeeperText extends TextView {
         public void onPhoneStateChanged(int phoneState) {
             update();
         }
+
+        @Override
+        public void onRefreshCarrierInfo() {
+            update();
+        }
     };
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override

@@ -372,6 +372,8 @@ public final class NsdManager {
                     ((DiscoveryListener) listener).onServiceLost((NsdServiceInfo) message.obj);
                     break;
                 case STOP_DISCOVERY_FAILED:
+                    // TODO: failure to stop discovery should be internal and retried internally, as
+                    // the effect for the client is indistinguishable from STOP_DISCOVERY_SUCCEEDED
                     removeListener(message.arg2);
                     ((DiscoveryListener) listener).onStopDiscoveryFailed(getNsdServiceInfoType(ns),
                             message.arg1);
@@ -393,6 +395,8 @@ public final class NsdManager {
                     ((RegistrationListener) listener).onUnregistrationFailed(ns, message.arg1);
                     break;
                 case UNREGISTER_SERVICE_SUCCEEDED:
+                    // TODO: do not unregister listener until service is unregistered, or provide
+                    // alternative way for unregistering ?
                     removeListener(message.arg2);
                     ((RegistrationListener) listener).onServiceUnregistered(ns);
                     break;

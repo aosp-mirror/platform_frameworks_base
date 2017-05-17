@@ -152,6 +152,12 @@ public class StorageMeasurement {
         final MeasurementDetails details = new MeasurementDetails();
         if (mVolume == null) return details;
 
+        if (mVolume.getType() == VolumeInfo.TYPE_PUBLIC) {
+            details.totalSize = mVolume.getPath().getTotalSpace();
+            details.availSize = mVolume.getPath().getUsableSpace();
+            return details;
+        }
+
         try {
             details.totalSize = mStats.getTotalBytes(mVolume.fsUuid);
             details.availSize = mStats.getFreeBytes(mVolume.fsUuid);
@@ -160,7 +166,6 @@ public class StorageMeasurement {
             Log.w(TAG, e);
             return details;
         }
-
 
         final long finishTotal = SystemClock.elapsedRealtime();
         Log.d(TAG, "Measured total storage in " + (finishTotal - start) + "ms");

@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -48,9 +49,11 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE
 import static com.android.server.wm.WindowManagerService.logWithStack;
 
 import android.annotation.NonNull;
+import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -67,6 +70,8 @@ import com.android.server.wm.WindowManagerService.H;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+
+import static android.os.Build.VERSION_CODES.O;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -555,6 +560,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // with it will be removed as soon as their animations are complete
             mAppAnimator.clearAnimation();
             mAppAnimator.animating = false;
+            if (stack != null) {
+                stack.mExitingAppTokens.remove(this);
+            }
             removeIfPossible();
         }
 
@@ -1243,7 +1251,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @Override
     int getOrientation(int candidate) {
-        if (!fillsParent()) {
+        // We do not allow non-fullscreen apps to influence orientation beyond O. While we do
+        // throw an exception in {@link Activity#onCreate} and
+        // {@link Activity#setRequestedOrientation}, we also ignore the orientation here so that
+        // other calculations aren't affected.
+        if (!fillsParent() && mTargetSdk > O) {
             // Can't specify orientation if app doesn't fill parent.
             return SCREEN_ORIENTATION_UNSET;
         }
@@ -1528,12 +1540,24 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return candidate;
     }
 
-    void setDisablePreviewSnapshots(boolean disable) {
+    /**
+     * See {@link Activity#setDisablePreviewScreenshots}.
+     */
+    void setDisablePreviewScreenshots(boolean disable) {
         mDisbalePreviewScreenshots = disable;
     }
 
-    boolean shouldDisablePreviewScreenshots() {
-        return mDisbalePreviewScreenshots;
+    /**
+     * Retrieves whether we'd like to generate a snapshot that's based solely on the theme. This is
+     * the case when preview screenshots are disabled {@link #setDisablePreviewScreenshots} or when
+     * we can't take a snapshot for other reasons, for example, if we have a secure window.
+     *
+     * @return True if we need to generate an app theme snapshot, false if we'd like to take a real
+     *         screenshot.
+     */
+    boolean shouldUseAppThemeSnapshot() {
+        return mDisbalePreviewScreenshots || forAllWindows(w -> (w.mAttrs.flags & FLAG_SECURE) != 0,
+                true /* topToBottom */);
     }
 
     @Override

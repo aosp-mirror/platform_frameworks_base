@@ -17,15 +17,13 @@
 package android.telephony.mbms;
 
 import android.net.Uri;
-import android.telephony.SignalStrength;
-import android.telephony.mbms.StreamingService;
 
 /**
  * @hide
  */
 oneway interface IStreamingServiceCallback {
     void error(int errorCode, String message);
-    void streamStateChanged(in StreamingService service, int state);
+    void streamStateChanged(int state);
     void uriUpdated(in Uri uri);
-    void signalStrengthUpdated(in SignalStrength signalStrength);
+    void broadcastSignalStrengthUpdated(int signalStrength);
 }

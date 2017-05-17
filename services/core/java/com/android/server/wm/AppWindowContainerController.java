@@ -36,7 +36,6 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.IApplicationToken;
@@ -319,7 +318,7 @@ public class AppWindowContainerController
                         + " token: " + mToken);
                 return;
             }
-            mContainer.setDisablePreviewSnapshots(disable);
+            mContainer.setDisablePreviewScreenshots(disable);
         }
     }
 
@@ -448,7 +447,7 @@ public class AppWindowContainerController
     public boolean addStartingWindow(String pkg, int theme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
-            boolean allowTaskSnapshot) {
+            boolean allowTaskSnapshot, boolean activityCreated) {
         synchronized(mWindowMap) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "setAppStartingWindow: token=" + mToken
                     + " pkg=" + pkg + " transferFrom=" + transferFrom);
@@ -476,7 +475,7 @@ public class AppWindowContainerController
             }
 
             final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
-                    allowTaskSnapshot);
+                    allowTaskSnapshot, activityCreated);
 
             if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
                 return createSnapshot();
@@ -547,8 +546,9 @@ public class AppWindowContainerController
     }
 
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
-            boolean allowTaskSnapshot) {
-        if (newTask || !processRunning) {
+            boolean allowTaskSnapshot, boolean activityCreated) {
+        if (newTask || !processRunning
+                || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
             return STARTING_WINDOW_TYPE_SNAPSHOT;

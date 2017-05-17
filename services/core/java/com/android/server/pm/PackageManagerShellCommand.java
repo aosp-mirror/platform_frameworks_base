@@ -48,6 +48,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.SystemProperties;
@@ -147,6 +148,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetHomeActivity();
                 case "get-privapp-permissions":
                     return runGetPrivappPermissions();
+                case "get-instantapp-resolver":
+                    return runGetInstantAppResolver();
                 case "has-feature":
                     return runHasFeature();
                 default:
@@ -889,7 +892,8 @@ class PackageManagerShellCommand extends ShellCommand {
             userId = UserHandle.USER_SYSTEM;
             flags |= PackageManager.DELETE_ALL_USERS;
         } else {
-            final PackageInfo info = mInterface.getPackageInfo(packageName, 0, userId);
+            final PackageInfo info = mInterface.getPackageInfo(packageName,
+                    PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
             if (info == null) {
                 pw.println("Failure [not installed for " + userId + "]");
                 return 1;
@@ -1269,6 +1273,21 @@ class PackageManagerShellCommand extends ShellCommand {
         getOutPrintWriter().println(privAppPermissions == null
                 ? "{}" : privAppPermissions.toString());
         return 0;
+    }
+
+    private int runGetInstantAppResolver() {
+        final PrintWriter pw = getOutPrintWriter();
+        try {
+            final ComponentName instantAppsResolver = mInterface.getInstantAppResolverComponent();
+            if (instantAppsResolver == null) {
+                return 1;
+            }
+            pw.println(instantAppsResolver.flattenToString());
+            return 0;
+        } catch (Exception e) {
+            pw.println(e.toString());
+            return 1;
+        }
     }
 
     private int runHasFeature() {
@@ -1686,7 +1705,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
         private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
-            public void send(int code, Intent intent, String resolvedType,
+            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
                     IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
                 try {
                     mResult.offer(intent, 5, TimeUnit.SECONDS);

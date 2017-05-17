@@ -1548,6 +1548,7 @@ public class BaseBundle {
         Parcel p = Parcel.obtain();
         p.setDataPosition(0);
         p.appendFrom(parcel, offset, length);
+        p.adoptClassCookies(parcel);
         if (DEBUG) Log.d(TAG, "Retrieving "  + Integer.toHexString(System.identityHashCode(this))
                 + ": " + length + " bundle bytes starting at " + offset);
         p.setDataPosition(0);

@@ -29,19 +29,15 @@ import android.widget.Switch;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 /** Quick settings tile: Airplane mode **/
 public class AirplaneModeTile extends QSTileImpl<BooleanState> {
-    private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_signal_airplane_enable_animation,
-                    R.drawable.ic_signal_airplane_disable);
-    private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_signal_airplane_disable_animation,
-                    R.drawable.ic_signal_airplane_enable);
+    private final Icon mIcon =
+            ResourceIcon.get(R.drawable.ic_signal_airplane_disable);
     private final GlobalSetting mSetting;
 
     private boolean mListening;
@@ -90,11 +86,11 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
         final boolean airplaneMode = value != 0;
         state.value = airplaneMode;
         state.label = mContext.getString(R.string.airplane_mode);
-        if (airplaneMode) {
-            state.icon = mEnable;
-        } else {
-            state.icon = mDisable;
+        state.icon = mIcon;
+        if (state.slash == null) {
+            state.slash = new SlashState();
         }
+        state.slash.isSlashed = !airplaneMode;
         state.state = airplaneMode ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();

@@ -43,6 +43,7 @@ import org.junit.runners.model.Statement;
  * <ul>
  * <li>System services can be mocked out with {@link #addMockSystemService}</li>
  * <li>Service binding can be mocked out with {@link #addMockService}</li>
+ * <li>Resources can be mocked out using {@link #getOrCreateTestableResources()}</li>
  * <li>Settings support {@link TestableSettingsProvider}</li>
  * <li>Has support for {@link LeakCheck} for services and receivers</li>
  * </ul>
@@ -50,10 +51,8 @@ import org.junit.runners.model.Statement;
  * <p>TestableContext should be defined as a rule on your test so it can clean up after itself.
  * Like the following:</p>
  * <pre class="prettyprint">
- * {@literal
- * @Rule
+ * &#064;Rule
  * private final TestableContext mContext = new TestableContext(InstrumentationRegister.getContext());
- * }
  * </pre>
  */
 public class TestableContext extends ContextWrapper implements TestRule {
@@ -69,6 +68,7 @@ public class TestableContext extends ContextWrapper implements TestRule {
     private LeakCheck.Tracker mReceiver;
     private LeakCheck.Tracker mService;
     private LeakCheck.Tracker mComponent;
+    private TestableResources mTestableResources;
 
     public TestableContext(Context base) {
         this(base, null);
@@ -98,25 +98,59 @@ public class TestableContext extends ContextWrapper implements TestRule {
         return super.getPackageManager();
     }
 
-    @Override
-    public Resources getResources() {
-        return super.getResources();
+    /**
+     * Makes sure the resources being returned by this TestableContext are a version of
+     * TestableResources.
+     * @see #getResources()
+     */
+    public void ensureTestableResources() {
+        if (mTestableResources == null) {
+            mTestableResources = new TestableResources(super.getResources());
+        }
     }
 
+    /**
+     * Get (and create if necessary) {@link TestableResources} for this TestableContext.
+     */
+    public TestableResources getOrCreateTestableResources() {
+        ensureTestableResources();
+        return mTestableResources;
+    }
+
+    /**
+     * Returns a Resources instance for the test.
+     *
+     * By default this returns the same resources object that would come from the
+     * {@link ContextWrapper}, but if {@link #ensureTestableResources()} or
+     * {@link #getOrCreateTestableResources()} has been called, it will return resources gotten from
+     * {@link TestableResources}.
+     */
+    @Override
+    public Resources getResources() {
+        return mTestableResources != null ? mTestableResources.getResources()
+                : super.getResources();
+    }
+
+    /**
+     * @see #getSystemService(String)
+     */
     public <T> void addMockSystemService(Class<T> service, T mock) {
         addMockSystemService(getSystemServiceName(service), mock);
     }
 
+    /**
+     * @see #getSystemService(String)
+     */
     public void addMockSystemService(String name, Object service) {
         if (mMockSystemServices == null) mMockSystemServices = new ArrayMap<>();
         mMockSystemServices.put(name, service);
     }
 
-    public void addMockService(ComponentName component, IBinder service) {
-        if (mMockServices == null) mMockServices = new ArrayMap<>();
-        mMockServices.put(component, service);
-    }
-
+    /**
+     * If a matching mock service has been added through {@link #addMockSystemService} then
+     * that will be returned, otherwise the real service will be acquired from the base
+     * context.
+     */
     @Override
     public Object getSystemService(String name) {
         if (mMockSystemServices != null && mMockSystemServices.containsKey(name)) {
@@ -137,6 +171,10 @@ public class TestableContext extends ContextWrapper implements TestRule {
         return mTestableContentResolver;
     }
 
+    /**
+     * Will always return itself for a TestableContext to ensure the testable effects extend
+     * to the application context.
+     */
     @Override
     public Context getApplicationContext() {
         // Return this so its always a TestableContext.
@@ -170,6 +208,24 @@ public class TestableContext extends ContextWrapper implements TestRule {
         super.unregisterReceiver(receiver);
     }
 
+    /**
+     * Adds a mock service to be connected to by a bindService call.
+     * <p>
+     *     Normally a TestableContext will pass through all bind requests to the base context
+     *     but when addMockService has been called for a ComponentName being bound, then
+     *     TestableContext will immediately trigger a {@link ServiceConnection#onServiceConnected}
+     *     with the specified service, and will call {@link ServiceConnection#onServiceDisconnected}
+     *     when the service is unbound.
+     * </p>
+     */
+    public void addMockService(ComponentName component, IBinder service) {
+        if (mMockServices == null) mMockServices = new ArrayMap<>();
+        mMockServices.put(component, service);
+    }
+
+    /**
+     * @see #addMockService(ComponentName, IBinder)
+     */
     @Override
     public boolean bindService(Intent service, ServiceConnection conn, int flags) {
         if (mService != null) mService.getLeakInfo(conn).addAllocation(new Throwable());
@@ -177,6 +233,9 @@ public class TestableContext extends ContextWrapper implements TestRule {
         return super.bindService(service, conn, flags);
     }
 
+    /**
+     * @see #addMockService(ComponentName, IBinder)
+     */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
@@ -185,6 +244,9 @@ public class TestableContext extends ContextWrapper implements TestRule {
         return super.bindServiceAsUser(service, conn, flags, handler, user);
     }
 
+    /**
+     * @see #addMockService(ComponentName, IBinder)
+     */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {
@@ -203,6 +265,9 @@ public class TestableContext extends ContextWrapper implements TestRule {
         return false;
     }
 
+    /**
+     * @see #addMockService(ComponentName, IBinder)
+     */
     @Override
     public void unbindService(ServiceConnection conn) {
         if (mService != null) mService.getLeakInfo(conn).clearAllocations();
@@ -214,6 +279,13 @@ public class TestableContext extends ContextWrapper implements TestRule {
         super.unbindService(conn);
     }
 
+    /**
+     * Check if the TestableContext has a mock binding for a specified component. Will return
+     * true between {@link ServiceConnection#onServiceConnected} and
+     * {@link ServiceConnection#onServiceDisconnected} callbacks for a mock service.
+     *
+     * @see #addMockService(ComponentName, IBinder)
+     */
     public boolean isBound(ComponentName component) {
         return mActiveServices != null && mActiveServices.containsValue(component);
     }

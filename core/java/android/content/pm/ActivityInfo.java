@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
+import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
@@ -440,7 +441,6 @@ public class ActivityInfo extends ComponentInfo
      * @hide
      */
     public static final int FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x400000;
-
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
@@ -883,9 +883,12 @@ public class ActivityInfo extends ComponentInfo
     /**
      * Screen rotation animation desired by the activity, with values as defined
      * for {@link android.view.WindowManager.LayoutParams#rotationAnimation}.
+     *
+     * -1 means to use the system default.
+     *
      * @hide
      */
-    public int rotationAnimation = ROTATION_ANIMATION_ROTATE;
+    public int rotationAnimation = -1;
 
     /** @hide */
     public static final int LOCK_TASK_LAUNCH_MODE_DEFAULT = 0;
@@ -975,9 +978,17 @@ public class ActivityInfo extends ComponentInfo
      * Returns true if the activity's orientation is fixed.
      * @hide
      */
-    boolean isFixedOrientation() {
+    public boolean isFixedOrientation() {
         return isFixedOrientationLandscape() || isFixedOrientationPortrait()
                 || screenOrientation == SCREEN_ORIENTATION_LOCKED;
+    }
+
+    /**
+     * Returns true if the specified orientation is considered fixed.
+     * @hide
+     */
+    static public boolean isFixedOrientation(int orientation) {
+        return isFixedOrientationLandscape(orientation) || isFixedOrientationPortrait(orientation);
     }
 
     /**
@@ -985,10 +996,18 @@ public class ActivityInfo extends ComponentInfo
      * @hide
      */
     boolean isFixedOrientationLandscape() {
-        return screenOrientation == SCREEN_ORIENTATION_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_USER_LANDSCAPE;
+        return isFixedOrientationLandscape(screenOrientation);
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to landscape.
+     * @hide
+     */
+    public static boolean isFixedOrientationLandscape(@ScreenOrientation int orientation) {
+        return orientation == SCREEN_ORIENTATION_LANDSCAPE
+                || orientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                || orientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                || orientation == SCREEN_ORIENTATION_USER_LANDSCAPE;
     }
 
     /**
@@ -996,10 +1015,18 @@ public class ActivityInfo extends ComponentInfo
      * @hide
      */
     boolean isFixedOrientationPortrait() {
-        return screenOrientation == SCREEN_ORIENTATION_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_USER_PORTRAIT;
+        return isFixedOrientationPortrait(screenOrientation);
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to portrait.
+     * @hide
+     */
+    public static boolean isFixedOrientationPortrait(@ScreenOrientation int orientation) {
+        return orientation == SCREEN_ORIENTATION_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_USER_PORTRAIT;
     }
 
     /**
@@ -1141,6 +1168,25 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(rotationAnimation);
         dest.writeInt(colorMode);
         dest.writeFloat(maxAspectRatio);
+    }
+
+    /**
+     * Determines whether the {@link Activity} is considered translucent or floating.
+     * @hide
+     */
+    public static boolean isTranslucentOrFloating(TypedArray attributes) {
+        final boolean isTranslucent =
+                attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsTranslucent,
+                        false);
+        final boolean isSwipeToDismiss = !attributes.hasValue(
+                com.android.internal.R.styleable.Window_windowIsTranslucent)
+                && attributes.getBoolean(
+                        com.android.internal.R.styleable.Window_windowSwipeToDismiss, false);
+        final boolean isFloating =
+                attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsFloating,
+                        false);
+
+        return isFloating || isTranslucent || isSwipeToDismiss;
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR

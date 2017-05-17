@@ -1,6 +1,25 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
 package com.android.server.backup.utils;
 
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
+
+import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.IBackupManagerMonitor;
@@ -8,8 +27,6 @@ import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
-
-import com.android.server.backup.RefactoredBackupManagerService;
 
 /**
  * Utility methods to communicate with BackupManagerMonitor.
@@ -46,14 +63,23 @@ public class BackupManagerMonitorUtils {
                 monitor.onEvent(bundle);
                 return monitor;
             } catch (RemoteException e) {
-                if (RefactoredBackupManagerService.DEBUG) {
-                    Slog.w(RefactoredBackupManagerService.TAG, "backup manager monitor went away");
+                if (DEBUG) {
+                    Slog.w(TAG, "backup manager monitor went away");
                 }
             }
         }
         return null;
     }
 
+    /**
+     * Adds given key-value pair in the bundle and returns the bundle. If bundle was null it will
+     * be created.
+     *
+     * @param extras - bundle where to add key-value to, if null a new bundle will be created.
+     * @param key - key.
+     * @param value - value.
+     * @return extras if it was not null and new bundle otherwise.
+     */
     public static Bundle putMonitoringExtra(Bundle extras, String key, String value) {
         if (extras == null) {
             extras = new Bundle();
@@ -62,14 +88,15 @@ public class BackupManagerMonitorUtils {
         return extras;
     }
 
-    private static Bundle putMonitoringExtra(Bundle extras, String key, int value) {
-        if (extras == null) {
-            extras = new Bundle();
-        }
-        extras.putInt(key, value);
-        return extras;
-    }
-
+    /**
+     * Adds given key-value pair in the bundle and returns the bundle. If bundle was null it will
+     * be created.
+     *
+     * @param extras - bundle where to add key-value to, if null a new bundle will be created.
+     * @param key - key.
+     * @param value - value.
+     * @return extras if it was not null and new bundle otherwise.
+     */
     public static Bundle putMonitoringExtra(Bundle extras, String key, long value) {
         if (extras == null) {
             extras = new Bundle();
@@ -78,6 +105,15 @@ public class BackupManagerMonitorUtils {
         return extras;
     }
 
+    /**
+     * Adds given key-value pair in the bundle and returns the bundle. If bundle was null it will
+     * be created.
+     *
+     * @param extras - bundle where to add key-value to, if null a new bundle will be created.
+     * @param key - key.
+     * @param value - value.
+     * @return extras if it was not null and new bundle otherwise.
+     */
     public static Bundle putMonitoringExtra(Bundle extras, String key, boolean value) {
         if (extras == null) {
             extras = new Bundle();

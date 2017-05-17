@@ -200,7 +200,7 @@ interface IActivityManager {
     void setRequestedOrientation(in IBinder token, int requestedOrientation);
     int getRequestedOrientation(in IBinder token);
     void unbindFinished(in IBinder token, in Intent service, boolean doRebind);
-    void setProcessForeground(in IBinder token, int pid, boolean isForeground);
+    void setProcessImportant(in IBinder token, int pid, boolean isForeground, String reason);
     void setServiceForeground(in ComponentName className, in IBinder token,
             int id, in Notification notification, int flags);
     boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
@@ -562,8 +562,8 @@ interface IActivityManager {
     void notifyLockedProfile(int userId);
     void startConfirmDeviceCredentialIntent(in Intent intent, in Bundle options);
     void sendIdleJobTrigger();
-    int sendIntentSender(in IIntentSender target, int code, in Intent intent,
-            in String resolvedType, in IIntentReceiver finishedReceiver,
+    int sendIntentSender(in IIntentSender target, in IBinder whitelistToken, int code,
+            in Intent intent, in String resolvedType, in IIntentReceiver finishedReceiver,
             in String requiredPermission, in Bundle options);
 
 

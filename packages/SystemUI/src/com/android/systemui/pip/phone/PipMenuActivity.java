@@ -63,6 +63,8 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.component.HidePipMenuEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +82,7 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_HIDE_MENU = 3;
     public static final int MESSAGE_UPDATE_ACTIONS = 4;
     public static final int MESSAGE_UPDATE_DISMISS_FRACTION = 5;
+    public static final int MESSAGE_ANIMATION_ENDED = 6;
 
     private static final long INITIAL_DISMISS_DELAY = 3500;
     private static final long POST_INTERACTION_DISMISS_DELAY = 2000;
@@ -92,6 +95,7 @@ public class PipMenuActivity extends Activity {
 
     private int mMenuState;
     private boolean mAllowMenuTimeout = true;
+    private boolean mAllowTouches = true;
 
     private final List<RemoteAction> mActions = new ArrayList<>();
 
@@ -147,6 +151,10 @@ public class PipMenuActivity extends Activity {
                 case MESSAGE_UPDATE_DISMISS_FRACTION: {
                     final Bundle data = (Bundle) msg.obj;
                     updateDismissFraction(data.getFloat(EXTRA_DISMISS_FRACTION));
+                    break;
+                }
+                case MESSAGE_ANIMATION_ENDED: {
+                    mAllowTouches = true;
                     break;
                 }
             }
@@ -225,6 +233,7 @@ public class PipMenuActivity extends Activity {
         super.onStop();
 
         cancelDelayedFinish();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -245,6 +254,10 @@ public class PipMenuActivity extends Activity {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (!mAllowTouches) {
+            return super.dispatchTouchEvent(ev);
+        }
+
         // On the first action outside the window, hide the menu
         switch (ev.getAction()) {
             case MotionEvent.ACTION_OUTSIDE:
@@ -280,17 +293,32 @@ public class PipMenuActivity extends Activity {
         // Do nothing
     }
 
+    public final void onBusEvent(HidePipMenuEvent event) {
+        if (mMenuState != MENU_STATE_NONE) {
+            // If the menu is visible in either the closed or full state, then hide the menu and
+            // trigger the animation trigger afterwards
+            event.getAnimationTrigger().increment();
+            hideMenu(() -> {
+                mHandler.post(() -> {
+                    event.getAnimationTrigger().decrement();
+                });
+            }, true /* notifyMenuVisibility */);
+        }
+    }
+
     private void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
             boolean allowMenuTimeout) {
         mAllowMenuTimeout = allowMenuTimeout;
         if (mMenuState != menuState) {
+            boolean deferTouchesUntilAnimationEnds = (mMenuState == MENU_STATE_FULL) ||
+                    (menuState == MENU_STATE_FULL);
+            mAllowTouches = !deferTouchesUntilAnimationEnds;
             cancelDelayedFinish();
             updateActionViews(stackBounds);
             if (mMenuContainerAnimator != null) {
                 mMenuContainerAnimator.cancel();
             }
             notifyMenuStateChange(menuState);
-            updateExpandButtonFromBounds(stackBounds, movementBounds);
             mMenuContainerAnimator = new AnimatorSet();
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 1f);
@@ -361,11 +389,16 @@ public class PipMenuActivity extends Activity {
     private void updateFromIntent(Intent intent) {
         mToControllerMessenger = intent.getParcelableExtra(EXTRA_CONTROLLER_MESSENGER);
         notifyActivityCallback(mMessenger);
+
+        // Register for HidePipMenuEvents once we notify the controller of this activity
+        EventBus.getDefault().register(this);
+
         ParceledListSlice actions = intent.getParcelableExtra(EXTRA_ACTIONS);
         if (actions != null) {
             mActions.clear();
             mActions.addAll(actions.getList());
         }
+
         final int menuState = intent.getIntExtra(EXTRA_MENU_STATE, MENU_STATE_NONE);
         if (menuState != MENU_STATE_NONE) {
             Rect stackBounds = intent.getParcelableExtra(EXTRA_STACK_BOUNDS);
@@ -373,24 +406,6 @@ public class PipMenuActivity extends Activity {
             boolean allowMenuTimeout = intent.getBooleanExtra(EXTRA_ALLOW_TIMEOUT, true);
             showMenu(menuState, stackBounds, movementBounds, allowMenuTimeout);
         }
-    }
-
-    private void updateExpandButtonFromBounds(Rect stackBounds, Rect movementBounds) {
-        if (stackBounds == null) {
-            return;
-        }
-
-        boolean isLandscapePip = stackBounds.width() > stackBounds.height();
-        boolean left = stackBounds.left < movementBounds.centerX();
-        boolean top = stackBounds.top < movementBounds.centerY();
-        boolean expandL = (left && top) || (!left && !top);
-        int iconResId;
-        if (isLandscapePip) {
-            iconResId = expandL ? R.drawable.pip_expand_ll : R.drawable.pip_expand_lr;
-        } else {
-            iconResId = expandL ? R.drawable.pip_expand_pl : R.drawable.pip_expand_pr;
-        }
-        mExpandButton.setImageResource(iconResId);
     }
 
     private void setActions(Rect stackBounds, List<RemoteAction> actions) {
@@ -447,8 +462,8 @@ public class PipMenuActivity extends Activity {
                         });
                     } else {
                         actionView.setAlpha(DISABLED_ACTION_ALPHA);
-                        actionView.setEnabled(false);
                     }
+                    actionView.setEnabled(action.isEnabled());
 
                     // Update the margin between actions
                     LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)

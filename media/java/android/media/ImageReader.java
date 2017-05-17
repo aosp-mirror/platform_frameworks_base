@@ -705,6 +705,8 @@ public class ImageReader implements AutoCloseable {
         }
 
         nativeDetachImage(image);
+        si.clearSurfacePlanes();
+        si.mPlanes = null;
         si.setDetached(true);
     }
 

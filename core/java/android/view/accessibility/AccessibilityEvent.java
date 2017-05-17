@@ -365,8 +365,9 @@ import java.util.List;
  * <b>NOTIFICATION TYPES</b></br>
  * </p>
  * <p>
- * <b>Notification state changed</b> - represents the event showing
- * {@link android.app.Notification}.</br>
+ * <b>Notification state changed</b> - represents the event showing a transient piece of information
+ * to the user. This information may be a {@link android.app.Notification} or
+ * {@link android.widget.Toast}.</br>
  * <em>Type:</em> {@link #TYPE_NOTIFICATION_STATE_CHANGED}</br>
  * <em>Properties:</em></br>
  * <ul>
@@ -374,18 +375,12 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getParcelableData()} - The posted {@link android.app.Notification}.</li>
- *   <li>{@link #getText()} - Text for providing more context.</li>
+ *   <li>{@link #getParcelableData()} - The posted {@link android.app.Notification}, if
+ *   applicable.</li>
+ *   <li>{@link #getText()} - Displayed text of the {@link android.widget.Toast}, if applicable,
+ *   or may contain text from the {@link android.app.Notification}, although
+ *   {@link #getParcelableData()} is a richer set of data for {@link android.app.Notification}.</li>
  * </ul>
- * <em>Note:</em> This event type is not dispatched to descendants though
- * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
- * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
- * source {@link android.view.View} and the sub-tree rooted at it will not receive
- * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
- * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
- * text content to such events is by setting the
- * {@link android.R.styleable#View_contentDescription contentDescription} of the source
- * view.</br>
  * </p>
  * <p>
  * <b>EXPLORATION TYPES</b></br>
@@ -529,13 +524,6 @@ import java.util.List;
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  * </ul>
  * </p>
- * <p>
- * <b>Security note</b>
- * <p>
- * Since an event contains the text of its source privacy can be compromised by leaking
- * sensitive information such as passwords. To address this issue any event fired in response
- * to manipulation of a PASSWORD field does NOT CONTAIN the text of the password.
- * </p>
  *
  * @see android.view.accessibility.AccessibilityManager
  * @see android.accessibilityservice.AccessibilityService
@@ -630,7 +618,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_WINDOW_CONTENT_CHANGED = 0x00000800;
 
     /**
-     * Represents the event of scrolling a view.
+     * Represents the event of scrolling a view. This event type is generally not sent directly.
+     * @see View#onScrollChanged(int, int, int, int)
      */
     public static final int TYPE_VIEW_SCROLLED = 0x00001000;
 
@@ -1251,189 +1240,56 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         while (eventType != 0) {
             final int eventTypeFlag = 1 << Integer.numberOfTrailingZeros(eventType);
             eventType &= ~eventTypeFlag;
-            switch (eventTypeFlag) {
-                case TYPE_VIEW_CLICKED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_CLICKED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_LONG_CLICKED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_LONG_CLICKED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_SELECTED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_SELECTED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_FOCUSED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_FOCUSED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_TEXT_CHANGED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_TEXT_CHANGED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_WINDOW_STATE_CHANGED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_WINDOW_STATE_CHANGED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_HOVER_ENTER: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_HOVER_ENTER");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_HOVER_EXIT: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_HOVER_EXIT");
-                    eventTypeCount++;
-                } break;
-                case TYPE_NOTIFICATION_STATE_CHANGED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_NOTIFICATION_STATE_CHANGED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_TOUCH_EXPLORATION_GESTURE_START: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_TOUCH_EXPLORATION_GESTURE_START");
-                    eventTypeCount++;
-                } break;
-                case TYPE_TOUCH_EXPLORATION_GESTURE_END: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_TOUCH_EXPLORATION_GESTURE_END");
-                    eventTypeCount++;
-                } break;
-                case TYPE_WINDOW_CONTENT_CHANGED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_WINDOW_CONTENT_CHANGED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_TEXT_SELECTION_CHANGED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_SCROLLED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_SCROLLED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_ANNOUNCEMENT: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_ANNOUNCEMENT");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_ACCESSIBILITY_FOCUSED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY");
-                    eventTypeCount++;
-                } break;
-                case TYPE_GESTURE_DETECTION_START: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_GESTURE_DETECTION_START");
-                    eventTypeCount++;
-                } break;
-                case TYPE_GESTURE_DETECTION_END: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_GESTURE_DETECTION_END");
-                    eventTypeCount++;
-                } break;
-                case TYPE_TOUCH_INTERACTION_START: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_TOUCH_INTERACTION_START");
-                    eventTypeCount++;
-                } break;
-                case TYPE_TOUCH_INTERACTION_END: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_TOUCH_INTERACTION_END");
-                    eventTypeCount++;
-                } break;
-                case TYPE_WINDOWS_CHANGED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_WINDOWS_CHANGED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_VIEW_CONTEXT_CLICKED: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_VIEW_CONTEXT_CLICKED");
-                    eventTypeCount++;
-                } break;
-                case TYPE_ASSIST_READING_CONTEXT: {
-                    if (eventTypeCount > 0) {
-                        builder.append(", ");
-                    }
-                    builder.append("TYPE_ASSIST_READING_CONTEXT");
-                    eventTypeCount++;
-                } break;
+
+            if (eventTypeCount > 0) {
+                builder.append(", ");
             }
+            builder.append(singleEventTypeToString(eventTypeFlag));
+
+            eventTypeCount++;
         }
         if (eventTypeCount > 1) {
             builder.insert(0, '[');
             builder.append(']');
         }
         return builder.toString();
+    }
+
+    private static String singleEventTypeToString(int eventType) {
+        switch (eventType) {
+            case TYPE_VIEW_CLICKED: return "TYPE_VIEW_CLICKED";
+            case TYPE_VIEW_LONG_CLICKED: return "TYPE_VIEW_LONG_CLICKED";
+            case TYPE_VIEW_SELECTED: return "TYPE_VIEW_SELECTED";
+            case TYPE_VIEW_FOCUSED: return "TYPE_VIEW_FOCUSED";
+            case TYPE_VIEW_TEXT_CHANGED: return "TYPE_VIEW_TEXT_CHANGED";
+            case TYPE_WINDOW_STATE_CHANGED: return "TYPE_WINDOW_STATE_CHANGED";
+            case TYPE_VIEW_HOVER_ENTER: return "TYPE_VIEW_HOVER_ENTER";
+            case TYPE_VIEW_HOVER_EXIT: return "TYPE_VIEW_HOVER_EXIT";
+            case TYPE_NOTIFICATION_STATE_CHANGED: return "TYPE_NOTIFICATION_STATE_CHANGED";
+            case TYPE_TOUCH_EXPLORATION_GESTURE_START: {
+                return "TYPE_TOUCH_EXPLORATION_GESTURE_START";
+            }
+            case TYPE_TOUCH_EXPLORATION_GESTURE_END: return "TYPE_TOUCH_EXPLORATION_GESTURE_END";
+            case TYPE_WINDOW_CONTENT_CHANGED: return "TYPE_WINDOW_CONTENT_CHANGED";
+            case TYPE_VIEW_TEXT_SELECTION_CHANGED: return "TYPE_VIEW_TEXT_SELECTION_CHANGED";
+            case TYPE_VIEW_SCROLLED: return "TYPE_VIEW_SCROLLED";
+            case TYPE_ANNOUNCEMENT: return "TYPE_ANNOUNCEMENT";
+            case TYPE_VIEW_ACCESSIBILITY_FOCUSED: return "TYPE_VIEW_ACCESSIBILITY_FOCUSED";
+            case TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
+                return "TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED";
+            }
+            case TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY: {
+                return "TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY";
+            }
+            case TYPE_GESTURE_DETECTION_START: return "TYPE_GESTURE_DETECTION_START";
+            case TYPE_GESTURE_DETECTION_END: return "TYPE_GESTURE_DETECTION_END";
+            case TYPE_TOUCH_INTERACTION_START: return "TYPE_TOUCH_INTERACTION_START";
+            case TYPE_TOUCH_INTERACTION_END: return "TYPE_TOUCH_INTERACTION_END";
+            case TYPE_WINDOWS_CHANGED: return "TYPE_WINDOWS_CHANGED";
+            case TYPE_VIEW_CONTEXT_CLICKED: return "TYPE_VIEW_CONTEXT_CLICKED";
+            case TYPE_ASSIST_READING_CONTEXT: return "TYPE_ASSIST_READING_CONTEXT";
+            default: return Integer.toHexString(eventType);
+        }
     }
 
     /**

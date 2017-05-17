@@ -70,8 +70,14 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  get log_level ");
             pw.println("    Gets the Autofill log level (off | debug | verbose).");
             pw.println("");
+            pw.println("  get max_partitions");
+            pw.println("    Gets the maximum number of partitions per session.");
+            pw.println("");
             pw.println("  set log_level [off | debug | verbose]");
             pw.println("    Sets the Autofill log level.");
+            pw.println("");
+            pw.println("  set max_partitions number");
+            pw.println("    Sets the maximum number of partitions per session.");
             pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    List all pending sessions.");
@@ -86,9 +92,33 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
     }
 
     private int requestGet(PrintWriter pw) {
-        if (!isNextArgLogLevel(pw, "get")) {
-            return -1;
+        final String what = getNextArgRequired();
+        switch(what) {
+            case "log_level":
+                return getLogLevel(pw);
+            case "max_partitions":
+                return getMaxPartitions(pw);
+            default:
+                pw.println("Invalid set: " + what);
+                return -1;
         }
+    }
+
+    private int requestSet(PrintWriter pw) {
+        final String what = getNextArgRequired();
+
+        switch(what) {
+            case "log_level":
+                return setLogLevel(pw);
+            case "max_partitions":
+                return setMaxPartitions();
+            default:
+                pw.println("Invalid set: " + what);
+                return -1;
+        }
+    }
+
+    private int getLogLevel(PrintWriter pw) {
         final int logLevel = mService.getLogLevel();
         switch (logLevel) {
             case AutofillManager.FLAG_ADD_CLIENT_VERBOSE:
@@ -106,11 +136,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         }
     }
 
-    private int requestSet(PrintWriter pw) {
-        if (!isNextArgLogLevel(pw, "set")) {
-            return -1;
-        }
-        final String logLevel = getNextArg();
+    private int setLogLevel(PrintWriter pw) {
+        final String logLevel = getNextArgRequired();
         switch (logLevel.toLowerCase()) {
             case "verbose":
                 mService.setLogLevel(AutofillManager.FLAG_ADD_CLIENT_VERBOSE);
@@ -125,6 +152,16 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 pw.println("Invalid level: " + logLevel);
                 return -1;
         }
+    }
+
+    private int getMaxPartitions(PrintWriter pw) {
+        pw.println(mService.getMaxPartitions());
+        return 0;
+    }
+
+    private int setMaxPartitions() {
+        mService.setMaxPartitions(Integer.parseInt(getNextArgRequired()));
+        return 0;
     }
 
     private int requestDestroy(PrintWriter pw) {

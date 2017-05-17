@@ -6,8 +6,6 @@ import android.content.ComponentName;
 import android.os.RemoteException;
 import android.service.vr.IVrManager;
 
-import java.io.FileDescriptor;
-
 /**
  * Used to control aspects of a devices Virtual Reality (VR) capabilities.
  * <p>
@@ -45,48 +43,20 @@ public class VrManager {
     }
 
     /**
-     * Sets the resolution and DPI of the compatibility virtual display used to display 2D
+     * Sets the resolution and DPI of the vr2d virtual display used to display 2D
      * applications in VR mode.
      *
      * <p>Requires {@link android.Manifest.permission#ACCESS_VR_MANAGER} permission.</p>
      *
-     * @param {@link android.app.CompatibilityDisplayProperties} properties to be set to the
-     * virtual display for 2D applications in VR mode.
+     * @param vr2dDisplayProp properties to be set to the virtual display for
+     * 2D applications in VR mode.
      *
      * {@hide}
      */
-    public void setCompatibilityDisplayProperties(
-            CompatibilityDisplayProperties compatDisplayProp) {
+    public void setVr2dDisplayProperties(
+            Vr2dDisplayProperties vr2dDisplayProp) {
         try {
-            mService.setCompatibilityDisplayProperties(compatDisplayProp);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Initiate connection for system controller data.
-     *
-     * @param fd Controller data file descriptor.
-     *
-     * {@hide}
-     */
-    public void connectController(FileDescriptor fd) {
-        try {
-            mService.connectController(fd);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Sever connection for system controller data.
-     *
-     * {@hide}
-     */
-    public void disconnectController() {
-        try {
-            mService.disconnectController();
+            mService.setVr2dDisplayProperties(vr2dDisplayProp);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

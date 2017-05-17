@@ -232,7 +232,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     static final int STACK_VISIBLE = 1;
     // Stack is considered visible, but only becuase it has activity that is visible behind other
     // activities and there is a specific combination of stacks.
-    private static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
+    static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
 
     @VisibleForTesting
     /* The various modes for the method {@link #removeTask}. */
@@ -655,11 +655,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
-    final ActivityRecord topRunningActivityLocked() {
+    ActivityRecord topRunningActivityLocked() {
         return topRunningActivityLocked(false /* focusableOnly */);
     }
 
-    final ActivityRecord topRunningActivityLocked(boolean focusableOnly) {
+    private ActivityRecord topRunningActivityLocked(boolean focusableOnly) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ActivityRecord r = mTaskHistory.get(taskNdx).topRunningActivityLocked();
             if (r != null && (!focusableOnly || r.isFocusable())) {
@@ -669,7 +669,21 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return null;
     }
 
-    final ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
+    ActivityRecord topRunningNonOverlayTaskActivity() {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (!r.finishing && !r.mTaskOverlay) {
+                    return r;
+                }
+            }
+        }
+        return null;
+    }
+
+    ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -987,7 +1001,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 result.matchedByRootAffinity = false;
                 break;
             } else if (!isDocument && !taskIsDocument
-                    && result.r == null && task.canMatchRootAffinity()) {
+                    && result.r == null && task.rootAffinity != null) {
                 if (task.rootAffinity.equals(target.taskAffinity)) {
                     if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching affinity candidate!");
                     // It is possible for multiple tasks to have the same root affinity especially
@@ -1638,28 +1652,20 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         if (StackId.isBackdropToTranslucentActivity(mStackId)
                 && hasVisibleBehindActivity() && StackId.isHomeOrRecentsStack(topStackId)
-                && !topStack.topActivity().fullscreen) {
+                && (topStack.topActivity() == null || !topStack.topActivity().fullscreen)) {
             // The fullscreen or assistant stack should be visible if it has a visible behind
             // activity behind the home or recents stack that is translucent.
             return STACK_VISIBLE_ACTIVITY_BEHIND;
         }
 
         if (mStackId == DOCKED_STACK_ID) {
-            final ActivityRecord r = topStack.topRunningActivityLocked();
-
             // If the assistant stack is focused and translucent, then the docked stack is always
             // visible
             if (topStack.isAssistantStack()) {
                 return (topStack.isStackTranslucent(starting, DOCKED_STACK_ID)) ? STACK_VISIBLE
                         : STACK_INVISIBLE;
             }
-
-            // Otherwise, the docked stack is always visible, except in the case where the top
-            // running activity task in the focus stack doesn't support any form of resizing but we
-            // show it for the home task even though it's not resizable.
-            final TaskRecord task = r != null ? r.getTask() : null;
-            return task == null || task.supportsSplitScreen() || task.isHomeTask() ? STACK_VISIBLE
-                    : STACK_INVISIBLE;
+            return STACK_VISIBLE;
         }
 
         // Set home stack to invisible when it is below but not immediately below the docked stack
@@ -1678,14 +1684,17 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStacks.get(stackBehindTopIndex).topRunningActivityLocked() == null) {
             stackBehindTopIndex--;
         }
-        if ((topStackId == DOCKED_STACK_ID || topStackId == PINNED_STACK_ID)
-                && stackIndex == stackBehindTopIndex) {
-            // Stacks directly behind the docked or pinned stack are always visible.
-            return STACK_VISIBLE;
-        }
-
         final int stackBehindTopId = (stackBehindTopIndex >= 0)
                 ? mStacks.get(stackBehindTopIndex).mStackId : INVALID_STACK_ID;
+        if ((topStackId == DOCKED_STACK_ID || topStackId == PINNED_STACK_ID)
+                && (stackIndex == stackBehindTopIndex
+                || (stackBehindTopId == DOCKED_STACK_ID
+                && stackIndex == stackBehindTopIndex - 1))) {
+            // Stacks directly behind the docked or pinned stack are always visible.
+            // Also this stack is visible if behind docked stack and the docked stack is behind the
+            // top-most pinned stack
+            return STACK_VISIBLE;
+        }
 
         if (StackId.isBackdropToTranslucentActivity(topStackId)
                 && topStack.isStackTranslucent(starting, stackBehindTopId)) {
@@ -1924,7 +1933,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      *
      * @return true if {@param r} is visible taken Keyguard state into account, false otherwise
      */
-    private boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible,
+    boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible,
             boolean isTop) {
         final boolean isInPinnedStack = r.getStack().getStackId() == PINNED_STACK_ID;
         final boolean keyguardShowing = mStackSupervisor.mKeyguardController.isKeyguardShowing();

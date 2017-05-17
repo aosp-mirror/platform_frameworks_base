@@ -468,8 +468,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Sei collegato a <xliff:g id="APPLICATION">%1$s</xliff:g>, che consente di monitorare la tua attività di rete personale, inclusi siti web, email e app."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g> ed è collegato a <xliff:g id="APPLICATION">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi siti web, email e app.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g> ed è collegato a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi siti web, email e app.\n\nSei collegato anche a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Sbloccato per <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Il dispositivo resterà bloccato fino allo sblocco manuale"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ricevi notifiche più velocemente"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Visualizza prima di sbloccare"</string>
@@ -551,7 +550,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Off"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"I controlli di gestione delle notifiche ti consentono di impostare un livello di importanza compreso tra 0 e 5 per le notifiche di un\'app. \n\n"<b>"Livello 5"</b>" \n- Mostra in cima all\'elenco di notifiche \n- Consenti l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 4"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 3"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n\n"<b>"Livello 2"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n\n"<b>"Livello 1"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n- Nascondi da schermata di blocco e barra di stato \n- Mostra in fondo all\'elenco di notifiche \n\n"<b>"Livello 0"</b>" \n- Blocca tutte le notifiche dell\'app"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifiche"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Non riceverai più queste notifiche."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Non riceverai più queste notifiche"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> categorie di notifica"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Questa app non ha categorie di notifica"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -765,4 +764,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"Fino alle ore <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Mantieni"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Sostituisci"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"App in esecuzione in background"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tocca per conoscere i dettagli sull\'utilizzo dei dati e della batteria"</string>
 </resources>

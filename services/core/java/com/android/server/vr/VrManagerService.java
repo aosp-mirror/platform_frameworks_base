@@ -21,7 +21,7 @@ import android.Manifest;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.app.CompatibilityDisplayProperties;
+import android.app.Vr2dDisplayProperties;
 import android.app.NotificationManager;
 import android.annotation.NonNull;
 import android.content.ComponentName;
@@ -39,7 +39,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
@@ -47,7 +46,6 @@ import android.service.vr.IPersistentVrStateCallbacks;
 import android.service.vr.IVrListener;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
-import android.service.vr.IVrWindowManager;
 import android.service.vr.VrListenerService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -141,7 +139,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private final NotificationAccessManager mNotifAccessManager = new NotificationAccessManager();
     /** Tracks the state of the screen and keyguard UI.*/
     private int mSystemSleepFlags = FLAG_AWAKE;
-    private CompatibilityDisplay mCompatibilityDisplay;
+    private Vr2dDisplay mVr2dDisplay;
 
     private static final int MSG_VR_STATE_CHANGE = 0;
     private static final int MSG_PENDING_VR_STATE_CHANGE = 1;
@@ -428,27 +426,15 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
-        public void setCompatibilityDisplayProperties(
-                CompatibilityDisplayProperties compatDisplayProp) {
+        public void setVr2dDisplayProperties(
+                Vr2dDisplayProperties vr2dDisplayProp) {
             enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
-            VrManagerService.this.setCompatibilityDisplayProperties(compatDisplayProp);
+            VrManagerService.this.setVr2dDisplayProperties(vr2dDisplayProp);
         }
 
         @Override
-        public int getCompatibilityDisplayId() {
-            return VrManagerService.this.getCompatibilityDisplayId();
-        }
-
-        @Override
-        public void connectController(FileDescriptor fd) throws android.os.RemoteException {
-            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
-            VrManagerService.this.connectController(fd);
-        }
-
-        @Override
-        public void disconnectController() throws android.os.RemoteException {
-            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
-            VrManagerService.this.disconnectController();
+        public int getVr2dDisplayId() {
+            return VrManagerService.this.getVr2dDisplayId();
         }
 
         @Override
@@ -549,14 +535,14 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
-        public void setCompatibilityDisplayProperties(
-            CompatibilityDisplayProperties compatDisplayProp) {
-            VrManagerService.this.setCompatibilityDisplayProperties(compatDisplayProp);
+        public void setVr2dDisplayProperties(
+            Vr2dDisplayProperties compatDisplayProp) {
+            VrManagerService.this.setVr2dDisplayProperties(compatDisplayProp);
         }
 
         @Override
-        public int getCompatibilityDisplayId() {
-            return VrManagerService.this.getCompatibilityDisplayId();
+        public int getVr2dDisplayId() {
+            return VrManagerService.this.getVr2dDisplayId();
         }
 
         @Override
@@ -608,8 +594,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             DisplayManager dm =
                     (DisplayManager) getContext().getSystemService(Context.DISPLAY_SERVICE);
             ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
-            mCompatibilityDisplay = new CompatibilityDisplay(dm, ami, mVrManager);
-            mCompatibilityDisplay.init(getContext());
+            mVr2dDisplay = new Vr2dDisplay(dm, ami, mVrManager);
+            mVr2dDisplay.init(getContext());
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mLock) {
                 mVrModeAllowed = true;
@@ -749,7 +735,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 }
             }
 
-            if (calling != null && !Objects.equals(calling, mCurrentVrModeComponent)) {
+            if ((calling != null || mPersistentVrModeEnabled)
+                    && !Objects.equals(calling, mCurrentVrModeComponent)) {
                 sendUpdatedCaller = true;
             }
             mCurrentVrModeComponent = calling;
@@ -1116,20 +1103,20 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     }
 
-    public void setCompatibilityDisplayProperties(
-        CompatibilityDisplayProperties compatDisplayProp) {
-        if (mCompatibilityDisplay != null) {
-            mCompatibilityDisplay.setVirtualDisplayProperties(compatDisplayProp);
+    public void setVr2dDisplayProperties(
+        Vr2dDisplayProperties compatDisplayProp) {
+        if (mVr2dDisplay != null) {
+            mVr2dDisplay.setVirtualDisplayProperties(compatDisplayProp);
             return;
         }
-        Slog.w(TAG, "CompatibilityDisplay is null!");
+        Slog.w(TAG, "Vr2dDisplay is null!");
     }
 
-    private int getCompatibilityDisplayId() {
-        if (mCompatibilityDisplay != null) {
-            return mCompatibilityDisplay.getVirtualDisplayId();
+    private int getVr2dDisplayId() {
+        if (mVr2dDisplay != null) {
+            return mVr2dDisplay.getVirtualDisplayId();
         }
-        Slog.w(TAG, "CompatibilityDisplay is null!");
+        Slog.w(TAG, "Vr2dDisplay is null!");
         return INVALID_DISPLAY;
     }
 
@@ -1183,21 +1170,5 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         synchronized (mLock) {
             return mVrModeEnabled;
         }
-    }
-
-    private void connectController(FileDescriptor fd) throws android.os.RemoteException {
-        // TODO(b/36506799): move vr_wm code to VrCore and remove this.
-        IVrWindowManager remote =
-                IVrWindowManager.Stub.asInterface(
-                        ServiceManager.getService(IVrWindowManager.SERVICE_NAME));
-        remote.connectController(fd);
-    }
-
-    private void disconnectController() throws android.os.RemoteException {
-        // TODO(b/36506799): move vr_wm code to VrCore and remove this.
-        IVrWindowManager remote =
-                IVrWindowManager.Stub.asInterface(
-                        ServiceManager.getService(IVrWindowManager.SERVICE_NAME));
-        remote.disconnectController();
     }
 }

@@ -1239,7 +1239,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                     }
                 }
-                token = new WindowToken(this, attrs.token, type, false, displayContent,
+                final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
+                token = new WindowToken(this, binder, type, false, displayContent,
                         session.mCanAddInternalSystemWindow);
             } else if (rootType >= FIRST_APPLICATION_WINDOW && rootType <= LAST_APPLICATION_WINDOW) {
                 atoken = token.asAppWindowToken();
@@ -1310,7 +1311,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
-                token = new WindowToken(this, null, type, false, displayContent,
+                token = new WindowToken(this, client.asBinder(), type, false, displayContent,
                         session.mCanAddInternalSystemWindow);
             }
 
@@ -1684,6 +1685,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 // re-factor.
                 atoken.firstWindowDrawn = false;
                 atoken.clearAllDrawn();
+                final TaskStack stack = atoken.getStack();
+                if (stack != null) {
+                    stack.mExitingAppTokens.remove(atoken);
+                }
             }
         }
 
@@ -1951,6 +1956,16 @@ public class WindowManagerService extends IWindowManager.Stub
             if (viewVisibility == View.VISIBLE &&
                     (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
                             || !win.mAppToken.isClientHidden())) {
+
+                // We are about to create a surface, but we didn't run a layout yet. So better run
+                // a layout now that we already know the right size, as a resize call will make the
+                // surface transaction blocking until next vsync and slow us down.
+                // TODO: Ideally we'd create the surface after running layout a bit further down,
+                // but moving this seems to be too risky at this point in the release.
+                if (win.mLayoutSeq == -1) {
+                    win.setDisplayLayoutNeeded();
+                    mWindowPlacerLocked.performSurfacePlacement(true);
+                }
                 result = win.relayoutVisibleWindow(mergedConfiguration, result, attrChanges,
                         oldVisibility);
                 try {
@@ -2082,6 +2097,7 @@ public class WindowManagerService extends IWindowManager.Stub
             outFrame.set(win.mCompatFrame);
             outOverscanInsets.set(win.mOverscanInsets);
             outContentInsets.set(win.mContentInsets);
+            win.mLastRelayoutContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
             outStableInsets.set(win.mStableInsets);
             outOutsets.set(win.mOutsets);

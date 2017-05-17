@@ -393,6 +393,12 @@
     <!-- Activity name to enable wifi tethering after provisioning app succeeds -->
     <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.TetherService</string>
 
+    <!-- Controls the WiFi wakeup feature.
+          0 = Not available.
+          1 = Available.
+     -->
+    <integer translatable="false" name="config_wifi_wakeup_available">0</integer>
+
     <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering -->
     <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
     <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH -->
@@ -424,9 +430,6 @@
 
     <!-- Boolean indicating whether the wifi chipset has dual frequency band support -->
     <bool translatable="false" name="config_wifi_dual_band_support">false</bool>
-
-    <!-- Boolean indicating whether Hotspot 2.0/Passpoint and ANQP queries is enabled -->
-    <bool translatable="false" name="config_wifi_hotspot2_enabled">false</bool>
 
     <!-- Boolean indicating whether 802.11r Fast BSS Transition is enabled on this platform -->
     <bool translatable="false" name="config_wifi_fast_bss_transition_enabled">false</bool>
@@ -1007,6 +1010,9 @@
     <!-- Is the notification LED intrusive? Used to decide if there should be a disable option -->
     <bool name="config_intrusiveNotificationLed">false</bool>
 
+    <!-- De we do icon badges? Used to decide if there should be a disable option-->
+    <bool name="config_notificationBadging">true</bool>
+
     <!-- Default value for LED off time when the battery is low on charge in miliseconds -->
     <integer name="config_notificationsBatteryLedOff">2875</integer>
 
@@ -1265,6 +1271,49 @@
     <!-- True if WallpaperService is enabled -->
     <bool name="config_enableWallpaperService">true</bool>
 
+    <!-- Enables the TimeZoneRuleManager service. This is the master switch for the updateable time
+         zone update mechanism. -->
+    <bool name="config_enableUpdateableTimeZoneRules">false</bool>
+
+    <!-- Enables APK-based time zone update triggering. Set this to false when updates are triggered
+         via external events and not by APK updates. For example, if an updater checks with a server
+         on a regular schedule.
+         [This is only used if config_enableUpdateableTimeZoneRules is true.] -->
+    <bool name="config_timeZoneRulesUpdateTrackingEnabled">false</bool>
+
+    <!-- The package of the time zone rules updater application. Expected to be the same
+         for all Android devices that support APK-based time zone rule updates.
+         A package-targeted android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         will be sent to the updater app if the system server detects an update to the updater or
+         data app packages.
+         The package referenced here must have the android.permission.UPDATE_TIME_ZONE_RULES
+         permission.
+         [This is only used if config_enableUpdateableTimeZoneRules and
+         config_timeZoneRulesUpdateTrackingEnabled are true.] -->
+    <string name="config_timeZoneRulesUpdaterPackage" translateable="false"></string>
+
+    <!-- The package of the time zone rules data application. Expected to be configured
+         by OEMs to reference their own priv-app APK package.
+         A package-targeted android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         will be sent to the updater app if the system server detects an update to the updater or
+         data app packages.
+         [This is only used if config_enableUpdateableTimeZoneRules and
+         config_timeZoneRulesUpdateTrackingEnabled are true.] -->
+    <string name="config_timeZoneRulesDataPackage" translateable="false"></string>
+
+    <!-- The allowed time in milliseconds between an update check intent being broadcast and the
+         response being considered overdue. Reliability triggers will not fire in this time.
+         [This is only used if config_enableUpdateableTimeZoneRules and
+         config_timeZoneRulesUpdateTrackingEnabled are true.] -->
+    <!-- 5 minutes -->
+    <integer name="config_timeZoneRulesCheckTimeMillisAllowed">300000</integer>
+
+    <!-- The number of times a time zone update check is allowed to fail before the system will stop
+         reacting to reliability triggers.
+         [This is only used if config_enableUpdateableTimeZoneRules and
+         config_timeZoneRulesUpdateTrackingEnabled are true.] -->
+    <integer name="config_timeZoneRulesCheckRetryCount">5</integer>
+
     <!-- Whether to enable network location overlay which allows network
          location provider to be replaced by an app at run-time. When disabled,
          only the config_networkLocationProviderPackageName package will be
@@ -1299,9 +1348,9 @@
              * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action
                protected by the BIND_NETWORK_RECOMMENDATION_SERVICE permission.
 
-         This must be set to a valid network recommendation app.
+         This must be set to a valid network recommendation app or empty.
      -->
-    <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false">com.android.networkrecommendation</string>
+    <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false"></string>
 
     <!-- Whether to enable Hardware FLP overlay which allows Hardware FLP to be
          replaced by an app at run-time. When disabled, only the
@@ -1784,6 +1833,11 @@
 
     <!-- Type of the double tap sensor. Empty if double tap is not supported. -->
     <string name="config_dozeDoubleTapSensorType" translatable="false"></string>
+
+    <!-- Control whether the always on display mode is available. This should only be enabled on
+         devices where the display has be tuned to be power efficient in DOZE and/or DOZE_SUSPEND
+         states. -->
+    <bool name="config_dozeAlwaysOnDisplayAvailable">false</bool>
 
     <!-- Power Management: Specifies whether to decouple the auto-suspend state of the
          device from the display on/off state.
@@ -2877,4 +2931,26 @@
 
     <!-- The apps that need to be hidden when they are disabled -->
     <string-array name="config_hideWhenDisabled_packageNames"></string-array>
+
+    <!-- Additional non-platform defined global settings exposed to Instant Apps -->
+    <string-array name="config_allowedGlobalInstantAppSettings"></string-array>
+
+    <!-- Additional non-platform defined system settings exposed to Instant Apps -->
+    <string-array name="config_allowedSystemInstantAppSettings"></string-array>
+
+    <!-- Additional non-platform defined secure settings exposed to Instant Apps -->
+    <string-array name="config_allowedSecureInstantAppSettings"></string-array>
+
+    <!-- Handle volume keys directly in Window Manager without passing them to the foreground app -->
+    <bool name="config_handleVolumeKeysInWindowManager">false</bool>
+
+    <!-- Volume level of in-call notification tone playback,
+         relative to the overall voice call stream volume [0..100] -->
+    <integer name="config_inCallNotificationVolumeRelative">67</integer>
+
+    <!-- The OEM specified sensor type for the lift trigger to launch the camera app. -->
+    <integer name="config_cameraLiftTriggerSensorType">-1</integer>
+    <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
+        must match the value of config_cameraLiftTriggerSensorType in OEM's HAL -->
+    <string translatable="false" name="config_cameraLiftTriggerSensorStringType"></string>
 </resources>

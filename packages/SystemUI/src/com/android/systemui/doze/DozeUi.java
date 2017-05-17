@@ -83,7 +83,7 @@ public class DozeUi implements DozeMachine.Part {
                 unscheduleTimeTick();
                 break;
             case DOZE_REQUEST_PULSE:
-                pulseWhileDozing(DozeLog.PULSE_REASON_NOTIFICATION /* TODO */);
+                pulseWhileDozing(mMachine.getPulseReason());
                 break;
             case DOZE_PULSE_DONE:
                 mHost.abortPulsing();
@@ -95,6 +95,19 @@ public class DozeUi implements DozeMachine.Part {
                 mHost.stopDozing();
                 unscheduleTimeTick();
                 break;
+        }
+        mHost.setAnimateWakeup(shouldAnimateWakeup(newState));
+    }
+
+    private boolean shouldAnimateWakeup(DozeMachine.State state) {
+        switch (state) {
+            case DOZE_AOD:
+            case DOZE_REQUEST_PULSE:
+            case DOZE_PULSING:
+            case DOZE_PULSE_DONE:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -117,6 +130,7 @@ public class DozeUi implements DozeMachine.Part {
         }
         verifyLastTimeTick();
         mAlarmManager.cancel(mTimeTick);
+        mTimeTickScheduled = false;
     }
 
     private void verifyLastTimeTick() {

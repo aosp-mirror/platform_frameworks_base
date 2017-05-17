@@ -16,6 +16,11 @@
 
 package com.android.server.backup.fullbackup;
 
+import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,8 +53,8 @@ public class FullBackupObbConnection implements ServiceConnection {
     }
 
     public void establish() {
-        if (RefactoredBackupManagerService.MORE_DEBUG) {
-            Slog.i(RefactoredBackupManagerService.TAG, "Initiating bind of OBB service on " + this);
+        if (MORE_DEBUG) {
+            Slog.i(TAG, "Initiating bind of OBB service on " + this);
         }
         Intent obbIntent = new Intent().setComponent(new ComponentName(
                 "com.android.sharedstoragebackup",
@@ -70,16 +75,14 @@ public class FullBackupObbConnection implements ServiceConnection {
         try {
             pipes = ParcelFileDescriptor.createPipe();
             int token = backupManagerService.generateRandomIntegerToken();
-            backupManagerService
-                    .prepareOperationTimeout(token,
-                            RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL,
-                            null, RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT);
+            backupManagerService.prepareOperationTimeout(
+                    token, TIMEOUT_FULL_BACKUP_INTERVAL, null, OP_TYPE_BACKUP_WAIT);
             mService.backupObbs(pkg.packageName, pipes[1], token,
                     backupManagerService.getBackupManagerBinder());
             FullBackupUtils.routeSocketDataToOutput(pipes[0], out);
             success = backupManagerService.waitUntilOperationComplete(token);
         } catch (Exception e) {
-            Slog.w(RefactoredBackupManagerService.TAG, "Unable to back up OBBs for " + pkg, e);
+            Slog.w(TAG, "Unable to back up OBBs for " + pkg, e);
         } finally {
             try {
                 out.flush();
@@ -92,7 +95,7 @@ public class FullBackupObbConnection implements ServiceConnection {
                     }
                 }
             } catch (IOException e) {
-                Slog.w(RefactoredBackupManagerService.TAG, "I/O error closing down OBB backup", e);
+                Slog.w(TAG, "I/O error closing down OBB backup", e);
             }
         }
         return success;
@@ -107,23 +110,22 @@ public class FullBackupObbConnection implements ServiceConnection {
             mService.restoreObbFile(pkgName, data, fileSize, type, path, mode, mtime,
                     token, callbackBinder);
         } catch (Exception e) {
-            Slog.w(RefactoredBackupManagerService.TAG, "Unable to restore OBBs for " + pkgName, e);
+            Slog.w(TAG, "Unable to restore OBBs for " + pkgName, e);
         }
     }
 
     private void waitForConnection() {
         synchronized (this) {
             while (mService == null) {
-                if (RefactoredBackupManagerService.MORE_DEBUG) {
-                    Slog.i(RefactoredBackupManagerService.TAG,
-                            "...waiting for OBB service binding...");
+                if (MORE_DEBUG) {
+                    Slog.i(TAG, "...waiting for OBB service binding...");
                 }
                 try {
                     this.wait();
                 } catch (InterruptedException e) { /* never interrupted */ }
             }
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.i(RefactoredBackupManagerService.TAG, "Connected to OBB service; continuing");
+            if (MORE_DEBUG) {
+                Slog.i(TAG, "Connected to OBB service; continuing");
             }
         }
     }
@@ -132,9 +134,8 @@ public class FullBackupObbConnection implements ServiceConnection {
     public void onServiceConnected(ComponentName name, IBinder service) {
         synchronized (this) {
             mService = IObbBackupService.Stub.asInterface(service);
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.i(RefactoredBackupManagerService.TAG, "OBB service connection " + mService
-                        + " connected on " + this);
+            if (MORE_DEBUG) {
+                Slog.i(TAG, "OBB service connection " + mService + " connected on " + this);
             }
             this.notifyAll();
         }
@@ -144,9 +145,8 @@ public class FullBackupObbConnection implements ServiceConnection {
     public void onServiceDisconnected(ComponentName name) {
         synchronized (this) {
             mService = null;
-            if (RefactoredBackupManagerService.MORE_DEBUG) {
-                Slog.i(RefactoredBackupManagerService.TAG,
-                        "OBB service connection disconnected on " + this);
+            if (MORE_DEBUG) {
+                Slog.i(TAG, "OBB service connection disconnected on " + this);
             }
             this.notifyAll();
         }

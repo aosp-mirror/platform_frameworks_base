@@ -92,6 +92,12 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     private TaskDescription mTaskDescription;
 
+    // If set to true, the task will report that it is not in the floating
+    // state regardless of it's stack affilation. As the floating state drives
+    // production of content insets this can be used to preserve them across
+    // stack moves and we in fact do so when moving from full screen to pinned.
+    private boolean mPreserveNonFloatingState = false;
+
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
             Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
             boolean homeTask, TaskDescription taskDescription,
@@ -193,6 +199,16 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
                 + " from stack=" + mStack);
         EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "reParentTask");
         final DisplayContent prevDisplayContent = getDisplayContent();
+
+        // If we are moving from the fullscreen stack to the pinned stack
+        // then we want to preserve our insets so that there will not
+        // be a jump in the area covered by system decorations. We rely
+        // on the pinned animation to later unset this value.
+        if (stack.mStackId == PINNED_STACK_ID) {
+            mPreserveNonFloatingState = true;
+        } else {
+            mPreserveNonFloatingState = false;
+        }
 
         getParent().removeChild(this);
         stack.addTask(this, position, showForAllUsers(), moveParents);
@@ -593,7 +609,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
      * we will have a jump at the end.
      */
     boolean isFloating() {
-        return StackId.tasksAreFloating(mStack.mStackId) && !mStack.isAnimatingBoundsToFullscreen();
+        return StackId.tasksAreFloating(mStack.mStackId)
+                && !mStack.isAnimatingBoundsToFullscreen() && !mPreserveNonFloatingState;
     }
 
     WindowState getTopVisibleAppMainWindow() {
@@ -673,6 +690,10 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     String getName() {
         return toShortString();
+    }
+
+    void clearPreserveNonFloatingState() {
+        mPreserveNonFloatingState = false;
     }
 
     @Override

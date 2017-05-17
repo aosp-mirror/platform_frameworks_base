@@ -110,7 +110,7 @@ public abstract class VrListenerService extends Service {
      * transition.</p>
      *
      * @param component the {@link ComponentName} of the VR activity that the system has
-     *    switched to.
+     *    switched to, or null if the system is displaying a 2D activity in VR compatibility mode.
      *
      * @see android.app.Activity#setVrModeEnabled
      * @see android.R.attr#enableVrMode

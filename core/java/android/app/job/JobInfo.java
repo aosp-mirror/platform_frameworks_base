@@ -111,8 +111,11 @@ public class JobInfo implements Parcelable {
     /* Minimum flex for a periodic job, in milliseconds. */
     private static final long MIN_FLEX_MILLIS = 5 * 60 * 1000L; // 5 minutes
 
-    /* Minimum backoff interval for a job, in milliseconds */
-    private static final long MIN_BACKOFF_MILLIS = 10 * 1000L;      // 10 seconds
+    /**
+     * Minimum backoff interval for a job, in milliseconds
+     * @hide
+     */
+    public static final long MIN_BACKOFF_MILLIS = 10 * 1000L;      // 10 seconds
 
     /**
      * Query the minimum interval allowed for periodic scheduled jobs.  Attempting
@@ -431,7 +434,7 @@ public class JobInfo implements Parcelable {
     /**
      * The amount of time the JobScheduler will wait before rescheduling a failed job. This value
      * will be increased depending on the backoff policy specified at job creation time. Defaults
-     * to 5 seconds.
+     * to 30 seconds, minimum is currently 10 seconds.
      */
     public long getInitialBackoffMillis() {
         final long minBackoff = getMinBackoffMillis();

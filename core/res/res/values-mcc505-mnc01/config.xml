@@ -40,6 +40,16 @@
       <item>Telstra Tethering,telstra.internet,,,,,,,,,505,01,,DUN</item>
     </string-array>
 
+    <!--Thresholds for LTE dbm in status bar-->
+    <integer-array translatable="false" name="config_lteDbmThresholds">
+        <item>-140</item>    <!-- SIGNAL_STRENGTH_NONE_OR_UNKNOWN -->
+        <item>-120</item>    <!-- SIGNAL_STRENGTH_POOR -->
+        <item>-115</item>    <!-- SIGNAL_STRENGTH_MODERATE -->
+        <item>-100</item>    <!-- SIGNAL_STRENGTH_GOOD -->
+        <item>-90</item>     <!-- SIGNAL_STRENGTH_GREAT -->
+        <item>-44</item>
+    </integer-array>
+
     <!-- Configure mobile network MTU. Carrier specific value is set here.
     -->
     <integer name="config_mobile_mtu">1400</integer>

@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.StrictMode;
 import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -600,6 +601,13 @@ public final class Bitmap implements Parcelable {
         src.position(position);
     }
 
+    private void noteHardwareBitmapSlowCall() {
+        if (getConfig() == Config.HARDWARE) {
+            StrictMode.noteSlowCall("Warning: attempt to read pixels from hardware "
+                    + "bitmap, which is very slow operation");
+        }
+    }
+
     /**
      * Tries to make a new bitmap based on the dimensions of this bitmap,
      * setting the new bitmap's config to the one specified, and then copying
@@ -618,6 +626,7 @@ public final class Bitmap implements Parcelable {
         if (config == Config.HARDWARE && isMutable) {
             throw new IllegalArgumentException("Hardware bitmaps are always immutable");
         }
+        noteHardwareBitmapSlowCall();
         Bitmap b = nativeCopy(mNativePtr, config.nativeInt, isMutable);
         if (b != null) {
             b.setPremultiplied(mRequestPremultiplied);
@@ -635,6 +644,7 @@ public final class Bitmap implements Parcelable {
      */
     public Bitmap createAshmemBitmap() {
         checkRecycled("Can't copy a recycled bitmap");
+        noteHardwareBitmapSlowCall();
         Bitmap b = nativeCopyAshmem(mNativePtr);
         if (b != null) {
             b.setPremultiplied(mRequestPremultiplied);
@@ -652,6 +662,7 @@ public final class Bitmap implements Parcelable {
      */
     public Bitmap createAshmemBitmap(Config config) {
         checkRecycled("Can't copy a recycled bitmap");
+        noteHardwareBitmapSlowCall();
         Bitmap b = nativeCopyAshmemConfig(mNativePtr, config.nativeInt);
         if (b != null) {
             b.setPremultiplied(mRequestPremultiplied);
@@ -772,6 +783,7 @@ public final class Bitmap implements Parcelable {
 
         boolean isHardware = source.getConfig() == Config.HARDWARE;
         if (isHardware) {
+            source.noteHardwareBitmapSlowCall();
             source = nativeCopyPreserveInternalConfig(source.mNativePtr);
         }
 
@@ -1218,6 +1230,7 @@ public final class Bitmap implements Parcelable {
         if (quality < 0 || quality > 100) {
             throw new IllegalArgumentException("quality must be 0..100");
         }
+        StrictMode.noteSlowCall("Compression of a bitmap is slow");
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "Bitmap.compress");
         boolean result = nativeCompress(mNativePtr, format.nativeInt,
                 quality, stream, new byte[WORKING_COMPRESS_STORAGE]);
@@ -1792,6 +1805,7 @@ public final class Bitmap implements Parcelable {
      */
     public void writeToParcel(Parcel p, int flags) {
         checkRecycled("Can't parcel a recycled bitmap");
+        noteHardwareBitmapSlowCall();
         if (!nativeWriteToParcel(mNativePtr, mIsMutable, mDensity, p)) {
             throw new RuntimeException("native writeToParcel failed");
         }
@@ -1838,6 +1852,7 @@ public final class Bitmap implements Parcelable {
     public Bitmap extractAlpha(Paint paint, int[] offsetXY) {
         checkRecycled("Can't extractAlpha on a recycled bitmap");
         long nativePaint = paint != null ? paint.getNativeInstance() : 0;
+        noteHardwareBitmapSlowCall();
         Bitmap bm = nativeExtractAlpha(mNativePtr, nativePaint, offsetXY);
         if (bm == null) {
             throw new RuntimeException("Failed to extractAlpha on Bitmap");
@@ -1853,8 +1868,10 @@ public final class Bitmap implements Parcelable {
      */
     public boolean sameAs(Bitmap other) {
         checkRecycled("Can't call sameAs on a recycled bitmap!");
+        noteHardwareBitmapSlowCall();
         if (this == other) return true;
         if (other == null) return false;
+        other.noteHardwareBitmapSlowCall();
         if (other.isRecycled()) {
             throw new IllegalArgumentException("Can't compare to a recycled bitmap!");
         }
@@ -1862,15 +1879,22 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Rebuilds any caches associated with the bitmap that are used for
-     * drawing it. In the case of purgeable bitmaps, this call will attempt to
-     * ensure that the pixels have been decoded.
-     * If this is called on more than one bitmap in sequence, the priority is
-     * given in LRU order (i.e. the last bitmap called will be given highest
-     * priority).
+     * Builds caches associated with the bitmap that are used for drawing it.
      *
-     * For bitmaps with no associated caches, this call is effectively a no-op,
-     * and therefore is harmless.
+     * <p>Starting in {@link android.os.Build.VERSION_CODES#N}, this call initiates an asynchronous
+     * upload to the GPU on RenderThread, if the Bitmap is not already uploaded. With Hardware
+     * Acceleration, Bitmaps must be uploaded to the GPU in order to be rendered. This is done by
+     * default the first time a Bitmap is drawn, but the process can take several milliseconds,
+     * depending on the size of the Bitmap. Each time a Bitmap is modified and drawn again, it must
+     * be re-uploaded.</p>
+     *
+     * <p>Calling this method in advance can save time in the first frame it's used. For example, it
+     * is recommended to call this on an image decoding worker thread when a decoded Bitmap is about
+     * to be displayed. It is recommended to make any pre-draw modifications to the Bitmap before
+     * calling this method, so the cached, uploaded copy may be reused without re-uploading.</p>
+     *
+     * In {@link android.os.Build.VERSION_CODES#KITKAT} and below, for purgeable bitmaps, this call
+     * would attempt to ensure that the pixels have been decoded.
      */
     public void prepareToDraw() {
         checkRecycled("Can't prepareToDraw on a recycled bitmap!");

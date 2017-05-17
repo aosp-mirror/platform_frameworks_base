@@ -784,13 +784,13 @@
         <enum name="locked" value="14" />
     </attr>
 
-    <!-- Specify the configuration changes that trigger the system to restart the
+    <!-- Specify the configuration changes that trigger the system to recreate the
          current activity if any of these configuration changes happen in the system.
          The valid configuration changes include mcc and mnc which are the same with
-         those in configChanges. By default from Android O, we don't restart the activity
+         those in configChanges. By default from Android O, we don't recreate the activity
          even the app doesn't specify mcc or mnc in configChanges. If the app wants to
-         restart, specify them in restartOnConfigChanges. -->
-    <attr name="restartOnConfigChanges">
+         be recreated, specify them in recreateOnConfigChanges. -->
+    <attr name="recreateOnConfigChanges">
         <!-- The IMSI MCC has changed, that is a SIM has been detected and
              updated the Mobile Country Code. -->
         <flag name="mcc" value="0x0001" />
@@ -817,15 +817,15 @@
     <attr name="configChanges">
         <!-- The IMSI MCC has changed, that is a SIM has been detected and
              updated the Mobile Country Code. By default from Android O, we
-             don't restart the activity even the app doesn't specify mcc in
-             configChanges. If the app wants to restart, specify mcc in
-             restartOnConfigChanges. -->
+             don't recreate the activity even the app doesn't specify mcc in
+             configChanges. If the app wants to recreate the activity, specify
+             mcc in recreateOnConfigChanges. -->
         <flag name="mcc" value="0x0001" />
         <!-- The IMSI MNC has changed, that is a SIM has been detected and
              updated the Mobile Network Code. By default from Android O, we
-             don't restart the activity even the app doesn't specify mnc in
-             configChanges. If the app wants to restart, specify mnc in
-             restartOnConfigChanges. -->
+             don't recreate the activity even the app doesn't specify mnc in
+             configChanges. If the app wants to recreate the acvitity, specify
+             mnc in recreateOnConfigChanges. -->
         <flag name="mnc" value="0x0002" />
         <!-- The locale has changed, that is the user has selected a new
              language that text should be displayed in. -->
@@ -2048,7 +2048,7 @@
         <attr name="launchMode" />
         <attr name="screenOrientation" />
         <attr name="configChanges" />
-        <attr name="restartOnConfigChanges" />
+        <attr name="recreateOnConfigChanges" />
         <attr name="permission" />
         <attr name="multiprocess" />
         <attr name="process" />

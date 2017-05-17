@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"آپ <xliff:g id="APPLICATION">%1$s</xliff:g> سے منسلک ہیں، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نجی نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"آپ کا دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔ پروفائل <xliff:g id="APPLICATION">%2$s</xliff:g> سے منسلک ہے جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے دفتری نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔\n\nمزید معلومات کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"آپ کا دفتری پروفائل <xliff:g id="ORGANIZATION">%1$s</xliff:g> کے زیر انتظام ہے۔ پروفائل <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> سے منسلک ہے جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے دفتری نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔\n\nآپ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> سے بھی منسلک ہیں، جو آپ کے ذاتی نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> کے لیے غیر مقفل کر دیا گیا"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"آلہ اس وقت تک مقفل رہے گا جب تک آپ دستی طور پر اسے غیر مقفل نہ کریں"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"تیزی سے اطلاعات حاصل کریں"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"غیر مقفل کرنے سے پہلے انہیں دیکھیں"</string>
@@ -549,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"آف"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"پاور اطلاع کنٹرولز کے ساتھ آپ کسی ایپ کی اطلاعات کیلئے 0 سے 5 تک اہمیت کی سطح سیٹ کر سکتے ہیں۔ \n\n"<b>"سطح 5"</b>\n"- اطلاعات کی فہرست کے اوپر دکھائیں \n- پوری اسکرین کی مداخلت کی اجازت دیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 4"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 3"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n\n"<b>"سطح 2"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n- کبھی آواز اور ارتعاش پیدا نہ کرنا \n\n"<b>" سطح 1"</b>\n"- پوری اسکرین کی مداخلت کو روکنا \n- کبھی نہ جھانکنا \n- کبھی بھی آواز یا ارتعاش پیدا نہ کرنا\n- مقفل اسکرین اور اسٹیٹس بار سے چھپانا \n - اطلاع کی فہرست کی نیچے دکھانا \n\n"<b>"سطح 0"</b>\n"- ایپ سے تمام اطلاعات مسدود کریں"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"اطلاعات"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"آپ کو یہ اطلاعات مزید نہیں ملیں گی۔"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"آپ کو یہ اطلاعات مزید نہیں ملیں گی"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"اطلاع کے <xliff:g id="NUMBER">%d</xliff:g> زمرے"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"اس ایپ میں اطلاعاتی زمرے نہیں ہیں"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -701,8 +700,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> اطلاع: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ممکن ہے کہ ایپ سپلٹ اسکرین کے ساتھ کام نہ کرے۔"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ایپ سپلٹ اسکرین کو سپورٹ نہیں کرتی۔"</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"یہ ایپ شاید ثانوی ڈسپلے پر کام نہ کرے۔"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"یہ ایپ ثانوی ڈسپلیز پر شروعات کا تعاون نہیں کرتی ہے۔"</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ممکن ہے ایپ ثانوی ڈسپلے پر کام نہ کرے۔"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"ایپ ثانوی ڈسپلیز پر شروعات کا تعاون نہیں کرتی۔"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ترتیبات کھولیں۔"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"فوری ترتیبات کھولیں۔"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"فوری ترتیبات بند کریں۔"</string>
@@ -763,4 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> تک"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"رکھیں"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"بدلیں"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"ایپس پس منظر میں چل رہی ہیں"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"بیٹری اور ڈیٹا استعمال کے بارے میں تفصیلات کے لیے تھپتھپائیں"</string>
 </resources>

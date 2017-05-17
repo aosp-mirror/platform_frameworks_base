@@ -22,5 +22,66 @@ import android.hardware.radio.RadioManager;
 interface ITuner {
     void close();
 
-    int getProgramInformation(out RadioManager.ProgramInfo[] infoOut);
+    /**
+     * @throws IllegalArgumentException if config is not valid or null
+     */
+    void setConfiguration(in RadioManager.BandConfig config);
+
+    RadioManager.BandConfig getConfiguration();
+
+    /**
+     * @throws IllegalStateException if tuner was opened without audio
+     */
+    void setMuted(boolean mute);
+
+    boolean isMuted();
+
+    /**
+     * @throws IllegalStateException if called out of sequence
+     */
+    void step(boolean directionDown, boolean skipSubChannel);
+
+    /**
+     * @throws IllegalStateException if called out of sequence
+     */
+    void scan(boolean directionDown, boolean skipSubChannel);
+
+    /**
+     * @throws IllegalArgumentException if invalid arguments are passed
+     * @throws IllegalStateException if called out of sequence
+     */
+    void tune(int channel, int subChannel);
+
+    /**
+     * @throws IllegalStateException if called out of sequence
+     */
+    void cancel();
+
+    RadioManager.ProgramInfo getProgramInformation();
+
+    /**
+     * @returns {@code true} if the scan was properly scheduled,
+     *          {@code false} if the scan feature is unavailable
+     */
+    boolean startBackgroundScan();
+
+    /**
+     * @returns the list, or null if scan is in progress
+     * @throws IllegalArgumentException if invalid arguments are passed
+     * @throws IllegalStateException if the scan has not been started, client may
+     *         call startBackgroundScan to fix this.
+     */
+    List<RadioManager.ProgramInfo> getProgramList(String filter);
+
+    /**
+     * @throws IllegalStateException if the switch is not supported at current
+     *         configuration.
+     */
+    boolean isAnalogForced();
+
+    /**
+     * @throws IllegalStateException if the switch is not supported at current
+     *         configuration.
+     */
+    void setAnalogForced(boolean isForced);
 }

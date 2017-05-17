@@ -12,8 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// ====  c++ proto device library  ==============================
+cc_library {
+    name: "libplatformprotos",
+    host_supported: true,
+    // b/34740546, work around clang-tidy segmentation fault.
+    tidy_checks: ["-modernize*"],
+    proto: {
+        export_proto_headers: true,
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    target: {
+        host: {
+            proto: {
+                type: "full",
+            },
+            srcs: [
+                "core/proto/**/*.proto",
+                "libs/incident/**/*.proto",
+            ],
+        },
+        android: {
+            proto: {
+                type: "lite",
+            },
+            // We only build the protos that are optimized for the lite
+            // runtime, as well as the only protos that are actually
+            // needed by the device.
+            srcs: [
+                "core/proto/android/service/graphicsstats.proto",
+            ],
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}
+
 subdirs = [
+    "core/jni",
     "libs/*",
+    "media/*",
     "tools/*",
     "native/android",
     "native/graphics/jni",

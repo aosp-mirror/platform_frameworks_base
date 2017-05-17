@@ -368,8 +368,8 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testSetActiveScorer_noRequestNetworkScoresPermission() {
-        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+    public void testSetActiveScorer_noScoreNetworksPermission() {
+        when(mContext.checkCallingOrSelfPermission(permission.SCORE_NETWORKS))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
 
         try {

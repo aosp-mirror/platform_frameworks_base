@@ -68,6 +68,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final Callback mCallback = new Callback();
     private final ActivityStarter mActivityStarter;
     private Dialog mDialog;
+    private boolean mRegistered;
 
     public CastTile(QSHost host) {
         super(host);
@@ -146,7 +147,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 mDialog = dialog;
             }
             mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
-            mDialog.show();
+            mUiHandler.post(() -> mDialog.show());
             registerReceiver();
             mHost.collapsePanels();
         });
@@ -155,7 +156,13 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private void registerReceiver() {
         mContext.registerReceiverAsUser(mReceiver, UserHandle.CURRENT,
                 new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), null, null);
-        mDialog.setOnDismissListener(dialog -> mContext.unregisterReceiver(mReceiver));
+        mRegistered = true;
+        mDialog.setOnDismissListener(dialog -> {
+            if (mRegistered) {
+                mContext.unregisterReceiver(mReceiver);
+                mRegistered = false;
+            }
+        });
     }
 
     @Override

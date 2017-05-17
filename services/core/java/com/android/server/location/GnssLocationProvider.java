@@ -384,6 +384,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // Wakelocks
     private final static String WAKELOCK_KEY = "GnssLocationProvider";
     private final PowerManager.WakeLock mWakeLock;
+    private static final String DOWNLOAD_EXTRA_WAKELOCK_KEY = "GnssLocationProviderXtraDownload";
+    private final PowerManager.WakeLock mDownloadXtraWakeLock;
 
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
@@ -691,6 +693,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
         mWakeLock.setReferenceCounted(true);
 
+        // Create a separate wake lock for xtra downloader as it may be released due to timeout.
+        mDownloadXtraWakeLock = mPowerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, DOWNLOAD_EXTRA_WAKELOCK_KEY);
+        mDownloadXtraWakeLock.setReferenceCounted(true);
+
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
         mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT), 0);
@@ -995,7 +1002,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mDownloadXtraDataPending = STATE_DOWNLOADING;
 
         // hold wake lock while task runs
-        mWakeLock.acquire(DOWNLOAD_XTRA_DATA_TIMEOUT_MS);
+        mDownloadXtraWakeLock.acquire(DOWNLOAD_XTRA_DATA_TIMEOUT_MS);
         Log.i(TAG, "WakeLock acquired by handleDownloadXtraData()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
@@ -1017,13 +1024,17 @@ public class GnssLocationProvider implements LocationProviderInterface {
                             mXtraBackOff.nextBackoffMillis());
                 }
 
-                // release wake lock held by task
-                if (mWakeLock.isHeld()) {
-                    mWakeLock.release();
-                } else {
-                    Log.e(TAG, "WakeLock expired before release in handleDownloadXtraData()");
+                // Release wake lock held by task, synchronize on mLock in case multiple
+                // download tasks overrun.
+                synchronized (mLock) {
+                    if (mDownloadXtraWakeLock.isHeld()) {
+                        mDownloadXtraWakeLock.release();
+                        if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadXtraData()");
+                    } else {
+                        Log.e(TAG, "WakeLock expired before release in "
+                                + "handleDownloadXtraData()");
+                    }
                 }
-                Log.i(TAG, "WakeLock released by handleDownloadXtraData()");
             }
         });
     }
@@ -1173,18 +1184,26 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     @Override
     public int getStatus(Bundle extras) {
-        if (extras != null) {
-            extras.putInt("satellites", mSvCount);
-        }
+        setLocationExtras(extras);
         return mStatus;
     }
 
-    private void updateStatus(int status, int svCount) {
-        if (status != mStatus || svCount != mSvCount) {
+    private void updateStatus(int status, int svCount, int meanCn0, int maxCn0) {
+        if (status != mStatus || svCount != mSvCount || meanCn0 != mMeanCn0 || maxCn0 != mMaxCn0 ) {
             mStatus = status;
             mSvCount = svCount;
-            mLocationExtras.putInt("satellites", svCount);
+            mMeanCn0 = meanCn0;
+            mMaxCn0 = maxCn0;
+            setLocationExtras(mLocationExtras);
             mStatusUpdateTime = SystemClock.elapsedRealtime();
+        }
+    }
+
+    private void setLocationExtras(Bundle extras) {
+        if (extras != null) {
+            extras.putInt("satellites", mSvCount);
+            extras.putInt("meanCn0", mMeanCn0);
+            extras.putInt("maxCn0", mMaxCn0);
         }
     }
 
@@ -1438,7 +1457,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0, 0, 0);
             mFixRequestTime = System.currentTimeMillis();
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING)) {
                 // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
@@ -1461,7 +1480,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             mLastFixTime = 0;
 
             // reset SV count to zero
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0, 0, 0);
         }
     }
 
@@ -1547,7 +1566,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, true);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            updateStatus(LocationProvider.AVAILABLE, mSvCount);
+            updateStatus(LocationProvider.AVAILABLE, mSvCount, mMeanCn0, mMaxCn0);
         }
 
        if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted &&
@@ -1611,15 +1630,21 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (VERBOSE) {
             Log.v(TAG, "SV count: " + svCount);
         }
-        // Calculate number of sets used in fix.
+        // Calculate number of satellites used in fix.
         int usedInFixCount = 0;
+        int maxCn0 = 0;
+        int meanCn0 = 0;
         for (int i = 0; i < svCount; i++) {
             if ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
                 ++usedInFixCount;
+                if (mCn0s[i] > maxCn0) {
+                    maxCn0 = (int)mCn0s[i];
+                }
+                meanCn0 += mCn0s[i];
             }
             if (VERBOSE) {
                 Log.v(TAG, "svid: " + (mSvidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH) +
-                        " cn0: " + mCn0s[i]/10 +
+                        " cn0: " + mCn0s[i] +
                         " elev: " + mSvElevations[i] +
                         " azimuth: " + mSvAzimuths[i] +
                         " carrier frequency: " + mSvCarrierFreqs[i] +
@@ -1633,8 +1658,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
                         ? "" : "F"));
             }
         }
-        // return number of sets used in fix instead of total
-        updateStatus(mStatus, usedInFixCount);
+        if (usedInFixCount > 0) {
+            meanCn0 /= usedInFixCount;
+        }
+        // return number of sats used in fix instead of total reported
+        updateStatus(mStatus, usedInFixCount, meanCn0, maxCn0);
 
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
             System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT) {
@@ -1642,7 +1670,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, false);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount, mMeanCn0, mMaxCn0);
         }
     }
 
@@ -2520,6 +2548,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private float mSvAzimuths[] = new float[MAX_SVS];
     private float mSvCarrierFreqs[] = new float[MAX_SVS];
     private int mSvCount;
+    private int mMeanCn0;
+    private int mMaxCn0;
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
 

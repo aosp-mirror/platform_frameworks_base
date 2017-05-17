@@ -35,6 +35,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -184,6 +185,26 @@ public class SettingsProvider extends ContentProvider {
 
     private static final Bundle NULL_SETTING_BUNDLE = Bundle.forPair(
             Settings.NameValueTable.VALUE, null);
+
+    // Overlay specified settings whitelisted for Instant Apps
+    private static final Set<String> OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS = new ArraySet<>();
+    private static final Set<String> OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS = new ArraySet<>();
+    private static final Set<String> OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS = new ArraySet<>();
+
+    static {
+        for (String name : Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_allowedGlobalInstantAppSettings)) {
+            OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS.add(name);
+        }
+        for (String name : Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_allowedSystemInstantAppSettings)) {
+            OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS.add(name);
+        }
+        for (String name : Resources.getSystem().getStringArray(
+                com.android.internal.R.array.config_allowedSecureInstantAppSettings)) {
+            OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS.add(name);
+        }
+    }
 
     // Changes to these global settings are synchronously persisted
     private static final Set<String> CRITICAL_GLOBAL_SETTINGS = new ArraySet<>();
@@ -898,14 +919,13 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getGlobalSetting(" + name + ")");
         }
 
+        // Ensure the caller can access the setting.
+        enforceSettingReadable(name, SETTINGS_TYPE_GLOBAL, UserHandle.getCallingUserId());
+
         // Get the value.
         synchronized (mLock) {
-            Setting setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_GLOBAL,
+            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_GLOBAL,
                     UserHandle.USER_SYSTEM, name);
-            // Ensure the caller can access the setting before we return it.
-            enforceSettingReadable(setting, name, SETTINGS_TYPE_GLOBAL,
-                    UserHandle.getCallingUserId());
-            return setting;
         }
     }
 
@@ -1063,6 +1083,9 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
+        // Ensure the caller can access the setting.
+        enforceSettingReadable(name, SETTINGS_TYPE_SECURE, UserHandle.getCallingUserId());
+
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId, name);
 
@@ -1076,7 +1099,6 @@ public class SettingsProvider extends ContentProvider {
 
         // As of Android O, the SSAID is read from an app-specific entry in table
         // SETTINGS_FILE_SSAID, unless accessed by a system process.
-        // All apps are allowed to access their SSAID, so we skip the permission check.
         if (isNewSsaidSetting(name)) {
             PackageInfo callingPkg = getCallingPackageInfo(owningUserId);
             synchronized (mLock) {
@@ -1086,12 +1108,8 @@ public class SettingsProvider extends ContentProvider {
 
         // Not the SSAID; do a straight lookup
         synchronized (mLock) {
-            Setting setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE,
+            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE,
                     owningUserId, name);
-            // Ensure the caller can access the setting before we return it.
-            enforceSettingReadable(setting, name, SETTINGS_TYPE_SECURE,
-                    UserHandle.getCallingUserId());
-            return setting;
         }
     }
 
@@ -1124,28 +1142,55 @@ public class SettingsProvider extends ContentProvider {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+
+        final SettingsState ssaidSettings = mSettingsRegistry.getSettingsLocked(
+                SETTINGS_TYPE_SSAID, owningUserId);
+
         if (instantSsaid != null) {
             // Use the stored value if it is still valid.
             if (ssaid != null && instantSsaid.equals(ssaid.getValue())) {
-                return ssaid;
+                return mascaradeSsaidSetting(ssaidSettings, ssaid);
             }
             // The value has changed, update the stored value.
-            final SettingsState ssaidSettings = mSettingsRegistry.getSettingsLocked(
-                    SETTINGS_TYPE_SSAID, owningUserId);
             final boolean success = ssaidSettings.insertSettingLocked(name, instantSsaid, null,
                     true, callingPkg.packageName);
             if (!success) {
                 throw new IllegalStateException("Failed to update instant app android id");
             }
-            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SSAID, owningUserId, name);
+            Setting setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SSAID,
+                    owningUserId, name);
+            return mascaradeSsaidSetting(ssaidSettings, setting);
         }
 
         // Lazy initialize ssaid if not yet present in ssaid table.
         if (ssaid == null || ssaid.isNull() || ssaid.getValue() == null) {
-            return mSettingsRegistry.generateSsaidLocked(callingPkg, owningUserId);
+            Setting setting = mSettingsRegistry.generateSsaidLocked(callingPkg, owningUserId);
+            return mascaradeSsaidSetting(ssaidSettings, setting);
         }
 
-        return ssaid;
+        return mascaradeSsaidSetting(ssaidSettings, ssaid);
+    }
+
+    private Setting mascaradeSsaidSetting(SettingsState settingsState, Setting ssaidSetting) {
+        // SSAID settings are located in a dedicated table for internal bookkeeping
+        // but for the world they reside in the secure table, so adjust the key here.
+        // We have a special name when looking it up but want the world to see it as
+        // "android_id".
+        if (ssaidSetting != null) {
+            return settingsState.new Setting(ssaidSetting) {
+                @Override
+                public int getKey() {
+                    final int userId = getUserIdFromKey(super.getKey());
+                    return makeKey(SETTINGS_TYPE_SECURE, userId);
+                }
+
+                @Override
+                public String getName() {
+                    return Settings.Secure.ANDROID_ID;
+                }
+            };
+        }
+        return null;
     }
 
     private boolean insertSecureSetting(String name, String value, String tag,
@@ -1155,7 +1200,6 @@ public class SettingsProvider extends ContentProvider {
                     + ", " + tag  + ", " + makeDefault + ", "  + requestingUserId
                     + ", " + forceNotify + ")");
         }
-
         return mutateSecureSetting(name, value, tag, makeDefault, requestingUserId,
                 MUTATION_OPERATION_INSERT, forceNotify, 0);
     }
@@ -1292,18 +1336,15 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
+        // Ensure the caller can access the setting.
+        enforceSettingReadable(name, SETTINGS_TYPE_SYSTEM, UserHandle.getCallingUserId());
 
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId, name);
 
         // Get the value.
         synchronized (mLock) {
-            Setting setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SYSTEM,
-                    owningUserId, name);
-            // Ensure the caller can access the setting before we return it.
-            enforceSettingReadable(setting, name, SETTINGS_TYPE_SYSTEM,
-                    UserHandle.getCallingUserId());
-            return setting;
+            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SYSTEM, owningUserId, name);
         }
     }
 
@@ -1635,6 +1676,19 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
+    private Set<String> getOverlayInstantAppAccessibleSettings(int settingsType) {
+        switch (settingsType) {
+            case SETTINGS_TYPE_GLOBAL:
+                return OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS;
+            case SETTINGS_TYPE_SYSTEM:
+                return OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS;
+            case SETTINGS_TYPE_SECURE:
+                return OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS;
+            default:
+                throw new IllegalArgumentException("Invalid settings type: " + settingsType);
+        }
+    }
+
     private List<String> getSettingsNamesLocked(int settingsType, int userId) {
         boolean instantApp;
         if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
@@ -1650,23 +1704,16 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void enforceSettingReadable(Setting setting, String settingName, int settingsType,
-            int userId) {
+    private void enforceSettingReadable(String settingName, int settingsType, int userId) {
         if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
             return;
         }
         ApplicationInfo ai = getCallingApplicationInfoOrThrow();
-        // Installed apps are allowed to read all settings.
         if (!ai.isInstantApp()) {
             return;
         }
-        // Instant Apps are allowed to read settings defined by applications.
-        // TODO: Replace this with an API that allows the setting application to say if a setting
-        // shoud/shouldn't be accessible.
-        if (!setting.isDefaultFromSystem()) {
-            return;
-        }
-        if (!getInstantAppAccessibleSettings(settingsType).contains(settingName)) {
+        if (!getInstantAppAccessibleSettings(settingsType).contains(settingName)
+                && !getOverlayInstantAppAccessibleSettings(settingsType).contains(settingName)) {
             throw new SecurityException("Setting " + settingName + " is not accessible from"
                     + " ephemeral package " + getCallingPackage());
         }
@@ -1858,6 +1905,7 @@ public class SettingsProvider extends ContentProvider {
         Bundle result = new Bundle();
         result.putString(Settings.NameValueTable.VALUE,
                 !setting.isNull() ? setting.getValue() : null);
+
         mSettingsRegistry.mGenerationRegistry.addGenerationData(result, setting.getKey());
         return result;
     }
@@ -2851,7 +2899,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 144;
+            private static final int SETTINGS_VERSION = 145;
 
             private final int mUserId;
 
@@ -3431,6 +3479,25 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 144;
+                }
+
+                if (currentVersion == 144) {
+                    // Version 145: Set the default value for WIFI_WAKEUP_AVAILABLE.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        final Setting currentSetting = globalSettings.getSettingLocked(
+                                Settings.Global.WIFI_WAKEUP_AVAILABLE);
+                        if (currentSetting.isNull()) {
+                            final int defaultValue = getContext().getResources().getInteger(
+                                    com.android.internal.R.integer.config_wifi_wakeup_available);
+                            globalSettings.insertSettingLocked(
+                                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
+                                    String.valueOf(defaultValue),
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 145;
                 }
 
                 // vXXX: Add new settings above this point.

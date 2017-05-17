@@ -3241,7 +3241,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertNull(mService.getShortcutsForTest().get(USER_10).getLastKnownLauncher());
 
         // Try stopping the user
-        mService.handleCleanupUser(USER_10);
+        mService.handleStopUser(USER_10);
 
         // Now it's unloaded.
         assertEquals(1, mService.getShortcutsForTest().size());
@@ -6106,7 +6106,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEmpty(mManager.getPinnedShortcuts());
         });
         // Send add broadcast, but the user is not running, so should be ignored.
-        mService.handleCleanupUser(USER_10);
+        mService.handleStopUser(USER_10);
         mRunningUsers.put(USER_10, false);
         mUnlockedUsers.put(USER_10, false);
 
@@ -7397,6 +7397,52 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertShortcutIds(assertAllEnabled(mManager.getPinnedShortcuts()),
                     "s11", "s12",
                     "s21", "s22");
+        });
+    }
+
+    public void testReturnedByServer() {
+        // Package 1 updated, with manifest shortcuts.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_1);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(mManager.getManifestShortcuts())
+                    .haveIds("ms1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
+
+            assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"))));
+
+            assertWith(mManager.getDynamicShortcuts())
+                    .haveIds("s1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
+        });
+
+        // Pin them.
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("ms1", "s1"), getCallingUser());
+            assertWith(getShortcutAsLauncher(USER_0))
+                    .haveIds("ms1", "s1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(mManager.getPinnedShortcuts())
+                    .haveIds("ms1", "s1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            // This shows a warning log, but should still work.
+            assertTrue(mManager.setDynamicShortcuts(mManager.getDynamicShortcuts()));
+
+            assertWith(mManager.getDynamicShortcuts())
+                    .haveIds("s1")
+                    .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
         });
     }
 }

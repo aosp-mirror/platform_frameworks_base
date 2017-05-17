@@ -56,6 +56,7 @@ import android.util.AndroidException;
  */
 public class IntentSender implements Parcelable {
     private final IIntentSender mTarget;
+    IBinder mWhitelistToken;
 
     /**
      * Exception thrown when trying to send through a PendingIntent that
@@ -187,7 +188,7 @@ public class IntentSender implements Parcelable {
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;
-            int res = ActivityManager.getService().sendIntentSender(mTarget,
+            int res = ActivityManager.getService().sendIntentSender(mTarget, mWhitelistToken,
                     code, intent, resolvedType,
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)
@@ -362,6 +363,12 @@ public class IntentSender implements Parcelable {
     /** @hide */
     public IntentSender(IIntentSender target) {
         mTarget = target;
+    }
+
+    /** @hide */
+    public IntentSender(IIntentSender target, IBinder whitelistToken) {
+        mTarget = target;
+        mWhitelistToken = whitelistToken;
     }
 
     /** @hide */

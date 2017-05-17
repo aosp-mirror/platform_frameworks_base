@@ -20,18 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
-import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implements the ITunerCallback interface by forwarding calls to RadioTuner.Callback.
  */
 class TunerCallbackAdapter extends ITunerCallback.Stub {
-    private static final String TAG = "radio.TunerCallbackAdapter";
-
     @NonNull private final RadioTuner.Callback mCallback;
     @NonNull private final Handler mHandler;
 
@@ -52,5 +45,10 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
     @Override
     public void onConfigurationChanged(RadioManager.BandConfig config) {
         mHandler.post(() -> mCallback.onConfigurationChanged(config));
+    }
+
+    @Override
+    public void onProgramInfoChanged(RadioManager.ProgramInfo info) {
+        mHandler.post(() -> mCallback.onProgramInfoChanged(info));
     }
 }

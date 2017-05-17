@@ -21,22 +21,20 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.ActivityOptions.OnAnimationStartedListener;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.AppTransitionAnimationSpec;
-import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
-import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
@@ -44,6 +42,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
@@ -58,7 +57,9 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationC
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.events.activity.ShowEmptyViewEvent;
 import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
+import com.android.systemui.recents.events.component.ExpandPipEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
@@ -73,10 +74,13 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecComposer;
+import com.android.systemui.recents.views.RecentsTransitionHelper.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
-import java.io.FileDescriptor;
+import com.google.android.colorextraction.ColorExtractor;
+import com.google.android.colorextraction.drawable.GradientDrawable;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,13 +89,12 @@ import java.util.List;
  * This view is the the top level layout that contains TaskStacks (which are laid out according
  * to their SpaceNode bounds.
  */
-public class RecentsView extends FrameLayout {
+public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsChangedListener {
 
     private static final String TAG = "RecentsView";
 
     private static final int DEFAULT_UPDATE_SCRIM_DURATION = 200;
-    private static final float DEFAULT_SCRIM_ALPHA = 0.33f;
-    private static final float GRID_LAYOUT_SCRIM_ALPHA = 0.45f;
+    private static final float DEFAULT_SCRIM_ALPHA = 0.8f;
 
     private static final int SHOW_STACK_ACTION_BUTTON_DURATION = 134;
     private static final int HIDE_STACK_ACTION_BUTTON_DURATION = 100;
@@ -108,7 +111,8 @@ public class RecentsView extends FrameLayout {
     private int mDividerSize;
 
     private final float mScrimAlpha;
-    private final Drawable mBackgroundScrim;
+    private final GradientDrawable mBackgroundScrim;
+    private final ColorExtractor mColorExtractor;
     private Animator mBackgroundScrimAnimator;
 
     private RecentsTransitionHelper mTransitionHelper;
@@ -137,10 +141,11 @@ public class RecentsView extends FrameLayout {
         mDividerSize = ssp.getDockedDividerSize(context);
         mTouchHandler = new RecentsViewTouchHandler(this);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
-        mScrimAlpha = Recents.getConfiguration().isGridEnabled
-                ? GRID_LAYOUT_SCRIM_ALPHA : DEFAULT_SCRIM_ALPHA;
-        mBackgroundScrim = new ColorDrawable(
-                Color.argb((int) (mScrimAlpha * 255), 0, 0, 0)).mutate();
+        mScrimAlpha = DEFAULT_SCRIM_ALPHA;
+        mBackgroundScrim = new GradientDrawable(context);
+        mBackgroundScrim.setCallback(this);
+        mBackgroundScrim.setAlpha((int) (mScrimAlpha * 255));
+        mColorExtractor = Dependency.get(ColorExtractor.class);
 
         LayoutInflater inflater = LayoutInflater.from(context);
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
@@ -188,7 +193,7 @@ public class RecentsView extends FrameLayout {
             // the tasks for the home animation.
             if (launchState.launchedViaDockGesture || launchState.launchedFromApp
                     || isTaskStackEmpty) {
-                mBackgroundScrim.setAlpha(255);
+                mBackgroundScrim.setAlpha((int) (mScrimAlpha * 255));
             } else {
                 mBackgroundScrim.setAlpha(0);
             }
@@ -253,6 +258,12 @@ public class RecentsView extends FrameLayout {
 
     /** Launches the task that recents was launched from if possible */
     public boolean launchPreviousTask() {
+        if (Recents.getConfiguration().getLaunchState().launchedFromPipApp) {
+            // If the app auto-entered PiP on the way to Recents, then just re-expand it
+            EventBus.getDefault().send(new ExpandPipEvent());
+            return true;
+        }
+
         if (mTaskStackView != null) {
             Task task = getStack().getLaunchTarget();
             if (task != null) {
@@ -373,6 +384,11 @@ public class RecentsView extends FrameLayout {
             mEmptyView.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
         }
 
+        // Needs to know the screen size since the gradient never scales up or down
+        // even when bounds change.
+        mBackgroundScrim.setScreenSize(right - left, bottom - top);
+        mBackgroundScrim.setBounds(left, top, right, bottom);
+
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             // Layout the stack action button such that its drawable is start-aligned with the
             // stack, vertically centered in the available space above the stack
@@ -440,8 +456,7 @@ public class RecentsView extends FrameLayout {
     public final void onBusEvent(LaunchTaskEvent event) {
         mLastTaskLaunchedWasFreeform = event.task.isFreeformTask();
         mTransitionHelper.launchTaskFromRecents(getStack(), event.task, mTaskStackView,
-                event.taskView, event.screenPinningRequested, event.targetTaskBounds,
-                event.targetTaskStack);
+                event.taskView, event.screenPinningRequested, event.targetTaskStack);
     }
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
@@ -523,7 +538,7 @@ public class RecentsView extends FrameLayout {
                 };
 
                 final Rect taskRect = getTaskRect(event.taskView);
-                IAppTransitionAnimationSpecsFuture future =
+                AppTransitionAnimationSpecsFuture future =
                         mTransitionHelper.getAppTransitionFuture(
                                 new AnimationSpecComposer() {
                                     @Override
@@ -532,7 +547,7 @@ public class RecentsView extends FrameLayout {
                                                 event.taskView, taskRect);
                                     }
                                 });
-                ssp.overridePendingAppTransitionMultiThumbFuture(future,
+                ssp.overridePendingAppTransitionMultiThumbFuture(future.getFuture(),
                         mTransitionHelper.wrapStartedListener(startedListener),
                         true /* scaleUp */);
 
@@ -637,6 +652,10 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(MultiWindowStateChangedEvent event) {
         updateStack(event.stack, false /* setStackViewTasks */);
+    }
+
+    public final void onBusEvent(ShowEmptyViewEvent event) {
+        showEmptyView(R.string.recents_empty_message);
     }
 
     /**
@@ -763,8 +782,8 @@ public class RecentsView extends FrameLayout {
     private void animateBackgroundScrim(float alpha, int duration) {
         Utilities.cancelAnimationWithoutCallbacks(mBackgroundScrimAnimator);
         // Calculate the absolute alpha to animate from
-        int fromAlpha = (int) ((mBackgroundScrim.getAlpha() / (mScrimAlpha * 255)) * 255);
-        int toAlpha = (int) (alpha * 255);
+        int fromAlpha = mBackgroundScrim.getAlpha();
+        int toAlpha = (int) (alpha * mScrimAlpha * 255);
         mBackgroundScrimAnimator = ObjectAnimator.ofInt(mBackgroundScrim, Utilities.DRAWABLE_ALPHA,
                 fromAlpha, toAlpha);
         mBackgroundScrimAnimator.setDuration(duration);
@@ -806,5 +825,23 @@ public class RecentsView extends FrameLayout {
         if (mTaskStackView != null) {
             mTaskStackView.dump(innerPrefix, writer);
         }
+    }
+
+    @Override
+    public void onColorsChanged(ColorExtractor.GradientColors colors, int which) {
+        if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
+            mBackgroundScrim.setColors(colors);
+        }
+    }
+
+    public void onStart() {
+        mColorExtractor.addOnColorsChangedListener(this);
+        // We don't want to interpolate colors because we're defining the initial state.
+        // Gradient should be set/ready when you open "Recents".
+        mBackgroundScrim.setColors(mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM), false);
+    }
+
+    public void onStop() {
+        mColorExtractor.removeOnColorsChangedListener(this);
     }
 }

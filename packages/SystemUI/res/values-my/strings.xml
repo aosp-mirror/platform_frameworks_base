@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"မိုဘိုင်းဒေတာ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"မိုဘိုင်းဒေတာကို ဖွင့်ထားပါသည်"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"မိုဘိုင်းဒေတာကို ပိတ်ထားပါသည်"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်ဖြင့်ကွန်ရက်ချိတ်ခြင်း"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်သုံး၍ ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ကို ဖွင့်ထားသည်။"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကဒ် မရှိပါ"</string>
@@ -466,8 +466,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"သင်သည် အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာ ကွန်ရက်အသုံးပြုမှုကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"သင်၏ အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> က စီမံခန့်ခွဲထားပါသည်။ ပရိုဖိုင်သည် အီးမေး၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက် လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။\n\nနောက်ထပ် အချက်အလက်များအတွက် သင်၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"သင်၏ အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> က စီမံခန့်ခွဲထားသည်။ ပရိုဖိုင်သည် အီးမေး၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက် လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။\n\nသင်၏ ကိုယ်ရေးကိုယ်တာ ကွန်ရက်လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> သို့လည်း ချိတ်ဆက်ထားပါသည်။"</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> အတွက် လော့ခ်ဖွင့်ထားသည်"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"သင်က လက်ဖြင့် သော့မဖွင့်မချင်း ကိရိယာမှာ သော့ပိတ်လျက် ရှိနေမည်"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"အကြောင်းကြားချက်များ မြန်မြန်ရရန်"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"မဖွင့်ခင် ၎င်းတို့ကို ကြည့်ပါ"</string>
@@ -549,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ပိတ်ပါ"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများကိုအသုံးပြုပြီး အက်ပ်တစ်ခု၏ အကြောင်းကြားချက် အရေးပါမှု ၀ မှ ၅ အထိသတ်မှတ်ပေးနိုင်သည်။ \n\n"<b>"အဆင့် ၅"</b>" \n- အကြောင်းကြားချက်စာရင်း၏ ထိပ်ဆုံးတွင် ပြသည် \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်းကို ခွင့်ပြုသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၄"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၃"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n\n"<b>"အဆင့် ၂"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n\n"<b>"အဆင့် ၁"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n- လော့ခ်ချထားသည့် မျက်နှာပြင်နှင့် အခြေအနေဘားတန်းတို့တွင် မပြပါ \n- အကြောင်းကြားချက်စာရင်း အောက်ဆုံးတွင်ပြသည် \n\n"<b>"အဆင့် ၀"</b>" \n- အက်ပ်မှ အကြောင်းကြားချက်များ အားလုံးကို ပိတ်ဆို့သည်"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"အကြောင်းကြားချက်များ"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"သင်သည် ဤအကြောင်းကြားချက်များကို လက်ခံရရှိတော့မည် မဟုတ်ပါ။"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"သင်သည် ဤအကြောင်းကြားချက်များကို နောက်ထပ် လက်ခံရရှိတော့မည် မဟုတ်ပါ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"အကြောင်းကြားချက် အမျိုးအစား <xliff:g id="NUMBER">%d</xliff:g> ခု"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ဤအက်ပ်တွင် အကြောင်းကြားချက် အမျိုးအစားများ မရှိပါ"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -701,8 +700,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> အကြောင်းကြားချက် − <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"မျက်နှာပြင် ခွဲခြမ်းပြသမှုဖြင့် အက်ပ်သည် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"အက်ပ်သည် မျက်နှာပြင်ခွဲပြရန် ပံ့ပိုးထားခြင်းမရှိပါ။"</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"အက်ပ်သည် ဒုတိယမျက်နှာပြင်ပြသမှုတွင် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"အက်ပ်ကို ဒုတိယဖန်မျက်နှာပြင်ပြသမှုတွင် ဖွင့်ရန်အတွက် ပံ့ပိုးမထားပါ။"</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ဤအက်ပ်အနေဖြင့် ဒုတိယဖန်သားပြင်ပေါ်တွင် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"ဤအက်ပ်အနေဖြင့် ဖွင့်ရန်စနစ်ကို ဒုတိယဖန်သားပြင်မှ အသုံးပြုရန် ပံ့ပိုးမထားပါ။"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ဆက်တင်များကို ဖွင့်ပါ။"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"အမြန်ဆက်တင်များကို ဖွင့်ပါ။"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"အမြန်ဆက်တင်များကို ပိတ်ပါ။"</string>
@@ -763,4 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> အထိ"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"သိမ်းထားရန်"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"အစားထိုးရန်"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"နောက်ခံတွင် ပွင့်နေသော အက်ပ်များ"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"ဘက်ထရီနှင့် ဒေတာအသုံးပြုမှု အသေးစိတ်ကို ကြည့်ရန် တို့ပါ"</string>
 </resources>

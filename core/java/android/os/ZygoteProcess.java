@@ -19,6 +19,7 @@ package android.os;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.util.Log;
+import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.Preconditions;
@@ -528,5 +529,28 @@ public class ZygoteProcess {
 
             return (state.inputStream.readInt() == 0);
         }
+    }
+
+    /**
+     * Try connecting to the Zygote over and over again until we hit a time-out.
+     * @param socketName The name of the socket to connect to.
+     */
+    public static void waitForConnectionToZygote(String socketName) {
+        for (int n = 20; n >= 0; n--) {
+            try {
+                final ZygoteState zs = ZygoteState.connect(socketName);
+                zs.close();
+                return;
+            } catch (IOException ioe) {
+                Log.w(LOG_TAG,
+                        "Got error connecting to zygote, retrying. msg= " + ioe.getMessage());
+            }
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ie) {
+            }
+        }
+        Slog.wtf(LOG_TAG, "Failed to connect to Zygote through socket " + socketName);
     }
 }

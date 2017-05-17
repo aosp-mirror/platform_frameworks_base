@@ -16,10 +16,17 @@
 
 package android.text.method;
 
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.InputType;
+import android.util.KeyUtils;
 import android.view.KeyEvent;
+import android.widget.EditText;
 import android.widget.TextView.BufferType;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test backspace key handling of {@link android.text.method.BaseKeyListener}.
@@ -27,12 +34,22 @@ import android.widget.TextView.BufferType;
  * Only contains edge cases. For normal cases, see {@see android.text.method.cts.BackspaceTest}.
  * TODO: introduce test cases for surrogate pairs and replacement span.
  */
-public class BackspaceTest extends KeyListenerTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class BackspaceTest {
+    private EditText mTextView;
+
     private static final BaseKeyListener mKeyListener = new BaseKeyListener() {
         public int getInputType() {
             return InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL;
         }
     };
+
+    @Before
+    public void setup() {
+        mTextView = new EditText(InstrumentationRegistry.getInstrumentation().getContext());
+    }
+
 
     // Sync the state to the TextView and call onKeyDown with KEYCODE_DEL key event.
     // Then update the state to the result of TextView.
@@ -41,7 +58,8 @@ public class BackspaceTest extends KeyListenerTestCase {
         mTextView.setKeyListener(mKeyListener);
         mTextView.setSelection(state.mSelectionStart, state.mSelectionEnd);
 
-        final KeyEvent keyEvent = getKey(KeyEvent.KEYCODE_DEL, modifiers);
+        final KeyEvent keyEvent = KeyUtils.generateKeyEvent(
+            KeyEvent.KEYCODE_DEL, KeyEvent.ACTION_DOWN, modifiers);
         mTextView.onKeyDown(keyEvent.getKeyCode(), keyEvent);
 
         state.mText = mTextView.getText();
@@ -49,7 +67,7 @@ public class BackspaceTest extends KeyListenerTestCase {
         state.mSelectionEnd = mTextView.getSelectionEnd();
     }
 
-    @SmallTest
+    @Test
     public void testCombiningEnclosingKeycaps() {
         EditorState state = new EditorState();
 
@@ -77,7 +95,7 @@ public class BackspaceTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testVariationSelector() {
         EditorState state = new EditorState();
 
@@ -141,7 +159,7 @@ public class BackspaceTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testEmojiZWJSequence() {
         EditorState state = new EditorState();
 
@@ -221,7 +239,7 @@ public class BackspaceTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testFlags() {
         EditorState state = new EditorState();
 
@@ -283,7 +301,7 @@ public class BackspaceTest extends KeyListenerTestCase {
         state.assertEquals("'a' |");
     }
 
-    @SmallTest
+    @Test
     public void testEmojiModifier() {
         EditorState state = new EditorState();
 
@@ -312,7 +330,7 @@ public class BackspaceTest extends KeyListenerTestCase {
         state.assertEquals("|");
     }
 
-    @SmallTest
+    @Test
     public void testMixedEdgeCases() {
         EditorState state = new EditorState();
 

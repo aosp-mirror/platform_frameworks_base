@@ -26,6 +26,7 @@ import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager.InstallReason;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.FileBridge;
@@ -948,7 +949,7 @@ public class PackageInstaller {
         /** {@hide} */
         public int installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
         /** {@hide} */
-        public int installReason = PackageManager.INSTALL_REASON_UNKNOWN;
+        public @InstallReason int installReason = PackageManager.INSTALL_REASON_UNKNOWN;
         /** {@hide} */
         public long sizeBytes = -1;
         /** {@hide} */
@@ -1147,11 +1148,9 @@ public class PackageInstaller {
         }
 
         /**
-         * Set the reason for installing this package. Currently,
-         * {@code PackageManager#INSTALL_REASON_UNKNOWN} and
-         * {@code PackageManager#INSTALL_REASON_POLICY} are defined.
+         * Set the reason for installing this package.
          */
-        public void setInstallReason(int installReason) {
+        public void setInstallReason(@InstallReason int installReason) {
             this.installReason = installReason;
         }
 
@@ -1241,7 +1240,7 @@ public class PackageInstaller {
         /** {@hide} */
         public int mode;
         /** {@hide} */
-        public int installReason;
+        public @InstallReason int installReason;
         /** {@hide} */
         public long sizeBytes;
         /** {@hide} */
@@ -1329,13 +1328,9 @@ public class PackageInstaller {
         /**
          * Return the reason for installing this package.
          *
-         * @return The install reason, currently one of
-         *         {@code PackageManager#INSTALL_REASON_UNKNOWN} and
-         *         {@code PackageManager#INSTALL_REASON_POLICY}.
-         *
-         * @see PackageManager#INSTALL_REASON_UNKNOWN
+         * @return The install reason.
          */
-        public int getInstallReason() {
+        public @InstallReason int getInstallReason() {
             return installReason;
         }
 

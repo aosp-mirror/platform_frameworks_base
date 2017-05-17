@@ -464,8 +464,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Та имэйл, апп, вэб хуудас зэрэг хувийн сүлжээнийхээ үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон байна."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь таны имэйл, апп, вэб хуудас зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%2$s</xliff:g>-д холбогдсон. \n\nДэлгэрэнгүй мэдээллийг авахын тулд админтай холбогдоно уу."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь таны имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-тай холбогдсон. \n\nМөн таны сүлжээний хувийн үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-д холбогдсон байна."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g>-н түгжээг тайлсан"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар нээх хүртэл төхөөрөмж түгжээтэй байх болно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Мэдэгдлийг хурдан авах"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Түгжээг тайлахын өмнө үзнэ үү"</string>
@@ -531,7 +530,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Баяр хүргэе! Системийн UI Tохируулагчийг тохиргоонд нэмлээ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Тохиргооноос устгах"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Системийн UI Тохируулагчийг тохиргооноос устгаж, үүнтэй холбоотой бүх тохиргоог ашиглахаа болих уу?"</string>
-    <string name="activity_not_found" msgid="348423244327799974">"Апп-ыг таны төхөөрөмжид суулгаагүй байна"</string>
+    <string name="activity_not_found" msgid="348423244327799974">"Аппыг таны төхөөрөмжид суулгаагүй байна"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Цагийн секундыг харуулах"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Статус талбарт цагийн секундыг харуулах. Энэ нь тэжээлийн цэнэгт нөлөөлж болно."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Түргэн тохиргоог дахин засварлах"</string>
@@ -549,7 +548,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Идэвхгүй"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Тэжээлийн мэдэгдлийн удирдлагын тусламжтайгаар та апп-н мэдэгдэлд 0-5 хүртэлх ач холбогдлын түвшин тогтоох боломжтой. \n\n"<b>"5-р түвшин"</b>" \n- Мэдэгдлийн жагсаалтын хамгийн дээр харуулна \n- Бүтэн дэлгэцэд саад болно \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"4-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"3-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n\n"<b>"2-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n\n"<b>"1-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n- Түгжигдсэн дэлгэц болон статусын самбараас нууна \n- Мэдэгдлийн жагсаалтын доор харуулна \n\n"<b>"0-р түвшин"</b>" \n- Энэ апп-н бүх мэдэгдлийг блоклоно"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Мэдэгдэл"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Ta цаашид мэдэгдэл авахгүй."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Ta цаашид эдгээр мэдэгдлийг авахгүй"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> мэдэгдлийн ангилал"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Энэ апп-д мэдэгдлийн категори алга"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -763,4 +762,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> хүртэл"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Хадгалах"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Солих"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Цаана ажиллаж буй апп"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
 </resources>

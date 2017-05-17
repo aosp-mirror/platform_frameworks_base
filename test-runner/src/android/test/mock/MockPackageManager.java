@@ -17,6 +17,7 @@
 package android.test.mock;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -986,6 +987,15 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
+    public int installExistingPackage(String packageName, int installReason)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException {
         throw new UnsupportedOperationException();
@@ -1157,6 +1167,15 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     public String getInstantAppAndroidId(String packageName, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void registerDexModule(String dexModulePath,
+            @Nullable DexModuleRegisterCallback callback) {
         throw new UnsupportedOperationException();
     }
 }

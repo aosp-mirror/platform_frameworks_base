@@ -583,4 +583,8 @@ public class ArrayUtils {
         }
         return size - leftIdx;
     }
+
+    public static @NonNull String[] defeatNullable(@Nullable String[] val) {
+        return (val != null) ? val : EmptyArray.STRING;
+    }
 }

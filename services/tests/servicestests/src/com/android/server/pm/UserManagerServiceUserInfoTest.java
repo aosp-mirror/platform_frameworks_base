@@ -24,6 +24,7 @@ import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.MediumTest;
+import android.text.TextUtils;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerService.UserData;
@@ -38,6 +39,8 @@ import java.io.DataOutputStream;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * <p>Run with:<pre>
@@ -98,6 +101,23 @@ public class UserManagerServiceUserInfoTest {
         in.recycle();
 
         assertUserInfoEquals(info, read);
+    }
+
+    @Test
+    public void testGetUserName() throws Exception {
+        assertFalse("System user name shouldn't be set",
+                mUserManagerService.isUserNameSet(UserHandle.USER_SYSTEM));
+        UserInfo userInfo = mUserManagerService.getUserInfo(UserHandle.USER_SYSTEM);
+        assertFalse("A system provided name should be returned for primary user",
+                TextUtils.isEmpty(userInfo.name));
+
+        userInfo = createUser();
+        userInfo.partial = false;
+        final int TEST_ID = 100;
+        userInfo.id = TEST_ID;
+        mUserManagerService.putUserInfo(userInfo);
+        assertTrue("Test user name must be set", mUserManagerService.isUserNameSet(TEST_ID));
+        assertEquals("A Name", mUserManagerService.getUserInfo(TEST_ID).name);
     }
 
     private UserInfo createUser() {

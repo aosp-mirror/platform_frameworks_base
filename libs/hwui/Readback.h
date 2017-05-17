@@ -20,10 +20,10 @@
 #include "Rect.h"
 
 #include <SkBitmap.h>
-#include <gui/Surface.h>
 
 namespace android {
 class GraphicBuffer;
+class Surface;
 namespace uirenderer {
 
 // Keep in sync with PixelCopy.java codes

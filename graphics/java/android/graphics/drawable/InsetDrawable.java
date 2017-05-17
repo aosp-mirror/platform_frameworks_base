@@ -188,19 +188,19 @@ public class InsetDrawable extends DrawableWrapper {
 
         // Inset attribute may be overridden by more specific attributes.
         if (a.hasValue(R.styleable.InsetDrawable_inset)) {
-            final InsetValue inset = getInset(a, R.styleable.InsetDrawable_inset, 0);
+            final InsetValue inset = getInset(a, R.styleable.InsetDrawable_inset, new InsetValue());
             state.mInsetLeft = inset;
             state.mInsetTop = inset;
             state.mInsetRight = inset;
             state.mInsetBottom = inset;
         }
-        state.mInsetLeft = getInset(a, R.styleable.InsetDrawable_insetLeft, 0);
-        state.mInsetTop = getInset(a, R.styleable.InsetDrawable_insetTop, 0);
-        state.mInsetRight = getInset(a, R.styleable.InsetDrawable_insetRight, 0);
-        state.mInsetBottom = getInset(a, R.styleable.InsetDrawable_insetBottom, 0);
+        state.mInsetLeft = getInset(a, R.styleable.InsetDrawable_insetLeft, state.mInsetLeft);
+        state.mInsetTop = getInset(a, R.styleable.InsetDrawable_insetTop, state.mInsetTop);
+        state.mInsetRight = getInset(a, R.styleable.InsetDrawable_insetRight, state.mInsetRight);
+        state.mInsetBottom = getInset(a, R.styleable.InsetDrawable_insetBottom, state.mInsetBottom);
     }
 
-    private InsetValue getInset(@NonNull TypedArray a, int index, int defaultValue) {
+    private InsetValue getInset(@NonNull TypedArray a, int index, InsetValue defaultValue) {
         if (a.hasValue(index)) {
             TypedValue tv = a.peekValue(index);
             if (tv.type == TypedValue.TYPE_FRACTION) {
@@ -210,10 +210,13 @@ public class InsetDrawable extends DrawableWrapper {
                 }
                 return new InsetValue(f, 0);
             } else {
-                return new InsetValue(0f, a.getDimensionPixelOffset(index, defaultValue));
+                int dimension = a.getDimensionPixelOffset(index, 0);
+                if (dimension != 0) {
+                    return new InsetValue(0, dimension);
+                }
             }
         }
-        return new InsetValue();
+        return defaultValue;
     }
 
     private void getInsets(Rect out) {

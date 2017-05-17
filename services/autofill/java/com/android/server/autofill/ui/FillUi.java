@@ -16,6 +16,7 @@
 package com.android.server.autofill.ui;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -23,20 +24,26 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
+import android.text.TextUtils;
 import android.util.Slog;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutofillWindowPresenter;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.RemoteViews;
 
@@ -46,11 +53,15 @@ import libcore.util.Objects;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 final class FillUi {
     private static final String TAG = "FillUi";
 
     private static final int VISIBLE_OPTIONS_MAX_COUNT = 3;
+
+    private static final TypedValue sTempTypedValue = new TypedValue();
 
     interface Callback {
         void onResponsePicked(@NonNull FillResponse response);
@@ -63,8 +74,12 @@ final class FillUi {
         void startIntentSender(IntentSender intentSender);
     }
 
+    private final @NonNull Point mTempPoint = new Point();
+
     private final @NonNull AutofillWindowPresenter mWindowPresenter =
             new AutofillWindowPresenter();
+
+    private final @NonNull Context mContext;
 
     private final @NonNull AnchoredWindow mWindow;
 
@@ -72,9 +87,11 @@ final class FillUi {
 
     private final @NonNull ListView mListView;
 
-    private final @Nullable ArrayAdapter<ViewItem> mAdapter;
+    private final @Nullable ItemsAdapter mAdapter;
 
     private @Nullable String mFilterText;
+
+    private @Nullable AnnounceFilterResult mAnnounceFilterResult;
 
     private int mContentWidth;
     private int mContentHeight;
@@ -84,6 +101,7 @@ final class FillUi {
     FillUi(@NonNull Context context, @NonNull FillResponse response,
             @NonNull AutofillId focusedViewId, @NonNull @Nullable String filterText,
             @NonNull Callback callback) {
+        mContext = context;
         mCallback = callback;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -115,13 +133,18 @@ final class FillUi {
                 mWindow = null;
                 return;
             }
-            final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            content.measure(widthMeasureSpec, heightMeasureSpec);
+
+            Point maxSize = mTempPoint;
+            resolveMaxWindowSize(context, maxSize);
+            final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.x,
+                    MeasureSpec.AT_MOST);
+            final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.y,
+                    MeasureSpec.AT_MOST);
+
+            decor.measure(widthMeasureSpec, heightMeasureSpec);
             decor.setOnClickListener(v -> mCallback.onResponsePicked(response));
-            // TODO(b/37567439): temporary limiting maximum height and minimum width
-            mContentWidth = Math.max(content.getMeasuredWidth(), 1000);
-            mContentHeight = Math.min(content.getMeasuredHeight(), 500);
+            mContentWidth = content.getMeasuredWidth();
+            mContentHeight = content.getMeasuredHeight();
 
             mWindow = new AnchoredWindow(decor);
             mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
@@ -142,7 +165,9 @@ final class FillUi {
                     }
                     final AutofillValue value = dataset.getFieldValues().get(index);
                     String valueText = null;
-                    if (value.isText()) {
+                    // If the dataset needs auth - don't add its text to allow guessing
+                    // its content based on how filtering behaves.
+                    if (value != null && value.isText() && dataset.getAuthentication() == null) {
                         valueText = value.getTextValue().toString().toLowerCase();
                     }
 
@@ -150,12 +175,7 @@ final class FillUi {
                 }
             }
 
-            mAdapter = new ArrayAdapter<ViewItem>(context, 0, items) {
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    return getItem(position).getView();
-                }
-            };
+            mAdapter = new ItemsAdapter(items);
 
             mListView = decor.findViewById(R.id.autofill_dataset_list);
             mListView.setAdapter(mAdapter);
@@ -245,24 +265,34 @@ final class FillUi {
             return changed;
         }
 
+        Point maxSize = mTempPoint;
+        resolveMaxWindowSize(mContext, maxSize);
+
         mContentWidth = 0;
         mContentHeight = 0;
 
-        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
-        final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
-        final int itemCount = Math.min(mAdapter.getCount(), VISIBLE_OPTIONS_MAX_COUNT);
+        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.x,
+                MeasureSpec.AT_MOST);
+        final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxSize.y,
+                MeasureSpec.AT_MOST);
+        final int itemCount = mAdapter.getCount();
         for (int i = 0; i < itemCount; i++) {
             View view = mAdapter.getItem(i).getView();
             view.measure(widthMeasureSpec, heightMeasureSpec);
-            final int newContentWidth = Math.max(mContentWidth, view.getMeasuredWidth());
+            final int clampedMeasuredWidth = Math.min(view.getMeasuredWidth(), maxSize.x);
+            final int newContentWidth = Math.max(mContentWidth, clampedMeasuredWidth);
             if (newContentWidth != mContentWidth) {
                 mContentWidth = newContentWidth;
                 changed = true;
             }
-            final int newContentHeight = mContentHeight + view.getMeasuredHeight();
-            if (newContentHeight != mContentHeight) {
-                mContentHeight = newContentHeight;
-                changed = true;
+            // Update the width to fit only the first items up to max count
+            if (i < VISIBLE_OPTIONS_MAX_COUNT) {
+                final int clampedMeasuredHeight = Math.min(view.getMeasuredHeight(), maxSize.y);
+                final int newContentHeight = mContentHeight + clampedMeasuredHeight;
+                if (newContentHeight != mContentHeight) {
+                    mContentHeight = newContentHeight;
+                    changed = true;
+                }
             }
         }
         return changed;
@@ -272,6 +302,17 @@ final class FillUi {
         if (mDestroyed) {
             throw new IllegalStateException("cannot interact with a destroyed instance");
         }
+    }
+
+    private static void resolveMaxWindowSize(Context context, Point outPoint) {
+        context.getDisplay().getSize(outPoint);
+        TypedValue typedValue = sTempTypedValue;
+        context.getTheme().resolveAttribute(R.attr.autofillDatasetPickerMaxWidth,
+                typedValue, true);
+        outPoint.x = (int) typedValue.getFraction(outPoint.x, outPoint.x);
+        context.getTheme().resolveAttribute(R.attr.autofillDatasetPickerMaxHeight,
+                typedValue, true);
+        outPoint.y = (int) typedValue.getFraction(outPoint.y, outPoint.y);
     }
 
     private static class ViewItem {
@@ -293,6 +334,10 @@ final class FillUi {
             return mDataset;
         }
 
+        public String getValue() {
+            return mValue;
+        }
+
         @Override
         public String toString() {
             // Used for filtering in the adapter
@@ -304,6 +349,11 @@ final class FillUi {
         @Override
         public void show(WindowManager.LayoutParams p, Rect transitionEpicenter,
                 boolean fitsSystemWindows, int layoutDirection) {
+            if (sVerbose) {
+                Slog.v(TAG, "AutofillWindowPresenter.show(): fit=" + fitsSystemWindows
+                        + ", epicenter="+ transitionEpicenter + ", dir=" + layoutDirection
+                        + ", params=" + p);
+            }
             UiThread.getHandler().post(() -> mWindow.show(p));
         }
 
@@ -368,6 +418,7 @@ final class FillUi {
             }
             return false;
         }
+
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -378,5 +429,133 @@ final class FillUi {
         pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
         pw.print(prefix); pw.print("mContentHeight: "); pw.println(mContentHeight);
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
+        pw.print(prefix); pw.print("mWindow: ");
+        if (mWindow == null) {
+            pw.println("N/A");
+        } else {
+            final String prefix2 = prefix + "  ";
+            pw.println();
+            pw.print(prefix2); pw.print("showing: "); pw.println(mWindow.mShowing);
+            pw.print(prefix2); pw.print("view: "); pw.println(mWindow.mContentView);
+            pw.print(prefix2); pw.print("screen coordinates: ");
+            if (mWindow.mContentView == null) {
+                pw.println("N/A");
+            } else {
+                final int[] coordinates = mWindow.mContentView.getLocationOnScreen();
+                pw.print(coordinates[0]); pw.print("x"); pw.println(coordinates[1]);
+            }
+        }
+    }
+
+    private void announceSearchResultIfNeeded() {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            if (mAnnounceFilterResult == null) {
+                mAnnounceFilterResult = new AnnounceFilterResult();
+            }
+            mAnnounceFilterResult.post();
+        }
+    }
+
+    private final class ItemsAdapter extends BaseAdapter implements Filterable {
+        private @NonNull final List<ViewItem> mAllItems;
+
+        private @NonNull final List<ViewItem> mFilteredItems = new ArrayList<>();
+
+        ItemsAdapter(@NonNull List<ViewItem> items) {
+            mAllItems = Collections.unmodifiableList(new ArrayList<>(items));
+            mFilteredItems.addAll(items);
+        }
+
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+                    // No locking needed as mAllItems is final an immutable
+                    final FilterResults results = new FilterResults();
+                    if (TextUtils.isEmpty(constraint)) {
+                        results.values = mAllItems;
+                        results.count = mAllItems.size();
+                        return results;
+                    }
+                    final List<ViewItem> filteredItems = new ArrayList<>();
+                    final String constraintLowerCase = constraint.toString().toLowerCase();
+                    final int itemCount = mAllItems.size();
+                    for (int i = 0; i < itemCount; i++) {
+                        final ViewItem item = mAllItems.get(i);
+                        final String value = item.getValue();
+                        // No value, i.e. null, matches any filter
+                        if (value == null
+                                || value.toLowerCase().contains(constraintLowerCase)) {
+                            filteredItems.add(item);
+                        }
+                    }
+                    results.values = filteredItems;
+                    results.count = filteredItems.size();
+                    return results;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    final boolean resultCountChanged;
+                    final int oldItemCount = mFilteredItems.size();
+                    mFilteredItems.clear();
+                    @SuppressWarnings("unchecked")
+                    final List<ViewItem> items = (List<ViewItem>) results.values;
+                    mFilteredItems.addAll(items);
+                    resultCountChanged = (oldItemCount != mFilteredItems.size());
+                    if (resultCountChanged) {
+                        announceSearchResultIfNeeded();
+                    }
+                    notifyDataSetChanged();
+                }
+            };
+        }
+
+        @Override
+        public int getCount() {
+            return mFilteredItems.size();
+        }
+
+        @Override
+        public ViewItem getItem(int position) {
+            return mFilteredItems.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return getItem(position).getView();
+        }
+    }
+
+    private final class AnnounceFilterResult implements Runnable {
+        private static final int SEARCH_RESULT_ANNOUNCEMENT_DELAY = 1000; // 1 sec
+
+        public void post() {
+            remove();
+            mListView.postDelayed(this, SEARCH_RESULT_ANNOUNCEMENT_DELAY);
+        }
+
+        public void remove() {
+            mListView.removeCallbacks(this);
+        }
+
+        @Override
+        public void run() {
+            final int count = mListView.getAdapter().getCount();
+            final String text;
+            if (count <= 0) {
+                text = mContext.getString(R.string.autofill_picker_no_suggestions);
+            } else {
+                text = mContext.getResources().getQuantityString(
+                        R.plurals.autofill_picker_some_suggestions, count, count);
+            }
+            mListView.announceForAccessibility(text);
+        }
     }
 }

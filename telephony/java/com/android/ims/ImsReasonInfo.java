@@ -45,6 +45,8 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_LOCAL_IMS_SERVICE_DOWN = 106;
     // No pending incoming call exists
     public static final int CODE_LOCAL_NO_PENDING_CALL = 107;
+    // IMS Call ended during conference merge process
+    public static final int CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE = 108;
 
     // IMS -> Telephony
     // Service unavailable; by power off

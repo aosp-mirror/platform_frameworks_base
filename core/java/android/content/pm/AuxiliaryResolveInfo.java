@@ -43,13 +43,16 @@ public final class AuxiliaryResolveInfo extends IntentFilter {
     public final String token;
     /** The version code of the package */
     public final int versionCode;
+    /** An intent to start upon failure to install */
+    public final Intent failureIntent;
 
     /** Create a response for installing an instant application. */
     public AuxiliaryResolveInfo(@NonNull InstantAppResolveInfo resolveInfo,
             @NonNull IntentFilter orig,
             @Nullable String splitName,
             @NonNull String token,
-            boolean needsPhase2) {
+            boolean needsPhase2,
+            @Nullable Intent failureIntent) {
         super(orig);
         this.resolveInfo = resolveInfo;
         this.packageName = resolveInfo.getPackageName();
@@ -57,12 +60,14 @@ public final class AuxiliaryResolveInfo extends IntentFilter {
         this.token = token;
         this.needsPhaseTwo = needsPhase2;
         this.versionCode = resolveInfo.getVersionCode();
+        this.failureIntent = failureIntent;
     }
 
     /** Create a response for installing a split on demand. */
     public AuxiliaryResolveInfo(@NonNull String packageName,
             @Nullable String splitName,
-            int versionCode) {
+            int versionCode,
+            @Nullable Intent failureIntent) {
         super();
         this.packageName = packageName;
         this.splitName = splitName;
@@ -70,5 +75,6 @@ public final class AuxiliaryResolveInfo extends IntentFilter {
         this.resolveInfo = null;
         this.token = null;
         this.needsPhaseTwo = false;
+        this.failureIntent = failureIntent;
     }
 }

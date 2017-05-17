@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class ServiceInfo implements Parcelable {
     // arbitrary limit on the number of locale -> name pairs we support
-    final static int MAP_LIMIT = 50;
+    final static int MAP_LIMIT = 1000;
     /**
      * User displayable names listed by language.  Unmodifiable.
      */
@@ -114,6 +114,7 @@ public class ServiceInfo implements Parcelable {
         sessionEndTime = (java.util.Date) in.readSerializable();
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         Set<Locale> keySet = names.keySet();
         dest.writeInt(keySet.size());
@@ -128,7 +129,33 @@ public class ServiceInfo implements Parcelable {
         dest.writeSerializable(sessionEndTime);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
+
+    public Map<Locale, String> getNames() {
+        return names;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public Date getSessionStartTime() {
+        return sessionStartTime;
+    }
+
+    public Date getSessionEndTime() {
+        return sessionEndTime;
+    }
+
 }

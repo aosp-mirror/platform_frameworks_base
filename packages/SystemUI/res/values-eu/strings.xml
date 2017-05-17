@@ -354,7 +354,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Bilatu"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lerratu gora hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Lerratu ezkerrera hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Soinuek eta dardarek ez zaituzte eragotziko, zehazten dituzun alarmek, abisuek, gertaerek eta deitzaileek izan ezik."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Soinuek eta dardarek ez zaituzte oztoporik egingo, zehazten dituzun alarmek, abisuek, gertaerek eta deitzaileek izan ezik."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Pertsonalizatu"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak."</string>
@@ -468,8 +468,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduera pertsonalak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> erakundeak kudeatzen dizu laneko profila. <xliff:g id="APPLICATION">%2$s</xliff:g> aplikaziora dago konektatuta profila, eta aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> erakundeak kudeatzen dizu laneko profila. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> aplikaziora dago konektatuta profila, eta aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne. \n\n<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> aplikaziora ere zaude konektatuta, eta hark sare pertsonalean egiten dituzun jarduerak kontrola ditzake."</string>
-    <!-- no translation found for keyguard_indication_trust_granted (4985003749105182372) -->
-    <skip />
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> erabiltzailearentzat desblokeatu da"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Gailua blokeatuta egongo da eskuz desblokeatu arte"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Eskuratu jakinarazpenak azkarrago"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Ikusi desblokeatu baino lehen"</string>
@@ -551,7 +550,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Desaktibatuta"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerekin, 0 eta 5 bitarteko garrantzi-mailetan sailka ditzakezu aplikazioen jakinarazpenak. \n\n"<b>"5. maila"</b>" \n- Erakutsi jakinarazpenen zerrendaren goialdean. \n- Baimendu etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"4. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"3. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n\n"<b>"2. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n\n"<b>"1. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n- Ezkutatu pantaila blokeatutik eta egoera-barratik. \n- Erakutsi jakinarazpenen zerrendaren behealdean. \n\n"<b>"0. maila"</b>" \n- Blokeatu aplikazioaren jakinarazpen guztiak."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Jakinarazpenak"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Aurrerantzean ez duzu jasoko horrelako jakinarazpenik."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Aurrerantzean ez duzu jasoko horrelako jakinarazpenik"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Jakinarazpenen <xliff:g id="NUMBER">%d</xliff:g> kategoria"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Aplikazio honek ez du jakinarazpen-kategoriarik"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
@@ -703,8 +702,8 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> zerbitzuaren jakinarazpena: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Baliteke aplikazioak ez funtzionatzea pantaila zatituan."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikazioak ez du onartzen pantaila zatitua"</string>
-    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Baliteke aplikazioak ez funtzionatzea bigarren mailako pantailan."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Aplikazioak ez du onartzen bigarren mailako pantailarik."</string>
+    <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Baliteke aplikazioak ez funtzionatzea bigarren mailako pantailetan."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Aplikazioa ezin da abiarazi bigarren mailako pantailatan."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Ireki ezarpenak."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Ireki ezarpen bizkorrak."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Itxi ezarpen bizkorrak."</string>
@@ -765,4 +764,6 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> arte"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Utzi bere horretan"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ordeztu"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikazioak exekutatzen ari dira atzeko planoan"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
 </resources>

@@ -116,6 +116,7 @@ public class ResolverActivityTest {
 
         // The other entry is filtered to the last used slot
         assertThat(activity.getAdapter().getCount(), is(1));
+        assertThat(activity.getAdapter().getPlaceholderCount(), is(1));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
         sOverrides.onSafelyStartCallback = targetInfo -> {

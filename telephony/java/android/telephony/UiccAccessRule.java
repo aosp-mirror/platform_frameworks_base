@@ -16,7 +16,6 @@
 package android.telephony;
 
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
 import android.os.Parcel;
@@ -63,7 +62,11 @@ public final class UiccAccessRule implements Parcelable {
      * Encode these access rules as a byte array which can be parsed with {@link #decodeRules}.
      * @hide
      */
-    public static byte[] encodeRules(UiccAccessRule[] accessRules) {
+    @Nullable
+    public static byte[] encodeRules(@Nullable UiccAccessRule[] accessRules) {
+        if (accessRules == null) {
+            return null;
+        }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream output = new DataOutputStream(baos);
@@ -72,7 +75,12 @@ public final class UiccAccessRule implements Parcelable {
             for (UiccAccessRule accessRule : accessRules) {
                 output.writeInt(accessRule.mCertificateHash.length);
                 output.write(accessRule.mCertificateHash);
-                output.writeUTF(accessRule.mPackageName);
+                if (accessRule.mPackageName != null) {
+                    output.writeBoolean(true);
+                    output.writeUTF(accessRule.mPackageName);
+                } else {
+                    output.writeBoolean(false);
+                }
                 output.writeLong(accessRule.mAccessType);
             }
             output.close();
@@ -87,7 +95,11 @@ public final class UiccAccessRule implements Parcelable {
      * Decodes a byte array generated with {@link #encodeRules}.
      * @hide
      */
-    public static UiccAccessRule[] decodeRules(byte[] encodedRules) {
+    @Nullable
+    public static UiccAccessRule[] decodeRules(@Nullable byte[] encodedRules) {
+        if (encodedRules == null) {
+            return null;
+        }
         ByteArrayInputStream bais = new ByteArrayInputStream(encodedRules);
         try (DataInputStream input = new DataInputStream(bais)) {
             input.readInt(); // version; currently ignored
@@ -97,7 +109,7 @@ public final class UiccAccessRule implements Parcelable {
                 int certificateHashLength = input.readInt();
                 byte[] certificateHash = new byte[certificateHashLength];
                 input.readFully(certificateHash);
-                String packageName = input.readUTF();
+                String packageName = input.readBoolean() ? input.readUTF() : null;
                 long accessType = input.readLong();
                 accessRules[i] = new UiccAccessRule(certificateHash, packageName, accessType);
             }

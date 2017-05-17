@@ -40,11 +40,11 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.telephony.ITelephony;
@@ -2641,7 +2641,7 @@ public class ConnectivityManager {
 
         /**
          * Called if no network is found in the timeout time specified in
-         * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)} call. This callback is not
+         * {@link #requestNetwork(NetworkRequest, NetworkCallback, int)} call. This callback is not
          * called for the version of {@link #requestNetwork(NetworkRequest, NetworkCallback)}
          * without timeout. When this callback is invoked the associated
          * {@link NetworkRequest} will have already been removed and released, as if
@@ -2692,6 +2692,28 @@ public class ConnectivityManager {
 
         private boolean isRegistered() {
             return (networkRequest != null) && (networkRequest.requestId != REQUEST_ID_UNSET);
+        }
+    }
+
+    /**
+     * Constant error codes used by ConnectivityService to communicate about failures and errors
+     * across a Binder boundary.
+     * @hide
+     */
+    public interface Errors {
+        static int TOO_MANY_REQUESTS = 1;
+    }
+
+    /** @hide */
+    public static class TooManyRequestsException extends RuntimeException {}
+
+    private static RuntimeException convertServiceException(ServiceSpecificException e) {
+        switch (e.errorCode) {
+            case Errors.TOO_MANY_REQUESTS:
+                return new TooManyRequestsException();
+            default:
+                Log.w(TAG, "Unknown service error code " + e.errorCode);
+                return new RuntimeException(e);
         }
     }
 
@@ -2886,6 +2908,8 @@ public class ConnectivityManager {
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw convertServiceException(e);
         }
         return request;
     }
@@ -2914,7 +2938,7 @@ public class ConnectivityManager {
      * This {@link NetworkRequest} will live until released via
      * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits. A
      * version of the method which takes a timeout is
-     * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)}.
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback, int)}.
      * Status of the request can be followed by listening to the various
      * callbacks described in {@link NetworkCallback}.  The {@link Network}
      * can be used to direct traffic to the network.
@@ -2949,7 +2973,7 @@ public class ConnectivityManager {
      * This {@link NetworkRequest} will live until released via
      * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits. A
      * version of the method which takes a timeout is
-     * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)}.
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback, int)}.
      * Status of the request can be followed by listening to the various
      * callbacks described in {@link NetworkCallback}.  The {@link Network}
      * can be used to direct traffic to the network.
@@ -3127,6 +3151,8 @@ public class ConnectivityManager {
             mService.pendingRequestForNetwork(request.networkCapabilities, operation);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw convertServiceException(e);
         }
     }
 
@@ -3226,6 +3252,8 @@ public class ConnectivityManager {
             mService.pendingListenForNetwork(request.networkCapabilities, operation);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw convertServiceException(e);
         }
     }
 
@@ -3375,6 +3403,22 @@ public class ConnectivityManager {
     public void setAvoidUnvalidated(Network network) {
         try {
             mService.setAvoidUnvalidated(network);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests that the system open the captive portal app on the specified network.
+     *
+     * @param network The network to log into.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    public void startCaptivePortalApp(Network network) {
+        try {
+            mService.startCaptivePortalApp(network);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

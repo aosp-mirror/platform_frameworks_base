@@ -94,6 +94,21 @@ interface ISub {
     int getActiveSubInfoCountMax();
 
     /**
+     * @see android.telephony.SubscriptionManager#getAvailableSubscriptionInfoList
+     */
+    List<SubscriptionInfo> getAvailableSubscriptionInfoList(String callingPackage);
+
+    /**
+     * @see android.telephony.SubscriptionManager#getAccessibleSubscriptionInfoList
+     */
+    List<SubscriptionInfo> getAccessibleSubscriptionInfoList(String callingPackage);
+
+    /**
+     * @see android.telephony.SubscriptionManager#requestEmbeddedSubscriptionInfoListRefresh
+     */
+    oneway void requestEmbeddedSubscriptionInfoListRefresh();
+
+    /**
      * Add a new SubscriptionInfo to subinfo database if needed
      * @param iccId the IccId of the SIM card
      * @param slotIndex the slot which the SIM is inserted
