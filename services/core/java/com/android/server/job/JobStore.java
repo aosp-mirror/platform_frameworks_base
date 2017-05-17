@@ -35,6 +35,7 @@ import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.IoThread;
 import com.android.server.job.controllers.JobStatus;
@@ -169,6 +170,14 @@ public class JobStore {
             maybeWriteStatusToDiskAsync();
         }
         return removed;
+    }
+
+    /**
+     * Remove the jobs of users not specified in the whitelist.
+     * @param whitelist Array of User IDs whose jobs are not to be removed.
+     */
+    public void removeJobsOfNonUsers(int[] whitelist) {
+        mJobSet.removeJobsOfNonUsers(whitelist);
     }
 
     @VisibleForTesting
@@ -837,6 +846,17 @@ public class JobStore {
                 mJobs.remove(uid);
             }
             return didRemove;
+        }
+
+        // Remove the jobs all users not specified by the whitelist of user ids
+        public void removeJobsOfNonUsers(int[] whitelist) {
+            for (int jobIndex = mJobs.size() - 1; jobIndex >= 0; jobIndex--) {
+                int jobUserId = UserHandle.getUserId(mJobs.keyAt(jobIndex));
+                // check if job's user id is not in the whitelist
+                if (!ArrayUtils.contains(whitelist, jobUserId)) {
+                    mJobs.removeAt(jobIndex);
+                }
+            }
         }
 
         public boolean contains(JobStatus job) {
