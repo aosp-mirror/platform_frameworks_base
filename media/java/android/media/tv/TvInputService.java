@@ -974,7 +974,7 @@ public abstract class TvInputService extends Service {
          * seek to a position earlier than the start position.
          *
          * <p>For playback of a recorded program initiated by {@link #onTimeShiftPlay(Uri)}, the
-         * start position is the time when playback starts. It does not change.
+         * start position should be 0 and does not change.
          *
          * @see #onTimeShiftPlay(Uri)
          * @see #onTimeShiftResume()
