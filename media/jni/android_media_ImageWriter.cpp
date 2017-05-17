@@ -25,7 +25,6 @@
 #include <gui/Surface.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
-#include <camera3.h>
 #include <jni.h>
 #include <JNIHelp.h>
 

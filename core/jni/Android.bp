@@ -271,7 +271,15 @@ cc_library_shared {
     ],
 
     local_include_dirs: ["android/graphics"],
-    export_include_dirs: ["include"],
-    // AndroidRuntime.h depends on nativehelper/jni.h
-    export_shared_lib_headers: ["libnativehelper"],
+    export_include_dirs: [
+        ".",
+        "include",
+    ],
+    export_shared_lib_headers: [
+        // AndroidRuntime.h depends on nativehelper/jni.h
+        "libnativehelper",
+
+        // GraphicsJNI.h includes hwui headers
+        "libhwui",
+    ],
 }
