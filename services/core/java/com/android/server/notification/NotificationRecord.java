@@ -153,7 +153,7 @@ public final class NotificationRecord {
                   final ApplicationInfo applicationInfo =
                         mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
                                 0, UserHandle.getUserId(sbn.getUid()));
-                if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
+                if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.O) {
                     return true;
                 }
             }
