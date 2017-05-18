@@ -218,8 +218,11 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public boolean isAntennaConnected() {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            return mTuner.isAntennaConnected();
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
     }
 
     @Override

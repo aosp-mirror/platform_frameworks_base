@@ -113,7 +113,7 @@ class TaskSnapshotSurface implements StartingSurface {
     private final Rect mStableInsets = new Rect();
     private final Rect mContentInsets = new Rect();
     private final Rect mFrame = new Rect();
-    private final TaskSnapshot mSnapshot;
+    private TaskSnapshot mSnapshot;
     private final CharSequence mTitle;
     private boolean mHasDrawn;
     private long mShownTime;
@@ -267,6 +267,9 @@ class TaskSnapshotSurface implements StartingSurface {
             mHasDrawn = true;
         }
         reportDrawn();
+
+        // In case window manager leaks us, make sure we don't retain the snapshot.
+        mSnapshot = null;
     }
 
     private void drawSizeMatchSnapshot(GraphicBuffer buffer) {

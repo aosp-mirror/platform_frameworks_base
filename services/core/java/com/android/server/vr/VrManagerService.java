@@ -368,7 +368,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
             // There is an active service, update it if needed
             updateCurrentVrServiceLocked(mVrModeEnabled, mCurrentVrService.getComponent(),
-                    mCurrentVrService.getUserId(), null);
+                    mCurrentVrService.getUserId(), mCurrentVrModeComponent);
         }
     }
 
@@ -675,7 +675,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      * @param enabled new state for VR mode.
      * @param component new component to be bound as a VR listener.
      * @param userId user owning the component to be bound.
-     * @param calling the component currently using VR mode, or null to leave unchanged.
+     * @param calling the component currently using VR mode.
      *
      * @return {@code true} if the component/user combination specified is valid.
      */

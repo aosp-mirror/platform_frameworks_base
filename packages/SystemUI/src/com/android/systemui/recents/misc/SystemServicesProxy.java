@@ -58,20 +58,22 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IRemoteCallback;
-import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
+import android.service.dreams.DreamService;
+import android.service.dreams.IDreamManager;
 import android.util.ArraySet;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.MutableBoolean;
-import android.view.AppTransitionAnimationSpec;
 import android.view.Display;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
@@ -84,14 +86,15 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.tv.PipMenuActivity;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.ThumbnailData;
-import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecComposer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -130,6 +133,8 @@ public class SystemServicesProxy {
     PackageManager mPm;
     IconDrawableFactory mDrawableFactory;
     IPackageManager mIpm;
+    private final IDreamManager mDreamManager;
+    private final Context mContext;
     AssistUtils mAssistUtils;
     WindowManager mWm;
     IWindowManager mIwm;
@@ -149,7 +154,8 @@ public class SystemServicesProxy {
     Canvas mBgProtectionCanvas;
 
     private final Handler mHandler = new H();
-    private final ExecutorService mOnewayExecutor = Executors.newSingleThreadExecutor();
+
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     /**
      * An abstract class to track task stack changes.
@@ -285,6 +291,7 @@ public class SystemServicesProxy {
 
     /** Private constructor */
     private SystemServicesProxy(Context context) {
+        mContext = context.getApplicationContext();
         mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManager.getService();
@@ -296,6 +303,8 @@ public class SystemServicesProxy {
         mIwm = WindowManagerGlobal.getWindowManagerService();
         mKgm = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         mUm = UserManager.get(context);
+        mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
         mHasFreeformWorkspaceSupport =
@@ -778,7 +787,7 @@ public class SystemServicesProxy {
      * Sends a message to close other system windows.
      */
     public void sendCloseSystemWindows(String reason) {
-        mOnewayExecutor.submit(() -> {
+        mUiOffloadThread.submit(() -> {
             try {
                 mIam.closeSystemDialogs(reason);
             } catch (RemoteException e) {
@@ -1023,7 +1032,12 @@ public class SystemServicesProxy {
      * Returns the current user id.
      */
     public int getCurrentUser() {
-        return KeyguardUpdateMonitor.getCurrentUser();
+        if (mAm == null) return 0;
+
+        // This must call through ActivityManager, as the SystemServicesProxy can be called in a
+        // secondary user's SystemUI process, and KeyguardUpdateMonitor is only updated in the
+        // primary user's SystemUI process
+        return mAm.getCurrentUser();
     }
 
     /**
@@ -1127,6 +1141,11 @@ public class SystemServicesProxy {
         }
     }
 
+    public void startActivityAsUserAsync(Intent intent, ActivityOptions opts) {
+        mUiOffloadThread.submit(() -> mContext.startActivityAsUser(intent,
+                opts != null ? opts.toBundle() : null, UserHandle.CURRENT));
+    }
+
     /** Starts an activity from recents. */
     public void startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
             ActivityOptions options, int stackId,
@@ -1151,7 +1170,7 @@ public class SystemServicesProxy {
 
         // Execute this from another thread such that we can do other things (like caching the
         // bitmap for the thumbnail) while AM is busy starting our activity.
-        mOnewayExecutor.submit(() -> {
+        mUiOffloadThread.submit(() -> {
             try {
                 mIam.startActivityFromRecents(
                         taskKey.id, finalOptions == null ? null : finalOptions.toBundle());
@@ -1281,6 +1300,33 @@ public class SystemServicesProxy {
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to reach window manager", e);
         }
+    }
+
+    public boolean isDreaming() {
+        try {
+            return mDreamManager.isDreaming();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query dream manager.", e);
+        }
+        return false;
+    }
+
+    public void awakenDreamsAsync() {
+        mUiOffloadThread.submit(() -> {
+            try {
+                mDreamManager.awaken();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void updateOverviewLastStackActiveTimeAsync(long newLastStackActiveTime,
+            int currentUserId) {
+        mUiOffloadThread.submit(() -> {
+            Settings.Secure.putLongForUser(mContext.getContentResolver(),
+                    Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, newLastStackActiveTime, currentUserId);
+        });
     }
 
     public interface StartActivityFromRecentsResultListener {

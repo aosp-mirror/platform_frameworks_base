@@ -570,18 +570,6 @@ void NotifyHandler::handleMessage(const Message& message) {
     mObserver->decStrong(nullptr);
 }
 
-static jboolean android_view_ThreadedRenderer_supportsOpenGL(JNIEnv* env, jobject clazz) {
-    char prop[PROPERTY_VALUE_MAX];
-    if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
-        // not in the emulator
-        return JNI_TRUE;
-    }
-    // In the emulator this property will be set > 0 when OpenGL ES 2.0 is
-    // enabled, 0 otherwise. On old emulator versions it will be undefined.
-    property_get("qemu.gles", prop, "0");
-    return atoi(prop) > 0 ? JNI_TRUE : JNI_FALSE;
-}
-
 static void android_view_ThreadedRenderer_rotateProcessStatsBuffer(JNIEnv* env, jobject clazz) {
     RenderProxy::rotateProcessStatsBuffer();
 }
@@ -898,7 +886,6 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
 const char* const kClassPathName = "android/view/ThreadedRenderer";
 
 static const JNINativeMethod gMethods[] = {
-    { "nSupportsOpenGL", "()Z", (void*) android_view_ThreadedRenderer_supportsOpenGL },
     { "nRotateProcessStatsBuffer", "()V", (void*) android_view_ThreadedRenderer_rotateProcessStatsBuffer },
     { "nSetProcessStatsBuffer", "(I)V", (void*) android_view_ThreadedRenderer_setProcessStatsBuffer },
     { "nGetRenderThreadTid", "(J)I", (void*) android_view_ThreadedRenderer_getRenderThreadTid },

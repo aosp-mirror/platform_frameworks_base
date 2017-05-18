@@ -137,7 +137,6 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
 
     float ambientAlpha = (SkiaPipeline::getAmbientShadowAlpha()/255.f)*casterAlpha;
     float spotAlpha = (SkiaPipeline::getSpotShadowAlpha()/255.f)*casterAlpha;
-    const float casterZValue = casterProperties.getZ();
 
     const RevealClip& revealClip = casterProperties.getRevealClip();
     const SkPath* revealClipPath = revealClip.getPath();
@@ -178,6 +177,7 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
     // intersect the shadow-casting path with the reveal, if present
     if (revealClipPath) {
         Op(*casterPath, *revealClipPath, kIntersect_SkPathOp, &tmpPath);
+        tmpPath.setIsVolatile(true);
         casterPath = &tmpPath;
     }
 
@@ -186,36 +186,23 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
         SkPath clipBoundsPath;
         clipBoundsPath.addRect(casterClipRect);
         Op(*casterPath, clipBoundsPath, kIntersect_SkPathOp, &tmpPath);
+        tmpPath.setIsVolatile(true);
         casterPath = &tmpPath;
     }
     const Vector3 lightPos = SkiaPipeline::getLightCenter();
     SkPoint3 skiaLightPos = SkPoint3::Make(lightPos.x, lightPos.y, lightPos.z);
-    if (shadowMatrix.hasPerspective() || revealClipPath || clippedToBounds) {
-        std::function<SkScalar(SkScalar, SkScalar)> casterHeightFunc;
-        if (shadowMatrix.hasPerspective()) {
-            // get the matrix with the full 3D transform
-            mat4 zMatrix;
-            caster->getRenderNode()->applyViewPropertyTransforms(zMatrix, true);
-            SkScalar A = zMatrix[2];
-            SkScalar B = zMatrix[6];
-            SkScalar C = zMatrix[mat4::kTranslateZ];
-            casterHeightFunc = [A, B, C](SkScalar x, SkScalar y) {
-                return A*x + B*y + C;  // casterZValue already baked into C
-            };
-        } else {
-            casterHeightFunc = [casterZValue] (SkScalar, SkScalar) {
-                return casterZValue;
-            };
-        }
-
-        SkShadowUtils::DrawUncachedShadow(canvas, *casterPath, casterHeightFunc, skiaLightPos,
-            SkiaPipeline::getLightRadius(), ambientAlpha, spotAlpha, SK_ColorBLACK,
-            casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
+    SkPoint3 zParams;
+    if (shadowMatrix.hasPerspective()) {
+        // get the matrix with the full 3D transform
+        mat4 zMatrix;
+        caster->getRenderNode()->applyViewPropertyTransforms(zMatrix, true);
+        zParams = SkPoint3::Make(zMatrix[2], zMatrix[6], zMatrix[mat4::kTranslateZ]);
     } else {
-        SkShadowUtils::DrawShadow(canvas, *casterPath, casterZValue, skiaLightPos,
-            SkiaPipeline::getLightRadius(), ambientAlpha, spotAlpha, SK_ColorBLACK,
-            casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
+        zParams = SkPoint3::Make(0, 0, casterProperties.getZ());
     }
+    SkShadowUtils::DrawShadow(canvas, *casterPath, zParams, skiaLightPos,
+        SkiaPipeline::getLightRadius(), ambientAlpha, spotAlpha, SK_ColorBLACK,
+        casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
 }
 
 }; // namespace skiapipeline

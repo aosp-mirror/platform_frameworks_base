@@ -23,6 +23,8 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.UiOffloadThread;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +37,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class DismissCallbackRegistryTest {
+public class DismissCallbackRegistryTest extends SysuiTestCase {
 
     private final DismissCallbackRegistry mDismissCallbackRegistry = new DismissCallbackRegistry();
     private @Mock IKeyguardDismissCallback mMockCallback;
@@ -50,6 +52,7 @@ public class DismissCallbackRegistryTest {
     public void testCancelled() throws Exception {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.notifyDismissCancelled();
+        waitForUiOffloadThread();
         verify(mMockCallback).onDismissCancelled();
     }
 
@@ -58,6 +61,7 @@ public class DismissCallbackRegistryTest {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.addCallback(mMockCallback2);
         mDismissCallbackRegistry.notifyDismissCancelled();
+        waitForUiOffloadThread();
         verify(mMockCallback).onDismissCancelled();
         verify(mMockCallback2).onDismissCancelled();
     }
@@ -66,6 +70,7 @@ public class DismissCallbackRegistryTest {
     public void testSucceeded() throws Exception {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.notifyDismissSucceeded();
+        waitForUiOffloadThread();
         verify(mMockCallback).onDismissSucceeded();
     }
 
@@ -74,6 +79,7 @@ public class DismissCallbackRegistryTest {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.addCallback(mMockCallback2);
         mDismissCallbackRegistry.notifyDismissSucceeded();
+        waitForUiOffloadThread();
         verify(mMockCallback).onDismissSucceeded();
         verify(mMockCallback2).onDismissSucceeded();
     }
@@ -83,6 +89,7 @@ public class DismissCallbackRegistryTest {
         mDismissCallbackRegistry.addCallback(mMockCallback);
         mDismissCallbackRegistry.notifyDismissSucceeded();
         mDismissCallbackRegistry.notifyDismissSucceeded();
+        waitForUiOffloadThread();
         verify(mMockCallback, times(1)).onDismissSucceeded();
     }
 }

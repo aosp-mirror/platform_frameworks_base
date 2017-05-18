@@ -18,12 +18,14 @@
 package com.android.internal.util;
 
 import android.annotation.Nullable;
+import android.text.TextUtils;
 
 import libcore.util.Objects;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.function.IntFunction;
 
 /**
  * A utility class for handling unsigned integers and unsigned arithmetics, as well as syntactic
@@ -131,5 +133,19 @@ public final class BitUtils {
 
     public static long bitAt(int bitIndex) {
         return 1L << bitIndex;
+    }
+
+    public static String flagsToString(int flags, IntFunction<String> getFlagName) {
+        StringBuilder builder = new StringBuilder();
+        int count = 0;
+        while (flags != 0) {
+            final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+            flags &= ~flag;
+            if (count > 0) builder.append(", ");
+            builder.append(getFlagName.apply(flag));
+            count++;
+        }
+        TextUtils.wrap(builder, "[", "]");
+        return builder.toString();
     }
 }

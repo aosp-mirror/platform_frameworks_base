@@ -1697,7 +1697,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     mHandler.removeMessages(MESSAGE_USER_SWITCHED);
 
                     /* disable and enable BT when detect a user switch */
-                    if (mEnable && mBluetooth != null) {
+                    if (mBluetooth != null && isEnabled()) {
                         try {
                             mBluetoothLock.readLock().lock();
                             if (mBluetooth != null) {
@@ -1766,6 +1766,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         mState = BluetoothAdapter.STATE_OFF;
                         // enable
                         addActiveLog(REASON_USER_SWITCH, true);
+                        // mEnable flag could have been reset on disableBLE. Reenable it.
+                        mEnable = true;
                         handleEnable(mQuietEnable);
                     } else if (mBinding || mBluetooth != null) {
                         Message userMsg = mHandler.obtainMessage(MESSAGE_USER_SWITCHED);

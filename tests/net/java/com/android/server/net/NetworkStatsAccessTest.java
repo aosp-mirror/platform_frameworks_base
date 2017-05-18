@@ -25,6 +25,7 @@ import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.support.test.filters.SmallTest;
 import android.telephony.TelephonyManager;
 
 import com.android.server.LocalServices;
@@ -34,6 +35,7 @@ import junit.framework.TestCase;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@SmallTest
 public class NetworkStatsAccessTest extends TestCase {
     private static final String TEST_PKG = "com.example.test";
     private static final int TEST_UID = 12345;

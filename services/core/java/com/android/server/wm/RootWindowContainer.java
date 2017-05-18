@@ -181,7 +181,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         final int size = mChildren.size();
         for (int i = 0; i < size; ++i) {
-            displaysInFocusOrder.put(i, mChildren.get(i).getDisplayId());
+            final DisplayContent displayContent = mChildren.get(i);
+            if (displayContent.isRemovalDeferred()) {
+                // Don't report displays that are going to be removed soon.
+                continue;
+            }
+            displaysInFocusOrder.put(i, displayContent.getDisplayId());
         }
     }
 

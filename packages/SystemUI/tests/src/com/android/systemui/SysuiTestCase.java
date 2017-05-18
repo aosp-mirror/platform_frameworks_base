@@ -21,14 +21,20 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.support.test.InstrumentationRegistry;
 import android.testing.LeakCheck;
+import android.util.Log;
 
 import org.junit.Before;
 import org.junit.Rule;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Base class that does System UI specific setup.
  */
 public abstract class SysuiTestCase {
+
+    private static final String TAG = "SysuiTestCase";
 
     private Handler mHandler;
     @Rule
@@ -55,6 +61,15 @@ public abstract class SysuiTestCase {
             mHandler = new Handler(Looper.getMainLooper());
         }
         waitForIdleSync(mHandler);
+    }
+
+    protected void waitForUiOffloadThread() {
+        Future<?> future = Dependency.get(UiOffloadThread.class).submit(() -> {});
+        try {
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(TAG, "Failed to wait for ui offload thread.", e);
+        }
     }
 
     public static void waitForIdleSync(Handler h) {

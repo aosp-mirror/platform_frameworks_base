@@ -74,6 +74,8 @@ class Tuner extends ITuner.Stub {
     private native boolean nativeIsAnalogForced(long nativeContext);
     private native void nativeSetAnalogForced(long nativeContext, boolean isForced);
 
+    private native boolean nativeIsAntennaConnected(long nativeContext);
+
     @Override
     public void close() {
         synchronized (mLock) {
@@ -177,6 +179,7 @@ class Tuner extends ITuner.Stub {
         }
     }
 
+    @Override
     public boolean startBackgroundScan() {
         synchronized (mLock) {
             checkNotClosedLocked();
@@ -184,6 +187,7 @@ class Tuner extends ITuner.Stub {
         }
     }
 
+    @Override
     public List<RadioManager.ProgramInfo> getProgramList(String filter) {
         synchronized (mLock) {
             checkNotClosedLocked();
@@ -195,6 +199,7 @@ class Tuner extends ITuner.Stub {
         }
     }
 
+    @Override
     public boolean isAnalogForced() {
         synchronized (mLock) {
             checkNotClosedLocked();
@@ -202,10 +207,19 @@ class Tuner extends ITuner.Stub {
         }
     }
 
+    @Override
     public void setAnalogForced(boolean isForced) {
         synchronized (mLock) {
             checkNotClosedLocked();
             nativeSetAnalogForced(mNativeContext, isForced);
+        }
+    }
+
+    @Override
+    public boolean isAntennaConnected() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return nativeIsAntennaConnected(mNativeContext);
         }
     }
 }

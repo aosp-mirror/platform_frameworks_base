@@ -124,13 +124,11 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         mKeyguardFadingAway = true;
         mKeyguardFadingAwayDelay = delay;
         mKeyguardFadingAwayDuration = fadeoutDuration;
-        notifyKeyguardChanged();
     }
 
     public void notifyKeyguardDoneFading() {
         mKeyguardFadingAway = false;
         mKeyguardGoingAway = false;
-        notifyKeyguardChanged();
     }
 
     @Override

@@ -218,26 +218,28 @@ static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativ
     auto halTuner11 = getHalTuner11(nativeContext);
     if (halTuner10 == nullptr) return nullptr;
 
-    V1_1::ProgramInfo halInfo;
+    JavaRef<jobject> jInfo;
     Result halResult;
     Return<void> hidlResult;
     if (halTuner11 != nullptr) {
         hidlResult = halTuner11->getProgramInformation_1_1([&](Result result,
                 const V1_1::ProgramInfo& info) {
             halResult = result;
-            halInfo = info;
+            if (result != Result::OK) return;
+            jInfo = convert::ProgramInfoFromHal(env, info);
         });
     } else {
         hidlResult = halTuner10->getProgramInformation([&](Result result,
                 const V1_0::ProgramInfo& info) {
             halResult = result;
-            halInfo.base = info;
+            if (result != Result::OK) return;
+            jInfo = convert::ProgramInfoFromHal(env, info);
         });
     }
 
-    if (convert::ThrowIfFailed(env, hidlResult, halResult)) return nullptr;
-
-    return convert::ProgramInfoFromHal(env, halInfo).release();
+    if (jInfo != nullptr) return jInfo.release();
+    convert::ThrowIfFailed(env, hidlResult, halResult);
+    return nullptr;
 }
 
 static bool nativeStartBackgroundScan(JNIEnv *env, jobject obj, jlong nativeContext) {
@@ -317,6 +319,21 @@ static void nativeSetAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext,
     convert::ThrowIfFailed(env, halResult);
 }
 
+static bool nativeIsAntennaConnected(JNIEnv *env, jobject obj, jlong nativeContext) {
+    ALOGV("nativeIsAntennaConnected()");
+    auto halTuner = getHalTuner(nativeContext);
+    if (halTuner == nullptr) return false;
+
+    bool isConnected = false;
+    Result halResult;
+    auto hidlResult = halTuner->getConfiguration([&](Result result, const BandConfig& config) {
+        halResult = result;
+        isConnected = config.antennaConnected;
+    });
+    convert::ThrowIfFailed(env, hidlResult, halResult);
+    return isConnected;
+}
+
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "(I)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
@@ -336,6 +353,7 @@ static const JNINativeMethod gTunerMethods[] = {
             (void*)nativeGetProgramList },
     { "nativeIsAnalogForced", "(J)Z", (void*)nativeIsAnalogForced },
     { "nativeSetAnalogForced", "(JZ)V", (void*)nativeSetAnalogForced },
+    { "nativeIsAntennaConnected", "(J)Z", (void*)nativeIsAntennaConnected },
 };
 
 } // namespace Tuner

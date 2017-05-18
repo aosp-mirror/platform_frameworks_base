@@ -1397,13 +1397,16 @@ public final class PowerManagerService extends SystemService
         try {
             switch (mWakefulness) {
                 case WAKEFULNESS_ASLEEP:
-                    Slog.i(TAG, "Waking up from sleep (uid " + reasonUid +")...");
+                    Slog.i(TAG, "Waking up from sleep (uid=" + reasonUid + " reason=" + reason
+                            + ")...");
                     break;
                 case WAKEFULNESS_DREAMING:
-                    Slog.i(TAG, "Waking up from dream (uid " + reasonUid +")...");
+                    Slog.i(TAG, "Waking up from dream (uid=" + reasonUid + " reason=" + reason
+                            + ")...");
                     break;
                 case WAKEFULNESS_DOZING:
-                    Slog.i(TAG, "Waking up from dozing (uid " + reasonUid +")...");
+                    Slog.i(TAG, "Waking up from dozing (uid=" + reasonUid + " reason=" + reason
+                            + ")...");
                     break;
             }
 
