@@ -31,8 +31,16 @@ import java.util.Objects;
 /**
  * The {@code VolumeShaper} class is used to automatically control audio volume during media
  * playback, allowing simple implementation of transition effects and ducking.
+ * It is created from implementations of {@code VolumeAutomation},
+ * such as {@code MediaPlayer} and {@code AudioTrack} (referred to as "players" below),
+ * by {@link MediaPlayer#createVolumeShaper} or {@link AudioTrack#createVolumeShaper}.
  *
- * The {@link VolumeShaper} appears as an additional scaling on the audio output,
+ * A {@code VolumeShaper} is intended for short volume changes.
+ * If the audio output sink changes during
+ * a {@code VolumeShaper} transition, the precise curve position may be lost, and the
+ * {@code VolumeShaper} may advance to the end of the curve for the new audio output sink.
+ *
+ * The {@code VolumeShaper} appears as an additional scaling on the audio output,
  * and adjusts independently of track or stream volume controls.
  */
 public final class VolumeShaper implements AutoCloseable {
@@ -52,7 +60,19 @@ public final class VolumeShaper implements AutoCloseable {
 
     /**
      * Applies the {@link VolumeShaper.Operation} to the {@code VolumeShaper}.
+     *
+     * Applying {@link VolumeShaper.Operation#PLAY} after {@code PLAY}
+     * or {@link VolumeShaper.Operation#REVERSE} after
+     * {@code REVERSE} has no effect.
+     *
+     * Applying {@link VolumeShaper.Operation#PLAY} when the player
+     * hasn't started will synchronously start the {@code VolumeShaper} when
+     * playback begins.
+     *
      * @param operation the {@code operation} to apply.
+     * @throws IllegalStateException if the player is uninitialized or if there
+     *         is a critical failure. In that case, the {@code VolumeShaper} should be
+     *         recreated.
      */
     public void apply(@NonNull Operation operation) {
         /* void */ applyPlayer(new VolumeShaper.Configuration(mId), operation);
@@ -65,11 +85,24 @@ public final class VolumeShaper implements AutoCloseable {
      * This allows the user to change the volume shape
      * while the existing {@code VolumeShaper} is in effect.
      *
+     * The effect of {@code replace()} is similar to an atomic close of
+     * the existing {@code VolumeShaper} and creation of a new {@code VolumeShaper}.
+     *
+     * If the {@code operation} is {@link VolumeShaper.Operation#PLAY} then the
+     * new curve starts immediately.
+     *
+     * If the {@code operation} is
+     * {@link VolumeShaper.Operation#REVERSE}, then the new curve will
+     * be delayed until {@code PLAY} is applied.
+     *
      * @param configuration the new {@code configuration} to use.
-     * @param operation the operation to apply to the {@code VolumeShaper}
+     * @param operation the {@code operation} to apply to the {@code VolumeShaper}
      * @param join if true, match the start volume of the
      *             new {@code configuration} to the current volume of the existing
      *             {@code VolumeShaper}, to avoid discontinuity.
+     * @throws IllegalStateException if the player is uninitialized or if there
+     *         is a critical failure. In that case, the {@code VolumeShaper} should be
+     *         recreated.
      */
     public void replace(
             @NonNull Configuration configuration, @NonNull Operation operation, boolean join) {
@@ -81,7 +114,14 @@ public final class VolumeShaper implements AutoCloseable {
     /**
      * Returns the current volume scale attributable to the {@code VolumeShaper}.
      *
+     * This is the last volume from the {@code VolumeShaper} used for the player,
+     * or the initial volume if the {@code VolumeShaper} hasn't been started with
+     * {@link VolumeShaper.Operation#PLAY}.
+     *
      * @return the volume, linearly represented as a value between 0.f and 1.f.
+     * @throws IllegalStateException if the player is uninitialized or if there
+     *         is a critical failure.  In that case, the {@code VolumeShaper} should be
+     *         recreated.
      */
     public float getVolume() {
         return getStatePlayer(mId).getVolume();
@@ -89,7 +129,14 @@ public final class VolumeShaper implements AutoCloseable {
 
     /**
      * Releases the {@code VolumeShaper} object; any volume scale due to the
-     * {@code VolumeShaper} is removed.
+     * {@code VolumeShaper} is removed after closing.
+     *
+     * If the volume does not reach 1.f when the {@code VolumeShaper} is closed
+     * (or finalized), there may be an abrupt change of volume.
+     *
+     * {@code close()} may be safely called after a prior {@code close()}.
+     * This class implements the Java {@code AutoClosable} interface and
+     * may be used with try-with-resources.
      */
     @Override
     public void close() {
@@ -107,11 +154,11 @@ public final class VolumeShaper implements AutoCloseable {
 
     @Override
     protected void finalize() {
-        close(); // ensure we remove the native volume shaper
+        close(); // ensure we remove the native VolumeShaper
     }
 
     /**
-     * Internal call to apply the configuration and operation to the Player.
+     * Internal call to apply the {@code configuration} and {@code operation} to the player.
      * Returns a valid shaper id or throws the appropriate exception.
      * @param configuration
      * @param operation
@@ -137,7 +184,7 @@ public final class VolumeShaper implements AutoCloseable {
             // Due to RPC handling, we translate integer codes to exceptions right before
             // delivering to the user.
             if (id == VOLUME_SHAPER_INVALID_OPERATION) {
-                throw new IllegalStateException("player or volume shaper deallocated");
+                throw new IllegalStateException("player or VolumeShaper deallocated");
             } else {
                 throw new IllegalArgumentException("invalid configuration or operation: " + id);
             }
@@ -146,9 +193,9 @@ public final class VolumeShaper implements AutoCloseable {
     }
 
     /**
-     * Internal call to retrieve the current VolumeShaper state.
+     * Internal call to retrieve the current {@code VolumeShaper} state.
      * @param id
-     * @return the current {@vode VolumeShaper.State}
+     * @return the current {@code VolumeShaper.State}
      * @throws IllegalStateException if the player has been deallocated or is uninitialized.
      */
     private @NonNull VolumeShaper.State getStatePlayer(int id) {
@@ -180,6 +227,9 @@ public final class VolumeShaper implements AutoCloseable {
      * by {@link VolumeShaper#replace(Configuration, Operation, boolean)
      * VolumeShaper.replace(Configuration, Operation, boolean)}
      * to replace an existing {@code configuration}.
+     * <p>
+     * The {@link AudioTrack} and {@link MediaPlayer} classes implement
+     * the {@link VolumeAutomation} interface.
      */
     public static final class Configuration implements Parcelable {
         private static final int MAXIMUM_CURVE_POINTS = 16;
@@ -485,7 +535,7 @@ public final class VolumeShaper implements AutoCloseable {
 
         /**
          * @hide
-         * Constructs a volume shaper from an id.
+         * Constructs a {@code VolumeShaper} from an id.
          *
          * This is an opaque handle for controlling a {@code VolumeShaper} that has
          * already been sent to a player.  The {@code id} is returned from the
@@ -756,7 +806,7 @@ public final class VolumeShaper implements AutoCloseable {
             /**
              * Sets the interpolator type.
              *
-             * If omitted the interplator type is {@link #INTERPOLATOR_TYPE_CUBIC}.
+             * If omitted the default interpolator type is {@link #INTERPOLATOR_TYPE_CUBIC}.
              *
              * @param interpolatorType method of interpolation used for the volume curve.
              *        One of {@link #INTERPOLATOR_TYPE_STEP},
@@ -802,7 +852,7 @@ public final class VolumeShaper implements AutoCloseable {
             }
 
             /**
-             * Sets the volume shaper duration in milliseconds.
+             * Sets the {@code VolumeShaper} duration in milliseconds.
              *
              * If omitted, the default duration is 1 second.
              *
@@ -1059,13 +1109,13 @@ public final class VolumeShaper implements AutoCloseable {
 
         /**
          * Defer playback until next operation is sent. This is used
-         * when starting a VolumeShaper effect.
+         * when starting a {@code VolumeShaper} effect.
          */
         private static final int FLAG_DEFER = 1 << 3;
 
         /**
          * Use the id specified in the configuration, creating
-         * VolumeShaper as needed; the configuration should be
+         * {@code VolumeShaper} as needed; the configuration should be
          * TYPE_SCALE.
          */
         private static final int FLAG_CREATE_IF_NEEDED = 1 << 4;
@@ -1074,18 +1124,20 @@ public final class VolumeShaper implements AutoCloseable {
 
         private final int mFlags;
         private final int mReplaceId;
+        private final float mXOffset;
 
         @Override
         public String toString() {
             return "VolumeShaper.Operation{"
                     + "mFlags = 0x" + Integer.toHexString(mFlags).toUpperCase()
                     + ", mReplaceId = " + mReplaceId
+                    + ", mXOffset = " + mXOffset
                     + "}";
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mFlags, mReplaceId);
+            return Objects.hash(mFlags, mReplaceId, mXOffset);
         }
 
         @Override
@@ -1093,10 +1145,10 @@ public final class VolumeShaper implements AutoCloseable {
             if (!(o instanceof Operation)) return false;
             if (o == this) return true;
             final Operation other = (Operation) o;
-            // if xOffset (native field only) is brought into Java
-            // we need to do proper NaN comparison as that is allowed.
+
             return mFlags == other.mFlags
-                    && mReplaceId == other.mReplaceId;
+                    && mReplaceId == other.mReplaceId
+                    && Float.compare(mXOffset, other.mXOffset) == 0;
         }
 
         @Override
@@ -1109,7 +1161,7 @@ public final class VolumeShaper implements AutoCloseable {
             // this needs to match the native VolumeShaper.Operation parceling
             dest.writeInt(mFlags);
             dest.writeInt(mReplaceId);
-            dest.writeFloat(Float.NaN); // xOffset (ignored at Java level)
+            dest.writeFloat(mXOffset);
         }
 
         public static final Parcelable.Creator<VolumeShaper.Operation> CREATOR
@@ -1119,11 +1171,12 @@ public final class VolumeShaper implements AutoCloseable {
                 // this needs to match the native VolumeShaper.Operation parceling
                 final int flags = p.readInt();
                 final int replaceId = p.readInt();
-                final float xOffset = p.readFloat(); // ignored at Java level
+                final float xOffset = p.readFloat();
 
                 return new VolumeShaper.Operation(
                         flags
-                        , replaceId);
+                        , replaceId
+                        , xOffset);
             }
 
             @Override
@@ -1132,9 +1185,10 @@ public final class VolumeShaper implements AutoCloseable {
             }
         };
 
-        private Operation(@Flag int flags, int replaceId) {
+        private Operation(@Flag int flags, int replaceId, float xOffset) {
             mFlags = flags;
             mReplaceId = replaceId;
+            mXOffset = xOffset;
         }
 
         /**
@@ -1146,6 +1200,7 @@ public final class VolumeShaper implements AutoCloseable {
         public static final class Builder {
             int mFlags;
             int mReplaceId;
+            float mXOffset;
 
             /**
              * Constructs a new {@code Builder} with the defaults.
@@ -1153,23 +1208,27 @@ public final class VolumeShaper implements AutoCloseable {
             public Builder() {
                 mFlags = 0;
                 mReplaceId = -1;
+                mXOffset = Float.NaN;
             }
 
             /**
-             * Constructs a new Builder from a given {@code VolumeShaper.Operation}
+             * Constructs a new {@code Builder} from a given {@code VolumeShaper.Operation}
              * @param operation the {@code VolumeShaper.operation} whose data will be
-             *        reused in the new Builder.
+             *        reused in the new {@code Builder}.
              */
             public Builder(@NonNull VolumeShaper.Operation operation) {
                 mReplaceId = operation.mReplaceId;
                 mFlags = operation.mFlags;
+                mXOffset = operation.mXOffset;
             }
 
             /**
-             * Replaces the previous {@code VolumeShaper} specified by id.
-             * It has no other effect if the {@code VolumeShaper} is
-             * already expired.
-             * @param id the id of the previous {@code VolumeShaper}.
+             * Replaces the previous {@code VolumeShaper} specified by {@code id}.
+             *
+             * The {@code VolumeShaper} specified by the {@code id} is removed
+             * if it exists. The configuration should be TYPE_SCALE.
+             *
+             * @param id the {@code id} of the previous {@code VolumeShaper}.
              * @param join if true, match the volume of the previous
              * shaper to the start volume of the new {@code VolumeShaper}.
              * @return the same {@code Builder} instance.
@@ -1194,8 +1253,9 @@ public final class VolumeShaper implements AutoCloseable {
             }
 
             /**
-             * Terminates the VolumeShaper.
-             * Do not call directly, use {@link VolumeShaper#release()}.
+             * Terminates the {@code VolumeShaper}.
+             *
+             * Do not call directly, use {@link VolumeShaper#close()}.
              * @return the same {@code Builder} instance.
              */
             public @NonNull Builder terminate() {
@@ -1214,12 +1274,38 @@ public final class VolumeShaper implements AutoCloseable {
 
             /**
              * Use the id specified in the configuration, creating
-             * VolumeShaper as needed; the configuration should be
+             * {@code VolumeShaper} only as needed; the configuration should be
              * TYPE_SCALE.
+             *
+             * If the {@code VolumeShaper} with the same id already exists
+             * then the operation has no effect.
+             *
              * @return the same {@code Builder} instance.
              */
             public @NonNull Builder createIfNeeded() {
                 mFlags |= FLAG_CREATE_IF_NEEDED;
+                return this;
+            }
+
+            /**
+             * Sets the {@code xOffset} to use for the {@code VolumeShaper}.
+             *
+             * The {@code xOffset} is the position on the volume curve,
+             * and setting takes effect when the {@code VolumeShaper} is used next.
+             *
+             * @param xOffset a value between (or equal to) 0.f and 1.f, or Float.NaN to ignore.
+             * @return the same {@code Builder} instance.
+             * @throws IllegalArgumentException if {@code xOffset} is not between 0.f and 1.f,
+             *         or a Float.NaN.
+             */
+            public @NonNull Builder setXOffset(float xOffset) {
+                if (xOffset < -0.f) {
+                    throw new IllegalArgumentException("Negative xOffset not allowed");
+                } else if (xOffset > 1.f) {
+                    throw new IllegalArgumentException("xOffset > 1.f not allowed");
+                }
+                // Float.NaN passes through
+                mXOffset = xOffset;
                 return this;
             }
 
@@ -1245,7 +1331,7 @@ public final class VolumeShaper implements AutoCloseable {
              * @return a new {@code VolumeShaper.Operation} object
              */
             public @NonNull Operation build() {
-                return new Operation(mFlags, mReplaceId);
+                return new Operation(mFlags, mReplaceId, mXOffset);
             }
         } // Operation.Builder
     } // Operation
@@ -1316,15 +1402,18 @@ public final class VolumeShaper implements AutoCloseable {
 
         /**
          * Gets the volume of the {@link VolumeShaper.State}.
+         * @return linear volume between 0.f and 1.f.
          */
         public float getVolume() {
             return mVolume;
         }
 
         /**
-         * Gets the elapsed ms of the {@link VolumeShaper.State}
+         * Gets the {@code xOffset} position on the normalized curve
+         * of the {@link VolumeShaper.State}.
+         * @return the curve x position between 0.f and 1.f.
          */
-        public double getXOffset() {
+        public float getXOffset() {
             return mXOffset;
         }
     } // State
