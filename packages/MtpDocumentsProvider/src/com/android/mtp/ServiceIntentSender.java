@@ -23,6 +23,7 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 /**
@@ -30,7 +31,7 @@ import com.android.internal.util.Preconditions;
  */
 class ServiceIntentSender {
     private final static String CHANNEL_ID = "device_notification_channel";
-    private Context mContext;
+    private final Context mContext;
 
     ServiceIntentSender(Context context) {
         mContext = context;
@@ -44,6 +45,11 @@ class ServiceIntentSender {
         final NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.createNotificationChannel(mChannel);
+    }
+
+    @VisibleForTesting
+    protected ServiceIntentSender() {
+        mContext = null;
     }
 
     /**
