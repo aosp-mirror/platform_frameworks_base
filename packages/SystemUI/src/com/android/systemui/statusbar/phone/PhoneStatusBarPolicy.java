@@ -58,6 +58,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -128,6 +129,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private final KeyguardMonitor mKeyguardMonitor;
     private final LocationController mLocationController;
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -472,30 +474,38 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     }
 
     private void updateManagedProfile() {
-        try {
-            final boolean showIcon;
-            final int userId = ActivityManager.getService().getLastResumedActivityUserId();
-            if (mUserManager.isManagedProfile(userId) && !mKeyguardMonitor.isShowing()) {
-                showIcon = true;
-                mIconController.setIcon(mSlotManagedProfile,
-                        R.drawable.stat_sys_managed_profile_status,
-                        mContext.getString(R.string.accessibility_managed_profile));
-            } else if (mManagedProfileInQuietMode) {
-                showIcon = true;
-                mIconController.setIcon(mSlotManagedProfile,
-                        R.drawable.stat_sys_managed_profile_status_off,
-                        mContext.getString(R.string.accessibility_managed_profile));
-            } else {
-                showIcon = false;
+        // getLastResumedActivityUserId needds to acquire the AM lock, which may be contended in
+        // some cases. Since it doesn't really matter here whether it's updated in this frame
+        // or in the next one, we call this method from our UI offload thread.
+        mUiOffloadThread.submit(() -> {
+            final int userId;
+            try {
+                userId = ActivityManager.getService().getLastResumedActivityUserId();
+                boolean isManagedProfile = mUserManager.isManagedProfile(userId);
+                mHandler.post(() -> {
+                    final boolean showIcon;
+                    if (isManagedProfile && !mKeyguardMonitor.isShowing()) {
+                        showIcon = true;
+                        mIconController.setIcon(mSlotManagedProfile,
+                                R.drawable.stat_sys_managed_profile_status,
+                                mContext.getString(R.string.accessibility_managed_profile));
+                    } else if (mManagedProfileInQuietMode) {
+                        showIcon = true;
+                        mIconController.setIcon(mSlotManagedProfile,
+                                R.drawable.stat_sys_managed_profile_status_off,
+                                mContext.getString(R.string.accessibility_managed_profile));
+                    } else {
+                        showIcon = false;
+                    }
+                    if (mManagedProfileIconVisible != showIcon) {
+                        mIconController.setIconVisibility(mSlotManagedProfile, showIcon);
+                        mManagedProfileIconVisible = showIcon;
+                    }
+                });
+            } catch (RemoteException e) {
+                Log.w(TAG, "updateManagedProfile: ", e);
             }
-            if (mManagedProfileIconVisible != showIcon) {
-                mIconController.setIconVisibility(mSlotManagedProfile, showIcon);
-                mManagedProfileIconVisible = showIcon;
-            }
-        } catch (RemoteException ex) {
-            Log.w(TAG, "updateManagedProfile: ", ex);
-            // ignore
-        }
+        });
     }
 
     private void updateForegroundInstantApps() {
@@ -503,26 +513,22 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         ArraySet<Pair<String, Integer>> notifs = new ArraySet<>(mCurrentNotifs);
         IPackageManager pm = AppGlobals.getPackageManager();
         mCurrentNotifs.clear();
-        try {
-            ArraySet<Integer> stacksToCheck = new ArraySet<>();
-            int[] STACKS_TO_CHECK = new int[]{
-                    StackId.FULLSCREEN_WORKSPACE_STACK_ID,
-                    StackId.DOCKED_STACK_ID,
-            };
-            int focusedId = ActivityManager.getService().getFocusedStackId();
-            if (focusedId == StackId.FULLSCREEN_WORKSPACE_STACK_ID
-                    || focusedId == StackId.FULLSCREEN_WORKSPACE_STACK_ID) {
-                checkStack(StackId.FULLSCREEN_WORKSPACE_STACK_ID, notifs, noMan, pm);
+        mUiOffloadThread.submit(() -> {
+            try {
+                int focusedId = ActivityManager.getService().getFocusedStackId();
+                if (focusedId == StackId.FULLSCREEN_WORKSPACE_STACK_ID) {
+                    checkStack(StackId.FULLSCREEN_WORKSPACE_STACK_ID, notifs, noMan, pm);
+                }
+                if (mDockedStackExists) {
+                    checkStack(StackId.DOCKED_STACK_ID, notifs, noMan, pm);
+                }
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
             }
-            if (mDockedStackExists) {
-                checkStack(StackId.DOCKED_STACK_ID, notifs, noMan, pm);
-            }
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        // Cancel all the leftover notifications that don't have a foreground process anymore.
-        notifs.forEach(v -> noMan.cancelAsUser(v.first, SystemMessage.NOTE_INSTANT_APPS,
-                new UserHandle(v.second)));
+            // Cancel all the leftover notifications that don't have a foreground process anymore.
+            notifs.forEach(v -> noMan.cancelAsUser(v.first, SystemMessage.NOTE_INSTANT_APPS,
+                    new UserHandle(v.second)));
+        });
     }
 
     private void checkStack(int stackId, ArraySet<Pair<String, Integer>> notifs,

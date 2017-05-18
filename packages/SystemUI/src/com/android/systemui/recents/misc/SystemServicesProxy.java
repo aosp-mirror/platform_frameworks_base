@@ -86,7 +86,9 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.tv.PipMenuActivity;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
@@ -152,7 +154,8 @@ public class SystemServicesProxy {
     Canvas mBgProtectionCanvas;
 
     private final Handler mHandler = new H();
-    private final ExecutorService mOnewayExecutor = Executors.newSingleThreadExecutor();
+
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     /**
      * An abstract class to track task stack changes.
@@ -784,7 +787,7 @@ public class SystemServicesProxy {
      * Sends a message to close other system windows.
      */
     public void sendCloseSystemWindows(String reason) {
-        mOnewayExecutor.submit(() -> {
+        mUiOffloadThread.submit(() -> {
             try {
                 mIam.closeSystemDialogs(reason);
             } catch (RemoteException e) {
@@ -1139,7 +1142,7 @@ public class SystemServicesProxy {
     }
 
     public void startActivityAsUserAsync(Intent intent, ActivityOptions opts) {
-        mOnewayExecutor.submit(() -> mContext.startActivityAsUser(intent,
+        mUiOffloadThread.submit(() -> mContext.startActivityAsUser(intent,
                 opts != null ? opts.toBundle() : null, UserHandle.CURRENT));
     }
 
@@ -1167,7 +1170,7 @@ public class SystemServicesProxy {
 
         // Execute this from another thread such that we can do other things (like caching the
         // bitmap for the thumbnail) while AM is busy starting our activity.
-        mOnewayExecutor.submit(() -> {
+        mUiOffloadThread.submit(() -> {
             try {
                 mIam.startActivityFromRecents(
                         taskKey.id, finalOptions == null ? null : finalOptions.toBundle());
@@ -1309,7 +1312,7 @@ public class SystemServicesProxy {
     }
 
     public void awakenDreamsAsync() {
-        mOnewayExecutor.submit(() -> {
+        mUiOffloadThread.submit(() -> {
             try {
                 mDreamManager.awaken();
             } catch (RemoteException e) {
@@ -1320,7 +1323,7 @@ public class SystemServicesProxy {
 
     public void updateOverviewLastStackActiveTimeAsync(long newLastStackActiveTime,
             int currentUserId) {
-        mOnewayExecutor.submit(() -> {
+        mUiOffloadThread.submit(() -> {
             Settings.Secure.putLongForUser(mContext.getContentResolver(),
                     Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, newLastStackActiveTime, currentUserId);
         });
