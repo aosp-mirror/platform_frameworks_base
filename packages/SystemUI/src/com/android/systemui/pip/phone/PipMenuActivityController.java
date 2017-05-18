@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -254,7 +255,9 @@ public class PipMenuActivityController {
     public void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
             boolean allowMenuTimeout) {
         if (DEBUG) {
-            Log.d(TAG, "showMenu() hasActivity=" + (mToActivityMessenger != null));
+            Log.d(TAG, "showMenu() state=" + menuState
+                    + " hasActivity=" + (mToActivityMessenger != null)
+                    + " callers=\n" + Debug.getCallers(5, "    "));
         }
         if (mToActivityMessenger != null) {
             Bundle data = new Bundle();
@@ -298,7 +301,9 @@ public class PipMenuActivityController {
      */
     public void hideMenu() {
         if (DEBUG) {
-            Log.d(TAG, "hideMenu() hasActivity=" + (mToActivityMessenger != null));
+            Log.d(TAG, "hideMenu() state=" + mMenuState
+                    + " hasActivity=" + (mToActivityMessenger != null)
+                    + " callers=\n" + Debug.getCallers(5, "    "));
         }
         if (mToActivityMessenger != null) {
             Message m = Message.obtain();
@@ -318,13 +323,6 @@ public class PipMenuActivityController {
      */
     public void hideMenuWithoutResize() {
         onMenuStateChanged(MENU_STATE_NONE, false /* resize */);
-    }
-
-    /**
-     * @return the current menu state.
-     */
-    public int getMenuState() {
-        return mMenuState;
     }
 
     /**
