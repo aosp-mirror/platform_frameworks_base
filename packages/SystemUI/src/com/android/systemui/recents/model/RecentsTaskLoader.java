@@ -103,6 +103,7 @@ class BackgroundTaskLoader implements Runnable {
     Bitmap mDefaultThumbnail;
     BitmapDrawable mDefaultIcon;
 
+    boolean mStarted;
     boolean mCancelled;
     boolean mWaitingOnLoadQueue;
 
@@ -122,16 +123,21 @@ class BackgroundTaskLoader implements Runnable {
                 android.os.Process.THREAD_PRIORITY_BACKGROUND);
         mLoadThread.start();
         mLoadThreadHandler = new Handler(mLoadThread.getLooper());
-        mLoadThreadHandler.post(this);
     }
 
     /** Restarts the loader thread */
     void start(Context context) {
         mContext = context;
         mCancelled = false;
-        // Notify the load thread to start loading
-        synchronized(mLoadThread) {
-            mLoadThread.notifyAll();
+        if (!mStarted) {
+            // Start loading on the load thread
+            mStarted = true;
+            mLoadThreadHandler.post(this);
+        } else {
+            // Notify the load thread to start loading again
+            synchronized (mLoadThread) {
+                mLoadThread.notifyAll();
+            }
         }
     }
 
