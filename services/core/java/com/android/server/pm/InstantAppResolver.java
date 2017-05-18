@@ -182,6 +182,7 @@ public abstract class InstantAppResolver {
                     failureIntent = null;
                 }
                 final Intent installerIntent = buildEphemeralInstallerIntent(
+                        Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE,
                         requestObj.origIntent,
                         failureIntent,
                         requestObj.callingPackage,
@@ -226,6 +227,7 @@ public abstract class InstantAppResolver {
      * Builds and returns an intent to launch the instant installer.
      */
     public static Intent buildEphemeralInstallerIntent(
+            @NonNull String action,
             @NonNull Intent origIntent,
             @NonNull Intent failureIntent,
             @NonNull String callingPackage,
@@ -239,7 +241,7 @@ public abstract class InstantAppResolver {
             boolean needsPhaseTwo) {
         // Construct the intent that launches the instant installer
         int flags = origIntent.getFlags();
-        final Intent intent = new Intent();
+        final Intent intent = new Intent(action);
         intent.setFlags(flags
                 | Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK
