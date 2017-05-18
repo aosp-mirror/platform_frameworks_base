@@ -119,6 +119,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         @Override
         public void onTaskStackChangedBackground() {
+            // Check this is for the right user
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
+                return;
+            }
+
             // Preloads the next task
             RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
@@ -161,6 +166,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         @Override
         public void onActivityPinned(String packageName, int taskId) {
+            // Check this is for the right user
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
+                return;
+            }
+
             // This time needs to be fetched the same way the last active time is fetched in
             // {@link TaskRecord#touchActiveTime}
             Recents.getConfiguration().getLaunchState().launchedFromPipApp = true;
@@ -172,12 +182,22 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         @Override
         public void onActivityUnpinned() {
+            // Check this is for the right user
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
+                return;
+            }
+
             EventBus.getDefault().send(new ActivityUnpinnedEvent());
             sLastPipTime = -1;
         }
 
         @Override
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
+            // Check this is for the right user
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
+                return;
+            }
+
             EventBus.getDefault().send(new TaskSnapshotChangedEvent(taskId, snapshot));
         }
     }
