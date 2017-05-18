@@ -187,6 +187,9 @@
     <!-- to access ResolverRankerServices -->
     <uses-permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE" />
 
+    <!-- to access instant apps -->
+    <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
