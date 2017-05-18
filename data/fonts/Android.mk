@@ -81,6 +81,33 @@ $(foreach f, $(font_src_files), $(call build-one-font-module, $(f)))
 build-one-font-module :=
 font_src_files :=
 
+################################
+# Copies the font configuration file into system/etc for the product as fonts.xml.
+# In the case where $(ADDITIONAL_FONTS_FILE) is defined, the content of $(ADDITIONAL_FONTS_FILE)
+# is added to the $(AOSP_FONTS_FILE).
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := fonts.xml
+LOCAL_MODULE_CLASS := ETC
+
+AOSP_FONTS_FILE := frameworks/base/data/fonts/fonts.xml
+
+ifdef ADDITIONAL_FONTS_FILE
+ADDITIONAL_FONTS_SCRIPT := frameworks/base/tools/fonts/add_additional_fonts.py
+ADD_ADDITIONAL_FONTS := $(local-generated-sources-dir)/fonts.xml
+
+$(ADD_ADDITIONAL_FONTS): PRIVATE_SCRIPT := $(ADDITIONAL_FONTS_SCRIPT)
+$(ADD_ADDITIONAL_FONTS): PRIVATE_ADDITIONAL_FONTS_FILE := $(ADDITIONAL_FONTS_FILE)
+$(ADD_ADDITIONAL_FONTS): $(ADDITIONAL_FONTS_SCRIPT) $(AOSP_FONTS_FILE) $(ADDITIONAL_FONTS_FILE)
+	rm -f $@
+	python $(PRIVATE_SCRIPT) $@ $(PRIVATE_ADDITIONAL_FONTS_FILE)
+else
+ADD_ADDITIONAL_FONTS := $(AOSP_FONTS_FILE)
+endif
+
+LOCAL_PREBUILT_MODULE_FILE := $(ADD_ADDITIONAL_FONTS)
+
+include $(BUILD_PREBUILT)
 
 # Run sanity tests on fonts on checkbuild
 checkbuild: fontchain_lint
