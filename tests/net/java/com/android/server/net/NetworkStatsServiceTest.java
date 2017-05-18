@@ -85,6 +85,7 @@ import android.os.MessageQueue.IdleHandler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.test.AndroidTestCase;
@@ -119,6 +120,7 @@ import java.util.List;
  * still uses the Easymock structure, which could be simplified.
  */
 @RunWith(AndroidJUnit4.class)
+@SmallTest
 public class NetworkStatsServiceTest {
     private static final String TAG = "NetworkStatsServiceTest";
 
