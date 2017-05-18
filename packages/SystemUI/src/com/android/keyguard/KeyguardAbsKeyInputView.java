@@ -205,6 +205,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
             boolean isValidPassword) {
         boolean dismissKeyguard = KeyguardUpdateMonitor.getCurrentUser() == userId;
         if (matched) {
+            mLockPatternUtils.sanitizePassword();
             mCallback.reportUnlockAttempt(userId, true, 0);
             if (dismissKeyguard) {
                 mDismissing = true;

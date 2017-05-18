@@ -672,6 +672,17 @@ public class LockPatternUtils {
         reportEnabledTrustAgentsChanged(userHandle);
     }
 
+    /**
+     * clears stored password.
+     */
+    public void sanitizePassword() {
+        try {
+            getLockSettings().sanitizePassword();
+        } catch (RemoteException re) {
+            Log.e(TAG, "Couldn't sanitize password" + re);
+        }
+    }
+
     private void updateCryptoUserInfo(int userId) {
         if (userId != UserHandle.USER_SYSTEM) {
             return;
