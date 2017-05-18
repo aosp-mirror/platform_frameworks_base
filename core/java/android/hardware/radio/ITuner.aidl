@@ -84,4 +84,6 @@ interface ITuner {
      *         configuration.
      */
     void setAnalogForced(boolean isForced);
+
+    boolean isAntennaConnected();
 }

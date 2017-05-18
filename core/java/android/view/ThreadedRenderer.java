@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
@@ -188,6 +189,11 @@ public final class ThreadedRenderer {
     public static final String DEBUG_SHOW_NON_RECTANGULAR_CLIP_PROPERTY =
             "debug.hwui.show_non_rect_clip";
 
+    static {
+        // Try to check OpenGL support early if possible.
+        isAvailable();
+    }
+
     /**
      * A process can set this flag to false to prevent the use of threaded
      * rendering.
@@ -227,8 +233,7 @@ public final class ThreadedRenderer {
         sTrimForeground = true;
     }
 
-    private static native boolean nSupportsOpenGL();
-    private static boolean sSupportsOpenGL = nSupportsOpenGL();
+    private static Boolean sSupportsOpenGL;
 
     /**
      * Indicates whether threaded rendering is available under any form for
@@ -238,7 +243,24 @@ public final class ThreadedRenderer {
      *         false otherwise
      */
     public static boolean isAvailable() {
-        return sSupportsOpenGL;
+        if (sSupportsOpenGL != null) {
+            return sSupportsOpenGL.booleanValue();
+        }
+        if (SystemProperties.getInt("ro.kernel.qemu", 0) == 0) {
+            // Device is not an emulator.
+            sSupportsOpenGL = true;
+            return true;
+        }
+        int qemu_gles = SystemProperties.getInt("qemu.gles", -1);
+        if (qemu_gles == -1) {
+            // In this case, the value of the qemu.gles property is not ready
+            // because the SurfaceFlinger service may not start at this point.
+            return false;
+        }
+        // In the emulator this property will be set > 0 when OpenGL ES 2.0 is
+        // enabled, 0 otherwise. On old emulator versions it will be undefined.
+        sSupportsOpenGL = qemu_gles > 0;
+        return sSupportsOpenGL.booleanValue();
     }
 
     /**

@@ -655,39 +655,44 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
 
         final LinkedList<WindowContainer> thisParentChain = mTmpChain1;
         final LinkedList<WindowContainer> otherParentChain = mTmpChain2;
-        getParents(thisParentChain);
-        other.getParents(otherParentChain);
+        try {
+            getParents(thisParentChain);
+            other.getParents(otherParentChain);
 
-        // Find the common ancestor of both containers.
-        WindowContainer commonAncestor = null;
-        WindowContainer thisTop = thisParentChain.peekLast();
-        WindowContainer otherTop = otherParentChain.peekLast();
-        while (thisTop != null && otherTop != null && thisTop == otherTop) {
-            commonAncestor = thisParentChain.removeLast();
-            otherParentChain.removeLast();
-            thisTop = thisParentChain.peekLast();
-            otherTop = otherParentChain.peekLast();
+            // Find the common ancestor of both containers.
+            WindowContainer commonAncestor = null;
+            WindowContainer thisTop = thisParentChain.peekLast();
+            WindowContainer otherTop = otherParentChain.peekLast();
+            while (thisTop != null && otherTop != null && thisTop == otherTop) {
+                commonAncestor = thisParentChain.removeLast();
+                otherParentChain.removeLast();
+                thisTop = thisParentChain.peekLast();
+                otherTop = otherParentChain.peekLast();
+            }
+
+            // Containers don't belong to the same hierarchy???
+            if (commonAncestor == null) {
+                throw new IllegalArgumentException("No in the same hierarchy this="
+                        + thisParentChain + " other=" + otherParentChain);
+            }
+
+            // Children are always considered greater than their parents, so if one of the containers
+            // we are comparing it the parent of the other then whichever is the child is greater.
+            if (commonAncestor == this) {
+                return -1;
+            } else if (commonAncestor == other) {
+                return 1;
+            }
+
+            // The position of the first non-common ancestor in the common ancestor list determines
+            // which is greater the which.
+            final WindowList<WindowContainer> list = commonAncestor.mChildren;
+            return list.indexOf(thisParentChain.peekLast()) > list.indexOf(otherParentChain.peekLast())
+                    ? 1 : -1;
+        } finally {
+            mTmpChain1.clear();
+            mTmpChain2.clear();
         }
-
-        // Containers don't belong to the same hierarchy???
-        if (commonAncestor == null) {
-            throw new IllegalArgumentException("No in the same hierarchy this="
-                    + thisParentChain + " other=" + otherParentChain);
-        }
-
-        // Children are always considered greater than their parents, so if one of the containers
-        // we are comparing it the parent of the other then whichever is the child is greater.
-        if (commonAncestor == this) {
-            return -1;
-        } else if (commonAncestor == other) {
-            return 1;
-        }
-
-        // The position of the first non-common ancestor in the common ancestor list determines
-        // which is greater the which.
-        final WindowList<WindowContainer> list = commonAncestor.mChildren;
-        return list.indexOf(thisParentChain.peekLast()) > list.indexOf(otherParentChain.peekLast())
-                ? 1 : -1;
     }
 
     private void getParents(LinkedList<WindowContainer> parents) {

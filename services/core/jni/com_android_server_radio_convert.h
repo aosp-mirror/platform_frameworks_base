@@ -39,8 +39,11 @@ V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region);
 
 V1_0::Direction DirectionToHal(bool directionDown);
 
+JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info);
 JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info);
 
+
+void ThrowParcelableRuntimeException(JNIEnv *env, const std::string& msg);
 
 // These three are only for internal use by template functions below.
 bool __ThrowIfFailedHidl(JNIEnv *env,

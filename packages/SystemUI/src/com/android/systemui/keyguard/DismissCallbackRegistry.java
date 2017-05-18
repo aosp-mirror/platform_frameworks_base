@@ -17,6 +17,10 @@
 package com.android.systemui.keyguard;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.systemui.Dependency;
+import com.android.systemui.UiOffloadThread;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
 
@@ -26,6 +30,7 @@ import java.util.ArrayList;
 public class DismissCallbackRegistry {
 
     private final ArrayList<DismissCallbackWrapper> mDismissCallbacks = new ArrayList<>();
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     public void addCallback(IKeyguardDismissCallback callback) {
         mDismissCallbacks.add(new DismissCallbackWrapper(callback));
@@ -33,14 +38,16 @@ public class DismissCallbackRegistry {
 
     public void notifyDismissCancelled() {
         for (int i = mDismissCallbacks.size() - 1; i >= 0; i--) {
-            mDismissCallbacks.get(i).notifyDismissCancelled();
+            DismissCallbackWrapper callback = mDismissCallbacks.get(i);
+            mUiOffloadThread.submit(callback::notifyDismissCancelled);
         }
         mDismissCallbacks.clear();
     }
 
     public void notifyDismissSucceeded() {
         for (int i = mDismissCallbacks.size() - 1; i >= 0; i--) {
-            mDismissCallbacks.get(i).notifyDismissSucceeded();
+            DismissCallbackWrapper callback = mDismissCallbacks.get(i);
+            mUiOffloadThread.submit(callback::notifyDismissSucceeded);
         }
         mDismissCallbacks.clear();
     }
