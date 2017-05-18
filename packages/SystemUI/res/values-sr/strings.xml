@@ -473,7 +473,7 @@
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Брже добијајте обавештења"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Прегледајте их пре откључавања"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Не, хвала"</string>
-    <string name="hidden_notifications_setup" msgid="41079514801976810">"Подеси"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Активирај"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Искључи одмах"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Прошири"</string>
@@ -739,7 +739,7 @@
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"И лева пречица откључава"</string>
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"И десна пречица откључава"</string>
     <string name="lockscreen_none" msgid="4783896034844841821">"Ништа"</string>
-    <string name="tuner_launch_app" msgid="1527264114781925348">"Покретање <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Покрени <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"Друге апликације"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Круг"</string>
     <string name="tuner_plus" msgid="6792960658533229675">"Плус"</string>
