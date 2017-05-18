@@ -80,6 +80,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
@@ -3785,7 +3786,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void logPerformShow(String prefix) {
         if (DEBUG_VISIBILITY
-                || (DEBUG_STARTING_WINDOW && mAttrs.type == TYPE_APPLICATION_STARTING)) {
+                || (DEBUG_STARTING_WINDOW_VERBOSE && mAttrs.type == TYPE_APPLICATION_STARTING)) {
             Slog.v(TAG, prefix + this
                     + ": mDrawState=" + mWinAnimator.drawStateToString()
                     + " readyForDisplay=" + isReadyForDisplay()

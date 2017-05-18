@@ -30,6 +30,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
@@ -519,7 +520,7 @@ class WindowStateAnimator {
 
     // This must be called while inside a transaction.
     boolean commitFinishDrawingLocked() {
-        if (DEBUG_STARTING_WINDOW &&
+        if (DEBUG_STARTING_WINDOW_VERBOSE &&
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
             Slog.i(TAG, "commitFinishDrawingLocked: " + mWin + " cur mDrawState="
                     + drawStateToString());
