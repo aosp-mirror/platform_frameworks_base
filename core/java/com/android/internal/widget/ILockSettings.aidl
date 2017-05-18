@@ -90,4 +90,6 @@ interface ILockSettings {
             in byte[] recoveryKeyBlob,
             in List<WrappedApplicationKey> applicationKeys);
     void closeSession(in String sessionId);
+    void sanitizePassword();
+    String getPassword();
 }
