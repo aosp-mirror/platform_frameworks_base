@@ -138,6 +138,7 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputWindowHandle;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -170,7 +171,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final int mOwnerUid;
     /** The owner has {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW} */
     final boolean mOwnerCanAddInternalSystemWindow;
-    final IWindowId mWindowId;
+    final WindowId mWindowId;
     WindowToken mToken;
     // The same object as mToken if this is an app window and null for non-app windows.
     AppWindowToken mAppToken;
@@ -587,20 +588,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mAppToken = mToken.asAppWindowToken();
         mOwnerUid = ownerId;
         mOwnerCanAddInternalSystemWindow = ownerCanAddInternalSystemWindow;
-        mWindowId = new IWindowId.Stub() {
-            @Override
-            public void registerFocusObserver(IWindowFocusObserver observer) {
-                WindowState.this.registerFocusObserver(observer);
-            }
-            @Override
-            public void unregisterFocusObserver(IWindowFocusObserver observer) {
-                WindowState.this.unregisterFocusObserver(observer);
-            }
-            @Override
-            public boolean isFocused() {
-                return WindowState.this.isFocused();
-            }
-        };
+        mWindowId = new WindowId(this);
         mAttrs.copyFrom(a);
         mViewVisibility = viewVisibility;
         mPolicy = mService.mPolicy;
@@ -4432,6 +4420,40 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             numVisible = 0;
             numDrawn = 0;
             nowGone = true;
+        }
+    }
+
+    private static final class WindowId extends IWindowId.Stub {
+        private final WeakReference<WindowState> mOuter;
+
+        private WindowId(WindowState outer) {
+
+            // Use a weak reference for the outer class. This is important to prevent the following
+            // leak: Since we send this class to the client process, binder will keep it alive as
+            // long as the client keeps it alive. Now, if the window is removed, we need to clear
+            // out our reference so even though this class is kept alive we don't leak WindowState,
+            // which can keep a whole lot of classes alive.
+            mOuter = new WeakReference<>(outer);
+        }
+
+        @Override
+        public void registerFocusObserver(IWindowFocusObserver observer) {
+            final WindowState outer = mOuter.get();
+            if (outer != null) {
+                outer.registerFocusObserver(observer);
+            }
+        }
+        @Override
+        public void unregisterFocusObserver(IWindowFocusObserver observer) {
+            final WindowState outer = mOuter.get();
+            if (outer != null) {
+                outer.unregisterFocusObserver(observer);
+            }
+        }
+        @Override
+        public boolean isFocused() {
+            final WindowState outer = mOuter.get();
+            return outer != null && outer.isFocused();
         }
     }
 
