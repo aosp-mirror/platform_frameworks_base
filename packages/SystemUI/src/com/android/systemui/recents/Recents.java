@@ -320,16 +320,11 @@ public class Recents extends SystemUI
         }
     }
 
-    @Override
-    public void toggleRecentApps() {
-        toggleRecents();
-    }
-
     /**
      * Toggles the Recents activity.
      */
     @Override
-    public void toggleRecents() {
+    public void toggleRecentApps() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
@@ -366,7 +361,7 @@ public class Recents extends SystemUI
      * Preloads info for the Recents activity.
      */
     @Override
-    public void preloadRecents() {
+    public void preloadRecentApps() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
