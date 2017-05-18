@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"अद्यावधिकहरू"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"नेटवर्कको स्थिति"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"नेटवर्कका अलर्टहरू"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"नेटवर्क उपलब्ध छ"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN को स्थिति"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"यन्त्रको प्रशासन"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"अलर्टहरू"</string>
@@ -492,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"औँठाछापको समय सकिएको छ। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"औँठाछाप सञ्चालन रद्द गरियो।"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"धेरै प्रयासहरू। केहि समय पछि पुन: प्रयास गर्नुहोला"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"अत्यन्त धेरै प्रयासहरू। फिंगरप्रिन्ट सेन्सरलाई असक्षम पारियो।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास गर्नुहोला।"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"औंला <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1212,7 +1210,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"भाषा र लेआउट चयन गर्न ट्याप गर्नुहोस्"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> अन्य अनुप्रयोगहरूमा देखिँदैछ"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"अनुप्रयोगको गतिविधि"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> अन्य अनुप्रयोगहरूमा देखिँदैछ"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले यो विशेषता प्रयोग नगरेको चाहनुहुन्न भने सेटिङहरू खोली यसलाई निष्क्रिय पार्न ट्याप गर्नुहोस्।"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"निष्क्रिय पार्नुहोस्"</string>

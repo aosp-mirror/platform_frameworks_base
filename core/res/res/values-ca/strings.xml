@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"S\'han produït massa intents. Torna-ho a provar més tard."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"S\'han fet massa intents. S\'ha desactivat el sensor d\'empremtes digitals."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Torna-ho a provar."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -759,7 +758,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Has provat de desbloquejar el televisor incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. Ara es restabliran els valors de fàbrica de l\'aparell."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades incorrectament. Ara el telèfon es restablirà a la configuració predeterminada de fàbrica."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Torneu-ho a provar d\'aquí a <xliff:g id="NUMBER">%d</xliff:g> segons."</string>
-    <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Heu oblidat el patró?"</string>
+    <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Has oblidat el patró?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Desbloqueig del compte"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Massa intents de patró"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Per desbloquejar el telèfon, inicia la sessió amb el compte de Google."</string>
@@ -1205,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca per seleccionar l\'idioma i el disseny"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"S\'està superposant <xliff:g id="NAME">%s</xliff:g> a altres aplicacions"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Activitat en aplicacions"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> s\'està superposant a altres apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DESACTIVA"</string>
@@ -1439,7 +1438,7 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposa #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", segur"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Patró oblidat"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"He oblidat el patró"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Patró incorrecte"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Contrasenya incorrecta"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN incorrecte"</string>

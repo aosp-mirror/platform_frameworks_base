@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Timeout impronta digitale. Riprova."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operazione associata all\'impronta digitale annullata."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Troppi tentativi. Riprova più tardi."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Troppi tentativi. Sensore di impronte digitali disattivato."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Riprova."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dito <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1205,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tocca per selezionare la lingua e il layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"App <xliff:g id="NAME">%s</xliff:g> visualizzata sopra altre app"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Attività app"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"App <xliff:g id="NAME">%s</xliff:g> mostrata sopra altre app"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se non desideri che l\'app <xliff:g id="NAME">%s</xliff:g> utilizzi questa funzione, tocca per aprire le impostazioni e disattivarla."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DISATTIVA"</string>

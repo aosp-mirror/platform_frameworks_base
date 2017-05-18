@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"به‌روزرسانی‌ها"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"وضعیت شبکه"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"هشدارهای شبکه"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"شبکه دردسترس است"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"‏وضعیت VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"سرپرست دستگاه"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"هشدارها"</string>
@@ -492,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"مهلت زمانی ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"تلاش‌های زیادی انجام شده است. بعداً دوباره امتحان کنید."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"تلاش‌های بسیاری زیادی انجام شده است. حسگر اثر انگشت غیرفعال شد."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"دوباره امتحان کنید."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1206,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"برای انتخاب زبان و چیدمان ضربه بزنید"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> روی برنامه‌های دیگر نشان داده می‌شود"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"فعالیت برنامه"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> روی برنامه‌های دیگر نشان داده می‌شود"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"اگر نمی‌خواهید <xliff:g id="NAME">%s</xliff:g> از این قابلیت استفاده کند، با ضربه زدن، تنظیمات را باز کنید و قابلیت را خاموش کنید."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"خاموش کردن"</string>

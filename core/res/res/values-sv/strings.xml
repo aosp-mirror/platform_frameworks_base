@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"Uppdateringar"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"Nätverksstatus"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Nätverksvarningar"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"Nätverk tillgängligt"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN-status"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Enhetsadministration"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Varningar"</string>
@@ -492,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tidsgränsen för fingeravtrycket har uppnåtts. Försök igen."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Fingeravtrycksåtgärden avbröts."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Du har gjort för många försök. Försök igen senare."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Du har försökt för många gånger. Fingeravtryckssensorn har inaktiverats."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Försök igen."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1206,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tryck om du vill välja språk och layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> visas över andra appar"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Appaktivitet"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> visas över andra appar"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Om du inte vill att den här funktionen används för <xliff:g id="NAME">%s</xliff:g> öppnar du inställningarna genom att trycka. Sedan inaktiverar du funktionen."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"INAKTIVERA"</string>

@@ -481,7 +481,7 @@
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ऐप के प्रमाणीकरण के लिए अंगुली की छाप हार्डवेयर का उपयोग करने देती है"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फ़िंगरप्रिंट की पहचान की गई. कृपया पुनः प्रयास करें."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट संसाधित नहीं हो सका. कृपया पुन: प्रयास करें."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फ़िंगरप्रिंट संवेदक गंदा है. कृपया साफ़ करें और पुनः प्रयास करें."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फ़िंगरप्रिंट सेंसर गंदा है. कृपया साफ़ करें और फिर कोशिश करें."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"अंगुली बहुत तेज़ी से चलाई गई है. कृपया पुनः प्रयास करें."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"अंगुली बहुत धीरे चलाई गई. कृपया पुनः प्रयास करें."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"फ़िंगरप्रिंट का समय समाप्त हो गया. पुनः प्रयास करें."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"फ़िंगरप्रिंट क्रियान्वयन रोक दिया गया."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"बहुत अधिक प्रयास कर लिए गए हैं. बाद में पुन: प्रयास करें."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"बहुत अधिक कोशिशें. फ़िंगरप्रिंट सेंसर अक्षम है."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास करें."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"अंगुली <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1205,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"भाषा और लेआउट चुनने के लिए टैप करें"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> अन्य ऐप्लिकेशन के ऊपर दिखाई दे रहा है"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"ऐप्लिकेशन गतिविधि"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> अन्य ऐप पर दिखाई दे रहा है"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने और उसे बंद करने के लिए टैप करें."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"बंद करें"</string>
