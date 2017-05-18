@@ -154,10 +154,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int[] mDataConnectionState;
 
-    private boolean[] mDataConnectionPossible;
-
-    private String[] mDataConnectionReason;
-
     private String[] mDataConnectionApn;
 
     private ArrayList<String>[] mConnectedApns;
@@ -307,8 +303,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mDataActivationState = new int[numPhones];
         mSignalStrength = new SignalStrength[numPhones];
         mMessageWaiting = new boolean[numPhones];
-        mDataConnectionPossible = new boolean[numPhones];
-        mDataConnectionReason = new String[numPhones];
         mDataConnectionApn = new String[numPhones];
         mCallForwarding = new boolean[numPhones];
         mCellLocation = new Bundle[numPhones];
@@ -326,8 +320,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mSignalStrength[i] =  new SignalStrength();
             mMessageWaiting[i] =  false;
             mCallForwarding[i] =  false;
-            mDataConnectionPossible[i] = false;
-            mDataConnectionReason[i] =  "";
             mDataConnectionApn[i] =  "";
             mCellLocation[i] = new Bundle();
             mCellInfo.add(i, null);
@@ -1081,16 +1073,16 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
+    public void notifyDataConnection(int state, boolean isDataAllowed,
             String reason, String apn, String apnType, LinkProperties linkProperties,
             NetworkCapabilities networkCapabilities, int networkType, boolean roaming) {
         notifyDataConnectionForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, state,
-            isDataConnectivityPossible,reason, apn, apnType, linkProperties,
+            isDataAllowed,reason, apn, apnType, linkProperties,
             networkCapabilities, networkType, roaming);
     }
 
     public void notifyDataConnectionForSubscriber(int subId, int state,
-            boolean isDataConnectivityPossible, String reason, String apn, String apnType,
+            boolean isDataAllowed, String reason, String apn, String apnType,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int networkType, boolean roaming) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
@@ -1098,7 +1090,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         if (VDBG) {
             log("notifyDataConnectionForSubscriber: subId=" + subId
-                + " state=" + state + " isDataConnectivityPossible=" + isDataConnectivityPossible
+                + " state=" + state + " isDataAllowed=" + isDataAllowed
                 + " reason='" + reason
                 + "' apn='" + apn + "' apnType=" + apnType + " networkType=" + networkType
                 + " mRecords.size()=" + mRecords.size());
@@ -1126,8 +1118,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         }
                     }
                 }
-                mDataConnectionPossible[phoneId] = isDataConnectivityPossible;
-                mDataConnectionReason[phoneId] = reason;
                 mDataConnectionLinkProperties[phoneId] = linkProperties;
                 mDataConnectionNetworkCapabilities[phoneId] = networkCapabilities;
                 if (mDataConnectionNetworkType[phoneId] != networkType) {
@@ -1171,7 +1161,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
-        broadcastDataConnectionStateChanged(state, isDataConnectivityPossible, reason, apn,
+        broadcastDataConnectionStateChanged(state, isDataAllowed, reason, apn,
                 apnType, linkProperties, networkCapabilities, roaming, subId);
         broadcastPreciseDataConnectionStateChanged(state, networkType, apnType, apn, reason,
                 linkProperties, "");
@@ -1412,8 +1402,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("  mCallForwarding=" + mCallForwarding[i]);
                 pw.println("  mDataActivity=" + mDataActivity[i]);
                 pw.println("  mDataConnectionState=" + mDataConnectionState[i]);
-                pw.println("  mDataConnectionPossible=" + mDataConnectionPossible[i]);
-                pw.println("  mDataConnectionReason=" + mDataConnectionReason[i]);
                 pw.println("  mDataConnectionApn=" + mDataConnectionApn[i]);
                 pw.println("  mDataConnectionLinkProperties=" + mDataConnectionLinkProperties[i]);
                 pw.println("  mDataConnectionNetworkCapabilities=" +
@@ -1521,7 +1509,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void broadcastDataConnectionStateChanged(int state,
-            boolean isDataConnectivityPossible,
+            boolean isDataAllowed,
             String reason, String apn, String apnType, LinkProperties linkProperties,
             NetworkCapabilities networkCapabilities, boolean roaming, int subId) {
         // Note: not reporting to the battery stats service here, because the
@@ -1530,7 +1518,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Intent intent = new Intent(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         intent.putExtra(PhoneConstants.STATE_KEY,
                 PhoneConstantConversions.convertDataState(state).toString());
-        if (!isDataConnectivityPossible) {
+        if (!isDataAllowed) {
             intent.putExtra(PhoneConstants.NETWORK_UNAVAILABLE_KEY, true);
         }
         if (reason != null) {
