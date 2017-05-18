@@ -59,6 +59,15 @@ public class WebChromeClient {
             boolean precomposed) {}
 
     /**
+     * Notify the host application of a new theme color.
+     * @param view The WebView that initiated the callback.
+     * @param color The newly set theme color, which may be partially transparent.
+     *              A value of Color.TRANSPARENT denotes no theme color being set.
+     * @hide
+     */
+    public void onThemeColorChanged(WebView view, int color) {}
+
+    /**
      * A callback interface used by the host application to notify
      * the current page that its custom view has been dismissed.
      */

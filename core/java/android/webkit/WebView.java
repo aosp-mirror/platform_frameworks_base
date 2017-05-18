@@ -29,6 +29,7 @@ import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
@@ -69,6 +70,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -113,6 +116,8 @@ public class WebView extends AbsoluteLayout
     // set in the WebView constructor.
     @UnsupportedAppUsage
     private static volatile boolean sEnforceThreadChecking = false;
+
+    private Method mGetThemeColorMethod;
 
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -426,6 +431,13 @@ public class WebView extends AbsoluteLayout
         checkThread();
 
         ensureProviderCreated();
+
+        try {
+            mGetThemeColorMethod = mProvider.getClass().getMethod("getThemeColor");
+        } catch (Exception e) {
+            // ignored, no theme color support
+        }
+
         mProvider.init(javaScriptInterfaces, privateBrowsing);
         // Post condition of creating a webview is the CookieSyncManager.getInstance() is allowed.
         CookieSyncManager.setGetInstanceIsAllowed();
@@ -1311,6 +1323,37 @@ public class WebView extends AbsoluteLayout
     public int getProgress() {
         checkThread();
         return mProvider.getProgress();
+    }
+
+    /**
+     * Checks whether the WebView implementation has support for fetching
+     * the theme color set by the page.
+     *
+     * @return true if the WebView supports the getThemeColor() method
+     * @hide
+     */
+    public boolean isThemeColorSupported() {
+        return mGetThemeColorMethod != null;
+    }
+
+    /**
+     * Gets the theme color set by the page.
+     *
+     * The returned color may not be fully opaque. If the page didn't set
+     * any theme color, Color.TRANSPARENT is returned.
+     *
+     * @return theme color set by the page
+     * @hide
+     */
+    public int getThemeColor() {
+        if (mGetThemeColorMethod != null) {
+            try {
+                return (Integer) mGetThemeColorMethod.invoke(mProvider);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                // ignored, fall back to returning transparent
+            }
+        }
+        return Color.TRANSPARENT;
     }
 
     /**
