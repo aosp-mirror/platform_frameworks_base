@@ -18,8 +18,7 @@ package com.android.server.connectivity.tethering;
 
 import android.net.LinkProperties;
 import android.os.Handler;
-import android.os.RemoteException;
-import android.util.Log;
+import android.net.util.SharedLog;
 
 /**
  * A class to encapsulate the business logic of programming the tethering
@@ -32,13 +31,15 @@ public class OffloadController {
 
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
+    private final SharedLog mLog;
     private boolean mConfigInitialized;
     private boolean mControlInitialized;
     private LinkProperties mUpstreamLinkProperties;
 
-    public OffloadController(Handler h, OffloadHardwareInterface hwi) {
+    public OffloadController(Handler h, OffloadHardwareInterface hwi, SharedLog log) {
         mHandler = h;
         mHwInterface = hwi;
+        mLog = log.forSubComponent(TAG);
     }
 
     public void start() {
@@ -47,7 +48,7 @@ public class OffloadController {
         if (!mConfigInitialized) {
             mConfigInitialized = mHwInterface.initOffloadConfig();
             if (!mConfigInitialized) {
-                Log.d(TAG, "tethering offload config not supported");
+                mLog.i("tethering offload config not supported");
                 return;
             }
         }
