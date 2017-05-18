@@ -758,8 +758,8 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Posnetki zaslona"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Splošna sporočila"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Shramba"</string>
-    <string name="instant_apps" msgid="6647570248119804907">"Aplikacije brez nameščanja"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"Aplikacij brez nameščanja ni treba namestiti."</string>
+    <string name="instant_apps" msgid="6647570248119804907">"Nenamestljive aplikacije"</string>
+    <string name="instant_apps_message" msgid="8116608994995104836">"Nenamestljivih aplikacij ni treba namestiti."</string>
     <string name="app_info" msgid="6856026610594615344">"Podatki o aplikaciji"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Pojdi v splet"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilni podatki"</string>
