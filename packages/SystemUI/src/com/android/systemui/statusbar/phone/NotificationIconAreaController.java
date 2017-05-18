@@ -128,8 +128,7 @@ public class NotificationIconAreaController implements DarkReceiver {
 
     protected boolean shouldShowNotificationIcon(NotificationData.Entry entry,
             NotificationData notificationData, boolean showAmbient) {
-        if (notificationData.isAmbient(entry.key) && !showAmbient
-                && !NotificationData.showNotificationEvenIfUnprovisioned(entry.notification)) {
+        if (notificationData.isAmbient(entry.key) && !showAmbient) {
             return false;
         }
         if (!StatusBar.isTopLevelChild(entry)) {

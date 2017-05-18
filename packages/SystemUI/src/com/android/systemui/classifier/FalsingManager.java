@@ -30,7 +30,10 @@ import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.systemui.Dependency;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.analytics.DataCollector;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.StatusBarState;
 
 import java.io.PrintWriter;
@@ -63,6 +66,7 @@ public class FalsingManager implements SensorEventListener {
     private final DataCollector mDataCollector;
     private final HumanInteractionClassifier mHumanInteractionClassifier;
     private final AccessibilityManager mAccessibilityManager;
+    private final UiOffloadThread mUiOffloadThread;
 
     private static FalsingManager sInstance = null;
 
@@ -86,6 +90,7 @@ public class FalsingManager implements SensorEventListener {
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mDataCollector = DataCollector.getInstance(mContext);
         mHumanInteractionClassifier = HumanInteractionClassifier.getInstance(mContext);
+        mUiOffloadThread = Dependency.get(UiOffloadThread.class);
         mScreenOn = context.getSystemService(PowerManager.class).isInteractive();
 
         mContext.getContentResolver().registerContentObserver(
@@ -130,7 +135,11 @@ public class FalsingManager implements SensorEventListener {
     private void sessionExitpoint(boolean force) {
         if (mSessionActive && (force || !shouldSessionBeActive())) {
             mSessionActive = false;
-            mSensorManager.unregisterListener(this);
+
+            // This can be expensive, and doesn't need to happen on the main thread.
+            mUiOffloadThread.submit(() -> {
+                mSensorManager.unregisterListener(this);
+            });
         }
     }
 
@@ -154,7 +163,11 @@ public class FalsingManager implements SensorEventListener {
         for (int sensorType : sensors) {
             Sensor s = mSensorManager.getDefaultSensor(sensorType);
             if (s != null) {
-                mSensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_GAME);
+
+                // This can be expensive, and doesn't need to happen on the main thread.
+                mUiOffloadThread.submit(() -> {
+                    mSensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_GAME);
+                });
             }
         }
     }
