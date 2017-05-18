@@ -101,9 +101,9 @@ public class A2dpProfile implements LocalBluetoothProfile {
         mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
+        mWrapperFactory = new BluetoothA2dpWrapperImpl.Factory();
         mLocalAdapter.getProfileProxy(context, new A2dpServiceListener(),
                 BluetoothProfile.A2DP);
-        mWrapperFactory = new BluetoothA2dpWrapperImpl.Factory();
     }
 
     @VisibleForTesting
