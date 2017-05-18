@@ -37,6 +37,7 @@ struct Debug {
                               const ResourceName& target_style);
   static void DumpHex(const void* data, size_t len);
   static void DumpXml(xml::XmlResource* doc);
+  static std::string ToString(xml::XmlResource* doc);
 };
 
 }  // namespace aapt

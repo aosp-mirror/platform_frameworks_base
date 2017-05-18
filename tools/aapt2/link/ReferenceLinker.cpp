@@ -274,7 +274,7 @@ Maybe<xml::AaptAttribute> ReferenceLinker::CompileXmlAttribute(const Reference& 
     if (out_error) *out_error = "is not an attribute";
     return {};
   }
-  return xml::AaptAttribute{symbol->id, *symbol->attribute};
+  return xml::AaptAttribute(*symbol->attribute, symbol->id);
 }
 
 void ReferenceLinker::WriteResourceName(DiagMessage* out_msg,

@@ -50,6 +50,7 @@
 #include "link/ManifestFixer.h"
 #include "link/ReferenceLinker.h"
 #include "link/TableMerger.h"
+#include "link/XmlCompatVersioner.h"
 #include "optimize/ResourceDeduper.h"
 #include "optimize/VersionCollapser.h"
 #include "process/IResourceTableConsumer.h"
@@ -247,25 +248,20 @@ class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
   IAaptContext* context_;
 };
 
-static bool FlattenXml(xml::XmlResource* xml_res, const StringPiece& path,
-                       Maybe<size_t> max_sdk_level, bool keep_raw_values, IArchiveWriter* writer,
-                       IAaptContext* context) {
+static bool FlattenXml(IAaptContext* context, xml::XmlResource* xml_res, const StringPiece& path,
+                       bool keep_raw_values, IArchiveWriter* writer) {
   BigBuffer buffer(1024);
   XmlFlattenerOptions options = {};
   options.keep_raw_values = keep_raw_values;
-  options.max_sdk_level = max_sdk_level;
   XmlFlattener flattener(&buffer, options);
   if (!flattener.Consume(context, xml_res)) {
     return false;
   }
 
   if (context->IsVerbose()) {
-    DiagMessage msg;
-    msg << "writing " << path << " to archive";
-    if (max_sdk_level) {
-      msg << " maxSdkLevel=" << max_sdk_level.value() << " keepRawValues=" << keep_raw_values;
-    }
-    context->GetDiagnostics()->Note(msg);
+    context->GetDiagnostics()->Note(DiagMessage(path) << "writing to archive (keep_raw_values="
+                                                      << (keep_raw_values ? "true" : "false")
+                                                      << ")");
   }
 
   io::BigBufferInputStream input_stream(&buffer);
@@ -311,12 +307,33 @@ struct ResourceFileFlattenerOptions {
   std::unordered_set<std::string> extensions_to_not_compress;
 };
 
+// A sampling of public framework resource IDs.
+struct R {
+  struct attr {
+    enum : uint32_t {
+      paddingLeft = 0x010100d6u,
+      paddingRight = 0x010100d8u,
+      paddingHorizontal = 0x0101053du,
+
+      paddingTop = 0x010100d7u,
+      paddingBottom = 0x010100d9u,
+      paddingVertical = 0x0101053eu,
+
+      layout_marginLeft = 0x010100f7u,
+      layout_marginRight = 0x010100f9u,
+      layout_marginHorizontal = 0x0101053bu,
+
+      layout_marginTop = 0x010100f8u,
+      layout_marginBottom = 0x010100fau,
+      layout_marginVertical = 0x0101053cu,
+    };
+  };
+};
+
 class ResourceFileFlattener {
  public:
   ResourceFileFlattener(const ResourceFileFlattenerOptions& options, IAaptContext* context,
-                        proguard::KeepSet* keep_set)
-      : options_(options), context_(context), keep_set_(keep_set) {
-  }
+                        proguard::KeepSet* keep_set);
 
   bool Flatten(ResourceTable* table, IArchiveWriter* archive_writer);
 
@@ -325,7 +342,7 @@ class ResourceFileFlattener {
     ConfigDescription config;
 
     // The entry this file came from.
-    const ResourceEntry* entry;
+    ResourceEntry* entry;
 
     // The file to copy as-is.
     io::IFile* file_to_copy;
@@ -335,18 +352,71 @@ class ResourceFileFlattener {
 
     // The destination to write this file to.
     std::string dst_path;
-    bool skip_version = false;
   };
 
   uint32_t GetCompressionFlags(const StringPiece& str);
 
-  bool LinkAndVersionXmlFile(ResourceTable* table, FileOperation* file_op,
-                             std::queue<FileOperation>* out_file_op_queue);
+  std::vector<std::unique_ptr<xml::XmlResource>> LinkAndVersionXmlFile(ResourceTable* table,
+                                                                       FileOperation* file_op);
 
   ResourceFileFlattenerOptions options_;
   IAaptContext* context_;
   proguard::KeepSet* keep_set_;
+  XmlCompatVersioner::Rules rules_;
 };
+
+ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions& options,
+                                             IAaptContext* context, proguard::KeepSet* keep_set)
+    : options_(options), context_(context), keep_set_(keep_set) {
+  SymbolTable* symm = context_->GetExternalSymbols();
+
+  // Build up the rules for degrading newer attributes to older ones.
+  // NOTE(adamlesinski): These rules are hardcoded right now, but they should be
+  // generated from the attribute definitions themselves (b/62028956).
+  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::paddingHorizontal)) {
+    std::vector<ReplacementAttr> replacements{
+        {"paddingLeft", R::attr::paddingLeft,
+         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+        {"paddingRight", R::attr::paddingRight,
+         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+    };
+    rules_[R::attr::paddingHorizontal] =
+        util::make_unique<DegradeToManyRule>(std::move(replacements));
+  }
+
+  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::paddingVertical)) {
+    std::vector<ReplacementAttr> replacements{
+        {"paddingTop", R::attr::paddingTop,
+         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+        {"paddingBottom", R::attr::paddingBottom,
+         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+    };
+    rules_[R::attr::paddingVertical] =
+        util::make_unique<DegradeToManyRule>(std::move(replacements));
+  }
+
+  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::layout_marginHorizontal)) {
+    std::vector<ReplacementAttr> replacements{
+        {"layout_marginLeft", R::attr::layout_marginLeft,
+         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+        {"layout_marginRight", R::attr::layout_marginRight,
+         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+    };
+    rules_[R::attr::layout_marginHorizontal] =
+        util::make_unique<DegradeToManyRule>(std::move(replacements));
+  }
+
+  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::layout_marginVertical)) {
+    std::vector<ReplacementAttr> replacements{
+        {"layout_marginTop", R::attr::layout_marginTop,
+         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+        {"layout_marginBottom", R::attr::layout_marginBottom,
+         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+    };
+    rules_[R::attr::layout_marginVertical] =
+        util::make_unique<DegradeToManyRule>(std::move(replacements));
+  }
+}
 
 uint32_t ResourceFileFlattener::GetCompressionFlags(const StringPiece& str) {
   if (options_.do_not_compress_anything) {
@@ -369,8 +439,19 @@ static bool IsTransitionElement(const std::string& name) {
          name == "transitionManager";
 }
 
-bool ResourceFileFlattener::LinkAndVersionXmlFile(ResourceTable* table, FileOperation* file_op,
-                                                  std::queue<FileOperation>* out_file_op_queue) {
+static bool IsVectorElement(const std::string& name) {
+  return name == "vector" || name == "animated-vector";
+}
+
+template <typename T>
+std::vector<T> make_singleton_vec(T&& val) {
+  std::vector<T> vec;
+  vec.emplace_back(std::forward<T>(val));
+  return vec;
+}
+
+std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVersionXmlFile(
+    ResourceTable* table, FileOperation* file_op) {
   xml::XmlResource* doc = file_op->xml_to_flatten.get();
   const Source& src = doc->file.source;
 
@@ -380,107 +461,60 @@ bool ResourceFileFlattener::LinkAndVersionXmlFile(ResourceTable* table, FileOper
 
   XmlReferenceLinker xml_linker;
   if (!xml_linker.Consume(context_, doc)) {
-    return false;
+    return {};
   }
 
   if (options_.update_proguard_spec && !proguard::CollectProguardRules(src, doc, keep_set_)) {
-    return false;
+    return {};
   }
 
   if (options_.no_xml_namespaces) {
     XmlNamespaceRemover namespace_remover;
     if (!namespace_remover.Consume(context_, doc)) {
-      return false;
+      return {};
     }
   }
 
-  if (!options_.no_auto_version) {
-    if (options_.no_version_vectors) {
-      // Skip this if it is a vector or animated-vector.
-      xml::Element* el = xml::FindRootElement(doc);
-      if (el && el->namespace_uri.empty()) {
-        if (el->name == "vector" || el->name == "animated-vector") {
-          // We are NOT going to version this file.
-          file_op->skip_version = true;
-          return true;
-        }
-      }
-    }
-    if (options_.no_version_transitions) {
-      // Skip this if it is a transition resource.
-      xml::Element* el = xml::FindRootElement(doc);
-      if (el && el->namespace_uri.empty()) {
-        if (IsTransitionElement(el->name)) {
-          // We are NOT going to version this file.
-          file_op->skip_version = true;
-          return true;
-        }
-      }
-    }
+  if (options_.no_auto_version) {
+    return make_singleton_vec(std::move(file_op->xml_to_flatten));
+  }
 
-    const ConfigDescription& config = file_op->config;
-
-    // Find the first SDK level used that is higher than this defined config and
-    // not superseded by a lower or equal SDK level resource.
-    const int min_sdk_version = context_->GetMinSdkVersion();
-    for (int sdk_level : xml_linker.sdk_levels()) {
-      if (sdk_level > min_sdk_version && sdk_level > config.sdkVersion) {
-        if (!ShouldGenerateVersionedResource(file_op->entry, config, sdk_level)) {
-          // If we shouldn't generate a versioned resource, stop checking.
-          break;
-        }
-
-        ResourceFile versioned_file_desc = doc->file;
-        versioned_file_desc.config.sdkVersion = (uint16_t)sdk_level;
-
-        FileOperation new_file_op;
-        new_file_op.xml_to_flatten = util::make_unique<xml::XmlResource>(
-            versioned_file_desc, StringPool{}, doc->root->Clone());
-        new_file_op.config = versioned_file_desc.config;
-        new_file_op.entry = file_op->entry;
-        new_file_op.dst_path =
-            ResourceUtils::BuildResourceFileName(versioned_file_desc, context_->GetNameMangler());
-
-        if (context_->IsVerbose()) {
-          context_->GetDiagnostics()->Note(DiagMessage(versioned_file_desc.source)
-                                           << "auto-versioning resource from config '" << config
-                                           << "' -> '" << versioned_file_desc.config << "'");
-        }
-
-        bool added = table->AddFileReferenceAllowMangled(
-            versioned_file_desc.name, versioned_file_desc.config, versioned_file_desc.source,
-            new_file_op.dst_path, nullptr, context_->GetDiagnostics());
-        if (!added) {
-          return false;
-        }
-
-        out_file_op_queue->push(std::move(new_file_op));
-        break;
+  if (options_.no_version_vectors || options_.no_version_transitions) {
+    // Skip this if it is a vector or animated-vector.
+    xml::Element* el = xml::FindRootElement(doc);
+    if (el && el->namespace_uri.empty()) {
+      if ((options_.no_version_vectors && IsVectorElement(el->name)) ||
+          (options_.no_version_transitions && IsTransitionElement(el->name))) {
+        return make_singleton_vec(std::move(file_op->xml_to_flatten));
       }
     }
   }
-  return true;
+
+  const ConfigDescription& config = file_op->config;
+  ResourceEntry* entry = file_op->entry;
+
+  XmlCompatVersioner xml_compat_versioner(&rules_);
+  const util::Range<ApiVersion> api_range{config.sdkVersion,
+                                          FindNextApiVersionForConfig(entry, config)};
+  return xml_compat_versioner.Process(context_, doc, api_range);
 }
 
-/**
- * Do not insert or remove any resources while executing in this function. It
- * will
- * corrupt the iteration order.
- */
 bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archive_writer) {
   bool error = false;
   std::map<std::pair<ConfigDescription, StringPiece>, FileOperation> config_sorted_files;
 
   for (auto& pkg : table->packages) {
     for (auto& type : pkg->types) {
-      // Sort by config and name, so that we get better locality in the zip
-      // file.
+      // Sort by config and name, so that we get better locality in the zip file.
       config_sorted_files.clear();
       std::queue<FileOperation> file_operations;
 
       // Populate the queue with all files in the ResourceTable.
       for (auto& entry : type->entries) {
         for (auto& config_value : entry->values) {
+          // WARNING! Do not insert or remove any resources while executing in this scope. It will
+          // corrupt the iteration order.
+
           FileReference* file_ref = ValueCast<FileReference>(config_value->value.get());
           if (!file_ref) {
             continue;
@@ -497,6 +531,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
           file_op.entry = entry.get();
           file_op.dst_path = *file_ref->path;
           file_op.config = config_value->config;
+          file_op.file_to_copy = file;
 
           const StringPiece src_path = file->GetSource().path;
           if (type->type != ResourceType::kRaw &&
@@ -518,68 +553,51 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
             file_op.xml_to_flatten->file.config = config_value->config;
             file_op.xml_to_flatten->file.source = file_ref->GetSource();
             file_op.xml_to_flatten->file.name = ResourceName(pkg->name, type->type, entry->name);
-
-            // Enqueue the XML files to be processed.
-            file_operations.push(std::move(file_op));
-          } else {
-            file_op.file_to_copy = file;
-
-            // NOTE(adamlesinski): Explicitly construct a StringPiece here, or
-            // else we end up copying the string in the std::make_pair() method,
-            // then creating a StringPiece from the copy, which would cause us
-            // to end up referencing garbage in the map.
-            const StringPiece entry_name(entry->name);
-            config_sorted_files[std::make_pair(config_value->config, entry_name)] =
-                std::move(file_op);
           }
+
+          // NOTE(adamlesinski): Explicitly construct a StringPiece here, or
+          // else we end up copying the string in the std::make_pair() method,
+          // then creating a StringPiece from the copy, which would cause us
+          // to end up referencing garbage in the map.
+          const StringPiece entry_name(entry->name);
+          config_sorted_files[std::make_pair(config_value->config, entry_name)] =
+              std::move(file_op);
         }
-      }
-
-      // Now process the XML queue
-      for (; !file_operations.empty(); file_operations.pop()) {
-        FileOperation& file_op = file_operations.front();
-
-        if (!LinkAndVersionXmlFile(table, &file_op, &file_operations)) {
-          error = true;
-          continue;
-        }
-
-        // NOTE(adamlesinski): Explicitly construct a StringPiece here, or else
-        // we end up copying the string in the std::make_pair() method, then
-        // creating a StringPiece from the copy, which would cause us to end up
-        // referencing garbage in the map.
-        const StringPiece entry_name(file_op.entry->name);
-        config_sorted_files[std::make_pair(file_op.config, entry_name)] = std::move(file_op);
-      }
-
-      if (error) {
-        return false;
       }
 
       // Now flatten the sorted values.
       for (auto& map_entry : config_sorted_files) {
         const ConfigDescription& config = map_entry.first.first;
-        const FileOperation& file_op = map_entry.second;
+        FileOperation& file_op = map_entry.second;
 
         if (file_op.xml_to_flatten) {
-          Maybe<size_t> max_sdk_level;
-          if (!options_.no_auto_version && !file_op.skip_version) {
-            max_sdk_level = std::max<size_t>(std::max<size_t>(config.sdkVersion, 1u),
-                                             context_->GetMinSdkVersion());
-          }
+          std::vector<std::unique_ptr<xml::XmlResource>> versioned_docs =
+              LinkAndVersionXmlFile(table, &file_op);
+          for (std::unique_ptr<xml::XmlResource>& doc : versioned_docs) {
+            std::string dst_path = file_op.dst_path;
+            if (doc->file.config != file_op.config) {
+              // Only add the new versioned configurations.
+              if (context_->IsVerbose()) {
+                context_->GetDiagnostics()->Note(DiagMessage(doc->file.source)
+                                                 << "auto-versioning resource from config '"
+                                                 << config << "' -> '" << doc->file.config << "'");
+              }
 
-          bool result = FlattenXml(file_op.xml_to_flatten.get(), file_op.dst_path, max_sdk_level,
-                                   options_.keep_raw_values, archive_writer, context_);
-          if (!result) {
-            error = true;
+              dst_path =
+                  ResourceUtils::BuildResourceFileName(doc->file, context_->GetNameMangler());
+              bool result = table->AddFileReferenceAllowMangled(doc->file.name, doc->file.config,
+                                                                doc->file.source, dst_path, nullptr,
+                                                                context_->GetDiagnostics());
+              if (!result) {
+                return false;
+              }
+            }
+            error |= !FlattenXml(context_, doc.get(), dst_path, options_.keep_raw_values,
+                                 archive_writer);
           }
         } else {
-          bool result =
-              io::CopyFileToArchive(context_, file_op.file_to_copy, file_op.dst_path,
-                                    GetCompressionFlags(file_op.dst_path), archive_writer);
-          if (!result) {
-            error = true;
-          }
+          error |= !io::CopyFileToArchive(context_, file_op.file_to_copy, file_op.dst_path,
+                                          GetCompressionFlags(file_op.dst_path), archive_writer);
         }
       }
     }
@@ -1358,8 +1376,7 @@ class LinkCommand {
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
     const bool keep_raw_values = context_->GetPackageType() == PackageType::kStaticLib;
-    bool result =
-        FlattenXml(manifest, "AndroidManifest.xml", {}, keep_raw_values, writer, context_);
+    bool result = FlattenXml(context_, manifest, "AndroidManifest.xml", keep_raw_values, writer);
     if (!result) {
       return false;
     }

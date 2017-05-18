@@ -149,31 +149,6 @@ TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
   ASSERT_EQ(android::ResXMLTree::END_DOCUMENT, tree.next());
 }
 
-TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripSdk21) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
-            <View xmlns:android="http://schemas.android.com/apk/res/android"
-                android:paddingStart="1dp"
-                android:colorAccent="#ffffff"/>)EOF");
-
-  XmlReferenceLinker linker;
-  ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
-  ASSERT_TRUE(linker.sdk_levels().count(17) == 1);
-  ASSERT_TRUE(linker.sdk_levels().count(21) == 1);
-
-  android::ResXMLTree tree;
-  XmlFlattenerOptions options;
-  options.max_sdk_level = 17;
-  ASSERT_TRUE(Flatten(doc.get(), &tree, options));
-
-  while (tree.next() != android::ResXMLTree::START_TAG) {
-    ASSERT_NE(tree.getEventType(), android::ResXMLTree::BAD_DOCUMENT);
-    ASSERT_NE(tree.getEventType(), android::ResXMLTree::END_DOCUMENT);
-  }
-
-  ASSERT_EQ(1u, tree.getAttributeCount());
-  EXPECT_EQ(uint32_t(0x010103b3), tree.getAttributeNameResID(0));
-}
-
 TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripOnlyTools) {
   std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
             <View xmlns:tools="http://schemas.android.com/tools"
@@ -234,13 +209,11 @@ TEST_F(XmlFlattenerTest, NoNamespaceIsNotTheSameAsEmptyNamespace) {
   }
 
   const StringPiece16 kPackage = u"package";
-  EXPECT_GE(tree.indexOfAttribute(nullptr, 0, kPackage.data(), kPackage.size()),
-            0);
+  EXPECT_GE(tree.indexOfAttribute(nullptr, 0, kPackage.data(), kPackage.size()), 0);
 }
 
 TEST_F(XmlFlattenerTest, EmptyStringValueInAttributeIsNotNull) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDom("<View package=\"\"/>");
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom("<View package=\"\"/>");
 
   android::ResXMLTree tree;
   ASSERT_TRUE(Flatten(doc.get(), &tree));
@@ -251,8 +224,7 @@ TEST_F(XmlFlattenerTest, EmptyStringValueInAttributeIsNotNull) {
   }
 
   const StringPiece16 kPackage = u"package";
-  ssize_t idx =
-      tree.indexOfAttribute(nullptr, 0, kPackage.data(), kPackage.size());
+  ssize_t idx = tree.indexOfAttribute(nullptr, 0, kPackage.data(), kPackage.size());
   ASSERT_GE(idx, 0);
 
   size_t len;

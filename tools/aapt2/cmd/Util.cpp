@@ -131,7 +131,7 @@ std::vector<SplitConstraints> AdjustSplitConstraintsForMinSdk(
 }
 
 static xml::AaptAttribute CreateAttributeWithId(const ResourceId& id) {
-  return xml::AaptAttribute{id, Attribute(true)};
+  return xml::AaptAttribute(Attribute(), id);
 }
 
 std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
