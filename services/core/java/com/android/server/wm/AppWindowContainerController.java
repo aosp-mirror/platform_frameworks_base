@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -98,18 +99,27 @@ public class AppWindowContainerController
     private final Runnable mRemoveStartingWindow = () -> {
         StartingSurface surface = null;
         synchronized (mWindowMap) {
+            if (mContainer == null) {
+                if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "mContainer was null while trying to"
+                        + " remove starting window");
+                return;
+            }
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Remove starting " + mContainer
                     + ": startingWindow=" + mContainer.startingWindow
                     + " startingView=" + mContainer.startingSurface);
-            if (mContainer == null) {
-                return;
-            }
             if (mContainer.startingWindow != null) {
                 surface = mContainer.startingSurface;
                 mContainer.startingData = null;
                 mContainer.startingSurface = null;
                 mContainer.startingWindow = null;
                 mContainer.startingDisplayed = false;
+                if (surface == null && DEBUG_STARTING_WINDOW) {
+                    Slog.v(TAG_WM, "startingWindow was set but startingSurface==null, couldn't "
+                            + "remove");
+                }
+            } else if (DEBUG_STARTING_WINDOW) {
+                Slog.v(TAG_WM, "Tried to remove starting window but startingWindow was null:"
+                        + mContainer);
             }
         }
         if (surface != null) {
@@ -127,6 +137,8 @@ public class AppWindowContainerController
 
         synchronized (mWindowMap) {
             if (mContainer == null) {
+                if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "mContainer was null while trying to"
+                        + " add starting window");
                 return;
             }
             startingData = mContainer.startingData;
@@ -135,6 +147,8 @@ public class AppWindowContainerController
 
         if (startingData == null) {
             // Animation has been canceled... do nothing.
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "startingData was nulled out before handling"
+                    + " mAddStartingWindow: " + mContainer);
             return;
         }
 
@@ -174,6 +188,8 @@ public class AppWindowContainerController
             if (abort) {
                 surface.remove();
             }
+        } else if (DEBUG_STARTING_WINDOW) {
+            Slog.v(TAG_WM, "Surface returned was null: " + mContainer);
         }
     };
 
@@ -450,7 +466,9 @@ public class AppWindowContainerController
             boolean allowTaskSnapshot, boolean activityCreated) {
         synchronized(mWindowMap) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "setAppStartingWindow: token=" + mToken
-                    + " pkg=" + pkg + " transferFrom=" + transferFrom);
+                    + " pkg=" + pkg + " transferFrom=" + transferFrom + " newTask=" + newTask
+                    + " taskSwitch=" + taskSwitch + " processRunning=" + processRunning
+                    + " allowTaskSnapshot=" + allowTaskSnapshot);
 
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to set icon of non-existing app token: " + mToken);
@@ -536,7 +554,7 @@ public class AppWindowContainerController
                 return false;
             }
 
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating StartingData");
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SplashScreenStartingData");
             mContainer.startingData = new SplashScreenStartingData(mService, pkg, theme,
                     compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                     mContainer.getMergedOverrideConfiguration());
@@ -574,6 +592,7 @@ public class AppWindowContainerController
             return false;
         }
 
+        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SnapshotStartingData");
         mContainer.startingData = new SnapshotStartingData(mService, snapshot);
         scheduleAddStartingWindow();
         return true;
@@ -583,6 +602,8 @@ public class AppWindowContainerController
         synchronized (mWindowMap) {
             if (mHandler.hasCallbacks(mRemoveStartingWindow)) {
                 // Already scheduled.
+                if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Trying to remove starting window but "
+                        + "already scheduled");
                 return;
             }
 
@@ -597,8 +618,7 @@ public class AppWindowContainerController
                 return;
             }
 
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, Debug.getCallers(1)
-                    + ": Schedule remove starting " + mContainer
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Schedule remove starting " + mContainer
                     + " startingWindow=" + mContainer.startingWindow);
             mHandler.post(mRemoveStartingWindow);
         }
