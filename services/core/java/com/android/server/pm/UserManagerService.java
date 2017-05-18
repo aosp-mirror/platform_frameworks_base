@@ -3684,6 +3684,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
+        public int[] getUserIds() {
+            return UserManagerService.this.getUserIds();
+        }
+
+        @Override
         public boolean isUserUnlockingOrUnlocked(int userId) {
             synchronized (mUserStates) {
                 int state = mUserStates.get(userId, -1);

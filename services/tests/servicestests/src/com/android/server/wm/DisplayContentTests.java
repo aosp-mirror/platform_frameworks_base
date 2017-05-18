@@ -34,6 +34,7 @@ import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.SparseIntArray;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -239,7 +240,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     @Ignore
     public void testFocusedWindowMultipleDisplays() throws Exception {
-        // Create a focusable window and check that focus is calcualted correctly
+        // Create a focusable window and check that focus is calculated correctly
         final WindowState window1 =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "window1");
         assertEquals(window1, sWm.mRoot.computeFocusedWindow());
@@ -308,6 +309,24 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(initialStackCount + 1, afterStackCount);
         // Ensure that the pinned stack is still on top
         assertEquals(afterStackCount - 1, mDisplayContent.getStaskPosById(PINNED_STACK_ID));
+    }
+
+    /**
+     * Test that WM does not report displays to AM that are pending to be removed.
+     */
+    @Test
+    public void testDontReportDeferredRemoval() {
+        // Create a display and add an animating window to it.
+        final DisplayContent dc = createNewDisplay();
+        final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
+        window.mAnimatingExit = true;
+        // Request display removal, it should be deferred.
+        dc.removeIfPossible();
+        // Request ordered display ids from WM.
+        final SparseIntArray orderedDisplayIds = new SparseIntArray();
+        sWm.getDisplaysInFocusOrder(orderedDisplayIds);
+        // Make sure that display that is marked for removal is not reported.
+        assertEquals(-1, orderedDisplayIds.indexOfValue(dc.getDisplayId()));
     }
 
     private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,

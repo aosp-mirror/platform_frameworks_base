@@ -204,8 +204,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                                 Recents.getSystemServices().removeTask(task.persistentId);
                             }
                         }
-                        Settings.Secure.putLongForUser(RecentsActivity.this.getContentResolver(),
-                                Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, currentTime, currentUser);
+                        Recents.getSystemServices().updateOverviewLastStackActiveTimeAsync(
+                                currentTime, currentUser);
 
                         // Clear the last PiP task time, it's an edge case and we'd rather it
                         // not relaunch the PiP task if the user double taps

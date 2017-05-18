@@ -40,7 +40,7 @@ import android.os.Looper;
  * <p>When an application requests audio focus, it expresses its intention to “own” audio focus to
  * play audio. Let’s review the different types of focus requests, the return value after a request,
  * and the responses to a loss.
- * <br><b>Note:<b> applications should not play anything until granted focus.
+ * <p class="note">Note: applications should not play anything until granted focus.</p>
  *
  * <h3>The different types of focus requests</h3>
  * <p>There are four focus request types. A successful focus request with each will yield different
@@ -77,9 +77,10 @@ import android.os.Looper;
  *
  * <p>An {@code AudioFocusRequest} instance always contains one of the four types of requests
  * explained above. It is passed when building an {@code AudioFocusRequest} instance with its
- * builder in the {@link Builder} constructor {@link Builder#Builder(int)}, or with
- * {@link Builder#setFocusGain(int)} after copying an existing instance with
- * {@link Builder#Builder(AudioFocusRequest)}.
+ * builder in the {@link Builder} constructor
+ * {@link AudioFocusRequest.Builder#AudioFocusRequest.Builder(int)}, or
+ * with {@link AudioFocusRequest.Builder#setFocusGain(int)} after copying an existing instance with
+ * {@link AudioFocusRequest.Builder#AudioFocusRequest.Builder(AudioFocusRequest)}.
  *
  * <h3>Qualifying your focus request</h3>
  * <h4>Use case requiring a focus request</h4>
@@ -105,10 +106,11 @@ import android.os.Looper;
  * <h4>Pausing vs ducking</h4>
  * <p>When an application requested audio focus with
  * {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK}, the system will duck the current focus
- * owner. Note that this behavior is <b>new for Android O<b>, whereas applications targeting SDK
- * up to API 25, applications had to implement the ducking themselves when they received a focus
+ * owner.
+ * <p class="note">Note: this behavior is <b>new for Android O</b>, whereas applications targeting
+ * SDK level up to API 25 had to implement the ducking themselves when they received a focus
  * loss of {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}.
- * <br>But ducking is not always the behavior expected by the user. A typical example is when the
+ * <p>But ducking is not always the behavior expected by the user. A typical example is when the
  * device plays driving directions while the user is listening to an audio book or podcast, and
  * expects the audio playback to pause, instead of duck, as it is hard to understand a navigation
  * prompt and spoken content at the same time. Therefore the system will not automatically duck
@@ -126,7 +128,92 @@ import android.os.Looper;
  * speech, you can also declare so with {@link Builder#setWillPauseWhenDucked(boolean)}, which will
  * cause the system to call your focus listener instead of automatically ducking.
  *
+ * <h4>Example</h4>
+ * <p>The example below covers the following steps to be found in any application that would play
+ * audio, and use audio focus. Here we play an audio book, and our application is intended to pause
+ * rather than duck when it loses focus. These steps consist in:
+ * <ul>
+ * <li>Creating {@code AudioAttributes} to be used for the playback and the focus request.</li>
+ * <li>Configuring and creating the {@code AudioFocusRequest} instance that defines the intended
+ *     focus behaviors.</li>
+ * <li>Requesting audio focus and checking the return code to see if playback can happen right
+ *     away, or is delayed.</li>
+ * <li>Implementing a focus change listener to respond to focus gains and losses.</li>
+ * </ul>
+ * <p>
+ * <pre class="prettyprint">
+ * // initialization of the audio attributes and focus request
+ * mAudioManager = (AudioManager) Context.getSystemService(Context.AUDIO_SERVICE);
+ * mPlaybackAttributes = new AudioAttributes.Builder()
+ *         .setUsage(AudioAttributes.USAGE_MEDIA)
+ *         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+ *         .build();
+ * mFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+ *         .setAudioAttributes(mPlaybackAttributes)
+ *         .setAcceptsDelayedFocusGain(true)
+ *         .setWillPauseWhenDucked(true)
+ *         .setOnAudioFocusChangeListener(this, mMyHandler)
+ *         .build();
+ * mMediaPlayer = new MediaPlayer();
+ * mMediaPlayer.setAudioAttributes(mPlaybackAttributes);
+ * final Object mFocusLock = new Object();
+ *
+ * boolean mPlaybackDelayed = false;
+ *
+ * // requesting audio focus
+ * int res = mAudioManager.requestAudioFocus(mFocusRequest);
+ * synchronized (mFocusLock) {
+ *     if (res == AUDIOFOCUS_REQUEST_FAILED) {
+ *         mPlaybackDelayed = false;
+ *     } else if (res == AUDIOFOCUS_REQUEST_GRANTED) {
+ *         mPlaybackDelayed = false;
+ *         playbackNow();
+ *     } else if (res == AUDIOFOCUS_REQUEST_DELAYED) {
+ *        mPlaybackDelayed = true;
+ *     }
+ * }
+ *
+ * // implementation of the OnAudioFocusChangeListener
+ * &#64;Override
+ * public void onAudioFocusChange(int focusChange) {
+ *     switch (focusChange) {
+ *         case AudioManager.AUDIOFOCUS_GAIN:
+ *             if (mPlaybackDelayed || mResumeOnFocusGain) {
+ *                 synchronized (mFocusLock) {
+ *                     mPlaybackDelayed = false;
+ *                     mResumeOnFocusGain = false;
+ *                 }
+ *                 playbackNow();
+ *             }
+ *             break;
+ *         case AudioManager.AUDIOFOCUS_LOSS:
+ *             synchronized (mFocusLock) {
+ *                 // this is not a transient loss, we shouldn't automatically resume for now
+ *                 mResumeOnFocusGain = false;
+ *                 mPlaybackDelayed = false;
+ *             }
+ *             pausePlayback();
+ *             break;
+ *         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+ *         case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+ *             // we handle all transient losses the same way because we never duck audio books
+ *             synchronized (mFocusLock) {
+ *                 // we should only resume if playback was interrupted
+ *                 mResumeOnFocusGain = mMediaPlayer.isPlaying();
+ *                 mPlaybackDelayed = false;
+ *             }
+ *             pausePlayback();
+ *             break;
+ *     }
+ * }
+ *
+ * // Important:
+ * // Also set "mResumeOnFocusGain" to false when the user pauses or stops playback: this way your
+ * // application doesn't automatically restart when it gains focus, even though the user had
+ * // stopped it.
+ * </pre>
  */
+
 public final class AudioFocusRequest {
 
     // default attributes for the request when not specified
@@ -244,36 +331,15 @@ public final class AudioFocusRequest {
 
     /**
      * Builder class for {@link AudioFocusRequest} objects.
-     * <p> Here is an example where {@code Builder} is used to define the
-     * {@link AudioFocusRequest} for requesting audio focus:
-     *
-     * <pre class="prettyprint">
-     * mAudioManager = (AudioManager) Context.getSystemService(Context.AUDIO_SERVICE);
-     * mPlaybackAttributes = new AudioAttributes.Builder()
-     *         .setUsage(AudioAttributes.USAGE_GAME)
-     *         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-     *         .build();
-     * mFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-     *         .setAudioAttributes(mPlaybackAttributes)
-     *         .setAcceptsDelayedFocusGain(true)
-     *         .setOnAudioFocusChangeListener(mMyFocusListener, mMyHandler)
-     *         .build();
-     * mMediaPlayer = new MediaPlayer();
-     *  ...
-     * mMediaPlayer.setAudioAttributes(mPlaybackAttributes);
-     *  ...
-     * boolean mPlaybackAuthorized = true;;
-     * int res = mAudioManager.requestAudioFocus(mFocusRequest);
-     * if (res == AUDIOFOCUS_REQUEST_FAILED) {
-     *     mPlaybackAuthorized = false;
-     *     cancelPlayback();
-     * } else if (res == AUDIOFOCUS_REQUEST_DELAYED) {
-     *     playbackDelayed();
-     * } else { // res == AUDIOFOCUS_REQUEST_GRANTED
-     *     playbackNow();
-     * }
-     * </pre>
-     *
+     * <p>See {@link AudioFocusRequest} for an example of building an instance with this builder.
+     * <br>The default values for the instance to be built are:
+     * <table>
+     * <tr><td>focus listener and handler</td><td>none</td></tr>
+     * <tr><td>{@code AudioAttributes}</td><td>attributes with usage set to
+     *     {@link AudioAttributes#USAGE_MEDIA}</td></tr>
+     * <tr><td>pauses on duck</td><td>false</td></tr>
+     * <tr><td>supports delayed focus grant</td><td>false</td></tr>
+     * </table>
      */
     public static final class Builder {
         private OnAudioFocusChangeListener mFocusListener;

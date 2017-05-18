@@ -83,6 +83,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -131,6 +132,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
@@ -149,6 +151,7 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -220,8 +223,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.os.Build;
 import android.os.Handler;
-import android.service.dreams.DreamService;
-import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -538,6 +539,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     protected ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     private final Runnable mAutohide = new Runnable() {
         @Override
@@ -778,8 +780,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
 
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
@@ -1532,13 +1532,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     void awakenDreams() {
-        if (mDreamManager != null) {
-            try {
-                mDreamManager.awaken();
-            } catch (RemoteException e) {
-                // fine, stay asleep then
-            }
-        }
+        SystemServicesProxy.getInstance(mContext).awakenDreamsAsync();
     }
 
     public UserHandle getCurrentUserHandle() {
@@ -4348,7 +4342,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         checkBarModes();
         updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
         mKeyguardMonitor.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
-                mStatusBarKeyguardViewManager.isSecure(),
+                mUnlockMethodCache.isMethodSecure(),
                 mStatusBarKeyguardViewManager.isOccluded());
         Trace.endSection();
     }
@@ -5173,7 +5167,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected boolean mDisableNotificationAlerts = false;
 
     protected DevicePolicyManager mDevicePolicyManager;
-    protected IDreamManager mDreamManager;
     protected PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -6816,12 +6809,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        boolean inUse = mPowerManager.isScreenOn();
-        try {
-            inUse = inUse && !mDreamManager.isDreaming();
-        } catch (RemoteException e) {
-            Log.d(TAG, "failed to query dream manager", e);
-        }
+        boolean inUse = mPowerManager.isScreenOn()
+                && !SystemServicesProxy.getInstance(mContext).isDreaming();
 
         if (!inUse && !isDozing()) {
             if (DEBUG) {
@@ -6898,11 +6887,13 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
-        try {
-            mBarService.onNotificationExpansionChanged(key, userAction, expanded);
-        } catch (RemoteException e) {
-            // Ignore.
-        }
+        mUiOffloadThread.submit(() -> {
+            try {
+                mBarService.onNotificationExpansionChanged(key, userAction, expanded);
+            } catch (RemoteException e) {
+                // Ignore.
+            }
+        });
     }
 
     public boolean isKeyguardSecure() {

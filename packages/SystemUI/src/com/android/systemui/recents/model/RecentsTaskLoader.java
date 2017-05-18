@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Trace;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -351,7 +352,12 @@ public class RecentsTaskLoader {
     /** Preloads recents tasks using the specified plan to store the output. */
     public synchronized void preloadTasks(RecentsTaskLoadPlan plan, int runningTaskId,
             boolean includeFrontMostExcludedTask) {
-        plan.preloadPlan(this, runningTaskId, includeFrontMostExcludedTask);
+        try {
+            Trace.beginSection("preloadPlan");
+            plan.preloadPlan(this, runningTaskId, includeFrontMostExcludedTask);
+        } finally {
+            Trace.endSection();
+        }
     }
 
     /** Begins loading the heavy task data according to the specified options. */
