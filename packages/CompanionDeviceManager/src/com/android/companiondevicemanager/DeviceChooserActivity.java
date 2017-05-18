@@ -93,9 +93,9 @@ public class DeviceChooserActivity extends Activity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (!isFinishing()) {
+    protected void onStop() {
+        super.onStop();
+        if (!isFinishing() && !isChangingConfigurations()) {
             cancel();
         }
     }
