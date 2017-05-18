@@ -310,7 +310,6 @@ class MediaSessionStack {
      * Get a priority sorted list of sessions. Can filter to only return active
      * sessions or sessions.
      * <p>Here's the priority order.
-     * <li>System priority session (session with FLAG_EXCLUSIVE_GLOBAL_PRIORITY)</li>
      * <li>Active sessions whose PlaybackState is active</li>
      * <li>Active sessions whose PlaybackState is inactive</li>
      * <li>Inactive sessions</li>
@@ -344,13 +343,7 @@ class MediaSessionStack {
                 continue;
             }
 
-            if (session.isSystemPriority()) {
-                // System priority sessions are special and always go at the
-                // front. We expect there to only be one of these at a time.
-                result.add(0, session);
-                lastPlaybackActiveIndex++;
-                lastActiveIndex++;
-            } else if (session.isPlaybackActive()) {
+            if (session.isPlaybackActive()) {
                 result.add(lastPlaybackActiveIndex++, session);
                 lastActiveIndex++;
             } else {
