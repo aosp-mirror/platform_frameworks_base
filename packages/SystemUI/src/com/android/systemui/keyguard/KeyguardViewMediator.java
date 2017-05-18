@@ -1808,11 +1808,11 @@ public class KeyguardViewMediator extends SystemUI {
 
             mWakeAndUnlocking = false;
             setShowingLocked(false);
+            mDismissCallbackRegistry.notifyDismissSucceeded();
             mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
             adjustStatusBarLocked();
-            mDismissCallbackRegistry.notifyDismissSucceeded();
             sendUserPresentBroadcast();
             mUpdateMonitor.setKeyguardGoingAway(false /* goingAway */);
         }
