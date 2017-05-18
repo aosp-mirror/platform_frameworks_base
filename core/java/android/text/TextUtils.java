@@ -1943,6 +1943,16 @@ public class TextUtils {
         return charSequence;
     }
 
+    /**
+     * Prepends {@code start} and appends {@code end} to a given {@link StringBuilder}
+     *
+     * @hide
+     */
+    public static void wrap(StringBuilder builder, String start, String end) {
+        builder.insert(0, start);
+        builder.append(end);
+    }
+
     private static Object sLock = new Object();
 
     private static char[] sTemp = null;
