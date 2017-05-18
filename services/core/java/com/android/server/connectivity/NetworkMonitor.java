@@ -960,14 +960,18 @@ public class NetworkMonitor extends StateMachine {
                 return result;
             }
         }
-        // Otherwise wait until https probe completes and use its result.
+        // Otherwise wait until http and https probes completes and use their results.
         try {
+            httpProbe.join();
+            if (httpProbe.result().isPortal()) {
+                return httpProbe.result();
+            }
             httpsProbe.join();
+            return httpsProbe.result();
         } catch (InterruptedException e) {
-            validationLog("Error: https probe wait interrupted!");
+            validationLog("Error: http or https probe wait interrupted!");
             return CaptivePortalProbeResult.FAILED;
         }
-        return httpsProbe.result();
     }
 
     private URL makeURL(String url) {
