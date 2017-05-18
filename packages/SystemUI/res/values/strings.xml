@@ -1508,6 +1508,8 @@
     <string name="snooze_option_30_min">30 minutes</string>
     <!-- Notification: Menu row: Snooze options: 1 hour option. [CHAR LIMIT=50]-->
     <string name="snooze_option_1_hour">1 hour</string>
+    <!-- Notification: Menu row: Snooze options: 1 hour option. [CHAR LIMIT=50]-->
+    <string name="snooze_option_2_hour">2 hours</string>
     <!-- Notification: Menu row: Snooze undo button label. [CHAR LIMIT=50]-->
     <string name="snooze_undo">UNDO</string>
 
