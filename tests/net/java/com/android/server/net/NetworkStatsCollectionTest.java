@@ -31,11 +31,11 @@ import android.net.NetworkTemplate;
 import android.os.Process;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
+import android.support.test.filters.SmallTest;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
-import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.frameworks.servicestests.R;
+import com.android.frameworks.tests.net.R;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,7 +51,7 @@ import libcore.io.Streams;
 /**
  * Tests for {@link NetworkStatsCollection}.
  */
-@MediumTest
+@SmallTest
 public class NetworkStatsCollectionTest extends AndroidTestCase {
 
     private static final String TEST_FILE = "test.bin";
