@@ -254,7 +254,7 @@ Direction DirectionToHal(bool directionDown) {
     return directionDown ? Direction::DOWN : Direction::UP;
 }
 
-static JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> metadata) {
+JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &metadata) {
     ALOGV("MetadataFromHal()");
     EnvWrapper wrap(env);
 

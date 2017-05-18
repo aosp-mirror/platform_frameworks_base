@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -57,6 +58,18 @@ class TunerCallback implements ITunerCallback {
         nativeDetach(mNativeContext);
     }
 
+    private interface RunnableThrowingRemoteException {
+        void run() throws RemoteException;
+    }
+
+    private void dispatch(RunnableThrowingRemoteException func) {
+        try {
+            func.run();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "client died", e);
+        }
+    }
+
     // called from native side
     private void handleHwFailure() {
         onError(RadioTuner.ERROR_HARDWARE_FAILURE);
@@ -65,29 +78,52 @@ class TunerCallback implements ITunerCallback {
 
     @Override
     public void onError(int status) {
-        try {
-            mClientCallback.onError(status);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "client died", e);
-        }
+        dispatch(() -> mClientCallback.onError(status));
     }
 
     @Override
     public void onConfigurationChanged(RadioManager.BandConfig config) {
-        try {
-            mClientCallback.onConfigurationChanged(config);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "client died", e);
-        }
+        dispatch(() -> mClientCallback.onConfigurationChanged(config));
     }
 
     @Override
     public void onProgramInfoChanged(RadioManager.ProgramInfo info) {
-        try {
-            mClientCallback.onProgramInfoChanged(info);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "client died", e);
-        }
+        dispatch(() -> mClientCallback.onProgramInfoChanged(info));
+    }
+
+    @Override
+    public void onMetadataChanged(RadioMetadata metadata) {
+        dispatch(() -> mClientCallback.onMetadataChanged(metadata));
+    }
+
+    @Override
+    public void onTrafficAnnouncement(boolean active) {
+        dispatch(() -> mClientCallback.onTrafficAnnouncement(active));
+    }
+
+    @Override
+    public void onEmergencyAnnouncement(boolean active) {
+        dispatch(() -> mClientCallback.onEmergencyAnnouncement(active));
+    }
+
+    @Override
+    public void onAntennaState(boolean connected) {
+        dispatch(() -> mClientCallback.onAntennaState(connected));
+    }
+
+    @Override
+    public void onBackgroundScanAvailabilityChange(boolean isAvailable) {
+        dispatch(() -> mClientCallback.onBackgroundScanAvailabilityChange(isAvailable));
+    }
+
+    @Override
+    public void onBackgroundScanComplete() {
+        dispatch(() -> mClientCallback.onBackgroundScanComplete());
+    }
+
+    @Override
+    public void onProgramListChanged() {
+        dispatch(() -> mClientCallback.onProgramListChanged());
     }
 
     @Override
