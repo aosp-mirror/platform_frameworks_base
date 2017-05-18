@@ -223,9 +223,9 @@ public class PipMenuActivity extends Activity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
 
-        // If another task is starting on top of the menu, then finish it so that it can be
+        // If another task is starting on top of the menu, then hide and finish it so that it can be
         // recreated on the top next time it starts
-        finish();
+        hideMenu();
     }
 
     @Override
