@@ -747,7 +747,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         mLastNotificationId = icon;
 
         notificationManager.notifyAsUser(null, mLastNotificationId,
-                mTetheredNotificationBuilder.build(), UserHandle.ALL);
+                mTetheredNotificationBuilder.buildInto(new Notification()), UserHandle.ALL);
     }
 
     private void clearTetheredNotification() {
