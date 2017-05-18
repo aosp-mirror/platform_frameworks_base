@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -207,7 +206,16 @@ public class KeyguardIndicationController {
      *
      * @return {@code null} or an empty string if a trust indication text should not be shown.
      */
-    protected String getTrustIndication() {
+    protected String getTrustGrantedIndication() {
+        return null;
+    }
+
+    /**
+     * Returns the indication text indicating that trust is currently being managed.
+     *
+     * @return {@code null} or an empty string if a trust managed text should not be shown.
+     */
+    protected String getTrustManagedIndication() {
         return null;
     }
 
@@ -281,16 +289,17 @@ public class KeyguardIndicationController {
 
             KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
             int userId = KeyguardUpdateMonitor.getCurrentUser();
-            String trustIndication = getTrustIndication();
+            String trustGrantedIndication = getTrustGrantedIndication();
+            String trustManagedIndication = getTrustManagedIndication();
             if (!mUserManager.isUserUnlocked(userId)) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
                 mTextView.setTextColor(Color.WHITE);
             } else if (!TextUtils.isEmpty(mTransientIndication)) {
                 mTextView.switchIndication(mTransientIndication);
                 mTextView.setTextColor(mTransientTextColor);
-            } else if (!TextUtils.isEmpty(trustIndication)
+            } else if (!TextUtils.isEmpty(trustGrantedIndication)
                     && updateMonitor.getUserHasTrust(userId)) {
-                mTextView.switchIndication(trustIndication);
+                mTextView.switchIndication(trustGrantedIndication);
                 mTextView.setTextColor(Color.WHITE);
             } else if (mPowerPluggedIn) {
                 String indication = computePowerIndication();
@@ -299,7 +308,11 @@ public class KeyguardIndicationController {
                 }
                 mTextView.switchIndication(indication);
                 mTextView.setTextColor(Color.WHITE);
-
+            } else if (!TextUtils.isEmpty(trustManagedIndication)
+                    && updateMonitor.getUserTrustIsManaged(userId)
+                    && !updateMonitor.getUserHasTrust(userId)) {
+                mTextView.switchIndication(trustManagedIndication);
+                mTextView.setTextColor(Color.WHITE);
             } else {
                 mTextView.switchIndication(mRestingIndication);
                 mTextView.setTextColor(Color.WHITE);
