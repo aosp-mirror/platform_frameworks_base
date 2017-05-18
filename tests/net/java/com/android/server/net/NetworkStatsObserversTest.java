@@ -38,16 +38,16 @@ import android.net.DataUsageRequest;
 import android.net.NetworkIdentity;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Process;
-
-import android.os.ConditionVariable;
 import android.os.Looper;
-import android.os.Messenger;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.Process;
 import android.os.UserHandle;
+import android.support.test.filters.SmallTest;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 
@@ -69,6 +69,7 @@ import org.mockito.MockitoAnnotations;
 /**
  * Tests for {@link NetworkStatsObservers}.
  */
+@SmallTest
 public class NetworkStatsObserversTest extends TestCase {
     private static final String TEST_IFACE = "test0";
     private static final String TEST_IFACE2 = "test1";
