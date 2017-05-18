@@ -260,6 +260,19 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
+     * Return the size of {@link #mParcelledData} in bytes if available, otherwise {@code 0}.
+     *
+     * @hide
+     */
+    public int getSize() {
+        if (mParcelledData != null) {
+            return mParcelledData.dataSize();
+        } else {
+            return 0;
+        }
+    }
+
+    /**
      * Reports whether the bundle contains any parcelled file descriptors.
      */
     public boolean hasFileDescriptors() {
