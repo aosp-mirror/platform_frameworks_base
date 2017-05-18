@@ -795,6 +795,10 @@ public class TrustManagerService extends SystemService {
             // coalesce refresh messages.
             mHandler.removeMessages(MSG_KEYGUARD_SHOWING_CHANGED);
             mHandler.sendEmptyMessage(MSG_KEYGUARD_SHOWING_CHANGED);
+
+            // Make sure handler processes the message before returning, such that isDeviceLocked
+            // after this call will retrieve the correct value.
+            mHandler.runWithScissors(() -> {}, 0);
         }
 
         @Override
