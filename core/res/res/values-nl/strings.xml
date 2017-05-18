@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Time-out bereikt voor vingerafdruk. Probeer het opnieuw."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Vingerafdrukbewerking geannuleerd."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Te veel pogingen. Probeer het later opnieuw."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Te veel pogingen. Vingerafdruksensor uitgeschakeld."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Probeer het opnieuw."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Vinger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1205,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tik om een taal en indeling te selecteren"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> wordt weergegeven over andere apps"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"App-activiteit"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> wordt weergegeven over apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en schakel je de functie uit."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"UITSCHAKELEN"</string>
@@ -1318,7 +1317,7 @@
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD-kaart wissen..."</string>
     <string name="share" msgid="1778686618230011964">"Delen"</string>
     <string name="find" msgid="4808270900322985960">"Vinden"</string>
-    <string name="websearch" msgid="4337157977400211589">"Online zoeken"</string>
+    <string name="websearch" msgid="4337157977400211589">"Google Zoeken"</string>
     <string name="find_next" msgid="5742124618942193978">"Volgende zoeken"</string>
     <string name="find_previous" msgid="2196723669388360506">"Vorige zoeken"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Locatieverzoek van <xliff:g id="NAME">%s</xliff:g>"</string>

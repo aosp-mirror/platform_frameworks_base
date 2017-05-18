@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"അപ്‌ഡേറ്റുകൾ"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"നെറ്റ്‌വർക്ക് നില"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"നെറ്റ്‌വർക്ക് അലേർട്ടുകൾ"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"നെറ്റ്‌വർക്ക് ‌ലഭ്യമല്ല"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN നില"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"ഉപകരണ അഡ്മിനിസ്ട്രേഷൻ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"അലേർട്ടുകൾ"</string>
@@ -492,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"നിരവധി തവണ ശ്രമിച്ചതിനാൽ, വിരലടയാള സെൻസർ പ്രവർത്തനരഹിതമായി."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"കൈവിരൽ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1207,7 +1205,8 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ഭാഷയും ലേഔട്ടും തിരഞ്ഞെടുക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7684862527629252655) -->
+    <skip />
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ഈ ഫീച്ചർ ഉപയോഗിക്കുന്നതിൽ നിങ്ങൾക്ക് താൽപ്പര്യമില്ലെങ്കിൽ, ടാപ്പുചെയ്‌ത് ക്രമീകരണം തുറന്ന് അത് ഓഫാക്കുക."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ഓഫാക്കുക"</string>

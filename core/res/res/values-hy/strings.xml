@@ -224,7 +224,7 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Պլանշետի ընտրանքները"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Հեռուստացույցի ընտրանքներ"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Հեռախոսի ընտրանքներ"</string>
-    <string name="global_action_lock" msgid="2844945191792119712">"Էկրանի փական"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"Էկրանի կողպում"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Անջատել"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Շտապ կանչ"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Վրիպակի զեկույց"</string>
@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Մատնահետքի գրանցման ժամանակը սպառվել է: Փորձեք նորից:"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Իսկորոշումը մատնահետքի միջոցով չեղարկվեց:"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Չափից շատ փորձ եք կատարել: Փորձեք նորից քիչ հետո:"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Չափից շատ փորձ եք կատարել: Մատնահետքերի սկաներն անջատվել է:"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Փորձեք նորից:"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Մատնահետք <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1205,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՈՒՓՔԵւՕՖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Հավելվածների պատմություն"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ԱՆՋԱՏԵԼ"</string>

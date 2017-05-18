@@ -369,11 +369,11 @@
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Tillader, at appen kan sende klæbende udsendelser, der forbliver tilbage, når udsendelsen er slut. Overdreven brug kan gøre din telefon langsom eller ustabil ved at tvinge den til at bruge for meget hukommelse."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"læse dine kontaktpersoner"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Giver appen lov til at læse data om dine kontaktpersoner, der er gemt på dit tv, herunder hvor ofte du har ringet, e-mailet eller på andre måder kommunikeret med bestemte personer. Denne tilladelse gør det muligt for apps at gemme dine kontaktoplysninger, og ondsindede apps kan dele kontaktoplysninger uden din viden."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Giver appen lov til at læse data om dine kontaktpersoner, der er gemt på dit tv, herunder hvor ofte du har ringet, mailet eller på andre måder kommunikeret med bestemte personer. Denne tilladelse gør det muligt for apps at gemme dine kontaktoplysninger, og ondsindede apps kan dele kontaktoplysninger uden din viden."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Tillader, at appen kan læse data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til, sendt e-mail til eller på anden måde kommunikeret med bestemte personer. Med denne tilladelse kan apps gemme dine kontaktdata, og skadelige apps kan dele kontaktdata uden din viden."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"ændre dine kontaktpersoner"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din tablet, f.eks. hvor ofte du har ringet til dem, sendt dem en e-mail eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Giver appen lov til at ændre data om dine kontaktpersoner, der er gemt på dit tv, herunder hvor ofte du har ringet, e-mailet eller på anden måde kommunikeret med bestemte kontaktpersoner. Denne tilladelse gør det muligt for apps at slette kontaktoplysninger."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Giver appen lov til at ændre data om dine kontaktpersoner, der er gemt på dit tv, herunder hvor ofte du har ringet, mailet eller på anden måde kommunikeret med bestemte kontaktpersoner. Denne tilladelse gør det muligt for apps at slette kontaktoplysninger."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til dem, sendt en e-mail til dem eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"læse opkaldsliste"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Denne app kan læse din opkaldshistorik."</string>
@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Registrering af fingeraftryk fik timeout. Prøv igen."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Fingeraftrykshandlingen blev annulleret."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Du har prøvet for mange gange. Prøv igen senere."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Du har brugt for mange forsøg. Fingeraftrykslæseren er deaktiveret."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Prøv igen."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Fingeraftryk <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1205,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tryk for at vælge sprog og layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> vises over andre apps"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Appaktivitet"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> vises over andre apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Hvis du ikke ønsker, at <xliff:g id="NAME">%s</xliff:g> skal benytte denne funktion, kan du åbne indstillingerne og deaktivere den."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"SLÅ FRA"</string>

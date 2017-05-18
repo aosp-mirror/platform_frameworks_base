@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"လက်ဗွေရာအချိန်ကုန် သွားပါသည်။ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"လက်ဗွေရာ လုပ်ငန်း ဖျက်သိမ်းခဲ့၏။"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ကြိုးစာမှု အကြိမ်များနေ၏။ နောက်မှ ထပ်မံကြိုးစားပါ။"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"အကြိမ်အရေအတွက် အလွန်များနေပါပြီ။ လက်ဗွေဖတ်စနစ်ကို ပိတ်ထားပါသည်။"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ပြန်ကြိုးစားပါ"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1206,7 +1205,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ဘာသာစကားနှင့် အသွင်အပြင်ရွေးချယ်ရန် တို့ပါ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> သည် အခြားအက်ပ်များအပေါ်တွင် ပြပါသည်"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"အက်ပ်လုပ်ဆောင်ချက်"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ကို အခြားအက်ပ်များပေါ်တွင် မြင်နေရပါသည်။"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ကို ဤဝန်ဆောင်မှုအား အသုံးမပြုစေလိုလျှင် ဆက်တင်ကို တို့၍ ဖွင့်ပြီး ၎င်းကို ပိတ်လိုက်ပါ။"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ပိတ်ပါ"</string>

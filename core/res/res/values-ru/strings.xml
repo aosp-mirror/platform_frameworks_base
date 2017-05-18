@@ -497,8 +497,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Превышено время ожидания. Повторите попытку."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Операция с отпечатком отменена."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Слишком много попыток. Повторите позже."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Слишком много попыток. Сканер отпечатков пальцев отключен."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Повторите попытку."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Палец <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1249,7 +1248,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Нажмите, чтобы выбрать язык и раскладку"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g>: поверх других приложений"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"История приложений"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>: поверх других приложений"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Чтобы отключить эту функцию для приложения <xliff:g id="NAME">%s</xliff:g>, перейдите в настройки."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ОТКЛЮЧИТЬ"</string>

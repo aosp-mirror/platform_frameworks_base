@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ඇඟිලි සලකුණු කාල නිමාව ළඟා විය. නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"උත්සාහයන් ඉතා වැඩි ගණනකි. ඇඟිලි සලකුණු සංවේදකය අබල කරන ලදී."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1207,7 +1206,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"භාෂාව හා පිරිසැලසුම තේරීමට තට්ටු කරන්න"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"අනෙක් යෙදුම්වලට උඩින් <xliff:g id="NAME">%s</xliff:g> සංදර්ශනය කරමින්"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"යෙදුම් ක්‍රියාකාරකම"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"අනෙක් යෙදුම්වලට උඩින් <xliff:g id="NAME">%s</xliff:g> දිස් වේ"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"ඔබට <xliff:g id="NAME">%s</xliff:g> මෙම විශේෂාංගය භාවිත කිරීමට අවශ්‍ය නැති නම්, සැකසීම් විවෘත කිරීමට තට්ටු කර එය ක්‍රියාවිරහිත කරන්න."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ක්‍රියා විරහිත කරන්න"</string>

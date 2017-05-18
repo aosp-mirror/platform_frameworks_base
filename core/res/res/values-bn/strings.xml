@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"আপডেটগুলি"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"নেটওয়ার্কের স্থিতি"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"নেটওয়ার্ক সক্রান্ত অ্যালার্ট"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"নেটওয়ার্ক পাওয়া যাচ্ছে"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN এর স্থিতি"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"ডিভাইস প্রশাসন"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"সতর্কতাগুলি"</string>
@@ -492,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"আঙ্গুলের ছাপ নেওয়ার সময়সীমা শেষ হযেছে৷ আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"আঙ্গুলের ছাপ অপারেশন বাতিল করা হয়েছে৷"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"অনেকবার প্রচেষ্টা করা হয়েছে৷ পরে আবার চেষ্টা করুন৷"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"বহুবার চেষ্টা করেছেন। আঙ্গুলের ছাপ নেওয়ার সেন্সর অক্ষম করা হয়েছে।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"আঙ্গুল <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1207,7 +1205,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ভাষা এবং লেআউট নির্বাচন করুন আলতো চাপ দিন"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> অন্যান্য অ্যাপ্লিকেশানের ওপরেও প্রদর্শিত"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"অ্যাপের কার্যকলাপ"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> অন্যান্য অ্যাপের ওপর প্রদর্শিত হচ্ছে"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> কে এই বৈশিষ্ট্যটি ব্যবহার করতে দিতে না চাইলে, ট্যাপ করে সেটিংসে যান ও বৈশিষ্ট্যটি বন্ধ করে দিন।"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"বন্ধ করুন"</string>

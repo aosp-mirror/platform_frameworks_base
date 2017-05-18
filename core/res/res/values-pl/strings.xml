@@ -497,8 +497,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu linii papilarnych. Spróbuj ponownie."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Zbyt wiele prób. Spróbuj ponownie później."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Zbyt wiele prób. Czytnik linii papilarnych został wyłączony."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Spróbuj ponownie."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Odcisk palca <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1249,7 +1248,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Kliknij, by wybrać język i układ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Wyświetlanie aplikacji <xliff:g id="NAME">%s</xliff:g> nad innymi"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Aktywność w aplikacjach"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"Aplikacja <xliff:g id="NAME">%s</xliff:g> jest nad innymi"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i ją wyłącz."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"WYŁĄCZ"</string>
@@ -1811,8 +1810,8 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"Produktywność"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Pamięć urządzenia"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Debugowanie USB"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"godzina"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"minuta"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"godz."</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"min"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Ustawianie godziny"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Wpisz prawidłowy czas"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Podaj czas"</string>

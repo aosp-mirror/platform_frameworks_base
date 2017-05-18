@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"หมดเวลาใช้ลายนิ้วมือแล้ว โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ยกเลิกการทำงานของลายนิ้วมือ"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ดำเนินการหลายครั้งเกินไป ลองอีกครั้งในภายหลัง"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ลองหลายครั้งเกินไป ปิดใช้เซ็นเซอร์ลายนิ้วมือแล้ว"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ลองอีกครั้ง"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"นิ้ว <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1205,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"แตะเพื่อเลือกภาษาและรูปแบบ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> แสดงทับแอปอื่นๆ"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"กิจกรรมแอป"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> กำลังแสดงทับแอปอื่นๆ"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้คุณลักษณะนี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดคุณลักษณะ"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ปิด"</string>
