@@ -37,11 +37,27 @@ public class BatteryStatsNoteTest extends TestCase{
     public void testNoteBluetoothScanResultLocked() throws Exception {
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClocks());
         bi.updateTimeBasesLocked(true, true, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
 
         bi.noteBluetoothScanResultsFromSourceLocked(WS, 1);
         bi.noteBluetoothScanResultsFromSourceLocked(WS, 100);
         assertEquals(101,
                 bi.getUidStats().get(UID).getBluetoothScanResultCounter()
+                        .getCountLocked(STATS_SINCE_CHARGED));
+        // TODO: remove next line when Counter misreporting values when plugged-in bug is fixed.
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        BatteryStats.Counter bgCntr = bi.getUidStats().get(UID).getBluetoothScanResultBgCounter();
+        if (bgCntr != null) {
+            assertEquals(0, bgCntr.getCountLocked(STATS_SINCE_CHARGED));
+        }
+
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        bi.noteBluetoothScanResultsFromSourceLocked(WS, 17);
+        assertEquals(101 + 17,
+                bi.getUidStats().get(UID).getBluetoothScanResultCounter()
+                        .getCountLocked(STATS_SINCE_CHARGED));
+        assertEquals(17,
+                bi.getUidStats().get(UID).getBluetoothScanResultBgCounter()
                         .getCountLocked(STATS_SINCE_CHARGED));
     }
 
