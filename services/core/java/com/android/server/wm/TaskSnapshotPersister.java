@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 /**
  * Persists {@link TaskSnapshot}s to disk.
@@ -55,9 +56,12 @@ class TaskSnapshotPersister {
     private static final int QUALITY = 95;
     private static final String PROTO_EXTENSION = ".proto";
     private static final String BITMAP_EXTENSION = ".jpg";
+    private static final int MAX_STORE_QUEUE_DEPTH = 2;
 
     @GuardedBy("mLock")
     private final ArrayDeque<WriteQueueItem> mWriteQueue = new ArrayDeque<>();
+    @GuardedBy("mLock")
+    private final ArrayDeque<StoreWriteQueueItem> mStoreQueueItems = new ArrayDeque<>();
     @GuardedBy("mLock")
     private boolean mQueueIdling;
     @GuardedBy("mLock")
@@ -153,8 +157,19 @@ class TaskSnapshotPersister {
     @GuardedBy("mLock")
     private void sendToQueueLocked(WriteQueueItem item) {
         mWriteQueue.offer(item);
+        item.onQueuedLocked();
+        ensureStoreQueueDepthLocked();
         if (!mPaused) {
             mLock.notifyAll();
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void ensureStoreQueueDepthLocked() {
+        while (mStoreQueueItems.size() > MAX_STORE_QUEUE_DEPTH) {
+            final StoreWriteQueueItem item = mStoreQueueItems.poll();
+            mWriteQueue.remove(item);
+            Slog.i(TAG, "Queue is too deep! Purged item with taskid=" + item.mTaskId);
         }
     }
 
@@ -202,6 +217,9 @@ class TaskSnapshotPersister {
                         next = null;
                     } else {
                         next = mWriteQueue.poll();
+                        if (next != null) {
+                            next.onDequeuedLocked();
+                        }
                     }
                 }
                 if (next != null) {
@@ -226,6 +244,18 @@ class TaskSnapshotPersister {
 
     private abstract class WriteQueueItem {
         abstract void write();
+
+        /**
+         * Called when this queue item has been put into the queue.
+         */
+        void onQueuedLocked() {
+        }
+
+        /**
+         * Called when this queue item has been taken out of the queue.
+         */
+        void onDequeuedLocked() {
+        }
     }
 
     private class StoreWriteQueueItem extends WriteQueueItem {
@@ -237,6 +267,16 @@ class TaskSnapshotPersister {
             mTaskId = taskId;
             mUserId = userId;
             mSnapshot = snapshot;
+        }
+
+        @Override
+        void onQueuedLocked() {
+            mStoreQueueItems.offer(this);
+        }
+
+        @Override
+        void onDequeuedLocked() {
+            mStoreQueueItems.remove(this);
         }
 
         @Override
