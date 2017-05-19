@@ -88,4 +88,6 @@
         android:contentDescription="@string/accessibility_unlock_button"
         android:scaleType="center" />
 
+    <include layout="@layout/keyguard_bottom_area_overlay" />
+
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>
