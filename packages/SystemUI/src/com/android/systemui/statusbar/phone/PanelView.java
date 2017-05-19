@@ -34,10 +34,9 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.DejankUtils;
-import com.android.systemui.EventLogTags;
-import com.android.systemui.Interpolators;
 import com.android.keyguard.LatencyTracker;
+import com.android.systemui.DejankUtils;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeLog;
@@ -833,6 +832,14 @@ public abstract class PanelView extends FrameLayout {
             }
         }
 
+        // If we are closing the panel and we are almost there due to a slow decelerating
+        // interpolator, abort the animation.
+        if (mExpandedHeight < 1f && mExpandedHeight != 0f && mClosing) {
+            mExpandedHeight = 0f;
+            if (mHeightAnimator != null) {
+                mHeightAnimator.end();
+            }
+        }
         mExpandedFraction = Math.min(1f,
                 fhWithoutOverExpansion == 0 ? 0 : mExpandedHeight / fhWithoutOverExpansion);
         onHeightUpdated(mExpandedHeight);
