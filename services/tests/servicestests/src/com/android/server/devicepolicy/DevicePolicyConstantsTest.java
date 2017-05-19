@@ -16,6 +16,7 @@
 package com.android.server.devicepolicy;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Test for {@link DevicePolicyConstants}.
@@ -29,6 +30,7 @@ import android.test.AndroidTestCase;
 
  -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
+@SmallTest
 public class DevicePolicyConstantsTest extends AndroidTestCase {
     private static final String TAG = "DevicePolicyConstantsTest";
 

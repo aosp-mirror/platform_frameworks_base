@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Pair;
 
 import org.mockito.ArgumentMatchers;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+@SmallTest
 public class PersistentConnectionTest extends AndroidTestCase {
     private static class MyConnection extends PersistentConnection<IDeviceAdminService> {
         public long uptimeMillis = 12345;
