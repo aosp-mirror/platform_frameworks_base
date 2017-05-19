@@ -54,6 +54,7 @@ public class TransformState {
 
     protected View mTransformedView;
     private int[] mOwnPosition = new int[2];
+    private boolean mSameAsAny;
     private float mTransformationEndY = UNDEFINED;
     private float mTransformationEndX = UNDEFINED;
 
@@ -418,7 +419,7 @@ public class TransformState {
     }
 
     protected boolean sameAs(TransformState otherState) {
-        return false;
+        return mSameAsAny;
     }
 
     public void appear(float transformationAmount, TransformableView otherView) {
@@ -449,6 +450,9 @@ public class TransformState {
         if (view instanceof ImageView) {
             ImageTransformState result = ImageTransformState.obtain();
             result.initFrom(view);
+            if (view.getId() == com.android.internal.R.id.reply_icon_action) {
+                ((TransformState) result).setIsSameAsAnyView(true);
+            }
             return result;
         }
         if (view instanceof ProgressBar) {
@@ -459,6 +463,10 @@ public class TransformState {
         TransformState result = obtain();
         result.initFrom(view);
         return result;
+    }
+
+    private void setIsSameAsAnyView(boolean sameAsAny) {
+        mSameAsAny = sameAsAny;
     }
 
     public void recycle() {
@@ -514,6 +522,7 @@ public class TransformState {
 
     protected void reset() {
         mTransformedView = null;
+        mSameAsAny = false;
         mTransformationEndX = UNDEFINED;
         mTransformationEndY = UNDEFINED;
     }

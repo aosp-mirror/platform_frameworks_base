@@ -1440,4 +1440,15 @@ public class NotificationContentView extends FrameLayout {
         }
         return true;
     }
+
+    /**
+     * Should a single click be disallowed on this view when on the keyguard?
+     */
+    public boolean disallowSingleClick(float x, float y) {
+        NotificationViewWrapper visibleWrapper = getVisibleWrapper(getVisibleType());
+        if (visibleWrapper != null) {
+            return visibleWrapper.disallowSingleClick(x, y);
+        }
+        return false;
+    }
 }

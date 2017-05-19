@@ -2943,6 +2943,8 @@
   <java-symbol type="string" name="config_defaultTrustAgent" />
 
   <!-- Time picker -->
+  <java-symbol type="id" name="right_icon_container"/>
+  <java-symbol type="id" name="reply_icon_action"/>
   <java-symbol type="id" name="toggle_mode"/>
   <java-symbol type="id" name="input_mode"/>
   <java-symbol type="id" name="input_header"/>
