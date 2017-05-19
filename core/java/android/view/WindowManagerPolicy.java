@@ -1684,4 +1684,16 @@ public interface WindowManagerPolicy {
     public void onConfigurationChanged();
 
     public boolean shouldRotateSeamlessly(int oldRotation, int newRotation);
+
+    /**
+     * Called when System UI has been started.
+     */
+    void onSystemUiStarted();
+
+    /**
+     * Checks whether the policy is ready for dismissing the boot animation and completing the boot.
+     *
+     * @return true if ready; false otherwise.
+     */
+    boolean canDismissBootAnimation();
 }

@@ -1653,6 +1653,7 @@ public final class SystemServer {
         final MediaRouterService mediaRouterF = mediaRouter;
         final MmsServiceBroker mmsServiceF = mmsService;
         final IpSecService ipSecServiceF = ipSecService;
+        final WindowManagerService windowManagerF = wm;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -1692,7 +1693,7 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartSystemUI");
             try {
-                startSystemUi(context);
+                startSystemUi(context, windowManagerF);
             } catch (Throwable e) {
                 reportWtf("starting System UI", e);
             }
@@ -1846,13 +1847,14 @@ public final class SystemServer {
         }, BOOT_TIMINGS_TRACE_LOG);
     }
 
-    static final void startSystemUi(Context context) {
+    static final void startSystemUi(Context context, WindowManagerService windowManager) {
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.android.systemui",
                     "com.android.systemui.SystemUIService"));
         intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);
         //Slog.d(TAG, "Starting service: " + intent);
         context.startServiceAsUser(intent, UserHandle.SYSTEM);
+        windowManager.onSystemUiStarted();
     }
 
     private static void traceBeginAndSlog(String name) {

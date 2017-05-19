@@ -3341,6 +3341,13 @@ public class WindowManagerService extends IWindowManager.Stub
         performEnableScreen();
     }
 
+    /**
+     * Called when System UI has been started.
+     */
+    public void onSystemUiStarted() {
+        mPolicy.onSystemUiStarted();
+    }
+
     private void performEnableScreen() {
         synchronized(mWindowMap) {
             if (DEBUG_BOOT) Slog.i(TAG_WM, "performEnableScreen: mDisplayEnabled=" + mDisplayEnabled
@@ -3353,6 +3360,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             if (!mSystemBooted && !mShowingBootMessages) {
+                return;
+            }
+
+            if (!mShowingBootMessages && !mPolicy.canDismissBootAnimation()) {
                 return;
             }
 
@@ -3369,7 +3380,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
                     if (surfaceFlinger != null) {
-                        //Slog.i(TAG_WM, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
+                        Slog.i(TAG_WM, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
                         Parcel data = Parcel.obtain();
                         data.writeInterfaceToken("android.ui.ISurfaceComposer");
                         surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
