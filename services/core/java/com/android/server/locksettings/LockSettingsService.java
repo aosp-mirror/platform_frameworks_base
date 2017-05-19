@@ -150,12 +150,12 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final NotificationManager mNotificationManager;
     private final UserManager mUserManager;
     private final IActivityManager mActivityManager;
+    private final SyntheticPasswordManager mSpManager;
 
     private final KeyStore mKeyStore;
 
     private boolean mFirstCallToVold;
     protected IGateKeeperService mGateKeeperService;
-    private SyntheticPasswordManager mSpManager;
 
     /**
      * The UIDs that are used for system credential storage in keystore.
