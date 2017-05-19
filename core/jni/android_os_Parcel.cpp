@@ -119,11 +119,7 @@ static jlong android_os_Parcel_setDataSize(JNIEnv* env, jclass clazz, jlong nati
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     if (parcel != NULL) {
         const status_t err = parcel->setDataSize(size);
-        //STOPSHIP: check for BADFLO is for a temporary debug using wtf. Remove once bug resolved.
-        if (err == UNKNOWN_ERROR + 0xBADF10) {
-            jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-                         "Attempt to resize (size = %d) Parcel would corrupt object memory", size);
-        } else if (err != NO_ERROR) {
+        if (err != NO_ERROR) {
             signalExceptionForError(env, clazz, err);
         }
         return parcel->getOpenAshmemSize();
