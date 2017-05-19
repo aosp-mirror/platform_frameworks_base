@@ -68,7 +68,7 @@ class WebViewUpdater {
     // The WebView package currently in use (or the one we are preparing).
     private PackageInfo mCurrentWebViewPackage = null;
 
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
 
     WebViewUpdater(Context context, SystemInterface systemInterface) {
         mContext = context;
