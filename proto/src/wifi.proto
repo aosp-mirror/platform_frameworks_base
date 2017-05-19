@@ -241,6 +241,20 @@ message WifiLog {
 
   // List of events
   repeated StaEvent sta_event_list = 52;
+
+  // Total number of times WiFi HAL crashed.
+  optional int32 num_hal_crashes = 53;
+
+  // Total number of times WiFicond crashed.
+  optional int32 num_wificond_crashes = 54;
+
+  // Indicates the number of times an error was encountered in
+  // Wifi HAL when wifi was turned on.
+  optional int32 num_wifi_on_failure_due_to_hal = 55;
+
+  // Indicates the number of times an error was encountered in
+  // Wificond when wifi was turned on.
+  optional int32 num_wifi_on_failure_due_to_wificond = 56;
 }
 
 // Information that gets logged for every WiFi connection.
