@@ -30,8 +30,10 @@ import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.ArraySet;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManagerPolicy.ScreenOffListener;
 import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.google.android.collect.Sets;
@@ -40,6 +42,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.TaskSnapshotSurface.SystemBarBackgroundPainter;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 /**
  * When an app token becomes invisible, we take a snapshot (bitmap) of the corresponding task and
@@ -83,6 +86,7 @@ class TaskSnapshotController {
             Environment::getDataSystemCeDirectory);
     private final TaskSnapshotLoader mLoader = new TaskSnapshotLoader(mPersister);
     private final ArraySet<Task> mTmpTasks = new ArraySet<>();
+    private final Handler mHandler = new Handler();
 
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
@@ -114,8 +118,13 @@ class TaskSnapshotController {
         // We need to take a snapshot of the task if and only if all activities of the task are
         // either closing or hidden.
         getClosingTasks(closingApps, mTmpTasks);
-        for (int i = mTmpTasks.size() - 1; i >= 0; i--) {
-            final Task task = mTmpTasks.valueAt(i);
+        snapshotTasks(mTmpTasks);
+
+    }
+
+    private void snapshotTasks(ArraySet<Task> tasks) {
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            final Task task = tasks.valueAt(i);
             final int mode = getSnapshotMode(task);
             final TaskSnapshot snapshot;
             switch (mode) {
@@ -282,6 +291,33 @@ class TaskSnapshotController {
      */
     void setPersisterPaused(boolean paused) {
         mPersister.setPaused(paused);
+    }
+
+    /**
+     * Called when screen is being turned off.
+     */
+    void screenTurningOff(ScreenOffListener listener) {
+        if (!ENABLE_TASK_SNAPSHOTS || ActivityManager.isLowRamDeviceStatic()) {
+            listener.onScreenOff();
+            return;
+        }
+
+        // We can't take a snapshot when screen is off, so take a snapshot now!
+        mHandler.post(() -> {
+            try {
+                synchronized (mService.mWindowMap) {
+                    mTmpTasks.clear();
+                    mService.mRoot.forAllTasks(task -> {
+                        if (task.isVisible()) {
+                            mTmpTasks.add(task);
+                        }
+                    });
+                    snapshotTasks(mTmpTasks);
+                }
+            } finally {
+                listener.onScreenOff();
+            }
+        });
     }
 
     void dump(PrintWriter pw, String prefix) {

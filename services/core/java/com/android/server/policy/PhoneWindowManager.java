@@ -6667,6 +6667,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         reportScreenStateToVrManager(true);
     }
 
+    @Override
+    public void screenTurningOff(ScreenOffListener screenOffListener) {
+        mWindowManagerFuncs.screenTurningOff(screenOffListener);
+    }
+
     private void reportScreenStateToVrManager(boolean isScreenOn) {
         if (mVrManagerInternal == null) {
             return;

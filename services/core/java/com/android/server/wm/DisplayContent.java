@@ -2903,6 +2903,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
         final MutableBoolean mutableIncludeFullDisplay = new MutableBoolean(includeFullDisplay);
         synchronized(mService.mWindowMap) {
+            if (!mService.mPolicy.isScreenOn()) {
+                if (DEBUG_SCREENSHOT) Slog.i(TAG_WM, "Attempted to take screenshot while display"
+                        + " was off.");
+                return null;
+            }
             // Figure out the part of the screen that is actually the app.
             mScreenshotApplicationState.appWin = null;
             forAllWindows(w -> {
