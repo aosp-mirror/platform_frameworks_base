@@ -10088,6 +10088,15 @@ public final class Settings {
             "backup_refactored_service_disabled";
 
         /**
+         * Flag to set the waiting time for euicc factory reset inside System > Settings
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String EUICC_WIPING_TIMEOUT_MILLIS =
+                "euicc_wiping_timeout_millis";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
