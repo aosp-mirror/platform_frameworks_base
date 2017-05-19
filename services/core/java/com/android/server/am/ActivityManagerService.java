@@ -4587,9 +4587,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int startActivityIntentSender(IApplicationThread caller, IntentSender intent,
-            Intent fillInIntent, String resolvedType, IBinder resultTo, String resultWho,
-            int requestCode, int flagsMask, int flagsValues, Bundle bOptions)
+    public int startActivityIntentSender(IApplicationThread caller, IIntentSender target,
+            IBinder whitelistToken, Intent fillInIntent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int flagsMask, int flagsValues, Bundle bOptions)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startActivityIntentSender");
         // Refuse possible leaked file descriptors
@@ -4597,12 +4597,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
-        IIntentSender sender = intent.getTarget();
-        if (!(sender instanceof PendingIntentRecord)) {
+        if (!(target instanceof PendingIntentRecord)) {
             throw new IllegalArgumentException("Bad PendingIntent object");
         }
 
-        PendingIntentRecord pir = (PendingIntentRecord)sender;
+        PendingIntentRecord pir = (PendingIntentRecord)target;
 
         synchronized (this) {
             // If this is coming from the currently resumed activity, it is
@@ -4613,7 +4612,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mAppSwitchesAllowedTime = 0;
             }
         }
-        int ret = pir.sendInner(0, fillInIntent, resolvedType, null, null, null,
+        int ret = pir.sendInner(0, fillInIntent, resolvedType, whitelistToken, null, null,
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, bOptions, null);
         return ret;
     }
