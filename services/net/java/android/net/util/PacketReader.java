@@ -67,7 +67,7 @@ import java.io.IOException;
  *
  * @hide
  */
-public abstract class BlockingSocketReader {
+public abstract class PacketReader {
     private static final int FD_EVENTS = EVENT_INPUT | EVENT_ERROR;
     private static final int UNREGISTER_THIS_FD = 0;
 
@@ -83,11 +83,11 @@ public abstract class BlockingSocketReader {
         IoUtils.closeQuietly(fd);
     }
 
-    protected BlockingSocketReader(Handler h) {
+    protected PacketReader(Handler h) {
         this(h, DEFAULT_RECV_BUF_SIZE);
     }
 
-    protected BlockingSocketReader(Handler h, int recvbufsize) {
+    protected PacketReader(Handler h, int recvbufsize) {
         mHandler = h;
         mQueue = mHandler.getLooper().getQueue();
         mPacket = new byte[Math.max(recvbufsize, DEFAULT_RECV_BUF_SIZE)];
@@ -114,6 +114,8 @@ public abstract class BlockingSocketReader {
             });
         }
     }
+
+    public Handler getHandler() { return mHandler; }
 
     public final int recvBufSize() { return mPacket.length; }
 
