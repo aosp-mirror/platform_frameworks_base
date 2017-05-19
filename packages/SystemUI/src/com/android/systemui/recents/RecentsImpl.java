@@ -1039,7 +1039,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                 | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-        Recents.getSystemServices().startActivityAsUserAsync(intent, opts);
         HidePipMenuEvent hideMenuEvent = new HidePipMenuEvent();
         hideMenuEvent.addPostAnimationCallback(() -> {
             Recents.getSystemServices().startActivityAsUserAsync(intent, opts);
