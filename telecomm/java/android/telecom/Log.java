@@ -269,6 +269,23 @@ public class Log {
     }
 
     /**
+     * Dumps the events in a timeline format.
+     * @param pw The {@link IndentingPrintWriter} to write to.
+     * @hide
+     */
+    public static void dumpEventsTimeline(IndentingPrintWriter pw) {
+        // If the Events logger has not been initialized, then there have been no events logged.
+        // Don't load it now!
+        synchronized (sSingletonSync) {
+            if (sEventManager != null) {
+                getEventManager().dumpEventsTimeline(pw);
+            } else {
+                pw.println("No Historical Events Logged.");
+            }
+        }
+    }
+
+    /**
      * Enable or disable extended telecom logging.
      *
      * @param isExtendedLoggingEnabled {@code true} if extended logging should be enabled,
