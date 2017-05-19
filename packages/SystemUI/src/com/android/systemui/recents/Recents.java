@@ -19,7 +19,6 @@ package com.android.systemui.recents;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
 
 import android.app.ActivityManager;
-import android.app.UiModeManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -33,7 +32,6 @@ import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -41,7 +39,6 @@ import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -60,11 +57,12 @@ import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.HighResThumbnailLoader;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -322,16 +320,11 @@ public class Recents extends SystemUI
         }
     }
 
-    @Override
-    public void toggleRecentApps() {
-        toggleRecents();
-    }
-
     /**
      * Toggles the Recents activity.
      */
     @Override
-    public void toggleRecents() {
+    public void toggleRecentApps() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
@@ -368,7 +361,7 @@ public class Recents extends SystemUI
      * Preloads info for the Recents activity.
      */
     @Override
-    public void preloadRecents() {
+    public void preloadRecentApps() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
@@ -791,5 +784,11 @@ public class Recents extends SystemUI
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("Recents");
+        pw.println("  currentUserId=" + SystemServicesProxy.getInstance(mContext).getCurrentUser());
     }
 }

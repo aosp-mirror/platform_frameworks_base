@@ -85,7 +85,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
@@ -95,6 +94,8 @@ import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.ThumbnailData;
+import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,8 +103,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -143,6 +142,7 @@ public class SystemServicesProxy {
     Display mDisplay;
     String mRecentsPackage;
     ComponentName mAssistComponent;
+    private int mCurrentUserId;
 
     boolean mIsSafeMode;
     boolean mHasFreeformWorkspaceSupport;
@@ -185,9 +185,9 @@ public class SystemServicesProxy {
          * TaskStackListener should make this call to verify that we don't act on events from other
          * user's processes.
          */
-        protected final boolean checkCurrentUserId(boolean debug) {
+        protected final boolean checkCurrentUserId(Context context, boolean debug) {
             int processUserId = UserHandle.myUserId();
-            int currentUserId = KeyguardUpdateMonitor.getCurrentUser();
+            int currentUserId = SystemServicesProxy.getInstance(context).getCurrentUser();
             if (processUserId != currentUserId) {
                 if (debug) {
                     Log.d(TAG, "UID mismatch. SystemUI is running uid=" + processUserId
@@ -284,6 +284,10 @@ public class SystemServicesProxy {
         }
     };
 
+    private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
+            (String name, Drawable picture, String userAccount) ->
+                    mCurrentUserId = mAm.getCurrentUser();
+
     /**
      * List of {@link TaskStackListener} registered from {@link #registerTaskStackListener}.
      */
@@ -312,6 +316,7 @@ public class SystemServicesProxy {
                         Settings.Global.getInt(context.getContentResolver(),
                                 DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
         mIsSafeMode = mPm.isSafeMode();
+        mCurrentUserId = mAm.getCurrentUser();
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();
@@ -328,6 +333,12 @@ public class SystemServicesProxy {
 
         // Resolve the assist intent
         mAssistComponent = mAssistUtils.getAssistComponentForUser(UserHandle.myUserId());
+
+        // Since SystemServicesProxy can be accessed from a per-SysUI process component, create a
+        // per-process listener to keep track of the current user id to reduce the number of binder
+        // calls to fetch it.
+        UserInfoController userInfoController = Dependency.get(UserInfoController.class);
+        userInfoController.addCallback(mOnUserInfoChangedListener);
 
         if (RecentsDebugFlags.Static.EnableMockTasks) {
             // Create a dummy icon
@@ -1029,15 +1040,11 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns the current user id.
+     * Returns the current user id.  Used instead of KeyguardUpdateMonitor in SystemUI components
+     * that run in the non-primary SystemUI process.
      */
     public int getCurrentUser() {
-        if (mAm == null) return 0;
-
-        // This must call through ActivityManager, as the SystemServicesProxy can be called in a
-        // secondary user's SystemUI process, and KeyguardUpdateMonitor is only updated in the
-        // primary user's SystemUI process
-        return mAm.getCurrentUser();
+        return mCurrentUserId;
     }
 
     /**
