@@ -140,7 +140,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public void createMenu(ViewGroup parent) {
         mParent = (ExpandableNotificationRow) parent;
-        createMenuViews();
+        createMenuViews(true /* resetState */);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             // Menu hasn't been created yet, no need to do anything.
             return;
         }
-        createMenuViews();
+        createMenuViews(!isMenuVisible() /* resetState */);
     }
 
     @Override
@@ -179,7 +179,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mParent.removeListener();
     }
 
-    private void createMenuViews() {
+    private void createMenuViews(boolean resetState) {
         // Filter the menu items based on the notification
         if (mParent != null && mParent.getStatusBarNotification() != null) {
             int flags = mParent.getStatusBarNotification().getNotification().flags;
@@ -201,7 +201,14 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         for (int i = 0; i < mMenuItems.size(); i++) {
             addMenuView(mMenuItems.get(i), mMenuContainer);
         }
-        resetState(false /* notify */);
+        if (resetState) {
+            resetState(false /* notify */);
+        } else {
+            mIconsPlaced = false;
+            setMenuLocation();
+            // If the # of items showing changed we need to update the snap position
+            showMenu(mParent, mOnLeft ? getSpaceForMenu() : -getSpaceForMenu(), 0 /* velocity */);
+        }
     }
 
     private void resetState(boolean notify) {
