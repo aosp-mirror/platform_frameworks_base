@@ -102,15 +102,21 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
     }
 
     private void notifyUserChanged() {
-        mListeners.forEach(c -> c.onUserSwitched());
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            mListeners.get(i).onUserSwitched();
+        }
     }
 
     private void notifySetupChanged() {
-        mListeners.forEach(c -> c.onUserSetupChanged());
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            mListeners.get(i).onUserSetupChanged();
+        }
     }
 
     private void notifyProvisionedChanged() {
-        mListeners.forEach(c -> c.onDeviceProvisionedChanged());
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            mListeners.get(i).onDeviceProvisionedChanged();
+        }
     }
 
     protected final ContentObserver mSettingsObserver = new ContentObserver(Dependency.get(
