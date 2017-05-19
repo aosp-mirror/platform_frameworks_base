@@ -100,6 +100,55 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         assertEquals(227_000, bgtb.computeRealtime(cur, STATS_SINCE_CHARGED));
     }
 
+    /** Test that BatteryStatsImpl.Uid.mOnBatteryScreenOffBackgroundTimeBase works correctly. */
+    @SmallTest
+    public void testScreenOffBgTimeBase() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        long cur = 0; // realtime in us
+
+        BatteryStatsImpl.TimeBase bgtb = bi.getOnBatteryScreenOffBackgroundTimeBase(UID);
+
+        // battery=off, screen=off, background=off
+        cur = (clocks.realtime = clocks.uptime = 100) * 1000;
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+        bi.updateTimeBasesLocked(false, false, cur, cur);
+        assertFalse(bgtb.isRunning());
+
+        // battery=on, screen=off, background=off
+        cur = (clocks.realtime = clocks.uptime = 200) * 1000;
+        bi.updateTimeBasesLocked(true, false, cur, cur);
+        assertFalse(bgtb.isRunning());
+
+        // battery=on, screen=on, background=off
+        cur = (clocks.realtime = clocks.uptime = 300) * 1000;
+        bi.updateTimeBasesLocked(true, true, cur, cur);
+        assertFalse(bgtb.isRunning());
+
+        // battery=on, screen=on, background=on
+        // Only during this period should the timebase progress
+        cur = (clocks.realtime = clocks.uptime = 400) * 1000;
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        assertTrue(bgtb.isRunning());
+
+        // battery=on, screen=off, background=on
+        cur = (clocks.realtime = clocks.uptime = 550) * 1000;
+        bi.updateTimeBasesLocked(true, false, cur, cur);
+        assertFalse(bgtb.isRunning());
+
+        // battery=off, screen=off, background=on
+        cur = (clocks.realtime = clocks.uptime = 660) * 1000;
+        bi.updateTimeBasesLocked(false, false, cur, cur);
+        assertFalse(bgtb.isRunning());
+
+        // battery=off, screen=off, background=off
+        cur = (clocks.realtime = clocks.uptime = 770) * 1000;
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+        assertFalse(bgtb.isRunning());
+
+        assertEquals(150_000, bgtb.computeRealtime(cur, STATS_SINCE_CHARGED));
+    }
+
     @SmallTest
     public void testWifiScan() throws Exception {
         final MockClocks clocks = new MockClocks();
