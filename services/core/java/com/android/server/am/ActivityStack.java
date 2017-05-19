@@ -1152,11 +1152,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     void updateActivityApplicationInfoLocked(ApplicationInfo aInfo) {
         final String packageName = aInfo.packageName;
+        final int userId = UserHandle.getUserId(aInfo.uid);
+
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final List<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                if (packageName.equals(activities.get(activityNdx).packageName)) {
-                    activities.get(activityNdx).info.applicationInfo = aInfo;
+                final ActivityRecord ar = activities.get(activityNdx);
+
+                if ((userId == ar.userId) && packageName.equals(ar.packageName)) {
+                    ar.info.applicationInfo = aInfo;
                 }
             }
         }
