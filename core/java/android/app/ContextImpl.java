@@ -925,7 +925,9 @@ class ContextImpl extends Context {
                 resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
             }
             int result = ActivityManager.getService()
-                .startActivityIntentSender(mMainThread.getApplicationThread(), intent,
+                .startActivityIntentSender(mMainThread.getApplicationThread(),
+                        intent != null ? intent.getTarget() : null,
+                        intent != null ? intent.getWhitelistToken() : null,
                         fillInIntent, resolvedType, null, null,
                         0, flagsMask, flagsValues, options);
             if (result == ActivityManager.START_CANCELED) {
