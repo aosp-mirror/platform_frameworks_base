@@ -25,9 +25,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.annotation.NonNull;
@@ -37,6 +40,7 @@ import android.content.pm.PackageUserState;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
+import android.security.keystore.ArrayUtils;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -57,6 +61,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
@@ -525,6 +530,41 @@ public class PackageManagerSettingsTests {
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
                 false /*notLaunched*/, false /*stopped*/, true /*installed*/);
+    }
+
+    @Test
+    public void testInsertPackageSetting() {
+        final PackageSetting ps = createPackageSetting(0 /*sharedUserId*/, 0 /*pkgFlags*/);
+        final PackageParser.Package pkg = new PackageParser.Package(PACKAGE_NAME);
+        pkg.applicationInfo.setCodePath(ps.codePathString);
+        pkg.applicationInfo.setResourcePath(ps.resourcePathString);
+        final Settings settings =
+                new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
+        pkg.usesStaticLibraries = new ArrayList<>(
+                Arrays.asList("foo.bar1", "foo.bar2", "foo.bar3"));
+        pkg.usesStaticLibrariesVersions = new int[] {2, 4, 6};
+        settings.insertPackageSettingLPw(ps, pkg);
+        assertEquals(pkg, ps.pkg);
+        assertArrayEquals(pkg.usesStaticLibraries.toArray(new String[0]), ps.usesStaticLibraries);
+        assertArrayEquals(pkg.usesStaticLibrariesVersions, ps.usesStaticLibrariesVersions);
+
+        pkg.usesStaticLibraries = null;
+        pkg.usesStaticLibrariesVersions = null;
+        settings.insertPackageSettingLPw(ps, pkg);
+        assertEquals(pkg, ps.pkg);
+        assertNull("Actual: " + Arrays.toString(ps.usesStaticLibraries), ps.usesStaticLibraries);
+        assertNull("Actual: " + Arrays.toString(ps.usesStaticLibrariesVersions),
+                ps.usesStaticLibrariesVersions);
+    }
+
+    private <T> void assertArrayEquals(T[] a, T[] b) {
+        assertTrue("Expected: " + Arrays.toString(a) + ", actual: " + Arrays.toString(b),
+                Arrays.equals(a, b));
+    }
+
+    private void assertArrayEquals(int[] a, int[] b) {
+        assertTrue("Expected: " + Arrays.toString(a) + ", actual: " + Arrays.toString(b),
+                Arrays.equals(a, b));
     }
 
     private void verifyUserState(PackageUserState userState, PackageUserState oldUserState,
