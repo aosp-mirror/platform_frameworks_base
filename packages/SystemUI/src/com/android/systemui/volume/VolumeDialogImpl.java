@@ -211,8 +211,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable,
                 | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
         Point displaySize = new Point();
         mContext.getDisplay().getRealSize(displaySize);
         mDialog.setCanceledOnTouchOutside(true);

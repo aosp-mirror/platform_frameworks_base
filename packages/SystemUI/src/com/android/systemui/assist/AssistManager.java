@@ -168,9 +168,6 @@ public class AssistManager implements ConfigurationChangedReceiver {
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         lp.token = new Binder();
-        if (ActivityManager.isHighEndGfx()) {
-            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        }
         lp.gravity = Gravity.BOTTOM | Gravity.START;
         lp.setTitle("AssistPreviewPanel");
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED

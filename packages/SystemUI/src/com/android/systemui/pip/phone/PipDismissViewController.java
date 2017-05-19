@@ -90,8 +90,7 @@ public class PipDismissViewController {
                     LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                     LayoutParams.FLAG_LAYOUT_IN_SCREEN
                             | LayoutParams.FLAG_NOT_TOUCHABLE
-                            | LayoutParams.FLAG_NOT_FOCUSABLE
-                            | LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                            | LayoutParams.FLAG_NOT_FOCUSABLE,
                     PixelFormat.TRANSLUCENT);
             lp.setTitle("pip-dismiss-overlay");
             lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;

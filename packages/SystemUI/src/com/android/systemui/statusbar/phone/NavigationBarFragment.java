@@ -683,10 +683,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                         | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
         lp.token = new Binder();
-        // this will allow the navbar to run in an overlay on devices that support this
-        if (ActivityManager.isHighEndGfx()) {
-            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        }
         lp.setTitle("NavigationBar");
         lp.windowAnimations = 0;
 
