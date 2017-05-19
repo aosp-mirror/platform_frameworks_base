@@ -71,6 +71,7 @@ import java.io.PrintWriter;
 final class DisplayPowerController implements AutomaticBrightnessController.Callbacks {
     private static final String TAG = "DisplayPowerController";
     private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
+    private static final String SCREEN_OFF_BLOCKED_TRACE_NAME = "Screen off blocked";
 
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
@@ -90,6 +91,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int MSG_UPDATE_POWER_STATE = 1;
     private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
     private static final int MSG_SCREEN_ON_UNBLOCKED = 3;
+    private static final int MSG_SCREEN_OFF_UNBLOCKED = 4;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -105,6 +107,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int REPORTED_TO_POLICY_SCREEN_OFF = 0;
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_ON = 1;
     private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
+    private static final int REPORTED_TO_POLICY_SCREEN_TURNING_OFF = 3;
 
     private final Object mLock = new Object();
 
@@ -219,6 +222,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The currently active screen on unblocker.  This field is non-null whenever
     // we are waiting for a callback to release it and unblock the screen.
     private ScreenOnUnblocker mPendingScreenOnUnblocker;
+    private ScreenOffUnblocker mPendingScreenOffUnblocker;
 
     // True if we were in the process of turning off the screen.
     // This allows us to recover more gracefully from situations where we abort
@@ -230,6 +234,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // The elapsed real time when the screen on was blocked.
     private long mScreenOnBlockStartRealTime;
+    private long mScreenOffBlockStartRealTime;
 
     // Screen state we reported to policy. Must be one of REPORTED_TO_POLICY_SCREEN_* fields.
     private int mReportedScreenStateToPolicy;
@@ -810,9 +815,43 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
+    private void blockScreenOff() {
+        if (mPendingScreenOffUnblocker == null) {
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, SCREEN_OFF_BLOCKED_TRACE_NAME, 0);
+            mPendingScreenOffUnblocker = new ScreenOffUnblocker();
+            mScreenOffBlockStartRealTime = SystemClock.elapsedRealtime();
+            Slog.i(TAG, "Blocking screen off");
+        }
+    }
+
+    private void unblockScreenOff() {
+        if (mPendingScreenOffUnblocker != null) {
+            mPendingScreenOffUnblocker = null;
+            long delay = SystemClock.elapsedRealtime() - mScreenOffBlockStartRealTime;
+            Slog.i(TAG, "Unblocked screen off after " + delay + " ms");
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, SCREEN_OFF_BLOCKED_TRACE_NAME, 0);
+        }
+    }
+
     private boolean setScreenState(int state) {
+        final boolean isOff = (state == Display.STATE_OFF);
         if (mPowerState.getScreenState() != state) {
-            final boolean wasOn = (mPowerState.getScreenState() != Display.STATE_OFF);
+
+            // If we are trying to turn screen off, give policy a chance to do something before we
+            // actually turn the screen off.
+            if (isOff && !mScreenOffBecauseOfProximity) {
+                if (mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_ON) {
+                    mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_TURNING_OFF;
+                    blockScreenOff();
+                    mWindowManagerPolicy.screenTurningOff(mPendingScreenOffUnblocker);
+                    return false;
+                } else if (mPendingScreenOffUnblocker != null) {
+
+                    // Abort doing the state change until screen off is unblocked.
+                    return false;
+                }
+            }
+
             mPowerState.setScreenState(state);
 
             // Tell battery stats about the transition.
@@ -829,13 +868,21 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // This surface is essentially the final state of the color fade animation and
         // it is only removed once the window manager tells us that the activity has
         // finished drawing underneath.
-        final boolean isOff = (state == Display.STATE_OFF);
         if (isOff && mReportedScreenStateToPolicy != REPORTED_TO_POLICY_SCREEN_OFF
                 && !mScreenOffBecauseOfProximity) {
             mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_OFF;
             unblockScreenOn();
             mWindowManagerPolicy.screenTurnedOff();
-        } else if (!isOff && mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_OFF) {
+        } else if (!isOff
+                && mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_TURNING_OFF) {
+
+            // We told policy already that screen was turning off, but now we changed our minds.
+            // Complete the full state transition on -> turningOff -> off.
+            unblockScreenOff();
+            mWindowManagerPolicy.screenTurnedOff();
+            mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_OFF;
+        }
+        if (!isOff && mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_OFF) {
             mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_TURNING_ON;
             if (mPowerState.getColorFadeLevel() == 0.0f) {
                 blockScreenOn();
@@ -1282,6 +1329,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         updatePowerState();
                     }
                     break;
+                case MSG_SCREEN_OFF_UNBLOCKED:
+                    if (mPendingScreenOffUnblocker == msg.obj) {
+                        unblockScreenOff();
+                        updatePowerState();
+                    }
+                    break;
             }
         }
     }
@@ -1307,6 +1360,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         @Override
         public void onScreenOn() {
             Message msg = mHandler.obtainMessage(MSG_SCREEN_ON_UNBLOCKED, this);
+            msg.setAsynchronous(true);
+            mHandler.sendMessage(msg);
+        }
+    }
+
+    private final class ScreenOffUnblocker implements WindowManagerPolicy.ScreenOffListener {
+
+        @Override
+        public void onScreenOff() {
+            Message msg = mHandler.obtainMessage(MSG_SCREEN_OFF_UNBLOCKED, this);
             msg.setAsynchronous(true);
             mHandler.sendMessage(msg);
         }

@@ -589,6 +589,13 @@ public interface WindowManagerPolicy {
          * Notifies window manager that {@link #isKeyguardTrustedLw} has changed.
          */
         void notifyKeyguardTrustedChanged();
+
+        /**
+         * Notifies the window manager that screen is being turned off.
+         *
+         * @param listener callback to call when display can be turned off
+         */
+        void screenTurningOff(ScreenOffListener listener);
     }
 
     public interface PointerEventListener {
@@ -1267,12 +1274,28 @@ public interface WindowManagerPolicy {
     public void screenTurnedOn();
 
     /**
+     * Called when the display would like to be turned off. This gives policy a chance to do some
+     * things before the display power state is actually changed to off.
+     *
+     * @param screenOffListener Must be called to tell that the display power state can actually be
+     *                          changed now after policy has done its work.
+     */
+    public void screenTurningOff(ScreenOffListener screenOffListener);
+
+    /**
      * Called when the device has turned the screen off.
      */
     public void screenTurnedOff();
 
     public interface ScreenOnListener {
         void onScreenOn();
+    }
+
+    /**
+     * See {@link #screenTurnedOff}
+     */
+    public interface ScreenOffListener {
+        void onScreenOff();
     }
 
     /**
