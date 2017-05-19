@@ -1653,6 +1653,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 ? (val.data == 0 ? NOT_FOCUSABLE : FOCUSABLE)
                                 : val.data;
                     }
+                    break;
 
                 case com.android.internal.R.styleable.View_clickable:
                     clickable = a.getBoolean(attr, clickable);
