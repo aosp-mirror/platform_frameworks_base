@@ -2641,7 +2641,7 @@ public class ConnectivityManager {
 
         /**
          * Called if no network is found in the timeout time specified in
-         * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)} call. This callback is not
+         * {@link #requestNetwork(NetworkRequest, NetworkCallback, int)} call. This callback is not
          * called for the version of {@link #requestNetwork(NetworkRequest, NetworkCallback)}
          * without timeout. When this callback is invoked the associated
          * {@link NetworkRequest} will have already been removed and released, as if
@@ -2938,7 +2938,7 @@ public class ConnectivityManager {
      * This {@link NetworkRequest} will live until released via
      * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits. A
      * version of the method which takes a timeout is
-     * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)}.
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback, int)}.
      * Status of the request can be followed by listening to the various
      * callbacks described in {@link NetworkCallback}.  The {@link Network}
      * can be used to direct traffic to the network.
@@ -2973,7 +2973,7 @@ public class ConnectivityManager {
      * This {@link NetworkRequest} will live until released via
      * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits. A
      * version of the method which takes a timeout is
-     * {@link #requestNetwork(NetworkRequest, int, NetworkCallback)}.
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback, int)}.
      * Status of the request can be followed by listening to the various
      * callbacks described in {@link NetworkCallback}.  The {@link Network}
      * can be used to direct traffic to the network.
