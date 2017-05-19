@@ -22,9 +22,6 @@ import android.view.View;
 
 public interface RecentsComponent {
     void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
-    void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
-    void toggleRecents();
-    void preloadRecents();
     void showNextAffiliatedTask();
     void showPrevAffiliatedTask();
 
