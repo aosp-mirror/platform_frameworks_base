@@ -17,8 +17,7 @@
 package android.telephony.mbms;
 
 import android.net.Uri;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.DeadObjectException;
 import android.os.RemoteException;
 import android.telephony.mbms.vendor.IMbmsStreamingService;
 import android.util.Log;
@@ -34,9 +33,10 @@ public class StreamingService {
 
     private final String mAppName;
     private final int mSubscriptionId;
-    private final IMbmsStreamingService mService;
     private final StreamingServiceInfo mServiceInfo;
     private final IStreamingServiceCallback mCallback;
+
+    private IMbmsStreamingService mService;
     /**
      * @hide
      */
@@ -55,13 +55,23 @@ public class StreamingService {
     /**
      * Retreive the Uri used to play this stream.
      *
-     * This may throw a {@link MbmsException} with the error code
-     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION}
+     * This may throw a {@link MbmsException} with the error codes
+     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION} or
+     * {@link MbmsException#ERROR_SERVICE_LOST}
+     *
      * @return The {@link Uri} to pass to the streaming client.
      */
     public Uri getPlaybackUri() throws MbmsException {
+        if (mService == null) {
+            throw new IllegalStateException("No streaming service attached");
+        }
+
         try {
             return mService.getPlaybackUri(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
+        } catch (DeadObjectException e) {
+            Log.w(LOG_TAG, "Remote process died");
+            mService = null;
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Caught remote exception calling getPlaybackUri: " + e);
             throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
@@ -76,18 +86,41 @@ public class StreamingService {
     }
 
     /**
-     * Stop streaming this service.  Terminal.
-     *
-     * This may throw a RemoteException.
+     * Stop streaming this service.
+     * This may throw a {@link MbmsException} with the error code
+     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION} or
+     * {@link MbmsException#ERROR_SERVICE_LOST}
      */
-    public void stopStreaming() {
+    public void stopStreaming() throws MbmsException {
+        if (mService == null) {
+            throw new IllegalStateException("No streaming service attached");
+        }
+
+        try {
+            mService.stopStreaming(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
+        } catch (DeadObjectException e) {
+            Log.w(LOG_TAG, "Remote process died");
+            mService = null;
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "Caught remote exception calling stopStreaming: " + e);
+            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
+        }
     }
 
     public void dispose() throws MbmsException {
+        if (mService == null) {
+            throw new IllegalStateException("No streaming service attached");
+        }
+
         try {
             mService.disposeStream(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
+        } catch (DeadObjectException e) {
+            Log.w(LOG_TAG, "Remote process died");
+            mService = null;
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
         } catch (RemoteException e) {
-            Log.w(LOG_TAG, "Caught remote exception calling disposeStream: " + e);
+            Log.w(LOG_TAG, "Caught remote exception calling dispose: " + e);
             throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
         }
     }
