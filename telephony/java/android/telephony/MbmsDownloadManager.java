@@ -17,9 +17,10 @@
 package android.telephony;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.telephony.mbms.DownloadCallback;
+import android.telephony.mbms.IDownloadCallback;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.DownloadStatus;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
@@ -242,8 +243,9 @@ public class MbmsDownloadManager {
      *
      * Asynchronous errors through the listener include any of the errors
      */
-    public DownloadRequest download(DownloadRequest downloadRequest, DownloadCallback listener) {
-        return null;
+    public DownloadRequest download(DownloadRequest request, IDownloadCallback listener) {
+        request.setAppName(mDownloadAppName);
+        return request;
     }
 
     /**
