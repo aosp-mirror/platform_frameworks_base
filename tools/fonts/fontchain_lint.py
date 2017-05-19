@@ -3,7 +3,6 @@
 import collections
 import copy
 import glob
-import itertools
 from os import path
 import sys
 from xml.etree import ElementTree
@@ -574,8 +573,8 @@ def compute_expected_emoji():
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
         if _emoji_sequences.get(sequence, None) == 'Emoji_Tag_Sequence':
-            # Add reverse of all emoji ZWJ sequences, which are added to the fonts
-            # as a workaround to get the sequences work in RTL text.
+            # Add reverse of all emoji ZWJ sequences, which are added to the
+            # fonts as a workaround to get the sequences work in RTL text.
             # TODO: test if these are actually needed by Minikin/HarfBuzz.
             reversed_seq = reverse_emoji(sequence)
             all_sequences.add(reversed_seq)
@@ -630,12 +629,26 @@ def check_vertical_metrics():
         if record.name in ['sans-serif', 'sans-serif-condensed']:
             font = open_font(record.font)
             assert font['head'].yMax == 2163 and font['head'].yMin == -555, (
-                'yMax and yMin of %s do not match expected values.' % (record.font,))
+                'yMax and yMin of %s do not match expected values.' % (
+                record.font,))
 
-        if record.name in ['sans-serif', 'sans-serif-condensed', 'serif', 'monospace']:
+        if record.name in ['sans-serif', 'sans-serif-condensed',
+                           'serif', 'monospace']:
             font = open_font(record.font)
-            assert font['hhea'].ascent == 1900 and font['hhea'].descent == -500, (
-                'ascent and descent of %s do not match expected values.' % (record.font,))
+            assert (font['hhea'].ascent == 1900 and
+                    font['hhea'].descent == -500), (
+                        'ascent and descent of %s do not match expected '
+                        'values.' % (record.font,))
+
+
+def check_cjk_punctuation():
+    cjk_scripts = {'Hans', 'Hant', 'Jpan', 'Kore'}
+    cjk_punctuation = range(0x3000, 0x301F + 1)
+    for record in _fallback_chain:
+        if record.scripts.intersection(cjk_scripts):
+            # CJK font seen. Stop checking the rest of the fonts.
+            break
+        assert_font_supports_none_of_chars(record.font, cjk_punctuation)
 
 
 def main():
@@ -650,6 +663,8 @@ def main():
 
     hyphens_dir = path.join(target_out, 'usr', 'hyphen-data')
     check_hyphens(hyphens_dir)
+
+    check_cjk_punctuation()
 
     check_emoji = sys.argv[2]
     if check_emoji == 'true':
