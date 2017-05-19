@@ -70,7 +70,7 @@ public class PipManager implements BasePipManager {
     TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onActivityPinned(String packageName, int taskId) {
-            if (!checkCurrentUserId(false /* debug */)) {
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
                 return;
             }
 
@@ -85,7 +85,7 @@ public class PipManager implements BasePipManager {
 
         @Override
         public void onActivityUnpinned() {
-            if (!checkCurrentUserId(false /* debug */)) {
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
                 return;
             }
 
@@ -114,7 +114,7 @@ public class PipManager implements BasePipManager {
 
         @Override
         public void onPinnedActivityRestartAttempt(boolean clearedTask) {
-            if (!checkCurrentUserId(false /* debug */)) {
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
                 return;
             }
 
