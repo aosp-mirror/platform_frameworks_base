@@ -362,6 +362,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             mNetworkAgent.sendNetworkScore(mScore);
         }
 
+        public void explicitlySelected(boolean acceptUnvalidated) {
+            mNetworkAgent.explicitlySelected(acceptUnvalidated);
+        }
+
         public void addCapability(int capability) {
             mNetworkCapabilities.addCapability(capability);
             mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
@@ -797,6 +801,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // Ensure that the default setting for Captive Portals is used for most tests
         setCaptivePortalMode(Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT);
+        setMobileDataAlwaysOn(false);
     }
 
     public void tearDown() throws Exception {
@@ -1595,13 +1600,104 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         final int lingerTimeoutMs = TEST_LINGER_DELAY_MS + TEST_LINGER_DELAY_MS / 4;
         callback.expectCallback(CallbackState.LOST, mCellNetworkAgent, lingerTimeoutMs);
 
+        // Register a TRACK_DEFAULT request and check that it does not affect lingering.
+        TestNetworkCallback trackDefaultCallback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(trackDefaultCallback);
+        trackDefaultCallback.expectAvailableCallbacks(mWiFiNetworkAgent);
+        mEthernetNetworkAgent = new MockNetworkAgent(TRANSPORT_ETHERNET);
+        mEthernetNetworkAgent.connect(true);
+        callback.expectAvailableCallbacks(mEthernetNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mWiFiNetworkAgent);
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mEthernetNetworkAgent);
+        trackDefaultCallback.expectAvailableAndValidatedCallbacks(mEthernetNetworkAgent);
+        defaultCallback.expectAvailableAndValidatedCallbacks(mEthernetNetworkAgent);
+
+        // Let linger run its course.
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent, lingerTimeoutMs);
+
         // Clean up.
-        mWiFiNetworkAgent.disconnect();
-        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
-        defaultCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        mEthernetNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mEthernetNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.LOST, mEthernetNetworkAgent);
+        trackDefaultCallback.expectCallback(CallbackState.LOST, mEthernetNetworkAgent);
 
         mCm.unregisterNetworkCallback(callback);
         mCm.unregisterNetworkCallback(defaultCallback);
+        mCm.unregisterNetworkCallback(trackDefaultCallback);
+    }
+
+    @SmallTest
+    public void testExplicitlySelected() {
+        NetworkRequest request = new NetworkRequest.Builder()
+                .clearCapabilities().addCapability(NET_CAPABILITY_INTERNET)
+                .build();
+        TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        // Bring up validated cell.
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        callback.expectAvailableAndValidatedCallbacks(mCellNetworkAgent);
+
+        // Bring up unvalidated wifi with explicitlySelected=true.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.explicitlySelected(false);
+        mWiFiNetworkAgent.connect(false);
+        callback.expectAvailableCallbacks(mWiFiNetworkAgent);
+
+        // Cell Remains the default.
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // Lower wifi's score to below than cell, and check that it doesn't disconnect because
+        // it's explicitly selected.
+        mWiFiNetworkAgent.adjustScore(-40);
+        mWiFiNetworkAgent.adjustScore(40);
+        callback.assertNoCallback();
+
+        // If the user chooses yes on the "No Internet access, stay connected?" dialog, we switch to
+        // wifi even though it's unvalidated.
+        mCm.setAcceptUnvalidated(mWiFiNetworkAgent.getNetwork(), true, false);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // Disconnect wifi, and then reconnect, again with explicitlySelected=true.
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.explicitlySelected(false);
+        mWiFiNetworkAgent.connect(false);
+        callback.expectAvailableCallbacks(mWiFiNetworkAgent);
+
+        // If the user chooses no on the "No Internet access, stay connected?" dialog, we ask the
+        // network to disconnect.
+        mCm.setAcceptUnvalidated(mWiFiNetworkAgent.getNetwork(), false, false);
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+
+        // Reconnect, again with explicitlySelected=true, but this time validate.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.explicitlySelected(false);
+        mWiFiNetworkAgent.connect(true);
+        callback.expectAvailableCallbacks(mWiFiNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // BUG: the network will no longer linger, even though it's validated and outscored.
+        // TODO: fix this.
+        mEthernetNetworkAgent = new MockNetworkAgent(TRANSPORT_ETHERNET);
+        mEthernetNetworkAgent.connect(true);
+        callback.expectAvailableAndValidatedCallbacks(mEthernetNetworkAgent);
+        assertEquals(mEthernetNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+        callback.assertNoCallback();
+
+        // Clean up.
+        mWiFiNetworkAgent.disconnect();
+        mCellNetworkAgent.disconnect();
+        mEthernetNetworkAgent.disconnect();
+
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        callback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        callback.expectCallback(CallbackState.LOST, mEthernetNetworkAgent);
     }
 
     private void tryNetworkFactoryRequests(int capability) throws Exception {
