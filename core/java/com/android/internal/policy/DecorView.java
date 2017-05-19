@@ -296,7 +296,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public void onDraw(Canvas c) {
         super.onDraw(c);
-        mBackgroundFallback.draw(mContentRoot, c, mWindow.mContentParent);
+
+        // When we are resizing, we need the fallback background to cover the area where we have our
+        // system bar background views as the navigation bar will be hidden during resizing.
+        mBackgroundFallback.draw(isResizing() ? this : mContentRoot, mContentRoot, c,
+                mWindow.mContentParent);
     }
 
     @Override
