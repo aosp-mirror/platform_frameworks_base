@@ -39,14 +39,22 @@ public class BackgroundFallback {
         return mBackgroundFallback != null;
     }
 
-    public void draw(ViewGroup root, Canvas c, View content) {
+    /**
+     * Draws the fallback background.
+     *
+     * @param boundsView The view determining with which bounds the background should be drawn.
+     * @param root The view group containing the content.
+     * @param c The canvas to draw the background onto.
+     * @param content The view where the actual app content is contained in.
+     */
+    public void draw(ViewGroup boundsView, ViewGroup root, Canvas c, View content) {
         if (!hasFallback()) {
             return;
         }
 
         // Draw the fallback in the padding.
-        final int width = root.getWidth();
-        final int height = root.getHeight();
+        final int width = boundsView.getWidth();
+        final int height = boundsView.getHeight();
         int left = width;
         int top = height;
         int right = 0;
