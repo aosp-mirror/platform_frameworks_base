@@ -36,6 +36,13 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.Assert;
 
 import java.util.HashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A utility that inflates the right kind of contentView based on the state
@@ -50,6 +57,7 @@ public class NotificationInflater {
     private static final int FLAG_REINFLATE_HEADS_UP_VIEW = 1<<2;
     private static final int FLAG_REINFLATE_PUBLIC_VIEW = 1<<3;
     private static final int FLAG_REINFLATE_AMBIENT_VIEW = 1<<4;
+    private static final InflationExecutor EXECUTOR = new InflationExecutor();
 
     private final ExpandableNotificationRow mRow;
     private boolean mIsLowPriority;
@@ -330,14 +338,14 @@ public class NotificationInflater {
             cancellationSignal = newContentView.applyAsync(
                     result.packageContext,
                     parentLayout,
-                    null /* executor */,
+                    EXECUTOR,
                     listener,
                     remoteViewClickHandler);
         } else {
             cancellationSignal = newContentView.reapplyAsync(
                     result.packageContext,
                     existingView,
-                    null /* executor */,
+                    EXECUTOR,
                     listener,
                     remoteViewClickHandler);
         }
@@ -603,5 +611,41 @@ public class NotificationInflater {
     private abstract static class ApplyCallback {
         public abstract void setResultView(View v);
         public abstract RemoteViews getRemoteView();
+    }
+
+    /**
+     * A custom executor that allows more tasks to be queued. Default values are copied from
+     * AsyncTask
+      */
+    private static class InflationExecutor implements Executor {
+        private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+        // We want at least 2 threads and at most 4 threads in the core pool,
+        // preferring to have 1 less than the CPU count to avoid saturating
+        // the CPU with background work
+        private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));
+        private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
+        private static final int KEEP_ALIVE_SECONDS = 30;
+
+        private static final ThreadFactory sThreadFactory = new ThreadFactory() {
+            private final AtomicInteger mCount = new AtomicInteger(1);
+
+            public Thread newThread(Runnable r) {
+                return new Thread(r, "InflaterThread #" + mCount.getAndIncrement());
+            }
+        };
+
+        private final ThreadPoolExecutor mExecutor;
+
+        private InflationExecutor() {
+            mExecutor = new ThreadPoolExecutor(
+                    CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(), sThreadFactory);
+            mExecutor.allowCoreThreadTimeOut(true);
+        }
+
+        @Override
+        public void execute(Runnable runnable) {
+            mExecutor.execute(runnable);
+        }
     }
 }
