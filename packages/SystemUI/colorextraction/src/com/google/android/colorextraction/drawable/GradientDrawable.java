@@ -157,7 +157,10 @@ public class GradientDrawable extends Drawable {
     }
 
     private void buildPaints() {
-        final Rect bounds = mWindowBounds;
+        Rect bounds = mWindowBounds;
+        if (bounds.width() == 0) {
+            return;
+        }
 
         float w = bounds.width();
         float h = bounds.height();
@@ -177,7 +180,10 @@ public class GradientDrawable extends Drawable {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        final Rect bounds = mWindowBounds;
+        Rect bounds = mWindowBounds;
+        if (bounds.width() == 0) {
+            throw new IllegalStateException("You need to call setScreenSize before drawing.");
+        }
 
         // Splat each gradient
         float w = bounds.width();
