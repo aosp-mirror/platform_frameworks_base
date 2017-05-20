@@ -100,6 +100,10 @@ public abstract class EnrollClient extends ClientMonitor {
 
     @Override
     public int stop(boolean initiatedByClient) {
+        if (mAlreadyCancelled) {
+            Slog.w(TAG, "stopEnroll: already cancelled!");
+            return 0;
+        }
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "stopEnrollment: no fingerprint HAL!");
@@ -117,6 +121,7 @@ public abstract class EnrollClient extends ClientMonitor {
         if (initiatedByClient) {
             onError(FingerprintManager.FINGERPRINT_ERROR_CANCELED, 0 /* vendorCode */);
         }
+        mAlreadyCancelled = true;
         return 0;
     }
 

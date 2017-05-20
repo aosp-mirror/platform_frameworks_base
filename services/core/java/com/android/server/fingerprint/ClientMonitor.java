@@ -44,6 +44,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     private String mOwner;
     private Context mContext;
     private long mHalDeviceId;
+    protected boolean mAlreadyCancelled;
 
     /**
      * @param context context of FingerprintService

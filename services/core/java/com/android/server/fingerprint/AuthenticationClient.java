@@ -41,8 +41,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public static final int LOCKOUT_TIMED = 1;
     public static final int LOCKOUT_PERMANENT = 2;
 
-    private boolean mAlreadyCancelled;
-
     public AuthenticationClient(Context context, long halDeviceId, IBinder token,
             IFingerprintServiceReceiver receiver, int targetUserId, int groupId, long opId,
             boolean restricted, String owner) {
