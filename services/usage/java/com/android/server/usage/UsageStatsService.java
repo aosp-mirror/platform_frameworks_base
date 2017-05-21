@@ -831,6 +831,9 @@ public class UsageStatsService extends SystemService implements
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
             List<UsageStats> list = service.queryUsageStats(bucketType, beginTime, endTime);
+            if (list == null) {
+                return null;
+            }
 
             // Mangle instant app names *using their current state (not whether they were ephemeral
             // when the data was recorded)*.

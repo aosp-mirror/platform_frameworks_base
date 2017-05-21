@@ -34,6 +34,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -54,6 +55,7 @@ import java.io.PrintWriter;
 public class PipMotionHelper {
 
     private static final String TAG = "PipMotionHelper";
+    private static final boolean DEBUG = false;
 
     private static final RectEvaluator RECT_EVALUATOR = new RectEvaluator(new Rect());
 
@@ -150,6 +152,10 @@ public class PipMotionHelper {
      * Resizes the pinned stack back to fullscreen.
      */
     void expandPip(boolean skipAnimation) {
+        if (DEBUG) {
+            Log.d(TAG, "expandPip: skipAnimation=" + skipAnimation
+                    + " callers=\n" + Debug.getCallers(5, "    "));
+        }
         cancelAnimations();
         mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
@@ -171,6 +177,9 @@ public class PipMotionHelper {
      * Dismisses the pinned stack.
      */
     void dismissPip() {
+        if (DEBUG) {
+            Log.d(TAG, "dismissPip: callers=\n" + Debug.getCallers(5, "    "));
+        }
         cancelAnimations();
         mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
@@ -419,6 +428,10 @@ public class PipMotionHelper {
      * Directly resizes the PiP to the given {@param bounds}.
      */
     private void resizePipUnchecked(Rect toBounds) {
+        if (DEBUG) {
+            Log.d(TAG, "resizePipUnchecked: toBounds=" + toBounds
+                    + " callers=\n" + Debug.getCallers(5, "    "));
+        }
         if (!toBounds.equals(mBounds)) {
             mVsyncChoreographer.scheduleAtSfVsync(() -> {
                 try {
@@ -435,6 +448,10 @@ public class PipMotionHelper {
      * Directly resizes the PiP to the given {@param bounds}.
      */
     private void resizeAndAnimatePipUnchecked(Rect toBounds, int duration) {
+        if (DEBUG) {
+            Log.d(TAG, "resizeAndAnimatePipUnchecked: toBounds=" + toBounds
+                    + " duration=" + duration + " callers=\n" + Debug.getCallers(5, "    "));
+        }
         if (!toBounds.equals(mBounds)) {
             mHandler.post(() -> {
                 try {

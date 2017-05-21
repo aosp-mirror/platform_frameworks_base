@@ -73,6 +73,11 @@ static void LogWarning(png_structp png_ptr, png_const_charp warning_msg) {
 static void LogError(png_structp png_ptr, png_const_charp error_msg) {
   IDiagnostics* diag = (IDiagnostics*)png_get_error_ptr(png_ptr);
   diag->Error(DiagMessage() << error_msg);
+
+  // Causes libpng to longjmp to the spot where setjmp was set. This is how libpng does
+  // error handling. If this custom error handler method were to return, libpng would, by
+  // default, print the error message to stdout and call the same png_longjmp method.
+  png_longjmp(png_ptr, 1);
 }
 
 static void ReadDataFromStream(png_structp png_ptr, png_bytep buffer, png_size_t len) {
@@ -82,7 +87,12 @@ static void ReadDataFromStream(png_structp png_ptr, png_bytep buffer, png_size_t
   size_t in_len;
   if (!in->Next(&in_buffer, &in_len)) {
     if (in->HadError()) {
-      std::string err = in->GetError();
+      std::stringstream error_msg_builder;
+      error_msg_builder << "failed reading from input";
+      if (!in->GetError().empty()) {
+        error_msg_builder << ": " << in->GetError();
+      }
+      std::string err = error_msg_builder.str();
       png_error(png_ptr, err.c_str());
     }
     return;
@@ -103,6 +113,11 @@ static void WriteDataToStream(png_structp png_ptr, png_bytep buffer, png_size_t 
   while (len > 0) {
     if (!out->Next(&out_buffer, &out_len)) {
       if (out->HadError()) {
+        std::stringstream err_msg_builder;
+        err_msg_builder << "failed writing to output";
+        if (!out->GetError().empty()) {
+          err_msg_builder << ": " << out->GetError();
+        }
         std::string err = out->GetError();
         png_error(png_ptr, err.c_str());
       }
@@ -126,7 +141,7 @@ static void WriteDataToStream(png_structp png_ptr, png_bytep buffer, png_size_t 
   }
 }
 
-std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
+std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::InputStream* in) {
   // Read the first 8 bytes of the file looking for the PNG signature.
   // Bail early if it does not match.
   const png_byte* signature;
@@ -163,6 +178,9 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
     return {};
   }
 
+  // Create a diagnostics that has the source information encoded.
+  SourcePathDiagnostics source_diag(source, context->GetDiagnostics());
+
   // Automatically release PNG resources at end of scope.
   PngReadStructDeleter png_read_deleter(read_ptr, info_ptr);
 
@@ -174,7 +192,7 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
   }
 
   // Handle warnings ourselves via IDiagnostics.
-  png_set_error_fn(read_ptr, (png_voidp)context->GetDiagnostics(), LogError, LogWarning);
+  png_set_error_fn(read_ptr, (png_voidp)&source_diag, LogError, LogWarning);
 
   // Set up the read functions which read from our custom data sources.
   png_set_read_fn(read_ptr, (png_voidp)in, ReadDataFromStream);
@@ -231,8 +249,8 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, io::InputStream* in) {
   // something
   // that can always be represented by 9-patch.
   if (width > std::numeric_limits<int32_t>::max() || height > std::numeric_limits<int32_t>::max()) {
-    context->GetDiagnostics()->Error(
-        DiagMessage() << "PNG image dimensions are too large: " << width << "x" << height);
+    source_diag.Error(DiagMessage()
+                      << "PNG image dimensions are too large: " << width << "x" << height);
     return {};
   }
 

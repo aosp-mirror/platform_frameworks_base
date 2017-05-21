@@ -16,7 +16,7 @@
 
 package android.widget;
 
-import static android.os.Build.VERSION_CODES.N_MR1;
+import static android.os.Build.VERSION_CODES.O;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -302,7 +302,7 @@ class DayPickerView extends ViewGroup {
         getTempCalendarForTime(timeInMillis);
 
         final int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion > N_MR1) {
+        if (targetSdkVersion >= O) {
             if (mTempCalendar.before(mMinDate) || mTempCalendar.after(mMaxDate)) {
                 throw new IllegalArgumentException("timeInMillis must be between the values of "
                         + "getMinDate() and getMaxDate()");

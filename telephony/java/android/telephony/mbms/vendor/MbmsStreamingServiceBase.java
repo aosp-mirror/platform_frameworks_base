@@ -107,15 +107,44 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
         return null;
     }
 
+    /**
+     * Stop streaming the stream identified by {@code serviceId}. Notification of the resulting
+     * stream state change should be reported to the app via
+     * {@link IStreamingServiceCallback#streamStateChanged(int)}.
+     * @param appName The app name as negotiated with the wireless carrier.
+     * @param subscriptionId The subscription id to use.
+     * @param serviceId The ID of the streaming service that the app wishes to stop.
+     */
     @Override
-    public void stopStreaming(String appName, int subId, String serviceId) throws RemoteException {
+    public void stopStreaming(String appName, int subscriptionId, String serviceId)
+            throws RemoteException {
     }
 
+    /**
+     * Dispose of the stream identified by {@code serviceId} for the app identified by the
+     * {@code appName} and {@code subscriptionId} arguments along with the caller's uid.
+     * No notification back to the app is required for this operation, and the callback provided via
+     * {@link #startStreaming(String, int, String, IStreamingServiceCallback)} should no longer be
+     * used after this method has called by the app.
+     * @param appName The app name as negotiated with the wireless carrier.
+     * @param subscriptionId The subscription id to use.
+     * @param serviceId The ID of the streaming service that the app wishes to dispose of.
+     */
     @Override
-    public void disposeStream(String appName, int subId, String serviceId) throws RemoteException {
+    public void disposeStream(String appName, int subscriptionId, String serviceId)
+            throws RemoteException {
     }
 
+    /**
+     * Signals that the app wishes to dispose of the session identified by the {@code appName} and
+     * {@code subscriptionId} arguments, as well as the caller's uid. No notification back to the
+     * app is required for this operation, and the corresponding callback provided via
+     * {@link #initialize(IMbmsStreamingManagerCallback, String, int)} should no longer be used
+     * after this method has been called by the app.
+     * @param appName The app name as negotiated with the wireless carrier.
+     * @param subscriptionId The subscription id to use.
+     */
     @Override
-    public void dispose(String appName, int subId) throws RemoteException {
+    public void dispose(String appName, int subscriptionId) throws RemoteException {
     }
 }

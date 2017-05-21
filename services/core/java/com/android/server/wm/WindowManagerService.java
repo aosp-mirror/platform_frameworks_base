@@ -203,6 +203,7 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManagerPolicy.PointerEventListener;
+import android.view.WindowManagerPolicy.ScreenOffListener;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 
@@ -1521,7 +1522,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Try using the target SDK of the root window
         if (attachedWindow != null) {
             return attachedWindow.mAppToken != null
-                    && attachedWindow.mAppToken.mTargetSdk > Build.VERSION_CODES.N_MR1;
+                    && attachedWindow.mAppToken.mTargetSdk >= Build.VERSION_CODES.O;
         } else {
             // Otherwise, look at the package
             try {
@@ -1532,7 +1533,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new SecurityException("Package " + packageName + " not in UID "
                             + callingUid);
                 }
-                if (appInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1) {
+                if (appInfo.targetSdkVersion >= Build.VERSION_CODES.O) {
                     return true;
                 }
             } catch (PackageManager.NameNotFoundException e) {
@@ -2810,6 +2811,11 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendEmptyMessage(H.NOTIFY_KEYGUARD_TRUSTED_CHANGED);
     }
 
+    @Override
+    public void screenTurningOff(ScreenOffListener listener) {
+        mTaskSnapshotController.screenTurningOff(listener);
+    }
+
     /**
      * Starts deferring layout passes. Useful when doing multiple changes but to optimize
      * performance, only one layout pass should be done. This can be called multiple times, and
@@ -3335,6 +3341,13 @@ public class WindowManagerService extends IWindowManager.Stub
         performEnableScreen();
     }
 
+    /**
+     * Called when System UI has been started.
+     */
+    public void onSystemUiStarted() {
+        mPolicy.onSystemUiStarted();
+    }
+
     private void performEnableScreen() {
         synchronized(mWindowMap) {
             if (DEBUG_BOOT) Slog.i(TAG_WM, "performEnableScreen: mDisplayEnabled=" + mDisplayEnabled
@@ -3347,6 +3360,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             if (!mSystemBooted && !mShowingBootMessages) {
+                return;
+            }
+
+            if (!mShowingBootMessages && !mPolicy.canDismissBootAnimation()) {
                 return;
             }
 
@@ -3363,7 +3380,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
                     if (surfaceFlinger != null) {
-                        //Slog.i(TAG_WM, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
+                        Slog.i(TAG_WM, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
                         Parcel data = Parcel.obtain();
                         data.writeInterfaceToken("android.ui.ISurfaceComposer");
                         surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
