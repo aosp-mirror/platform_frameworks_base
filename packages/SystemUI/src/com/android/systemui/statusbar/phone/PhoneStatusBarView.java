@@ -121,12 +121,12 @@ public class PhoneStatusBarView extends PanelBar {
     public void onPanelCollapsed() {
         super.onPanelCollapsed();
         // Close the status bar in the next frame so we can show the end of the animation.
-        DejankUtils.postAfterTraversal(mHideExpandedRunnable);
+        post(mHideExpandedRunnable);
         mIsFullyOpenedPanel = false;
     }
 
     public void removePendingHideExpandedRunnables() {
-        DejankUtils.removeCallbacks(mHideExpandedRunnable);
+        removeCallbacks(mHideExpandedRunnable);
     }
 
     @Override

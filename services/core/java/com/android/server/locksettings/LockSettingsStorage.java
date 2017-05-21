@@ -555,7 +555,7 @@ class LockSettingsStorage {
         void initialize(SQLiteDatabase db);
     }
 
-    class DatabaseHelper extends SQLiteOpenHelper {
+    static class DatabaseHelper extends SQLiteOpenHelper {
         private static final String TAG = "LockSettingsDB";
         private static final String DATABASE_NAME = "locksettings.db";
 

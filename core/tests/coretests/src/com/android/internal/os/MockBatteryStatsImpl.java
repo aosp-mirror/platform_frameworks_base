@@ -44,5 +44,9 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     public TimeBase getOnBatteryBackgroundTimeBase(int uid) {
         return getUidStatsLocked(uid).mOnBatteryBackgroundTimeBase;
     }
+
+    public TimeBase getOnBatteryScreenOffBackgroundTimeBase(int uid) {
+        return getUidStatsLocked(uid).mOnBatteryScreenOffBackgroundTimeBase;
+    }
 }
 

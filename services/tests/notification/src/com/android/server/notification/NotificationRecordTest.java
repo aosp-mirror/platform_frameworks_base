@@ -99,7 +99,7 @@ public class NotificationRecordTest extends NotificationTestCase {
         when(mMockContext.getPackageManager()).thenReturn(mPm);
 
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
-        upgrade.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
+        upgrade.targetSdkVersion = Build.VERSION_CODES.O;
         try {
             when(mPm.getApplicationInfoAsUser(eq(pkg), anyInt(), anyInt())).thenReturn(legacy);
             when(mPm.getApplicationInfoAsUser(eq(pkg2), anyInt(), anyInt())).thenReturn(upgrade);

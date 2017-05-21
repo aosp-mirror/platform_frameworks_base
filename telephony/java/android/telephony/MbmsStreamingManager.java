@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.mbms.MbmsException;
@@ -157,6 +158,7 @@ public class MbmsStreamingManager {
      * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
      * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION}
      * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
+     * {@link MbmsException#ERROR_SERVICE_LOST}
      *
      * Asynchronous error codes via the {@link MbmsStreamingManagerCallback#error(int, String)}
      * callback can include any of the errors except:
@@ -172,6 +174,10 @@ public class MbmsStreamingManager {
             if (returnCode != MbmsException.SUCCESS) {
                 throw new MbmsException(returnCode);
             }
+        } catch (DeadObjectException e) {
+            Log.w(LOG_TAG, "Remote process died");
+            mService = null;
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
         } catch (RemoteException e) {
             throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
         }
@@ -187,6 +193,7 @@ public class MbmsStreamingManager {
      * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
      * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION}
      * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
+     * {@link MbmsException#ERROR_SERVICE_LOST}
      *
      * May also throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
@@ -204,6 +211,10 @@ public class MbmsStreamingManager {
             if (returnCode != MbmsException.SUCCESS) {
                 throw new MbmsException(returnCode);
             }
+        } catch (DeadObjectException e) {
+            Log.w(LOG_TAG, "Remote process died");
+            mService = null;
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
         } catch (RemoteException e) {
             throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
         }
@@ -269,7 +280,11 @@ public class MbmsStreamingManager {
             } catch (RemoteException e) {
                 mService = null;
                 Log.e(LOG_TAG, "Service died before initialization");
-                throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
+                if (e instanceof DeadObjectException) {
+                    throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+                } else {
+                    throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
+                }
             }
         }
     }

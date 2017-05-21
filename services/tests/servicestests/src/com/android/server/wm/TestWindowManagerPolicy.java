@@ -366,6 +366,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public void screenTurningOff(ScreenOffListener screenOffListener) {
+
+    }
+
+    @Override
     public void screenTurnedOff() {
 
     }
@@ -632,5 +637,14 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public void setRecentsVisibilityLw(boolean visible) {
 
-   }
+    }
+
+    @Override
+    public void onSystemUiStarted() {
+    }
+
+    @Override
+    public boolean canDismissBootAnimation() {
+        return true;
+    }
 }

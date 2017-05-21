@@ -96,7 +96,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
                 return mGetEphemeralResolveInfoCaller
                         .getEphemeralResolveInfoList(target, hashPrefix, token);
             } catch (TimeoutException e) {
-                throw new ConnectionException(ConnectionException.FAILURE_BIND);
+                throw new ConnectionException(ConnectionException.FAILURE_CALL);
             } catch (RemoteException ignore) {
             }
         } finally {

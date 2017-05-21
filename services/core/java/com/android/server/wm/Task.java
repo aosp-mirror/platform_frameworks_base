@@ -41,6 +41,7 @@ import android.view.Surface;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerUser {
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
@@ -681,6 +682,11 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     @Override
     TaskWindowContainerController getController() {
         return (TaskWindowContainerController) super.getController();
+    }
+
+    @Override
+    void forAllTasks(Consumer<Task> callback) {
+        callback.accept(this);
     }
 
     @Override

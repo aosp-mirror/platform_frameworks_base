@@ -3979,6 +3979,11 @@ message MetricsEvent {
     // OS: O
     ACTION_CAMERA_LIFT_TRIGGER = 989;
 
+    // OPEN: Choose screen lock dialog in Settings
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_CHOOSE_LOCK_DIALOG = 990;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
