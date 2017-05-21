@@ -286,7 +286,7 @@ public class RankingHelper implements RankingConfig {
     private boolean shouldHaveDefaultChannel(Record r) throws NameNotFoundException {
         final int userId = UserHandle.getUserId(r.uid);
         final ApplicationInfo applicationInfo = mPm.getApplicationInfoAsUser(r.pkg, 0, userId);
-        if (applicationInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1) {
+        if (applicationInfo.targetSdkVersion >= Build.VERSION_CODES.O) {
             // O apps should not have the default channel.
             return false;
         }

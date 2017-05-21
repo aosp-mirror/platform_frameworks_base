@@ -1653,6 +1653,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 ? (val.data == 0 ? NOT_FOCUSABLE : FOCUSABLE)
                                 : val.data;
                     }
+                    break;
 
                 case com.android.internal.R.styleable.View_clickable:
                     clickable = a.getBoolean(attr, clickable);
@@ -11227,8 +11228,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case DragEvent.ACTION_DRAG_LOCATION:
-                final int offset = getOffsetForPosition(event.getX(), event.getY());
-                Selection.setSelection((Spannable) mText, offset);
+                if (mText instanceof Spannable) {
+                    final int offset = getOffsetForPosition(event.getX(), event.getY());
+                    Selection.setSelection((Spannable) mText, offset);
+                }
                 return true;
 
             case DragEvent.ACTION_DROP:

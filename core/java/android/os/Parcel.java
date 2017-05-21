@@ -429,13 +429,7 @@ public final class Parcel {
      * @param size The new number of bytes in the Parcel.
      */
     public final void setDataSize(int size) {
-        // STOPSHIP: Try/catch for exception is for temporary debug. Remove once bug resolved
-        try {
-            updateNativeSize(nativeSetDataSize(mNativePtr, size));
-        } catch (IllegalArgumentException iae) {
-            Log.e(TAG,"Caught Exception representing a known bug in Parcel",iae);
-            Log.wtfStack(TAG, "This flow is using SetDataSize incorrectly");
-        }
+        updateNativeSize(nativeSetDataSize(mNativePtr, size));
     }
 
     /**

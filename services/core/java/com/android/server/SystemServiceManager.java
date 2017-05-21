@@ -164,6 +164,13 @@ public class SystemServiceManager {
         }
     }
 
+    /**
+     * @return true if system has completed the boot; false otherwise.
+     */
+    public boolean isBootCompleted() {
+        return mCurrentPhase >= SystemService.PHASE_BOOT_COMPLETED;
+    }
+
     public void startUser(final int userHandle) {
         Slog.i(TAG, "Calling onStartUser u" + userHandle);
         final int serviceLen = mServices.size();

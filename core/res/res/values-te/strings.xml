@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"నవీకరణలు"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"నెట్‌వర్క్ స్థితి"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"నెట్‌వర్క్ హెచ్చరికలు"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"నెట్‌వర్క్ అందుబాటులో ఉంది"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN స్థితి"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"పరికర నిర్వాహణ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"హెచ్చరికలు"</string>
@@ -492,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"వేలిముద్ర గడువు సమయం చేరుకుంది. మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"వేలిముద్ర కార్యాచరణ రద్దయింది."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"చాలా ఎక్కువ ప్రయత్నాలు చేసారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"అనేకసార్లు ప్రయత్నించారు. వేలిముద్ర సెన్సార్ నిలిపివేయబడింది."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"వేలు <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -1207,7 +1205,8 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"భాష మరియు లేఅవుట్‌ను ఎంచుకోవడానికి నొక్కండి"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది"</string>
+    <!-- no translation found for alert_windows_notification_channel_name (7684862527629252655) -->
+    <skip />
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి నొక్కి, దీన్ని ఆఫ్ చేయండి."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ఆఫ్ చేయి"</string>

@@ -772,6 +772,10 @@ public class ResourcesImpl {
         }
 
         final String file = value.string.toString();
+        if (!file.startsWith("res/")) {
+            return null;
+        }
+
         Typeface cached = Typeface.findFromCache(mAssets, file);
         if (cached != null) {
             return cached;

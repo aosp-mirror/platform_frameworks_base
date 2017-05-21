@@ -90,12 +90,40 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         long ms = SystemClock.elapsedRealtime();
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
         mPersister.persistSnapshot(2, mTestUserId, createSnapshot());
-        mPersister.persistSnapshot(3, mTestUserId, createSnapshot());
-        mPersister.persistSnapshot(4, mTestUserId, createSnapshot());
-        mPersister.persistSnapshot(5, mTestUserId, createSnapshot());
-        mPersister.persistSnapshot(6, mTestUserId, createSnapshot());
+        mPersister.removeObsoleteFiles(new ArraySet<>(), new int[] { mTestUserId });
+        mPersister.removeObsoleteFiles(new ArraySet<>(), new int[] { mTestUserId });
+        mPersister.removeObsoleteFiles(new ArraySet<>(), new int[] { mTestUserId });
+        mPersister.removeObsoleteFiles(new ArraySet<>(), new int[] { mTestUserId });
         mPersister.waitForQueueEmpty();
         assertTrue(SystemClock.elapsedRealtime() - ms > 500);
+    }
+
+    /**
+     * Tests that too many store write queue items are being purged.
+     */
+    @Test
+    public void testPurging() {
+        mPersister.persistSnapshot(100, mTestUserId, createSnapshot());
+        mPersister.waitForQueueEmpty();
+        mPersister.setPaused(true);
+        mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
+        mPersister.removeObsoleteFiles(new ArraySet<>(), new int[] { mTestUserId });
+        mPersister.persistSnapshot(2, mTestUserId, createSnapshot());
+        mPersister.persistSnapshot(3, mTestUserId, createSnapshot());
+        mPersister.persistSnapshot(4, mTestUserId, createSnapshot());
+        mPersister.setPaused(false);
+        mPersister.waitForQueueEmpty();
+
+        // Make sure 1,2 were purged but removeObsoleteFiles wasn't.
+        final File[] existsFiles = new File[] {
+                new File(sFilesDir.getPath() + "/snapshots/3.proto"),
+                new File(sFilesDir.getPath() + "/snapshots/4.proto")};
+        final File[] nonExistsFiles = new File[] {
+                new File(sFilesDir.getPath() + "/snapshots/100.proto"),
+                new File(sFilesDir.getPath() + "/snapshots/1.proto"),
+                new File(sFilesDir.getPath() + "/snapshots/1.proto")};
+        assertTrueForFiles(existsFiles, File::exists, " must exist");
+        assertTrueForFiles(nonExistsFiles, file -> !file.exists(), " must not exist");
     }
 
     @Test

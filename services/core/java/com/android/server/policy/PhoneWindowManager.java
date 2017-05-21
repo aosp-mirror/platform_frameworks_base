@@ -234,6 +234,7 @@ import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
+import com.android.server.SystemServiceManager;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate.DrawnListener;
 import com.android.server.policy.keyguard.KeyguardStateMonitor.StateCallback;
@@ -476,6 +477,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     boolean mBootMessageNeedsHiding;
     KeyguardServiceDelegate mKeyguardDelegate;
+    private boolean mKeyguardBound;
     final Runnable mWindowManagerDrawCallback = new Runnable() {
         @Override
         public void run() {
@@ -530,7 +532,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     boolean mSystemReady;
     boolean mSystemBooted;
-    private boolean mDeferBindKeyguard;
     boolean mHdmiPlugged;
     HdmiControl mHdmiControl;
     IUiModeManager mUiModeManager;
@@ -2087,6 +2088,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 handleStartTransitionForKeyguardLw(transit, null /* transit */);
             }
         });
+        mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
+                new StateCallback() {
+                    @Override
+                    public void onTrustedChanged() {
+                        mWindowManagerFuncs.notifyKeyguardTrustedChanged();
+                    }
+                });
     }
 
     /**
@@ -6631,6 +6639,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         reportScreenStateToVrManager(false);
     }
 
+    private long getKeyguardDrawnTimeout() {
+        final boolean bootCompleted =
+                LocalServices.getService(SystemServiceManager.class).isBootCompleted();
+        // Set longer timeout if it has not booted yet to prevent showing empty window.
+        return bootCompleted ? 1000 : 5000;
+    }
+
     // Called on the DisplayManager's DisplayPowerController thread.
     @Override
     public void screenTurningOn(final ScreenOnListener screenOnListener) {
@@ -6646,7 +6661,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             if (mKeyguardDelegate != null) {
                 mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
-                mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT, 1000);
+                mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT,
+                        getKeyguardDrawnTimeout());
                 mKeyguardDelegate.onScreenTurningOn(mKeyguardDrawnCallback);
             } else {
                 if (DEBUG_WAKEUP) Slog.d(TAG,
@@ -6665,6 +6681,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         reportScreenStateToVrManager(true);
+    }
+
+    @Override
+    public void screenTurningOff(ScreenOffListener screenOffListener) {
+        mWindowManagerFuncs.screenTurningOff(screenOffListener);
     }
 
     private void reportScreenStateToVrManager(boolean isScreenOn) {
@@ -7154,16 +7175,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return out;
     }
 
+    private void bindKeyguard() {
+        synchronized (mLock) {
+            if (mKeyguardBound) {
+                return;
+            }
+            mKeyguardBound = true;
+        }
+        mKeyguardDelegate.bindService(mContext);
+    }
+
+    @Override
+    public void onSystemUiStarted() {
+        bindKeyguard();
+    }
+
     /** {@inheritDoc} */
     @Override
     public void systemReady() {
-        mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
-                new StateCallback() {
-                    @Override
-                    public void onTrustedChanged() {
-                        mWindowManagerFuncs.notifyKeyguardTrustedChanged();
-                    }
-                });
+        // In normal flow, systemReady is called before other system services are ready.
+        // So it is better not to bind keyguard here.
         mKeyguardDelegate.onSystemReady();
 
         mVrManagerInternal = LocalServices.getService(VrManagerInternal.class);
@@ -7173,7 +7204,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         readCameraLensCoverState();
         updateUiMode();
-        boolean bindKeyguardNow;
         synchronized (mLock) {
             updateOrientationListenerLp();
             mSystemReady = true;
@@ -7183,18 +7213,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     updateSettings();
                 }
             });
-
-            bindKeyguardNow = mDeferBindKeyguard;
-            if (bindKeyguardNow) {
-                // systemBooted ran but wasn't able to bind to the Keyguard, we'll do it now.
-                mDeferBindKeyguard = false;
+            // If this happens, for whatever reason, systemReady came later than systemBooted.
+            // And keyguard should be already bound from systemBooted
+            if (mSystemBooted) {
+                mKeyguardDelegate.onBootCompleted();
             }
         }
 
-        if (bindKeyguardNow) {
-            mKeyguardDelegate.bindService(mContext);
-            mKeyguardDelegate.onBootCompleted();
-        }
         mSystemGestures.systemReady();
         mImmersiveModeConfirmation.systemReady();
     }
@@ -7202,28 +7227,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public void systemBooted() {
-        boolean bindKeyguardNow = false;
-        synchronized (mLock) {
-            // Time to bind Keyguard; take care to only bind it once, either here if ready or
-            // in systemReady if not.
-            if (mKeyguardDelegate != null) {
-                bindKeyguardNow = true;
-            } else {
-                // Because mKeyguardDelegate is null, we know that the synchronized block in
-                // systemReady didn't run yet and setting this will actually have an effect.
-                mDeferBindKeyguard = true;
-            }
-        }
-        if (bindKeyguardNow) {
-            mKeyguardDelegate.bindService(mContext);
-            mKeyguardDelegate.onBootCompleted();
-        }
+        bindKeyguard();
         synchronized (mLock) {
             mSystemBooted = true;
+            if (mSystemReady) {
+                mKeyguardDelegate.onBootCompleted();
+            }
         }
         startedWakingUp();
         screenTurningOn(null);
         screenTurnedOn();
+    }
+
+    @Override
+    public boolean canDismissBootAnimation() {
+        synchronized (mLock) {
+            return mKeyguardDrawComplete;
+        }
     }
 
     ProgressDialog mBootMsgDialog = null;

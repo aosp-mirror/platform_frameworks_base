@@ -119,6 +119,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         @Override
         public void onTaskStackChangedBackground() {
+            // Check this is for the right user
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
+                return;
+            }
+
             // Preloads the next task
             RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
@@ -161,6 +166,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         @Override
         public void onActivityPinned(String packageName, int taskId) {
+            // Check this is for the right user
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
+                return;
+            }
+
             // This time needs to be fetched the same way the last active time is fetched in
             // {@link TaskRecord#touchActiveTime}
             Recents.getConfiguration().getLaunchState().launchedFromPipApp = true;
@@ -172,12 +182,22 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         @Override
         public void onActivityUnpinned() {
+            // Check this is for the right user
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
+                return;
+            }
+
             EventBus.getDefault().send(new ActivityUnpinnedEvent());
             sLastPipTime = -1;
         }
 
         @Override
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
+            // Check this is for the right user
+            if (!checkCurrentUserId(mContext, false /* debug */)) {
+                return;
+            }
+
             EventBus.getDefault().send(new TaskSnapshotChangedEvent(taskId, snapshot));
         }
     }
@@ -413,30 +433,34 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     public void preloadRecents() {
         // Preload only the raw task list into a new load plan (which will be consumed by the
-        // RecentsActivity) only if there is a task to animate to.
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        MutableBoolean isHomeStackVisible = new MutableBoolean(true);
-        if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
-            ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
-            if (runningTask == null) {
-                return;
-            }
+        // RecentsActivity) only if there is a task to animate to.  Post this to ensure that we
+        // don't block the touch feedback on the nav bar button which triggers this.
+        mHandler.post(() -> {
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            MutableBoolean isHomeStackVisible = new MutableBoolean(true);
+            if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
+                ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+                if (runningTask == null) {
+                    return;
+                }
 
-            RecentsTaskLoader loader = Recents.getTaskLoader();
-            sInstanceLoadPlan = loader.createLoadPlan(mContext);
-            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, !isHomeStackVisible.value);
-            TaskStack stack = sInstanceLoadPlan.getTaskStack();
-            if (stack.getTaskCount() > 0) {
-                // Only preload the icon (but not the thumbnail since it may not have been taken for
-                // the pausing activity)
-                preloadIcon(runningTask.id);
+                RecentsTaskLoader loader = Recents.getTaskLoader();
+                sInstanceLoadPlan = loader.createLoadPlan(mContext);
+                loader.preloadTasks(sInstanceLoadPlan, runningTask.id, !isHomeStackVisible.value);
+                TaskStack stack = sInstanceLoadPlan.getTaskStack();
+                if (stack.getTaskCount() > 0) {
+                    // Only preload the icon (but not the thumbnail since it may not have been taken
+                    // for the pausing activity)
+                    preloadIcon(runningTask.id);
 
-                // At this point, we don't know anything about the stack state.  So only calculate
-                // the dimensions of the thumbnail that we need for the transition into Recents, but
-                // do not draw it until we construct the activity options when we start Recents
-                updateHeaderBarLayout(stack, null /* window rect override*/);
+                    // At this point, we don't know anything about the stack state.  So only
+                    // calculate the dimensions of the thumbnail that we need for the transition
+                    // into Recents, but do not draw it until we construct the activity options when
+                    // we start Recents
+                    updateHeaderBarLayout(stack, null /* window rect override*/);
+                }
             }
-        }
+        });
     }
 
     public void cancelPreloadingRecents() {

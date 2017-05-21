@@ -40,6 +40,7 @@ struct VolumeShaperHelper {
         jmethodID opConstructId;
         jfieldID  opFlagsId;
         jfieldID  opReplaceIdId;
+        jfieldID  opXOffsetId;
 
         // VolumeShaper.State
         jclass    stClazz;
@@ -74,9 +75,10 @@ struct VolumeShaperHelper {
             if (opClazz == nullptr) {
                 return;
             }
-            opConstructId = env->GetMethodID(opClazz, "<init>", "(II)V");
+            opConstructId = env->GetMethodID(opClazz, "<init>", "(IIF)V");
             opFlagsId = env->GetFieldID(opClazz, "mFlags", "I");
             opReplaceIdId = env->GetFieldID(opClazz, "mReplaceId", "I");
+            opXOffsetId = env->GetFieldID(opClazz, "mXOffset", "F");
             env->DeleteLocalRef(lclazz);
 
             lclazz = env->FindClass("android/media/VolumeShaper$State");
@@ -179,17 +181,20 @@ struct VolumeShaperHelper {
         VolumeShaper::Operation::Flag flags =
             (VolumeShaper::Operation::Flag)env->GetIntField(joperation, fields.opFlagsId);
         int replaceId = env->GetIntField(joperation, fields.opReplaceIdId);
+        float xOffset = env->GetFloatField(joperation, fields.opXOffsetId);
 
-        sp<VolumeShaper::Operation> operation = new VolumeShaper::Operation(flags, replaceId);
+        sp<VolumeShaper::Operation> operation =
+                new VolumeShaper::Operation(flags, replaceId, xOffset);
         return operation;
     }
 
     static jobject convertOperationToJobject(
             JNIEnv *env, const fields_t &fields, const sp<VolumeShaper::Operation> &operation) {
         // prepare constructor args
-        jvalue args[2];
+        jvalue args[3];
         args[0].i = (jint)operation->getFlags();
         args[1].i = (jint)operation->getReplaceId();
+        args[2].f = (jfloat)operation->getXOffset();
 
         jobject joperation = env->NewObjectA(fields.opClazz, fields.opConstructId, args);
         return joperation;

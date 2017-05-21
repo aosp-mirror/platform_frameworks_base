@@ -116,7 +116,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 157 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 158 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -967,14 +967,15 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @VisibleForTesting
     public static class LongSamplingCounterArray extends LongCounterArray implements TimeBaseObs {
         final TimeBase mTimeBase;
-        long[] mCounts;
-        long[] mLoadedCounts;
-        long[] mUnpluggedCounts;
-        long[] mPluggedCounts;
+        public long[] mCounts;
+        public long[] mLoadedCounts;
+        public long[] mUnpluggedCounts;
+        public long[] mPluggedCounts;
 
-        LongSamplingCounterArray(TimeBase timeBase, Parcel in) {
+        private LongSamplingCounterArray(TimeBase timeBase, Parcel in) {
             mTimeBase = timeBase;
             mPluggedCounts = in.createLongArray();
             mCounts = copyArray(mPluggedCounts, mCounts);
@@ -983,12 +984,12 @@ public class BatteryStatsImpl extends BatteryStats {
             timeBase.add(this);
         }
 
-        LongSamplingCounterArray(TimeBase timeBase) {
+        public LongSamplingCounterArray(TimeBase timeBase) {
             mTimeBase = timeBase;
             timeBase.add(this);
         }
 
-        public void writeToParcel(Parcel out) {
+        private void writeToParcel(Parcel out) {
             out.writeLongArray(mCounts);
             out.writeLongArray(mLoadedCounts);
             out.writeLongArray(mUnpluggedCounts);
@@ -1024,7 +1025,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     + " mPluggedCounts=" + Arrays.toString(mPluggedCounts));
         }
 
-        void addCountLocked(long[] counts) {
+        public void addCountLocked(long[] counts) {
             if (counts == null) {
                 return;
             }
@@ -1039,7 +1040,7 @@ public class BatteryStatsImpl extends BatteryStats {
         /**
          * Clear state of this counter.
          */
-        void reset(boolean detachIfReset) {
+        public void reset(boolean detachIfReset) {
             fillArray(mCounts, 0);
             fillArray(mLoadedCounts, 0);
             fillArray(mPluggedCounts, 0);
@@ -1049,19 +1050,58 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        void detach() {
+        public void detach() {
             mTimeBase.remove(this);
         }
 
-        void writeSummaryFromParcelLocked(Parcel out) {
+        private void writeSummaryToParcelLocked(Parcel out) {
             out.writeLongArray(mCounts);
         }
 
-        void readSummaryFromParcelLocked(Parcel in) {
+        private void readSummaryFromParcelLocked(Parcel in) {
             mCounts = in.createLongArray();
             mLoadedCounts = copyArray(mCounts, mLoadedCounts);
             mUnpluggedCounts = copyArray(mCounts, mUnpluggedCounts);
             mPluggedCounts = copyArray(mCounts, mPluggedCounts);
+        }
+
+        public static void writeToParcel(Parcel out, LongSamplingCounterArray counterArray) {
+            if (counterArray != null) {
+                out.writeInt(1);
+                counterArray.writeToParcel(out);
+            } else {
+                out.writeInt(0);
+            }
+        }
+
+        public static LongSamplingCounterArray readFromParcel(Parcel in, TimeBase timeBase) {
+            if (in.readInt() != 0) {
+                return new LongSamplingCounterArray(timeBase, in);
+            } else {
+                return null;
+            }
+        }
+
+        public static void writeSummaryToParcelLocked(Parcel out,
+                LongSamplingCounterArray counterArray) {
+            if (counterArray != null) {
+                out.writeInt(1);
+                counterArray.writeSummaryToParcelLocked(out);
+            } else {
+                out.writeInt(0);
+            }
+        }
+
+        public static LongSamplingCounterArray readSummaryFromParcelLocked(Parcel in,
+                TimeBase timeBase) {
+            if (in.readInt() != 0) {
+                final LongSamplingCounterArray counterArray
+                        = new LongSamplingCounterArray(timeBase);
+                counterArray.readSummaryFromParcelLocked(in);
+                return counterArray;
+            } else {
+                return null;
+            }
         }
 
         private void fillArray(long[] a, long val) {
@@ -3427,8 +3467,8 @@ public class BatteryStatsImpl extends BatteryStats {
         boolean batteryStatusChanged = mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime);
 
         if (batteryStatusChanged) {
-            for (int i=0; i<mUidStats.size(); i++) {
-                mUidStats.valueAt(i).updateBgTimeBase(uptime, realtime);
+            for (int i = 0; i < mUidStats.size(); i++) {
+                mUidStats.valueAt(i).updateOnBatteryBgTimeBase(uptime, realtime);
             }
         }
 
@@ -3442,6 +3482,9 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             updateCpuTimeLocked();
             mOnBatteryScreenOffTimeBase.setRunning(unpluggedScreenOff, uptime, realtime);
+            for (int i = 0; i < mUidStats.size(); i++) {
+                mUidStats.valueAt(i).updateOnBatteryScreenOffBgTimeBase(uptime, realtime);
+            }
         }
     }
 
@@ -5541,6 +5584,8 @@ public class BatteryStatsImpl extends BatteryStats {
         /** TimeBase for when uid is in background and device is on battery. */
         @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
         public final TimeBase mOnBatteryBackgroundTimeBase;
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public final TimeBase mOnBatteryScreenOffBackgroundTimeBase;
 
         boolean mWifiRunning;
         StopwatchTimer mWifiRunningTimer;
@@ -5563,6 +5608,8 @@ public class BatteryStatsImpl extends BatteryStats {
         StopwatchTimer mFlashlightTurnedOnTimer;
         StopwatchTimer mCameraTurnedOnTimer;
         StopwatchTimer mForegroundActivityTimer;
+        /** Total time spent by the uid holding any partial wakelocks. */
+        DualTimer mAggregatedPartialWakelockTimer;
         DualTimer mBluetoothScanTimer;
         Counter mBluetoothScanResultCounter;
 
@@ -5664,6 +5711,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mOnBatteryBackgroundTimeBase.init(mBsi.mClocks.uptimeMillis() * 1000,
                     mBsi.mClocks.elapsedRealtime() * 1000);
 
+            mOnBatteryScreenOffBackgroundTimeBase = new TimeBase();
+            mOnBatteryScreenOffBackgroundTimeBase.init(mBsi.mClocks.uptimeMillis() * 1000,
+                    mBsi.mClocks.elapsedRealtime() * 1000);
+
             mUserCpuTime = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
             mSystemCpuTime = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
 
@@ -5731,6 +5782,11 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
             return null;
+        }
+
+        @Override
+        public Timer getAggregatedPartialWakelockTimer() {
+            return mAggregatedPartialWakelockTimer;
         }
 
         @Override
@@ -6020,6 +6076,15 @@ public class BatteryStatsImpl extends BatteryStats {
                         FOREGROUND_ACTIVITY, null, mBsi.mOnBatteryTimeBase);
             }
             return mForegroundActivityTimer;
+        }
+
+        public DualTimer createAggregatedPartialWakelockTimerLocked() {
+            if (mAggregatedPartialWakelockTimer == null) {
+                mAggregatedPartialWakelockTimer = new DualTimer(mBsi.mClocks, this,
+                        AGGREGATED_WAKE_TYPE_PARTIAL, null,
+                        mBsi.mOnBatteryScreenOffTimeBase, mOnBatteryScreenOffBackgroundTimeBase);
+            }
+            return mAggregatedPartialWakelockTimer;
         }
 
         public DualTimer createBluetoothScanTimerLocked() {
@@ -6464,6 +6529,7 @@ public class BatteryStatsImpl extends BatteryStats {
             active |= !resetTimerIfNotNull(mFlashlightTurnedOnTimer, false);
             active |= !resetTimerIfNotNull(mCameraTurnedOnTimer, false);
             active |= !resetTimerIfNotNull(mForegroundActivityTimer, false);
+            active |= !resetTimerIfNotNull(mAggregatedPartialWakelockTimer, false);
             active |= !resetTimerIfNotNull(mBluetoothScanTimer, false);
             if (mBluetoothScanResultCounter != null) {
                 mBluetoothScanResultCounter.reset(false);
@@ -6616,6 +6682,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
             mOnBatteryBackgroundTimeBase.reset(mBsi.mClocks.elapsedRealtime() * 1000,
                     mBsi.mClocks.uptimeMillis() * 1000);
+            mOnBatteryScreenOffBackgroundTimeBase.reset(mBsi.mClocks.elapsedRealtime() * 1000,
+                    mBsi.mClocks.uptimeMillis() * 1000);
 
             if (!active) {
                 if (mWifiRunningTimer != null) {
@@ -6654,6 +6722,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (mForegroundActivityTimer != null) {
                     mForegroundActivityTimer.detach();
                     mForegroundActivityTimer = null;
+                }
+                if (mAggregatedPartialWakelockTimer != null) {
+                    mAggregatedPartialWakelockTimer.detach();
+                    mAggregatedPartialWakelockTimer = null;
                 }
                 if (mBluetoothScanTimer != null) {
                     mBluetoothScanTimer.detach();
@@ -6720,6 +6792,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         void writeToParcelLocked(Parcel out, long uptimeUs, long elapsedRealtimeUs) {
             mOnBatteryBackgroundTimeBase.writeToParcel(out, uptimeUs, elapsedRealtimeUs);
+            mOnBatteryScreenOffBackgroundTimeBase.writeToParcel(out, uptimeUs, elapsedRealtimeUs);
 
             final ArrayMap<String, Wakelock> wakeStats = mWakelockStats.getMap();
             int NW = wakeStats.size();
@@ -6834,6 +6907,12 @@ public class BatteryStatsImpl extends BatteryStats {
             } else {
                 out.writeInt(0);
             }
+            if (mAggregatedPartialWakelockTimer != null) {
+                out.writeInt(1);
+                mAggregatedPartialWakelockTimer.writeToParcel(out, elapsedRealtimeUs);
+            } else {
+                out.writeInt(0);
+            }
             if (mBluetoothScanTimer != null) {
                 out.writeInt(1);
                 mBluetoothScanTimer.writeToParcel(out, elapsedRealtimeUs);
@@ -6927,18 +7006,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(0);
             }
 
-            if (mCpuFreqTimeMs != null) {
-                out.writeInt(1);
-                mCpuFreqTimeMs.writeToParcel(out);
-            } else {
-                out.writeInt(0);
-            }
-            if (mScreenOffCpuFreqTimeMs != null) {
-                out.writeInt(1);
-                mScreenOffCpuFreqTimeMs.writeToParcel(out);
-            } else {
-                out.writeInt(0);
-            }
+            LongSamplingCounterArray.writeToParcel(out, mCpuFreqTimeMs);
+            LongSamplingCounterArray.writeToParcel(out, mScreenOffCpuFreqTimeMs);
 
             if (mMobileRadioApWakeupCount != null) {
                 out.writeInt(1);
@@ -6957,6 +7026,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         void readFromParcelLocked(TimeBase timeBase, TimeBase screenOffTimeBase, Parcel in) {
             mOnBatteryBackgroundTimeBase.readFromParcel(in);
+            mOnBatteryScreenOffBackgroundTimeBase.readFromParcel(in);
 
             int numWakelocks = in.readInt();
             mWakelockStats.clear();
@@ -7083,6 +7153,14 @@ public class BatteryStatsImpl extends BatteryStats {
                 mForegroundActivityTimer = null;
             }
             if (in.readInt() != 0) {
+                mAggregatedPartialWakelockTimer = new DualTimer(mBsi.mClocks, this,
+                        AGGREGATED_WAKE_TYPE_PARTIAL, null,
+                        mBsi.mOnBatteryScreenOffTimeBase, mOnBatteryScreenOffBackgroundTimeBase,
+                        in);
+            } else {
+                mAggregatedPartialWakelockTimer = null;
+            }
+            if (in.readInt() != 0) {
                 mBluetoothScanTimer = new DualTimer(mBsi.mClocks, Uid.this, BLUETOOTH_SCAN_ON,
                         mBsi.mBluetoothScanOnTimers, mBsi.mOnBatteryTimeBase,
                         mOnBatteryBackgroundTimeBase, in);
@@ -7187,17 +7265,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 mCpuClusterSpeed = null;
             }
 
-            if (in.readInt() != 0) {
-                mCpuFreqTimeMs = new LongSamplingCounterArray(mBsi.mOnBatteryTimeBase, in);
-            } else {
-                mCpuFreqTimeMs = null;
-            }
-            if (in.readInt() != 0) {
-                mScreenOffCpuFreqTimeMs = new LongSamplingCounterArray(
-                        mBsi.mOnBatteryScreenOffTimeBase, in);
-            } else {
-                mScreenOffCpuFreqTimeMs = null;
-            }
+            mCpuFreqTimeMs = LongSamplingCounterArray.readFromParcel(in, mBsi.mOnBatteryTimeBase);
+            mScreenOffCpuFreqTimeMs = LongSamplingCounterArray.readFromParcel(
+                    in, mBsi.mOnBatteryScreenOffTimeBase);
 
             if (in.readInt() != 0) {
                 mMobileRadioApWakeupCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
@@ -8202,15 +8272,25 @@ public class BatteryStatsImpl extends BatteryStats {
                 mProcessStateTimer[uidRunningState].startRunningLocked(elapsedRealtimeMs);
             }
 
-            updateBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
+            updateOnBatteryBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
+            updateOnBatteryScreenOffBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
         }
 
-        public boolean updateBgTimeBase(long uptimeUs, long realtimeUs) {
+        /** Whether to consider Uid to be in the background for background timebase purposes. */
+        public boolean isInBackground() {
             // Note that PROCESS_STATE_CACHED and ActivityManager.PROCESS_STATE_NONEXISTENT is
             // also considered to be 'background' for our purposes, because it's not foreground.
-            boolean isBgAndUnplugged = mBsi.mOnBatteryTimeBase.isRunning()
-                    && mProcessState >= PROCESS_STATE_BACKGROUND;
-            return mOnBatteryBackgroundTimeBase.setRunning(isBgAndUnplugged, uptimeUs, realtimeUs);
+            return mProcessState >= PROCESS_STATE_BACKGROUND;
+        }
+
+        public boolean updateOnBatteryBgTimeBase(long uptimeUs, long realtimeUs) {
+            boolean on = mBsi.mOnBatteryTimeBase.isRunning() && isInBackground();
+            return mOnBatteryBackgroundTimeBase.setRunning(on, uptimeUs, realtimeUs);
+        }
+
+        public boolean updateOnBatteryScreenOffBgTimeBase(long uptimeUs, long realtimeUs) {
+            boolean on = mBsi.mOnBatteryScreenOffTimeBase.isRunning() && isInBackground();
+            return mOnBatteryScreenOffBackgroundTimeBase.setRunning(on, uptimeUs, realtimeUs);
         }
 
         public SparseArray<? extends Pid> getPidStats() {
@@ -8341,10 +8421,13 @@ public class BatteryStatsImpl extends BatteryStats {
             if (wl != null) {
                 wl.getStopwatchTimer(type).startRunningLocked(elapsedRealtimeMs);
             }
-            if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
-                Pid p = getPidStatsLocked(pid);
-                if (p.mWakeNesting++ == 0) {
-                    p.mWakeStartMs = elapsedRealtimeMs;
+            if (type == WAKE_TYPE_PARTIAL) {
+                createAggregatedPartialWakelockTimerLocked().startRunningLocked(elapsedRealtimeMs);
+                if (pid >= 0) {
+                    Pid p = getPidStatsLocked(pid);
+                    if (p.mWakeNesting++ == 0) {
+                        p.mWakeStartMs = elapsedRealtimeMs;
+                    }
                 }
             }
         }
@@ -8354,12 +8437,17 @@ public class BatteryStatsImpl extends BatteryStats {
             if (wl != null) {
                 wl.getStopwatchTimer(type).stopRunningLocked(elapsedRealtimeMs);
             }
-            if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
-                Pid p = mPids.get(pid);
-                if (p != null && p.mWakeNesting > 0) {
-                    if (p.mWakeNesting-- == 1) {
-                        p.mWakeSumMs += elapsedRealtimeMs - p.mWakeStartMs;
-                        p.mWakeStartMs = 0;
+            if (type == WAKE_TYPE_PARTIAL) {
+                if (mAggregatedPartialWakelockTimer != null) {
+                    mAggregatedPartialWakelockTimer.stopRunningLocked(elapsedRealtimeMs);
+                }
+                if (pid >= 0) {
+                    Pid p = mPids.get(pid);
+                    if (p != null && p.mWakeNesting > 0) {
+                        if (p.mWakeNesting-- == 1) {
+                            p.mWakeSumMs += elapsedRealtimeMs - p.mWakeStartMs;
+                            p.mWakeStartMs = 0;
+                        }
                     }
                 }
             }
@@ -11243,6 +11331,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mUidStats.put(uid, u);
 
             u.mOnBatteryBackgroundTimeBase.readSummaryFromParcel(in);
+            u.mOnBatteryScreenOffBackgroundTimeBase.readSummaryFromParcel(in);
 
             u.mWifiRunning = false;
             if (in.readInt() != 0) {
@@ -11281,6 +11370,9 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             if (in.readInt() != 0) {
                 u.createForegroundActivityTimerLocked().readSummaryFromParcelLocked(in);
+            }
+            if (in.readInt() != 0) {
+                u.createAggregatedPartialWakelockTimerLocked().readSummaryFromParcelLocked(in);
             }
             if (in.readInt() != 0) {
                 u.createBluetoothScanTimerLocked().readSummaryFromParcelLocked(in);
@@ -11355,19 +11447,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 u.mCpuClusterSpeed = null;
             }
 
-            if (in.readInt() != 0) {
-                u.mCpuFreqTimeMs = new LongSamplingCounterArray(mOnBatteryTimeBase);
-                u.mCpuFreqTimeMs.readSummaryFromParcelLocked(in);
-            } else {
-                u.mCpuFreqTimeMs = null;
-            }
-            if (in.readInt() != 0) {
-                u.mScreenOffCpuFreqTimeMs = new LongSamplingCounterArray(
-                        mOnBatteryScreenOffTimeBase);
-                u.mScreenOffCpuFreqTimeMs.readSummaryFromParcelLocked(in);
-            } else {
-                u.mScreenOffCpuFreqTimeMs = null;
-            }
+            u.mCpuFreqTimeMs = LongSamplingCounterArray.readSummaryFromParcelLocked(
+                    in, mOnBatteryTimeBase);
+            u.mScreenOffCpuFreqTimeMs = LongSamplingCounterArray.readSummaryFromParcelLocked(
+                    in, mOnBatteryScreenOffTimeBase);
 
             if (in.readInt() != 0) {
                 u.mMobileRadioApWakeupCount = new LongSamplingCounter(mOnBatteryTimeBase);
@@ -11628,6 +11711,7 @@ public class BatteryStatsImpl extends BatteryStats {
             Uid u = mUidStats.valueAt(iu);
 
             u.mOnBatteryBackgroundTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
+            u.mOnBatteryScreenOffBackgroundTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
 
             if (u.mWifiRunningTimer != null) {
                 out.writeInt(1);
@@ -11688,6 +11772,12 @@ public class BatteryStatsImpl extends BatteryStats {
             if (u.mForegroundActivityTimer != null) {
                 out.writeInt(1);
                 u.mForegroundActivityTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            } else {
+                out.writeInt(0);
+            }
+            if (u.mAggregatedPartialWakelockTimer != null) {
+                out.writeInt(1);
+                u.mAggregatedPartialWakelockTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
@@ -11765,18 +11855,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(0);
             }
 
-            if (u.mCpuFreqTimeMs != null) {
-                out.writeInt(1);
-                u.mCpuFreqTimeMs.writeSummaryFromParcelLocked(out);
-            } else {
-                out.writeInt(0);
-            }
-            if (u.mScreenOffCpuFreqTimeMs != null) {
-                out.writeInt(1);
-                u.mScreenOffCpuFreqTimeMs.writeSummaryFromParcelLocked(out);
-            } else {
-                out.writeInt(0);
-            }
+            LongSamplingCounterArray.writeSummaryToParcelLocked(out, u.mCpuFreqTimeMs);
+            LongSamplingCounterArray.writeSummaryToParcelLocked(out, u.mScreenOffCpuFreqTimeMs);
 
             if (u.mMobileRadioApWakeupCount != null) {
                 out.writeInt(1);

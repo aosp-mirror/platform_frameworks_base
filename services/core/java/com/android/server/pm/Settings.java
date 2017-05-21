@@ -987,11 +987,11 @@ final class Settings {
         // Update static shared library dependencies if needed
         if (pkg.usesStaticLibraries != null && pkg.usesStaticLibrariesVersions != null
                 && pkg.usesStaticLibraries.size() == pkg.usesStaticLibrariesVersions.length) {
-            String[] usesStaticLibraries = new String[pkg.usesStaticLibraries.size()];
-            pkg.usesStaticLibraries.toArray(usesStaticLibraries);
+            p.usesStaticLibraries = new String[pkg.usesStaticLibraries.size()];
+            pkg.usesStaticLibraries.toArray(p.usesStaticLibraries);
             p.usesStaticLibrariesVersions = pkg.usesStaticLibrariesVersions;
         } else {
-            pkg.usesStaticLibraries = null;
+            p.usesStaticLibraries = null;
             p.usesStaticLibrariesVersions = null;
         }
         addPackageSettingLPw(p, p.sharedUser);

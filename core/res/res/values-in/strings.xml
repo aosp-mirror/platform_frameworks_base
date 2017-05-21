@@ -491,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Waktu sidik jari habis. Coba lagi."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operasi sidik jari dibatalkan."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Terlalu banyak upaya. Coba lagi nanti."</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Terlalu sering dicoba. Sensor sidik jari dinonaktifkan."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Coba lagi."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Jari <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -533,7 +532,7 @@
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"mengubah penghitungan penggunaan jaringan"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Mengizinkan apl memodifikasi cara penggunaan jaringan diperhitungkan terhadap apl. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"mengakses pemberitahuan"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Mengizinkan aplikasi mengambil, memeriksa, dan menghapus pemberitahuan, termasuk pemberitahuan yang diposkan oleh aplikasi lain."</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Mengizinkan aplikasi mengambil, memeriksa, dan menghapus pemberitahuan, termasuk pemberitahuan yang diposting oleh aplikasi lain."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mengikat layanan pendengar pemberitahuan"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Memungkinkan pemegang mengikat antarmuka tingkat teratas dari suatu layanan pendengar pemberitahuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"mengikat ke layanan penyedia ketentuan"</string>
@@ -1205,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Ketuk untuk memilih bahasa dan tata letak"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ditampilkan di atas aplikasi lain"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Aktivitas aplikasi"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ditampilkan di atas aplikasi lain"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jika Anda tidak ingin <xliff:g id="NAME">%s</xliff:g> menggunakan fitur ini, tap untuk membuka setelan dan menonaktifkannya."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"NONAKTIFKAN"</string>
