@@ -1521,15 +1521,13 @@ public class NotificationManagerService extends SystemService {
             final boolean isPackageSuspended =
                     isPackageSuspendedForUser(pkg, Binder.getCallingUid());
 
-            if (ENABLE_BLOCKED_TOASTS && (!noteNotificationOp(pkg, Binder.getCallingUid())
-                    || isPackageSuspended)) {
-                if (!isSystemToast) {
-                    Slog.e(TAG, "Suppressing toast from package " + pkg
-                            + (isPackageSuspended
-                                    ? " due to package suspended by administrator."
-                                    : " by user request."));
-                    return;
-                }
+            if (ENABLE_BLOCKED_TOASTS && !isSystemToast &&
+                    (!noteNotificationOp(pkg, Binder.getCallingUid()) || isPackageSuspended)) {
+                Slog.e(TAG, "Suppressing toast from package " + pkg
+                        + (isPackageSuspended
+                                ? " due to package suspended by administrator."
+                                : " by user request."));
+                return;
             }
 
             synchronized (mToastQueue) {
@@ -3282,10 +3280,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void doChannelWarningToast(CharSequence toastText) {
-        final boolean warningEnabled = Settings.System.getInt(getContext().getContentResolver(),
+        final boolean warningEnabled = Settings.Global.getInt(getContext().getContentResolver(),
                 Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS, 0) != 0;
         if (warningEnabled || Build.IS_DEBUGGABLE) {
-            Toast toast = Toast.makeText(getContext(), mHandler.getLooper(), toastText, Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), mHandler.getLooper(), toastText,
+                    Toast.LENGTH_LONG);
             toast.show();
         }
     }
