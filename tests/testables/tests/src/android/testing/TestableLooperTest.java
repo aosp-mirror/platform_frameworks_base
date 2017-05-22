@@ -31,9 +31,11 @@ import org.junit.runner.RunWith;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
 
+@SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class TestableLooperTest {
