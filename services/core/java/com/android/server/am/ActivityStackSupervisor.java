@@ -3232,6 +3232,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         // tasks should always have lower priority than any affinity-matching tasks
                         // in the fullscreen stacks
                         affinityMatch = mTmpFindTaskResult.r;
+                    } else if (DEBUG_TASKS && mTmpFindTaskResult.matchedByRootAffinity) {
+                        Slog.d(TAG_TASKS, "Skipping match on different display "
+                                + mTmpFindTaskResult.r.getDisplayId() + " " + displayId);
                     }
                 }
             }
