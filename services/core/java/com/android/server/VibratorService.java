@@ -221,7 +221,13 @@ public class VibratorService extends IVibratorService.Stub
 
         long[] clickEffectTimings = getLongIntArray(context.getResources(),
                 com.android.internal.R.array.config_virtualKeyVibePattern);
-        VibrationEffect clickEffect = VibrationEffect.createWaveform(clickEffectTimings, -1);
+        VibrationEffect clickEffect;
+        if (clickEffectTimings.length == 1) {
+            clickEffect = VibrationEffect.createOneShot(
+                    clickEffectTimings[0], VibrationEffect.DEFAULT_AMPLITUDE);
+        } else {
+            clickEffect = VibrationEffect.createWaveform(clickEffectTimings, -1);
+        }
         VibrationEffect doubleClickEffect = VibrationEffect.createWaveform(
                 new long[] {0, 30, 100, 30} /*timings*/, -1);
 
