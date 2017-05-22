@@ -84,7 +84,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     /**
      * Launcher icons design guideline
      */
-    private static final float SAFEZONE_SCALE = 72f/66f;
+    private static final float SAFEZONE_SCALE = 66f/72f;
 
     /**
      * All four sides of the layers are padded with extra inset so as to provide
@@ -676,12 +676,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
     @Override
     public int getAlpha() {
-        final Drawable dr = getFirstNonNullDrawable();
-        if (dr != null) {
-            return dr.getAlpha();
-        } else {
-            return super.getAlpha();
-        }
+        return PixelFormat.TRANSLUCENT;
     }
 
     @Override
@@ -717,17 +712,6 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
                 dr.setTintMode(tintMode);
             }
         }
-    }
-
-    private Drawable getFirstNonNullDrawable() {
-        final ChildDrawable[] array = mLayerState.mChildren;
-        for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
-            final Drawable dr = array[i].mDrawable;
-            if (dr != null) {
-                return dr;
-            }
-        }
-        return null;
     }
 
     public void setOpacity(int opacity) {
