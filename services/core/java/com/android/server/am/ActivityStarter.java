@@ -1432,7 +1432,13 @@ class ActivityStarter {
                     + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + mIntent);
             mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
             mNewTaskInfo = mSourceRecord.info;
-            mNewTaskIntent = mSourceRecord.getTask().intent;
+
+            // It is not guaranteed that the source record will have a task associated with it. For,
+            // example, if this method is being called for processing a pending activity launch, it
+            // is possible that the activity has been removed from the task after the launch was
+            // enqueued.
+            final TaskRecord sourceTask = mSourceRecord.getTask();
+            mNewTaskIntent = sourceTask != null ? sourceTask.intent : null;
         }
         mSourceRecord = null;
         mSourceStack = null;
