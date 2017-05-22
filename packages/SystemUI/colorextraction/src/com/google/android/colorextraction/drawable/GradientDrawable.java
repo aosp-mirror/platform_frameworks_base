@@ -147,7 +147,7 @@ public class GradientDrawable extends Drawable {
 
     @Override
     public int getOpacity() {
-        return mAlpha == 255 ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT;
+        return PixelFormat.TRANSLUCENT;
     }
 
     public void setScreenSize(int width, int height) {

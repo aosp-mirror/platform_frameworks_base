@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.KeyguardManager;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -33,6 +34,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -82,9 +84,13 @@ import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
 import com.android.systemui.plugins.VolumeDialog;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerZenModePanel;
+
+import com.google.android.colorextraction.ColorExtractor;
+import com.google.android.colorextraction.drawable.GradientDrawable;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -97,7 +103,8 @@ import java.util.List;
  *
  * Methods ending in "H" must be called on the (ui) handler.
  */
-public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
+public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable,
+        ColorExtractor.OnColorsChangedListener {
     private static final String TAG = Util.logTag(VolumeDialogImpl.class);
 
     public static final String SHOW_FULL_ZEN = "sysui_show_full_zen";
@@ -107,6 +114,8 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
 
     private final Context mContext;
     private final H mHandler = new H();
+    private final GradientDrawable mGradientDrawable;
+    private final ColorExtractor mColorExtractor;
     private VolumeDialogController mController;
 
     private Window mWindow;
@@ -161,6 +170,9 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
         mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
+        mGradientDrawable = new GradientDrawable(mContext);
+        mGradientDrawable.setAlpha((int) (ScrimController.GRADIENT_SCRIM_ALPHA * 255));
+        mColorExtractor = Dependency.get(ColorExtractor.class);
     }
 
     public void init(int windowType, Callback callback) {
@@ -182,6 +194,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     @Override
     public void destroy() {
         mController.removeCallback(mControllerCallbackH);
+        mColorExtractor.removeOnColorsChangedListener(this);
     }
 
     private void initDialog() {
@@ -192,7 +205,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         mShowing = false;
         mWindow = mDialog.getWindow();
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
-        mWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        mWindow.setBackgroundDrawable(mGradientDrawable);
         mWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -200,6 +213,8 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                 | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        Point displaySize = new Point();
+        mContext.getDisplay().getRealSize(displaySize);
         mDialog.setCanceledOnTouchOutside(true);
         final Resources res = mContext.getResources();
         mWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
@@ -213,6 +228,14 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             rescheduleTimeoutH();
             return true;
         });
+
+        mColorExtractor.addOnColorsChangedListener(this);
+        mGradientDrawable.setScreenSize(displaySize.x, displaySize.y);
+        ColorExtractor.GradientColors colors = mColorExtractor.getColors(
+                mKeyguard.isKeyguardLocked() ? WallpaperManager.FLAG_LOCK
+                        : WallpaperManager.FLAG_SYSTEM);
+        mGradientDrawable.setColors(colors, false);
+
         mDialogContentView = mDialog.findViewById(R.id.volume_dialog_content);
         mDialogRowsView = mDialogContentView.findViewById(R.id.volume_dialog_rows);
         mExpanded = false;
@@ -224,7 +247,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         updateExpandButtonH();
 
         mMotion = new VolumeDialogMotion(mDialog, (View) mDialogView.getParent(),
-                mDialogContentView, mExpandButton, animating -> {
+                mDialogContentView, mExpandButton, mGradientDrawable, animating -> {
                     if (animating) return;
                     if (mPendingStateChanged) {
                         mHandler.sendEmptyMessage(H.STATE_CHANGED);
@@ -1074,6 +1097,19 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             updateExpandedH(newExpand, false /* dismissing */);
         }
     };
+
+    @Override
+    public void onColorsChanged(ColorExtractor.GradientColors colors, int which) {
+        if (mKeyguard.isKeyguardLocked()) {
+            if ((WallpaperManager.FLAG_LOCK & which) != 0) {
+                mGradientDrawable.setColors(colors);
+            }
+        } else {
+            if ((WallpaperManager.FLAG_SYSTEM & which) != 0) {
+                mGradientDrawable.setColors(colors);
+            }
+        }
+    }
 
     private final class H extends Handler {
         private static final int SHOW = 1;

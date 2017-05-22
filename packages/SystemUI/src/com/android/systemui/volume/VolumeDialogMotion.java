@@ -24,6 +24,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnShowListener;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -40,8 +41,10 @@ public class VolumeDialogMotion {
     private final View mDialogView;
     private final ViewGroup mContents;  // volume rows + zen footer
     private final View mChevron;
+    private final Drawable mBackground;
     private final Handler mHandler = new Handler();
     private final Callback mCallback;
+    private final int mBackgroundTargetAlpha;
 
     private boolean mAnimating;  // show or dismiss animation is running
     private boolean mShowing;  // show animation is running
@@ -50,12 +53,14 @@ public class VolumeDialogMotion {
     private ValueAnimator mContentsPositionAnimator;
 
     public VolumeDialogMotion(Dialog dialog, View dialogView, ViewGroup contents, View chevron,
-            Callback callback) {
+            Drawable background, Callback callback) {
         mDialog = dialog;
         mDialogView = dialogView;
         mContents = contents;
         mChevron = chevron;
         mCallback = callback;
+        mBackground = background;
+        mBackgroundTargetAlpha = mBackground.getAlpha();
         mDialog.setOnDismissListener(new OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
@@ -68,6 +73,7 @@ public class VolumeDialogMotion {
                 if (D.BUG) Log.d(TAG, "mDialog.onShow");
                 final int w = mDialogView.getWidth() / 4;
                 mDialogView.setTranslationX(w);
+                mBackground.setAlpha(0);
                 startShowAnimation();
             }
         });
@@ -133,18 +139,20 @@ public class VolumeDialogMotion {
                 .setDuration(scaledDuration(300))
                 .setInterpolator(new LogDecelerateInterpolator())
                 .setListener(null)
-                .setUpdateListener(new AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
+                .setUpdateListener(animation -> {
+                    mBackground.setAlpha(
+                            (int) (animation.getAnimatedFraction() * mBackgroundTargetAlpha));
+                    if (mChevronPositionAnimator != null) {
+                        final float v = (Float) mChevronPositionAnimator.getAnimatedValue();
                         if (mChevronPositionAnimator == null) return;
                         // reposition chevron
-                        final float v = (Float) mChevronPositionAnimator.getAnimatedValue();
                         final int posY = chevronPosY();
                     }
                 })
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
+                        mBackground.setAlpha(mBackgroundTargetAlpha);
                         if (mChevronPositionAnimator == null) return;
                         // reposition chevron
                         final int posY = chevronPosY();
@@ -215,6 +223,10 @@ public class VolumeDialogMotion {
                 .alpha(0)
                 .setDuration(scaledDuration(250))
                 .setInterpolator(new LogAccelerateInterpolator())
+                .setUpdateListener(animation -> {
+                    final float v = 1 - mChevronPositionAnimator.getAnimatedFraction();
+                    mBackground.setAlpha((int) (v * mBackgroundTargetAlpha));
+                })
                 .setListener(new AnimatorListenerAdapter() {
                     private boolean mCancelled;
 
