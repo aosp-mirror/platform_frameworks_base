@@ -3236,6 +3236,8 @@ public class NotificationManagerService extends SystemService {
             final String noChannelStr = "No Channel found for "
                     + "pkg=" + pkg
                     + ", channelId=" + channelId
+                    + ", id=" + id
+                    + ", tag=" + tag
                     + ", opPkg=" + opPkg
                     + ", callingUid=" + callingUid
                     + ", userId=" + userId
