@@ -235,8 +235,7 @@ public class ActivityTestsBase {
                     if (mStackId == ActivityManager.StackId.PINNED_STACK_ID) {
                         mStack = new PinnedActivityStack(this, recents, mOnTop) {
                             @Override
-                            Rect getPictureInPictureBounds(float aspectRatio,
-                                    boolean useExistingStackBounds) {
+                            Rect getDefaultPictureInPictureBounds(float aspectRatio) {
                                 return new Rect(50, 50, 100, 100);
                             }
                         };
