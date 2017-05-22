@@ -27,6 +27,7 @@ import static junit.framework.Assert.fail;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -50,15 +51,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.testing.TestableContext;
-import android.testing.TestableSettingsProvider;
 import android.util.ArrayMap;
-import android.util.Slog;
 import android.util.Xml;
 
 import java.io.BufferedInputStream;
@@ -87,10 +84,10 @@ import static org.mockito.Mockito.when;
 public class RankingHelperTest extends NotificationTestCase {
     private static final String PKG = "com.android.server.notification";
     private static final int UID = 0;
-    private static final UserHandle USER = UserHandle.getUserHandleForUid(UID);
+    private static final UserHandle USER = UserHandle.of(0);
     private static final String UPDATED_PKG = "updatedPkg";
-    private static final int UID2 = 1111111;
-    private static final UserHandle USER2 = UserHandle.getUserHandleForUid(UID2);
+    private static final int UID2 = 1111;
+    private static final UserHandle USER2 = UserHandle.of(10);
     private static final String TEST_CHANNEL_ID = "test_channel_id";
 
     @Mock NotificationUsageStats mUsageStats;
@@ -199,24 +196,21 @@ public class RankingHelperTest extends NotificationTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
-        serializer.startTag(null, "ranking");
         mHelper.writeXml(serializer, forBackup);
-        serializer.endTag(null, "ranking");
         serializer.endDocument();
         serializer.flush();
-
         for (String channelId : channelIds) {
             mHelper.permanentlyDeleteNotificationChannel(pkg, uid, channelId);
         }
         return baos;
     }
 
-    private void loadStreamXml(ByteArrayOutputStream stream) throws Exception {
+    private void loadStreamXml(ByteArrayOutputStream stream, boolean forRestore) throws Exception {
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(stream.toByteArray())),
                 null);
         parser.nextTag();
-        mHelper.readXml(parser, false);
+        mHelper.readXml(parser, forRestore);
     }
 
     private void compareChannels(NotificationChannel expected, NotificationChannel actual) {
@@ -323,8 +317,72 @@ public class RankingHelperTest extends NotificationTestCase {
                 channel2.getId(), NotificationChannel.DEFAULT_CHANNEL_ID);
         mHelper.onPackagesChanged(true, UserHandle.myUserId(), new String[]{PKG}, new int[]{UID});
 
-        loadStreamXml(baos);
+        loadStreamXml(baos, false);
 
+        assertTrue(mHelper.canShowBadge(PKG, UID));
+        assertEquals(channel1, mHelper.getNotificationChannel(PKG, UID, channel1.getId(), false));
+        compareChannels(channel2,
+                mHelper.getNotificationChannel(PKG, UID, channel2.getId(), false));
+
+        List<NotificationChannelGroup> actualGroups =
+                mHelper.getNotificationChannelGroups(PKG, UID, false).getList();
+        boolean foundNcg = false;
+        for (NotificationChannelGroup actual : actualGroups) {
+            if (ncg.getId().equals(actual.getId())) {
+                foundNcg = true;
+                compareGroups(ncg, actual);
+            } else if (ncg2.getId().equals(actual.getId())) {
+                compareGroups(ncg2, actual);
+            }
+        }
+        assertTrue(foundNcg);
+
+        boolean foundChannel2Group = false;
+        for (NotificationChannelGroup actual : actualGroups) {
+            if (channel2.getGroup().equals(actual.getChannels().get(0).getGroup())) {
+                foundChannel2Group = true;
+                break;
+            }
+        }
+        assertTrue(foundChannel2Group);
+    }
+
+    @Test
+    public void testChannelXmlForBackup() throws Exception {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("1", "bye");
+        NotificationChannelGroup ncg2 = new NotificationChannelGroup("2", "hello");
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel2 =
+                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        channel2.setDescription("descriptions for all");
+        channel2.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
+        channel2.enableLights(true);
+        channel2.setBypassDnd(true);
+        channel2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+        channel2.enableVibration(false);
+        channel2.setGroup(ncg.getId());
+        channel2.setLightColor(Color.BLUE);
+
+        mHelper.createNotificationChannelGroup(PKG, UID, ncg, true);
+        mHelper.createNotificationChannelGroup(PKG, UID, ncg2, true);
+        mHelper.createNotificationChannel(PKG, UID, channel1, true);
+        mHelper.createNotificationChannel(PKG, UID, channel2, false);
+        mHelper.createNotificationChannel(UPDATED_PKG, UID2, getChannel(), true);
+
+        mHelper.setShowBadge(PKG, UID, true);
+
+        mHelper.setImportance(UPDATED_PKG, UID2, IMPORTANCE_NONE);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, true, channel1.getId(),
+                channel2.getId(), NotificationChannel.DEFAULT_CHANNEL_ID);
+        mHelper.onPackagesChanged(true, UserHandle.myUserId(), new String[]{PKG, UPDATED_PKG}, new int[]{UID, UID2});
+
+        mHelper.setShowBadge(UPDATED_PKG, UID2, true);
+
+        loadStreamXml(baos, true);
+
+        assertEquals(IMPORTANCE_NONE, mHelper.getImportance(UPDATED_PKG, UID2));
         assertTrue(mHelper.canShowBadge(PKG, UID));
         assertEquals(channel1, mHelper.getNotificationChannel(PKG, UID, channel1.getId(), false));
         compareChannels(channel2,
@@ -397,7 +455,7 @@ public class RankingHelperTest extends NotificationTestCase {
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, false,
                 NotificationChannel.DEFAULT_CHANNEL_ID);
 
-        loadStreamXml(baos);
+        loadStreamXml(baos, false);
 
         final NotificationChannel updated = mHelper.getNotificationChannel(PKG, UID,
                 NotificationChannel.DEFAULT_CHANNEL_ID, false);
@@ -417,7 +475,7 @@ public class RankingHelperTest extends NotificationTestCase {
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, false,
                 NotificationChannel.DEFAULT_CHANNEL_ID);
 
-        loadStreamXml(baos);
+        loadStreamXml(baos, false);
 
         assertEquals(NotificationManager.IMPORTANCE_LOW, mHelper.getNotificationChannel(
                 PKG, UID, NotificationChannel.DEFAULT_CHANNEL_ID, false).getImportance());
@@ -465,7 +523,7 @@ public class RankingHelperTest extends NotificationTestCase {
         final ApplicationInfo upgraded = new ApplicationInfo();
         upgraded.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
         when(mPm.getApplicationInfoAsUser(eq(PKG), anyInt(), anyInt())).thenReturn(upgraded);
-        loadStreamXml(baos);
+        loadStreamXml(baos, false);
 
         // Default Channel should be gone.
         assertEquals(null, mHelper.getNotificationChannel(PKG, UID,
@@ -483,7 +541,7 @@ public class RankingHelperTest extends NotificationTestCase {
         final ApplicationInfo upgraded = new ApplicationInfo();
         upgraded.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
         when(mPm.getApplicationInfoAsUser(eq(PKG), anyInt(), anyInt())).thenReturn(upgraded);
-        loadStreamXml(baos);
+        loadStreamXml(baos, false);
 
         // Default Channel should be gone.
         assertEquals(null, mHelper.getNotificationChannel(PKG, UID,
@@ -497,7 +555,7 @@ public class RankingHelperTest extends NotificationTestCase {
         mHelper.createNotificationChannel(PKG, UID,
                 new NotificationChannel("bananas", "bananas", IMPORTANCE_LOW), true);
 
-        loadStreamXml(baos);
+        loadStreamXml(baos, false);
 
         // Should still have the newly created channel that wasn't in the xml.
         assertTrue(mHelper.getNotificationChannel(PKG, UID, "bananas", false) != null);
@@ -1271,5 +1329,4 @@ public class RankingHelperTest extends NotificationTestCase {
         assertFalse(mHelper.badgingEnabled(USER));
         assertTrue(mHelper.badgingEnabled(USER2));
     }
-
 }
