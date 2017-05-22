@@ -582,11 +582,19 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_METERED_APN_TYPES_STRINGS =
             "carrier_metered_apn_types_strings";
     /**
-     * Default APN types that are roamig-metered by the carrier
+     * Default APN types that are roaming-metered by the carrier
      * @hide
      */
     public static final String KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS =
             "carrier_metered_roaming_apn_types_strings";
+
+    /**
+     * Default APN types that are metered on IWLAN by the carrier
+     * @hide
+     */
+    public static final String KEY_CARRIER_METERED_IWLAN_APN_TYPES_STRINGS =
+            "carrier_metered_iwlan_apn_types_strings";
+
     /**
      * CDMA carrier ERI (Enhanced Roaming Indicator) file name
      * @hide
@@ -1534,6 +1542,9 @@ public class CarrierConfigManager {
                 new String[]{"default", "mms", "dun", "supl"});
         sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
+        // By default all APNs are unmetered if the device is on IWLAN.
+        sDefaults.putStringArray(KEY_CARRIER_METERED_IWLAN_APN_TYPES_STRINGS,
+                new String[]{});
 
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
                 new int[]{
