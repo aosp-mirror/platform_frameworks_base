@@ -29,11 +29,13 @@ import com.android.systemui.statusbar.NotificationTestHelper;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@Ignore("flaking")
 public class NotificationChildrenContainerTest {
 
     private Context mContext;
