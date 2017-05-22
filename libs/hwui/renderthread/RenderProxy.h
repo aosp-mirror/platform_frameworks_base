@@ -135,6 +135,8 @@ public:
     static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
 
     static int copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap);
+
+    static void onBitmapDestroyed(uint32_t pixelRefId);
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;

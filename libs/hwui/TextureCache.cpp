@@ -191,25 +191,14 @@ Texture* TextureCache::get(Bitmap* bitmap) {
     return texture;
 }
 
-void TextureCache::releaseTexture(uint32_t pixelRefStableID) {
-    Mutex::Autolock _l(mLock);
-    mGarbage.push_back(pixelRefStableID);
-}
-
-void TextureCache::clearGarbage() {
-    Mutex::Autolock _l(mLock);
-    size_t count = mGarbage.size();
-    for (size_t i = 0; i < count; i++) {
-        uint32_t pixelRefId = mGarbage[i];
-        auto hardwareIter = mHardwareTextures.find(pixelRefId);
-        if (hardwareIter == mHardwareTextures.end()) {
-            mCache.remove(pixelRefId);
-        } else {
-            hardwareIter->second->deleteTexture();
-            mHardwareTextures.erase(hardwareIter);
-        }
+bool TextureCache::destroyTexture(uint32_t pixelRefStableID) {
+    auto hardwareIter = mHardwareTextures.find(pixelRefStableID);
+    if (hardwareIter != mHardwareTextures.end()) {
+        hardwareIter->second->deleteTexture();
+        mHardwareTextures.erase(hardwareIter);
+        return true;
     }
-    mGarbage.clear();
+    return mCache.remove(pixelRefStableID);
 }
 
 void TextureCache::clear() {

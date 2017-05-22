@@ -63,6 +63,7 @@ public:
     void onVkContextDestroyed();
 
     void flush(Caches::FlushMode flushMode);
+    void onBitmapDestroyed(uint32_t pixelRefId);
 
     void setViewport(GLsizei width, GLsizei height);
     void getViewport(GLsizei* outWidth, GLsizei* outHeight);

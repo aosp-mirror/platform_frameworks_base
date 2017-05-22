@@ -416,9 +416,7 @@ Bitmap::~Bitmap() {
 
     }
 
-    if (android::uirenderer::Caches::hasInstance()) {
-        android::uirenderer::Caches::getInstance().textureCache.releaseTexture(getStableID());
-    }
+    android::uirenderer::renderthread::RenderProxy::onBitmapDestroyed(getStableID());
 }
 
 bool Bitmap::hasHardwareMipMap() const {
