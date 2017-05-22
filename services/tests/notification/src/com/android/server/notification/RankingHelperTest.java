@@ -123,6 +123,7 @@ public class RankingHelperTest extends NotificationTestCase {
         when(mPm.getApplicationInfoAsUser(eq(PKG), anyInt(), anyInt())).thenReturn(legacy);
         when(mPm.getApplicationInfoAsUser(eq(UPDATED_PKG), anyInt(), anyInt())).thenReturn(upgrade);
         when(mPm.getPackageUidAsUser(eq(PKG), anyInt())).thenReturn(UID);
+        when(mPm.getPackageUidAsUser(eq(UPDATED_PKG), anyInt())).thenReturn(UID2);
         when(mContext.getResources()).thenReturn(
                 InstrumentationRegistry.getContext().getResources());
         when(mContext.getPackageManager()).thenReturn(mPm);
@@ -1043,6 +1044,24 @@ public class RankingHelperTest extends NotificationTestCase {
         mHelper.onPackagesChanged(true, UserHandle.USER_SYSTEM, new String[]{PKG}, new int[]{UID});
 
         assertEquals(0, mHelper.getNotificationChannelGroups(PKG, UID, true).getList().size());
+    }
+
+    @Test
+    public void testOnPackageChange_downgradeTargetSdk() throws Exception {
+        // create channel as api 26
+        mHelper.createNotificationChannel(UPDATED_PKG, UID2, getChannel(), true);
+
+        // install new app version targeting 25
+        final ApplicationInfo legacy = new ApplicationInfo();
+        legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
+        when(mPm.getApplicationInfoAsUser(eq(UPDATED_PKG), anyInt(), anyInt())).thenReturn(legacy);
+        mHelper.onPackagesChanged(
+                false, UserHandle.USER_SYSTEM, new String[]{UPDATED_PKG}, new int[]{UID2});
+
+        // make sure the default channel was readded
+        //assertEquals(2, mHelper.getNotificationChannels(UPDATED_PKG, UID2, false).getList().size());
+        assertNotNull(mHelper.getNotificationChannel(
+                UPDATED_PKG, UID2, NotificationChannel.DEFAULT_CHANNEL_ID, false));
     }
 
     @Test
