@@ -957,7 +957,7 @@ class ActivityStarter {
             // If we are not able to proceed, disassociate the activity from the task. Leaving an
             // activity in an incomplete state can lead to issues, such as performing operations
             // without a window container.
-            if (ActivityManager.isStartResultFatalError(result)
+            if (!ActivityManager.isStartResultSuccessful(result)
                     && mStartActivity.getTask() != null) {
                 mStartActivity.getTask().removeActivity(mStartActivity);
             }
