@@ -21,4 +21,5 @@ package android.media;
  */
 oneway interface IMediaRouterClient {
     void onStateChanged();
+    void onRestoreRoute();
 }
