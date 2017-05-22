@@ -16,8 +16,10 @@
 package android.net;
 
 import android.annotation.StringDef;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.android.internal.util.HexDump;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -181,5 +183,18 @@ public final class IpSecAlgorithm implements Parcelable {
             default:
                 return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("{mName=")
+                .append(mName)
+                .append(", mKey=")
+                .append(Build.IS_DEBUGGABLE ? HexDump.toHexString(mKey) : "<hidden>")
+                .append(", mTruncLenBits=")
+                .append(mTruncLenBits)
+                .append("}")
+                .toString();
     }
 };
