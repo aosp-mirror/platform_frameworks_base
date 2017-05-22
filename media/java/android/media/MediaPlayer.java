@@ -1332,7 +1332,7 @@ public class MediaPlayer extends PlayerBase
     private native int _getAudioStreamType() throws IllegalStateException;
 
     /**
-     * Stops playback after playback has been stopped or paused.
+     * Stops playback after playback has been started or paused.
      *
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
