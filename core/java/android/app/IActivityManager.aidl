@@ -236,8 +236,8 @@ interface IActivityManager {
     Debug.MemoryInfo[] getProcessMemoryInfo(in int[] pids);
     void killApplicationProcess(in String processName, int uid);
     int startActivityIntentSender(in IApplicationThread caller,
-            in IntentSender intent, in Intent fillInIntent, in String resolvedType,
-            in IBinder resultTo, in String resultWho, int requestCode,
+            in IIntentSender target, in IBinder whitelistToken, in Intent fillInIntent,
+            in String resolvedType, in IBinder resultTo, in String resultWho, int requestCode,
             int flagsMask, int flagsValues, in Bundle options);
     void overridePendingTransition(in IBinder token, in String packageName,
             int enterAnim, int exitAnim);
