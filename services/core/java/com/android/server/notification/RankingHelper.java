@@ -1115,6 +1115,7 @@ public class RankingHelper implements RankingConfig {
                     Record fullRecord = getRecord(pkg,
                             mPm.getPackageUidAsUser(pkg, changeUserId));
                     if (fullRecord != null) {
+                        createDefaultChannelIfNeeded(fullRecord);
                         deleteDefaultChannelIfNeeded(fullRecord);
                     }
                 } catch (NameNotFoundException e) {}
