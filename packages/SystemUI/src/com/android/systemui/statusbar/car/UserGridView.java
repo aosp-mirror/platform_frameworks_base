@@ -70,7 +70,7 @@ public class UserGridView extends ViewPager {
         mPendingUserId = UserHandle.USER_NULL;
     }
 
-    private void showOfflineAuthUi() {
+    void showOfflineAuthUi() {
         // TODO: Show keyguard UI in-place.
         mStatusBar.executeRunnableDismissingKeyguard(null, null, true, true, true);
     }

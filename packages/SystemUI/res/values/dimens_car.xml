@@ -22,11 +22,18 @@
     <dimen name="car_fullscreen_user_pod_margin_above_text">24dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_width">192dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_height">192dp</dimen>
-    <dimen name="car_fullscreen_user_pod_text_size">40sp</dimen>
+    <dimen name="car_fullscreen_user_pod_text_size">40sp</dimen> <!-- B1 -->
 
     <dimen name="car_navigation_button_width">64dp</dimen>
     <dimen name="car_navigation_bar_width">760dp</dimen>
 
     <dimen name="car_page_indicator_dot_diameter">12dp</dimen>
     <dimen name="car_page_indicator_margin_top">32dp</dimen>
+
+    <dimen name="car_user_switcher_progress_bar_height">6dp</dimen>
+    <dimen name="car_user_switcher_progress_bar_margin_top">@dimen/status_bar_height</dimen>
+    <dimen name="car_start_driving_corner_radius">16dp</dimen>
+    <dimen name="car_start_driving_padding_side">30dp</dimen>
+    <dimen name="car_start_driving_height">80dp</dimen>
+    <dimen name="car_start_driving_text_size">32sp</dimen> <!-- B2 -->
 </resources>
