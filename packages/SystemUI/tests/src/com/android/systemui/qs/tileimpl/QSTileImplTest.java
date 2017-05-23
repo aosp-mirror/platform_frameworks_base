@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.metrics.LogMaker;
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -48,6 +49,7 @@ import org.mockito.ArgumentMatcher;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+@SmallTest
 public class QSTileImplTest extends SysuiTestCase {
 
     public static final int POSITION = 14;

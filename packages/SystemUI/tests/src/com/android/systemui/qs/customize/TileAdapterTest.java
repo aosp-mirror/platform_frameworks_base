@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -33,6 +34,7 @@ import java.util.Collections;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+@SmallTest
 public class TileAdapterTest extends SysuiTestCase {
 
     private TileAdapter mTileAdapter;

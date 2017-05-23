@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.leak.ReferenceTestUtils.CollectionWaiter;
 
 import org.junit.Before;
@@ -31,7 +32,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class WeakIdentityHashMapTest {
+public class WeakIdentityHashMapTest extends SysuiTestCase {
 
     WeakIdentityHashMap<Object, Object> mMap;
 
