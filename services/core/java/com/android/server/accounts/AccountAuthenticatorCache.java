@@ -53,6 +53,7 @@ import java.io.IOException;
                 AccountManager.AUTHENTICATOR_ATTRIBUTES_NAME, sSerializer);
     }
 
+    @Override
     public AuthenticatorDescription parseServiceAttributes(Resources res,
             String packageName, AttributeSet attrs) {
         TypedArray sa = res.obtainAttributes(attrs,
@@ -81,11 +82,13 @@ import java.io.IOException;
     }
 
     private static class MySerializer implements XmlSerializerAndParser<AuthenticatorDescription> {
+        @Override
         public void writeAsXml(AuthenticatorDescription item, XmlSerializer out)
                 throws IOException {
             out.attribute(null, "type", item.type);
         }
 
+        @Override
         public AuthenticatorDescription createFromXml(XmlPullParser parser)
                 throws IOException, XmlPullParserException {
             return AuthenticatorDescription.newKey(parser.getAttributeValue(null, "type"));
