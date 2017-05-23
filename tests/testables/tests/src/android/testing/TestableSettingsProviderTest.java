@@ -20,6 +20,7 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.SmallTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 
+@SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TestableSettingsProviderTest {
 

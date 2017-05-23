@@ -93,12 +93,17 @@ public final class PublishConfig implements Parcelable {
 
     @Override
     public String toString() {
-        return "PublishConfig [mServiceName='" + mServiceName + ", mServiceSpecificInfo='" + (
-                (mServiceSpecificInfo == null) ? "null" : HexEncoding.encode(mServiceSpecificInfo))
-                + ", mMatchFilter=" + (new TlvBufferUtils.TlvIterable(0, 1,
-                mMatchFilter)).toString() + ", mPublishType=" + mPublishType
-                + ", mTtlSec=" + mTtlSec + ", mEnableTerminateNotification="
-                + mEnableTerminateNotification + "]";
+        return "PublishConfig [mServiceName='" + (mServiceName == null ? "<null>" : String.valueOf(
+                HexEncoding.encode(mServiceName))) + ", mServiceName.length=" + (
+                mServiceName == null ? 0 : mServiceName.length) + ", mServiceSpecificInfo='" + (
+                (mServiceSpecificInfo == null) ? "<null>" : String.valueOf(
+                        HexEncoding.encode(mServiceSpecificInfo)))
+                + ", mServiceSpecificInfo.length=" + (mServiceSpecificInfo == null ? 0
+                : mServiceSpecificInfo.length) + ", mMatchFilter="
+                + (new TlvBufferUtils.TlvIterable(0, 1, mMatchFilter)).toString()
+                + ", mMatchFilter.length=" + (mMatchFilter == null ? 0 : mMatchFilter.length)
+                + ", mPublishType=" + mPublishType + ", mTtlSec=" + mTtlSec
+                + ", mEnableTerminateNotification=" + mEnableTerminateNotification + "]";
     }
 
     @Override

@@ -943,9 +943,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
                     long time = mNtpTime.getCachedNtpTime();
                     long timeReference = mNtpTime.getCachedNtpTimeReference();
                     long certainty = mNtpTime.getCacheCertainty();
-                    long now = SystemClock.elapsedRealtime();
 
                     if (DEBUG) {
+                        long now = System.currentTimeMillis();
                         Log.d(TAG, "NTP server returned: "
                                 + time + " (" + new Date(time)
                                 + ") reference: " + timeReference

@@ -1899,7 +1899,9 @@ public class WifiManager {
             LocalOnlyHotspotCallbackProxy proxy =
                     new LocalOnlyHotspotCallbackProxy(this, looper, callback);
             try {
-                int returnCode = mService.startLocalOnlyHotspot(proxy.getMessenger(), new Binder());
+                String packageName = mContext.getOpPackageName();
+                int returnCode = mService.startLocalOnlyHotspot(
+                        proxy.getMessenger(), new Binder(), packageName);
                 if (returnCode != LocalOnlyHotspotCallback.REQUEST_REGISTERED) {
                     // Send message to the proxy to make sure we call back on the correct thread
                     proxy.notifyFailed(returnCode);

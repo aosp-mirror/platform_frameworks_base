@@ -131,7 +131,7 @@ public class TrustManagerService extends SystemService {
 
     // set to true only if user can skip bouncer
     @GuardedBy("mUsersUnlockedByFingerprint")
-    private SparseBooleanArray mUsersUnlockedByFingerprint = new SparseBooleanArray();
+    private final SparseBooleanArray mUsersUnlockedByFingerprint = new SparseBooleanArray();
 
     private final StrongAuthTracker mStrongAuthTracker;
 

@@ -361,6 +361,11 @@ public class IntentSender implements Parcelable {
     }
 
     /** @hide */
+    public IBinder getWhitelistToken() {
+        return mWhitelistToken;
+    }
+
+    /** @hide */
     public IntentSender(IIntentSender target) {
         mTarget = target;
     }
