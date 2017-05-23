@@ -186,6 +186,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     private native int getPlatformLowPowerStats(ByteBuffer outBuffer);
+    private native int getSubsystemLowPowerStats(ByteBuffer outBuffer);
     private CharsetDecoder mDecoderStat = StandardCharsets.UTF_8
                     .newDecoder()
                     .onMalformedInput(CodingErrorAction.REPLACE)
@@ -214,6 +215,28 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return mUtf16BufferStat.toString();
         } finally {
             if (DBG) Slog.d(TAG, "end getPlatformLowPowerStats");
+        }
+    }
+
+    @Override
+    public String getSubsystemLowPowerStats() {
+        Slog.d(TAG, "begin getSubsystemLowPowerStats");
+        try {
+            mUtf8BufferStat.clear();
+            mUtf16BufferStat.clear();
+            mDecoderStat.reset();
+            int bytesWritten = getSubsystemLowPowerStats(mUtf8BufferStat);
+            if (bytesWritten < 0) {
+                return null;
+            } else if (bytesWritten == 0) {
+                return "Empty";
+            }
+            mUtf8BufferStat.limit(bytesWritten);
+            mDecoderStat.decode(mUtf8BufferStat, mUtf16BufferStat, true);
+            mUtf16BufferStat.flip();
+            return mUtf16BufferStat.toString();
+        } finally {
+            Slog.d(TAG, "end getSubsystemLowPowerStats");
         }
     }
 

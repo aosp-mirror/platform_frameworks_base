@@ -95,6 +95,7 @@ LOCAL_SHARED_LIBRARIES += \
     android.hardware.ir@1.0 \
     android.hardware.light@2.0 \
     android.hardware.power@1.0 \
+    android.hardware.power@1.1 \
     android.hardware.tetheroffload.config@1.0 \
     android.hardware.thermal@1.0 \
     android.hardware.tv.cec@1.0 \
