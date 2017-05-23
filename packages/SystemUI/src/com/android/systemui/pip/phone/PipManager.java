@@ -25,6 +25,7 @@ import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -196,7 +197,7 @@ public class PipManager implements BasePipManager {
     /**
      * Updates the PIP per configuration changed.
      */
-    public void onConfigurationChanged() {
+    public void onConfigurationChanged(Configuration newConfig) {
         mTouchHandler.onConfigurationChanged();
     }
 
