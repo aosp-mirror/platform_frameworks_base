@@ -729,6 +729,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+        if (mDecor != null) {
+            mDecor.updatePictureInPictureOutlineProvider(isInPictureInPictureMode);
+        }
+    }
+
+    @Override
     public void reportActivityRelaunched() {
         if (mDecor != null && mDecor.getViewRootImpl() != null) {
             mDecor.getViewRootImpl().reportActivityRelaunched();
