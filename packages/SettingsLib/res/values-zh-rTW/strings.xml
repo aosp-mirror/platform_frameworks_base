@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"背景處理程序限制"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"顯示所有無回應程式"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"為背景應用程式顯示「應用程式無回應」對話方塊"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"強制允許將應用程式寫入外部儲存空間"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"允許將任何應用程式寫入外部儲存空間 (無論資訊清單值為何)"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"將活動強制設為可調整大小"</string>

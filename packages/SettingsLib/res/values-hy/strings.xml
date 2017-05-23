@@ -91,11 +91,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Հեռացված ծրագրեր"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Հեռացված հավելվածներն ու օգտատերերը"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB միացում"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB մոդեմ"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Դյուրակիր թեժ կետ"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth-ը կապվում է"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Միացում"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Միացում և շարժական թեժ կետ"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth մոդեմ"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Մոդեմի ռեժիմ"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Մոդեմի ռեժիմ"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Բոլոր աշխատանքային հավելվածները"</string>
     <string name="user_guest" msgid="8475274842845401871">"Հյուր"</string>
     <string name="unknown" msgid="1592123443519355854">"Անհայտ"</string>
@@ -149,7 +149,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"Կարգավորել ընտրանքները ծրագրի ծրագրավորման համար"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Ծրագրավորման ընտրանքներն այլևս հասանելի չեն այս օգտատիրոջ"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN-ի կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Միակցման կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Այս օգտատերը չի կարող փոխել մոդեմի ռեժիմի կարգավորումները"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Մատչման կետի անվան կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB վրիպազերծում"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Կարգաբերել ռեժիմը, երբ USB-ն միացված է"</string>
@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Հետնաշերտի գործընթացի սահմանաչափ"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Ցույց տալ բոլոր ANR-երը"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Ցուցադրել այն ծրագիրը, որը չի արձագանքում երկխոսությունը հետնաշերտի ծրագրերի համար"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"Միշտ թույլատրել ծրագրեր արտաքին պահեստում"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Թույլ է տալիս ցանկացած հավելված պահել արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Ստիպել, որ ակտիվությունների չափերը լինեն փոփոխելի"</string>

@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Limit procesów w tle"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Pokaż wszystkie ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Pokaż okno Aplikacja Nie Reaguje dla aplikacji w tle"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"Wymuś zezwalanie na aplikacje w pamięci zewn."</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Pozwala na zapis aplikacji w pamięci zewnętrznej niezależnie od wartości w pliku manifestu"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Wymuś zmianę rozmiaru okien aktywności"</string>

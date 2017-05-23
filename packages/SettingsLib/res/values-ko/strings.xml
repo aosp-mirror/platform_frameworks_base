@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"백그라운드 프로세스 수 제한"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"모든 ANR 보기"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"백그라운드 앱에 대해 앱 응답 없음 대화상자 표시"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"외부에서 앱 강제 허용"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"매니페스트 값과 관계없이 모든 앱이 외부 저장소에 작성되도록 허용"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"활동의 크기가 조정 가능하도록 설정"</string>

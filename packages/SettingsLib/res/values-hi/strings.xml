@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"पृष्ठभूमि प्रक्रिया सीमा"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"सभी ANR दिखाएं"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"पृष्ठभूमि ऐप्स के लिए ऐप्स प्रतिसाद नहीं दे रहा डॉयलॉग दिखाएं"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"ऐप्स को बाहरी मेमोरी पर बाध्‍य करें"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"इससे कोई भी ऐप्लिकेशन, मेनिफेस्ट मानों को अनदेखा करके, बाहरी मेमोरी पर लिखने योग्य बन जाता है"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"आकार बदले जाने के लिए गतिविधियों को बाध्य करें"</string>
