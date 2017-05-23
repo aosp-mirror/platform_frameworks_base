@@ -923,8 +923,11 @@ public abstract class LayoutInflater {
                             + " include tag: <include layout=\"@layout/layoutID\" />");
                 }
 
-                // Attempt to resolve the "?attr/name" string to an identifier.
-                layout = context.getResources().getIdentifier(value.substring(1), null, null);
+                // Attempt to resolve the "?attr/name" string to an attribute
+                // within the default (e.g. application) package.
+                layout = context.getResources().getIdentifier(
+                        value.substring(1), "attr", context.getPackageName());
+
             }
 
             // The layout might be referencing a theme attribute.
