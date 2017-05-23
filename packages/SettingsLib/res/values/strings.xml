@@ -684,6 +684,12 @@
     <string name="show_all_anrs_summary">Show App Not Responding dialog
         for background apps</string>
 
+    <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
+    <string name="show_notification_channel_warnings">Show notification channel warnings</string>
+    <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=50] -->
+    <string name="show_notification_channel_warnings_summary">Displays on-screen warning when an app posts a notification without a valid channel</string>
+
+
     <!-- UI debug setting: force allow apps on external storage [CHAR LIMIT=50] -->
     <string name="force_allow_on_external">Force allow apps on external</string>
     <!-- UI debug setting: force allow on external summary [CHAR LIMIT=150] -->
