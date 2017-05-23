@@ -98,7 +98,18 @@ public class SpanSet<E> {
      * Similar to {@link Spanned#nextSpanTransition(int, int, Class)}
      */
     int getNextTransition(int start, int limit) {
+        return getNextTransitionSkipping(null, start, limit);
+    }
+
+    /**
+     * Similar to {@link #getNextTransition(int, int)}, but skipping over spans with the exact class
+     * provided.
+     */
+    int getNextTransitionSkipping(Class skip, int start, int limit) {
         for (int i = 0; i < numberOfSpans; i++) {
+            if (spans[i].getClass() == skip) {
+                continue;
+            }
             final int spanStart = spanStarts[i];
             final int spanEnd = spanEnds[i];
             if (spanStart > start && spanStart < limit) limit = spanStart;
