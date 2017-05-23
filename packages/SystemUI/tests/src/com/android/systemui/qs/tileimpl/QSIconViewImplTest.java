@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.service.quicksettings.Tile;
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
 import android.widget.ImageView;
@@ -39,6 +40,7 @@ import org.mockito.ArgumentMatcher;
 
 @RunWith(AndroidTestingRunner.class)
 @UiThreadTest
+@SmallTest
 public class QSIconViewImplTest extends SysuiTestCase {
 
     private QSIconViewImpl mIconView;

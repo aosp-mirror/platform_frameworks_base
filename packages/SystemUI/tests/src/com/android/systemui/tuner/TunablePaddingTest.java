@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import android.support.test.filters.SmallTest;
 import android.testing.LeakCheck.Tracker;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -32,6 +33,7 @@ import com.android.systemui.utils.leaks.LeakCheckedTest;
 import org.junit.Before;
 import org.junit.Test;
 
+@SmallTest
 public class TunablePaddingTest extends LeakCheckedTest {
 
     private static final String KEY = "KEY";

@@ -34,8 +34,10 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.After;
@@ -44,9 +46,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class DozeUiTest {
+@SmallTest
+public class DozeUiTest extends SysuiTestCase {
 
-    private Context mContext;
     private AlarmManager mAlarmManager;
     private DozeMachine mMachine;
     private WakeLockFake mWakeLock;
@@ -59,7 +61,6 @@ public class DozeUiTest {
     public void setUp() throws Exception {
         mHandlerThread = new HandlerThread("DozeUiTest");
         mHandlerThread.start();
-        mContext = InstrumentationRegistry.getContext();
         mAlarmManager = mock(AlarmManager.class);
         mMachine = mock(DozeMachine.class);
         mWakeLock = new WakeLockFake();

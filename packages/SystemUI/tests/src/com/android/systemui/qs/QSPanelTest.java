@@ -16,9 +16,10 @@ package com.android.systemui.qs;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -38,6 +39,7 @@ import java.util.Collections;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @Ignore("flaking")
+@SmallTest
 public class QSPanelTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;
