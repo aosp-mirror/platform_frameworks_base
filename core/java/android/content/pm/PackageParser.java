@@ -27,9 +27,9 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
-import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
@@ -50,9 +50,9 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
-import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -148,8 +148,9 @@ public class PackageParser {
     private static final String PROPERTY_CHILD_PACKAGES_ENABLED =
             "persist.sys.child_packages_enabled";
 
+    // TODO: Decide the correct default before O-MR1.
     private static final boolean MULTI_PACKAGE_APK_ENABLED = Build.IS_DEBUGGABLE &&
-            SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, false);
+            SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, true);
 
     private static final int MAX_PACKAGES_PER_APK = 5;
 
@@ -498,11 +499,25 @@ public class PackageParser {
         }
     }
 
+    /**
+     * Cached parse state for new components.
+     *
+     * Allows reuse of the same parse argument records to avoid GC pressure.  Lifetime is carefully
+     * scoped to the parsing of a single application element.
+     */
+    private static class CachedComponentArgs {
+        ParseComponentArgs mActivityArgs;
+        ParseComponentArgs mActivityAliasArgs;
+        ParseComponentArgs mServiceArgs;
+        ParseComponentArgs mProviderArgs;
+    }
+
+    /**
+     * Cached state for parsing instrumentation to avoid GC pressure.
+     *
+     * Must be manually reset to null for each new manifest.
+     */
     private ParsePackageItemArgs mParseInstrumentationArgs;
-    private ParseComponentArgs mParseActivityArgs;
-    private ParseComponentArgs mParseActivityAliasArgs;
-    private ParseComponentArgs mParseServiceArgs;
-    private ParseComponentArgs mParseProviderArgs;
 
     /** If set to true, we will only allow package files that exactly match
      *  the DTD.  Otherwise, we try to get as much from the package as we
@@ -1335,9 +1350,6 @@ public class PackageParser {
         parsePackageSplitNames(parser, attrs);
 
         mParseInstrumentationArgs = null;
-        mParseActivityArgs = null;
-        mParseServiceArgs = null;
-        mParseProviderArgs = null;
 
         int type;
 
@@ -2044,9 +2056,6 @@ public class PackageParser {
             XmlResourceParser parser, int flags, String[] outError) throws XmlPullParserException,
             IOException {
         mParseInstrumentationArgs = null;
-        mParseActivityArgs = null;
-        mParseServiceArgs = null;
-        mParseProviderArgs = null;
 
         int type;
         boolean foundApp = false;
@@ -3638,6 +3647,9 @@ public class PackageParser {
         }
 
         final int innerDepth = parser.getDepth();
+        // IMPORTANT: These must only be cached for a single <application> to avoid components
+        // getting added to the wrong package.
+        final CachedComponentArgs cachedArgs = new CachedComponentArgs();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
@@ -3647,7 +3659,7 @@ public class PackageParser {
 
             String tagName = parser.getName();
             if (tagName.equals("activity")) {
-                Activity a = parseActivity(owner, res, parser, flags, outError, false,
+                Activity a = parseActivity(owner, res, parser, flags, outError, cachedArgs, false,
                         owner.baseHardwareAccelerated);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
@@ -3657,7 +3669,8 @@ public class PackageParser {
                 owner.activities.add(a);
 
             } else if (tagName.equals("receiver")) {
-                Activity a = parseActivity(owner, res, parser, flags, outError, true, false);
+                Activity a = parseActivity(owner, res, parser, flags, outError, cachedArgs,
+                        true, false);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3666,7 +3679,7 @@ public class PackageParser {
                 owner.receivers.add(a);
 
             } else if (tagName.equals("service")) {
-                Service s = parseService(owner, res, parser, flags, outError);
+                Service s = parseService(owner, res, parser, flags, outError, cachedArgs);
                 if (s == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3675,7 +3688,7 @@ public class PackageParser {
                 owner.services.add(s);
 
             } else if (tagName.equals("provider")) {
-                Provider p = parseProvider(owner, res, parser, flags, outError);
+                Provider p = parseProvider(owner, res, parser, flags, outError, cachedArgs);
                 if (p == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3684,7 +3697,7 @@ public class PackageParser {
                 owner.providers.add(p);
 
             } else if (tagName.equals("activity-alias")) {
-                Activity a = parseActivityAlias(owner, res, parser, flags, outError);
+                Activity a = parseActivityAlias(owner, res, parser, flags, outError, cachedArgs);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3892,9 +3905,12 @@ public class PackageParser {
 
             ComponentInfo parsedComponent = null;
 
+            // IMPORTANT: These must only be cached for a single <application> to avoid components
+            // getting added to the wrong package.
+            final CachedComponentArgs cachedArgs = new CachedComponentArgs();
             String tagName = parser.getName();
             if (tagName.equals("activity")) {
-                Activity a = parseActivity(owner, res, parser, flags, outError, false,
+                Activity a = parseActivity(owner, res, parser, flags, outError, cachedArgs, false,
                         owner.baseHardwareAccelerated);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
@@ -3905,7 +3921,8 @@ public class PackageParser {
                 parsedComponent = a.info;
 
             } else if (tagName.equals("receiver")) {
-                Activity a = parseActivity(owner, res, parser, flags, outError, true, false);
+                Activity a = parseActivity(owner, res, parser, flags, outError, cachedArgs,
+                        true, false);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3915,7 +3932,7 @@ public class PackageParser {
                 parsedComponent = a.info;
 
             } else if (tagName.equals("service")) {
-                Service s = parseService(owner, res, parser, flags, outError);
+                Service s = parseService(owner, res, parser, flags, outError, cachedArgs);
                 if (s == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3925,7 +3942,7 @@ public class PackageParser {
                 parsedComponent = s.info;
 
             } else if (tagName.equals("provider")) {
-                Provider p = parseProvider(owner, res, parser, flags, outError);
+                Provider p = parseProvider(owner, res, parser, flags, outError, cachedArgs);
                 if (p == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3935,7 +3952,7 @@ public class PackageParser {
                 parsedComponent = p.info;
 
             } else if (tagName.equals("activity-alias")) {
-                Activity a = parseActivityAlias(owner, res, parser, flags, outError);
+                Activity a = parseActivityAlias(owner, res, parser, flags, outError, cachedArgs);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -4081,13 +4098,13 @@ public class PackageParser {
     }
 
     private Activity parseActivity(Package owner, Resources res,
-            XmlResourceParser parser, int flags, String[] outError,
+            XmlResourceParser parser, int flags, String[] outError, CachedComponentArgs cachedArgs,
             boolean receiver, boolean hardwareAccelerated)
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestActivity);
 
-        if (mParseActivityArgs == null) {
-            mParseActivityArgs = new ParseComponentArgs(owner, outError,
+        if (cachedArgs.mActivityArgs == null) {
+            cachedArgs.mActivityArgs = new ParseComponentArgs(owner, outError,
                     R.styleable.AndroidManifestActivity_name,
                     R.styleable.AndroidManifestActivity_label,
                     R.styleable.AndroidManifestActivity_icon,
@@ -4100,11 +4117,11 @@ public class PackageParser {
                     R.styleable.AndroidManifestActivity_enabled);
         }
 
-        mParseActivityArgs.tag = receiver ? "<receiver>" : "<activity>";
-        mParseActivityArgs.sa = sa;
-        mParseActivityArgs.flags = flags;
+        cachedArgs.mActivityArgs.tag = receiver ? "<receiver>" : "<activity>";
+        cachedArgs.mActivityArgs.sa = sa;
+        cachedArgs.mActivityArgs.flags = flags;
 
-        Activity a = new Activity(mParseActivityArgs, new ActivityInfo());
+        Activity a = new Activity(cachedArgs.mActivityArgs, new ActivityInfo());
         if (outError[0] != null) {
             sa.recycle();
             return null;
@@ -4576,7 +4593,8 @@ public class PackageParser {
     }
 
     private Activity parseActivityAlias(Package owner, Resources res,
-            XmlResourceParser parser, int flags, String[] outError)
+            XmlResourceParser parser, int flags, String[] outError,
+            CachedComponentArgs cachedArgs)
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestActivityAlias);
@@ -4597,8 +4615,8 @@ public class PackageParser {
             return null;
         }
 
-        if (mParseActivityAliasArgs == null) {
-            mParseActivityAliasArgs = new ParseComponentArgs(owner, outError,
+        if (cachedArgs.mActivityAliasArgs == null) {
+            cachedArgs.mActivityAliasArgs = new ParseComponentArgs(owner, outError,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_name,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_label,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_icon,
@@ -4609,11 +4627,11 @@ public class PackageParser {
                     0,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_description,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_enabled);
-            mParseActivityAliasArgs.tag = "<activity-alias>";
+            cachedArgs.mActivityAliasArgs.tag = "<activity-alias>";
         }
 
-        mParseActivityAliasArgs.sa = sa;
-        mParseActivityAliasArgs.flags = flags;
+        cachedArgs.mActivityAliasArgs.sa = sa;
+        cachedArgs.mActivityAliasArgs.flags = flags;
 
         Activity target = null;
 
@@ -4660,7 +4678,7 @@ public class PackageParser {
         info.maxAspectRatio = target.info.maxAspectRatio;
         info.encryptionAware = info.directBootAware = target.info.directBootAware;
 
-        Activity a = new Activity(mParseActivityAliasArgs, info);
+        Activity a = new Activity(cachedArgs.mActivityAliasArgs, info);
         if (outError[0] != null) {
             sa.recycle();
             return null;
@@ -4766,13 +4784,14 @@ public class PackageParser {
     }
 
     private Provider parseProvider(Package owner, Resources res,
-            XmlResourceParser parser, int flags, String[] outError)
+            XmlResourceParser parser, int flags, String[] outError,
+            CachedComponentArgs cachedArgs)
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestProvider);
 
-        if (mParseProviderArgs == null) {
-            mParseProviderArgs = new ParseComponentArgs(owner, outError,
+        if (cachedArgs.mProviderArgs == null) {
+            cachedArgs.mProviderArgs = new ParseComponentArgs(owner, outError,
                     com.android.internal.R.styleable.AndroidManifestProvider_name,
                     com.android.internal.R.styleable.AndroidManifestProvider_label,
                     com.android.internal.R.styleable.AndroidManifestProvider_icon,
@@ -4783,13 +4802,13 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestProvider_process,
                     com.android.internal.R.styleable.AndroidManifestProvider_description,
                     com.android.internal.R.styleable.AndroidManifestProvider_enabled);
-            mParseProviderArgs.tag = "<provider>";
+            cachedArgs.mProviderArgs.tag = "<provider>";
         }
 
-        mParseProviderArgs.sa = sa;
-        mParseProviderArgs.flags = flags;
+        cachedArgs.mProviderArgs.sa = sa;
+        cachedArgs.mProviderArgs.flags = flags;
 
-        Provider p = new Provider(mParseProviderArgs, new ProviderInfo());
+        Provider p = new Provider(cachedArgs.mProviderArgs, new ProviderInfo());
         if (outError[0] != null) {
             sa.recycle();
             return null;
@@ -5120,13 +5139,14 @@ public class PackageParser {
     }
 
     private Service parseService(Package owner, Resources res,
-            XmlResourceParser parser, int flags, String[] outError)
+            XmlResourceParser parser, int flags, String[] outError,
+            CachedComponentArgs cachedArgs)
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestService);
 
-        if (mParseServiceArgs == null) {
-            mParseServiceArgs = new ParseComponentArgs(owner, outError,
+        if (cachedArgs.mServiceArgs == null) {
+            cachedArgs.mServiceArgs = new ParseComponentArgs(owner, outError,
                     com.android.internal.R.styleable.AndroidManifestService_name,
                     com.android.internal.R.styleable.AndroidManifestService_label,
                     com.android.internal.R.styleable.AndroidManifestService_icon,
@@ -5137,13 +5157,13 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestService_process,
                     com.android.internal.R.styleable.AndroidManifestService_description,
                     com.android.internal.R.styleable.AndroidManifestService_enabled);
-            mParseServiceArgs.tag = "<service>";
+            cachedArgs.mServiceArgs.tag = "<service>";
         }
 
-        mParseServiceArgs.sa = sa;
-        mParseServiceArgs.flags = flags;
+        cachedArgs.mServiceArgs.sa = sa;
+        cachedArgs.mServiceArgs.flags = flags;
 
-        Service s = new Service(mParseServiceArgs, new ServiceInfo());
+        Service s = new Service(cachedArgs.mServiceArgs, new ServiceInfo());
         if (outError[0] != null) {
             sa.recycle();
             return null;
