@@ -34,18 +34,18 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
+import com.android.systemui.SysuiTestCase;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 @Ignore("flaking")
-public class NotificationContentViewTest {
+public class NotificationContentViewTest extends SysuiTestCase {
 
     NotificationContentView mView;
-    Context mContext;
 
     @Before
     @UiThreadTest
     public void setup() {
-        mContext = InstrumentationRegistry.getTargetContext();
         mView = new NotificationContentView(mContext, null);
         ExpandableNotificationRow row = new ExpandableNotificationRow(mContext, null);
         ExpandableNotificationRow mockRow = spy(row);

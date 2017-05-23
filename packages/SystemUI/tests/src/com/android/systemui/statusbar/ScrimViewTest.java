@@ -26,6 +26,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 
 import android.graphics.drawable.VectorDrawable;
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 
@@ -50,6 +51,7 @@ import org.junit.runner.RunWith;
 import static junit.framework.Assert.assertEquals;
 
 @RunWith(AndroidTestingRunner.class)
+@SmallTest
 public class ScrimViewTest extends SysuiTestCase {
 
     ScrimView mView;

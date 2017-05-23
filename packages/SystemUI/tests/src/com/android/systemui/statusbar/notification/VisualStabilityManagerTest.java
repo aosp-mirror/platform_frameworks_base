@@ -20,6 +20,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
@@ -37,7 +38,7 @@ import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class VisualStabilityManagerTest {
+public class VisualStabilityManagerTest extends SysuiTestCase {
 
     private VisualStabilityManager mVisualStabilityManager = new VisualStabilityManager();
     private VisualStabilityManager.Callback mCallback = mock(VisualStabilityManager.Callback.class);

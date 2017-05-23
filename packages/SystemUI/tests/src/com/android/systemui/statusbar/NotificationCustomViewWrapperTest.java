@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.android.systemui.R;
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.NotificationViewWrapper;
 
@@ -37,15 +38,13 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 @Ignore("flaking")
-public class NotificationCustomViewWrapperTest {
+public class NotificationCustomViewWrapperTest extends SysuiTestCase {
 
-    private Context mContext;
     private ExpandableNotificationRow mRow;
 
     @Before
     @UiThreadTest
     public void setUp() {
-        mContext = InstrumentationRegistry.getTargetContext();
         mRow = new ExpandableNotificationRow(mContext, null);
     }
 

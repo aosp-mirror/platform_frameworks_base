@@ -21,6 +21,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static org.mockito.ArgumentMatchers.argThat;
 
 import android.metrics.LogMaker;
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -40,6 +41,7 @@ import java.util.Objects;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+@SmallTest
 public class KeyButtonViewTest extends SysuiTestCase {
 
     private KeyButtonView mKeyButtonView;
