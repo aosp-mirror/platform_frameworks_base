@@ -27,7 +27,6 @@ import android.graphics.Path;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 public class SlashDrawable extends Drawable {
 
@@ -85,7 +84,6 @@ public class SlashDrawable extends Drawable {
     }
 
     public void setSlashed(boolean slashed) {
-        Log.d("TestTest", "setSlashed " + slashed);
         if (mSlashed == slashed) return;
         // TODO: Animate.
         mSlashed = slashed;
@@ -95,7 +93,6 @@ public class SlashDrawable extends Drawable {
     @Override
     public void draw(@NonNull Canvas canvas) {
         canvas.save();
-        Log.d("TestTest", "draw " + mSlashed);
         if (mSlashed) {
             Matrix m = new Matrix();
             int width = getBounds().width();
