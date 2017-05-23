@@ -161,7 +161,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     private static final int[] SYSTEM_CREDENTIAL_UIDS = {
             Process.WIFI_UID, Process.VPN_UID,
-            Process.ROOT_UID };
+            Process.ROOT_UID, Process.SYSTEM_UID };
 
     // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
     // devices. The most basic of these is to show/hide notifications about missing features until

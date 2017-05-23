@@ -957,7 +957,7 @@ class ActivityStarter {
             // If we are not able to proceed, disassociate the activity from the task. Leaving an
             // activity in an incomplete state can lead to issues, such as performing operations
             // without a window container.
-            if (ActivityManager.isStartResultFatalError(result)
+            if (!ActivityManager.isStartResultSuccessful(result)
                     && mStartActivity.getTask() != null) {
                 mStartActivity.getTask().removeActivity(mStartActivity);
             }
@@ -1050,6 +1050,15 @@ class ActivityStarter {
             sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
 
             reusedActivity = setTargetStackAndMoveToFrontIfNeeded(reusedActivity);
+
+            final ActivityRecord outResult =
+                    outActivity != null && outActivity.length > 0 ? outActivity[0] : null;
+
+            // When there is a reused activity and the current result is a trampoline activity,
+            // set the reused activity as the result.
+            if (outResult != null && (outResult.finishing || outResult.noDisplay)) {
+                outActivity[0] = reusedActivity;
+            }
 
             if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
                 // We don't need to start a new activity, and the client said not to do anything

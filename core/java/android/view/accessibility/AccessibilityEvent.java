@@ -618,8 +618,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_WINDOW_CONTENT_CHANGED = 0x00000800;
 
     /**
-     * Represents the event of scrolling a view. This event type is generally not sent directly.
-     * @see View#onScrollChanged(int, int, int, int)
+     * Represents the event of scrolling a view.
      */
     public static final int TYPE_VIEW_SCROLLED = 0x00001000;
 

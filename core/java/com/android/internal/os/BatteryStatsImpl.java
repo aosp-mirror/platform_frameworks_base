@@ -185,7 +185,7 @@ public class BatteryStatsImpl extends BatteryStats {
             switch (msg.what) {
                 case MSG_UPDATE_WAKELOCKS:
                     synchronized (BatteryStatsImpl.this) {
-                        updateCpuTimeLocked();
+                        updateCpuTimeLocked(false /* updateCpuFreqData */);
                     }
                     if (cb != null) {
                         cb.batteryNeedsCpuUpdate();
@@ -3480,7 +3480,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 Slog.d(TAG, "Updating cpu time because screen is now " +
                         (unpluggedScreenOff ? "off" : "on"));
             }
-            updateCpuTimeLocked();
+            updateCpuTimeLocked(true /* updateCpuFreqData */);
             mOnBatteryScreenOffTimeBase.setRunning(unpluggedScreenOff, uptime, realtime);
             for (int i = 0; i < mUidStats.size(); i++) {
                 mUidStats.valueAt(i).updateOnBatteryScreenOffBgTimeBase(uptime, realtime);
@@ -10002,7 +10002,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * and we are on battery with screen off, we give more of the cpu time to those apps holding
      * wakelocks. If the screen is on, we just assign the actual cpu time an app used.
      */
-    public void updateCpuTimeLocked() {
+    public void updateCpuTimeLocked(boolean updateCpuFreqData) {
         if (mPowerProfile == null) {
             return;
         }
@@ -10117,7 +10117,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 });
 
-        readKernelUidCpuFreqTimesLocked();
+        if (updateCpuFreqData) {
+            readKernelUidCpuFreqTimesLocked();
+        }
 
         final long elapse = (mClocks.elapsedRealtime() - startTimeMs);
         if (DEBUG_ENERGY_CPU || (elapse >= 100)) {
