@@ -25,6 +25,10 @@
 #include <GraphicsJNI.h>
 #include <ScopedPrimitiveArray.h>
 
+#include <gui/BufferItemConsumer.h>
+#include <gui/BufferQueue.h>
+#include <gui/Surface.h>
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <private/EGL/cache.h>
@@ -851,6 +855,75 @@ static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
     return RenderProxy::copySurfaceInto(surface, left, top, right, bottom, &bitmap);
 }
 
+class ContextFactory : public IContextFactory {
+public:
+    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
+        return new AnimationContext(clock);
+    }
+};
+
+static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(JNIEnv* env,
+        jobject clazz, jlong renderNodePtr, jint jwidth, jint jheight) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    if (jwidth <= 0 || jheight <= 0) {
+        ALOGW("Invalid width %d or height %d", jwidth, jheight);
+        return nullptr;
+    }
+
+    uint32_t width = jwidth;
+    uint32_t height = jheight;
+
+    // Create a Surface wired up to a BufferItemConsumer
+    sp<IGraphicBufferProducer> producer;
+    sp<IGraphicBufferConsumer> rawConsumer;
+    BufferQueue::createBufferQueue(&producer, &rawConsumer);
+    rawConsumer->setMaxBufferCount(1);
+    sp<BufferItemConsumer> consumer = new BufferItemConsumer(rawConsumer,
+            GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_NEVER);
+    consumer->setDefaultBufferSize(width, height);
+    sp<Surface> surface = new Surface(producer);
+
+    // Render into the surface
+    {
+        ContextFactory factory;
+        RenderProxy proxy{false, renderNode, &factory};
+        proxy.loadSystemProperties();
+        proxy.setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
+        proxy.initialize(surface);
+        // Shadows can't be used via this interface, so just set the light source
+        // to all 0s.
+        proxy.setup(0, 0, 0);
+        proxy.setLightCenter((Vector3){0, 0, 0});
+        nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
+        UiFrameInfoBuilder(proxy.frameInfo())
+                .setVsync(vsync, vsync)
+                .addFlag(FrameInfoFlags::SurfaceCanvas);
+        proxy.syncAndDrawFrame();
+    }
+
+    // Yank out the GraphicBuffer
+    BufferItem bufferItem;
+    status_t err;
+    if ((err = consumer->acquireBuffer(&bufferItem, 0, true)) != OK) {
+        ALOGW("Failed to acquireBuffer, error %d (%s)", err, strerror(-err));
+        return nullptr;
+    }
+    sp<GraphicBuffer> buffer = bufferItem.mGraphicBuffer;
+    // We don't really care if this fails or not since we're just going to destroy this anyway
+    consumer->releaseBuffer(bufferItem);
+    if (!buffer.get()) {
+        ALOGW("GraphicBuffer is null?");
+        return nullptr;
+    }
+    if (buffer->getWidth() != width || buffer->getHeight() != height) {
+        ALOGW("GraphicBuffer size mismatch, got %dx%d expected %dx%d",
+                buffer->getWidth(), buffer->getHeight(), width, height);
+        // Continue I guess?
+    }
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer);
+    return createBitmap(env, bitmap.release(), android::bitmap::kBitmapCreateFlag_Mutable);
+}
+
 // ----------------------------------------------------------------------------
 // FrameMetricsObserver
 // ----------------------------------------------------------------------------
@@ -947,6 +1020,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_view_ThreadedRenderer_removeFrameMetricsObserver },
     { "nCopySurfaceInto", "(Landroid/view/Surface;IIIILandroid/graphics/Bitmap;)I",
                 (void*)android_view_ThreadedRenderer_copySurfaceInto },
+    { "nCreateHardwareBitmap", "(JII)Landroid/graphics/Bitmap;",
+            (void*)android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode },
 };
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
