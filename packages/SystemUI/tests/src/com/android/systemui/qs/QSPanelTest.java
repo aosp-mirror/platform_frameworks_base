@@ -29,6 +29,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.customize.QSCustomizer;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -36,6 +37,7 @@ import java.util.Collections;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+@Ignore("flaking")
 public class QSPanelTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;

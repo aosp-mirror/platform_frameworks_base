@@ -33,11 +33,13 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+@Ignore("flaking")
 public class QSFooterTest extends LeakCheckedTest {
 
     private QSFooter mFooter;

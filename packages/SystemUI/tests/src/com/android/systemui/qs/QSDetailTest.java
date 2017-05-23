@@ -37,12 +37,14 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+@Ignore("flaking")
 public class QSDetailTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;
