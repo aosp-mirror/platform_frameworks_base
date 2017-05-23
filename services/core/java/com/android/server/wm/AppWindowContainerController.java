@@ -107,7 +107,7 @@ public class AppWindowContainerController
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Remove starting " + mContainer
                     + ": startingWindow=" + mContainer.startingWindow
                     + " startingView=" + mContainer.startingSurface);
-            if (mContainer.startingWindow != null) {
+            if (mContainer.startingData != null) {
                 surface = mContainer.startingSurface;
                 mContainer.startingData = null;
                 mContainer.startingSurface = null;
@@ -164,18 +164,16 @@ public class AppWindowContainerController
         if (surface != null) {
             boolean abort = false;
             synchronized(mWindowMap) {
+                // If the window was successfully added, then
+                // we need to remove it.
                 if (container.removed || container.startingData == null) {
-                    // If the window was successfully added, then
-                    // we need to remove it.
-                    if (container.startingWindow != null) {
-                        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
-                                "Aborted starting " + container
-                                        + ": removed=" + container.removed
-                                        + " startingData=" + container.startingData);
-                        container.startingWindow = null;
-                        container.startingData = null;
-                        abort = true;
-                    }
+                    if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
+                            "Aborted starting " + container
+                                    + ": removed=" + container.removed
+                                    + " startingData=" + container.startingData);
+                    container.startingWindow = null;
+                    container.startingData = null;
+                    abort = true;
                 } else {
                     container.startingSurface = surface;
                 }
