@@ -438,6 +438,7 @@ public class BootReceiver extends BroadcastReceiver {
             String currentPass = "";
             boolean foundTreeOptimization = false;
             boolean foundQuotaFix = false;
+            boolean foundTimestampAdjustment = false;
             boolean foundOtherFix = false;
             String otherFixLine = null;
             for (int i = startLineNumber; i < endLineNumber; i++) {
@@ -470,6 +471,16 @@ public class BootReceiver extends BroadcastReceiver {
                     }
                 } else if (line.startsWith("Update quota info") && currentPass.equals("5")) {
                     // follows "[QUOTA WARNING]", ignore
+                } else if (line.startsWith("Timestamp(s) on inode") &&
+                        line.contains("beyond 2310-04-04 are likely pre-1970") &&
+                        currentPass.equals("1")) {
+                    Slog.i(TAG, "fs_stat, partition:" + partition + " found timestamp adjustment:"
+                            + line);
+                    // followed by next line, "Fix? yes"
+                    if (lines[i + 1].contains("Fix? yes")) {
+                        i++;
+                    }
+                    foundTimestampAdjustment = true;
                 } else {
                     line = line.trim();
                     // ignore empty msg or any msg before Pass 1
@@ -480,15 +491,17 @@ public class BootReceiver extends BroadcastReceiver {
                     }
                 }
             }
-            if (!foundOtherFix && foundTreeOptimization && foundQuotaFix) {
-                // not a real fix, so clear it.
-                Slog.i(TAG, "fs_stat, partition:" + partition +
-                        " quota fix due to tree optimization");
-                stat &= ~FS_STAT_FS_FIXED;
-            } else {
+            if (foundOtherFix) {
                 if (otherFixLine != null) {
                     Slog.i(TAG, "fs_stat, partition:" + partition + " fix:" + otherFixLine);
                 }
+            } else if (foundQuotaFix && !foundTreeOptimization) {
+                Slog.i(TAG, "fs_stat, got quota fix without tree optimization, partition:" +
+                        partition);
+            } else if ((foundTreeOptimization && foundQuotaFix) || foundTimestampAdjustment) {
+                // not a real fix, so clear it.
+                Slog.i(TAG, "fs_stat, partition:" + partition + " fix ignored");
+                stat &= ~FS_STAT_FS_FIXED;
             }
         }
         return stat;
