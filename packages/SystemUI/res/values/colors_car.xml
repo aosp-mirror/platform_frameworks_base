@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/**
- * Copyright (c) 2016, The Android Open Source Project
+/*
+ * Copyright 2017, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
  */
 -->
 <resources>
-    <string name="unknown_user_label">Unknown</string>
-    <string name="start_driving">Start Driving</string>
+    <color name="car_user_switcher_progress_bgcolor">#00000000</color> <!-- Transparent -->
+    <color name="car_user_switcher_progress_fgcolor">#80CBC4</color> <!-- Teal 200 -->
+    <color name="car_start_driving_background">#FAFAFA</color> <!-- Grey 50 -->
+    <color name="car_start_driving_text">#212121</color> <!-- Grey 900 -->
 </resources>
