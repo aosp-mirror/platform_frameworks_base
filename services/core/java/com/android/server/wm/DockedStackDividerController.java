@@ -191,12 +191,16 @@ public class DockedStackDividerController implements DimLayerUser {
                 mTmpRect);
         int dividerSize = mDividerWindowWidth - 2 * mDividerInsets;
         Configuration configuration = mDisplayContent.getConfiguration();
+        // The offset in the left (landscape)/top (portrait) is calculated with the minimized
+        // offset value with the divider size and any system insets in that direction.
         if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             outBounds.set(0, mTaskHeightInMinimizedMode + dividerSize + mTmpRect.top,
                     di.logicalWidth, di.logicalHeight);
         } else {
-            outBounds.set(mTaskHeightInMinimizedMode + dividerSize + mTmpRect.left, 0,
-                    di.logicalWidth, di.logicalHeight);
+            // In landscape append the left position with the statusbar height to match the
+            // minimized size height in portrait mode.
+            outBounds.set(mTaskHeightInMinimizedMode + dividerSize + mTmpRect.left + mTmpRect.top,
+                    0, di.logicalWidth, di.logicalHeight);
         }
     }
 
