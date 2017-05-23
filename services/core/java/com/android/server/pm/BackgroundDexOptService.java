@@ -36,6 +36,8 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.server.pm.dex.DexManager;
+import com.android.server.LocalServices;
+import com.android.server.PinnerService;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -366,11 +368,20 @@ public class BackgroundDexOptService extends JobService {
             return false;
         }
 
+        boolean result;
         if (params.getJobId() == JOB_POST_BOOT_UPDATE) {
-            return runPostBootUpdate(params, pm, pkgs);
+            result = runPostBootUpdate(params, pm, pkgs);
         } else {
-            return runIdleOptimization(params, pm, pkgs);
+            result = runIdleOptimization(params, pm, pkgs);
         }
+
+        PinnerService pinnerService = (PinnerService) LocalServices.getService(PinnerService.class);
+        if (pinnerService != null) {
+            Log.i(TAG, "Pinning optimized code");
+            pinnerService.update();
+        }
+
+        return result;
     }
 
     @Override

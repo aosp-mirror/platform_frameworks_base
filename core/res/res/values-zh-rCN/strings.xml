@@ -260,8 +260,7 @@
     <string name="notification_channel_updates" msgid="4794517569035110397">"更新"</string>
     <string name="notification_channel_network_status" msgid="5025648583129035447">"网络状态"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"网络提醒"</string>
-    <!-- no translation found for notification_channel_network_available (4531717914138179517) -->
-    <skip />
+    <string name="notification_channel_network_available" msgid="4531717914138179517">"有可用的网络"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN 状态"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"设备管理"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"提醒"</string>
@@ -492,8 +491,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指纹录入操作超时，请重试。"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"指纹操作已取消。"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"尝试次数过多，请稍后重试。"</string>
-    <!-- no translation found for fingerprint_error_lockout_permanent (5033251797919508137) -->
-    <skip />
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"尝试次数过多。指纹传感器已停用。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"请重试。"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"手指 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
@@ -779,19 +777,19 @@
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"已添加圆点 <xliff:g id="CELL_INDEX">%1$s</xliff:g>"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"图案绘制完成"</string>
     <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"图案区域。"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。%3$d的小部件%2$d。"</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"添加小部件。"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。%3$d的微件%2$d。"</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"添加微件。"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"空白"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"已展开解锁区域。"</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"已收起解锁区域。"</string>
-    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>小部件。"</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>微件。"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"用户选择器"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"状态"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"相机"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"媒体控制"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"已开始将小部件重新排序。"</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"已完成小部件重新排序。"</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"已删除小部件<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>。"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"已开始将微件重新排序。"</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"已完成微件重新排序。"</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"已删除微件<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>。"</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"展开解锁区域。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"滑动解锁。"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"图案解锁。"</string>
@@ -1208,7 +1206,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"点按即可选择语言和布局"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g>正在其他应用的上层显示内容"</string>
+    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"应用活动"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>正在其他应用的上层显示内容"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"如果您不想让<xliff:g id="NAME">%s</xliff:g>使用此功能，请点按以打开设置，然后关闭此功能。"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"关闭"</string>
@@ -1262,7 +1260,7 @@
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"请求忽略电池优化"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"允许应用请求相应的权限，以便忽略针对该应用的电池优化。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"双击可以进行缩放控制"</string>
-    <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加小部件。"</string>
+    <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加微件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>
     <string name="ime_action_search" msgid="658110271822807811">"搜索"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"发送"</string>

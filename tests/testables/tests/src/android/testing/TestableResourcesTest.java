@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import android.content.res.Resources;
 import android.support.test.InstrumentationRegistry;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.testables.R;
 
@@ -29,6 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class TestableResourcesTest {
 

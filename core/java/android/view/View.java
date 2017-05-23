@@ -19802,7 +19802,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && (mForegroundInfo == null || mForegroundInfo.mDrawable == null)) {
             mPrivateFlags |= PFLAG_SKIP_DRAW;
         }
-        requestLayout();
         invalidate();
     }
 

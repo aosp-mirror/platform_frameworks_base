@@ -55,6 +55,7 @@ import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -73,6 +74,7 @@ import org.mockito.MockitoAnnotations;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 
+@SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class NotificationManagerServiceTest extends NotificationTestCase {

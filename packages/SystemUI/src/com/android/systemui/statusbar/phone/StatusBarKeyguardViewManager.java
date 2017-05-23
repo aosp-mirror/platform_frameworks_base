@@ -29,6 +29,7 @@ import android.view.WindowManagerGlobal;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.keyguard.LatencyTracker;
@@ -99,12 +100,26 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mDeviceWillWakeUp;
     private boolean mDeferScrimFadeOut;
 
+    private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onEmergencyCallAction() {
+
+            // Since we won't get a setOccluded call we have to reset the view manually such that
+            // the bouncer goes away.
+            if (mOccluded) {
+                reset(false /* hideBouncerWhenShowing */);
+            }
+        }
+    };
+
     public StatusBarKeyguardViewManager(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
         mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
+        KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitorCallback);
     }
 
     public void registerStatusBar(StatusBar statusBar,

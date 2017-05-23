@@ -7061,6 +7061,14 @@ public final class ViewRootImpl implements ViewParent,
         if (mView == null || mStopped || mPausedForTransition) {
             return false;
         }
+
+        // Immediately flush pending content changed event (if any) to preserve event order
+        if (event.getEventType() != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                && mSendWindowContentChangedAccessibilityEvent != null
+                && mSendWindowContentChangedAccessibilityEvent.mSource != null) {
+            mSendWindowContentChangedAccessibilityEvent.removeCallbacksAndRun();
+        }
+
         // Intercept accessibility focus events fired by virtual nodes to keep
         // track of accessibility focus position in such nodes.
         final int eventType = event.getEventType();
@@ -7893,11 +7901,15 @@ public final class ViewRootImpl implements ViewParent,
             final long minEventIntevalMillis =
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
             if (timeSinceLastMillis >= minEventIntevalMillis) {
-                mSource.removeCallbacks(this);
-                run();
+                removeCallbacksAndRun();
             } else {
                 mSource.postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
             }
+        }
+
+        public void removeCallbacksAndRun() {
+            mSource.removeCallbacks(this);
+            run();
         }
     }
 }

@@ -29,6 +29,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.TriggerEvent;
+import android.hardware.TriggerEventListener;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -260,7 +262,7 @@ public class GestureLauncherService extends SystemService {
 
             SensorManager sensorManager = (SensorManager) mContext.getSystemService(
                     Context.SENSOR_SERVICE);
-            sensorManager.unregisterListener(mCameraLiftTriggerListener);
+            sensorManager.cancelTriggerSensor(mCameraLiftTriggerListener, mCameraLiftTriggerSensor);
         }
     }
 
@@ -281,15 +283,15 @@ public class GestureLauncherService extends SystemService {
                 com.android.internal.R.string.config_cameraLiftTriggerSensorStringType);
             mCameraLiftTriggerSensor = sensorManager.getDefaultSensor(
                     cameraLiftTriggerId,
-                    false /*wakeUp*/);
+                    true /*wakeUp*/);
 
             // Compare the camera lift trigger string type to that in the resource file to make
             // sure we are registering the correct sensor. This is redundant check, it
             // makes the code more robust.
             if (mCameraLiftTriggerSensor != null) {
                 if (sensorName.equals(mCameraLiftTriggerSensor.getStringType())) {
-                    mCameraLiftRegistered = sensorManager.registerListener(mCameraLiftTriggerListener,
-                            mCameraLiftTriggerSensor, 0);
+                    mCameraLiftRegistered = sensorManager.requestTriggerSensor(mCameraLiftTriggerListener,
+                            mCameraLiftTriggerSensor);
                 } else {
                     String message = String.format("Wrong configuration. Sensor type and sensor "
                             + "string type don't match: %s in resources, %s in the sensor.",
@@ -511,14 +513,18 @@ public class GestureLauncherService extends SystemService {
         }
     }
 
-    private final class CameraLiftTriggerEventListener implements SensorEventListener {
+    private final class CameraLiftTriggerEventListener extends TriggerEventListener {
         @Override
-        public void onSensorChanged(SensorEvent event) {
+        public void onTrigger(TriggerEvent event) {
             if (!mCameraLiftRegistered) {
               if (DBG) Slog.d(TAG, "Ignoring camera lift event because it's unregistered.");
               return;
             }
             if (event.sensor == mCameraLiftTriggerSensor) {
+                Resources resources = mContext.getResources();
+                SensorManager sensorManager = (SensorManager) mContext.getSystemService(
+                        Context.SENSOR_SERVICE);
+
                 if (DBG) {
                     float[] values = event.values;
                     Slog.d(TAG, String.format("Received a camera lift trigger event: " +
@@ -532,13 +538,13 @@ public class GestureLauncherService extends SystemService {
                 } else if (DBG) {
                     Slog.d(TAG, "Ignoring lift event because device is awake");
                 }
+
+                mCameraLiftRegistered = sensorManager.requestTriggerSensor(mCameraLiftTriggerListener,
+                        mCameraLiftTriggerSensor);
+
+                if (DBG) Slog.d(TAG, "Camera lift trigger sensor re-registered: " + mCameraLiftRegistered);
                 return;
             }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            // Ignored.
         }
     }
 }

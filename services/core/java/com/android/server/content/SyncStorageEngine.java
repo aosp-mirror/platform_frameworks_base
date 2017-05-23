@@ -18,6 +18,7 @@ package com.android.server.content;
 
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
+import android.accounts.AccountManager;
 import android.app.backup.BackupManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -27,6 +28,7 @@ import android.content.PeriodicSync;
 import android.content.SyncInfo;
 import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -348,6 +350,50 @@ public class SyncStorageEngine extends Handler {
     interface OnAuthorityRemovedListener {
         /** Called when an authority is removed. */
         void onAuthorityRemoved(EndPoint removedAuthority);
+    }
+
+    /**
+     * Validator that maintains a lazy cache of accounts and providers to tell if an authority or
+     * account is valid.
+     */
+    private static class AccountAuthorityValidator {
+        final private AccountManager mAccountManager;
+        final private PackageManager mPackageManager;
+        final private SparseArray<Account[]> mAccountsCache;
+        final private SparseArray<ArrayMap<String, Boolean>> mProvidersPerUserCache;
+
+        AccountAuthorityValidator(Context context) {
+            mAccountManager = context.getSystemService(AccountManager.class);
+            mPackageManager = context.getPackageManager();
+            mAccountsCache = new SparseArray<>();
+            mProvidersPerUserCache = new SparseArray<>();
+        }
+
+        // An account is valid if an installed authenticator has previously created that account
+        // on the device
+        boolean isAccountValid(Account account, int userId) {
+            Account[] accountsForUser = mAccountsCache.get(userId);
+            if (accountsForUser == null) {
+                accountsForUser = mAccountManager.getAccountsAsUser(userId);
+                mAccountsCache.put(userId, accountsForUser);
+            }
+            return ArrayUtils.contains(accountsForUser, account);
+        }
+
+        // An authority is only valid if it has a content provider installed on the system
+        boolean isAuthorityValid(String authority, int userId) {
+            ArrayMap<String, Boolean> authorityMap = mProvidersPerUserCache.get(userId);
+            if (authorityMap == null) {
+                authorityMap = new ArrayMap<>();
+                mProvidersPerUserCache.put(userId, authorityMap);
+            }
+            if (!authorityMap.containsKey(authority)) {
+                authorityMap.put(authority, mPackageManager.resolveContentProviderAsUser(authority,
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId) != null);
+            }
+            return authorityMap.get(authority);
+        }
     }
 
     // Primary list of all syncable authorities.  Also our global lock.
@@ -1502,12 +1548,13 @@ public class SyncStorageEngine extends Handler {
                 eventType = parser.next();
                 AuthorityInfo authority = null;
                 PeriodicSync periodicSync = null;
+                AccountAuthorityValidator validator = new AccountAuthorityValidator(mContext);
                 do {
                     if (eventType == XmlPullParser.START_TAG) {
                         tagName = parser.getName();
                         if (parser.getDepth() == 2) {
                             if ("authority".equals(tagName)) {
-                                authority = parseAuthority(parser, version);
+                                authority = parseAuthority(parser, version, validator);
                                 periodicSync = null;
                                 if (authority != null) {
                                     if (authority.ident > highestAuthorityId) {
@@ -1636,7 +1683,8 @@ public class SyncStorageEngine extends Handler {
         mMasterSyncAutomatically.put(userId, listen);
     }
 
-    private AuthorityInfo parseAuthority(XmlPullParser parser, int version) {
+    private AuthorityInfo parseAuthority(XmlPullParser parser, int version,
+            AccountAuthorityValidator validator) {
         AuthorityInfo authority = null;
         int id = -1;
         try {
@@ -1676,21 +1724,26 @@ public class SyncStorageEngine extends Handler {
                 if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
                     Slog.v(TAG_FILE, "Creating authority entry");
                 }
-                EndPoint info = null;
                 if (accountName != null && authorityName != null) {
-                    info = new EndPoint(
+                    EndPoint info = new EndPoint(
                             new Account(accountName, accountType),
                             authorityName, userId);
-                }
-                if (info != null) {
-                    authority = getOrCreateAuthorityLocked(info, id, false);
-                    // If the version is 0 then we are upgrading from a file format that did not
-                    // know about periodic syncs. In that case don't clear the list since we
-                    // want the default, which is a daily periodic sync.
-                    // Otherwise clear out this default list since we will populate it later with
-                    // the periodic sync descriptions that are read from the configuration file.
-                    if (version > 0) {
-                        authority.periodicSyncs.clear();
+                    if (validator.isAccountValid(info.account, userId)
+                            && validator.isAuthorityValid(authorityName, userId)) {
+                        authority = getOrCreateAuthorityLocked(info, id, false);
+                        // If the version is 0 then we are upgrading from a file format that did not
+                        // know about periodic syncs. In that case don't clear the list since we
+                        // want the default, which is a daily periodic sync.
+                        // Otherwise clear out this default list since we will populate it later
+                        // with
+                        // the periodic sync descriptions that are read from the configuration file.
+                        if (version > 0) {
+                            authority.periodicSyncs.clear();
+                        }
+                    } else {
+                        EventLog.writeEvent(0x534e4554, "35028827", -1,
+                                "account:" + info.account + " provider:" + authorityName + " user:"
+                                        + userId);
                     }
                 }
             }

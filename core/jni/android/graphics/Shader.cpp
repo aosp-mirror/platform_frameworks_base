@@ -50,9 +50,12 @@ static jint Color_HSVToColor(JNIEnv* env, jobject, jint alpha, jfloatArray hsvAr
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static void Shader_safeUnref(JNIEnv* env, jobject o, jlong shaderHandle) {
-    SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
+static void Shader_safeUnref(SkShader* shader) {
     SkSafeUnref(shader);
+}
+
+static jlong Shader_getNativeFinalizer(JNIEnv*, jobject) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&Shader_safeUnref));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +287,7 @@ static const JNINativeMethod gColorMethods[] = {
 };
 
 static const JNINativeMethod gShaderMethods[] = {
-    { "nativeSafeUnref",   "(J)V",    (void*)Shader_safeUnref },
+    { "nativeGetFinalizer",   "()J",    (void*)Shader_getNativeFinalizer },
 };
 
 static const JNINativeMethod gBitmapShaderMethods[] = {

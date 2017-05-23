@@ -129,6 +129,13 @@ public class BatteryInfo {
 
     public static BatteryInfo getBatteryInfo(Context context, Intent batteryBroadcast,
             BatteryStats stats, long elapsedRealtimeUs, boolean shortString) {
+        return getBatteryInfo(context, batteryBroadcast, stats, elapsedRealtimeUs, shortString,
+                stats.computeBatteryTimeRemaining(elapsedRealtimeUs), false);
+    }
+
+    public static BatteryInfo getBatteryInfo(Context context, Intent batteryBroadcast,
+            BatteryStats stats, long elapsedRealtimeUs, boolean shortString, long drainTimeUs,
+            boolean basedOnUsage) {
         BatteryInfo info = new BatteryInfo();
         info.mStats = stats;
         info.batteryLevel = Utils.getBatteryLevel(batteryBroadcast);
@@ -138,18 +145,25 @@ public class BatteryInfo {
 
         info.statusLabel = Utils.getBatteryStatus(resources, batteryBroadcast);
         if (!info.mCharging) {
-            final long drainTime = stats.computeBatteryTimeRemaining(elapsedRealtimeUs);
-            if (drainTime > 0) {
-                info.remainingTimeUs = drainTime;
+            if (drainTimeUs > 0) {
+                info.remainingTimeUs = drainTimeUs;
                 String timeString = Formatter.formatShortElapsedTime(context,
-                        drainTime / 1000);
+                        drainTimeUs / 1000);
                 info.remainingLabel = resources.getString(
-                        shortString ? R.string.power_remaining_duration_only_short
-                                : R.string.power_remaining_duration_only,
+                        shortString ?
+                                (basedOnUsage ?
+                                        R.string.power_remaining_duration_only_short_enhanced :
+                                        R.string.power_remaining_duration_only_short) :
+                                (basedOnUsage ?
+                                        R.string.power_remaining_duration_only_enhanced :
+                                        R.string.power_remaining_duration_only),
                         timeString);
                 info.chargeLabelString = resources.getString(
-                        shortString ? R.string.power_discharging_duration_short
-                                : R.string.power_discharging_duration,
+                        shortString ?
+                                R.string.power_discharging_duration_short :
+                                basedOnUsage ?
+                                        R.string.power_discharging_duration_enhanced :
+                                        R.string.power_discharging_duration,
                         info.batteryPercentString, timeString);
             } else {
                 info.remainingLabel = null;

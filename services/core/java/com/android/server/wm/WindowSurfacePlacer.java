@@ -15,6 +15,7 @@ import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AW
 import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+import static com.android.server.wm.AppTransition.TRANSIT_NONE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_CLOSE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
@@ -580,6 +581,11 @@ class WindowSurfacePlacer {
 
     private int maybeUpdateTransitToWallpaper(int transit, boolean openingAppHasWallpaper,
             boolean closingAppHasWallpaper) {
+        // Given no app transition pass it through instead of a wallpaper transition
+        if (transit == TRANSIT_NONE) {
+            return TRANSIT_NONE;
+        }
+
         // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper
         final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
         final WindowState oldWallpaper = mWallpaperControllerLocked.isWallpaperTargetAnimating()
