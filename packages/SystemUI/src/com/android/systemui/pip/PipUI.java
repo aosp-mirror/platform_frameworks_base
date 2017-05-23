@@ -72,7 +72,7 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
             return;
         }
 
-        mPipManager.onConfigurationChanged();
+        mPipManager.onConfigurationChanged(newConfig);
     }
 
     @Override
