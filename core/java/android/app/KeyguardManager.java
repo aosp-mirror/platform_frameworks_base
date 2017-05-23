@@ -33,7 +33,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.util.Log;
@@ -48,8 +47,8 @@ import com.android.internal.widget.LockPatternUtils;
 import java.util.List;
 
 /**
- * Class that can be used to lock and unlock the keyboard. The
- * actual class to control the keyboard locking is
+ * Class that can be used to lock and unlock the keyguard. The
+ * actual class to control the keyguard locking is
  * {@link android.app.KeyguardManager.KeyguardLock}.
  */
 @SystemService(Context.KEYGUARD_SERVICE)
@@ -343,11 +342,11 @@ public class KeyguardManager {
      * moves in and out of the foreground and does not require that any special
      * permissions be requested.
      *
-     * Enables you to lock or unlock the keyboard. Get an instance of this class by
+     * Enables you to lock or unlock the keyguard. Get an instance of this class by
      * calling {@link android.content.Context#getSystemService(java.lang.String) Context.getSystemService()}.
      * This class is wrapped by {@link android.app.KeyguardManager KeyguardManager}.
      * @param tag A tag that informally identifies who you are (for debugging who
-     *   is disabling he keyguard).
+     *   is disabling the keyguard).
      *
      * @return A {@link KeyguardLock} handle to use to disable and reenable the
      *   keyguard.
