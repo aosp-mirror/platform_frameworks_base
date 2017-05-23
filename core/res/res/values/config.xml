@@ -2958,4 +2958,7 @@
     <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
         must match the value of config_cameraLiftTriggerSensorType in OEM's HAL -->
     <string translatable="false" name="config_cameraLiftTriggerSensorStringType"></string>
+
+    <!-- Default number of days to retain for the automatic storage manager. -->
+    <integer translatable="false" name="config_storageManagerDaystoRetainDefault">90</integer>
 </resources>

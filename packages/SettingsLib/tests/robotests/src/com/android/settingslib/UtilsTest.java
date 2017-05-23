@@ -21,6 +21,12 @@ import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import android.content.res.Resources;
+
 @RunWith(SettingLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class UtilsTest {
@@ -53,5 +59,19 @@ public class UtilsTest {
             final String percentage = Utils.formatPercentage(TEST_PERCENTAGES[i], false);
             assertThat(percentage).isEqualTo(expectedPercentages[i]);
         }
+    }
+
+    @Test
+    public void testStorageManagerDaysToRetainUsesResources() {
+        Resources resources = mock(Resources.class);
+        when(resources.getInteger(
+                        eq(
+                                com.android
+                                        .internal
+                                        .R
+                                        .integer
+                                        .config_storageManagerDaystoRetainDefault)))
+                .thenReturn(60);
+        assertThat(Utils.getDefaultStorageManagerDaysToRetain(resources)).isEqualTo(60);
     }
 }
