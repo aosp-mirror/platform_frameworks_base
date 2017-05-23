@@ -484,7 +484,13 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
     if (isHardware()) {
-        outBitmap->allocPixels(info());
+        if (uirenderer::Properties::isSkiaEnabled()) {
+            // TODO: add color correctness for Skia pipeline - pass null color space for now
+            outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
+                    info().colorType(), info().alphaType(), nullptr));
+        } else {
+            outBitmap->allocPixels(info());
+        }
         uirenderer::renderthread::RenderProxy::copyGraphicBufferInto(graphicBuffer(), outBitmap);
         return;
     }
@@ -493,9 +499,13 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
 }
 
 void Bitmap::getSkBitmapForShaders(SkBitmap* outBitmap) {
-    outBitmap->setInfo(info(), rowBytes());
-    outBitmap->setPixelRef(this);
-    outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
+    if (isHardware() && uirenderer::Properties::isSkiaEnabled()) {
+        getSkBitmap(outBitmap);
+    } else {
+        outBitmap->setInfo(info(), rowBytes());
+        outBitmap->setPixelRef(this);
+        outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
+    }
 }
 
 void Bitmap::getBounds(SkRect* bounds) const {
