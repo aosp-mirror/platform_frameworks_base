@@ -981,6 +981,8 @@ public class BugreportProgressService extends Service {
         // Since we may be launched behind lockscreen, make sure that ChooserActivity doesn't finish
         // itself in onStop.
         chooserIntent.putExtra(ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP, true);
+        // Starting the activity from a service.
+        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(chooserIntent);
     }
 
