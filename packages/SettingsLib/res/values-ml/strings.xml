@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"പശ്ചാത്തല പ്രോസ‌സ്സ് പരിധി"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"എല്ലാ ANR-കളും ദൃശ്യമാക്കുക"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"പ‌ശ്ചാത്തല അപ്ലിക്കേഷനുകൾക്ക് അപ്ലിക്കേഷൻ പ്രതികരിക്കുന്നില്ല എന്ന ഡയലോഗ് കാണിക്കുക"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"ബാഹ്യമായതിൽ നിർബന്ധിച്ച് അനുവദിക്കുക"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, ബാഹ്യ സ്റ്റോറേജിലേക്ക് എഴുതപ്പെടുന്നതിന് ഏതൊരു ആപ്പിനെയും യോഗ്യമാക്കുന്നു"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"വലിപ്പം മാറ്റാൻ പ്രവർത്തനങ്ങളെ നിർബന്ധിക്കുക"</string>
@@ -319,9 +323,15 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ഈ ഫീച്ചർ പരീക്ഷണാത്മകമായതിനാൽ പ്രകടനത്തെ ബാധിച്ചേക്കാം."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ഉപയോഗിച്ച് അസാധുവാക്കി"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"ഏകദേശം <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
+    <!-- no translation found for power_remaining_duration_only_enhanced (5992456722677973678) -->
+    <skip />
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"മുഴുവൻ ചാർജാകാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
+    <!-- no translation found for power_remaining_duration_only_short_enhanced (7450425624026394823) -->
+    <skip />
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - ഏതാണ്ട് <xliff:g id="TIME">%2$s</xliff:g> ശേഷിക്കുന്നു"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (4401782117770255046) -->
+    <skip />
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - ഫുൾ ചാർജാകാൻ <xliff:g id="TIME">%2$s</xliff:g>"</string>
