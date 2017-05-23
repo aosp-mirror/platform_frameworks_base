@@ -778,14 +778,6 @@ public class BugreportProgressService extends Service {
      */
     private void onBugreportFinished(int id, Intent intent) {
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
-        // Since BugreportProvider and BugreportProgressService aren't tightly coupled,
-        // we need to make sure they are explicitly tied to a single unique notification URI
-        // so that the service can alert the provider of changes it has done (ie. new bug
-        // reports)
-        // See { @link Cursor#setNotificationUri } and {@link ContentResolver#notifyChanges }
-        final Uri notificationUri = BugreportStorageProvider.getNotificationUri();
-        mContext.getContentResolver().notifyChange(notificationUri, null, false);
-
         if (bugreportFile == null) {
             // Should never happen, dumpstate always set the file.
             Log.wtf(TAG, "Missing " + EXTRA_BUGREPORT + " on intent " + intent);
