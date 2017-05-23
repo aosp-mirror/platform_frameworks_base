@@ -37,18 +37,7 @@ public final class GraphicsEnvironment {
 
     public static void setupGraphicsEnvironment(Context context) {
         chooseDriver(context);
-
-        // Now that we've figured out which driver to use for this process, load and initialize it.
-        // This can take multiple frame periods, and it would otherwise happen as part of the first
-        // frame, increasing first-frame latency. Starting it here, as a low-priority background
-        // thread, means that it's usually done long before we start drawing the first frame,
-        // without significantly disrupting other activity launch work.
-        Thread eglInitThread = new Thread(
-                () -> {
-                    EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
-                },
-                "EGL Init");
-        eglInitThread.start();
+        earlyInitEGL();
     }
 
     private static void chooseDriver(Context context) {
@@ -99,6 +88,19 @@ public final class GraphicsEnvironment {
 
         if (DEBUG) Log.v(TAG, "gfx driver package libs: " + paths);
         setDriverPath(paths);
+    }
+
+    private static void earlyInitEGL() {
+        // Once we've figured out which driver to use for this process, load and initialize it.
+        // This can take multiple frame periods, and it would otherwise happen as part of the first
+        // frame, increasing first-frame latency. Starting it here means that it's usually done
+        // long before we start drawing the first frame.
+        Thread eglInitThread = new Thread(
+                () -> {
+                    EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
+                },
+                "EGL Init");
+        eglInitThread.start();
     }
 
     private static String chooseAbi(ApplicationInfo ai) {
