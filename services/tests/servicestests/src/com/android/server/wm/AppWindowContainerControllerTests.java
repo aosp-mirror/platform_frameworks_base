@@ -19,17 +19,23 @@ package com.android.server.wm;
 import org.junit.Test;
 
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.SecurityTest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.WindowManager;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.EMPTY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.util.function.Consumer;
 
 /**
  * Test class for {@link AppWindowContainerController}.
@@ -90,6 +96,9 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
         assertNull(atoken.startingSurface);
         assertNull(atoken.startingWindow);
         assertNull(atoken.startingData);
+        atoken.forAllWindows(windowState -> {
+            assertFalse(windowState.getBaseType() == TYPE_APPLICATION_STARTING);
+        }, true);
     }
 
     @Test
@@ -105,6 +114,22 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
         controller.removeStartingWindow();
         waitUntilHandlersIdle();
         assertNoStartingWindow(atoken);
+    }
+
+    @Test
+    public void testAddRemoveRace() throws Exception {
+
+        // There was once a race condition between adding and removing starting windows
+        for (int i = 0; i < 1000; i++) {
+            final WindowTestUtils.TestAppWindowContainerController controller =
+                    createAppWindowController();
+            controller.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
+                    android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                    false);
+            controller.removeStartingWindow();
+            waitUntilHandlersIdle();
+            assertNoStartingWindow(controller.getAppWindowToken(mDisplayContent));
+        }
     }
 
     @Test
