@@ -1760,7 +1760,9 @@ public class Resources {
     public final Theme newTheme() {
         Theme theme = new Theme();
         theme.setImpl(mResourcesImpl.newThemeImpl());
-        mThemeRefs.add(new WeakReference<>(theme));
+        synchronized (mThemeRefs) {
+            mThemeRefs.add(new WeakReference<>(theme));
+        }
         return theme;
     }
 
