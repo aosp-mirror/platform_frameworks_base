@@ -35,12 +35,12 @@ public final class GraphicsEnvironment {
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
 
-    public static void setupGraphicsEnvironment(Context context) {
-        chooseDriver(context);
-        earlyInitEGL();
-    }
-
-    private static void chooseDriver(Context context) {
+    /**
+     * Choose whether the current process should use the builtin or an updated driver.
+     *
+     * @hide
+     */
+    public static void chooseDriver(Context context) {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
         if (driverPackageName == null || driverPackageName.isEmpty()) {
             return;
@@ -90,11 +90,19 @@ public final class GraphicsEnvironment {
         setDriverPath(paths);
     }
 
-    private static void earlyInitEGL() {
-        // Once we've figured out which driver to use for this process, load and initialize it.
-        // This can take multiple frame periods, and it would otherwise happen as part of the first
-        // frame, increasing first-frame latency. Starting it here means that it's usually done
-        // long before we start drawing the first frame.
+    /**
+     * Start a background thread to initialize EGL.
+     *
+     * Initializing EGL involves loading and initializing the graphics driver. Some drivers take
+     * several 10s of milliseconds to do this, so doing it on-demand when an app tries to render
+     * its first frame adds directly to user-visible app launch latency. By starting it earlier
+     * on a separate thread, it can usually be finished well before the UI is ready to be drawn.
+     *
+     * Should only be called after chooseDriver().
+     *
+     * @hide
+     */
+    public static void earlyInitEGL() {
         Thread eglInitThread = new Thread(
                 () -> {
                     EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);

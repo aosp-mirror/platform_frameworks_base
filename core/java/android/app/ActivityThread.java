@@ -2890,6 +2890,9 @@ public final class ActivityThread {
             TAG, "Handling launch of " + r);
 
         // Initialize before creating the activity
+        if (!ThreadedRenderer.sRendererDisabled) {
+            GraphicsEnvironment.earlyInitEGL();
+        }
         WindowManagerGlobal.initialize();
 
         Activity a = performLaunchActivity(r, customIntent);
@@ -5401,7 +5404,6 @@ public final class ActivityThread {
                     if (packages != null) {
                         ThreadedRenderer.setupDiskCache(cacheDir);
                         RenderScriptCacheDir.setupDiskCache(cacheDir);
-                        GraphicsEnvironment.setupGraphicsEnvironment(context);
                     }
                 } catch (RemoteException e) {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -5412,6 +5414,7 @@ public final class ActivityThread {
             }
         }
 
+        GraphicsEnvironment.chooseDriver(context);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
