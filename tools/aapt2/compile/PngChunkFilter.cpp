@@ -75,7 +75,7 @@ PngChunkFilter::PngChunkFilter(const StringPiece& data) : data_(data) {
     window_start_ = 0;
     window_end_ = kPngSignatureSize;
   } else {
-    error_msg_ = "PNG does not start with PNG signature";
+    error_msg_ = "file does not start with PNG signature";
   }
 }
 
