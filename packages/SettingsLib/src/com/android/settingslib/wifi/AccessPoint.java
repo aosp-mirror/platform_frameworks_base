@@ -521,7 +521,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public boolean isMetered() {
         return mIsScoredNetworkMetered
                 || (mConfig != null && mConfig.meteredHint)
-                || (mInfo != null && mInfo.getMeteredHint());
+                || (mInfo != null && mInfo.getMeteredHint()
+                || (mNetworkInfo != null && mNetworkInfo.isMetered()));
     }
 
     public NetworkInfo getNetworkInfo() {
