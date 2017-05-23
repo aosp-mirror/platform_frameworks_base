@@ -299,7 +299,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     };
 
-    private boolean mEnableNextFingerprint;
     private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
     private SparseBooleanArray mUserTrustIsManaged = new SparseBooleanArray();
     private SparseBooleanArray mUserFingerprintAuthenticated = new SparseBooleanArray();
@@ -313,11 +312,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public synchronized static int getCurrentUser() {
         return sCurrentUser;
-    }
-
-    public void enableNextFingerprint() {
-        mEnableNextFingerprint = true;
-        if (DEBUG) Log.v(TAG, "enabling next fingerprint");
     }
 
     @Override
@@ -1133,8 +1127,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean shouldListenForFingerprint() {
         return (mKeyguardIsVisible || !mDeviceInteractive ||
                     (mBouncer && !mKeyguardGoingAway) || mGoingToSleep)
-                && (!mSwitchingUser && !isFingerprintDisabled(getCurrentUser()) ||
-                mEnableNextFingerprint);
+                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser());
     }
 
     private void startListeningForFingerprint() {
@@ -1161,11 +1154,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private void stopListeningForFingerprint() {
         if (DEBUG) Log.v(TAG, "stopListeningForFingerprint()");
-        if (mEnableNextFingerprint) {
-            if (DEBUG) Log.v(TAG, "listening to one more fingerprint");
-            return;
-        }
-
         if (mFingerprintRunningState == FINGERPRINT_STATE_RUNNING) {
             mFingerprintCancelSignal.cancel();
             mFingerprintCancelSignal = null;
@@ -1471,7 +1459,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private void handleKeyguardReset() {
         if (DEBUG) Log.d(TAG, "handleKeyguardReset");
         updateFingerprintListeningState();
-        mEnableNextFingerprint = false;
         mNeedsSlowUnlockTransition = resolveNeedsSlowUnlockTransition();
     }
 
