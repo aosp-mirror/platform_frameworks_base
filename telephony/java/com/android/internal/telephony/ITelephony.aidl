@@ -1296,6 +1296,16 @@ interface ITelephony {
     void carrierActionSetRadioEnabled(int subId, boolean enabled);
 
     /**
+     * Action set from carrier signalling broadcast receivers to start/stop reporting default
+     * network conditions.
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @param report control start/stop reporting default network events.
+     * @hide
+     */
+    void carrierActionReportDefaultNetworkStatus(int subId, boolean report);
+
+    /**
      * Get aggregated video call data usage since boot.
      * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
      *
