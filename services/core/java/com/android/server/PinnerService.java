@@ -16,12 +16,15 @@
 
 package com.android.server;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -68,6 +71,19 @@ public final class PinnerService extends SystemService {
 
     private PinnerHandler mPinnerHandler = null;
 
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          // If this user's camera app has been updated, update pinned files accordingly.
+          if (intent.getAction() == Intent.ACTION_PACKAGE_REPLACED) {
+                Uri packageUri = intent.getData();
+                ApplicationInfo cameraInfo = getCameraInfo(UserHandle.USER_SYSTEM);
+                if (cameraInfo.packageName == packageUri.getSchemeSpecificPart()) {
+                  update();
+                }
+            }
+        }
+    };
 
     public PinnerService(Context context) {
         super(context);
@@ -76,6 +92,11 @@ public final class PinnerService extends SystemService {
         mShouldPinCamera = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerCameraApp);
         mPinnerHandler = new PinnerHandler(BackgroundThread.get().getLooper());
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addDataScheme("package");
+        mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
     @Override
@@ -85,6 +106,7 @@ public final class PinnerService extends SystemService {
         }
         mBinderService = new BinderService();
         publishBinderService("pinner", mBinderService);
+        publishLocalService(PinnerService.class, this);
 
         mPinnerHandler.obtainMessage(PinnerHandler.PIN_ONSTART_MSG).sendToTarget();
         mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, UserHandle.USER_SYSTEM, 0)
@@ -100,6 +122,17 @@ public final class PinnerService extends SystemService {
     @Override
     public void onSwitchUser(int userHandle) {
         mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, userHandle, 0).sendToTarget();
+    }
+
+    /**
+     * Update the currently pinned files.
+     * Specifically, this only updates camera pinning.
+     * The other files pinned in onStart will not need to be updated.
+     */
+    public void update() {
+        Slog.i(TAG, "Updating pinned files.");
+        mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, UserHandle.USER_SYSTEM, 0)
+                      .sendToTarget();
     }
 
     /**
@@ -202,13 +235,10 @@ public final class PinnerService extends SystemService {
         return cameraResolveInfo.activityInfo.applicationInfo;
     }
 
+    /**
+     * If the camera app is already pinned, unpin and repin it.
+     */
     private boolean pinCamera(int userHandle){
-        //we may have already pinned a camera app.  If we've pinned this
-        //camera app, we're done.  otherwise, unpin and pin the new app
-        if (alreadyPinned(userHandle)){
-            return true;
-        }
-
         ApplicationInfo cameraInfo = getCameraInfo(userHandle);
         if (cameraInfo == null) {
             return false;
