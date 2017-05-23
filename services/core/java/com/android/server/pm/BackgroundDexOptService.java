@@ -177,6 +177,7 @@ public class BackgroundDexOptService extends JobService {
 
         mAbortPostBootUpdate.set(false);
 
+        ArraySet<String> updatedPackages = new ArraySet<>();
         for (String pkg : pkgs) {
             if (mAbortPostBootUpdate.get()) {
                 // JobScheduler requested an early abort.
@@ -210,11 +211,15 @@ public class BackgroundDexOptService extends JobService {
             // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
             // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
             // trade-off worth doing to save boot time work.
-            pm.performDexOpt(pkg,
+            int result = pm.performDexOptWithStatus(pkg,
                     /* checkProfiles */ false,
                     PackageManagerService.REASON_BOOT,
                     /* force */ false);
+            if (result == PackageDexOptimizer.DEX_OPT_PERFORMED)  {
+                updatedPackages.add(pkg);
+            }
         }
+        notifyPinService(updatedPackages);
         // Ran to completion, so we abandon our timeslice and do not reschedule.
         jobFinished(jobParams, /* reschedule */ false);
     }
@@ -267,6 +272,7 @@ public class BackgroundDexOptService extends JobService {
     private int optimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
             long lowStorageThreshold, boolean is_for_primary_dex,
             ArraySet<String> failedPackageNames) {
+        ArraySet<String> updatedPackages = new ArraySet<>();
         for (String pkg : pkgs) {
             int abort_code = abortIdleOptimizations(lowStorageThreshold);
             if (abort_code != OPTIMIZE_CONTINUE) {
@@ -286,14 +292,21 @@ public class BackgroundDexOptService extends JobService {
 
             // Optimize package if needed. Note that there can be no race between
             // concurrent jobs because PackageDexOptimizer.performDexOpt is synchronized.
-            boolean success = is_for_primary_dex
-                    ? pm.performDexOpt(pkg,
-                            /* checkProfiles */ true,
-                            PackageManagerService.REASON_BACKGROUND_DEXOPT,
-                            /* force */ false)
-                    : pm.performDexOptSecondary(pkg,
-                            PackageManagerService.REASON_BACKGROUND_DEXOPT,
-                            /* force */ false);
+            boolean success;
+            if (is_for_primary_dex) {
+                int result = pm.performDexOptWithStatus(pkg,
+                        /* checkProfiles */ true,
+                        PackageManagerService.REASON_BACKGROUND_DEXOPT,
+                        /* force */ false);
+                success = result != PackageDexOptimizer.DEX_OPT_FAILED;
+                if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
+                    updatedPackages.add(pkg);
+                }
+            } else {
+                success = pm.performDexOptSecondary(pkg,
+                        PackageManagerService.REASON_BACKGROUND_DEXOPT,
+                        /* force */ false);
+            }
             if (success) {
                 // Dexopt succeeded, remove package from the list of failing ones.
                 synchronized (failedPackageNames) {
@@ -301,6 +314,7 @@ public class BackgroundDexOptService extends JobService {
                 }
             }
         }
+        notifyPinService(updatedPackages);
         return OPTIMIZE_PROCESSED;
     }
 
@@ -375,12 +389,6 @@ public class BackgroundDexOptService extends JobService {
             result = runIdleOptimization(params, pm, pkgs);
         }
 
-        PinnerService pinnerService = (PinnerService) LocalServices.getService(PinnerService.class);
-        if (pinnerService != null) {
-            Log.i(TAG, "Pinning optimized code");
-            pinnerService.update();
-        }
-
         return result;
     }
 
@@ -396,5 +404,13 @@ public class BackgroundDexOptService extends JobService {
             mAbortIdleOptimization.set(true);
         }
         return false;
+    }
+
+    private void notifyPinService(ArraySet<String> updatedPackages) {
+        PinnerService pinnerService = LocalServices.getService(PinnerService.class);
+        if (pinnerService != null) {
+            Log.i(TAG, "Pinning optimized code " + updatedPackages);
+            pinnerService.update(updatedPackages);
+        }
     }
 }
