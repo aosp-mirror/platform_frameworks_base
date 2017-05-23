@@ -2401,17 +2401,26 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void setAlpha(float alpha) {
         super.setAlpha(alpha);
-        updateFullyVisibleState();
+        updateFullyVisibleState(false /* forceNotFullyVisible */);
+    }
+
+    /**
+     * Must be called before starting a ViewPropertyAnimator alpha animation because those
+     * do NOT call setAlpha and therefore don't properly update the fullyVisibleState.
+     */
+    public void notifyStartFading() {
+        updateFullyVisibleState(true /* forceNotFullyVisible */);
     }
 
     @Override
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
-        updateFullyVisibleState();
+        updateFullyVisibleState(false /* forceNotFullyVisible */);
     }
 
-    private void updateFullyVisibleState() {
-        mNotificationStackScroller.setParentNotFullyVisible(getAlpha() != 1.0f
+    private void updateFullyVisibleState(boolean forceNotFullyVisible) {
+        mNotificationStackScroller.setParentNotFullyVisible(forceNotFullyVisible
+                || getAlpha() != 1.0f
                 || getVisibility() != VISIBLE);
     }
 

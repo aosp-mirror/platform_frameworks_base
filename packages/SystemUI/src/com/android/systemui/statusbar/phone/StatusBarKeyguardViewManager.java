@@ -381,6 +381,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 } else {
                     mScrimController.animateGoingToFullShade(delay, fadeoutDuration);
                     mStatusBar.finishKeyguardFadingAway();
+                    mFingerprintUnlockController.finishKeyguardFadingAway();
                 }
             }
             mStatusBarWindowManager.setKeyguardShowing(false);
