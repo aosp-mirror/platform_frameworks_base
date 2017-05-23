@@ -54,6 +54,7 @@ import libcore.io.IoUtils;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -78,6 +79,7 @@ import java.util.concurrent.TimeUnit;
  * Run: adb shell am instrument -e class com.android.server.net.ConnOnActivityStartTest -w \
  *     com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
+@Ignore
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class ConnOnActivityStartTest {
