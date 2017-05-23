@@ -2603,23 +2603,25 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         f.mTargetIndex = f.mTarget != null ? f.mTarget.mIndex : -1;
                         if (DEBUG) Log.v(TAG, "retainNonConfig: keeping retained " + f);
                     }
-                    boolean addedChild = false;
+                    FragmentManagerNonConfig child;
                     if (f.mChildFragmentManager != null) {
                         f.mChildFragmentManager.saveNonConfig();
-                        FragmentManagerNonConfig child = f.mChildFragmentManager.mSavedNonConfig;
-                        if (child != null) {
-                            if (childFragments == null) {
-                                childFragments = new ArrayList<>();
-                                for (int j = 0; j < i; j++) {
-                                    childFragments.add(null);
-                                }
-                            }
-                            childFragments.add(child);
-                            addedChild = true;
+                        child = f.mChildFragmentManager.mSavedNonConfig;
+                    } else {
+                        // f.mChildNonConfig may be not null, when the parent fragment is
+                        // in the backstack.
+                        child = f.mChildNonConfig;
+                    }
+
+                    if (childFragments == null && child != null) {
+                        childFragments = new ArrayList<>(mActive.size());
+                        for (int j = 0; j < i; j++) {
+                            childFragments.add(null);
                         }
                     }
-                    if (childFragments != null && !addedChild) {
-                        childFragments.add(null);
+
+                    if (childFragments != null) {
+                        childFragments.add(child);
                     }
                 }
             }
