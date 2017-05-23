@@ -52,8 +52,8 @@ oneway interface IAutoFillManagerClient {
       * Sets the views to track. If saveOnAllViewsInvisible is set and all these view are invisible
       * the session is finished automatically.
       */
-    void setTrackedViews(int sessionId, in List<AutofillId> ids,
-            boolean saveOnAllViewsInvisible);
+    void setTrackedViews(int sessionId, in @nullable AutofillId[] savableIds,
+            boolean saveOnAllViewsInvisible, in @nullable AutofillId[] fillableIds);
 
     /**
      * Requests showing the fill UI.
