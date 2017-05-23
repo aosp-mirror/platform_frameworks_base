@@ -154,7 +154,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     public static final String PERMISSION_SYSTEM = "SYSTEM";
 
-    class NetdResponseCode {
+    static class NetdResponseCode {
         /* Keep in sync with system/netd/server/ResponseCode.h */
         public static final int InterfaceListResult       = 110;
         public static final int TetherInterfaceListResult = 111;
@@ -229,8 +229,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      * If both locks need to be held, then they should be obtained in the order:
      * first {@link #mQuotaLock} and then {@link #mRulesLock}.
      */
-    private Object mQuotaLock = new Object();
-    private Object mRulesLock = new Object();
+    private final Object mQuotaLock = new Object();
+    private final Object mRulesLock = new Object();
 
     /** Set of interfaces with active quotas. */
     @GuardedBy("mQuotaLock")
@@ -275,7 +275,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @GuardedBy("mQuotaLock")
     private volatile boolean mDataSaverMode;
 
-    private Object mIdleTimerLock = new Object();
+    private final Object mIdleTimerLock = new Object();
     /** Set of interfaces with active idle timers. */
     private static class IdleTimerParams {
         public final int timeout;
