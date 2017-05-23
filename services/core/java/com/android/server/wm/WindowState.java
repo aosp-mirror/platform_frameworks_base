@@ -1403,6 +1403,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         || ((mAppToken != null) && (mAppToken.mAppAnimator.animation != null)));
     }
 
+    // TODO: Another visibility method that was added late in the release to minimize risk.
+    @Override
+    public boolean canAffectSystemUiFlags() {
+        final boolean shown = mWinAnimator.getShown();
+        final boolean exiting = mAnimatingExit || mDestroying
+                || mAppToken != null && mAppToken.hidden;
+        final boolean translucent = mAttrs.alpha == 0.0f;
+        return shown && !exiting && !translucent;
+    }
+
     /**
      * Like isOnScreen, but returns false if the surface hasn't yet
      * been drawn.
