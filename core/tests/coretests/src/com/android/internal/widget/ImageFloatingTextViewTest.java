@@ -38,6 +38,7 @@ public class ImageFloatingTextViewTest {
     public void setup() {
         mContext = InstrumentationRegistry.getTargetContext();
         mView = new ImageFloatingTextView(mContext, null, 0, 0);
+        mView.setMaxLines(9);
         mTextView = new TextView(mContext, null, 0, 0);
         mTextView.setMaxLines(9);
     }
