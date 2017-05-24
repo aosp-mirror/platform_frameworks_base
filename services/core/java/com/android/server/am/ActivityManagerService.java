@@ -255,7 +255,6 @@ import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -1320,11 +1319,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean mDidAppSwitch;
 
     /**
-     * Last time (in realtime) at which we checked for power usage.
-     */
-    long mLastPowerCheckRealtime;
-
-    /**
      * Last time (in uptime) at which we checked for power usage.
      */
     long mLastPowerCheckUptime;
@@ -1658,7 +1652,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int POST_HEAVY_NOTIFICATION_MSG = 24;
     static final int CANCEL_HEAVY_NOTIFICATION_MSG = 25;
     static final int SHOW_STRICT_MODE_VIOLATION_UI_MSG = 26;
-    static final int CHECK_EXCESSIVE_WAKE_LOCKS_MSG = 27;
+    static final int CHECK_EXCESSIVE_POWER_USE_MSG = 27;
     static final int CLEAR_DNS_CACHE_MSG = 28;
     static final int UPDATE_HTTP_PROXY_MSG = 29;
     static final int SHOW_COMPAT_MODE_DIALOG_UI_MSG = 30;
@@ -2123,12 +2117,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } catch (RemoteException e) {
                 }
             } break;
-            case CHECK_EXCESSIVE_WAKE_LOCKS_MSG: {
+            case CHECK_EXCESSIVE_POWER_USE_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    checkExcessivePowerUsageLocked(true);
-                    removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                    Message nmsg = obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                    sendMessageDelayed(nmsg, mConstants.POWER_CHECK_DELAY);
+                    checkExcessivePowerUsageLocked();
+                    removeMessages(CHECK_EXCESSIVE_POWER_USE_MSG);
+                    Message nmsg = obtainMessage(CHECK_EXCESSIVE_POWER_USE_MSG);
+                    sendMessageDelayed(nmsg, mConstants.POWER_CHECK_INTERVAL);
                 }
             } break;
             case REPORT_MEM_USAGE_MSG: {
@@ -3003,6 +2997,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                     pr.curCpuTime += st.rel_utime + st.rel_stime;
+                                    if (pr.lastCpuTime == 0) {
+                                        pr.lastCpuTime = pr.curCpuTime;
+                                    }
                                 } else {
                                     BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
                                     if (ps == null || !ps.isActive()) {
@@ -7253,8 +7250,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 // Start looking for apps that are abusing wake locks.
-                Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                mHandler.sendMessageDelayed(nmsg, mConstants.POWER_CHECK_DELAY);
+                Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_POWER_USE_MSG);
+                mHandler.sendMessageDelayed(nmsg, mConstants.POWER_CHECK_INTERVAL);
                 // Tell anyone interested that we are done booting!
                 SystemProperties.set("sys.boot_completed", "1");
 
@@ -12445,12 +12442,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mStackSupervisor.goingToSleepLocked();
             sendNotifyVrManagerOfSleepState(true);
             updateOomAdjLocked();
-
-            // Initialize the wake times of all processes.
-            checkExcessivePowerUsageLocked(false);
-            mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-            Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-            mHandler.sendMessageDelayed(nmsg, mConstants.POWER_CHECK_DELAY);
         }
 
         // Also update state in a special way for running foreground services UI.
@@ -15951,9 +15942,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mBooting=" + mBooting
                         + " mCallFinishBooting=" + mCallFinishBooting
                         + " mBootAnimationComplete=" + mBootAnimationComplete);
-                pw.print("  mLastPowerCheckRealtime=");
-                        TimeUtils.formatDuration(mLastPowerCheckRealtime, pw);
-                        pw.println("");
                 pw.print("  mLastPowerCheckUptime=");
                         TimeUtils.formatDuration(mLastPowerCheckUptime, pw);
                         pw.println("");
@@ -16608,8 +16596,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         Collections.sort(list, comparator);
 
-        final long curRealtime = SystemClock.elapsedRealtime();
-        final long realtimeSince = curRealtime - service.mLastPowerCheckRealtime;
         final long curUptime = SystemClock.uptimeMillis();
         final long uptimeSince = curUptime - service.mLastPowerCheckUptime;
 
@@ -16706,24 +16692,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.print(" hasAboveClient="); pw.println(r.hasAboveClient);
 
                 if (r.setProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
-                    if (r.lastWakeTime != 0) {
-                        long wtime;
-                        BatteryStatsImpl stats = service.mBatteryStatsService.getActiveStatistics();
-                        synchronized (stats) {
-                            wtime = stats.getProcessWakeTime(r.info.uid,
-                                    r.pid, curRealtime);
-                        }
-                        long timeUsed = wtime - r.lastWakeTime;
-                        pw.print(prefix);
-                        pw.print("    ");
-                        pw.print("keep awake over ");
-                        TimeUtils.formatDuration(realtimeSince, pw);
-                        pw.print(" used ");
-                        TimeUtils.formatDuration(timeUsed, pw);
-                        pw.print(" (");
-                        pw.print((timeUsed*100)/realtimeSince);
-                        pw.println("%)");
-                    }
                     if (r.lastCpuTime != 0) {
                         long timeUsed = r.curCpuTime - r.lastCpuTime;
                         pw.print(prefix);
@@ -21862,58 +21830,28 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    final void checkExcessivePowerUsageLocked(boolean doKills) {
+    final void checkExcessivePowerUsageLocked() {
         updateCpuStatsNow();
 
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-        boolean doWakeKills = doKills;
-        boolean doCpuKills = doKills;
-        if (mLastPowerCheckRealtime == 0) {
-            doWakeKills = false;
-        }
+        boolean doCpuKills = true;
         if (mLastPowerCheckUptime == 0) {
             doCpuKills = false;
         }
-        if (stats.isScreenOn()) {
-            doWakeKills = false;
-        }
-        final long curRealtime = SystemClock.elapsedRealtime();
-        final long realtimeSince = curRealtime - mLastPowerCheckRealtime;
         final long curUptime = SystemClock.uptimeMillis();
         final long uptimeSince = curUptime - mLastPowerCheckUptime;
-        mLastPowerCheckRealtime = curRealtime;
         mLastPowerCheckUptime = curUptime;
-        if (realtimeSince < mConstants.WAKE_LOCK_MIN_CHECK_DURATION) {
-            doWakeKills = false;
-        }
-        if (uptimeSince < mConstants.CPU_MIN_CHECK_DURATION) {
-            doCpuKills = false;
-        }
         int i = mLruProcesses.size();
         while (i > 0) {
             i--;
             ProcessRecord app = mLruProcesses.get(i);
             if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
-                long wtime;
-                synchronized (stats) {
-                    wtime = stats.getProcessWakeTime(app.info.uid,
-                            app.pid, curRealtime);
+                if (app.lastCpuTime <= 0) {
+                    continue;
                 }
-                long wtimeUsed = wtime - app.lastWakeTime;
                 long cputimeUsed = app.curCpuTime - app.lastCpuTime;
                 if (DEBUG_POWER) {
                     StringBuilder sb = new StringBuilder(128);
-                    sb.append("Wake for ");
-                    app.toShortString(sb);
-                    sb.append(": over ");
-                    TimeUtils.formatDuration(realtimeSince, sb);
-                    sb.append(" used ");
-                    TimeUtils.formatDuration(wtimeUsed, sb);
-                    sb.append(" (");
-                    sb.append((wtimeUsed*100)/realtimeSince);
-                    sb.append("%)");
-                    Slog.i(TAG_POWER, sb.toString());
-                    sb.setLength(0);
                     sb.append("CPU for ");
                     app.toShortString(sb);
                     sb.append(": over ");
@@ -21925,29 +21863,33 @@ public class ActivityManagerService extends IActivityManager.Stub
                     sb.append("%)");
                     Slog.i(TAG_POWER, sb.toString());
                 }
-                // If a process has held a wake lock for more
-                // than 50% of the time during this period,
-                // that sounds bad.  Kill!
-                if (doWakeKills && realtimeSince > 0
-                        && ((wtimeUsed*100)/realtimeSince) >= 50) {
-                    synchronized (stats) {
-                        stats.reportExcessiveWakeLocked(app.info.uid, app.processName,
-                                realtimeSince, wtimeUsed);
+                // If the process has used too much CPU over the last duration, the
+                // user probably doesn't want this, so kill!
+                if (doCpuKills && uptimeSince > 0) {
+                    // What is the limit for this process?
+                    int cpuLimit;
+                    long checkDur = curUptime - app.whenUnimportant;
+                    if (checkDur <= mConstants.POWER_CHECK_INTERVAL) {
+                        cpuLimit = mConstants.POWER_CHECK_MAX_CPU_1;
+                    } else if (checkDur <= (mConstants.POWER_CHECK_INTERVAL*2)
+                            || app.setProcState <= ActivityManager.PROCESS_STATE_HOME) {
+                        cpuLimit = mConstants.POWER_CHECK_MAX_CPU_2;
+                    } else if (checkDur <= (mConstants.POWER_CHECK_INTERVAL*3)) {
+                        cpuLimit = mConstants.POWER_CHECK_MAX_CPU_3;
+                    } else {
+                        cpuLimit = mConstants.POWER_CHECK_MAX_CPU_4;
                     }
-                    app.kill("excessive wake held " + wtimeUsed + " during " + realtimeSince, true);
-                    app.baseProcessTracker.reportExcessiveWake(app.pkgList);
-                } else if (doCpuKills && uptimeSince > 0
-                        && ((cputimeUsed*100)/uptimeSince) >= 25) {
-                    synchronized (stats) {
-                        stats.reportExcessiveCpuLocked(app.info.uid, app.processName,
-                                uptimeSince, cputimeUsed);
+                    if (((cputimeUsed*100)/uptimeSince) >= cpuLimit) {
+                        synchronized (stats) {
+                            stats.reportExcessiveCpuLocked(app.info.uid, app.processName,
+                                    uptimeSince, cputimeUsed);
+                        }
+                        app.kill("excessive cpu " + cputimeUsed + " during " + uptimeSince
+                                + " dur=" + checkDur + " limit=" + cpuLimit, true);
+                        app.baseProcessTracker.reportExcessiveCpu(app.pkgList);
                     }
-                    app.kill("excessive cpu " + cputimeUsed + " during " + uptimeSince, true);
-                    app.baseProcessTracker.reportExcessiveCpu(app.pkgList);
-                } else {
-                    app.lastWakeTime = wtime;
-                    app.lastCpuTime = app.curCpuTime;
                 }
+                app.lastCpuTime = app.curCpuTime;
             }
         }
     }
@@ -22121,15 +22063,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (setImportant && !curImportant) {
                 // This app is no longer something we consider important enough to allow to
                 // use arbitrary amounts of battery power.  Note
-                // its current wake lock time to later know to kill it if
+                // its current CPU time to later know to kill it if
                 // it is not behaving well.
-                BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-                synchronized (stats) {
-                    app.lastWakeTime = stats.getProcessWakeTime(app.info.uid,
-                            app.pid, nowElapsed);
-                }
-                app.lastCpuTime = app.curCpuTime;
-
+                app.whenUnimportant = now;
+                app.lastCpuTime = 0;
             }
             // Inform UsageStats of important process state change
             // Must be called before updating setProcState
