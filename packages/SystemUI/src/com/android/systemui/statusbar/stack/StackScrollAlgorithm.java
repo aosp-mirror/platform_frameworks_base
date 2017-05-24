@@ -410,7 +410,7 @@ public class StackScrollAlgorithm {
             if (mIsExpanded) {
                 // Ensure that the heads up is always visible even when scrolled off
                 clampHunToTop(ambientState, row, childState);
-                if (i == 0) {
+                if (i == 0 && row.isAboveShelf()) {
                     // the first hun can't get off screen.
                     clampHunToMaxTranslation(ambientState, row, childState);
                 }
@@ -447,10 +447,14 @@ public class StackScrollAlgorithm {
     private void clampHunToMaxTranslation(AmbientState ambientState, ExpandableNotificationRow row,
             ExpandableViewState childState) {
         float newTranslation;
-        float bottomPosition = ambientState.getMaxHeadsUpTranslation() - row.getCollapsedHeight();
+        float maxHeadsUpTranslation = ambientState.getMaxHeadsUpTranslation();
+        float maxShelfPosition = ambientState.getInnerHeight() + ambientState.getTopPadding()
+                + ambientState.getStackTranslation();
+        maxHeadsUpTranslation = Math.min(maxHeadsUpTranslation, maxShelfPosition);
+        float bottomPosition = maxHeadsUpTranslation - row.getCollapsedHeight();
         newTranslation = Math.min(childState.yTranslation, bottomPosition);
-        childState.height = (int) Math.max(childState.height
-                - (childState.yTranslation - newTranslation), row.getCollapsedHeight());
+        childState.height = (int) Math.min(childState.height, maxHeadsUpTranslation
+                - newTranslation);
         childState.yTranslation = newTranslation;
     }
 
