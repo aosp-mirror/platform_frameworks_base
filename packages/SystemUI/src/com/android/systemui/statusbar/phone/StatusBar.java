@@ -4138,6 +4138,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * fading.
      */
     public void fadeKeyguardWhilePulsing() {
+        mNotificationPanel.notifyStartFading();
         mNotificationPanel.animate()
                 .alpha(0f)
                 .setStartDelay(0)
@@ -4356,12 +4357,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController.setDozing(mDozing);
         mNotificationPanel.setDark(mDozing, animate);
         updateQsExpansionEnabled();
-
-        // Immediately abort the dozing from the doze scrim controller in case of wake-and-unlock
-        // for pulsing so the Keyguard fade-out animation scrim can take over.
-        mDozeScrimController.setDozing(mDozing &&
-                mFingerprintUnlockController.getMode()
-                        != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING, animate);
+        mDozeScrimController.setDozing(mDozing, animate);
         updateRowStates();
         Trace.endSection();
     }
