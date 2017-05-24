@@ -1294,7 +1294,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"انقر لاختيار لغة وتنسيق"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789 أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"نشاط التطبيقات"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"جارٍ عرض <xliff:g id="NAME">%s</xliff:g> فوق تطبيقات أخرى"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"يتم عرض <xliff:g id="NAME">%s</xliff:g> فوق التطبيقات الأخرى."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"إذا كنت لا تريد أن يستخدم <xliff:g id="NAME">%s</xliff:g> هذه الميزة، فانقر لفتح الإعدادات، ثم اختر تعطيلها."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"إيقاف"</string>
