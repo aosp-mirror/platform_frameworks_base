@@ -18531,7 +18531,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         pkg.staticSharedLibVersion);
                 if (libEntry != null) {
                     for (int currUserId : allUsers) {
-                        if (userId != UserHandle.USER_ALL && userId != currUserId) {
+                        if (removeUser != UserHandle.USER_ALL && removeUser != currUserId) {
                             continue;
                         }
                         List<VersionedPackage> libClientPackages = getPackagesUsingSharedLibraryLPr(
