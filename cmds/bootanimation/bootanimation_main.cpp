@@ -16,12 +16,16 @@
 
 #define LOG_TAG "BootAnimation"
 
+#include <stdint.h>
+#include <inttypes.h>
+
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
 #include <cutils/properties.h>
 #include <sys/resource.h>
 #include <utils/Log.h>
+#include <utils/SystemClock.h>
 #include <utils/threads.h>
 
 #include "BootAnimation.h"
@@ -46,6 +50,26 @@ int main()
 
         sp<ProcessState> proc(ProcessState::self());
         ProcessState::self()->startThreadPool();
+
+        // TODO: replace this with better waiting logic in future, b/35253872
+        int64_t waitStartTime = elapsedRealtime();
+        sp<IServiceManager> sm = defaultServiceManager();
+        const String16 name("SurfaceFlinger");
+        const int SERVICE_WAIT_SLEEP_MS = 100;
+        const int LOG_PER_RETRIES = 10;
+        int retry = 0;
+        while (sm->checkService(name) == nullptr) {
+            retry++;
+            if ((retry % LOG_PER_RETRIES) == 0) {
+                ALOGW("Waiting for SurfaceFlinger, waited for %" PRId64 " ms",
+                      elapsedRealtime() - waitStartTime);
+            }
+            usleep(SERVICE_WAIT_SLEEP_MS * 1000);
+        };
+        int64_t totalWaited = elapsedRealtime() - waitStartTime;
+        if (totalWaited > SERVICE_WAIT_SLEEP_MS) {
+            ALOGI("Waiting for SurfaceFlinger took %" PRId64 " ms", totalWaited);
+        }
 
         // create the boot animation object
         sp<BootAnimation> boot = new BootAnimation();
