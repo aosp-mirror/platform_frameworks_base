@@ -738,7 +738,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
         // When the home stack is resizable, should always have the same stack and task bounds
         if (mStackId == HOME_STACK_ID) {
-            if (findHomeTask().isResizeable()) {
+            final Task homeTask = findHomeTask();
+            if (homeTask != null && homeTask.isResizeable()) {
                 // Calculate the home stack bounds when in docked mode and the home stack is
                 // resizeable.
                 getDisplayContent().mDividerControllerLocked
