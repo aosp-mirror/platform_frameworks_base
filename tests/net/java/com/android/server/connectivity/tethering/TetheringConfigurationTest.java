@@ -128,5 +128,8 @@ public class TetheringConfigurationTest {
         assertTrue(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN));
         // Just to prove we haven't clobbered Wi-Fi:
         assertTrue(cfg.preferredUpstreamIfaceTypes.contains(TYPE_WIFI));
+        // Check that we have not added new cellular interface types
+        assertFalse(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE));
+        assertFalse(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_HIPRI));
     }
 }
