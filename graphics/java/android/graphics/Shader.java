@@ -90,7 +90,8 @@ public class Shader {
 
     /**
      * Set the shader's local matrix. Passing null will reset the shader's
-     * matrix to identity.
+     * matrix to identity. If the matrix has scale value as 0, the drawing
+     * result is undefined.
      *
      * @param localM The shader's new local matrix, or null to specify identity
      */
