@@ -189,6 +189,16 @@ public class SensorAdditionalInfo {
      */
     public static final int TYPE_MAGNETIC_FIELD_CALIBRATION = 0x30004;
 
+    /**
+     * Custom sensor info: array of float values interpreted by sensor based on the type
+     * Any type between TYPE_CUSTOM_INFO <= info_type < TYPE_DEBUG_INFO may be
+     * used to send custom sensor info.
+     * @hide
+     */
+    public static final int TYPE_CUSTOM_INFO = 0x10000000;
+    /** @hide */
+    public static final int TYPE_DEBUG_INFO  = 0x40000000;
+
     SensorAdditionalInfo(
             Sensor aSensor, int aType, int aSerial, int [] aIntValues, float [] aFloatValues) {
         sensor = aSensor;
@@ -210,5 +220,14 @@ public class SensorAdditionalInfo {
         return new SensorAdditionalInfo(
                 null, TYPE_LOCAL_GEOMAGNETIC_FIELD, 0,
                 null, new float[] { strength, declination, inclination});
+    }
+    /** @hide */
+    public static SensorAdditionalInfo createCustomInfo(Sensor aSensor, int type, float [] data) {
+        if (type < TYPE_CUSTOM_INFO || type >= TYPE_DEBUG_INFO || aSensor == null) {
+            throw new IllegalArgumentException("invalid parameter(s): type: " + type +
+                    "; sensor: " + aSensor);
+        }
+
+        return new SensorAdditionalInfo(aSensor, type, 0, null, data);
     }
 }

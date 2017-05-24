@@ -68,7 +68,7 @@ public class SystemSensorManager extends SensorManager {
             long nativeInstance, int channelHandle, int sensorHandle, int rate);
 
     private static native int nativeSetOperationParameter(
-            long nativeInstance, int type, float[] floatValues, int[] intValues);
+            long nativeInstance, int handle, int type, float[] floatValues, int[] intValues);
 
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
@@ -956,7 +956,9 @@ public class SystemSensorManager extends SensorManager {
     }
 
     protected boolean setOperationParameterImpl(SensorAdditionalInfo parameter) {
+        int handle = -1;
+        if (parameter.sensor != null) handle = parameter.sensor.getHandle();
         return nativeSetOperationParameter(
-                mNativeInstance, parameter.type, parameter.floatValues, parameter.intValues) == 0;
+                mNativeInstance, handle, parameter.type, parameter.floatValues, parameter.intValues) == 0;
     }
 }
