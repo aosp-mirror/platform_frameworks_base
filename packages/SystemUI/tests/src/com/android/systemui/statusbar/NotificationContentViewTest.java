@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.spy;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@Ignore("flaking")
+@FlakyTest
 public class NotificationContentViewTest {
 
     NotificationContentView mView;

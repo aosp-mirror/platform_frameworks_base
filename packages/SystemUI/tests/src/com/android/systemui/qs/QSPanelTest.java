@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
+import android.support.test.filters.FlakyTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -37,7 +38,7 @@ import java.util.Collections;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
-@Ignore("flaking")
+@FlakyTest
 public class QSPanelTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;

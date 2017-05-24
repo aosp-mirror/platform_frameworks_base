@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
@@ -33,7 +34,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@Ignore("flaking")
+@FlakyTest
 public class ExpandableNotificationRowTest {
 
     private Context mContext;
