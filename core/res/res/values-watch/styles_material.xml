@@ -95,7 +95,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="DialogWindowTitle.Material">
-        <item name="maxLines">@empty</item>
+        <item name="maxLines">@null</item>
         <item name="scrollHorizontally">false</item>
         <item name="textAppearance">@style/TextAppearance.Material.DialogWindowTitle</item>
         <item name="gravity">center_horizontal|top</item>
