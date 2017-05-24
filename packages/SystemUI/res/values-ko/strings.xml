@@ -750,8 +750,8 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"스크린샷"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"일반 메시지"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"저장소"</string>
-    <string name="instant_apps" msgid="6647570248119804907">"빠른 실행 앱"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"빠른 실행 앱은 설치가 필요하지 않습니다."</string>
+    <string name="instant_apps" msgid="6647570248119804907">"인스턴트 앱"</string>
+    <string name="instant_apps_message" msgid="8116608994995104836">"인스턴트 앱은 설치가 필요하지 않습니다."</string>
     <string name="app_info" msgid="6856026610594615344">"앱 정보"</string>
     <string name="go_to_web" msgid="1106022723459948514">"웹으로 이동"</string>
     <string name="mobile_data" msgid="7094582042819250762">"모바일 데이터"</string>

@@ -719,8 +719,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Réduire"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Fermer"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Faire glisser vers le bas pour ignorer"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menu PIP"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> est en mode PIP"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Menu Picture-in-picture"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> est en mode Picture-in-picture"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Si vous ne voulez pas que l\'application <xliff:g id="NAME">%s</xliff:g> utilise cette fonctionnalité, appuyez ici pour ouvrir les paramètres et la désactiver."</string>
     <string name="pip_play" msgid="1417176722760265888">"Lecture"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Suspendre"</string>
