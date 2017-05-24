@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static android.print.PrintManager.PRINT_SPOOLER_PACKAGE_NAME;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
@@ -74,6 +76,7 @@ import java.util.concurrent.CountDownLatch;
 @UiThreadTest
 public class NotificationInfoTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test_package";
+    private static final String TEST_SYSTEM_PACKAGE_NAME = PRINT_SPOOLER_PACKAGE_NAME;
     private static final int TEST_UID = 1;
     private static final String TEST_CHANNEL = "test_channel";
     private static final String TEST_CHANNEL_NAME = "TEST CHANNEL NAME";
@@ -95,11 +98,18 @@ public class NotificationInfoTest extends SysuiTestCase {
         // PackageManager must return a packageInfo and applicationInfo.
         final PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = TEST_PACKAGE_NAME;
-        when(mMockPackageManager.getPackageInfo(anyString(), anyInt())).thenReturn(packageInfo);
+        when(mMockPackageManager.getPackageInfo(eq(TEST_PACKAGE_NAME), anyInt()))
+                .thenReturn(packageInfo);
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = TEST_UID;  // non-zero
         when(mMockPackageManager.getApplicationInfo(anyString(), anyInt())).thenReturn(
                 applicationInfo);
+        final PackageInfo systemPackageInfo = new PackageInfo();
+        systemPackageInfo.packageName = TEST_SYSTEM_PACKAGE_NAME;
+        when(mMockPackageManager.getPackageInfo(eq(TEST_SYSTEM_PACKAGE_NAME), anyInt()))
+                .thenReturn(systemPackageInfo);
+        when(mMockPackageManager.getPackageInfo(eq("android"), anyInt()))
+                .thenReturn(packageInfo);
 
         // Package has one channel by default.
         when(mMockINotificationManager.getNumNotificationChannelsForPackage(
@@ -597,6 +607,45 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
+                mNotificationChannel.getImportance(), mSbn, null, null, null,
+                null, Collections.singleton(TEST_PACKAGE_NAME));
+
+        Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
+        assertEquals(View.INVISIBLE, enabledSwitch.getVisibility());
+    }
+
+    @Test
+    public void testEnabledSwitchInvisibleIfNonBlockableSystemChannel() throws Exception {
+        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
+        mNotificationChannel.setBlockableSystem(false);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_SYSTEM_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
+                mNotificationChannel.getImportance(), mSbn, null, null, null,
+                null, null);
+
+        Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
+        assertEquals(View.INVISIBLE, enabledSwitch.getVisibility());
+    }
+
+    @Test
+    public void testEnabledSwitchVisibleIfBlockableSystemChannel() throws Exception {
+        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
+        mNotificationChannel.setBlockableSystem(true);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_SYSTEM_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
+                mNotificationChannel.getImportance(), mSbn, null, null, null,
+                null, null);
+
+        Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
+        assertEquals(View.VISIBLE, enabledSwitch.getVisibility());
+    }
+
+    @Test
+    public void testEnabledSwitchInvisibleIfMultiChannelSummary() throws Exception {
+        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
+        mNotificationChannel.setBlockableSystem(true);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel, mDefaultNotificationChannel),
                 mNotificationChannel.getImportance(), mSbn, null, null, null,
                 null, Collections.singleton(TEST_PACKAGE_NAME));
 
