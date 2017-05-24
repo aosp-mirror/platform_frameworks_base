@@ -469,6 +469,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ce profil est connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>, qui peut contrôler votre activité professionnelle sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web.\n\nPour plus d\'informations, contactez votre administrateur."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ce profil est connecté à <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, qui peut contrôler votre activité professionnelle sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web.\n\nVous êtes également connecté à <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, qui peut contrôler votre activité personnelle sur le réseau."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Déverrouillé pour <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recevoir les notifications plus vite"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Afficher les notifications avant de déverrouiller l\'appareil"</string>
@@ -719,8 +721,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Réduire"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Fermer"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Faire glisser vers le bas pour ignorer"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menu PIP"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> est en mode PIP"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Menu Picture-in-picture"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> est en mode Picture-in-picture"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Si vous ne voulez pas que l\'application <xliff:g id="NAME">%s</xliff:g> utilise cette fonctionnalité, appuyez ici pour ouvrir les paramètres et la désactiver."</string>
     <string name="pip_play" msgid="1417176722760265888">"Lecture"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Suspendre"</string>

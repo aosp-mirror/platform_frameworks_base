@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> bestuur jou werkprofiel. Die profiel is gekoppel aan <xliff:g id="APPLICATION">%2$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor.\n\nKontak jou administrateur vir meer inligting."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> bestuur jou werkprofiel. Die profiel is gekoppel aan <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor.\n\nJy is ook gekoppel aan <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, wat jou persoonlike netwerkaktiwiteit kan monitor."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Ontsluit vir <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Toestel sal gesluit bly totdat jy dit handmatig ontsluit"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Kry kennisgewings vinniger"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Sien hulle voordat jy ontsluit"</string>

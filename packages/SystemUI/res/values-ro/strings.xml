@@ -471,6 +471,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Profilul de serviciu este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profilul este conectat la <xliff:g id="APPLICATION">%2$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua de serviciu, inclusiv e-mailurile, aplicațiile și site-urile accesate.\n\nPentru mai multe informații, contactați administratorul."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Profilul de serviciu este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profilul este conectat la <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua de serviciu, inclusiv e-mailurile, aplicațiile și site-urile accesate.\n\nDe asemenea, v-ați conectat la <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua personală."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Deblocat pentru <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Dispozitivul va rămâne blocat până când îl deblocați manual"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Obțineți notificări mai rapid"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Doresc să se afișeze înainte de deblocare"</string>

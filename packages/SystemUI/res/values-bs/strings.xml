@@ -469,6 +469,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Vašim radnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil je povezan s aplikacijom <xliff:g id="APPLICATION">%2$s</xliff:g>, koja može pratiti vašu aktivnost na radnoj mreži, uključujući e-poruke, aplikacije i web lokacije.\n\nZa više informacija, obratite se svom administratoru."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Radnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil je povezan s aplikacijom <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, koja može pratiti vašu aktivnost na radnoj mreži, uključujući e-poruke, aplikacije i web lokacije.\n\nPovezani ste i sa aplikacijom <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, koja može pratiti vašu aktivnost na privatnoj mreži."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Otključano za korisnika <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Uređaj će ostati zaključan dok ga ručno ne otključate"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Brže primaj obavještenja"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Vidi ih prije otključavanja"</string>

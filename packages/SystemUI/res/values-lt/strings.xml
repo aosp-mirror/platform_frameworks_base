@@ -471,6 +471,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Jūsų darbo profilį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“. Profilis susietas su programa „<xliff:g id="APPLICATION">%2$s</xliff:g>“, kuri gali stebėti jūsų tinklo veiklą, įskaitant el. laiškus, programas ir svetaines.\n\nJei reikia daugiau informacijos, susisiekite su administratoriumi."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Jūsų darbo profilį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“. Profilis susietas su programa „<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>“, kuri gali stebėti jūsų tinklo veiklą, įskaitant el. laiškus, programas ir svetaines.\n\nTaip pat esate prisijungę prie programos „<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>“, kuri gali stebėti asmeninio tinklo veiklą."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Atrakinta (<xliff:g id="USER_NAME">%1$s</xliff:g>)"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Įrenginys liks užrakintas, kol neatrakinsite jo neautomatiniu būdu"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Greičiau gaukite pranešimus"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Peržiūrėti prieš atrakinant"</string>

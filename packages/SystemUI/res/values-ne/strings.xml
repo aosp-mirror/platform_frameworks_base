@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION">%2$s</xliff:g> मा जडान छ।\n\nथप जानकारीका लागि, आफ्ना प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> मा जडान छ। \n\nतपाईं आफ्नो व्यक्तिगत नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> मा पनि जडान हुनुहुन्छ।"</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> का लागि अनलक गरियो"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"तपाईँले अनलक गर्नअघि तिनीहरूलाई हेर्नुहोस्"</string>

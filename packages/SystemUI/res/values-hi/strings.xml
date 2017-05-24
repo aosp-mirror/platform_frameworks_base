@@ -467,10 +467,12 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"आपकी कार्य प्रोफ़ाइल का प्रबंधन <xliff:g id="ORGANIZATION">%1$s</xliff:g> करता है. प्रोफ़ाइल <xliff:g id="APPLICATION">%2$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"आपकी कार्य प्रोफ़ाइल का प्रबंधन <xliff:g id="ORGANIZATION">%1$s</xliff:g> करता है. प्रोफ़ाइल <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nआप <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> से भी कनेक्ट हैं, जो आपकी व्यक्तिगत नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> के लिए अनलॉक किया गया"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"जब तक कि आप मैन्‍युअल रूप से अनलॉक नहीं करते तब तक डिवाइस लॉक रहेगा"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचनाएं अधिक तेज़ी से प्राप्त करें"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"आपके द्वारा उन्हें अनलॉक किए जाने से पहले देखें"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"नहीं धन्यवाद"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"रहने दें"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"सेट करें"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"अब समाप्त करें"</string>

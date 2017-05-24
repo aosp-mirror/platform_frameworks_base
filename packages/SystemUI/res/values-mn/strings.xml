@@ -465,6 +465,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь таны имэйл, апп, вэб хуудас зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%2$s</xliff:g>-д холбогдсон. \n\nДэлгэрэнгүй мэдээллийг авахын тулд админтай холбогдоно уу."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь таны имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-тай холбогдсон. \n\nМөн таны сүлжээний хувийн үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-д холбогдсон байна."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g>-н түгжээг тайлсан"</string>
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> ажиллаж байна"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар нээх хүртэл төхөөрөмж түгжээтэй байх болно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Мэдэгдлийг хурдан авах"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Түгжээг тайлахын өмнө үзнэ үү"</string>

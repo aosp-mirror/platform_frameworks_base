@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Profil kerja anda diurus oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil itu dihubungkan ke <xliff:g id="APPLICATION">%2$s</xliff:g>, yang boleh memantau aktiviti rangkaian kerja anda, termasuk e-mel, apl dan tapak web.\n\nUntuk mendapatkan maklumat lanjut, hubungi pentadbir anda."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Profil kerja anda diurus oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil itu dihubungkan ke <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, yang boleh memantau aktiviti rangkaian kerja anda, termasuk e-mel, apl dan tapak web.\n\nAnda turut dihubungkan ke <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, yang boleh memantau aktiviti rangkaian peribadi anda."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Kunci dibuka untuk <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Peranti akan kekal terkunci sehingga anda membuka kunci secara manual"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Dapatkan pemberitahuan lebih cepat"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Lihat sebelum anda membuka kunci"</string>

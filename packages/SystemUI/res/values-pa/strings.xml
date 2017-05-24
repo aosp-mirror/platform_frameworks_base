@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫ਼ਾਈਲ ਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਹ ਪ੍ਰੋਫ਼ਾਈਲ <xliff:g id="APPLICATION">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਕਾਰਜ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਪ੍ਰੋਫਾਈਲ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ ਹੈ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਕਾਰਜ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।\n\nਤੁਸੀਂ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ਨਾਲ ਵੀ ਕਨੈਕਟ ਹੋਂ, ਜੋ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> ਲਈ ਅਨਲੌਕ ਕੀਤੀ ਗਈ"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ਡੀਵਾਈਸ ਲੌਕ ਰਹੇਗੀ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਮੈਨੂਅਲੀ ਅਨਲੌਕ ਨਹੀਂ ਕਰਦੇ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ਤੇਜ਼ੀ ਨਾਲ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ਅਨਲੌਕ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਉਹਨਾਂ ਨੂੰ ਦੇਖੋ"</string>
