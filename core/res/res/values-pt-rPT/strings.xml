@@ -63,8 +63,8 @@
     <string name="needPuk2" msgid="4526033371987193070">"Introduza o PUK2 para desbloquear o cartão SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Ação sem êxito. Ative o bloqueio do SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="one">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
       <item quantity="other">Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas antes de o cartão SIM ficar bloqueado.</item>
-      <item quantity="one">Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -179,8 +179,8 @@
     <string name="low_memory" product="tv" msgid="516619861191025923">"O armazenamento da TV está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"O armazenamento do telemóvel está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="one">Certificate authorities installed</item>
       <item quantity="other">Autoridades de certificação instaladas</item>
-      <item quantity="one">Autoridade de certificação instalada</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por um terceiro desconhecido"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Pelo administrador do seu perfil de trabalho"</string>
@@ -235,8 +235,8 @@
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Relatório completo"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Utilize esta opção para uma interferência mínima do sistema quando o dispositivo não responder ou estiver demasiado lento, ou quando precisar de todas as secções de relatório. Não permite introduzir mais detalhes ou tirar capturas de ecrã adicionais."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="one">Taking screenshot for bug report in <xliff:g id="NUMBER_1">%d</xliff:g> seconds.</item>
       <item quantity="other">A tirar uma captura de ecrã do relatório de erro dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
-      <item quantity="one">A tirar uma captura de ecrã do relatório de erro dentro de <xliff:g id="NUMBER_0">%d</xliff:g> segundo.</item>
     </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Som desativado"</string>
@@ -871,8 +871,8 @@
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Há 1 mês"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Há mais de 1 mês"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="one">Last <xliff:g id="COUNT_1">%d</xliff:g> days</item>
       <item quantity="other">Últimos <xliff:g id="COUNT_1">%d</xliff:g> dias</item>
-      <item quantity="one">Último <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Último mês"</string>
     <string name="older" msgid="5211975022815554840">"Mais antiga"</string>
@@ -893,68 +893,68 @@
     <string name="years" msgid="6881577717993213522">"anos"</string>
     <string name="now_string_shortest" msgid="8912796667087856402">"agora"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>d</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>y</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>a</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>a</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
+      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g>m</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g>m</item>
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g>m</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
+      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g>h</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g>h</item>
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
+      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g>d</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g>d</item>
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g>d</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
+      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g>y</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g>a</item>
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g>a</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> minutes ago</item>
       <item quantity="other">há <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
-      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> hours ago</item>
       <item quantity="other">há <xliff:g id="COUNT_1">%d</xliff:g> horas</item>
-      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
     </plurals>
     <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> days ago</item>
       <item quantity="other">há <xliff:g id="COUNT_1">%d</xliff:g> dias</item>
-      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
     </plurals>
     <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> years ago</item>
       <item quantity="other">há <xliff:g id="COUNT_1">%d</xliff:g> anos</item>
-      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> ano</item>
     </plurals>
     <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g> minutes</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
-      <item quantity="one">dentro <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
     </plurals>
     <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g> hours</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> horas</item>
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
     </plurals>
     <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g> days</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> dias</item>
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
     </plurals>
     <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g> years</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> anos</item>
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> ano</item>
     </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problema com o vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Este vídeo não é válido para transmissão em fluxo contínuo neste aparelho."</string>
@@ -1102,12 +1102,12 @@
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Sons de notificação"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Desconhecido"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">Wi-Fi networks available</item>
       <item quantity="other">Redes Wi-Fi disponíveis</item>
-      <item quantity="one">Rede Wi-Fi disponível</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">Open Wi-Fi networks available</item>
       <item quantity="other">Redes Wi-Fi abertas disponíveis</item>
-      <item quantity="one">Rede Wi-Fi aberta disponível</item>
     </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Iniciar sessão na rede Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Início de sessão na rede"</string>
@@ -1204,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toque para selecionar o idioma e o esquema"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Atividade de aplicações"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"A aplicação <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplicações"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplic."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se não pretende que a aplicação <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DESATIVAR"</string>
@@ -1309,8 +1309,8 @@
     <string name="no_matches" msgid="8129421908915840737">"Sem correspondências"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Localizar na página"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> of <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 correspondência</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Concluído"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"A apagar memória de armazenamento USB..."</string>
@@ -1595,8 +1595,8 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Os PINs não correspondem. Tente novamente."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"O PIN é demasiado pequeno. Deve ter, no mínimo, 4 dígitos."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="one">Try again in <xliff:g id="COUNT">%d</xliff:g> seconds</item>
       <item quantity="other">Tente novamente dentro de <xliff:g id="COUNT">%d</xliff:g> segundos</item>
-      <item quantity="one">Tente novamente dentro de 1 segundo</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Tente novamente mais tarde"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Visualização de ecrã inteiro"</string>
@@ -1628,36 +1628,36 @@
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="one">For %1$d minutes (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Durante %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Durante um minuto (até às <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">For %1$d min (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Durante %1$d min (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Durante 1 min (até às <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="one">For %1$d hours (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Durante %1$d horas (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Durante uma hora (até às <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">For %1$d hr (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Durante %1$d h (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Durante 1 h (até às <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="one">For %d minutes</item>
       <item quantity="other">Durante %d minutos</item>
-      <item quantity="one">Durante um minuto</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">For %d min</item>
       <item quantity="other">Durante %d min</item>
-      <item quantity="one">Durante 1 min</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="one">For %d hours</item>
       <item quantity="other">Durante %d horas</item>
-      <item quantity="one">Durante uma hora</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">For %d hr</item>
       <item quantity="other">Durante %d h</item>
-      <item quantity="one">Durante 1 h</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próximo alarme)"</string>
@@ -1692,8 +1692,8 @@
     <string name="close_button_text" msgid="3937902162644062866">"Fechar"</string>
     <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selected</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selecionado</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Sem categoria"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Definiu a importância destas notificações."</string>
@@ -1756,8 +1756,8 @@
     <string name="autofill_error_cannot_autofill" msgid="7402758580060110371">"Não é possível preencher automaticamente o conteúdo"</string>
     <string name="autofill_picker_no_suggestions" msgid="3908514303773350735">"Sem sugestões do preenchimento automático"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="5506565809835815274">
+      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> autofill suggestions</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> sugestões do preenchimento automático</item>
-      <item quantity="one">Uma sugestão do preenchimento automático</item>
     </plurals>
     <string name="autofill_save_title" msgid="3345527308992082601">"Pretende guardar no &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
     <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Pretende guardar <xliff:g id="TYPE">%1$s</xliff:g> no &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
