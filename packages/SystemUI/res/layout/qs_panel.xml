@@ -35,6 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
+        android:background="#00000000"
         android:layout_marginBottom="48dp" />
 
     <include layout="@layout/quick_status_bar_expanded_header" />
