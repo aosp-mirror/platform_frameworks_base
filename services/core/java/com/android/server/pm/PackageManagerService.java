@@ -9186,9 +9186,20 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean performDexOpt(String packageName,
             boolean checkProfiles, int compileReason, boolean force) {
-        int dexOptStatus = performDexOptTraced(packageName, checkProfiles,
+        return performDexOptWithStatus(packageName, checkProfiles, compileReason, force) !=
+                PackageDexOptimizer.DEX_OPT_FAILED;
+    }
+
+    /**
+     * Perform dexopt on the given package and return one of following result:
+     *  {@link PackageDexOptimizer#DEX_OPT_SKIPPED}
+     *  {@link PackageDexOptimizer#DEX_OPT_PERFORMED}
+     *  {@link PackageDexOptimizer#DEX_OPT_FAILED}
+     */
+    /* package */ int performDexOptWithStatus(String packageName,
+            boolean checkProfiles, int compileReason, boolean force) {
+        return performDexOptTraced(packageName, checkProfiles,
                 getCompilerFilterForReason(compileReason), force);
-        return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     @Override
