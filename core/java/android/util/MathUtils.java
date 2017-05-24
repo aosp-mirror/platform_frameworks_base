@@ -16,8 +16,6 @@
 
 package android.util;
 
-import java.util.Random;
-
 /**
  * A class that contains utility methods related to numbers.
  *
@@ -181,7 +179,7 @@ public final class MathUtils {
     }
 
     public static float map(float minStart, float minStop, float maxStart, float maxStop, float value) {
-        return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
+        return maxStart + (maxStop - maxStart) * ((value - minStart) / (minStop - minStart));
     }
 
     /**
