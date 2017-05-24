@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"İş profiliniz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tarafından yönetiliyor. Profil; e-postalar, uygulamalar ve web siteleri de dahil olmak üzere iş ağı etkinliğinizi izleyebilen <xliff:g id="APPLICATION">%2$s</xliff:g> uygulamasına bağlı.\n\nDaha fazla bilgi için yöneticinize başvurun."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"İş profiliniz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tarafından yönetiliyor. Profil; e-postalar, uygulamalar ve web siteleri de dahil olmak üzere iş ağı etkinliğinizi izleyebilen <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> uygulamasına bağlı.\n\nAyrıca, kişisel ağ etkinliğinizi izleyebilen <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> uygulamasına bağlısınız."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> için kilit açıldı"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Cihazınızın kilidini manuel olarak açmadıkça cihaz kilitli kalacak"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Bildirimleri daha hızlı alın"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Kilidi açmadan bildirimleri görün"</string>

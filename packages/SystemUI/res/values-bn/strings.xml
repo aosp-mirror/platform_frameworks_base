@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কর্মস্থলের প্রোফাইল পরিচালনা করে। প্রোফাইলটি <xliff:g id="APPLICATION">%2$s</xliff:g> এর সাথে সংযুক্ত, যেটি ইমেল, অ্যাপ, ও ওয়েবসাইট সহ আপনার কর্মস্থলের নেটওয়ার্ক কার্যকলাপের উপরে নজর রাখতে পারে।\n\nআরো তথ্যের জন্য প্রশাসকের সাথে যোগাযোগ করুন।"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কর্মস্থলের প্রোফাইল পরিচালনা করে। প্রোফাইলটি <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> এর সাথে সংযুক্ত, যেটি ইমেল অ্যাপ, ও ওয়েবসাইট সহ আপনার কর্মস্থলের নেটওয়ার্ক কার্যকলাপের উপরে নজর রাখতে পারে।\n\n এ ছাড়াও আপনি <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> এর সাথে সংযুক্ত, যেটি আপনার ব্যক্তিগত নেটওয়ার্কে নজর রাখে।"</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> এর জন্য আনলক করা হয়েছে"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"আপনি নিজে আনলক না করা পর্যন্ত ডিভাইসটি লক হয়ে থাকবে"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"বিজ্ঞপ্তিগুলি আরো দ্রুত পান"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"আপনি আনলক করার আগে ওগুলো দেখুন"</string>

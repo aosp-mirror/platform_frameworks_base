@@ -471,6 +471,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem do pracy. Profil jest połączony z aplikacją <xliff:g id="APPLICATION">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nSkontaktuj się z administratorem, aby uzyskać więcej informacji."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem do pracy. Profil jest połączony z aplikacją <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nMasz też połączenie z aplikacją <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, która może monitorować Twoją osobistą aktywność w sieci."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Odblokowano dla: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Urządzenie pozostanie zablokowane, aż odblokujesz je ręcznie"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Szybszy dostęp do powiadomień"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Zobacz powiadomienia, jeszcze zanim odblokujesz ekran"</string>

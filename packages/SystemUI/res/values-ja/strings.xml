@@ -469,6 +469,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION">%2$s</xliff:g> に接続しています。このアプリはあなたの仕事のネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION_WORK">%2$s</xliff:g> に接続しています。このアプリはあなたの仕事のネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を管理できます。\n\nまた、<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> にも接続しているため、あなたの個人のネットワーク アクティビティも監視できます。"</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> さんのロックを解除しました"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"手動でロックを解除するまでロックされたままとなります"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"通知をすばやく確認できます"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ロックを解除する前にご確認ください"</string>

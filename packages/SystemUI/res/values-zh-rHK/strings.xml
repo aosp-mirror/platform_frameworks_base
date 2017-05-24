@@ -469,6 +469,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"您的工作設定檔由<xliff:g id="ORGANIZATION">%1$s</xliff:g>管理。設定檔已連結至「<xliff:g id="APPLICATION">%2$s</xliff:g>」，此應用程式可以監控您的工作網絡活動，包括電郵、應用程式和網站。\n\n如需瞭解詳情，請聯絡您的管理員。"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"您的工作設定檔由<xliff:g id="ORGANIZATION">%1$s</xliff:g>管理。設定檔已連結至「<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>」，此應用程式可以監控您的工作網絡活動，包括電郵、應用程式和網站。\n\n您亦已連結至「<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>」，此應用程式可以監控您的個人網絡活動。"</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"已為<xliff:g id="USER_NAME">%1$s</xliff:g>解鎖"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"裝置將保持上鎖，直到您手動解鎖"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"更快取得通知"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"解鎖前顯示"</string>

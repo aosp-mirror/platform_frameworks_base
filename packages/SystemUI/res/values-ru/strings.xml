@@ -473,6 +473,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Вашим рабочим профилем управляет организация \"<xliff:g id="ORGANIZATION">%1$s</xliff:g>\". Приложение \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" может отслеживать ваши действия в корпоративной сети, включая работу с электронной почтой, приложениями и веб-сайтами.\n\nЧтобы получить подробную информацию, обратитесь к администратору."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Вашим рабочим профилем управляет организация \"<xliff:g id="ORGANIZATION">%1$s</xliff:g>\". Приложение \"<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>\" может отслеживать ваши действия в корпоративной сети, включая работу с электронной почтой, приложениями и веб-сайтами.\n\nТакже запущено приложение \"<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>\", которое может отслеживать ваши действия в сети, выполняемые в личном профиле."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Разблокировано для пользователя <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Устройство необходимо будет разблокировать вручную"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Быстрый доступ к уведомлениям"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Просматривайте уведомления на заблокированном экране."</string>

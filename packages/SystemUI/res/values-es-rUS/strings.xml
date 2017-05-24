@@ -469,6 +469,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> administra tu perfil de trabajo. El perfil está conectado a <xliff:g id="APPLICATION">%2$s</xliff:g>, que puede controlar tu actividad de red de trabajo, incluidos los correos electrónicos, apps y sitios web.\n\nPara obtener más información, comunícate con tu administrador."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> administra tu perfil de red. El perfil está conectado a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que puede controlar tu actividad de red de trabajo, incluidos los correos electrónicos, las apps y los sitios web.\n\nTambién estás conectado a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que puede controlar tu actividad de red personal."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Se desbloqueó para <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"El dispositivo permanecerá bloqueado hasta que lo desbloquees manualmente."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recibe notificaciones más rápido"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Ver antes de desbloquear"</string>
