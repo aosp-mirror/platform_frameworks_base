@@ -36,6 +36,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.app.ResolverActivity;
@@ -77,10 +78,10 @@ public final class PinnerService extends SystemService {
           // If this user's camera app has been updated, update pinned files accordingly.
           if (intent.getAction() == Intent.ACTION_PACKAGE_REPLACED) {
                 Uri packageUri = intent.getData();
-                ApplicationInfo cameraInfo = getCameraInfo(UserHandle.USER_SYSTEM);
-                if (cameraInfo.packageName == packageUri.getSchemeSpecificPart()) {
-                  update();
-                }
+                String packageName = packageUri.getSchemeSpecificPart();
+                ArraySet<String> updatedPackages = new ArraySet<>();
+                updatedPackages.add(packageName);
+                update(updatedPackages);
             }
         }
     };
@@ -129,10 +130,13 @@ public final class PinnerService extends SystemService {
      * Specifically, this only updates camera pinning.
      * The other files pinned in onStart will not need to be updated.
      */
-    public void update() {
-        Slog.i(TAG, "Updating pinned files.");
-        mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, UserHandle.USER_SYSTEM, 0)
-                      .sendToTarget();
+    public void update(ArraySet<String> updatedPackages) {
+        ApplicationInfo cameraInfo = getCameraInfo(UserHandle.USER_SYSTEM);
+        if (cameraInfo != null && updatedPackages.contains(cameraInfo.packageName)) {
+            Slog.i(TAG, "Updating pinned files.");
+            mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, UserHandle.USER_SYSTEM, 0)
+                    .sendToTarget();
+        }
     }
 
     /**
