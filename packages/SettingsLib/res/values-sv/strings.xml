@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Begränsa bakgrundsprocess"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Visa alla som inte svarar"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Visa dialogrutan om att appen inte svarar för bakgrundsappar"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tillåt appar i externt lagringsutrymme"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Allar appar kan skrivas till extern lagring, oavsett manifestvärden"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Framtvinga storleksanpassning för aktiviteter"</string>

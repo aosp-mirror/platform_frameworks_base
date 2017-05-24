@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Os ecrãs recentes aparecem aqui"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignorar aplicações recentes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="one">%d screens in Overview</item>
       <item quantity="other">%d ecrãs na Vista geral</item>
-      <item quantity="one">1 ecrã na Vista geral</item>
     </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Sem notificações"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Em curso"</string>
@@ -252,8 +252,8 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Limpar todas as notificações."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
       <item quantity="other">Mais <xliff:g id="NUMBER_1">%s</xliff:g> notificações no grupo.</item>
-      <item quantity="one">Mais <xliff:g id="NUMBER_0">%s</xliff:g> notificação no grupo.</item>
     </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Definições de notificação"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Definições do <xliff:g id="APP_NAME">%s</xliff:g>"</string>
@@ -552,13 +552,13 @@
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> categorias de notificação"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Esta aplicação não tem categorias de notificação"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
+      <item quantity="one">1 out of <xliff:g id="NUMBER_1">%d</xliff:g> notification categories from this app</item>
       <item quantity="other">1 de <xliff:g id="NUMBER_1">%d</xliff:g> categorias de notificação desta aplicação</item>
-      <item quantity="one">1 de <xliff:g id="NUMBER_0">%d</xliff:g> categoria de notificação desta aplicação</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
+      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, and <xliff:g id="NUMBER_5">%3$d</xliff:g> others</item>
       <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> e mais <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> e mais <xliff:g id="NUMBER_2">%3$d</xliff:g></item>
     </plurals>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Controlos de notificações da aplicação <xliff:g id="APP_NAME">%1$s</xliff:g> abertos"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Controlos de notificações da aplicação <xliff:g id="APP_NAME">%1$s</xliff:g> fechados"</string>

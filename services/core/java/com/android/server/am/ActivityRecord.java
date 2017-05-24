@@ -284,7 +284,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     boolean visible;        // does this activity's window need to be shown?
     boolean visibleIgnoringKeyguard; // is this activity visible, ignoring the fact that Keyguard
                                      // might hide this activity?
-    private boolean mLastSetWindowVisibility; // The last window visibility state that was set.
     private boolean mDeferHidingClient; // If true we told WM to defer reporting to the client
                                         // process that it is hidden.
     boolean sleeping;       // have we told the activity to sleep?
@@ -1589,10 +1588,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void setVisibility(boolean visible) {
-        if (mLastSetWindowVisibility == visible) {
-            return;
-        }
-        mLastSetWindowVisibility = visible;
         mWindowContainerController.setVisibility(visible, mDeferHidingClient);
         mStackSupervisor.mActivityMetricsLogger.notifyVisibilityChanged(this, visible);
     }

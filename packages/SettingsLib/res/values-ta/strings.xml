@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"பின்புலச் செயல்முறை வரம்பு"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"எல்லா ANRகளையும் காட்டு"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"பின்புலப் பயன்பாடுகளுக்குப் பயன்பாடு பதிலளிக்கவில்லை என்ற உரையாடலைக் காட்டு"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"பயன்பாடுகளை வெளிப்புறச் சேமிப்பிடத்தில் அனுமதி"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், எல்லா பயன்பாட்டையும் வெளிப்புறச் சேமிப்பிடத்தில் எழுத அனுமதிக்கும்"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"செயல்பாடுகளை அளவுமாறக்கூடியதாக அமை"</string>

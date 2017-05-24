@@ -17,12 +17,13 @@
 package com.android.systemui.pip;
 
 import android.content.Context;
+import android.content.res.Configuration;
 
 import java.io.PrintWriter;
 
 public interface  BasePipManager {
     void initialize(Context context);
     void showPictureInPictureMenu();
-    void onConfigurationChanged();
+    void onConfigurationChanged(Configuration newConfig);
     void dump(PrintWriter pw);
 }

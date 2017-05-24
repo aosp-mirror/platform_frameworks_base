@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
+import android.support.test.filters.FlakyTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -29,6 +30,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.customize.QSCustomizer;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -36,6 +38,7 @@ import java.util.Collections;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+@FlakyTest
 public class QSPanelTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;

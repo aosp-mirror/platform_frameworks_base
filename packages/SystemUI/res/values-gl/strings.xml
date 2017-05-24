@@ -719,8 +719,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizar"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Pechar"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Arrastra cara abaixo para ignorar"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menú de imaxe superposta"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> está na imaxe superposta"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Menú de pantalla superposta"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> está na pantalla superposta"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Se non queres que <xliff:g id="NAME">%s</xliff:g> utilice esta función, toca para abrir a configuración e desactivala."</string>
     <string name="pip_play" msgid="1417176722760265888">"Reproducir"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pausar"</string>

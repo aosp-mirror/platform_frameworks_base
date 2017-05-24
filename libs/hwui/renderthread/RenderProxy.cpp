@@ -24,6 +24,7 @@
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
+#include "renderstate/RenderState.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
 
@@ -691,6 +692,20 @@ int RenderProxy::copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap) 
         args->buffer = buffer;
         return static_cast<int>(reinterpret_cast<intptr_t>(staticPostAndWait(task)));
     }
+}
+
+CREATE_BRIDGE2(onBitmapDestroyed, RenderThread* thread, uint32_t pixelRefId) {
+    args->thread->renderState().onBitmapDestroyed(args->pixelRefId);
+    return nullptr;
+}
+
+void RenderProxy::onBitmapDestroyed(uint32_t pixelRefId) {
+    if (!RenderThread::hasInstance()) return;
+    SETUP_TASK(onBitmapDestroyed);
+    RenderThread& thread = RenderThread::getInstance();
+    args->thread = &thread;
+    args->pixelRefId = pixelRefId;
+    thread.queue(task);
 }
 
 void RenderProxy::post(RenderTask* task) {

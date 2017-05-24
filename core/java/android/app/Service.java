@@ -767,7 +767,15 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         mStartCompatibility = getApplicationInfo().targetSdkVersion
                 < Build.VERSION_CODES.ECLAIR;
     }
-    
+
+    /**
+     * @hide
+     * Clean up any references to avoid leaks.
+     */
+    public final void detachAndCleanUp() {
+        mToken = null;
+    }
+
     final String getClassName() {
         return mClassName;
     }

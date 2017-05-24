@@ -186,6 +186,10 @@ public final class AutofillManager {
     @GuardedBy("mLock")
     @Nullable private TrackedViews mTrackedViews;
 
+    /** Views that are only tracked because they are fillable and could be anchoring the UI. */
+    @GuardedBy("mLock")
+    @Nullable private ArraySet<AutofillId> mFillableIds;
+
     /** @hide */
     public interface AutofillClient {
         /**
@@ -238,13 +242,22 @@ public final class AutofillManager {
         boolean isVisibleForAutofill();
 
         /**
-         * Find views by traversing the hierarchies of the client.
+         * Finds views by traversing the hierarchies of the client.
          *
          * @param viewIds The accessibility ids of the views to find
          *
-         * @return And array containing the views, or {@code null} if not found
+         * @return And array containing the views (empty if no views found).
          */
         @NonNull View[] findViewsByAccessibilityIdTraversal(@NonNull int[] viewIds);
+
+        /**
+         * Finds a view by traversing the hierarchies of the client.
+         *
+         * @param viewId The accessibility id of the views to find
+         *
+         * @return The view, or {@code null} if not found
+         */
+        @Nullable View findViewByAccessibilityIdTraversal(int viewId);
     }
 
     /**
@@ -471,8 +484,17 @@ public final class AutofillManager {
      */
     public void notifyViewVisibilityChange(@NonNull View view, boolean isVisible) {
         synchronized (mLock) {
-            if (mEnabled && mSessionId != NO_SESSION && mTrackedViews != null) {
-                mTrackedViews.notifyViewVisibilityChange(view, isVisible);
+            if (mEnabled && mSessionId != NO_SESSION) {
+                if (!isVisible && mFillableIds != null) {
+                    final AutofillId id = view.getAutofillId();
+                    if (mFillableIds.contains(id)) {
+                        if (sDebug) Log.d(TAG, "Hidding UI when view " + id + " became invisible");
+                        requestHideFillUi(id, view);
+                    }
+                }
+                if (mTrackedViews != null) {
+                    mTrackedViews.notifyViewVisibilityChange(view, isVisible);
+                }
             }
         }
     }
@@ -1048,9 +1070,10 @@ public final class AutofillManager {
      *
      * @param trackedIds The views to be tracked
      * @param saveOnAllViewsInvisible Finish the session once all tracked views are invisible.
+     * @param fillableIds Views that might anchor FillUI.
      */
-    private void setTrackedViews(int sessionId, List<AutofillId> trackedIds,
-            boolean saveOnAllViewsInvisible) {
+    private void setTrackedViews(int sessionId, @Nullable AutofillId[] trackedIds,
+            boolean saveOnAllViewsInvisible, @Nullable AutofillId[] fillableIds) {
         synchronized (mLock) {
             if (mEnabled && mSessionId == sessionId) {
                 if (saveOnAllViewsInvisible) {
@@ -1058,15 +1081,32 @@ public final class AutofillManager {
                 } else {
                     mTrackedViews = null;
                 }
+                if (fillableIds != null) {
+                    if (mFillableIds == null) {
+                        mFillableIds = new ArraySet<>(fillableIds.length);
+                    }
+                    for (AutofillId id : fillableIds) {
+                        mFillableIds.add(id);
+                    }
+                    if (sVerbose) {
+                        Log.v(TAG, "setTrackedViews(): fillableIds=" + fillableIds
+                                + ", mFillableIds" + mFillableIds);
+                    }
+                }
             }
         }
     }
 
-    private void requestHideFillUi(int sessionId, AutofillId id) {
+    private void requestHideFillUi(AutofillId id) {
         final View anchor = findView(id);
+        if (sVerbose) Log.v(TAG, "requestHideFillUi(" + id + "): anchor = " + anchor);
         if (anchor == null) {
             return;
         }
+        requestHideFillUi(id, anchor);
+    }
+
+    private void requestHideFillUi(AutofillId id, View anchor) {
 
         AutofillCallback callback = null;
         synchronized (mLock) {
@@ -1123,6 +1163,18 @@ public final class AutofillManager {
      *
      * @return The array of viewIds.
      */
+    // TODO: move to Helper as static method
+    @NonNull private int[] getViewIds(@NonNull AutofillId[] autofillIds) {
+        final int numIds = autofillIds.length;
+        final int[] viewIds = new int[numIds];
+        for (int i = 0; i < numIds; i++) {
+            viewIds[i] = autofillIds[i].getViewId();
+        }
+
+        return viewIds;
+    }
+
+    // TODO: move to Helper as static method
     @NonNull private int[] getViewIds(@NonNull List<AutofillId> autofillIds) {
         final int numIds = autofillIds.size();
         final int[] viewIds = new int[numIds];
@@ -1147,7 +1199,7 @@ public final class AutofillManager {
             return null;
         }
 
-        return client.findViewsByAccessibilityIdTraversal(new int[]{autofillId.getViewId()})[0];
+        return client.findViewByAccessibilityIdTraversal(autofillId.getViewId());
     }
 
     /** @hide */
@@ -1173,6 +1225,7 @@ public final class AutofillManager {
          *
          * @return {@code true} iff set is not empty and value is in set
          */
+        // TODO: move to Helper as static method
         private <T> boolean isInSet(@Nullable ArraySet<T> set, T value) {
             return set != null && set.contains(value);
         }
@@ -1186,6 +1239,7 @@ public final class AutofillManager {
          * @return The set including the new value. If set was {@code null}, a set containing only
          *         the new value.
          */
+        // TODO: move to Helper as static method
         @NonNull
         private <T> ArraySet<T> addToSet(@Nullable ArraySet<T> set, T valueToAdd) {
             if (set == null) {
@@ -1206,6 +1260,7 @@ public final class AutofillManager {
          * @return The set without the removed value. {@code null} if set was null, or is empty
          *         after removal.
          */
+        // TODO: move to Helper as static method
         @Nullable
         private <T> ArraySet<T> removeFromSet(@Nullable ArraySet<T> set, T valueToRemove) {
             if (set == null) {
@@ -1226,11 +1281,8 @@ public final class AutofillManager {
          *
          * @param trackedIds The views to be tracked
          */
-        TrackedViews(List<AutofillId> trackedIds) {
-            mVisibleTrackedIds = null;
-            mInvisibleTrackedIds = null;
-
-            AutofillClient client = getClientLocked();
+        TrackedViews(@Nullable AutofillId[] trackedIds) {
+            final AutofillClient client = getClientLocked();
             if (trackedIds != null && client != null) {
                 final boolean[] isVisible;
 
@@ -1238,12 +1290,12 @@ public final class AutofillManager {
                     isVisible = client.getViewVisibility(getViewIds(trackedIds));
                 } else {
                     // All false
-                    isVisible = new boolean[trackedIds.size()];
+                    isVisible = new boolean[trackedIds.length];
                 }
 
-                final int numIds = trackedIds.size();
+                final int numIds = trackedIds.length;
                 for (int i = 0; i < numIds; i++) {
-                    final AutofillId id = trackedIds.get(i);
+                    final AutofillId id = trackedIds[i];
 
                     if (isVisible[i]) {
                         mVisibleTrackedIds = addToSet(mVisibleTrackedIds, id);
@@ -1294,6 +1346,9 @@ public final class AutofillManager {
             }
 
             if (mVisibleTrackedIds == null) {
+                if (sVerbose) {
+                    Log.v(TAG, "No more visible ids. Invisibile = " + mInvisibleTrackedIds);
+                }
                 finishSessionLocked();
             }
         }
@@ -1473,8 +1528,7 @@ public final class AutofillManager {
         public void requestHideFillUi(int sessionId, AutofillId id) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(
-                        () -> afm.requestHideFillUi(sessionId, id));
+                afm.mContext.getMainThreadHandler().post(() -> afm.requestHideFillUi(id));
             }
         }
 
@@ -1501,12 +1555,12 @@ public final class AutofillManager {
         }
 
         @Override
-        public void setTrackedViews(int sessionId, List<AutofillId> ids,
-                boolean saveOnAllViewsInvisible) {
+        public void setTrackedViews(int sessionId, AutofillId[] ids,
+                boolean saveOnAllViewsInvisible, AutofillId[] fillableIds) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(
-                        () -> afm.setTrackedViews(sessionId, ids, saveOnAllViewsInvisible)
+                afm.mContext.getMainThreadHandler().post(() ->
+                        afm.setTrackedViews(sessionId, ids, saveOnAllViewsInvisible, fillableIds)
                 );
             }
         }

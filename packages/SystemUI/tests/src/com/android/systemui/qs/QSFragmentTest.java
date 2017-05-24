@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import android.app.FragmentController;
 import android.app.FragmentManagerNonConfig;
 import android.os.Looper;
+import android.support.test.filters.FlakyTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.CarrierText;
@@ -39,6 +40,7 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,6 +50,7 @@ import android.widget.FrameLayout;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
+@FlakyTest
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private MetricsLogger mMockMetricsLogger;
