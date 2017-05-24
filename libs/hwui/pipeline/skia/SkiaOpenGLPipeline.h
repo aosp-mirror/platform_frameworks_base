@@ -19,6 +19,9 @@
 #include "SkiaPipeline.h"
 
 namespace android {
+
+class Bitmap;
+
 namespace uirenderer {
 namespace skiapipeline {
 
@@ -46,6 +49,8 @@ public:
     bool isContextReady() override;
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
+    static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,
+            SkBitmap& skBitmap);
 
 private:
     renderthread::EglManager& mEglManager;

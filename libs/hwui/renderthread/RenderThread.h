@@ -24,6 +24,7 @@
 
 #include <GrContext.h>
 #include <cutils/compiler.h>
+#include <SkBitmap.h>
 #include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
 #include <utils/Thread.h>
@@ -33,6 +34,7 @@
 
 namespace android {
 
+class Bitmap;
 class DisplayEventReceiver;
 
 namespace uirenderer {
@@ -103,6 +105,8 @@ public:
     void setGrContext(GrContext* cxt) { mGrContext.reset(cxt); }
 
     VulkanManager& vulkanManager() { return *mVkManager; }
+
+    sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& skBitmap);
 
 protected:
     virtual bool threadLoop() override;

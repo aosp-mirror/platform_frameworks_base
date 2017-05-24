@@ -16,6 +16,7 @@
 
 #include "SkiaOpenGLPipeline.h"
 
+#include "hwui/Bitmap.h"
 #include "DeferredLayerUpdater.h"
 #include "GlLayer.h"
 #include "LayerDrawable.h"
@@ -195,6 +196,186 @@ void SkiaOpenGLPipeline::invokeFunctor(const RenderThread& thread, Functor* func
     if (mode != DrawGlInfo::kModeProcessNoContext) {
         thread.getGrContext()->resetContext();
     }
+}
+
+#define FENCE_TIMEOUT 2000000000
+
+class AutoEglFence {
+public:
+    AutoEglFence(EGLDisplay display)
+            : mDisplay(display) {
+        fence = eglCreateSyncKHR(mDisplay, EGL_SYNC_FENCE_KHR, NULL);
+    }
+
+    ~AutoEglFence() {
+        if (fence != EGL_NO_SYNC_KHR) {
+            eglDestroySyncKHR(mDisplay, fence);
+        }
+    }
+
+    EGLSyncKHR fence = EGL_NO_SYNC_KHR;
+private:
+    EGLDisplay mDisplay = EGL_NO_DISPLAY;
+};
+
+class AutoEglImage {
+public:
+    AutoEglImage(EGLDisplay display, EGLClientBuffer clientBuffer)
+            : mDisplay(display) {
+        EGLint imageAttrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
+        image = eglCreateImageKHR(display, EGL_NO_CONTEXT,
+                EGL_NATIVE_BUFFER_ANDROID, clientBuffer, imageAttrs);
+    }
+
+    ~AutoEglImage() {
+        if (image != EGL_NO_IMAGE_KHR) {
+            eglDestroyImageKHR(mDisplay, image);
+        }
+    }
+
+    EGLImageKHR image = EGL_NO_IMAGE_KHR;
+private:
+    EGLDisplay mDisplay = EGL_NO_DISPLAY;
+};
+
+class AutoSkiaGlTexture {
+public:
+    AutoSkiaGlTexture() {
+        glGenTextures(1, &mTexture);
+        glBindTexture(GL_TEXTURE_2D, mTexture);
+    }
+
+    ~AutoSkiaGlTexture() {
+        glDeleteTextures(1, &mTexture);
+    }
+
+private:
+    GLuint mTexture = 0;
+};
+
+sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThread& renderThread,
+        SkBitmap& skBitmap) {
+    renderThread.eglManager().initialize();
+
+    sk_sp<GrContext> grContext = sk_ref_sp(renderThread.getGrContext());
+    const SkImageInfo& info = skBitmap.info();
+    PixelFormat pixelFormat;
+    GLint format, type;
+    bool isSupported = false;
+
+    //TODO: add support for linear blending (when ANDROID_ENABLE_LINEAR_BLENDING is defined)
+    switch (info.colorType()) {
+    case kRGBA_8888_SkColorType:
+        isSupported = true;
+    // ARGB_4444 and Index_8 are both upconverted to RGBA_8888
+    case kIndex_8_SkColorType:
+    case kARGB_4444_SkColorType:
+        pixelFormat = PIXEL_FORMAT_RGBA_8888;
+        format = GL_RGBA;
+        type = GL_UNSIGNED_BYTE;
+        break;
+    case kRGBA_F16_SkColorType:
+        isSupported = grContext->caps()->isConfigTexturable(kRGBA_half_GrPixelConfig);
+        if (isSupported) {
+            type = GL_HALF_FLOAT;
+            pixelFormat = PIXEL_FORMAT_RGBA_FP16;
+        } else {
+            type = GL_UNSIGNED_BYTE;
+            pixelFormat = PIXEL_FORMAT_RGBA_8888;
+        }
+        format = GL_RGBA;
+        break;
+    case kRGB_565_SkColorType:
+        isSupported = true;
+        pixelFormat = PIXEL_FORMAT_RGB_565;
+        format = GL_RGB;
+        type = GL_UNSIGNED_SHORT_5_6_5;
+        break;
+    case kGray_8_SkColorType:
+        isSupported = true;
+        pixelFormat = PIXEL_FORMAT_RGBA_8888;
+        format = GL_LUMINANCE;
+        type = GL_UNSIGNED_BYTE;
+        break;
+    default:
+        ALOGW("unable to create hardware bitmap of colortype: %d", info.colorType());
+        return nullptr;
+    }
+
+    SkBitmap bitmap;
+    if (isSupported) {
+        bitmap = skBitmap;
+    } else {
+        bitmap.allocPixels(SkImageInfo::MakeN32(info.width(), info.height(), info.alphaType(),
+                nullptr));
+        bitmap.eraseColor(0);
+        if (info.colorType() == kRGBA_F16_SkColorType) {
+            // Drawing RGBA_F16 onto ARGB_8888 is not supported
+            skBitmap.readPixels(bitmap.info().makeColorSpace(SkColorSpace::MakeSRGB()),
+                    bitmap.getPixels(), bitmap.rowBytes(), 0, 0);
+        } else {
+            SkCanvas canvas(bitmap);
+            canvas.drawBitmap(skBitmap, 0.0f, 0.0f, nullptr);
+        }
+    }
+
+    sp<GraphicBuffer> buffer = new GraphicBuffer(info.width(), info.height(), pixelFormat,
+            GraphicBuffer::USAGE_HW_TEXTURE |
+            GraphicBuffer::USAGE_SW_WRITE_NEVER |
+            GraphicBuffer::USAGE_SW_READ_NEVER,
+            std::string("Bitmap::allocateSkiaHardwareBitmap pid [") + std::to_string(getpid()) + "]");
+
+    status_t error = buffer->initCheck();
+    if (error < 0) {
+        ALOGW("createGraphicBuffer() failed in GraphicBuffer.create()");
+        return nullptr;
+    }
+
+    //upload the bitmap into a texture
+    EGLDisplay display = eglGetCurrentDisplay();
+    LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY,
+                "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
+                uirenderer::renderthread::EglManager::eglErrorString());
+    // We use an EGLImage to access the content of the GraphicBuffer
+    // The EGL image is later bound to a 2D texture
+    EGLClientBuffer clientBuffer = (EGLClientBuffer) buffer->getNativeBuffer();
+    AutoEglImage autoImage(display, clientBuffer);
+    if (autoImage.image == EGL_NO_IMAGE_KHR) {
+        ALOGW("Could not create EGL image, err =%s",
+                uirenderer::renderthread::EglManager::eglErrorString());
+        return nullptr;
+    }
+    AutoSkiaGlTexture glTexture;
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, autoImage.image);
+    GL_CHECKPOINT(MODERATE);
+
+    // glTexSubImage2D is synchronous in sense that it memcpy() from pointer that we provide.
+    // But asynchronous in sense that driver may upload texture onto hardware buffer when we first
+    // use it in drawing
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, info.width(), info.height(), format, type,
+            bitmap.getPixels());
+    GL_CHECKPOINT(MODERATE);
+
+    // The fence is used to wait for the texture upload to finish
+    // properly. We cannot rely on glFlush() and glFinish() as
+    // some drivers completely ignore these API calls
+    AutoEglFence autoFence(display);
+    if (autoFence.fence == EGL_NO_SYNC_KHR) {
+        LOG_ALWAYS_FATAL("Could not create sync fence %#x", eglGetError());
+        return nullptr;
+    }
+    // The flag EGL_SYNC_FLUSH_COMMANDS_BIT_KHR will trigger a
+    // pipeline flush (similar to what a glFlush() would do.)
+    EGLint waitStatus = eglClientWaitSyncKHR(display, autoFence.fence,
+            EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, FENCE_TIMEOUT);
+    if (waitStatus != EGL_CONDITION_SATISFIED_KHR) {
+        LOG_ALWAYS_FATAL("Failed to wait for the fence %#x", eglGetError());
+        return nullptr;
+    }
+
+    grContext->resetContext(kTextureBinding_GrGLBackendState);
+
+    return sk_sp<Bitmap>(new Bitmap(buffer.get(), bitmap.info()));
 }
 
 } /* namespace skiapipeline */
