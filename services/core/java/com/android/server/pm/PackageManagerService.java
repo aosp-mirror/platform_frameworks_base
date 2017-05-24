@@ -4804,9 +4804,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (filterAppAccessLPr(ps, callingUid, userId)) {
                     return PackageManager.PERMISSION_DENIED;
                 }
+                final boolean instantApp = ps.getInstantApp(userId);
                 final PermissionsState permissionsState = ps.getPermissionsState();
                 if (permissionsState.hasPermission(permName, userId)) {
-                    return PackageManager.PERMISSION_GRANTED;
+                    if (instantApp) {
+                        BasePermission bp = mSettings.mPermissions.get(permName);
+                        if (bp != null && bp.isInstant()) {
+                            return PackageManager.PERMISSION_GRANTED;
+                        }
+                    } else {
+                        return PackageManager.PERMISSION_GRANTED;
+                    }
                 }
                 // Special case: ACCESS_FINE_LOCATION permission includes ACCESS_COARSE_LOCATION
                 if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && permissionsState
@@ -4824,6 +4832,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
+        final boolean isUidInstantApp = getInstantAppPackageName(uid) != null;
         final int userId = UserHandle.getUserId(uid);
         if (!sUserManager.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
@@ -4845,7 +4854,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 final SettingBase settingBase = (SettingBase) obj;
                 final PermissionsState permissionsState = settingBase.getPermissionsState();
                 if (permissionsState.hasPermission(permName, userId)) {
-                    return PackageManager.PERMISSION_GRANTED;
+                    if (isUidInstantApp) {
+                        BasePermission bp = mSettings.mPermissions.get(permName);
+                        if (bp != null && bp.isInstant()) {
+                            return PackageManager.PERMISSION_GRANTED;
+                        }
+                    } else {
+                        return PackageManager.PERMISSION_GRANTED;
+                    }
                 }
                 // Special case: ACCESS_FINE_LOCATION permission includes ACCESS_COARSE_LOCATION
                 if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && permissionsState
