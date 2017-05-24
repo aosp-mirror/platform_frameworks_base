@@ -30,11 +30,13 @@ import com.android.systemui.statusbar.notification.NotificationViewWrapper;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@Ignore("flaking")
 public class NotificationCustomViewWrapperTest {
 
     private Context mContext;

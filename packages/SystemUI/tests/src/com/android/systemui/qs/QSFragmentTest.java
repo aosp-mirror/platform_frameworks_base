@@ -39,6 +39,7 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,6 +49,7 @@ import android.widget.FrameLayout;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
+@Ignore("flaking")
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private MetricsLogger mMockMetricsLogger;

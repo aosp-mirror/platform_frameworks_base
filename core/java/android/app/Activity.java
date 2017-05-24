@@ -7449,6 +7449,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
+    @Override
     @NonNull public View[] findViewsByAccessibilityIdTraversal(@NonNull int[] viewIds) {
         final View[] views = new View[viewIds.length];
         final ArrayList<ViewRootImpl> roots =
@@ -7468,6 +7469,25 @@ public class Activity extends ContextThemeWrapper
         }
 
         return views;
+    }
+
+    /** @hide */
+    @Override
+    @Nullable public View findViewByAccessibilityIdTraversal(int viewId) {
+        final ArrayList<ViewRootImpl> roots =
+                WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
+        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
+            final View rootView = roots.get(rootNum).getView();
+
+            if (rootView != null) {
+                final View view = rootView.findViewByAccessibilityIdTraversal(viewId);
+                if (view != null) {
+                    return view;
+                }
+            }
+        }
+
+        return null;
     }
 
     /** @hide */

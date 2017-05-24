@@ -16,7 +16,10 @@
 
 package com.android.server.autofill;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
+import android.util.ArraySet;
+import android.view.autofill.AutofillId;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -67,5 +70,16 @@ public final class Helper {
         final StringBuilder builder = new StringBuilder();
         append(builder, bundle);
         return builder.toString();
+    }
+
+    @Nullable
+    static AutofillId[] toArray(@Nullable ArraySet<AutofillId> set) {
+        if (set == null) return null;
+
+        final AutofillId[] array = new AutofillId[set.size()];
+        for (int i = 0; i < set.size(); i++) {
+            array[i] = set.valueAt(i);
+        }
+        return array;
     }
 }

@@ -234,7 +234,7 @@
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Ufuatiliaji"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modi makinifu imewezeshwa"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Mulika skrini wakati programu zinafanya uendeshaji mrefu kwenye mnyororo mkuu"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Mahali pa pointa"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Mahali pa kiashiria"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Kuegeshwa kwa skrini ikionyesha data ya mguso ya sasa"</string>
     <string name="show_touches" msgid="2642976305235070316">"Onyesha unapogonga"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Onyesha maoni ya picha unapogonga"</string>
@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Kiwango cha mchakato wa mandari nyuma"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Onyesha ANR zote"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Onyesha kisanduku kidadisi cha Programu Haiitikii kwa programu za usuli"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"Lazima uruhusu programu kwenye hifadhi ya nje"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Huruhusu programu yoyote iwekwe kwenye hifadhi ya nje, bila kujali thamani za faili ya maelezo"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Lazimisha shughuli ziweze kubadilishwa ukubwa"</string>

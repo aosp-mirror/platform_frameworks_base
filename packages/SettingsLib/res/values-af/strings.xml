@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Agtergrondproses-limiet"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Wys alle ANRe"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Wys Program reageer nie-dialoog vir agtergrond programme"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"Programme verplig ekstern toegelaat"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Maak dat enige program in eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Verplig verstelbare groottes vir aktiwiteite"</string>

@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Лимит фоновых процессов"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Все ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Уведомлять о том, что приложение не отвечает"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"Разрешить сохранение на внешние накопители"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Разрешить сохранение приложений на внешних накопителях (независимо от значений в манифесте)"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Изменение размера в многооконном режиме"</string>

@@ -194,7 +194,7 @@ public class PipNotification {
 
     private void dismissPipNotification() {
         mNotified = false;
-        mNotificationManager.cancel(SystemMessage.NOTE_TV_PIP);
+        mNotificationManager.cancel(NOTIFICATION_TAG, SystemMessage.NOTE_TV_PIP);
     }
 
     private boolean updateMediaControllerMetadata() {

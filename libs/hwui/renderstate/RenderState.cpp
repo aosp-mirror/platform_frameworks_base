@@ -122,6 +122,13 @@ void RenderState::flush(Caches::FlushMode mode) {
     mCaches->flush(mode);
 }
 
+void RenderState::onBitmapDestroyed(uint32_t pixelRefId) {
+    if (mCaches && mCaches->textureCache.destroyTexture(pixelRefId)) {
+        glFlush();
+        GL_CHECKPOINT(MODERATE);
+    }
+}
+
 void RenderState::setViewport(GLsizei width, GLsizei height) {
     mViewportWidth = width;
     mViewportHeight = height;

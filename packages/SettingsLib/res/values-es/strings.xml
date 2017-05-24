@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Límitar procesos en segundo plano"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Errores sin respuesta"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Informar de que una aplicación en segundo plano no responde"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forzar permiso de aplicaciones de forma externa"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Hace que cualquier aplicación se pueda escribir en un dispositivo de almacenamiento externo, independientemente de los valores definidos"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forzar el ajuste de tamaño de las actividades"</string>

@@ -272,6 +272,10 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Kufizimi i proceseve në sfond"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Shfaq raportet ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Shfaq raportet ANR (Aplikacioni nuk përgjigjet) për aplikacionet në sfond"</string>
+    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
+    <skip />
+    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
+    <skip />
     <string name="force_allow_on_external" msgid="3215759785081916381">"Detyro lejimin në hapësirën e jashtme"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Bën që çdo aplikacion të jetë i përshtatshëm për t\'u shkruar në hapësirën ruajtëse të jashtme, pavarësisht nga vlerat e manifestit"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Detyro madhësinë e ndryshueshme për aktivitetet"</string>

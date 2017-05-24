@@ -28,6 +28,7 @@ import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
+import static com.android.server.autofill.Helper.toArray;
 import static com.android.server.autofill.ViewState.STATE_AUTOFILLED;
 import static com.android.server.autofill.ViewState.STATE_RESTARTED_SESSION;
 
@@ -57,6 +58,7 @@ import android.service.autofill.FillResponse;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.autofill.AutofillId;
@@ -1139,15 +1141,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // Only track the views of the last response as only those are reported back to the
         // service, see #showSaveLocked
-        ArrayList<AutofillId> trackedViews = new ArrayList<>();
+        final FillResponse response = mResponses.valueAt(getLastResponseIndex());
+
+        ArraySet<AutofillId> trackedViews = null;
         boolean saveOnAllViewsInvisible = false;
-        SaveInfo saveInfo = mResponses.valueAt(getLastResponseIndex()).getSaveInfo();
+        final SaveInfo saveInfo = response.getSaveInfo();
         if (saveInfo != null) {
             saveOnAllViewsInvisible =
                     (saveInfo.getFlags() & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
 
             // We only need to track views if we want to save once they become invisible.
             if (saveOnAllViewsInvisible) {
+                if (trackedViews == null) {
+                    trackedViews = new ArraySet<>();
+                }
                 if (saveInfo.getRequiredIds() != null) {
                     Collections.addAll(trackedViews, saveInfo.getRequiredIds());
                 }
@@ -1158,8 +1165,32 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
+        // Must also track that are part of datasets, otherwise the FillUI won't be hidden when
+        // they go away (if they're not savable).
+
+        final ArrayList<Dataset> datasets = response.getDatasets();
+        ArraySet<AutofillId> fillableIds = null;
+        if (datasets != null) {
+            for (int i = 0; i < datasets.size(); i++) {
+                final Dataset dataset = datasets.get(i);
+                final ArrayList<AutofillId> fieldIds = dataset.getFieldIds();
+                if (fieldIds == null) continue;
+
+                for (int j = 0; j < fieldIds.size(); j++) {
+                    final AutofillId id = fieldIds.get(j);
+                    if (trackedViews == null || !trackedViews.contains(id)) {
+                        fillableIds = ArrayUtils.add(fillableIds, id);
+                    }
+                }
+            }
+        }
+
         try {
-            mClient.setTrackedViews(id, trackedViews, saveOnAllViewsInvisible);
+            if (sVerbose) {
+                Slog.v(TAG, "updateTrackedIdsLocked(): " + trackedViews + " => " + fillableIds);
+            }
+            mClient.setTrackedViews(id, toArray(trackedViews), saveOnAllViewsInvisible,
+                    toArray(fillableIds));
         } catch (RemoteException e) {
             Slog.w(TAG, "Cannot set tracked ids", e);
         }
