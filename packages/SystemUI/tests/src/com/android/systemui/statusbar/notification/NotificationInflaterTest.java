@@ -27,6 +27,7 @@ import android.content.Context;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.widget.RemoteViews;
@@ -46,7 +47,7 @@ import java.util.concurrent.CountDownLatch;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@Ignore("flaking")
+@FlakyTest
 public class NotificationInflaterTest {
 
     private Context mContext;
