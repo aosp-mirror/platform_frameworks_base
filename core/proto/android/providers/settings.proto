@@ -310,7 +310,7 @@ message GlobalSettingsProto {
     SettingProto lte_service_forced = 265;
     SettingProto ephemeral_cookie_max_size_bytes = 266;
     SettingProto enable_ephemeral_feature = 267;
-    SettingProto uninstalled_ephemeral_app_cache_duration_millis = 268;
+    SettingProto installed_instant_app_min_cache_period = 268;
     SettingProto allow_user_switching_when_system_user_locked = 269;
     SettingProto boot_count = 270;
     SettingProto safe_boot_disallowed = 271;
@@ -331,6 +331,10 @@ message GlobalSettingsProto {
     SettingProto network_recommendations_package = 286;
     SettingProto bluetooth_a2dp_supports_optional_codecs_prefix = 287;
     SettingProto bluetooth_a2dp_optional_codecs_enabled_prefix = 288;
+    SettingProto installed_instant_app_max_cache_period = 289;
+    SettingProto uninstalled_instant_app_min_cache_period = 290;
+    SettingProto uninstalled_instant_app_max_cache_period = 291;
+    SettingProto unused_static_shared_lib_min_cache_period = 292;
 }
 
 message SecureSettingsProto {

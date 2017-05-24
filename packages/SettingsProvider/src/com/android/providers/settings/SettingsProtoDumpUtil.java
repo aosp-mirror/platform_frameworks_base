@@ -888,8 +888,20 @@ class SettingsProtoDumpUtil {
                 Settings.Global.ENABLE_EPHEMERAL_FEATURE,
                 GlobalSettingsProto.ENABLE_EPHEMERAL_FEATURE);
         dumpSetting(s, p,
-                Settings.Global.UNINSTALLED_INSTANT_APP_CACHE_DURATION_MILLIS,
-                GlobalSettingsProto.UNINSTALLED_EPHEMERAL_APP_CACHE_DURATION_MILLIS);
+                Settings.Global.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
+                GlobalSettingsProto.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD);
+        dumpSetting(s, p,
+                Settings.Global.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
+                GlobalSettingsProto.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD);
+        dumpSetting(s, p,
+                Settings.Global.INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
+                GlobalSettingsProto.INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD);
+        dumpSetting(s, p,
+                Settings.Global.INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
+                GlobalSettingsProto.INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD);
+        dumpSetting(s, p,
+                Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
+                GlobalSettingsProto.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD);
         dumpSetting(s, p,
                 Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
                 GlobalSettingsProto.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED);
