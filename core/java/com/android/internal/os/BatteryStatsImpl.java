@@ -862,21 +862,19 @@ public class BatteryStatsImpl extends BatteryStats {
         final AtomicInteger mCount = new AtomicInteger();
         final TimeBase mTimeBase;
         int mLoadedCount;
-        int mLastCount;
         int mUnpluggedCount;
         int mPluggedCount;
 
-        Counter(TimeBase timeBase, Parcel in) {
+        public Counter(TimeBase timeBase, Parcel in) {
             mTimeBase = timeBase;
             mPluggedCount = in.readInt();
             mCount.set(mPluggedCount);
             mLoadedCount = in.readInt();
-            mLastCount = 0;
             mUnpluggedCount = in.readInt();
             timeBase.add(this);
         }
 
-        Counter(TimeBase timeBase) {
+        public Counter(TimeBase timeBase) {
             mTimeBase = timeBase;
             timeBase.add(this);
         }
@@ -887,11 +885,12 @@ public class BatteryStatsImpl extends BatteryStats {
             out.writeInt(mUnpluggedCount);
         }
 
+        @Override
         public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
             mUnpluggedCount = mPluggedCount;
-            mCount.set(mPluggedCount);
         }
 
+        @Override
         public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             mPluggedCount = mCount.get();
         }
@@ -926,17 +925,22 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void logState(Printer pw, String prefix) {
             pw.println(prefix + "mCount=" + mCount.get()
-                    + " mLoadedCount=" + mLoadedCount + " mLastCount=" + mLastCount
+                    + " mLoadedCount=" + mLoadedCount
                     + " mUnpluggedCount=" + mUnpluggedCount
                     + " mPluggedCount=" + mPluggedCount);
         }
 
-        void stepAtomic() {
-            mCount.incrementAndGet();
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void stepAtomic() {
+            if (mTimeBase.isRunning()) {
+                mCount.incrementAndGet();
+            }
         }
 
         void addAtomic(int delta) {
-            mCount.addAndGet(delta);
+            if (mTimeBase.isRunning()) {
+                mCount.addAndGet(delta);
+            }
         }
 
         /**
@@ -944,7 +948,7 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         void reset(boolean detachIfReset) {
             mCount.set(0);
-            mLoadedCount = mLastCount = mPluggedCount = mUnpluggedCount = 0;
+            mLoadedCount = mPluggedCount = mUnpluggedCount = 0;
             if (detachIfReset) {
                 detach();
             }
@@ -954,15 +958,16 @@ public class BatteryStatsImpl extends BatteryStats {
             mTimeBase.remove(this);
         }
 
-        void writeSummaryFromParcelLocked(Parcel out) {
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void writeSummaryFromParcelLocked(Parcel out) {
             int count = mCount.get();
             out.writeInt(count);
         }
 
-        void readSummaryFromParcelLocked(Parcel in) {
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void readSummaryFromParcelLocked(Parcel in) {
             mLoadedCount = in.readInt();
             mCount.set(mLoadedCount);
-            mLastCount = 0;
             mUnpluggedCount = mPluggedCount = mLoadedCount;
         }
     }
@@ -998,7 +1003,6 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public void onTimeStarted(long elapsedRealTime, long baseUptime, long baseRealtime) {
             mUnpluggedCounts = copyArray(mPluggedCounts, mUnpluggedCounts);
-            mCounts = copyArray(mPluggedCounts, mCounts);
         }
 
         @Override
@@ -1029,11 +1033,13 @@ public class BatteryStatsImpl extends BatteryStats {
             if (counts == null) {
                 return;
             }
-            if (mCounts == null) {
-                mCounts = new long[counts.length];
-            }
-            for (int i = 0; i < counts.length; ++i) {
-                mCounts[i] += counts[i];
+            if (mTimeBase.isRunning()) {
+                if (mCounts == null) {
+                    mCounts = new long[counts.length];
+                }
+                for (int i = 0; i < counts.length; ++i) {
+                    mCounts[i] += counts[i];
+                }
             }
         }
 
@@ -1104,13 +1110,13 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        private void fillArray(long[] a, long val) {
+        private static void fillArray(long[] a, long val) {
             if (a != null) {
                 Arrays.fill(a, val);
             }
         }
 
-        private void subtract(@NonNull long[] val, long[] toSubtract) {
+        private static void subtract(@NonNull long[] val, long[] toSubtract) {
             if (toSubtract == null) {
                 return;
             }
@@ -1119,7 +1125,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        private long[] copyArray(long[] src, long[] dest) {
+        private static long[] copyArray(long[] src, long[] dest) {
             if (src == null) {
                 return null;
             } else {
@@ -1162,7 +1168,6 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
             mUnpluggedCount = mPluggedCount;
-            mCount = mPluggedCount;
         }
 
         @Override
@@ -1189,7 +1194,9 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         void addCountLocked(long count) {
-            mCount += count;
+            if (mTimeBase.isRunning()) {
+                mCount += count;
+            }
         }
 
         /**
