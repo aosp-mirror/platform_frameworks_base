@@ -171,17 +171,61 @@ public class MediaSessionService extends SystemService implements Monitor {
     public void updateSession(MediaSessionRecord record) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
-            if (user == null || !user.mPriorityStack.contains(record)) {
-                Log.d(TAG, "Unknown session updated. Ignoring.");
+            if (user == null) {
+                Log.w(TAG, "Unknown session updated. Ignoring.");
                 return;
             }
-            user.mPriorityStack.onSessionStateChange(record);
             if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
-                mGlobalPrioritySession = record;
+                if (mGlobalPrioritySession != record) {
+                    Log.d(TAG, "Global priority session is changed from " + mGlobalPrioritySession
+                            + " to " + record);
+                    mGlobalPrioritySession = record;
+                    if (user != null && user.mPriorityStack.contains(record)) {
+                        // Handle the global priority session separately.
+                        // Otherwise, it will be the media button session even after it becomes
+                        // inactive because it has been the lastly played media app.
+                        user.mPriorityStack.removeSession(record);
+                    }
+                }
+                if (DEBUG_KEY_EVENT) {
+                    Log.d(TAG, "Global priority session is updated, active=" + record.isActive());
+                }
                 user.pushAddressedPlayerChangedLocked();
+            } else {
+                if (!user.mPriorityStack.contains(record)) {
+                    Log.w(TAG, "Unknown session updated. Ignoring.");
+                    return;
+                }
+                user.mPriorityStack.onSessionStateChange(record);
             }
             mHandler.postSessionsChanged(record.getUserId());
         }
+    }
+
+    private List<MediaSessionRecord> getActiveSessionsLocked(int userId) {
+        List<MediaSessionRecord> records;
+        if (userId == UserHandle.USER_ALL) {
+            records = new ArrayList<>();
+            int size = mUserRecords.size();
+            for (int i = 0; i < size; i++) {
+                records.addAll(mUserRecords.valueAt(i).mPriorityStack.getActiveSessions(userId));
+            }
+        } else {
+            FullUserRecord user = getFullUserRecordLocked(userId);
+            if (user == null) {
+                Log.w(TAG, "getSessions failed. Unknown user " + userId);
+                return new ArrayList<>();
+            }
+            records = user.mPriorityStack.getActiveSessions(userId);
+        }
+
+        // Return global priority session at the first whenever it's asked.
+        if (isGlobalPriorityActiveLocked()
+                && (userId == UserHandle.USER_ALL
+                    || userId == mGlobalPrioritySession.getUserId())) {
+            records.add(0, mGlobalPrioritySession);
+        }
+        return records;
     }
 
     /**
@@ -339,15 +383,15 @@ public class MediaSessionService extends SystemService implements Monitor {
         if (DEBUG) {
             Log.d(TAG, "Destroying " + session);
         }
-        int userId = session.getUserId();
-        FullUserRecord user = getFullUserRecordLocked(userId);
-        if (user != null) {
-            user.removeSessionLocked(session);
-        }
+        FullUserRecord user = getFullUserRecordLocked(session.getUserId());
         if (mGlobalPrioritySession == session) {
             mGlobalPrioritySession = null;
             if (session.isActive() && user != null) {
                 user.pushAddressedPlayerChangedLocked();
+            }
+        } else {
+            if (user != null) {
+                user.mPriorityStack.removeSession(session);
             }
         }
 
@@ -484,7 +528,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             throw new RuntimeException("Media Session owner died prematurely.", e);
         }
 
-        user.addSessionLocked(session);
+        user.mPriorityStack.addSession(session);
         mHandler.postSessionsChanged(userId);
 
         if (DEBUG) {
@@ -509,7 +553,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 Log.w(TAG, "pushSessionsChanged failed. No user with id=" + userId);
                 return;
             }
-            List<MediaSessionRecord> records = user.mPriorityStack.getActiveSessions(userId);
+            List<MediaSessionRecord> records = getActiveSessionsLocked(userId);
             int size = records.size();
             ArrayList<MediaSession.Token> tokens = new ArrayList<MediaSession.Token>();
             for (int i = 0; i < size; i++) {
@@ -635,14 +679,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             for (MediaSessionRecord session : sessions) {
                 MediaSessionService.this.destroySessionLocked(session);
             }
-        }
-
-        public void addSessionLocked(MediaSessionRecord session) {
-            mPriorityStack.addSession(session);
-        }
-
-        public void removeSessionLocked(MediaSessionRecord session) {
-            mPriorityStack.removeSession(session);
         }
 
         public void dumpLocked(PrintWriter pw, String prefix) {
@@ -816,27 +852,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                 int resolvedUserId = verifySessionsRequest(componentName, userId, pid, uid);
                 ArrayList<IBinder> binders = new ArrayList<IBinder>();
                 synchronized (mLock) {
-                    if (resolvedUserId == UserHandle.USER_ALL) {
-                        int size = mUserRecords.size();
-                        for (int i = 0; i < size; i++) {
-                            List<MediaSessionRecord> records =
-                                    mUserRecords.valueAt(i).mPriorityStack.getActiveSessions(
-                                            resolvedUserId);
-                            for (MediaSessionRecord record : records) {
-                                binders.add(record.getControllerBinder().asBinder());
-                            }
-                        }
-                    } else {
-                        FullUserRecord user = getFullUserRecordLocked(resolvedUserId);
-                        if (user == null) {
-                            Log.w(TAG, "getSessions failed. Unknown user " + userId);
-                            return binders;
-                        }
-                        List<MediaSessionRecord> records = user.mPriorityStack
-                                .getActiveSessions(resolvedUserId);
-                        for (MediaSessionRecord record : records) {
-                            binders.add(record.getControllerBinder().asBinder());
-                        }
+                    List<MediaSessionRecord> records = getActiveSessionsLocked(resolvedUserId);
+                    for (MediaSessionRecord record : records) {
+                        binders.add(record.getControllerBinder().asBinder());
                     }
                 }
                 return binders;
@@ -1292,6 +1310,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             synchronized (mLock) {
                 pw.println(mSessionsListeners.size() + " sessions listeners.");
                 pw.println("Global priority session is " + mGlobalPrioritySession);
+                if (mGlobalPrioritySession != null) {
+                    mGlobalPrioritySession.dump(pw, "  ");
+                }
                 pw.println("User Records:");
                 int count = mUserRecords.size();
                 for (int i = 0; i < count; i++) {
