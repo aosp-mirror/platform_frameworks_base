@@ -355,7 +355,7 @@ public class BugreportReceiverTest {
         assertProgressNotification(NEW_NAME, 00.00f);
 
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath,
-                mScreenshotPath);
+                mScreenshotPath, TITLE);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
                 NEW_NAME, TITLE, mDescription, 0, RENAMED_SCREENSHOTS);
 
@@ -410,7 +410,7 @@ public class BugreportReceiverTest {
         assertProgressNotification(NEW_NAME, 00.00f);
 
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID,
-                plainText? mPlainTextPath : mZipPath, mScreenshotPath);
+                plainText? mPlainTextPath : mZipPath, mScreenshotPath, TITLE);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
                 NEW_NAME, TITLE, mDescription, 0, RENAMED_SCREENSHOTS);
 
@@ -465,7 +465,7 @@ public class BugreportReceiverTest {
         sendBugreportStarted(ID2, PID2, NAME2, 1000);
 
         sendBugreportFinished(ID, mZipPath, mScreenshotPath);
-        Bundle extras = acceptBugreportAndGetSharedIntent(ID);
+        Bundle extras = acceptBugreportAndGetSharedIntent(TITLE);
 
         detailsUi = new DetailsUi(mUiBot, ID2, NAME2);
         detailsUi.assertName(NAME2);
@@ -479,7 +479,7 @@ public class BugreportReceiverTest {
 
         // Must use a different zip file otherwise it will fail because zip already contains
         // title.txt and description.txt entries.
-        extras = sendBugreportFinishedAndGetSharedIntent(ID2, mZipPath2, NO_SCREENSHOT);
+        extras = sendBugreportFinishedAndGetSharedIntent(ID2, mZipPath2, NO_SCREENSHOT, TITLE2);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, ID2, PID2, TITLE2,
                 NEW_NAME2, TITLE2, DESCRIPTION2, 0, RENAMED_SCREENSHOTS);
 
@@ -568,7 +568,7 @@ public class BugreportReceiverTest {
 
         // Send notification and click on share.
         sendBugreportFinished(NO_ID, mPlainTextPath, null);
-        acceptBugreport(NO_ID);
+        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title, NO_ID));
 
         // Handle the warning
         mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm));
@@ -725,13 +725,26 @@ public class BugreportReceiverTest {
         return acceptBugreportAndGetSharedIntent(id);
     }
 
+    // TODO: document / merge these 3 sendBugreportFinishedAndGetSharedIntent methods
+    private Bundle sendBugreportFinishedAndGetSharedIntent(int id, String bugreportPath,
+            String screenshotPath, String notificationTitle) {
+        sendBugreportFinished(id, bugreportPath, screenshotPath);
+        return acceptBugreportAndGetSharedIntent(notificationTitle);
+    }
+
     /**
      * Accepts the notification to share the finished bugreport and waits for the result.
      *
      * @return extras sent in the shared intent.
      */
     private Bundle acceptBugreportAndGetSharedIntent(int id) {
-        acceptBugreport(id);
+        final String notificationTitle = mContext.getString(R.string.bugreport_finished_title, id);
+        return acceptBugreportAndGetSharedIntent(notificationTitle);
+    }
+
+    // TODO: document and/or merge these 2 acceptBugreportAndGetSharedIntent methods
+    private Bundle acceptBugreportAndGetSharedIntent(String notificationTitle) {
+        mUiBot.clickOnNotification(notificationTitle);
         mUiBot.chooseActivity(UI_NAME);
         return mListener.getExtras();
     }
@@ -741,13 +754,6 @@ public class BugreportReceiverTest {
      */
     private void waitShareNotification(int id) {
         mUiBot.getNotification(mContext.getString(R.string.bugreport_finished_title, id));
-    }
-
-    /**
-     * Accepts the notification to share the finished bugreport.
-     */
-    private void acceptBugreport(int id) {
-        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title, id));
     }
 
     /**
