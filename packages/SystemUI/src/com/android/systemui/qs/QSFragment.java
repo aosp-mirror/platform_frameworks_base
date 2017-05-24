@@ -34,7 +34,6 @@ import android.widget.FrameLayout.LayoutParams;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
-import com.android.systemui.R.style;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
@@ -128,6 +127,11 @@ public class QSFragment extends Fragment implements QS {
     @Override
     public View getHeader() {
         return mHeader;
+    }
+
+    @Override
+    public void setHasNotifications(boolean hasNotifications) {
+        mContainer.setGutterEnabled(hasNotifications);
     }
 
     public void setPanelView(HeightListener panelView) {
@@ -307,7 +311,7 @@ public class QSFragment extends Fragment implements QS {
 
     public void notifyCustomizeChanged() {
         // The customize state changed, so our height changed.
-        mContainer.updateBottom();
+        mContainer.updateExpansion();
         mQSPanel.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
         mHeader.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
         mFooter.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
@@ -340,7 +344,7 @@ public class QSFragment extends Fragment implements QS {
     }
 
     public int getQsMinExpansionHeight() {
-        return mHeader.getHeight() + mGutterHeight;
+        return mHeader.getHeight();
     }
 
     @Override
