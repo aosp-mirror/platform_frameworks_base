@@ -3518,16 +3518,25 @@ public class PackageManagerService extends IPackageManager.Stub
      *     system partition.</li>
      * </ol>
      */
-    private boolean canAccessInstantApps(int callingUid) {
-        final boolean isSpecialProcess =
-                callingUid == Process.SYSTEM_UID
-                        || callingUid == Process.SHELL_UID
-                        || callingUid == Process.ROOT_UID;
-        final boolean allowMatchInstant =
-                isSpecialProcess
-                        || mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.ACCESS_INSTANT_APPS) == PERMISSION_GRANTED;
-        return allowMatchInstant;
+    private boolean canViewInstantApps(int callingUid, int userId) {
+        if (callingUid == Process.SYSTEM_UID
+                || callingUid == Process.SHELL_UID
+                || callingUid == Process.ROOT_UID) {
+            return true;
+        }
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_INSTANT_APPS) == PERMISSION_GRANTED) {
+            return true;
+        }
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.VIEW_INSTANT_APPS) == PERMISSION_GRANTED) {
+            final ComponentName homeComponent = getDefaultHomeActivity(userId);
+            if (homeComponent != null
+                    && isCallerSameApp(homeComponent.getPackageName(), callingUid)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private PackageInfo generatePackageInfo(PackageSetting ps, int flags, int userId) {
@@ -3785,7 +3794,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (ps.getInstantApp(userId)) {
             // caller can see all components of all instant applications, don't filter
-            if (canAccessInstantApps(callingUid)) {
+            if (canViewInstantApps(callingUid, userId)) {
                 return false;
             }
             // request for a specific instant application component, filter
@@ -4409,11 +4418,12 @@ public class PackageManagerService extends IPackageManager.Stub
             flags |= PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY;
             flags |= PackageManager.MATCH_INSTANT;
         } else {
+            final boolean wantMatchInstant = (flags & PackageManager.MATCH_INSTANT) != 0;
             final boolean allowMatchInstant =
                     (wantInstantApps
                             && Intent.ACTION_VIEW.equals(intent.getAction())
                             && hasWebURI(intent))
-                    || canAccessInstantApps(callingUid);
+                    || (wantMatchInstant && canViewInstantApps(callingUid, userId));
             flags &= ~(PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY
                     | PackageManager.MATCH_EXPLICITLY_VISIBLE_ONLY);
             if (!allowMatchInstant) {
@@ -5938,7 +5948,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mPackages) {
-            if (canAccessInstantApps(callingUid)) {
+            if (canViewInstantApps(callingUid, callingUserId)) {
                 return new ArrayList<String>(mPackages.keySet());
             }
             final String instantAppPkgName = getInstantAppPackageName(callingUid);
@@ -8147,9 +8157,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean returnAllowed =
                     ps != null
                     && (isCallerSameApp(packageName, callingUid)
-                            || mContext.checkCallingOrSelfPermission(
-                                    android.Manifest.permission.ACCESS_INSTANT_APPS)
-                                            == PERMISSION_GRANTED
+                            || canViewInstantApps(callingUid, userId)
                             || mInstantAppRegistry.isInstantAccessGranted(
                                     userId, UserHandle.getAppId(callingUid), ps.appId));
             if (returnAllowed) {
@@ -24439,8 +24447,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
-        public boolean canAccessInstantApps(int callingUid) {
-            return PackageManagerService.this.canAccessInstantApps(callingUid);
+        public boolean canAccessInstantApps(int callingUid, int userId) {
+            return PackageManagerService.this.canViewInstantApps(callingUid, userId);
         }
     }
 

@@ -343,5 +343,5 @@ public abstract class PackageManagerInternal {
     public abstract int getUidTargetSdkVersion(int uid);
 
     /** Whether the binder caller can access instant apps. */
-    public abstract boolean canAccessInstantApps(int callingUid);
+    public abstract boolean canAccessInstantApps(int callingUid, int userId);
 }
