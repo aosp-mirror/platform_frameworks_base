@@ -85,7 +85,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     /** @hide */
     public static final int UNDEFINED_SELECTION_INDEX = -1;
 
-    /* Special IDs for node source IDs */
     /** @hide */
     public static final int UNDEFINED_ITEM_ID = Integer.MAX_VALUE;
 
