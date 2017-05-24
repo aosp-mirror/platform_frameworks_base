@@ -341,7 +341,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         boolean delayed = false;
         inPendingTransaction = false;
-
+        // Reset the state of mHiddenSetFromTransferredStartingWindow since visibility is actually
+        // been set by the app now.
+        mHiddenSetFromTransferredStartingWindow = false;
         setClientHidden(!visible);
 
         // Allow for state changes and animation to be applied if:
