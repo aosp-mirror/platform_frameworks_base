@@ -1240,10 +1240,13 @@ public class UsbDeviceManager {
         private String getDefaultFunctions() {
             String func = SystemProperties.get(getPersistProp(true),
                     UsbManager.USB_FUNCTION_NONE);
-            if (UsbManager.USB_FUNCTION_NONE.equals(func)) {
-                func = UsbManager.USB_FUNCTION_MTP;
+            // if ADB is enabled, reset functions to ADB
+            // else enable MTP as usual.
+            if (UsbManager.containsFunction(func, UsbManager.USB_FUNCTION_ADB)) {
+                return UsbManager.USB_FUNCTION_ADB;
+            } else {
+                return UsbManager.USB_FUNCTION_MTP;
             }
-            return func;
         }
 
         public void dump(IndentingPrintWriter pw) {
