@@ -24,6 +24,7 @@
     android:layout_height="@dimen/status_bar_header_height"
     android:layout_gravity="@integer/notification_panel_layout_gravity"
     android:baselineAligned="false"
+    android:background="#00000000"
     android:elevation="4dp"
     android:clickable="false"
     android:clipChildren="false"
