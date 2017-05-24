@@ -336,7 +336,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static final int ACTION_SET_TEXT = 0x00200000;
 
-    private static final int LAST_LEGACY_STANDARD_ACTION = ACTION_SET_TEXT;
+    /** @hide */
+    public static final int LAST_LEGACY_STANDARD_ACTION = ACTION_SET_TEXT;
 
     /**
      * Mask to see if the value is larger than the largest ACTION_ constant
@@ -1181,7 +1182,7 @@ public class AccessibilityNodeInfo implements Parcelable {
                     "actions: " + action);
         }
 
-        addLegacyStandardActions(action);
+        addStandardActions(action);
     }
 
     /**
@@ -3194,22 +3195,22 @@ public class AccessibilityNodeInfo implements Parcelable {
             if (mActions != null && !mActions.isEmpty()) {
                 final int actionCount = mActions.size();
 
-                int nonLegacyActionCount = 0;
-                int defaultLegacyStandardActions = 0;
+                int nonStandardActionCount = 0;
+                int defaultStandardActions = 0;
                 for (int i = 0; i < actionCount; i++) {
                     AccessibilityAction action = mActions.get(i);
-                    if (isDefaultLegacyStandardAction(action)) {
-                        defaultLegacyStandardActions |= action.getId();
+                    if (isDefaultStandardAction(action)) {
+                        defaultStandardActions |= action.mSerializationFlag;
                     } else {
-                        nonLegacyActionCount++;
+                        nonStandardActionCount++;
                     }
                 }
-                parcel.writeInt(defaultLegacyStandardActions);
-                parcel.writeInt(nonLegacyActionCount);
+                parcel.writeInt(defaultStandardActions);
 
+                parcel.writeInt(nonStandardActionCount);
                 for (int i = 0; i < actionCount; i++) {
                     AccessibilityAction action = mActions.get(i);
-                    if (!isDefaultLegacyStandardAction(action)) {
+                    if (!isDefaultStandardAction(action)) {
                         parcel.writeInt(action.getId());
                         parcel.writeCharSequence(action.getLabel());
                     }
@@ -3401,10 +3402,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
-            final int legacyStandardActions = parcel.readInt();
-            addLegacyStandardActions(legacyStandardActions);
-            final int nonLegacyActionCount = parcel.readInt();
-            for (int i = 0; i < nonLegacyActionCount; i++) {
+            final int standardActions = parcel.readInt();
+            addStandardActions(standardActions);
+            final int nonStandardActionCount = parcel.readInt();
+            for (int i = 0; i < nonStandardActionCount; i++) {
                 final AccessibilityAction action = new AccessibilityAction(
                         parcel.readInt(), parcel.readCharSequence());
                 addActionUnchecked(action);
@@ -3479,9 +3480,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         init(DEFAULT);
     }
 
-    private static boolean isDefaultLegacyStandardAction(AccessibilityAction action) {
-        return (action.getId() <= LAST_LEGACY_STANDARD_ACTION
-                && TextUtils.isEmpty(action.getLabel()));
+    private static boolean isDefaultStandardAction(AccessibilityAction action) {
+        return action.mSerializationFlag != -1 && TextUtils.isEmpty(action.getLabel());
     }
 
     private static AccessibilityAction getActionSingleton(int actionId) {
@@ -3496,12 +3496,24 @@ public class AccessibilityNodeInfo implements Parcelable {
         return null;
     }
 
-    private void addLegacyStandardActions(int actionMask) {
-        int remainingIds = actionMask;
+    private static AccessibilityAction getActionSingletonBySerializationFlag(int flag) {
+        final int actions = AccessibilityAction.sStandardActions.size();
+        for (int i = 0; i < actions; i++) {
+            AccessibilityAction currentAction = AccessibilityAction.sStandardActions.valueAt(i);
+            if (flag == currentAction.mSerializationFlag) {
+                return currentAction;
+            }
+        }
+
+        return null;
+    }
+
+    private void addStandardActions(int serializationIdMask) {
+        int remainingIds = serializationIdMask;
         while (remainingIds > 0) {
             final int id = 1 << Integer.numberOfTrailingZeros(remainingIds);
             remainingIds &= ~id;
-            AccessibilityAction action = getActionSingleton(id);
+            AccessibilityAction action = getActionSingletonBySerializationFlag(id);
             addAction(action);
         }
     }
@@ -3750,61 +3762,56 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static final class AccessibilityAction {
 
+        /** @hide */
+        public static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<>();
+
         /**
          * Action that gives input focus to the node.
          */
         public static final AccessibilityAction ACTION_FOCUS =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_FOCUS, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_FOCUS);
 
         /**
          * Action that clears input focus of the node.
          */
         public static final AccessibilityAction ACTION_CLEAR_FOCUS =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_CLEAR_FOCUS, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
 
         /**
          *  Action that selects the node.
          */
         public static final AccessibilityAction ACTION_SELECT =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_SELECT, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_SELECT);
 
         /**
          * Action that deselects the node.
          */
         public static final AccessibilityAction ACTION_CLEAR_SELECTION =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_CLEAR_SELECTION, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
 
         /**
          * Action that clicks on the node info.
          */
         public static final AccessibilityAction ACTION_CLICK =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_CLICK, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK);
 
         /**
          * Action that long clicks on the node.
          */
         public static final AccessibilityAction ACTION_LONG_CLICK =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_LONG_CLICK, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
 
         /**
          * Action that gives accessibility focus to the node.
          */
         public static final AccessibilityAction ACTION_ACCESSIBILITY_FOCUS =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
 
         /**
          * Action that clears accessibility focus of the node.
          */
         public static final AccessibilityAction ACTION_CLEAR_ACCESSIBILITY_FOCUS =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
 
         /**
          * Action that requests to go to the next entity in this node's text
@@ -3850,8 +3857,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *  AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE
          */
         public static final AccessibilityAction ACTION_NEXT_AT_MOVEMENT_GRANULARITY =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
 
         /**
          * Action that requests to go to the previous entity in this node's text
@@ -3898,7 +3904,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static final AccessibilityAction ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY =
                 new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY, null);
+                        AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
 
         /**
          * Action to move to the next HTML element of a given type. For example, move
@@ -3916,8 +3922,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * </p>
          */
         public static final AccessibilityAction ACTION_NEXT_HTML_ELEMENT =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT);
 
         /**
          * Action to move to the previous HTML element of a given type. For example, move
@@ -3935,43 +3940,37 @@ public class AccessibilityNodeInfo implements Parcelable {
          * </p>
          */
         public static final AccessibilityAction ACTION_PREVIOUS_HTML_ELEMENT =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT);
 
         /**
          * Action to scroll the node content forward.
          */
         public static final AccessibilityAction ACTION_SCROLL_FORWARD =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_SCROLL_FORWARD, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
 
         /**
          * Action to scroll the node content backward.
          */
         public static final AccessibilityAction ACTION_SCROLL_BACKWARD =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
 
         /**
          * Action to copy the current selection to the clipboard.
          */
         public static final AccessibilityAction ACTION_COPY =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_COPY, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_COPY);
 
         /**
          * Action to paste the current clipboard content.
          */
         public static final AccessibilityAction ACTION_PASTE =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_PASTE, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_PASTE);
 
         /**
          * Action to cut the current selection and place it to the clipboard.
          */
         public static final AccessibilityAction ACTION_CUT =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_CUT, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_CUT);
 
         /**
          * Action to set the selection. Performing this action with no arguments
@@ -3997,29 +3996,25 @@ public class AccessibilityNodeInfo implements Parcelable {
          *  AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT
          */
         public static final AccessibilityAction ACTION_SET_SELECTION =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_SET_SELECTION, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
 
         /**
          * Action to expand an expandable node.
          */
         public static final AccessibilityAction ACTION_EXPAND =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_EXPAND, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_EXPAND);
 
         /**
          * Action to collapse an expandable node.
          */
         public static final AccessibilityAction ACTION_COLLAPSE =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_COLLAPSE, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
 
         /**
          * Action to dismiss a dismissable node.
          */
         public static final AccessibilityAction ACTION_DISMISS =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_DISMISS, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_DISMISS);
 
         /**
          * Action that sets the text of the node. Performing the action without argument,
@@ -4038,8 +4033,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * </code></pre></p>
          */
         public static final AccessibilityAction ACTION_SET_TEXT =
-                new AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_SET_TEXT, null);
+                new AccessibilityAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
 
         /**
          * Action that requests the node make its bounding rectangle visible
@@ -4048,7 +4042,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @see View#requestRectangleOnScreen(Rect)
          */
         public static final AccessibilityAction ACTION_SHOW_ON_SCREEN =
-                new AccessibilityAction(R.id.accessibilityActionShowOnScreen, null);
+                new AccessibilityAction(R.id.accessibilityActionShowOnScreen);
 
         /**
          * Action that scrolls the node to make the specified collection
@@ -4063,37 +4057,37 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @see AccessibilityNodeInfo#getCollectionInfo()
          */
         public static final AccessibilityAction ACTION_SCROLL_TO_POSITION =
-                new AccessibilityAction(R.id.accessibilityActionScrollToPosition, null);
+                new AccessibilityAction(R.id.accessibilityActionScrollToPosition);
 
         /**
          * Action to scroll the node content up.
          */
         public static final AccessibilityAction ACTION_SCROLL_UP =
-                new AccessibilityAction(R.id.accessibilityActionScrollUp, null);
+                new AccessibilityAction(R.id.accessibilityActionScrollUp);
 
         /**
          * Action to scroll the node content left.
          */
         public static final AccessibilityAction ACTION_SCROLL_LEFT =
-                new AccessibilityAction(R.id.accessibilityActionScrollLeft, null);
+                new AccessibilityAction(R.id.accessibilityActionScrollLeft);
 
         /**
          * Action to scroll the node content down.
          */
         public static final AccessibilityAction ACTION_SCROLL_DOWN =
-                new AccessibilityAction(R.id.accessibilityActionScrollDown, null);
+                new AccessibilityAction(R.id.accessibilityActionScrollDown);
 
         /**
          * Action to scroll the node content right.
          */
         public static final AccessibilityAction ACTION_SCROLL_RIGHT =
-                new AccessibilityAction(R.id.accessibilityActionScrollRight, null);
+                new AccessibilityAction(R.id.accessibilityActionScrollRight);
 
         /**
          * Action that context clicks the node.
          */
         public static final AccessibilityAction ACTION_CONTEXT_CLICK =
-                new AccessibilityAction(R.id.accessibilityActionContextClick, null);
+                new AccessibilityAction(R.id.accessibilityActionContextClick);
 
         /**
          * Action that sets progress between {@link  RangeInfo#getMin() RangeInfo.getMin()} and
@@ -4106,7 +4100,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @see RangeInfo
          */
         public static final AccessibilityAction ACTION_SET_PROGRESS =
-                new AccessibilityAction(R.id.accessibilityActionSetProgress, null);
+                new AccessibilityAction(R.id.accessibilityActionSetProgress);
 
         /**
          * Action to move a window to a new location.
@@ -4116,44 +4110,13 @@ public class AccessibilityNodeInfo implements Parcelable {
          * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_MOVE_WINDOW_Y}
          */
         public static final AccessibilityAction ACTION_MOVE_WINDOW =
-                new AccessibilityAction(R.id.accessibilityActionMoveWindow, null);
-
-        private static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<>();
-        static {
-            sStandardActions.add(ACTION_FOCUS);
-            sStandardActions.add(ACTION_CLEAR_FOCUS);
-            sStandardActions.add(ACTION_SELECT);
-            sStandardActions.add(ACTION_CLEAR_SELECTION);
-            sStandardActions.add(ACTION_CLICK);
-            sStandardActions.add(ACTION_LONG_CLICK);
-            sStandardActions.add(ACTION_ACCESSIBILITY_FOCUS);
-            sStandardActions.add(ACTION_CLEAR_ACCESSIBILITY_FOCUS);
-            sStandardActions.add(ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-            sStandardActions.add(ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
-            sStandardActions.add(ACTION_NEXT_HTML_ELEMENT);
-            sStandardActions.add(ACTION_PREVIOUS_HTML_ELEMENT);
-            sStandardActions.add(ACTION_SCROLL_FORWARD);
-            sStandardActions.add(ACTION_SCROLL_BACKWARD);
-            sStandardActions.add(ACTION_COPY);
-            sStandardActions.add(ACTION_PASTE);
-            sStandardActions.add(ACTION_CUT);
-            sStandardActions.add(ACTION_SET_SELECTION);
-            sStandardActions.add(ACTION_EXPAND);
-            sStandardActions.add(ACTION_COLLAPSE);
-            sStandardActions.add(ACTION_DISMISS);
-            sStandardActions.add(ACTION_SET_TEXT);
-            sStandardActions.add(ACTION_SHOW_ON_SCREEN);
-            sStandardActions.add(ACTION_SCROLL_TO_POSITION);
-            sStandardActions.add(ACTION_SCROLL_UP);
-            sStandardActions.add(ACTION_SCROLL_LEFT);
-            sStandardActions.add(ACTION_SCROLL_DOWN);
-            sStandardActions.add(ACTION_SCROLL_RIGHT);
-            sStandardActions.add(ACTION_SET_PROGRESS);
-            sStandardActions.add(ACTION_CONTEXT_CLICK);
-        }
+                new AccessibilityAction(R.id.accessibilityActionMoveWindow);
 
         private final int mActionId;
         private final CharSequence mLabel;
+
+        /** @hide */
+        public int mSerializationFlag = -1;
 
         /**
          * Creates a new AccessibilityAction. For adding a standard action without a specific label,
@@ -4179,6 +4142,16 @@ public class AccessibilityNodeInfo implements Parcelable {
 
             mActionId = actionId;
             mLabel = label;
+        }
+
+        /**
+         * Constructor for a {@link #sStandardActions standard} action
+         */
+        private AccessibilityAction(int standardActionId) {
+            this(standardActionId, null);
+
+            mSerializationFlag = (int) bitAt(sStandardActions.size());
+            sStandardActions.add(this);
         }
 
         /**
