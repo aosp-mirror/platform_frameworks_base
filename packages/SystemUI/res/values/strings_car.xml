@@ -18,4 +18,5 @@
 -->
 <resources>
     <string name="unknown_user_label">Unknown</string>
+    <string name="start_driving">Start Driving</string>
 </resources>

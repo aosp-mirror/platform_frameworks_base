@@ -20,6 +20,14 @@
     android:layout_height="match_parent"
     android:visibility="gone">
 
+    <ProgressBar
+        android:id="@+id/countdown_progress"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/car_user_switcher_progress_bar_height"
+        style="@style/CarUserSwitcher.ProgressBar"
+        android:layout_marginTop="@dimen/car_user_switcher_progress_bar_margin_top"
+        android:layout_alignParentTop="true"/>
+
     <com.android.systemui.statusbar.car.UserGridView
         android:id="@+id/user_grid"
         android:layout_width="match_parent"
@@ -34,4 +42,13 @@
         android:layout_height="@dimen/car_page_indicator_dot_diameter"
         android:layout_marginTop="@dimen/car_page_indicator_margin_top"
         android:layout_below="@+id/user_grid" />
+
+    <Button
+        android:id="@+id/start_driving"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/car_start_driving_height"
+        android:text="@string/start_driving"
+        style="@style/CarUserSwitcher.StartDrivingButton"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

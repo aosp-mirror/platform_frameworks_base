@@ -17,15 +17,14 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
-import static android.graphics.GraphicBuffer.USAGE_HW_TEXTURE;
-import static android.graphics.GraphicBuffer.USAGE_SW_READ_NEVER;
-import static android.graphics.GraphicBuffer.USAGE_SW_WRITE_RARELY;
-import static android.graphics.PixelFormat.RGBA_8888;
+import static android.graphics.Bitmap.Config.ARGB_8888;
+import static android.graphics.Bitmap.Config.HARDWARE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskSnapshot;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
@@ -42,7 +41,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.TaskSnapshotSurface.SystemBarBackgroundPainter;
 
 import java.io.PrintWriter;
-import java.util.function.Consumer;
 
 /**
  * When an app token becomes invisible, we take a snapshot (bitmap) of the corresponding task and
@@ -240,22 +238,22 @@ class TaskSnapshotController {
         final int color = task.getTaskDescription().getBackgroundColor();
         final int statusBarColor = task.getTaskDescription().getStatusBarColor();
         final int navigationBarColor = task.getTaskDescription().getNavigationBarColor();
-        final GraphicBuffer buffer = GraphicBuffer.create(mainWindow.getFrameLw().width(),
-                mainWindow.getFrameLw().height(),
-                RGBA_8888, USAGE_HW_TEXTURE | USAGE_SW_WRITE_RARELY | USAGE_SW_READ_NEVER);
-        if (buffer == null) {
-            return null;
-        }
-        final Canvas c = buffer.lockCanvas();
+        final Bitmap b = Bitmap.createBitmap(mainWindow.getFrameLw().width(),
+                mainWindow.getFrameLw().height(), ARGB_8888);
+        final Canvas c = new Canvas(b);
         c.drawColor(color);
         final LayoutParams attrs = mainWindow.getAttrs();
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, statusBarColor, navigationBarColor);
         decorPainter.setInsets(mainWindow.mContentInsets, mainWindow.mStableInsets);
         decorPainter.drawDecors(c, null /* statusBarExcludeFrame */);
-        buffer.unlockCanvasAndPost(c);
-        return new TaskSnapshot(buffer, topChild.getConfiguration().orientation,
-                mainWindow.mStableInsets, false /* reduced */, 1.0f /* scale */);
+
+        // Flush writer.
+        c.setBitmap(null);
+        final Bitmap hwBitmap = b.copy(HARDWARE, false /* isMutable */);
+        return new TaskSnapshot(hwBitmap.createGraphicBufferHandle(),
+                topChild.getConfiguration().orientation, mainWindow.mStableInsets,
+                false /* reduced */, 1.0f /* scale */);
     }
 
     /**

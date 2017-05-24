@@ -1461,6 +1461,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     mService.getGlobalConfiguration(), r.getMergedOverrideConfiguration());
             r.setLastReportedConfiguration(mergedConfiguration);
 
+            logIfTransactionTooLarge(r.intent, r.icicle);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
                     // TODO: Have this take the merged configuration instead of separate global and
@@ -1544,6 +1545,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         return true;
+    }
+
+    private void logIfTransactionTooLarge(Intent intent, Bundle icicle) {
+        int extrasSize = 0;
+        if (intent != null) {
+            final Bundle extras = intent.getExtras();
+            if (extras != null) {
+                extrasSize = extras.getSize();
+            }
+        }
+        int icicleSize = (icicle == null ? 0 : icicle.getSize());
+        if (extrasSize + icicleSize > 200000) {
+            Slog.e(TAG, "Transaction too large, intent: " + intent + ", extras size: " + extrasSize
+                    + ", icicle size: " + icicleSize);
+        }
     }
 
     void startSpecificActivityLocked(ActivityRecord r,

@@ -50,11 +50,14 @@ public class FooterPreference extends Preference {
         super.onBindViewHolder(holder);
         TextView title = holder.itemView.findViewById(android.R.id.title);
         title.setMovementMethod(new LinkMovementMethod());
+        title.setClickable(false);
+        title.setLongClickable(false);
     }
 
     private void init() {
         setIcon(R.drawable.ic_info_outline_24dp);
         setKey(KEY_FOOTER);
         setOrder(ORDER_FOOTER);
+        setSelectable(false);
     }
 }

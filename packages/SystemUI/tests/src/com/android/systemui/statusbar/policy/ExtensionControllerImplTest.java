@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -49,6 +50,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @RunWith(AndroidTestingRunner.class)
+@SmallTest
 public class ExtensionControllerImplTest extends SysuiTestCase {
 
     private PluginManager mPluginManager;

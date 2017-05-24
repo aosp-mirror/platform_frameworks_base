@@ -1371,6 +1371,7 @@ public class AccountManagerService
         if (accounts != null) {
             synchronized (accounts.dbLock) {
                 synchronized (accounts.cacheLock) {
+                    accounts.statementForLogging.close();
                     accounts.accountsDb.close();
                 }
             }

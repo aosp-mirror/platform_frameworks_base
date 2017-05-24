@@ -163,18 +163,29 @@ public class TetheringConfiguration {
         }
 
         // Fix up upstream interface types for DUN or mobile. NOTE: independent
-        // of the value of |requiresDun|, cell data of one form or another is
+        // of the value of |dunCheck|, cell data of one form or another is
         // *always* an upstream, regardless of the upstream interface types
         // specified by configuration resources.
         if (dunCheck == DUN_REQUIRED) {
             if (!upstreamIfaceTypes.contains(TYPE_MOBILE_DUN)) {
                 upstreamIfaceTypes.add(TYPE_MOBILE_DUN);
             }
-        } else {
+        } else if (dunCheck == DUN_NOT_REQUIRED) {
             if (!upstreamIfaceTypes.contains(TYPE_MOBILE)) {
                 upstreamIfaceTypes.add(TYPE_MOBILE);
             }
             if (!upstreamIfaceTypes.contains(TYPE_MOBILE_HIPRI)) {
+                upstreamIfaceTypes.add(TYPE_MOBILE_HIPRI);
+            }
+        } else {
+            // Fix upstream interface types for case DUN_UNSPECIFIED.
+            // Do not modify if a cellular interface type is already present in the
+            // upstream interface types. Add TYPE_MOBILE and TYPE_MOBILE_HIPRI if no
+            // cellular interface types are found in the upstream interface types.
+            if (!(upstreamIfaceTypes.contains(TYPE_MOBILE_DUN)
+                    || upstreamIfaceTypes.contains(TYPE_MOBILE)
+                    || upstreamIfaceTypes.contains(TYPE_MOBILE_HIPRI))) {
+                upstreamIfaceTypes.add(TYPE_MOBILE);
                 upstreamIfaceTypes.add(TYPE_MOBILE_HIPRI);
             }
         }

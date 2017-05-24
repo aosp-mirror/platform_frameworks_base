@@ -40,6 +40,7 @@ import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.keyguard.WorkLockActivityController;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -58,7 +59,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class WorkLockActivityControllerTest {
+public class WorkLockActivityControllerTest extends SysuiTestCase {
     private static final int USER_ID = 333;
     private static final int TASK_ID = 444;
 
