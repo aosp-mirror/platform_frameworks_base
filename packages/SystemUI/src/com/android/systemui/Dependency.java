@@ -28,6 +28,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.Preconditions;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginDependencyProvider;
@@ -38,9 +39,9 @@ import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
-import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
+import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -77,7 +78,6 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
-import com.android.systemui.tuner.TunablePadding;
 import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerServiceImpl;
@@ -85,8 +85,6 @@ import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
-
-import com.google.android.colorextraction.ColorExtractor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -109,6 +107,7 @@ import java.util.function.Consumer;
  * services, registered receivers, etc.
  */
 public class Dependency extends SystemUI {
+    private static final String TAG = "Dependency";
 
     /**
      * Key for getting a background Looper for background work.
@@ -268,7 +267,7 @@ public class Dependency extends SystemUI {
         mProviders.put(AccessibilityManagerWrapper.class,
                 () -> new AccessibilityManagerWrapper(mContext));
 
-        mProviders.put(ColorExtractor.class, () -> new ColorExtractor(mContext));
+        mProviders.put(SysuiColorExtractor.class, () -> new SysuiColorExtractor(mContext));
 
         mProviders.put(TunablePaddingService.class, () -> new TunablePaddingService());
 
