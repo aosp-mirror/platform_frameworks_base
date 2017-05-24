@@ -123,6 +123,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -2629,7 +2630,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
+    public void overridePendingAppTransitionThumb(GraphicBuffer srcThumb, int startX,
             int startY, IRemoteCallback startedCallback, boolean scaleUp) {
         synchronized(mWindowMap) {
             mAppTransition.overridePendingAppTransitionThumb(srcThumb, startX, startY,
@@ -2638,7 +2639,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX,
+    public void overridePendingAppTransitionAspectScaledThumb(GraphicBuffer srcThumb, int startX,
             int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
             boolean scaleUp) {
         synchronized(mWindowMap) {
