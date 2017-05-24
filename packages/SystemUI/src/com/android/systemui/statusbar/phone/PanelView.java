@@ -224,6 +224,7 @@ public abstract class PanelView extends FrameLayout {
             if (mTracking) {
                 onTrackingStopped(true /* expanded */);
             }
+            notifyExpandingFinished();
         }
     }
 
