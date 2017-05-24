@@ -123,7 +123,7 @@ void RenderState::flush(Caches::FlushMode mode) {
 }
 
 void RenderState::onBitmapDestroyed(uint32_t pixelRefId) {
-    if (mCaches->textureCache.destroyTexture(pixelRefId)) {
+    if (mCaches && mCaches->textureCache.destroyTexture(pixelRefId)) {
         glFlush();
         GL_CHECKPOINT(MODERATE);
     }
