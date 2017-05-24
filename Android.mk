@@ -357,6 +357,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IPinnedStackController.aidl \
 	core/java/android/view/IPinnedStackListener.aidl \
 	core/java/android/view/IRotationWatcher.aidl \
+	core/java/android/view/IWallpaperVisibilityListener.aidl \
 	core/java/android/view/IWindow.aidl \
 	core/java/android/view/IWindowFocusObserver.aidl \
 	core/java/android/view/IWindowId.aidl \
