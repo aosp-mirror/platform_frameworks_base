@@ -80,6 +80,11 @@ public class Paint {
     private String      mFontFeatureSettings;
     private String      mFontVariationSettings;
 
+    private float mShadowLayerRadius;
+    private float mShadowLayerDx;
+    private float mShadowLayerDy;
+    private int mShadowLayerColor;
+
     private static final Object sCacheLock = new Object();
 
     /**
@@ -530,6 +535,11 @@ public class Paint {
         setElegantTextHeight(false);
         mFontFeatureSettings = null;
         mFontVariationSettings = null;
+
+        mShadowLayerRadius = 0.0f;
+        mShadowLayerDx = 0.0f;
+        mShadowLayerDy = 0.0f;
+        mShadowLayerColor = 0;
     }
 
     /**
@@ -567,6 +577,54 @@ public class Paint {
         mLocales = paint.mLocales;
         mFontFeatureSettings = paint.mFontFeatureSettings;
         mFontVariationSettings = paint.mFontVariationSettings;
+
+        mShadowLayerRadius = paint.mShadowLayerRadius;
+        mShadowLayerDx = paint.mShadowLayerDx;
+        mShadowLayerDy = paint.mShadowLayerDy;
+        mShadowLayerColor = paint.mShadowLayerColor;
+    }
+
+    /**
+     * Returns true if all attributes are equal.
+     *
+     * The caller is expected to have checked the trivial cases, like the pointers being equal,
+     * the objects having different classes, or the parameter being null.
+     * @hide
+     */
+    public boolean hasEqualAttributes(@NonNull Paint other) {
+        return mColorFilter == other.mColorFilter
+                && mMaskFilter == other.mMaskFilter
+                && mPathEffect == other.mPathEffect
+                && mShader == other.mShader
+                && mTypeface == other.mTypeface
+                && mXfermode == other.mXfermode
+                && mHasCompatScaling == other.mHasCompatScaling
+                && mCompatScaling == other.mCompatScaling
+                && mInvCompatScaling == other.mInvCompatScaling
+                && mBidiFlags == other.mBidiFlags
+                && mLocales.equals(other.mLocales)
+                && TextUtils.equals(mFontFeatureSettings, other.mFontFeatureSettings)
+                && TextUtils.equals(mFontVariationSettings, other.mFontVariationSettings)
+                && mShadowLayerRadius == other.mShadowLayerRadius
+                && mShadowLayerDx == other.mShadowLayerDx
+                && mShadowLayerDy == other.mShadowLayerDy
+                && mShadowLayerColor == other.mShadowLayerColor
+                && getFlags() == other.getFlags()
+                && getHinting() == other.getHinting()
+                && getStyle() == other.getStyle()
+                && getColor() == other.getColor()
+                && getStrokeWidth() == other.getStrokeWidth()
+                && getStrokeMiter() == other.getStrokeMiter()
+                && getStrokeCap() == other.getStrokeCap()
+                && getStrokeJoin() == other.getStrokeJoin()
+                && getTextAlign() == other.getTextAlign()
+                && isElegantTextHeight() == other.isElegantTextHeight()
+                && getTextSize() == other.getTextSize()
+                && getTextScaleX() == other.getTextScaleX()
+                && getTextSkewX() == other.getTextSkewX()
+                && getLetterSpacing() == other.getLetterSpacing()
+                && getWordSpacing() == other.getWordSpacing()
+                && getHyphenEdit() == other.getHyphenEdit();
     }
 
     /** @hide */
@@ -1236,6 +1294,10 @@ public class Paint {
      * opaque, or the alpha from the shadow color if not.
      */
     public void setShadowLayer(float radius, float dx, float dy, int shadowColor) {
+      mShadowLayerRadius = radius;
+      mShadowLayerDx = dx;
+      mShadowLayerDy = dy;
+      mShadowLayerColor = shadowColor;
       nSetShadowLayer(mNativePaint, radius, dx, dy, shadowColor);
     }
 
@@ -2796,7 +2858,7 @@ public class Paint {
     private static native int nGetFontMetricsInt(long paintPtr,
             long typefacePtr, FontMetricsInt fmi);
 
-    
+
     // ---------------- @CriticalNative ------------------------
 
     @CriticalNative
