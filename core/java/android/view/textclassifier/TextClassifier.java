@@ -67,11 +67,6 @@ public interface TextClassifier {
                 CharSequence text, int startIndex, int endIndex, LocaleList defaultLocales) {
             return TextClassification.EMPTY;
         }
-
-        @Override
-        public LinksInfo getLinks(CharSequence text, int linkMask, LocaleList defaultLocales) {
-            return LinksInfo.NO_OP;
-        }
     };
 
     /**
@@ -138,8 +133,10 @@ public interface TextClassifier {
      * @hide
      */
     @WorkerThread
-    LinksInfo getLinks(
-            @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales);
+    default LinksInfo getLinks(
+            @NonNull CharSequence text, int linkMask, @Nullable LocaleList defaultLocales) {
+        return LinksInfo.NO_OP;
+    }
 
     /**
      * Logs a TextClassifier event.
