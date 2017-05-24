@@ -682,7 +682,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 removeSelf();
                 return;
             }
-            resetViewStatesLocked(dataset, ViewState.STATE_WAITING_DATASET_AUTH);
         }
 
         final Parcelable result = data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT);
@@ -1362,7 +1361,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
 
             // ...or handle authentication.
-            // TODO(b/37424539): proper implementation
             mService.setDatasetAuthenticationSelected(dataset.getId());
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH, false);
             final Intent fillInIntent = createAuthFillInIntent(
@@ -1455,21 +1453,36 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             try {
                 if (sDebug) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
+
                 // Skip null values as a null values means no change
                 final int entryCount = dataset.getFieldIds().size();
                 final List<AutofillId> ids = new ArrayList<>(entryCount);
                 final List<AutofillValue> values = new ArrayList<>(entryCount);
+                boolean waitingDatasetAuth = false;
                 for (int i = 0; i < entryCount; i++) {
                     if (dataset.getFieldValues().get(i) == null) {
                         continue;
                     }
-                    ids.add(dataset.getFieldIds().get(i));
+                    final AutofillId viewId = dataset.getFieldIds().get(i);
+                    ids.add(viewId);
                     values.add(dataset.getFieldValues().get(i));
+                    final ViewState viewState = mViewStates.get(viewId);
+                    if (viewState != null
+                            && (viewState.getState() & ViewState.STATE_WAITING_DATASET_AUTH) != 0) {
+                        if (sVerbose) {
+                            Slog.v(TAG, "autofillApp(): view " + viewId + " waiting auth");
+                        }
+                        waitingDatasetAuth = true;
+                        viewState.resetState(ViewState.STATE_WAITING_DATASET_AUTH);
+                    }
                 }
                 if (!ids.isEmpty()) {
+                    if (waitingDatasetAuth) {
+                        hideFillUiIfOwnedByMe();
+                    }
                     mClient.autofill(id, ids, values);
+                    setViewStatesLocked(null, dataset, ViewState.STATE_AUTOFILLED, false);
                 }
-                setViewStatesLocked(null, dataset, ViewState.STATE_AUTOFILLED, false);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Error autofilling activity: " + e);
             }
