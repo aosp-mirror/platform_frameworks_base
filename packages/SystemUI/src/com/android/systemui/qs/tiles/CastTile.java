@@ -16,33 +16,33 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
+
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaRouter;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.support.v7.app.MediaRouteChooserDialog;
-import android.support.v7.app.MediaRouteControllerDialog;
-import android.support.v7.media.MediaControlIntent;
-import android.support.v7.media.MediaRouteSelector;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import com.android.internal.app.MediaRouteChooserDialog;
+import com.android.internal.app.MediaRouteControllerDialog;
+import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.R.style;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -133,19 +133,12 @@ public class CastTile extends QSTileImpl<BooleanState> {
     @Override
     public void showDetail(boolean show) {
         mUiHandler.post(() -> {
-            Context context = new ContextThemeWrapper(mContext,
-                    R.style.Theme_AppCompat_Light_Dialog_Alert);
-            if (mState.value) {
-                mDialog = new MediaRouteControllerDialog(context);
-            } else {
-                // Instead of showing detail, show standard media routing UI.
-                MediaRouteChooserDialog dialog = new MediaRouteChooserDialog(context);
-                MediaRouteSelector selector = new MediaRouteSelector.Builder()
-                        .addControlCategory(MediaControlIntent.CATEGORY_LIVE_VIDEO)
-                        .build();
-                dialog.setRouteSelector(selector);
-                mDialog = dialog;
-            }
+            mDialog = MediaRouteDialogPresenter.createDialog(mContext, ROUTE_TYPE_REMOTE_DISPLAY,
+                    v -> {
+                        mDialog.dismiss();
+                        Dependency.get(ActivityStarter.class)
+                                .postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
+                    });
             mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
             mUiHandler.post(() -> mDialog.show());
             registerReceiver();
