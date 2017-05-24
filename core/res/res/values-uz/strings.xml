@@ -1205,7 +1205,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Til va sxemani belgilash uchun bosing"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Ilova tarixi"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> boshqa ilovalar ustidan ochilgan"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> boshqa ilovalar ustidan ochilgan"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ilovasi uchun bu funksiyani sozlamalar orqali o‘chirib qo‘yish mumkin."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"O‘CHIRIB QO‘YISH"</string>
