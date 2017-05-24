@@ -37,7 +37,10 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.AppTransitionAnimationSpec;
+import android.view.DisplayListCanvas;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.RenderNode;
+import android.view.ThreadedRenderer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.recents.Recents;
@@ -358,18 +361,23 @@ public class RecentsTransitionHelper {
             b.eraseColor(Color.TRANSPARENT);
             return b;
         } else {
-            Bitmap b = Bitmap.createBitmap(fromWidth, fromHeight,
-                    Bitmap.Config.ARGB_8888);
-
             if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
+                Bitmap b = Bitmap.createBitmap(fromWidth, fromHeight, Bitmap.Config.ARGB_8888);
                 b.eraseColor(0xFFff0000);
+                return b.createAshmemBitmap();
             } else {
-                Canvas c = new Canvas(b);
+
+                // Create a hardware bitmap to render the TaskView into because it may be bound to a
+                // snapshot that is backed by a GraphicBuffer
+                RenderNode node = RenderNode.create("RecentsTransitionHelper", null);
+                node.setLeftTopRightBottom(0, 0, fromWidth, fromHeight);
+                node.setClipToBounds(false);
+                DisplayListCanvas c = node.start(fromWidth, fromHeight);
                 c.scale(scale, scale);
                 taskView.draw(c);
-                c.setBitmap(null);
+                node.end(c);
+                return ThreadedRenderer.createHardwareBitmap(node, fromWidth, fromHeight);
             }
-            return b.createAshmemBitmap();
         }
     }
 

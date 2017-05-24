@@ -31,6 +31,9 @@ import android.graphics.Rect;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.ArraySet;
+import android.view.DisplayListCanvas;
+import android.view.RenderNode;
+import android.view.ThreadedRenderer;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy.ScreenOffListener;
 import android.view.WindowManagerPolicy.StartingSurface;
@@ -238,19 +241,22 @@ class TaskSnapshotController {
         final int color = task.getTaskDescription().getBackgroundColor();
         final int statusBarColor = task.getTaskDescription().getStatusBarColor();
         final int navigationBarColor = task.getTaskDescription().getNavigationBarColor();
-        final Bitmap b = Bitmap.createBitmap(mainWindow.getFrameLw().width(),
-                mainWindow.getFrameLw().height(), ARGB_8888);
-        final Canvas c = new Canvas(b);
-        c.drawColor(color);
         final LayoutParams attrs = mainWindow.getAttrs();
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, statusBarColor, navigationBarColor);
+        final int width = mainWindow.getFrameLw().width();
+        final int height = mainWindow.getFrameLw().height();
+
+        final RenderNode node = RenderNode.create("TaskSnapshotController", null);
+        node.setLeftTopRightBottom(0, 0, width, height);
+        node.setClipToBounds(false);
+        final DisplayListCanvas c = node.start(width, height);
+        c.drawColor(color);
         decorPainter.setInsets(mainWindow.mContentInsets, mainWindow.mStableInsets);
         decorPainter.drawDecors(c, null /* statusBarExcludeFrame */);
+        node.end(c);
+        final Bitmap hwBitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
 
-        // Flush writer.
-        c.setBitmap(null);
-        final Bitmap hwBitmap = b.copy(HARDWARE, false /* isMutable */);
         return new TaskSnapshot(hwBitmap.createGraphicBufferHandle(),
                 topChild.getConfiguration().orientation, mainWindow.mStableInsets,
                 false /* reduced */, 1.0f /* scale */);
