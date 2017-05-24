@@ -257,9 +257,20 @@ class WindowLayersController {
         w.mLayer = layer;
         w.mWinAnimator.mAnimLayer = w.getAnimLayerAdjustment()
                 + w.getSpecialWindowAnimLayerAdjustment();
-        if (w.mAppToken != null && w.mAppToken.mAppAnimator.thumbnailForceAboveLayer > 0
-                && w.mWinAnimator.mAnimLayer > w.mAppToken.mAppAnimator.thumbnailForceAboveLayer) {
-            w.mAppToken.mAppAnimator.thumbnailForceAboveLayer = w.mWinAnimator.mAnimLayer;
+        if (w.mAppToken != null && w.mAppToken.mAppAnimator.thumbnailForceAboveLayer > 0) {
+            if (w.mWinAnimator.mAnimLayer > w.mAppToken.mAppAnimator.thumbnailForceAboveLayer) {
+                w.mAppToken.mAppAnimator.thumbnailForceAboveLayer = w.mWinAnimator.mAnimLayer;
+            }
+            // TODO(b/62029108): the entire contents of the if statement should call the refactored
+            // function to set the thumbnail layer for w.AppToken
+            int highestLayer = w.mAppToken.getHighestAnimLayer();
+            if (highestLayer > 0) {
+                if (w.mAppToken.mAppAnimator.thumbnail != null
+                        && w.mAppToken.mAppAnimator.thumbnailForceAboveLayer != highestLayer) {
+                    w.mAppToken.mAppAnimator.thumbnailForceAboveLayer = highestLayer;
+                    w.mAppToken.mAppAnimator.thumbnail.setLayer(highestLayer + 1);
+                }
+            }
         }
     }
 }
