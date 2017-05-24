@@ -30,6 +30,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,6 +42,7 @@ import android.view.DisplayListCanvas;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
+import android.view.View;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.recents.Recents;
@@ -267,8 +269,8 @@ public class RecentsTransitionHelper {
             Rect bounds) {
         mTmpTransform.fillIn(taskView);
         Task task = taskView.getTask();
-        Bitmap thumbnail = RecentsTransitionHelper.composeTaskBitmap(taskView, mTmpTransform);
-        return Collections.singletonList(new AppTransitionAnimationSpec(task.key.id, thumbnail,
+        GraphicBuffer buffer = RecentsTransitionHelper.composeTaskBitmap(taskView, mTmpTransform);
+        return Collections.singletonList(new AppTransitionAnimationSpec(task.key.id, buffer,
                 bounds));
     }
 
@@ -349,7 +351,7 @@ public class RecentsTransitionHelper {
         return new AppTransitionAnimationSpec(task.key.id, null, taskRect);
     }
 
-    public static Bitmap composeTaskBitmap(TaskView taskView, TaskViewTransform transform) {
+    public static GraphicBuffer composeTaskBitmap(TaskView taskView, TaskViewTransform transform) {
         float scale = transform.scale;
         int fromWidth = (int) (transform.rect.width() * scale);
         int fromHeight = (int) (transform.rect.height() * scale);
@@ -357,31 +359,17 @@ public class RecentsTransitionHelper {
             Log.e(TAG, "Could not compose thumbnail for task: " + taskView.getTask() +
                     " at transform: " + transform);
 
-            Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-            b.eraseColor(Color.TRANSPARENT);
-            return b;
+            return drawViewIntoGraphicBuffer(1, 1, null, 1f, 0x00ffffff);
         } else {
             if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
-                Bitmap b = Bitmap.createBitmap(fromWidth, fromHeight, Bitmap.Config.ARGB_8888);
-                b.eraseColor(0xFFff0000);
-                return b.createAshmemBitmap();
+                return drawViewIntoGraphicBuffer(fromWidth, fromHeight, null, 1f, 0xFFff0000);
             } else {
-
-                // Create a hardware bitmap to render the TaskView into because it may be bound to a
-                // snapshot that is backed by a GraphicBuffer
-                RenderNode node = RenderNode.create("RecentsTransitionHelper", null);
-                node.setLeftTopRightBottom(0, 0, fromWidth, fromHeight);
-                node.setClipToBounds(false);
-                DisplayListCanvas c = node.start(fromWidth, fromHeight);
-                c.scale(scale, scale);
-                taskView.draw(c);
-                node.end(c);
-                return ThreadedRenderer.createHardwareBitmap(node, fromWidth, fromHeight);
+                return drawViewIntoGraphicBuffer(fromWidth, fromHeight, taskView, scale, 0);
             }
         }
     }
 
-    private static Bitmap composeHeaderBitmap(TaskView taskView,
+    private static GraphicBuffer composeHeaderBitmap(TaskView taskView,
             TaskViewTransform transform) {
         float scale = transform.scale;
         int headerWidth = (int) (transform.rect.width());
@@ -390,16 +378,30 @@ public class RecentsTransitionHelper {
             return null;
         }
 
-        Bitmap b = Bitmap.createBitmap(headerWidth, headerHeight, Bitmap.Config.ARGB_8888);
         if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
-            b.eraseColor(0xFFff0000);
+            return drawViewIntoGraphicBuffer(headerWidth, headerHeight, null, 1f, 0xFFff0000);
         } else {
-            Canvas c = new Canvas(b);
-            c.scale(scale, scale);
-            taskView.mHeaderView.draw(c);
-            c.setBitmap(null);
+            return drawViewIntoGraphicBuffer(headerWidth, headerHeight, taskView.mHeaderView,
+                    scale, 0);
         }
-        return b.createAshmemBitmap();
+    }
+
+    public static GraphicBuffer drawViewIntoGraphicBuffer(int bufferWidth, int bufferHeight,
+            View view, float scale, int eraseColor) {
+        RenderNode node = RenderNode.create("RecentsTransition", null);
+        node.setLeftTopRightBottom(0, 0, bufferWidth, bufferHeight);
+        node.setClipToBounds(false);
+        DisplayListCanvas c = node.start(bufferWidth, bufferHeight);
+        c.scale(scale, scale);
+        if (eraseColor != 0) {
+            c.drawColor(eraseColor);
+        }
+        if (view != null) {
+            view.draw(c);
+        }
+        node.end(c);
+        return ThreadedRenderer.createHardwareBitmap(node, bufferWidth, bufferHeight)
+                .createGraphicBufferHandle();
     }
 
     /**
@@ -407,7 +409,7 @@ public class RecentsTransitionHelper {
      */
     private static AppTransitionAnimationSpec composeAnimationSpec(TaskStackView stackView,
             TaskView taskView, TaskViewTransform transform, boolean addHeaderBitmap) {
-        Bitmap b = null;
+        GraphicBuffer b = null;
         if (addHeaderBitmap) {
             b = composeHeaderBitmap(taskView, transform);
             if (b == null) {
