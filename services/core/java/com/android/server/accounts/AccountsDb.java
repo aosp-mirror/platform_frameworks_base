@@ -1321,6 +1321,7 @@ class AccountsDb implements AutoCloseable {
         }
     }
 
+    @Override
     public void close() {
         mDeDatabase.close();
     }

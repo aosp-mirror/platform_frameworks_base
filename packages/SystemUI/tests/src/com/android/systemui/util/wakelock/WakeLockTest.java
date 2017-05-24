@@ -25,6 +25,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.systemui.SysuiTestCase;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +34,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class WakeLockTest {
+public class WakeLockTest extends SysuiTestCase {
 
     WakeLock mWakeLock;
     PowerManager.WakeLock mInner;

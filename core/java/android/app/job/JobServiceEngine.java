@@ -55,21 +55,12 @@ public abstract class JobServiceEngine {
      */
     private static final int MSG_JOB_FINISHED = 2;
 
-    /**
-     * Context we are running in.
-     */
-    private final Service mService;
-
     private final IJobService mBinder;
-
-    /** Lock object for {@link #mHandler}. */
-    private final Object mHandlerLock = new Object();
 
     /**
      * Handler we post jobs to. Responsible for calling into the client logic, and handling the
      * callback to the system.
      */
-    @GuardedBy("mHandlerLock")
     JobHandler mHandler;
 
     static final class JobInterface extends IJobService.Stub {
@@ -189,9 +180,8 @@ public abstract class JobServiceEngine {
      * @param service The {@link Service} that is creating this engine and in which it will run.
      */
     public JobServiceEngine(Service service) {
-        mService = service;
         mBinder = new JobInterface(this);
-        mHandler = new JobHandler(mService.getMainLooper());
+        mHandler = new JobHandler(service.getMainLooper());
     }
 
     /**

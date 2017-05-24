@@ -20,6 +20,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.support.test.filters.SmallTest;
+import android.support.test.filters.FlakyTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -33,11 +35,14 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+@SmallTest
+@FlakyTest
 public class QSFooterTest extends LeakCheckedTest {
 
     private QSFooter mFooter;

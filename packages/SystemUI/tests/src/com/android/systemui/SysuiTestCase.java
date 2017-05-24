@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.testing.LeakCheck;
 import android.util.Log;
 

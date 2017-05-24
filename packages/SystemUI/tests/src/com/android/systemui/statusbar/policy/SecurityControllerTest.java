@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.policy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doThrow;
@@ -29,7 +30,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.StringParceledListSlice;
+import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
+import android.os.UserManager;
 import android.security.IKeyChainService;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -55,6 +58,7 @@ import org.junit.runner.RunWith;
 public class SecurityControllerTest extends SysuiTestCase implements SecurityControllerCallback {
     private final DevicePolicyManager mDevicePolicyManager = mock(DevicePolicyManager.class);
     private final IKeyChainService.Stub mKeyChainService = mock(IKeyChainService.Stub.class);
+    private final UserManager mUserManager = mock(UserManager.class);
     private SecurityControllerImpl mSecurityController;
     private CountDownLatch mStateChangedLatch;
 
@@ -67,11 +71,14 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
     @Before
     public void setUp() throws Exception {
         mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
+        mContext.addMockSystemService(Context.USER_SERVICE, mUserManager);
         mContext.addMockSystemService(Context.CONNECTIVITY_SERVICE, mock(ConnectivityManager.class));
 
         Intent intent = new Intent(IKeyChainService.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         mContext.addMockService(comp, mKeyChainService);
+
+        when(mUserManager.getUserInfo(anyInt())).thenReturn(new UserInfo());
 
         when(mKeyChainService.getUserCaAliases())
                 .thenReturn(new StringParceledListSlice(new ArrayList<String>()));
@@ -80,12 +87,10 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         when(mKeyChainService.queryLocalInterface("android.security.IKeyChainService"))
                 .thenReturn(mKeyChainService);
 
-        mSecurityController = new SecurityControllerImpl(mContext);
-
-        // Wait for one or two state changes from the CACertLoader(s) in the constructor of
-        // mSecurityController
-        mStateChangedLatch = new CountDownLatch(mSecurityController.hasWorkProfile() ? 2 : 1);
-        mSecurityController.addCallback(this);
+        // Wait for callbacks from 1) the CACertLoader and 2) the onUserSwitched() function in the
+        // constructor of mSecurityController
+        mStateChangedLatch = new CountDownLatch(2);
+        mSecurityController = new SecurityControllerImpl(mContext, this);
     }
 
     @After
@@ -109,13 +114,40 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
     }
 
     @Test
-    @Ignore("Flaky")
-    public void testCaCertLoader() throws Exception {
+    public void testWorkAccount() throws Exception {
+        // Wait for the callbacks from setUp()
+        assertTrue(mStateChangedLatch.await(1, TimeUnit.SECONDS));
+        assertFalse(mSecurityController.hasCACertInCurrentUser());
+
+        final int PRIMARY_USER_ID = 0;
+        final int MANAGED_USER_ID = 1;
+        List<UserInfo> profiles = Arrays.asList(new UserInfo(PRIMARY_USER_ID, "Primary",
+                                                             UserInfo.FLAG_PRIMARY),
+                                                new UserInfo(MANAGED_USER_ID, "Working",
+                                                             UserInfo.FLAG_MANAGED_PROFILE));
+        when(mUserManager.getProfiles(anyInt())).thenReturn(profiles);
+        assertTrue(mSecurityController.hasWorkProfile());
+        assertFalse(mSecurityController.hasCACertInWorkProfile());
+
+        mStateChangedLatch = new CountDownLatch(1);
+
+        when(mKeyChainService.getUserCaAliases())
+                .thenReturn(new StringParceledListSlice(Arrays.asList("One CA Alias")));
+
+        mSecurityController.new CACertLoader()
+                           .execute(MANAGED_USER_ID);
+
         assertTrue(mStateChangedLatch.await(3, TimeUnit.SECONDS));
+        assertTrue(mSecurityController.hasCACertInWorkProfile());
+    }
+
+    @Test
+    public void testCaCertLoader() throws Exception {
+        // Wait for the callbacks from setUp()
+        assertTrue(mStateChangedLatch.await(1, TimeUnit.SECONDS));
         assertFalse(mSecurityController.hasCACertInCurrentUser());
 
         // With a CA cert
-
         mStateChangedLatch = new CountDownLatch(1);
 
         when(mKeyChainService.getUserCaAliases())
@@ -138,7 +170,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         mSecurityController.new CACertLoader()
                            .execute(0);
 
-        assertFalse(mStateChangedLatch.await(3, TimeUnit.SECONDS));
+        assertFalse(mStateChangedLatch.await(1, TimeUnit.SECONDS));
         assertTrue(mSecurityController.hasCACertInCurrentUser());
         // The retry takes 30s
         //assertTrue(mStateChangedLatch.await(31, TimeUnit.SECONDS));

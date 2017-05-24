@@ -356,6 +356,7 @@ static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
         case SP_FOREGROUND:
         case SP_AUDIO_APP:
         case SP_AUDIO_SYS:
+        case SP_RT_APP:
             filename = "/dev/cpuset/foreground/cpus";
             break;
         case SP_TOP_APP:

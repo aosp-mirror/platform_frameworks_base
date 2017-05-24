@@ -19,12 +19,14 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,17 +35,18 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
+import com.android.systemui.SysuiTestCase;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationContentViewTest {
+@FlakyTest
+public class NotificationContentViewTest extends SysuiTestCase {
 
     NotificationContentView mView;
-    Context mContext;
 
     @Before
     @UiThreadTest
     public void setup() {
-        mContext = InstrumentationRegistry.getTargetContext();
         mView = new NotificationContentView(mContext, null);
         ExpandableNotificationRow row = new ExpandableNotificationRow(mContext, null);
         ExpandableNotificationRow mockRow = spy(row);

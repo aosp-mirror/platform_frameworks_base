@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.test.filters.SmallTest;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.SysuiTestCase;
@@ -31,6 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+@SmallTest
 public class CommandQueueTest extends SysuiTestCase {
 
     private CommandQueue mCommandQueue;

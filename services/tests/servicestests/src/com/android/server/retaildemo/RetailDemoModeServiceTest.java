@@ -85,7 +85,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
-@SmallTest
 public class RetailDemoModeServiceTest {
     private static final int TEST_DEMO_USER = 111;
     private static final long SETUP_COMPLETE_TIMEOUT_MS = 2000; // 2 sec

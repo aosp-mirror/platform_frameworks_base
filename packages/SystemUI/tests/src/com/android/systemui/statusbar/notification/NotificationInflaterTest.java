@@ -27,17 +27,20 @@ import android.content.Context;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.widget.RemoteViews;
 
 import com.android.systemui.R;
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationTestHelper;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,16 +48,15 @@ import java.util.concurrent.CountDownLatch;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationInflaterTest {
+@FlakyTest
+public class NotificationInflaterTest extends SysuiTestCase {
 
-    private Context mContext;
     private NotificationInflater mNotificationInflater;
     private Notification.Builder mBuilder;
     private ExpandableNotificationRow mRow;
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getTargetContext();
         mBuilder = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setContentTitle("Title")

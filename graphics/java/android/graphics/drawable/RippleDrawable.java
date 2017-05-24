@@ -58,11 +58,11 @@ import java.util.Arrays;
  * mask using {@code setId(..., android.R.id.mask)} or an existing mask layer
  * may be replaced using {@code setDrawableByLayerId(android.R.id.mask, ...)}.
  * <pre>
- * <code>&lt!-- A red ripple masked against an opaque rectangle. --/>
- * &ltripple android:color="#ffff0000">
- *   &ltitem android:id="@android:id/mask"
+ * <code>&lt;!-- A red ripple masked against an opaque rectangle. --/>
+ * &lt;ripple android:color="#ffff0000">
+ *   &lt;item android:id="@android:id/mask"
  *         android:drawable="@android:color/white" />
- * &lt/ripple></code>
+ * &lt;/ripple></code>
  * </pre>
  * <p>
  * If a mask layer is set, the ripple effect will be masked against that layer
@@ -71,15 +71,15 @@ import java.util.Arrays;
  * If no mask layer is set, the ripple effect is masked against the composite
  * of the child layers.
  * <pre>
- * <code>&lt!-- A green ripple drawn atop a black rectangle. --/>
- * &ltripple android:color="#ff00ff00">
- *   &ltitem android:drawable="@android:color/black" />
- * &lt/ripple>
+ * <code>&lt;!-- A green ripple drawn atop a black rectangle. --/>
+ * &lt;ripple android:color="#ff00ff00">
+ *   &lt;item android:drawable="@android:color/black" />
+ * &lt;/ripple>
  *
- * &lt!-- A blue ripple drawn atop a drawable resource. --/>
- * &ltripple android:color="#ff0000ff">
- *   &ltitem android:drawable="@drawable/my_drawable" />
- * &lt/ripple></code>
+ * &lt;!-- A blue ripple drawn atop a drawable resource. --/>
+ * &lt;ripple android:color="#ff0000ff">
+ *   &lt;item android:drawable="@drawable/my_drawable" />
+ * &lt;/ripple></code>
  * </pre>
  * <p>
  * If no child layers or mask is specified and the ripple is set as a View
@@ -87,8 +87,8 @@ import java.util.Arrays;
  * background within the View's hierarchy. In this case, the drawing region
  * may extend outside of the Drawable bounds.
  * <pre>
- * <code>&lt!-- An unbounded red ripple. --/>
- * &ltripple android:color="#ffff0000" /></code>
+ * <code>&lt;!-- An unbounded red ripple. --/>
+ * &lt;ripple android:color="#ffff0000" /></code>
  * </pre>
  *
  * @attr ref android.R.styleable#RippleDrawable_color

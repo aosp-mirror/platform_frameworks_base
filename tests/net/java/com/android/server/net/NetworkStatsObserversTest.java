@@ -18,20 +18,22 @@ package com.android.server.net;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
-import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.when;
-
-import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.ROAMING_NO;
+import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.when;
 
 import android.app.usage.NetworkStatsManager;
 import android.net.DataUsageRequest;
@@ -48,6 +50,7 @@ import android.os.Messenger;
 import android.os.Process;
 import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 
@@ -60,8 +63,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -69,8 +73,9 @@ import org.mockito.MockitoAnnotations;
 /**
  * Tests for {@link NetworkStatsObservers}.
  */
+@RunWith(AndroidJUnit4.class)
 @SmallTest
-public class NetworkStatsObserversTest extends TestCase {
+public class NetworkStatsObserversTest {
     private static final String TEST_IFACE = "test0";
     private static final String TEST_IFACE2 = "test1";
     private static final long TEST_START = 1194220800000L;
@@ -88,7 +93,7 @@ public class NetworkStatsObserversTest extends TestCase {
     private static final int UID_GREEN = UserHandle.PER_USER_RANGE + 3;
     private static final int UID_ANOTHER_USER = 2 * UserHandle.PER_USER_RANGE + 4;
 
-    private static final long WAIT_TIMEOUT = 500;  // 1/2 sec
+    private static final long WAIT_TIMEOUT_MS = 500;
     private static final long THRESHOLD_BYTES = 2 * MB_IN_BYTES;
     private static final long BASE_BYTES = 7 * MB_IN_BYTES;
     private static final int INVALID_TYPE = -1;
@@ -101,7 +106,6 @@ public class NetworkStatsObserversTest extends TestCase {
     private Handler mObserverNoopHandler;
 
     private LatchedHandler mHandler;
-    private ConditionVariable mCv;
 
     private NetworkStatsObservers mStatsObservers;
     private Messenger mMessenger;
@@ -110,9 +114,8 @@ public class NetworkStatsObserversTest extends TestCase {
 
     @Mock private IBinder mockBinder;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         MockitoAnnotations.initMocks(this);
 
         mObserverHandlerThread = new IdleableHandlerThread("HandlerThread");
@@ -125,14 +128,14 @@ public class NetworkStatsObserversTest extends TestCase {
             }
         };
 
-        mCv = new ConditionVariable();
-        mHandler = new LatchedHandler(Looper.getMainLooper(), mCv);
+        mHandler = new LatchedHandler(Looper.getMainLooper(), new ConditionVariable());
         mMessenger = new Messenger(mHandler);
 
         mActiveIfaces = new ArrayMap<>();
         mActiveUidIfaces = new ArrayMap<>();
     }
 
+    @Test
     public void testRegister_thresholdTooLow_setsDefaultThreshold() throws Exception {
         long thresholdTooLowBytes = 1L;
         DataUsageRequest inputRequest = new DataUsageRequest(
@@ -145,6 +148,7 @@ public class NetworkStatsObserversTest extends TestCase {
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
     }
 
+    @Test
     public void testRegister_highThreshold_accepted() throws Exception {
         long highThresholdBytes = 2 * THRESHOLD_BYTES;
         DataUsageRequest inputRequest = new DataUsageRequest(
@@ -157,6 +161,7 @@ public class NetworkStatsObserversTest extends TestCase {
         assertEquals(highThresholdBytes, request.thresholdInBytes);
     }
 
+    @Test
     public void testRegister_twoRequests_twoIds() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateWifi, THRESHOLD_BYTES);
@@ -174,6 +179,7 @@ public class NetworkStatsObserversTest extends TestCase {
         assertEquals(THRESHOLD_BYTES, request2.thresholdInBytes);
     }
 
+    @Test
     public void testUnregister_unknownRequest_noop() throws Exception {
         DataUsageRequest unknownRequest = new DataUsageRequest(
                 123456 /* id */, sTemplateWifi, THRESHOLD_BYTES);
@@ -181,6 +187,7 @@ public class NetworkStatsObserversTest extends TestCase {
         mStatsObservers.unregister(unknownRequest, UID_RED);
     }
 
+    @Test
     public void testUnregister_knownRequest_releasesCaller() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
@@ -198,6 +205,7 @@ public class NetworkStatsObserversTest extends TestCase {
         Mockito.verify(mockBinder).unlinkToDeath(any(IBinder.DeathRecipient.class), anyInt());
     }
 
+    @Test
     public void testUnregister_knownRequest_invalidUid_doesNotUnregister() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
@@ -215,6 +223,7 @@ public class NetworkStatsObserversTest extends TestCase {
         Mockito.verifyZeroInteractions(mockBinder);
     }
 
+    @Test
     public void testUpdateStats_initialSample_doesNotNotify() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
@@ -240,11 +249,9 @@ public class NetworkStatsObserversTest extends TestCase {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-
-        assertTrue(mCv.block(WAIT_TIMEOUT));
-        assertEquals(INVALID_TYPE, mHandler.mLastMessageType);
     }
 
+    @Test
     public void testUpdateStats_belowThreshold_doesNotNotify() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
@@ -276,12 +283,10 @@ public class NetworkStatsObserversTest extends TestCase {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-
-        assertTrue(mCv.block(WAIT_TIMEOUT));
-        mCv.block(WAIT_TIMEOUT);
-        assertEquals(INVALID_TYPE, mHandler.mLastMessageType);
     }
 
+
+    @Test
     public void testUpdateStats_deviceAccess_notifies() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
@@ -314,11 +319,10 @@ public class NetworkStatsObserversTest extends TestCase {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-
-        assertTrue(mCv.block(WAIT_TIMEOUT));
         assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
     }
 
+    @Test
     public void testUpdateStats_defaultAccess_notifiesSameUid() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
@@ -352,11 +356,10 @@ public class NetworkStatsObserversTest extends TestCase {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-
-        assertTrue(mCv.block(WAIT_TIMEOUT));
         assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
     }
 
+    @Test
     public void testUpdateStats_defaultAccess_usageOtherUid_doesNotNotify() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
@@ -390,11 +393,9 @@ public class NetworkStatsObserversTest extends TestCase {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-
-        assertTrue(mCv.block(WAIT_TIMEOUT));
-        assertEquals(INVALID_TYPE, mHandler.mLastMessageType);
     }
 
+    @Test
     public void testUpdateStats_userAccess_usageSameUser_notifies() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
@@ -428,11 +429,10 @@ public class NetworkStatsObserversTest extends TestCase {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-
-        assertTrue(mCv.block(WAIT_TIMEOUT));
         assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
     }
 
+    @Test
     public void testUpdateStats_userAccess_usageAnotherUser_doesNotNotify() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
                 DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
@@ -467,14 +467,22 @@ public class NetworkStatsObserversTest extends TestCase {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-
-        assertTrue(mCv.block(WAIT_TIMEOUT));
-        assertEquals(INVALID_TYPE, mHandler.mLastMessageType);
     }
 
     private void waitForObserverToIdle() {
-        // Send dummy message to make sure that any previous message has been handled
-        mHandler.sendMessage(mHandler.obtainMessage(-1));
-        mObserverHandlerThread.waitForIdle(WAIT_TIMEOUT);
+        waitForIdleLooper(mObserverHandlerThread.getLooper(), WAIT_TIMEOUT_MS);
+        waitForIdleLooper(mHandler.getLooper(), WAIT_TIMEOUT_MS);
     }
+
+    // TODO: unify with ConnectivityService.waitForIdleHandler and
+    // NetworkServiceStatsTest.IdleableHandlerThread
+    private static void waitForIdleLooper(Looper looper, long timeoutMs) {
+        final ConditionVariable cv = new ConditionVariable();
+        final Handler handler = new Handler(looper);
+        handler.post(() -> cv.open());
+        if (!cv.block(timeoutMs)) {
+            fail("Looper did not become idle after " + timeoutMs + " ms");
+        }
+    }
+
 }

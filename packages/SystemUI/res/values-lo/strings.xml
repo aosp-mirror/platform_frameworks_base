@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານແມ່ນຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກດັ່ງກ່າວເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊໄດ້.\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ຕິດຕໍ່ຫາຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ\n."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານແມ່ນຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກດັ່ງກ່າວເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊໄດ້.\n\nນອກຈາກນັ້ນ, ທ່ານຍັງເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານໄດ້."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"ປົດລັອກສຳລັບ <xliff:g id="USER_NAME">%1$s</xliff:g> ແລ້ວ"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Device will stay locked until you manually unlock"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ຮັບເອົາການ​ແຈ້ງເຕືອນ​ໄວຂຶ້ນ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ເບິ່ງພວກ​ມັນກ່ອນ​ທ່ານຈະ​ປົດລັອກ"</string>

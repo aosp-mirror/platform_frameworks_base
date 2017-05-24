@@ -956,8 +956,8 @@ public class NotificationManagerService extends SystemService {
         public void update(Uri uri) {
             ContentResolver resolver = getContext().getContentResolver();
             if (uri == null || NOTIFICATION_LIGHT_PULSE_URI.equals(uri)) {
-                boolean pulseEnabled = Settings.System.getInt(resolver,
-                            Settings.System.NOTIFICATION_LIGHT_PULSE, 0) != 0;
+                boolean pulseEnabled = Settings.System.getIntForUser(resolver,
+                            Settings.System.NOTIFICATION_LIGHT_PULSE, 0, UserHandle.USER_CURRENT) != 0;
                 if (mNotificationPulseEnabled != pulseEnabled) {
                     mNotificationPulseEnabled = pulseEnabled;
                     updateNotificationPulse();
@@ -3282,9 +3282,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void doChannelWarningToast(CharSequence toastText) {
+        final int defaultWarningEnabled = Build.IS_DEBUGGABLE ? 1 : 0;
         final boolean warningEnabled = Settings.Global.getInt(getContext().getContentResolver(),
-                Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS, 0) != 0;
-        if (warningEnabled || Build.IS_DEBUGGABLE) {
+                Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS, defaultWarningEnabled) != 0;
+        if (warningEnabled) {
             Toast toast = Toast.makeText(getContext(), mHandler.getLooper(), toastText,
                     Toast.LENGTH_LONG);
             toast.show();

@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది. ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION">%2$s</xliff:g>కి ప్రొఫైల్ కనెక్ట్ చేయబడింది.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకులను సంప్రదించండి."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది. ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>కి ప్రొఫైల్ కనెక్ట్ చేయబడింది.\n\nమీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>కి కూడా మీరు కనెక్ట్ చేయబడ్డారు."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> కోసం అన్‌లాక్ చేయబడింది"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"మీరు మాన్యువల్‌గా అన్‌లాక్ చేస్తే మినహా పరికరం లాక్ చేయబడి ఉంటుంది"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"నోటిఫికేషన్‌లను వేగంగా పొందండి"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"వీటిని మీరు అన్‌లాక్ చేయకముందే చూడండి"</string>

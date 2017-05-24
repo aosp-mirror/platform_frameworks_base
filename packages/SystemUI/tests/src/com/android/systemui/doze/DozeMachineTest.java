@@ -43,6 +43,7 @@ import android.testing.AndroidTestingRunner;
 import android.view.Display;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import android.testing.UiThreadTest;
@@ -54,7 +55,7 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @UiThreadTest
-public class DozeMachineTest {
+public class DozeMachineTest extends SysuiTestCase {
 
     DozeMachine mMachine;
 

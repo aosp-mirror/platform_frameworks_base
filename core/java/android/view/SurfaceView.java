@@ -138,6 +138,8 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 case DRAW_FINISHED_MSG: {
                     mDrawFinished = true;
                     if (mAttachedToWindow) {
+                        mParent.requestTransparentRegion(SurfaceView.this);
+
                         notifyDrawFinished();
                         invalidate();
                     }
@@ -247,7 +249,6 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         getViewRootImpl().addWindowStoppedCallback(this);
         mWindowStopped = false;
 
-        mParent.requestTransparentRegion(this);
         mViewVisibility = getVisibility() == VISIBLE;
         updateRequestedVisibility();
 
@@ -352,7 +353,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     @Override
     public boolean gatherTransparentRegion(Region region) {
-        if (isAboveParent()) {
+        if (isAboveParent() || !mDrawFinished) {
             return super.gatherTransparentRegion(region);
         }
 

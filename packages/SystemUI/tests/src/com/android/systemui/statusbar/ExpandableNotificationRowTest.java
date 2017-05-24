@@ -21,26 +21,29 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 
+import com.android.systemui.SysuiTestCase;
+
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ExpandableNotificationRowTest {
+@FlakyTest
+public class ExpandableNotificationRowTest extends SysuiTestCase {
 
-    private Context mContext;
     private ExpandableNotificationRow mGroup;
     private NotificationTestHelper mNotificationTestHelper;
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getTargetContext();
         mNotificationTestHelper = new NotificationTestHelper(mContext);
         mGroup = mNotificationTestHelper.createGroup();
     }

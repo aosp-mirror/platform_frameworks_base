@@ -20,6 +20,7 @@ package com.android.systemui.util.leak;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.leak.ReferenceTestUtils.CollectionWaiter;
 
 import org.junit.Before;
@@ -35,7 +36,7 @@ import java.util.Collection;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class LeakDetectorTest {
+public class LeakDetectorTest extends SysuiTestCase {
 
     private LeakDetector mLeakDetector;
 

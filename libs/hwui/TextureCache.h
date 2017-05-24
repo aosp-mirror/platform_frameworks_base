@@ -94,14 +94,10 @@ public:
     Texture* get(Bitmap* bitmap);
 
     /**
-     * Removes the texture associated with the specified pixelRef. This is meant
-     * to be called from threads that are not the EGL context thread.
+     * Removes the texture associated with the specified pixelRef. Must be called from RenderThread
+     * Returns true if a texture was destroyed, false if no texture with that id was found
      */
-    ANDROID_API void releaseTexture(uint32_t pixelRefStableID);
-    /**
-     * Process deferred removals.
-     */
-    void clearGarbage();
+    bool destroyTexture(uint32_t pixelRefStableID);
 
     /**
      * Clears the cache. This causes all textures to be deleted.
@@ -139,9 +135,7 @@ private:
 
     bool mDebugEnabled;
 
-    std::vector<uint32_t> mGarbage;
     std::unordered_map<uint32_t, std::unique_ptr<Texture>> mHardwareTextures;
-    mutable Mutex mLock;
 }; // class TextureCache
 
 }; // namespace uirenderer

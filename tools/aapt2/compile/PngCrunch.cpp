@@ -142,19 +142,24 @@ static void WriteDataToStream(png_structp png_ptr, png_bytep buffer, png_size_t 
 }
 
 std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::InputStream* in) {
+  // Create a diagnostics that has the source information encoded.
+  SourcePathDiagnostics source_diag(source, context->GetDiagnostics());
+
   // Read the first 8 bytes of the file looking for the PNG signature.
   // Bail early if it does not match.
   const png_byte* signature;
   size_t buffer_size;
   if (!in->Next((const void**)&signature, &buffer_size)) {
-    context->GetDiagnostics()->Error(DiagMessage()
-                                     << android::base::SystemErrorCodeToString(errno));
+    if (in->HadError()) {
+      source_diag.Error(DiagMessage() << "failed to read PNG signature: " << in->GetError());
+    } else {
+      source_diag.Error(DiagMessage() << "not enough data for PNG signature");
+    }
     return {};
   }
 
   if (buffer_size < kPngSignatureSize || png_sig_cmp(signature, 0, kPngSignatureSize) != 0) {
-    context->GetDiagnostics()->Error(DiagMessage()
-                                     << "file signature does not match PNG signature");
+    source_diag.Error(DiagMessage() << "file signature does not match PNG signature");
     return {};
   }
 
@@ -166,20 +171,17 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::
   // version of libpng.
   png_structp read_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (read_ptr == nullptr) {
-    context->GetDiagnostics()->Error(DiagMessage() << "failed to create libpng read png_struct");
+    source_diag.Error(DiagMessage() << "failed to create libpng read png_struct");
     return {};
   }
 
   // Create and initialize the memory for image header and data.
   png_infop info_ptr = png_create_info_struct(read_ptr);
   if (info_ptr == nullptr) {
-    context->GetDiagnostics()->Error(DiagMessage() << "failed to create libpng read png_info");
+    source_diag.Error(DiagMessage() << "failed to create libpng read png_info");
     png_destroy_read_struct(&read_ptr, nullptr, nullptr);
     return {};
   }
-
-  // Create a diagnostics that has the source information encoded.
-  SourcePathDiagnostics source_diag(source, context->GetDiagnostics());
 
   // Automatically release PNG resources at end of scope.
   PngReadStructDeleter png_read_deleter(read_ptr, info_ptr);

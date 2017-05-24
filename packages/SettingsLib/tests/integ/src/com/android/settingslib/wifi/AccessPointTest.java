@@ -18,7 +18,6 @@ package com.android.settingslib.wifi;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -237,7 +236,7 @@ public class AccessPointTest {
         homeSp.setFriendlyName("Test Provider");
         config.setHomeSp(homeSp);
         AccessPoint ap = new AccessPoint(mContext, config);
-        assertTrue(ap.isPasspointConfig());
+        assertThat(ap.isPasspointConfig()).isTrue();
     }
 
     @Test
@@ -254,8 +253,8 @@ public class AccessPointTest {
         wifiInfo.setNetworkId(configuration.networkId);
         accessPoint.update(configuration, wifiInfo, networkInfo);
 
-        assertTrue(accessPoint.isMetered());
-    };
+        assertThat(accessPoint.isMetered()).isTrue();
+    }
 
     @Test
     public void testIsMetered_returnTrueWhenWifiInfoIsMetered() {
@@ -271,8 +270,25 @@ public class AccessPointTest {
         wifiInfo.setMeteredHint(true);
         accessPoint.update(configuration, wifiInfo, networkInfo);
 
-        assertTrue(accessPoint.isMetered());
-    };
+        assertThat(accessPoint.isMetered()).isTrue();
+    }
+
+    @Test
+    public void testIsMetered_returnTrueWhenNetworkInfoIsMetered() {
+        WifiConfiguration configuration = createWifiConfiguration();
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 2, "WIFI", "WIFI_SUBTYPE");
+        networkInfo.setMetered(true);
+        AccessPoint accessPoint = new AccessPoint(mContext, configuration);
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(configuration.SSID));
+        wifiInfo.setBSSID(configuration.BSSID);
+        wifiInfo.setNetworkId(configuration.networkId);
+        accessPoint.update(configuration, wifiInfo, networkInfo);
+
+        assertThat(accessPoint.isMetered()).isTrue();
+    }
 
     @Test
     public void testIsMetered_returnTrueWhenScoredNetworkIsMetered() {
@@ -286,8 +302,24 @@ public class AccessPointTest {
                                 true /* metered */));
         ap.update(mWifiNetworkScoreCache, false /* scoringUiEnabled */);
 
-        assertTrue(ap.isMetered());
-    };
+        assertThat(ap.isMetered()).isTrue();
+    }
+
+    @Test
+    public void testIsMetered_returnFalseByDefault() {
+        WifiConfiguration configuration = createWifiConfiguration();
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 2, "WIFI", "WIFI_SUBTYPE");
+        AccessPoint accessPoint = new AccessPoint(mContext, configuration);
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(configuration.SSID));
+        wifiInfo.setBSSID(configuration.BSSID);
+        wifiInfo.setNetworkId(configuration.networkId);
+        accessPoint.update(configuration, wifiInfo, networkInfo);
+
+        assertThat(accessPoint.isMetered()).isFalse();
+    }
 
     private AccessPoint createAccessPointWithScanResultCache() {
         Bundle bundle = new Bundle();
@@ -400,7 +432,7 @@ public class AccessPointTest {
         String providerFriendlyName = "Test Provider";
         AccessPoint ap = new TestAccessPointBuilder(mContext).setFqdn(fqdn)
                 .setProviderFriendlyName(providerFriendlyName).build();
-        assertTrue(ap.isPasspointConfig());
+        assertThat(ap.isPasspointConfig()).isTrue();
         assertThat(ap.getPasspointFqdn()).isEqualTo(fqdn);
         assertThat(ap.getConfigName()).isEqualTo(providerFriendlyName);
     }

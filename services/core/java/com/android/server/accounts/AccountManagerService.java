@@ -1371,6 +1371,7 @@ public class AccountManagerService
         if (accounts != null) {
             synchronized (accounts.dbLock) {
                 synchronized (accounts.cacheLock) {
+                    accounts.statementForLogging.close();
                     accounts.accountsDb.close();
                 }
             }
@@ -4944,6 +4945,7 @@ public class AccountManagerService
                 this.userDebugDbInsertionPoint = userDebugDbInsertionPoint;
             }
 
+            @Override
             public void run() {
                 SQLiteStatement logStatement = userAccount.statementForLogging;
                 logStatement.bindLong(1, accountId);
@@ -6060,7 +6062,7 @@ public class AccountManagerService
         }
     }
 
-    private class NotificationId {
+    private static class NotificationId {
         final String mTag;
         private final int mId;
 

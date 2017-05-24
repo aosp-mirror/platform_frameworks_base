@@ -513,7 +513,7 @@ int startLoadAppTxn(uint64_t appId, int hubHandle) {
 
     if (!txnInfo || instanceId < 0) {
         returnId(instanceId);
-        free(txnInfo);
+        delete txnInfo;
         return -1;
     }
 
@@ -526,7 +526,7 @@ int startLoadAppTxn(uint64_t appId, int hubHandle) {
 
     if (db.txnManager.addTxn(CONTEXT_HUB_LOAD_APP, txnInfo) != 0) {
         returnId(instanceId);
-        free(txnInfo);
+        delete txnInfo;
         return -1;
     }
 
@@ -543,7 +543,7 @@ int startUnloadAppTxn(jint appInstanceHandle) {
     *txnData = appInstanceHandle;
 
     if (db.txnManager.addTxn(CONTEXT_HUB_UNLOAD_APP, txnData) != 0) {
-        free(txnData);
+        delete txnData;
         ALOGW("Cannot start transaction to unload app");
         return -1;
     }

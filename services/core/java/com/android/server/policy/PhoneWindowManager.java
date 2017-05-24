@@ -5027,17 +5027,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // A window that has requested to fill the entire screen just
                 // gets everything, period.
                 if (attrs.type == TYPE_STATUS_BAR_PANEL
-                        || attrs.type == TYPE_STATUS_BAR_SUB_PANEL
-                        || attrs.type == TYPE_VOLUME_OVERLAY) {
+                        || attrs.type == TYPE_STATUS_BAR_SUB_PANEL) {
                     pf.left = df.left = of.left = cf.left = hasNavBar
                             ? mDockLeft : mUnrestrictedScreenLeft;
                     pf.top = df.top = of.top = cf.top = mUnrestrictedScreenTop;
                     pf.right = df.right = of.right = cf.right = hasNavBar
-                                        ? mRestrictedScreenLeft+mRestrictedScreenWidth
-                                        : mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
+                            ? mRestrictedScreenLeft + mRestrictedScreenWidth
+                            : mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom = hasNavBar
-                                          ? mRestrictedScreenTop+mRestrictedScreenHeight
-                                          : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
+                            ? mRestrictedScreenTop + mRestrictedScreenHeight
+                            : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
+                    if (DEBUG_LAYOUT) Slog.v(TAG, String.format(
+                            "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
+                            pf.left, pf.top, pf.right, pf.bottom));
+                } else if (attrs.type == TYPE_VOLUME_OVERLAY) {
+                    // Volume overlay covers everything, including the status and navbar
+                    pf.left = df.left = of.left = cf.left = mUnrestrictedScreenLeft;
+                    pf.top = df.top = of.top = cf.top = mUnrestrictedScreenTop;
+                    pf.right = df.right = of.right = cf.right =
+                            mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
+                    pf.bottom = df.bottom = of.bottom = cf.bottom =
+                            mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
                     if (DEBUG_LAYOUT) Slog.v(TAG, String.format(
                                     "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
                                     pf.left, pf.top, pf.right, pf.bottom));
@@ -5333,11 +5343,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs,
             WindowState attached, WindowState imeTarget) {
-        final boolean visible = win.isVisibleLw() && win.getAttrs().alpha > 0f;
-        if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisible=" + visible);
+        final boolean affectsSystemUi = win.canAffectSystemUiFlags();
+        if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": affectsSystemUi=" + affectsSystemUi);
         applyKeyguardPolicyLw(win, imeTarget);
         final int fl = PolicyControl.getWindowFlags(win, attrs);
-        if (mTopFullscreenOpaqueWindowState == null && visible && attrs.type == TYPE_INPUT_METHOD) {
+        if (mTopFullscreenOpaqueWindowState == null && affectsSystemUi
+                && attrs.type == TYPE_INPUT_METHOD) {
             mForcingShowNavBar = true;
             mForcingShowNavBarLayer = win.getSurfaceLayer();
         }
@@ -5353,7 +5364,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
                 && attrs.type < FIRST_SYSTEM_WINDOW;
         final int stackId = win.getStackId();
-        if (mTopFullscreenOpaqueWindowState == null && visible) {
+        if (mTopFullscreenOpaqueWindowState == null && affectsSystemUi) {
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
             }
@@ -5385,7 +5396,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Voice interaction overrides both top fullscreen and top docked.
-        if (visible && win.getAttrs().type == TYPE_VOICE_INTERACTION) {
+        if (affectsSystemUi && win.getAttrs().type == TYPE_VOICE_INTERACTION) {
             if (mTopFullscreenOpaqueWindowState == null) {
                 mTopFullscreenOpaqueWindowState = win;
                 if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
@@ -5401,7 +5412,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Keep track of the window if it's dimming but not necessarily fullscreen.
-        if (mTopFullscreenOpaqueOrDimmingWindowState == null && visible
+        if (mTopFullscreenOpaqueOrDimmingWindowState == null && affectsSystemUi
                 && win.isDimming() && StackId.normallyFullscreenWindows(stackId)) {
             mTopFullscreenOpaqueOrDimmingWindowState = win;
         }
@@ -5409,7 +5420,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // We need to keep track of the top "fullscreen" opaque window for the docked stack
         // separately, because both the "real fullscreen" opaque window and the one for the docked
         // stack can control View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.
-        if (mTopDockedOpaqueWindowState == null && visible && appWindow && attached == null
+        if (mTopDockedOpaqueWindowState == null && affectsSystemUi && appWindow && attached == null
                 && isFullscreen(attrs) && stackId == DOCKED_STACK_ID) {
             mTopDockedOpaqueWindowState = win;
             if (mTopDockedOpaqueOrDimmingWindowState == null) {
@@ -5419,7 +5430,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Also keep track of any windows that are dimming but not necessarily fullscreen in the
         // docked stack.
-        if (mTopDockedOpaqueOrDimmingWindowState == null && visible && win.isDimming()
+        if (mTopDockedOpaqueOrDimmingWindowState == null && affectsSystemUi && win.isDimming()
                 && stackId == DOCKED_STACK_ID) {
             mTopDockedOpaqueOrDimmingWindowState = win;
         }
