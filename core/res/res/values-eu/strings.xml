@@ -864,7 +864,7 @@
     <string name="searchview_description_query" msgid="5911778593125355124">"Bilaketa-kontsulta"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Garbitu kontsulta"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Bidali kontsulta"</string>
-    <string name="searchview_description_voice" msgid="2453203695674994440">"Ahots bidezko bilaketa"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"Ahozko bilaketa"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"\"Arakatu ukituta\" eginbidea gaitu nahi duzu?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> zerbitzuak \"Arakatu ukituta\" eginbidea gaitu nahi du. Eginbide hori aktibatuta dagoenean, hatzaren azpian duzunaren azalpena ikus edo entzun dezakezu, edo tabletarekin elkarrekintzan aritzeko keinuak egin ditzakezu."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> zerbitzuak \"Arakatu ukituta\" eginbidea gaitu nahi du. Eginbide hori aktibatuta dagoenean, hatzaren azpian duzunaren azalpena ikus edo entzun dezakezu, edo telefonoarekin elkarrekintzan aritzeko keinuak egin ditzakezu."</string>
@@ -1207,7 +1207,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Hizkuntza eta diseinua hautatzeko, sakatu hau"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Aplikazioetako jarduerak"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> aplikazioen gainean agertzea"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"Besteen gainean agertzen da <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DESAKTIBATU"</string>

@@ -1206,7 +1206,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"แตะเพื่อเลือกภาษาและรูปแบบ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"กิจกรรมแอป"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> แสดงทับแอปอื่นๆ"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> กำลังแสดงทับแอปอื่นๆ"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้คุณลักษณะนี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดคุณลักษณะ"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ปิด"</string>

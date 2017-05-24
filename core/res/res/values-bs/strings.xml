@@ -447,7 +447,7 @@
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"prikaz mrežnih veza"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Omogućava aplikaciji pregled informacija o mrežnim vezama, npr. koje mreže postoje i koje su povezane."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"ima potpuni pristup mreži"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Omogućava aplikaciji kreiranje spojnih tačaka sa mrežom i korištenje prilagođenih mrežnih protokola. Preglednik i druge aplikacije omogućavaju slanje podataka na internet, tako da ova dozvola nije potrebna za vršenje te radnje."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Omogućava aplikaciji kreiranje spojnih tačaka sa mrežom i korištenje prilagođenih mrežnih protokola. Preglednik i druge aplikacije omogućavaju slanje podataka na internet, tako da ovo odobrenje nije potrebno za vršenje te radnje."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"izmjene povezivanja na mrežu"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Dozvoljava aplikaciji izmjenu stanja mrežne povezanosti."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"izmjene podijeljenog povezivanja"</string>
@@ -848,7 +848,7 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Dozvoljava aplikaciji postavljanje alarma u instaliranom budilniku. Moguće je da neki budilnici neće primijeniti ovu funkciju."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodavanje govorne pošte"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Dozvoljava aplikaciji dodavanje poruka u vašu ulaznu govornu poštu."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"izmjena geolokacijskih dozvola preglednika"</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"izmjena geolokacijskih odobrenja preglednika"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Dozvoljava aplikaciji mijenjanje geolokacijskih odobrenja preglednika. Zlonamjerne aplikacije mogu to iskoristiti i dozvoliti slanje informacija o lokaciji proizvoljnim web lokcacijama."</string>
     <string name="save_password_message" msgid="767344687139195790">"Želite li da preglednik zapamti ovu lozinku?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ne sada"</string>
@@ -1204,7 +1204,7 @@
     <string name="date_time_done" msgid="2507683751759308828">"Gotovo"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NOVO: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> omogućava."</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Nisu potrebne dozvole"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Nisu potrebna odobrenja"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ovo se možda dodatno plaća"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Uredu"</string>
     <string name="usb_charging_notification_title" msgid="6895185153353640787">"Ovaj uređaj se puni preko USB-a"</string>
@@ -1233,7 +1233,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dodirnite za odabir jezika i rasporeda"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Aktivnost aplikacija"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Aplikacija <xliff:g id="NAME">%s</xliff:g> prekriva ostale aplikacije"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"Aplikacija <xliff:g id="NAME">%s</xliff:g> prekriva druge apl."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ako ne želite da <xliff:g id="NAME">%s</xliff:g> koristi ovu funkciju, dodirnite da otvorite postavke i isključite je."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ISKLJUČI"</string>
