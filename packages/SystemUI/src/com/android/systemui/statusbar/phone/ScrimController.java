@@ -57,10 +57,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             = new PathInterpolator(0f, 0, 0.7f, 1f);
     public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED
             = new PathInterpolator(0.3f, 0f, 0.8f, 1f);
+    public static final float GRADIENT_SCRIM_ALPHA = 0.75f;
     protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.45f;
     protected static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
-    private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
-    private static final float SCRIM_IN_FRONT_ALPHA_LOCKED = 0.85f;
+    private static final float SCRIM_IN_FRONT_ALPHA = GRADIENT_SCRIM_ALPHA;
+    private static final float SCRIM_IN_FRONT_ALPHA_LOCKED = GRADIENT_SCRIM_ALPHA;
     private static final int TAG_KEY_ANIM = R.id.scrim;
     private static final int TAG_KEY_ANIM_TARGET = R.id.scrim_target;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
