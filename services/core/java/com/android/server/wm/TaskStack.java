@@ -1489,7 +1489,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     void onAllWindowsDrawn() {
-        if (!mBoundsAnimating) {
+        if (!mBoundsAnimating && !mBoundsAnimatingRequested) {
             return;
         }
 
