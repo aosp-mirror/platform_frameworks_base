@@ -6772,6 +6772,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         // another "changeViewPosition" call is ever added.
         mStackScroller.changeViewPosition(mNotificationShelf,
                 mStackScroller.getChildCount() - offsetFromEnd);
+
+        // Scrim opacity varies based on notification count
+        mScrimController.setNotificationCount(mStackScroller.getNotGoneChildCount());
     }
 
     public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
