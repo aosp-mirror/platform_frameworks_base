@@ -4053,7 +4053,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
                         !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY);
             }
-            removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
+
+            // We must keep the task around until all activities are destroyed.
+            if (lastActivity) {
+                removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
+            }
         }
         cleanUpActivityServicesLocked(r);
         r.removeUriPermissionsLocked();
