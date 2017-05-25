@@ -7701,7 +7701,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             default:
                 return null;
         }
-        if (pattern.length == 1) {
+        if (pattern.length == 0) {
+            // No vibration
+            return null;
+        } else if (pattern.length == 1) {
             // One-shot vibration
             return VibrationEffect.createOneShot(pattern[0], VibrationEffect.DEFAULT_AMPLITUDE);
         } else {
