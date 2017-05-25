@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -535,8 +536,8 @@ public class NotificationChildrenContainer extends ViewGroup {
             firstOverflowIndex = getMaxAllowedVisibleChildren(true /* likeCollapsed */);
         }
 
-        boolean childrenExpanded = !mContainingNotification.isGroupExpansionChanging()
-                && mChildrenExpanded;
+        boolean childrenExpandedAndNotAnimating = mChildrenExpanded
+                && !mContainingNotification.isGroupExpansionChanging();
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
             if (!firstChild) {
@@ -544,7 +545,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                     yPosition += NotificationUtils.interpolate(mChildPadding, mDividerHeight,
                             expandFactor);
                 } else {
-                    yPosition += childrenExpanded ? mDividerHeight : mChildPadding;
+                    yPosition += mChildrenExpanded ? mDividerHeight : mChildPadding;
                 }
             } else {
                 if (expandingToExpandedGroup) {
@@ -553,7 +554,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                             mNotificatonTopPadding + mDividerHeight,
                             expandFactor);
                 } else {
-                    yPosition += childrenExpanded ? mNotificatonTopPadding + mDividerHeight : 0;
+                    yPosition += mChildrenExpanded ? mNotificatonTopPadding + mDividerHeight : 0;
                 }
                 firstChild = false;
             }
@@ -565,7 +566,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             childState.hidden = false;
             // When the group is expanded, the children cast the shadows rather than the parent
             // so use the parent's elevation here.
-            childState.zTranslation = childrenExpanded
+            childState.zTranslation = childrenExpandedAndNotAnimating
                     ? mContainingNotification.getTranslationZ()
                     : 0;
             childState.dimmed = parentState.dimmed;
@@ -619,7 +620,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 mHeaderViewState = new ViewState();
             }
             mHeaderViewState.initFrom(mNotificationHeader);
-            mHeaderViewState.zTranslation = childrenExpanded
+            mHeaderViewState.zTranslation = childrenExpandedAndNotAnimating
                     ? mContainingNotification.getTranslationZ()
                     : 0;
         }
@@ -1222,5 +1223,10 @@ public class NotificationChildrenContainer extends ViewGroup {
             return 0.0f;
         }
         return getGroupExpandFraction();
+    }
+
+    @VisibleForTesting
+    public boolean isUserLocked() {
+        return mUserLocked;
     }
 }

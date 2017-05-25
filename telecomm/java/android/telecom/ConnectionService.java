@@ -100,6 +100,7 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_ADD_CS_ADAPTER = "CS.aCSA";
     private static final String SESSION_REMOVE_CS_ADAPTER = "CS.rCSA";
     private static final String SESSION_CREATE_CONN = "CS.crCo";
+    private static final String SESSION_CREATE_CONN_COMPLETE = "CS.crCoC";
     private static final String SESSION_CREATE_CONN_FAILED = "CS.crCoF";
     private static final String SESSION_ABORT = "CS.ab";
     private static final String SESSION_ANSWER = "CS.an";
@@ -152,6 +153,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ON_START_RTT = 26;
     private static final int MSG_ON_STOP_RTT = 27;
     private static final int MSG_RTT_UPGRADE_RESPONSE = 28;
+    private static final int MSG_CREATE_CONNECTION_COMPLETE = 29;
 
     private static Connection sNullConnection;
 
@@ -215,6 +217,19 @@ public abstract class ConnectionService extends Service {
                 args.argi1 = isIncoming ? 1 : 0;
                 args.argi2 = isUnknown ? 1 : 0;
                 mHandler.obtainMessage(MSG_CREATE_CONNECTION, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void createConnectionComplete(String id, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_CREATE_CONN_COMPLETE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = id;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_CREATE_CONNECTION_COMPLETE, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -623,6 +638,33 @@ public abstract class ConnectionService extends Service {
                                     request,
                                     isIncoming,
                                     isUnknown);
+                        }
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_CREATE_CONNECTION_COMPLETE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2,
+                            SESSION_HANDLER + SESSION_CREATE_CONN_COMPLETE);
+                    try {
+                        final String id = (String) args.arg1;
+                        if (!mAreAccountsInitialized) {
+                            Log.d(this, "Enqueueing pre-init request %s", id);
+                            mPreInitializationConnectionRequests.add(
+                                    new android.telecom.Logging.Runnable(
+                                            SESSION_HANDLER + SESSION_CREATE_CONN_COMPLETE
+                                                    + ".pICR",
+                                            null /*lock*/) {
+                                        @Override
+                                        public void loggedRun() {
+                                            notifyCreateConnectionComplete(id);
+                                        }
+                                    }.prepare());
+                        } else {
+                            notifyCreateConnectionComplete(id);
                         }
                     } finally {
                         args.recycle();
@@ -1373,6 +1415,17 @@ public abstract class ConnectionService extends Service {
         }
     }
 
+    /**
+     * Called by Telecom when the creation of a new Connection has completed and it is now added
+     * to Telecom.
+     * @param callId The ID of the connection.
+     */
+    private void notifyCreateConnectionComplete(final String callId) {
+        Log.i(this, "notifyCreateConnectionComplete %s", callId);
+        onCreateConnectionComplete(findConnectionForAction(callId,
+                "notifyCreateConnectionComplete"));
+    }
+
     private void abort(String callId) {
         Log.d(this, "abort %s", callId);
         findConnectionForAction(callId, "abort").onAbort();
@@ -1833,6 +1886,18 @@ public abstract class ConnectionService extends Service {
             PhoneAccountHandle connectionManagerPhoneAccount,
             ConnectionRequest request) {
         return null;
+    }
+
+    /**
+     * Called after the {@link Connection} returned by
+     * {@link #onCreateIncomingConnection(PhoneAccountHandle, ConnectionRequest)}
+     * or {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)} has been
+     * added to the {@link ConnectionService} and sent to Telecom.
+     *
+     * @param connection the {@link Connection}.
+     * @hide
+     */
+    public void onCreateConnectionComplete(Connection connection) {
     }
 
     /**

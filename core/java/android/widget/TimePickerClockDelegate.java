@@ -137,6 +137,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         final int layoutResourceId = a.getResourceId(R.styleable.TimePicker_internalLayout,
                 R.layout.time_picker_material);
         final View mainView = inflater.inflate(layoutResourceId, delegator);
+        mainView.setSaveFromParentEnabled(false);
         mRadialTimePickerHeader = mainView.findViewById(R.id.time_header);
         mRadialTimePickerHeader.setOnTouchListener(new NearestTouchDelegate());
 

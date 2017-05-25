@@ -26,7 +26,7 @@
     <dimen name="keyguard_security_view_margin">12dp</dimen>
 
     <!-- Overload default clock widget parameters -->
-    <dimen name="widget_big_font_size">110dp</dimen>
+    <dimen name="widget_big_font_size">100dp</dimen>
     <dimen name="widget_label_font_size">16sp</dimen>
     <dimen name="bottom_text_spacing_digital">-1dp</dimen>
 

@@ -932,7 +932,6 @@ public class FingerprintManager {
             } else if (mAuthenticationCallback != null) {
                 mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
                         getErrorString(errMsgId, vendorCode));
-                mAuthenticationCallback = null;
             } else if (mRemovalCallback != null) {
                 mRemovalCallback.onRemovalError(mRemovalFingerprint, clientErrMsgId,
                         getErrorString(errMsgId, vendorCode));
@@ -953,7 +952,6 @@ public class FingerprintManager {
                 final AuthenticationResult result =
                         new AuthenticationResult(mCryptoObject, fp, userId);
                 mAuthenticationCallback.onAuthenticationSucceeded(result);
-                mAuthenticationCallback = null;
             }
         }
 

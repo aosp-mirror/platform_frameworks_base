@@ -53,6 +53,7 @@ public class DozeScrimController {
     private float mInFrontTarget;
     private float mBehindTarget;
     private boolean mDozingAborted;
+    private boolean mWakeAndUnlocking;
 
     public DozeScrimController(ScrimController scrimController, Context context) {
         mContext = context;
@@ -63,6 +64,7 @@ public class DozeScrimController {
     public void setDozing(boolean dozing, boolean animate) {
         if (mDozing == dozing) return;
         mDozing = dozing;
+        mWakeAndUnlocking = false;
         if (mDozing) {
             mDozingAborted = false;
             abortAnimations();
@@ -82,6 +84,16 @@ public class DozeScrimController {
                 mScrimController.setDozeBehindAlpha(0f);
                 mScrimController.setDozeInFrontAlpha(0f);
             }
+        }
+    }
+
+    public void setWakeAndUnlocking() {
+        // Immediately abort the doze scrims in case of wake-and-unlock
+        // for pulsing so the Keyguard fade-out animation scrim can take over.
+        if (!mWakeAndUnlocking) {
+            mWakeAndUnlocking = true;
+            mScrimController.setDozeBehindAlpha(0f);
+            mScrimController.setDozeInFrontAlpha(0f);
         }
     }
 
@@ -109,7 +121,7 @@ public class DozeScrimController {
      */
     public void abortPulsing() {
         cancelPulsing();
-        if (mDozing) {
+        if (mDozing && !mWakeAndUnlocking) {
             mScrimController.setDozeBehindAlpha(1f);
             mScrimController.setDozeInFrontAlpha(
                     mDozeParameters.getAlwaysOn() && !mDozingAborted ? 0f : 1f);
@@ -244,6 +256,9 @@ public class DozeScrimController {
     }
 
     private void setDozeAlpha(boolean inFront, float alpha) {
+        if (mWakeAndUnlocking) {
+            return;
+        }
         if (inFront) {
             mScrimController.setDozeInFrontAlpha(alpha);
         } else {
