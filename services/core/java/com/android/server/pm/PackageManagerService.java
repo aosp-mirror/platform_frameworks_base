@@ -18371,7 +18371,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private boolean isCallerAllowedToSilentlyUninstall(int callingUid, String pkgName) {
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID
-              || callingUid == Process.SYSTEM_UID) {
+              || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return true;
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
