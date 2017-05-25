@@ -162,7 +162,7 @@ public final class ActiveServices {
 
     /**
      * Information about an app that is currently running one or more foreground services.
-     * (This mapps directly to the running apps we show in the notification.)
+     * (This maps directly to the running apps we show in the notification.)
      */
     static final class ActiveForegroundApp {
         String mPackageName;
@@ -813,6 +813,7 @@ public final class ActiveServices {
             String title;
             String msg;
             String[] pkgs;
+            long oldestStartTime = System.currentTimeMillis(); // now
             if (active.size() == 1) {
                 intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                 intent.setData(Uri.fromParts("package", active.get(0).mPackageName, null));
@@ -820,11 +821,13 @@ public final class ActiveServices {
                         R.string.foreground_service_app_in_background, active.get(0).mLabel);
                 msg = context.getString(R.string.foreground_service_tap_for_details);
                 pkgs = new String[] { active.get(0).mPackageName };
+                oldestStartTime = active.get(0).mStartTime;
             } else {
                 intent = new Intent(Settings.ACTION_FOREGROUND_SERVICES_SETTINGS);
                 pkgs = new String[active.size()];
                 for (int i = 0; i < active.size(); i++) {
                     pkgs[i] = active.get(i).mPackageName;
+                    oldestStartTime = Math.min(oldestStartTime, active.get(i).mStartTime);
                 }
                 intent.putExtra("packages", pkgs);
                 title = context.getString(
@@ -841,9 +844,10 @@ public final class ActiveServices {
                     new Notification.Builder(context,
                             SystemNotificationChannels.FOREGROUND_SERVICE)
                             .addExtras(notificationBundle)
-                            .setSmallIcon(R.drawable.ic_check_circle_24px)
+                            .setSmallIcon(R.drawable.stat_sys_vitals)
                             .setOngoing(true)
-                            .setShowWhen(false)
+                            .setShowWhen(oldestStartTime > 0)
+                            .setWhen(oldestStartTime)
                             .setColor(context.getColor(
                                     com.android.internal.R.color.system_notification_accent_color))
                             .setContentTitle(title)
