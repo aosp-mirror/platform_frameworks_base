@@ -28,6 +28,7 @@ import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
 import android.net.wifi.p2p.nsd.WifiP2pUpnpServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pUpnpServiceResponse;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -290,6 +291,7 @@ public class WifiP2pManager {
             "android.net.wifi.p2p.CALLING_PACKAGE";
 
     IWifiP2pManager mService;
+    private final Map<Channel, Binder> mBinders = new HashMap<>();
 
     private static final int BASE = Protocol.BASE_WIFI_P2P_MANAGER;
 
@@ -889,7 +891,10 @@ public class WifiP2pManager {
      * @return Channel instance that is necessary for performing any further p2p operations
      */
     public Channel initialize(Context srcContext, Looper srcLooper, ChannelListener listener) {
-        return initalizeChannel(srcContext, srcLooper, listener, getMessenger());
+        Binder binder = new Binder();
+        Channel channel = initalizeChannel(srcContext, srcLooper, listener, getMessenger(binder));
+        mBinders.put(channel, binder);
+        return channel;
     }
 
     /**
@@ -1385,12 +1390,14 @@ public class WifiP2pManager {
      * Get a reference to WifiP2pService handler. This is used to establish
      * an AsyncChannel communication with WifiService
      *
+     * @param binder A binder for the service to associate with this client.
+     *
      * @return Messenger pointing to the WifiP2pService handler
      * @hide
      */
-    public Messenger getMessenger() {
+    public Messenger getMessenger(Binder binder) {
         try {
-            return mService.getMessenger();
+            return mService.getMessenger(binder);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1406,6 +1413,23 @@ public class WifiP2pManager {
     public Messenger getP2pStateMachineMessenger() {
         try {
             return mService.getP2pStateMachineMessenger();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Close the current P2P connection and clean-up any configuration requested by the
+     * current app. Takes same action as taken when the app dies.
+     *
+     * @param c is the channel created at {@link #initialize}
+     *
+     * @hide
+     */
+    public void close(Channel c) {
+        try {
+            mService.close(mBinders.get(c));
+            mBinders.remove(c);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
