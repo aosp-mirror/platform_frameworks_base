@@ -778,4 +778,13 @@ public class WifiManagerTest {
         verify(mWifiService).stopWatchLocalOnlyHotspot();
     }
 
+    /**
+     * Verify that calls to setWifiApEnabled return false.
+     */
+    @Test
+    public void testSetWifiApEnabledReturnsFalse() throws Exception {
+        assertFalse(mWifiManager.setWifiApEnabled(null, true));
+        assertFalse(mWifiManager.setWifiApEnabled(null, false));
+        verify(mWifiService, never()).setWifiApEnabled(any(), anyBoolean());
+    }
 }
