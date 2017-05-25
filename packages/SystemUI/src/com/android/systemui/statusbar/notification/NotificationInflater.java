@@ -28,7 +28,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.Abortable;
+import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationContentView;
 import com.android.systemui.statusbar.NotificationData;
@@ -130,6 +130,12 @@ public class NotificationInflater {
      */
     @VisibleForTesting
     void inflateNotificationViews(int reInflateFlags) {
+        if (mRow.isRemoved()) {
+            // We don't want to reinflate anything for removed notifications. Otherwise views might
+            // be readded to the stack, leading to leaks. This may happen with low-priority groups
+            // where the removal of already removed children can lead to a reinflation.
+            return;
+        }
         StatusBarNotification sbn = mRow.getEntry().notification;
         new AsyncInflationTask(sbn, reInflateFlags, mRow, mIsLowPriority,
                 mIsChildInGroup, mUsesIncreasedHeight, mUsesIncreasedHeadsUpHeight, mRedactAmbient,
@@ -485,17 +491,17 @@ public class NotificationInflater {
     }
 
     public static class AsyncInflationTask extends AsyncTask<Void, Void, InflationProgress>
-            implements InflationCallback, Abortable {
+            implements InflationCallback, InflationTask {
 
         private final StatusBarNotification mSbn;
         private final Context mContext;
-        private final int mReInflateFlags;
         private final boolean mIsLowPriority;
         private final boolean mIsChildInGroup;
         private final boolean mUsesIncreasedHeight;
         private final InflationCallback mCallback;
         private final boolean mUsesIncreasedHeadsUpHeight;
         private final boolean mRedactAmbient;
+        private int mReInflateFlags;
         private ExpandableNotificationRow mRow;
         private Exception mError;
         private RemoteViews.OnClickHandler mRemoteViewClickHandler;
@@ -508,8 +514,6 @@ public class NotificationInflater {
                 InflationCallback callback,
                 RemoteViews.OnClickHandler remoteViewClickHandler) {
             mRow = row;
-            NotificationData.Entry entry = row.getEntry();
-            entry.setInflationTask(this);
             mSbn = notification;
             mReInflateFlags = reInflateFlags;
             mContext = mRow.getContext();
@@ -520,6 +524,13 @@ public class NotificationInflater {
             mRedactAmbient = redactAmbient;
             mRemoteViewClickHandler = remoteViewClickHandler;
             mCallback = callback;
+            NotificationData.Entry entry = row.getEntry();
+            entry.setInflationTask(this);
+        }
+
+        @VisibleForTesting
+        public int getReInflateFlags() {
+            return mReInflateFlags;
         }
 
         @Override
@@ -576,6 +587,14 @@ public class NotificationInflater {
             cancel(true /* mayInterruptIfRunning */);
             if (mCancellationSignal != null) {
                 mCancellationSignal.cancel();
+            }
+        }
+
+        @Override
+        public void supersedeTask(InflationTask task) {
+            if (task instanceof AsyncInflationTask) {
+                // We want to inflate all flags of the previous task as well
+                mReInflateFlags |= ((AsyncInflationTask) task).mReInflateFlags;
             }
         }
 

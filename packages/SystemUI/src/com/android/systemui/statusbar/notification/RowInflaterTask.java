@@ -22,14 +22,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.Abortable;
+import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 
 /**
  * An inflater task that asynchronously inflates a ExpandableNotificationRow
  */
-public class RowInflaterTask implements Abortable, AsyncLayoutInflater.OnInflateFinishedListener {
+public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInflateFinishedListener {
     private RowInflationFinishedListener mListener;
     private NotificationData.Entry mEntry;
     private boolean mCancelled;
