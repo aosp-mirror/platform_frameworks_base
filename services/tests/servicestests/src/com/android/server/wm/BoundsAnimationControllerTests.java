@@ -152,8 +152,6 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
             mAwaitingAnimationStart = false;
             mAnimationStarted = true;
             mSchedulePipModeChangedOnStart = schedulePipModeChangedCallback;
-
-            mController.onAllWindowsDrawn();
         }
 
         @Override
@@ -207,6 +205,9 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
                 throw new IllegalArgumentException("Call restart() to restart an animation");
             }
 
+            boolean fromFullscreen = from.equals(BOUNDS_FULL);
+            boolean toFullscreen = to.equals(BOUNDS_FULL);
+
             mTarget.initialize(from);
 
             // Started, not running
@@ -214,6 +215,15 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
             assertTrue(!mTarget.mAnimationStarted);
 
             startImpl(from, to);
+
+            // Ensure that the animator is paused for the all windows drawn signal when animating
+            // to/from fullscreen
+            if (fromFullscreen || toFullscreen) {
+                assertTrue(mAnimator.isPaused());
+                mController.onAllWindowsDrawn();
+            } else {
+                assertTrue(!mAnimator.isPaused());
+            }
 
             // Started and running
             assertTrue(!mTarget.mAwaitingAnimationStart);
@@ -262,7 +272,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
                             ? SCHEDULE_PIP_MODE_CHANGED_ON_END
                             : NO_PIP_MODE_CHANGED_CALLBACKS;
             mAnimator = mController.animateBoundsImpl(mTarget, from, to, DURATION,
-                    schedulePipModeChangedState, toFullscreen);
+                    schedulePipModeChangedState, fromFullscreen, toFullscreen);
 
             // Original stack bounds, frozen task bounds
             assertEquals(mFrom, mTarget.mStackBounds);
