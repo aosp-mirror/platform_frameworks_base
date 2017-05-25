@@ -87,3 +87,10 @@ cc_library_shared {
 
     include_dirs: ["bionic/libc/dns/include"],
 }
+
+llndk_library {
+    name: "libandroid_net",
+    export_include_dirs: ["include"],
+    symbol_file: "libandroid_net.map.txt",
+    unversioned: true,
+}
