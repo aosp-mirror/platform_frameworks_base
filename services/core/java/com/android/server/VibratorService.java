@@ -222,7 +222,9 @@ public class VibratorService extends IVibratorService.Stub
         long[] clickEffectTimings = getLongIntArray(context.getResources(),
                 com.android.internal.R.array.config_virtualKeyVibePattern);
         VibrationEffect clickEffect;
-        if (clickEffectTimings.length == 1) {
+        if (clickEffectTimings.length == 0) {
+            clickEffect = null;
+        } else if (clickEffectTimings.length == 1) {
             clickEffect = VibrationEffect.createOneShot(
                     clickEffectTimings[0], VibrationEffect.DEFAULT_AMPLITUDE);
         } else {
@@ -232,7 +234,6 @@ public class VibratorService extends IVibratorService.Stub
                 new long[] {0, 30, 100, 30} /*timings*/, -1);
 
         mFallbackEffects = new VibrationEffect[] { clickEffect, doubleClickEffect };
-
     }
 
     public void systemReady() {
@@ -701,7 +702,7 @@ public class VibratorService extends IVibratorService.Stub
                 }
             }
             final int id = prebaked.getId();
-            if (id < 0 || id >= mFallbackEffects.length) {
+            if (id < 0 || id >= mFallbackEffects.length || mFallbackEffects[id] == null) {
                 Slog.w(TAG, "Failed to play prebaked effect, no fallback");
                 return 0;
             }
