@@ -21,6 +21,8 @@ import static android.os.UserManagerInternal.CAMERA_DISABLED_GLOBALLY;
 import static android.os.UserManagerInternal.CAMERA_DISABLED_LOCALLY;
 import static android.os.UserManagerInternal.CAMERA_NOT_DISABLED;
 
+import static com.android.server.testutis.TestUtils.assertExpectException;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
@@ -111,6 +113,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private static final List<String> OWNER_SETUP_PERMISSIONS = Arrays.asList(
             permission.MANAGE_DEVICE_ADMINS, permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
             permission.MANAGE_USERS, permission.INTERACT_ACROSS_USERS_FULL);
+    public static final String NOT_DEVICE_OWNER_MSG = "does not own the device";
+    public static final String ONGOING_CALL_MSG = "ongoing call on the device";
 
     // TODO replace all instances of this with explicit {@link #mServiceContext}.
     @Deprecated
@@ -267,19 +271,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // 1. Failure cases.
 
         // Caller doesn't have MANAGE_DEVICE_ADMINS.
-        try {
-            dpm.setActiveAdmin(admin1, false);
-            fail("Didn't throw SecurityException");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setActiveAdmin(admin1, false));
 
         // Caller has MANAGE_DEVICE_ADMINS, but for different user.
         mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
-        try {
-            dpm.setActiveAdmin(admin1, false, DpmMockContext.CALLER_USER_HANDLE + 1);
-            fail("Didn't throw SecurityException");
-        } catch (SecurityException expected) {
-        }
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setActiveAdmin(admin1, false, DpmMockContext.CALLER_USER_HANDLE + 1));
     }
 
     /**
@@ -357,11 +356,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 anyString());
 
         // 4. Add the same admin1 again without replace, which should throw.
-        try {
-            dpm.setActiveAdmin(admin1, /* replace =*/ false);
-            fail("Didn't throw");
-        } catch (IllegalArgumentException expected) {
-        }
+        assertExpectException(IllegalArgumentException.class, /* messageRegex= */ null,
+                () -> dpm.setActiveAdmin(admin1, /* replace =*/ false));
 
         // 5. Add the same admin1 again with replace, which should succeed.
         dpm.setActiveAdmin(admin1, /* replace =*/ true);
@@ -423,11 +419,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.isAdminActive(admin1));
 
         // Add the same admin1 again without replace, which should throw.
-        try {
-            dpm.setActiveAdmin(admin1, /* replace =*/ false);
-            fail("Didn't throw");
-        } catch (IllegalArgumentException expected) {
-        }
+        assertExpectException(IllegalArgumentException.class, /* messageRegex= */ null,
+                () -> dpm.setActiveAdmin(admin1, /* replace =*/ false));
     }
 
     /**
@@ -439,12 +432,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // 1. Make sure the caller has proper permissions.
         mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
 
-        try {
-            dpm.setActiveAdmin(adminNoPerm, /* replace =*/ false);
-            fail();
-        } catch (IllegalArgumentException expected) {
-            assertTrue(expected.getMessage().contains(permission.BIND_DEVICE_ADMIN));
-        }
+        assertExpectException(IllegalArgumentException.class,
+                /* messageRegex= */ permission.BIND_DEVICE_ADMIN,
+                () -> dpm.setActiveAdmin(adminNoPerm, /* replace =*/ false));
         assertFalse(dpm.isAdminActive(adminNoPerm));
 
         // Change the target API level to MNC.  Now it can be set as DA.
@@ -473,11 +463,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertFalse(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
 
         // Directly call the DPMS method with a different userid, which should fail.
-        try {
-            dpms.removeActiveAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE + 1);
-            fail("Didn't throw SecurityException");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpms.removeActiveAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE + 1));
 
         // Try to remove active admin with a different caller userid should fail too, without
         // having MANAGE_DEVICE_ADMINS.
@@ -486,11 +473,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Change the caller, and call into DPMS directly with a different user-id.
 
         mContext.binder.callingUid = 1234567;
-        try {
-            dpms.removeActiveAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE);
-            fail("Didn't throw SecurityException");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpms.removeActiveAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
     }
 
     /**
@@ -513,13 +497,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // 1. User not unlocked.
         when(getServices().userManager.isUserUnlocked(eq(DpmMockContext.CALLER_USER_HANDLE)))
                 .thenReturn(false);
-        try {
-            dpm.removeActiveAdmin(admin1);
-            fail("Didn't throw IllegalStateException");
-        } catch (IllegalStateException expected) {
-            MoreAsserts.assertContainsRegex(
-                    "User must be running and unlocked", expected.getMessage());
-        }
+        assertExpectException(IllegalStateException.class,
+                /* messageRegex= */ "User must be running and unlocked",
+                () -> dpm.removeActiveAdmin(admin1));
 
         assertFalse(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
 
@@ -690,13 +670,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Try to set a profile owner on the same user, which should fail.
         setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin2, /* refreshing= */ true, UserHandle.USER_SYSTEM);
-        try {
-            dpm.setProfileOwner(admin2, "owner-name", UserHandle.USER_SYSTEM);
-            fail("IllegalStateException not thrown");
-        } catch (IllegalStateException expected) {
-            assertTrue("Message was: " + expected.getMessage(),
-                    expected.getMessage().contains("already has a device owner"));
-        }
+        assertExpectException(IllegalStateException.class,
+                /* messageRegex= */ "already has a device owner",
+                () -> dpm.setProfileOwner(admin2, "owner-name", UserHandle.USER_SYSTEM));
 
         // DO admin can't be deactivated.
         dpm.removeActiveAdmin(admin1);
@@ -853,26 +829,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             assertEquals(null, dpm.getDeviceOwnerComponentOnCallingUser());
         }
 
-        try {
-            dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName());
-            fail();
-        } catch (SecurityException expected) {
-        }
-        try {
-            dpm.getDeviceOwnerComponentOnAnyUser();
-            fail();
-        } catch (SecurityException expected) {
-        }
-        try {
-            dpm.getDeviceOwnerUserId();
-            fail();
-        } catch (SecurityException expected) {
-        }
-        try {
-            dpm.getDeviceOwnerNameOnAnyUser();
-            fail();
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                dpm::getDeviceOwnerComponentOnAnyUser);
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                dpm::getDeviceOwnerUserId);
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                dpm::getDeviceOwnerNameOnAnyUser);
 
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
         // Still no MANAGE_USERS.
@@ -880,26 +844,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertFalse(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
         assertEquals(null, dpm.getDeviceOwnerComponentOnCallingUser());
 
-        try {
-            dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName());
-            fail();
-        } catch (SecurityException expected) {
-        }
-        try {
-            dpm.getDeviceOwnerComponentOnAnyUser();
-            fail();
-        } catch (SecurityException expected) {
-        }
-        try {
-            dpm.getDeviceOwnerUserId();
-            fail();
-        } catch (SecurityException expected) {
-        }
-        try {
-            dpm.getDeviceOwnerNameOnAnyUser();
-            fail();
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                dpm::getDeviceOwnerComponentOnAnyUser);
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                dpm::getDeviceOwnerUserId);
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                dpm::getDeviceOwnerNameOnAnyUser);
 
         // Restore.
         mContext.binder.callingUid = origCallingUser;
@@ -919,13 +871,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Call from a process on the system user.
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
 
-        try {
-            dpm.setDeviceOwner(new ComponentName("a.b.c", ".def"));
-            fail("Didn't throw IllegalArgumentException");
-        } catch (IllegalArgumentException expected) {
-            assertTrue("Message was: " + expected.getMessage(),
-                    expected.getMessage().contains("Invalid component"));
-        }
+        assertExpectException(IllegalArgumentException.class,
+                /* messageRegex= */ "Invalid component",
+                () -> dpm.setDeviceOwner(new ComponentName("a.b.c", ".def")));
     }
 
     public void testSetDeviceOwner_failures() throws Exception {
@@ -972,13 +920,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // But first pretend the user is locked.  Then it should fail.
         when(getServices().userManager.isUserUnlocked(anyInt())).thenReturn(false);
-        try {
-            dpm.clearDeviceOwnerApp(admin1.getPackageName());
-            fail("Didn't throw IllegalStateException");
-        } catch (IllegalStateException expected) {
-            MoreAsserts.assertContainsRegex(
-                    "User must be running and unlocked", expected.getMessage());
-        }
+        assertExpectException(IllegalStateException.class,
+                /* messageRegex= */ "User must be running and unlocked",
+                () -> dpm.clearDeviceOwnerApp(admin1.getPackageName()));
 
         when(getServices().userManager.isUserUnlocked(anyInt())).thenReturn(true);
         reset(getServices().userManagerInternal);
@@ -1037,12 +981,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         doReturn(DpmMockContext.CALLER_UID).when(getServices().packageManager).getPackageUidAsUser(
                 eq(admin1.getPackageName()),
                 anyInt());
-        try {
-            dpm.clearDeviceOwnerApp(admin1.getPackageName());
-            fail("Didn't throw");
-        } catch (SecurityException e) {
-            assertEquals("clearDeviceOwner can only be called by the device owner", e.getMessage());
-        }
+        assertExpectException(SecurityException.class,
+                /* messageRegex =*/ "clearDeviceOwner can only be called by the device owner",
+                () -> dpm.clearDeviceOwnerApp(admin1.getPackageName()));
 
         // DO shouldn't be removed.
         assertTrue(dpm.isDeviceManaged());
@@ -1060,13 +1001,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         runAsCaller(mServiceContext, dpms, dpm -> {
             dpm.setActiveAdmin(admin2, /* refreshing= */ true, DpmMockContext.CALLER_USER_HANDLE);
-            try {
-                dpm.setDeviceOwner(admin2, "owner-name", DpmMockContext.CALLER_USER_HANDLE);
-                fail("IllegalStateException not thrown");
-            } catch (IllegalStateException expected) {
-                assertTrue("Message was: " + expected.getMessage(),
-                        expected.getMessage().contains("already has a profile owner"));
-            }
+            assertExpectException(IllegalStateException.class,
+                    /* messageRegex= */ "already has a profile owner",
+                    () -> dpm.setDeviceOwner(admin2, "owner-name",
+                            DpmMockContext.CALLER_USER_HANDLE));
         });
     }
 
@@ -1081,16 +1019,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // First try when the user is locked, which should fail.
         when(getServices().userManager.isUserUnlocked(anyInt()))
                 .thenReturn(false);
-        try {
-            dpm.clearProfileOwner(admin1);
-            fail("Didn't throw IllegalStateException");
-        } catch (IllegalStateException expected) {
-            MoreAsserts.assertContainsRegex(
-                    "User must be running and unlocked", expected.getMessage());
-        }
+        assertExpectException(IllegalStateException.class,
+                /* messageRegex= */ "User must be running and unlocked",
+                () -> dpm.clearProfileOwner(admin1));
+
         // Clear, really.
-        when(getServices().userManager.isUserUnlocked(anyInt()))
-                .thenReturn(true);
+        when(getServices().userManager.isUserUnlocked(anyInt())).thenReturn(true);
         dpm.clearProfileOwner(admin1);
 
         // Check
@@ -1357,12 +1291,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = RESTRICTIONS_DELEGATE_UID;
         mContext.packageName = RESTRICTIONS_DELEGATE;
 
-        // DPMS throws a SecurityException
-        try {
-            dpm.installCaCert(null, null);
-            fail("Didn't throw SecurityException on unauthorized access");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.installCaCert(null, null));
 
         // On calling install certificate APIs from an authorized process
         mContext.binder.callingUid = CERT_DELEGATE_UID;
@@ -1384,11 +1314,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // DPMS does not allow access to ex-delegate
         mContext.binder.callingUid = CERT_DELEGATE_UID;
         mContext.packageName = CERT_DELEGATE;
-        try {
-            dpm.installCaCert(null, null);
-            fail("Didn't throw SecurityException on unauthorized access");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.installCaCert(null, null));
 
         // But still allows access to other existing delegates
         mContext.binder.callingUid = RESTRICTIONS_DELEGATE_UID;
@@ -1405,6 +1332,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         final String nonExistAppRestrictionsManagerPackage = "com.google.app.restrictions.manager2";
         final String appRestrictionsManagerPackage = "com.google.app.restrictions.manager";
+        final String nonDelegateExceptionMessageRegex =
+                "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.";
         final int appRestrictionsManagerAppId = 20987;
         final int appRestrictionsManagerUid = setupPackageInPackageManager(
                 appRestrictionsManagerPackage, appRestrictionsManagerAppId);
@@ -1414,24 +1343,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
         mContext.packageName = admin1.getPackageName();
         assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
-        Bundle rest = new Bundle();
+        final Bundle rest = new Bundle();
         rest.putString("KEY_STRING", "Foo1");
-        try {
-            dpm.setApplicationRestrictions(null, "pkg1", rest);
-            fail("Didn't throw expected SecurityException");
-        } catch (SecurityException expected) {
-            MoreAsserts.assertContainsRegex(
-                    "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.",
-                    expected.getMessage());
-        }
-        try {
-            dpm.getApplicationRestrictions(null, "pkg1");
-            fail("Didn't throw expected SecurityException");
-        } catch (SecurityException expected) {
-            MoreAsserts.assertContainsRegex(
-                    "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.",
-                    expected.getMessage());
-        }
+        assertExpectException(SecurityException.class, nonDelegateExceptionMessageRegex,
+                () -> dpm.setApplicationRestrictions(null, "pkg1", rest));
 
         // Check via the profile owner that no restrictions were set.
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
@@ -1439,14 +1354,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg1").size());
 
         // Check the API does not allow setting a non-existent package
-        try {
-            dpm.setApplicationRestrictionsManagingPackage(admin1,
-                    nonExistAppRestrictionsManagerPackage);
-            fail("Non-existent app set as app restriction manager.");
-        } catch (PackageManager.NameNotFoundException expected) {
-            MoreAsserts.assertContainsRegex(
-                    nonExistAppRestrictionsManagerPackage, expected.getMessage());
-        }
+        assertExpectException(PackageManager.NameNotFoundException.class,
+                /* messageRegex= */ nonExistAppRestrictionsManagerPackage,
+                () -> dpm.setApplicationRestrictionsManagingPackage(
+                        admin1, nonExistAppRestrictionsManagerPackage));
 
         // Let appRestrictionsManagerPackage manage app restrictions
         dpm.setApplicationRestrictionsManagingPackage(admin1, appRestrictionsManagerPackage);
@@ -1466,14 +1377,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = UserHandle.getUid(
                 UserHandle.USER_SYSTEM, appRestrictionsManagerAppId);
         assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
-        try {
-            dpm.setApplicationRestrictions(null, "pkg1", rest);
-            fail("Didn't throw expected SecurityException");
-        } catch (SecurityException expected) {
-            MoreAsserts.assertContainsRegex(
-                    "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.",
-                    expected.getMessage());
-        }
+        assertExpectException(SecurityException.class, nonDelegateExceptionMessageRegex,
+                () -> dpm.setApplicationRestrictions(null, "pkg1", rest));
 
         // The DPM is still able to manage app restrictions, even if it allowed another app to do it
         // too.
@@ -1489,14 +1394,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = appRestrictionsManagerUid;
         mContext.packageName = appRestrictionsManagerPackage;
         assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
-        try {
-            dpm.setApplicationRestrictions(null, "pkg1", null);
-            fail("Didn't throw expected SecurityException");
-        } catch (SecurityException expected) {
-            MoreAsserts.assertContainsRegex(
-                    "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.",
-                    expected.getMessage());
-        }
+        assertExpectException(SecurityException.class, nonDelegateExceptionMessageRegex,
+                () -> dpm.setApplicationRestrictions(null, "pkg1", null));
     }
 
     public void testSetUserRestriction_asDo() throws Exception {
@@ -1519,7 +1418,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 UserHandle.USER_SYSTEM));
 
         // Check that the user restrictions that are enabled by default are set. Then unset them.
-        String[] defaultRestrictions = UserRestrictionsUtils
+        final String[] defaultRestrictions = UserRestrictionsUtils
                 .getDefaultEnabledForDeviceOwner().toArray(new String[0]);
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(defaultRestrictions),
@@ -1875,33 +1774,21 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
 
         // Test 1. Caller doesn't have DO or DA.
-        try {
-            dpm.getWifiMacAddress(admin1);
-            fail();
-        } catch (SecurityException e) {
-            MoreAsserts.assertContainsRegex("No active admin", e.getMessage());
-        }
+        assertExpectException(SecurityException.class, /* messageRegex= */ "No active admin",
+                () -> dpm.getWifiMacAddress(admin1));
 
         // DO needs to be an DA.
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
         assertTrue(dpm.isAdminActive(admin1));
 
         // Test 2. Caller has DA, but not DO.
-        try {
-            dpm.getWifiMacAddress(admin1);
-            fail();
-        } catch (SecurityException e) {
-            MoreAsserts.assertContainsRegex("does not own the device", e.getMessage());
-        }
+        assertExpectException(SecurityException.class, /* messageRegex= */ NOT_DEVICE_OWNER_MSG,
+                () -> dpm.getWifiMacAddress(admin1));
 
         // Test 3. Caller has PO, but not DO.
         assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
-        try {
-            dpm.getWifiMacAddress(admin1);
-            fail();
-        } catch (SecurityException e) {
-            MoreAsserts.assertContainsRegex("does not own the device", e.getMessage());
-        }
+        assertExpectException(SecurityException.class, /* messageRegex= */ NOT_DEVICE_OWNER_MSG,
+                () -> dpm.getWifiMacAddress(admin1));
 
         // Remove PO.
         dpm.clearProfileOwner(admin1);
@@ -1936,21 +1823,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Set admin1 as DA.
         dpm.setActiveAdmin(admin1, false);
         assertTrue(dpm.isAdminActive(admin1));
-        try {
-            dpm.reboot(admin1);
-            fail("DA calls DPM.reboot(), did not throw expected SecurityException");
-        } catch (SecurityException expected) {
-            MoreAsserts.assertContainsRegex("does not own the device", expected.getMessage());
-        }
+        assertExpectException(SecurityException.class, /* messageRegex= */ NOT_DEVICE_OWNER_MSG,
+                () -> dpm.reboot(admin1));
 
         // Set admin1 as PO.
         assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
-        try {
-            dpm.reboot(admin1);
-            fail("PO calls DPM.reboot(), did not throw expected SecurityException");
-        } catch (SecurityException expected) {
-            MoreAsserts.assertContainsRegex("does not own the device", expected.getMessage());
-        }
+        assertExpectException(SecurityException.class, /* messageRegex= */ NOT_DEVICE_OWNER_MSG,
+                () -> dpm.reboot(admin1));
 
         // Remove PO and add DO.
         dpm.clearProfileOwner(admin1);
@@ -1961,22 +1840,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Set current call state of device to ringing.
         when(getServices().telephonyManager.getCallState())
                 .thenReturn(TelephonyManager.CALL_STATE_RINGING);
-        try {
-            dpm.reboot(admin1);
-            fail("DPM.reboot() called when receiveing a call, should thrown IllegalStateException");
-        } catch (IllegalStateException expected) {
-            MoreAsserts.assertContainsRegex("ongoing call on the device", expected.getMessage());
-        }
+        assertExpectException(IllegalStateException.class, /* messageRegex= */ ONGOING_CALL_MSG,
+                () -> dpm.reboot(admin1));
 
         // Set current call state of device to dialing/active.
         when(getServices().telephonyManager.getCallState())
                 .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK);
-        try {
-            dpm.reboot(admin1);
-            fail("DPM.reboot() called when dialing, should thrown IllegalStateException");
-        } catch (IllegalStateException expected) {
-            MoreAsserts.assertContainsRegex("ongoing call on the device", expected.getMessage());
-        }
+        assertExpectException(IllegalStateException.class, /* messageRegex= */ ONGOING_CALL_MSG,
+                () -> dpm.reboot(admin1));
 
         // Set current call state of device to idle.
         when(getServices().telephonyManager.getCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
@@ -2003,31 +1874,20 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Only system can call the per user versions.
         {
-            try {
-                dpm.getShortSupportMessageForUser(admin1,
-                        DpmMockContext.CALLER_USER_HANDLE);
-                fail("Only system should be able to call getXXXForUser versions");
-            } catch (SecurityException expected) {
-                MoreAsserts.assertContainsRegex("message for user", expected.getMessage());
-            }
-            try {
-                dpm.getLongSupportMessageForUser(admin1,
-                        DpmMockContext.CALLER_USER_HANDLE);
-                fail("Only system should be able to call getXXXForUser versions");
-            } catch (SecurityException expected) {
-                MoreAsserts.assertContainsRegex("message for user", expected.getMessage());
-            }
+            assertExpectException(SecurityException.class, /* messageRegex= */ "message for user",
+                    () -> dpm.getShortSupportMessageForUser(admin1,
+                            DpmMockContext.CALLER_USER_HANDLE));
+            assertExpectException(SecurityException.class, /* messageRegex= */ "message for user",
+                    () -> dpm.getLongSupportMessageForUser(admin1,
+                        DpmMockContext.CALLER_USER_HANDLE));
         }
 
         // Can't set message for admin in another uid.
         {
             mContext.binder.callingUid = DpmMockContext.CALLER_UID + 1;
-            try {
-                dpm.setShortSupportMessage(admin1, "Some text");
-                fail("Admins should only be able to change their own support text.");
-            } catch (SecurityException expected) {
-                MoreAsserts.assertContainsRegex("is not owned by uid", expected.getMessage());
-            }
+            assertExpectException(SecurityException.class,
+                    /* messageRegex= */ "is not owned by uid",
+                    () -> dpm.setShortSupportMessage(admin1, "Some text"));
             mContext.binder.callingUid = DpmMockContext.CALLER_UID;
         }
 
@@ -2105,8 +1965,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS, intent.getAction());
         assertEquals(UserHandle.getUserId(DpmMockContext.CALLER_SYSTEM_USER_UID),
                 intent.getIntExtra(Intent.EXTRA_USER_ID, -1));
-        assertEquals(admin1,
-                (ComponentName) intent.getParcelableExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN));
+        assertEquals(admin1, intent.getParcelableExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN));
         assertEquals(UserManager.DISALLOW_ADJUST_VOLUME,
                 intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
 
@@ -2242,24 +2101,17 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetUserProvisioningState_unprivileged() throws Exception {
         setupProfileOwner();
-        try {
-            dpm.setUserProvisioningState(DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
-                    DpmMockContext.CALLER_USER_HANDLE);
-            fail("Expected SecurityException");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.setUserProvisioningState(DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
+                        DpmMockContext.CALLER_USER_HANDLE));
     }
 
     public void testSetUserProvisioningState_noManagement() {
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
-        try {
-            dpm.setUserProvisioningState(DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
-                    DpmMockContext.CALLER_USER_HANDLE);
-            fail("IllegalStateException expected");
-        } catch (IllegalStateException e) {
-            MoreAsserts.assertContainsRegex("change provisioning state unless a .* owner is set",
-                    e.getMessage());
-        }
+        assertExpectException(IllegalStateException.class,
+                /* messageRegex= */ "change provisioning state unless a .* owner is set",
+                () -> dpm.setUserProvisioningState(DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
+                        DpmMockContext.CALLER_USER_HANDLE));
         assertEquals(DevicePolicyManager.STATE_USER_UNMANAGED, dpm.getUserProvisioningState());
     }
 
@@ -2325,15 +2177,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupProfileOwner();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
-        try {
-            exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
-                    DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
-                    DevicePolicyManager.STATE_USER_UNMANAGED);
-            fail("Expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            MoreAsserts.assertContainsRegex("Cannot move to user provisioning state",
-                    e.getMessage());
-        }
+        assertExpectException(IllegalStateException.class,
+                /* messageRegex= */ "Cannot move to user provisioning state",
+                () -> exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
+                        DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
+                        DevicePolicyManager.STATE_USER_UNMANAGED));
     }
 
     public void testSetUserProvisioningState_illegalTransitionToAnotherInProgressState()
@@ -2341,15 +2189,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupProfileOwner();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
-        try {
-            exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
-                    DevicePolicyManager.STATE_USER_SETUP_INCOMPLETE,
-                    DevicePolicyManager.STATE_USER_SETUP_COMPLETE);
-            fail("Expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            MoreAsserts.assertContainsRegex("Cannot move to user provisioning state",
-                    e.getMessage());
-        }
+        assertExpectException(IllegalStateException.class,
+                /* messageRegex= */ "Cannot move to user provisioning state",
+                () -> exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
+                        DevicePolicyManager.STATE_USER_SETUP_INCOMPLETE,
+                        DevicePolicyManager.STATE_USER_SETUP_COMPLETE));
     }
 
     private void exerciseUserProvisioningTransitions(int userId, int... states) {
@@ -2512,11 +2356,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS);
 
         // negative value
-        try {
-            dpm.setRequiredStrongAuthTimeout(admin1, -ONE_MINUTE);
-            fail("Didn't throw IllegalArgumentException");
-        } catch (IllegalArgumentException iae) {
-        }
+        assertExpectException(IllegalArgumentException.class, /* messageRegex= */ null,
+                () -> dpm.setRequiredStrongAuthTimeout(admin1, -ONE_MINUTE));
     }
 
     private void verifyScreenTimeoutCall(Integer expectedTimeout,
@@ -3097,32 +2938,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testCheckProvisioningPreCondition_permission() {
         // GIVEN the permission MANAGE_PROFILE_AND_DEVICE_OWNERS is not granted
-        try {
-            dpm.checkProvisioningPreCondition(
-                    DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, "some.package");
-            fail("Didn't throw SecurityException");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.checkProvisioningPreCondition(
+                        DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, "some.package"));
     }
 
     public void testForceUpdateUserSetupComplete_permission() {
         // GIVEN the permission MANAGE_PROFILE_AND_DEVICE_OWNERS is not granted
-        try {
-            dpm.forceUpdateUserSetupComplete();
-            fail("Didn't throw SecurityException");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.forceUpdateUserSetupComplete());
     }
 
     public void testForceUpdateUserSetupComplete_systemUser() {
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         // GIVEN calling from user 20
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        try {
-            dpm.forceUpdateUserSetupComplete();
-            fail("Didn't throw SecurityException");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.forceUpdateUserSetupComplete());
     }
 
     public void testForceUpdateUserSetupComplete_userbuild() {
@@ -3492,16 +3324,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Managed profile is unaffiliated - shouldn't be able to setLockTaskPackages.
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         final String[] poPackages = {"poPackage1", "poPackage2"};
-        try {
-            dpm.setLockTaskPackages(adminDifferentPackage, poPackages);
-            fail("Didn't throw expected security exception.");
-        } catch (SecurityException expected) {
-        }
-        try {
-            dpm.getLockTaskPackages(adminDifferentPackage);
-            fail("Didn't throw expected security exception.");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.setLockTaskPackages(adminDifferentPackage, poPackages));
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.getLockTaskPackages(adminDifferentPackage));
         assertFalse(dpm.isLockTaskPermitted("doPackage1"));
 
         // Setting same affiliation ids
@@ -3610,13 +3436,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 UserHandle.of(MANAGED_PROFILE_USER_ID)))
                 .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
-        try {
-            // The PO is not allowed to remove the profile if the user restriction was set on the
-            // profile by the system
-            dpm.wipeData(0);
-            fail("SecurityException not thrown");
-        } catch (SecurityException expected) {
-        }
+        // The PO is not allowed to remove the profile if the user restriction was set on the
+        // profile by the system
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.wipeData(0));
     }
 
     public void testWipeDataDeviceOwner() throws Exception {
@@ -3637,13 +3460,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 UserManager.DISALLOW_FACTORY_RESET,
                 UserHandle.SYSTEM))
                 .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
-        try {
-            // The DO is not allowed to wipe the device if the user restriction was set
-            // by the system
-            dpm.wipeData(0);
-            fail("SecurityException not thrown");
-        } catch (SecurityException expected) {
-        }
+        // The DO is not allowed to wipe the device if the user restriction was set
+        // by the system
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.wipeData(0));
     }
 
     public void testMaximumFailedPasswordAttemptsReachedManagedProfile() throws Exception {
@@ -3783,11 +3603,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // A regular app cannot retrieve permission grant state.
         mContext.binder.callingUid = setupPackageInPackageManager(app1, 1);
         mContext.packageName = app1;
-        try {
-            dpm.getPermissionGrantState(null, app1, permission);
-            fail("Didn't throw SecurityException");
-        } catch (SecurityException expected) {
-        }
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.getPermissionGrantState(null, app1, permission));
 
         // Profile owner can retrieve permission grant state.
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
@@ -3803,11 +3620,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
         // test token validation
-        try {
-            dpm.setResetPasswordToken(admin1, new byte[31]);
-            fail("should not have accepted tokens too short");
-        } catch (IllegalArgumentException expected) {
-        }
+        assertExpectException(IllegalArgumentException.class, /* messageRegex= */ null,
+                () -> dpm.setResetPasswordToken(admin1, new byte[31]));
+
         // test adding a token
         final byte[] token = new byte[32];
         final long handle = 123456;
@@ -4125,12 +3940,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpms.setPermittedCrossProfileNotificationListeners(
                 admin1, Collections.singletonList(permittedListener)));
 
-        try {
-            dpms.isNotificationListenerServicePermitted(
-                permittedListener, MANAGED_PROFILE_USER_ID);
-            fail("isNotificationListenerServicePermitted should throw if not called from System");
-        } catch (SecurityException expected) {
-        }
+        // isNotificationListenerServicePermitted should throw if not called from System.
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpms.isNotificationListenerServicePermitted(
+                        permittedListener, MANAGED_PROFILE_USER_ID));
 
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         assertTrue(dpms.isNotificationListenerServicePermitted(
