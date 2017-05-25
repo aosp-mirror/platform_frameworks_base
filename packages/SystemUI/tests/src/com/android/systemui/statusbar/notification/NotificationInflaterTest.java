@@ -37,6 +37,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.InflationTask;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -130,7 +131,29 @@ public class NotificationInflaterTest extends SysuiTestCase {
         mRow.getEntry().abortTask();
         runThenWaitForInflation(() -> mNotificationInflater.inflateNotificationViews(),
                 mNotificationInflater);
-        Assert.assertNull(mRow.getEntry().getRunningTask() );
+        verify(mRow).onNotificationUpdated();
+    }
+
+    @Test
+    public void testRemovedNotInflated() throws Exception {
+        mRow.setRemoved();
+        mNotificationInflater.inflateNotificationViews();
+        Assert.assertNull(mRow.getEntry().getRunningTask());
+    }
+
+
+    @Test
+    public void testSupersedesExistingTask() throws Exception {
+        mNotificationInflater.inflateNotificationViews();
+        mNotificationInflater.setIsLowPriority(true);
+        mNotificationInflater.setIsChildInGroup(true);
+        InflationTask runningTask = mRow.getEntry().getRunningTask();
+        NotificationInflater.AsyncInflationTask asyncInflationTask =
+                (NotificationInflater.AsyncInflationTask) runningTask;
+        Assert.assertSame("Successive inflations don't inherit the previous flags!",
+                asyncInflationTask.getReInflateFlags(),
+                NotificationInflater.FLAG_REINFLATE_ALL);
+        runningTask.abort();
     }
 
     public static void runThenWaitForInflation(Runnable block,
