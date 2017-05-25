@@ -29,6 +29,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
+import android.net.util.SharedLog;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -73,6 +74,7 @@ public class UpstreamNetworkMonitor {
     private static final int CALLBACK_MOBILE_REQUEST = 3;
 
     private final Context mContext;
+    private final SharedLog mLog;
     private final StateMachine mTarget;
     private final Handler mHandler;
     private final int mWhat;
@@ -84,16 +86,18 @@ public class UpstreamNetworkMonitor {
     private boolean mDunRequired;
     private Network mCurrentDefault;
 
-    public UpstreamNetworkMonitor(Context ctx, StateMachine tgt, int what) {
+    public UpstreamNetworkMonitor(Context ctx, StateMachine tgt, int what, SharedLog log) {
         mContext = ctx;
         mTarget = tgt;
         mHandler = mTarget.getHandler();
         mWhat = what;
+        mLog = log.forSubComponent(TAG);
     }
 
     @VisibleForTesting
-    public UpstreamNetworkMonitor(StateMachine tgt, int what, ConnectivityManager cm) {
-        this(null, tgt, what);
+    public UpstreamNetworkMonitor(
+            StateMachine tgt, int what, ConnectivityManager cm, SharedLog log) {
+        this(null, tgt, what, log);
         mCM = cm;
     }
 
@@ -136,7 +140,7 @@ public class UpstreamNetworkMonitor {
 
     public void registerMobileNetworkRequest() {
         if (mMobileNetworkCallback != null) {
-            Log.e(TAG, "registerMobileNetworkRequest() already registered");
+            mLog.e("registerMobileNetworkRequest() already registered");
             return;
         }
 
@@ -156,7 +160,7 @@ public class UpstreamNetworkMonitor {
         // TODO: Change the timeout from 0 (no onUnavailable callback) to some
         // moderate callback timeout. This might be useful for updating some UI.
         // Additionally, we log a message to aid in any subsequent debugging.
-        Log.d(TAG, "requesting mobile upstream network: " + mobileUpstreamRequest);
+        mLog.i("requesting mobile upstream network: " + mobileUpstreamRequest);
 
         cm().requestNetwork(mobileUpstreamRequest, mMobileNetworkCallback, 0, legacyType, mHandler);
     }
