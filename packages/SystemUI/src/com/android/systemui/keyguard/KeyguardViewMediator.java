@@ -364,7 +364,10 @@ public class KeyguardViewMediator extends SystemUI {
         public void onUserSwitchComplete(int userId) {
             if (userId != UserHandle.USER_SYSTEM) {
                 UserInfo info = UserManager.get(mContext).getUserInfo(userId);
-                if (info != null && (info.isGuest() || info.isDemo())) {
+                // Don't try to dismiss if the user has Pin/Patter/Password set
+                if (info == null || mLockPatternUtils.isSecure(userId)) {
+                    return;
+                } else if (info.isGuest() || info.isDemo()) {
                     // If we just switched to a guest, try to dismiss keyguard.
                     dismiss(null /* callback */);
                 }
