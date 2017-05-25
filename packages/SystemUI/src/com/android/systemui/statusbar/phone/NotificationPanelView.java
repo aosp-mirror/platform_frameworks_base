@@ -2552,6 +2552,9 @@ public class NotificationPanelView extends PanelView implements
 
     public void setNoVisibleNotifications(boolean noNotifications) {
         mNoVisibleNotifications = noNotifications;
+        if (mQs != null) {
+            mQs.setHasNotifications(!noNotifications);
+        }
     }
 
     public void setPulsing(boolean pulsing) {
