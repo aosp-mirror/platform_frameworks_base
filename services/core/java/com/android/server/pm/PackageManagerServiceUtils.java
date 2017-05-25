@@ -16,12 +16,16 @@
 
 package com.android.server.pm;
 
+import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.PackageDexUsage;
+
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
 import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.app.AppGlobals;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
@@ -176,6 +180,41 @@ public class PackageManagerServiceUtils {
         }
 
         return result;
+    }
+
+    /**
+     * Checks if the package was inactive during since <code>thresholdTimeinMillis</code>.
+     * Package is considered active, if:
+     * 1) It was active in foreground.
+     * 2) It was active in background and also used by other apps.
+     *
+     * If it doesn't have sufficient information about the package, it return <code>false</code>.
+     */
+    static boolean isUnusedSinceTimeInMillis(long firstInstallTime, long currentTimeInMillis,
+            long thresholdTimeinMillis, PackageDexUsage.PackageUseInfo packageUseInfo,
+            long latestPackageUseTimeInMillis, long latestForegroundPackageUseTimeInMillis) {
+
+        if (currentTimeInMillis - firstInstallTime < thresholdTimeinMillis) {
+            return false;
+        }
+
+        // If the app was active in foreground during the threshold period.
+        boolean isActiveInForeground = (currentTimeInMillis
+                - latestForegroundPackageUseTimeInMillis)
+                < thresholdTimeinMillis;
+
+        if (isActiveInForeground) {
+            return false;
+        }
+
+        // If the app was active in background during the threshold period and was used
+        // by other packages.
+        boolean isActiveInBackgroundAndUsedByOtherPackages = ((currentTimeInMillis
+                - latestPackageUseTimeInMillis)
+                < thresholdTimeinMillis)
+                && packageUseInfo.isUsedByOtherApps();
+
+        return !isActiveInBackgroundAndUsedByOtherPackages;
     }
 
     /**

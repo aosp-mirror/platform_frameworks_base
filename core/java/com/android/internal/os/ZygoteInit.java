@@ -548,7 +548,8 @@ public class ZygoteInit {
             int dexoptNeeded;
             try {
                 dexoptNeeded = DexFile.getDexOptNeeded(
-                    classPathElement, instructionSet, systemServerFilter, false /* newProfile */);
+                    classPathElement, instructionSet, systemServerFilter,
+                    false /* newProfile */, false /* downgrade */);
             } catch (FileNotFoundException ignored) {
                 // Do not add to the classpath.
                 Log.w(TAG, "Missing classpath element for system server: " + classPathElement);
@@ -572,7 +573,7 @@ public class ZygoteInit {
                 try {
                     installd.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
                             instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
-                            uuid, sharedLibraries, seInfo);
+                            uuid, sharedLibraries, seInfo, false /* downgrade */);
                 } catch (RemoteException | ServiceSpecificException e) {
                     // Ignore (but log), we need this on the classpath for fallback mode.
                     Log.w(TAG, "Failed compiling classpath element for system server: "
