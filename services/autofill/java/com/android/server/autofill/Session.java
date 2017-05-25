@@ -174,13 +174,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         public void send(int resultCode, Bundle resultData) throws RemoteException {
             final AssistStructure structure = resultData.getParcelable(KEY_STRUCTURE);
             if (structure == null) {
-                Slog.wtf(TAG, "no assist structure");
+                Slog.e(TAG, "No assist structure - app might have crashed providing it");
                 return;
             }
 
             final Bundle receiverExtras = resultData.getBundle(KEY_RECEIVER_EXTRAS);
             if (receiverExtras == null) {
-                Slog.wtf(TAG, "No " + KEY_RECEIVER_EXTRAS + " on receiver");
+                Slog.e(TAG, "No receiver extras - app might have crashed providing it");
                 return;
             }
 
