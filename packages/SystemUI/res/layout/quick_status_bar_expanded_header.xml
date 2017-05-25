@@ -41,8 +41,8 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:gravity="center"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:orientation="horizontal">
 
 
