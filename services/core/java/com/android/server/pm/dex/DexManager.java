@@ -304,10 +304,11 @@ public class DexManager {
      * @return true if all secondary dex files were processed successfully (compiled or skipped
      *         because they don't need to be compiled)..
      */
-    public boolean dexoptSecondaryDex(String packageName, int compilerReason, boolean force) {
+    public boolean dexoptSecondaryDex(String packageName, int compilerReason, boolean force,
+            boolean downgrade) {
         return dexoptSecondaryDex(packageName,
                 PackageManagerServiceCompilerMapping.getCompilerFilterForReason(compilerReason),
-                force, /* compileOnlySharedDex */ false);
+                force, /* compileOnlySharedDex */ false, downgrade);
     }
 
     /**
@@ -316,7 +317,7 @@ public class DexManager {
      *         because they don't need to be compiled)..
      */
     public boolean dexoptSecondaryDex(String packageName, String compilerFilter, boolean force,
-            boolean compileOnlySharedDex) {
+            boolean compileOnlySharedDex, boolean downgrade) {
         // Select the dex optimizer based on the force parameter.
         // Forced compilation is done through ForcedUpdatePackageDexOptimizer which will adjust
         // the necessary dexopt flags to make sure that compilation is not skipped. This avoid
@@ -360,7 +361,8 @@ public class DexManager {
             }
 
             int result = pdo.dexOptSecondaryDexPath(pkg.applicationInfo, dexPath,
-                    dexUseInfo.getLoaderIsas(), compilerFilter, dexUseInfo.isUsedByOtherApps());
+                    dexUseInfo.getLoaderIsas(), compilerFilter, dexUseInfo.isUsedByOtherApps(),
+                    downgrade);
             success = success && (result != PackageDexOptimizer.DEX_OPT_FAILED);
         }
         return success;
@@ -476,7 +478,7 @@ public class DexManager {
         String compilerFilter = PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
                 PackageManagerService.REASON_INSTALL);
         int result = mPackageDexOptimizer.dexOptSecondaryDexPath(info, dexPath, isas,
-                compilerFilter, isUsedByOtherApps);
+                compilerFilter, isUsedByOtherApps, /* downgrade */ false);
 
         // If we fail to optimize the package log an error but don't propagate the error
         // back to the app. The app cannot do much about it and the background job

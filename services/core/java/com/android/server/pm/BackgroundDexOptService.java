@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
 
-import android.app.AlarmManager;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -40,6 +39,7 @@ import com.android.server.LocalServices;
 import com.android.server.PinnerService;
 
 import java.io.File;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.TimeUnit;
 
@@ -73,6 +73,9 @@ public class BackgroundDexOptService extends JobService {
     // Optimizations should be aborted. No space left on device.
     private static final int OPTIMIZE_ABORT_NO_SPACE_LEFT = 3;
 
+    // Used for calculating space threshold for downgrading unused apps.
+    private static final int LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE = 2;
+
     /**
      * Set of failed packages remembered across job runs.
      */
@@ -91,6 +94,9 @@ public class BackgroundDexOptService extends JobService {
     private final AtomicBoolean mExitPostBootUpdate = new AtomicBoolean(false);
 
     private final File mDataDir = Environment.getDataDirectory();
+
+    private static final long mDowngradeUnusedAppsThresholdInMillis =
+            getDowngradeUnusedAppsThresholdInMillis();
 
     public static void schedule(Context context) {
         JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
@@ -215,7 +221,8 @@ public class BackgroundDexOptService extends JobService {
                     /* checkProfiles */ false,
                     PackageManagerService.REASON_BOOT,
                     /* force */ false,
-                    /* bootComplete */ true);
+                    /* bootComplete */ true,
+                    /* downgrade */ false);
             if (result == PackageDexOptimizer.DEX_OPT_PERFORMED)  {
                 updatedPackages.add(pkg);
             }
@@ -243,7 +250,8 @@ public class BackgroundDexOptService extends JobService {
     }
 
     // Optimize the given packages and return the optimization result (one of the OPTIMIZE_* codes).
-    private int idleOptimization(PackageManagerService pm, ArraySet<String> pkgs, Context context) {
+    private int idleOptimization(PackageManagerService pm, ArraySet<String> pkgs,
+            Context context) {
         Log.i(TAG, "Performing idle optimizations");
         // If post-boot update is still running, request that it exits early.
         mExitPostBootUpdate.set(true);
@@ -274,9 +282,16 @@ public class BackgroundDexOptService extends JobService {
             long lowStorageThreshold, boolean is_for_primary_dex,
             ArraySet<String> failedPackageNames) {
         ArraySet<String> updatedPackages = new ArraySet<>();
+        Set<String> unusedPackages = pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
+        // Only downgrade apps when space is low on device.
+        // Threshold is selected above the lowStorageThreshold so that we can pro-actively clean
+        // up disk before user hits the actual lowStorageThreshold.
+        final long lowStorageThresholdForDowngrade = LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE *
+                lowStorageThreshold;
+        boolean shouldDowngrade = shouldDowngrade(lowStorageThresholdForDowngrade);
         for (String pkg : pkgs) {
             int abort_code = abortIdleOptimizations(lowStorageThreshold);
-            if (abort_code != OPTIMIZE_CONTINUE) {
+            if (abort_code == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
                 return abort_code;
             }
 
@@ -284,11 +299,36 @@ public class BackgroundDexOptService extends JobService {
                 if (failedPackageNames.contains(pkg)) {
                     // Skip previously failing package
                     continue;
-                } else {
-                    // Conservatively add package to the list of failing ones in case performDexOpt
-                    // never returns.
-                    failedPackageNames.add(pkg);
                 }
+            }
+
+            int reason;
+            boolean downgrade;
+            // Downgrade unused packages.
+            if (unusedPackages.contains(pkg) && shouldDowngrade) {
+                // This applies for system apps or if packages location is not a directory, i.e.
+                // monolithic install.
+                if (is_for_primary_dex && !pm.canHaveOatDir(pkg)) {
+                    // For apps that don't have the oat directory, instead of downgrading,
+                    // remove their compiler artifacts from dalvik cache.
+                    pm.deleteOatArtifactsOfPackage(pkg);
+                    continue;
+                } else {
+                    reason = PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE;
+                    downgrade = true;
+                }
+            } else if (abort_code != OPTIMIZE_ABORT_NO_SPACE_LEFT) {
+                reason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
+                downgrade = false;
+            } else {
+                // can't dexopt because of low space.
+                continue;
+            }
+
+            synchronized (failedPackageNames) {
+                // Conservatively add package to the list of failing ones in case
+                // performDexOpt never returns.
+                failedPackageNames.add(pkg);
             }
 
             // Optimize package if needed. Note that there can be no race between
@@ -297,17 +337,19 @@ public class BackgroundDexOptService extends JobService {
             if (is_for_primary_dex) {
                 int result = pm.performDexOptWithStatus(pkg,
                         /* checkProfiles */ true,
-                        PackageManagerService.REASON_BACKGROUND_DEXOPT,
-                        /* force */ false,
-                        /* bootComplete */ true);
+                        reason,
+                        false /* forceCompile*/,
+                        true /* bootComplete */,
+                        downgrade);
                 success = result != PackageDexOptimizer.DEX_OPT_FAILED;
                 if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
                     updatedPackages.add(pkg);
                 }
             } else {
                 success = pm.performDexOptSecondary(pkg,
-                        PackageManagerService.REASON_BACKGROUND_DEXOPT,
-                        /* force */ false);
+                        reason,
+                        false /* force */,
+                        downgrade);
             }
             if (success) {
                 // Dexopt succeeded, remove package from the list of failing ones.
@@ -345,6 +387,16 @@ public class BackgroundDexOptService extends JobService {
         }
 
         return OPTIMIZE_CONTINUE;
+    }
+
+    // Evaluate whether apps should be downgraded.
+    private boolean shouldDowngrade(long lowStorageThresholdForDowngrade) {
+        long usableSpace = mDataDir.getUsableSpace();
+        if (usableSpace < lowStorageThresholdForDowngrade) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -414,5 +466,15 @@ public class BackgroundDexOptService extends JobService {
             Log.i(TAG, "Pinning optimized code " + updatedPackages);
             pinnerService.update(updatedPackages);
         }
+    }
+
+    private static long getDowngradeUnusedAppsThresholdInMillis() {
+        final String sysPropKey = "pm.dexopt.downgrade_after_inactive_days";
+        String sysPropValue = SystemProperties.get(sysPropKey);
+        if (sysPropValue == null || sysPropValue.isEmpty()) {
+            Log.w(TAG, "SysProp " + sysPropKey + " not set");
+            return Long.MAX_VALUE;
+        }
+        return TimeUnit.DAYS.toMillis(Long.parseLong(sysPropValue));
     }
 }
