@@ -25,13 +25,14 @@ import static org.mockito.Mockito.when;
 import android.support.test.filters.SmallTest;
 import android.view.Display;
 
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 import org.junit.Before;
 import org.junit.Test;
 
 @SmallTest
-public class DozeScreenStatePreventingAdapterTest {
+public class DozeScreenStatePreventingAdapterTest extends SysuiTestCase {
 
     private DozeMachine.Service mInner;
     private DozeScreenStatePreventingAdapter mWrapper;

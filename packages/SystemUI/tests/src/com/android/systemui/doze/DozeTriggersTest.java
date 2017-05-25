@@ -32,6 +32,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.util.wakelock.WakeLockFake;
@@ -44,8 +45,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class DozeTriggersTest {
-    private Context mContext;
+public class DozeTriggersTest extends SysuiTestCase {
     private DozeTriggers mTriggers;
     private DozeMachine mMachine;
     private DozeHostFake mHost;
@@ -65,7 +65,6 @@ public class DozeTriggersTest {
     @Before
     public void setUp() throws Exception {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
-        mContext = InstrumentationRegistry.getContext();
         mMachine = mock(DozeMachine.class);
         mHost = new DozeHostFake();
         mConfig = DozeConfigurationUtil.createMockConfig();
