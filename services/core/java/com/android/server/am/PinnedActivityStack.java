@@ -50,12 +50,12 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
     }
 
     void animateResizePinnedStack(Rect sourceHintBounds, Rect toBounds, int animationDuration,
-            boolean schedulePipModeChangedOnAnimationEnd) {
+            boolean fromFullscreen) {
         if (skipResizeAnimation(toBounds == null /* toFullscreen */)) {
             mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
         } else {
             getWindowContainerController().animateResizePinnedStack(toBounds, sourceHintBounds,
-                    animationDuration, schedulePipModeChangedOnAnimationEnd);
+                    animationDuration, fromFullscreen);
         }
     }
 
