@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
+import android.R.attr;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.Notification;
@@ -31,6 +32,7 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -52,6 +54,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
@@ -739,7 +742,12 @@ public class UserSwitcherController {
             if (item.isAddUser) {
                 return context.getDrawable(R.drawable.ic_add_circle_qs);
             }
-            return UserIcons.getDefaultUserIcon(item.resolveId(), /* light= */ true);
+            Drawable icon = UserIcons.getDefaultUserIcon(item.resolveId(), /* light= */ false);
+            if (item.isGuest) {
+                icon.setColorFilter(Utils.getColorAttr(context, android.R.attr.colorForeground),
+                        Mode.SRC_IN);
+            }
+            return icon;
         }
 
         public void refresh() {
