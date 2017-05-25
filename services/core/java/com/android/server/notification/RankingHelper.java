@@ -564,7 +564,7 @@ public class RankingHelper implements RankingConfig {
             updateConfig();
             return;
         }
-        if (channel.getImportance() < NotificationManager.IMPORTANCE_MIN
+        if (channel.getImportance() < NotificationManager.IMPORTANCE_NONE
                 || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
             throw new IllegalArgumentException("Invalid importance level");
         }

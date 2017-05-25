@@ -18,6 +18,7 @@ package com.android.server.notification;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
@@ -570,14 +571,32 @@ public class RankingHelperTest extends NotificationTestCase {
     }
 
     @Test
-    public void testCreateChannel_ImportanceNone() throws Exception {
+    public void testCreateChannel_badImportance() throws Exception {
         try {
             mHelper.createNotificationChannel(PKG, UID,
-                    new NotificationChannel("bananas", "bananas", IMPORTANCE_NONE), true);
-            fail("Was allowed to create a blocked channel");
+                    new NotificationChannel("bananas", "bananas", IMPORTANCE_NONE - 1), true);
+            fail("Was allowed to create a channel with invalid importance");
         } catch (IllegalArgumentException e) {
             // yay
         }
+        try {
+            mHelper.createNotificationChannel(PKG, UID,
+                    new NotificationChannel("bananas", "bananas", IMPORTANCE_UNSPECIFIED), true);
+            fail("Was allowed to create a channel with invalid importance");
+        } catch (IllegalArgumentException e) {
+            // yay
+        }
+        try {
+            mHelper.createNotificationChannel(PKG, UID,
+                    new NotificationChannel("bananas", "bananas", IMPORTANCE_MAX + 1), true);
+            fail("Was allowed to create a channel with invalid importance");
+        } catch (IllegalArgumentException e) {
+            // yay
+        }
+        mHelper.createNotificationChannel(PKG, UID,
+                new NotificationChannel("bananas", "bananas", IMPORTANCE_NONE), true);
+        mHelper.createNotificationChannel(PKG, UID,
+                new NotificationChannel("bananas", "bananas", IMPORTANCE_MAX), true);
     }
 
 
