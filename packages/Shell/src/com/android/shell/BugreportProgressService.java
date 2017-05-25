@@ -52,6 +52,7 @@ import com.google.android.collect.Lists;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.MainThread;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -126,6 +127,8 @@ import android.widget.Toast;
  * <li>Stops itself if it doesn't have any process left to monitor.
  * </ol>
  * </ol>
+ *
+ * TODO: There are multiple threads involved.  Add synchronization accordingly.
  */
 public class BugreportProgressService extends Service {
     private static final String TAG = "BugreportProgressService";
@@ -201,11 +204,15 @@ public class BugreportProgressService extends Service {
 
     private static final String NOTIFICATION_CHANNEL_ID = "bugreports";
 
+    private final Object mLock = new Object();
+
     /** Managed dumpstate processes (keyed by id) */
     private final SparseArray<DumpstateListener> mProcesses = new SparseArray<>();
 
     private Context mContext;
-    private ServiceHandler mMainHandler;
+
+    private Handler mMainThreadHandler;
+    private ServiceHandler mServiceHandler;
     private ScreenshotHandler mScreenshotHandler;
 
     private final BugreportInfoDialog mInfoDialog = new BugreportInfoDialog();
@@ -234,7 +241,8 @@ public class BugreportProgressService extends Service {
     @Override
     public void onCreate() {
         mContext = getApplicationContext();
-        mMainHandler = new ServiceHandler("BugreportProgressServiceMainThread");
+        mMainThreadHandler = new Handler(Looper.getMainLooper());
+        mServiceHandler = new ServiceHandler("BugreportProgressServiceMainThread");
         mScreenshotHandler = new ScreenshotHandler("BugreportProgressServiceScreenshotThread");
 
         mScreenshotsDir = new File(getFilesDir(), SCREENSHOT_DIR);
@@ -260,10 +268,10 @@ public class BugreportProgressService extends Service {
         Log.v(TAG, "onStartCommand(): " + dumpIntent(intent));
         if (intent != null) {
             // Handle it in a separate thread.
-            final Message msg = mMainHandler.obtainMessage();
+            final Message msg = mServiceHandler.obtainMessage();
             msg.what = MSG_SERVICE_COMMAND;
             msg.obj = intent;
-            mMainHandler.sendMessage(msg);
+            mServiceHandler.sendMessage(msg);
         }
 
         // If service is killed it cannot be recreated because it would not know which
@@ -278,7 +286,7 @@ public class BugreportProgressService extends Service {
 
     @Override
     public void onDestroy() {
-        mMainHandler.getLooper().quit();
+        mServiceHandler.getLooper().quit();
         mScreenshotHandler.getLooper().quit();
         super.onDestroy();
     }
@@ -613,7 +621,7 @@ public class BugreportProgressService extends Service {
             // ignore it
         }
 
-        mInfoDialog.initialize(mContext, info);
+        mMainThreadHandler.post(() -> mInfoDialog.initialize(mContext, info));
     }
 
     /**
@@ -652,11 +660,11 @@ public class BugreportProgressService extends Service {
     private void takeScreenshot(int id, int delay) {
         if (delay > 0) {
             Log.d(TAG, "Taking screenshot for " + id + " in " + delay + " seconds");
-            final Message msg = mMainHandler.obtainMessage();
+            final Message msg = mServiceHandler.obtainMessage();
             msg.what = MSG_DELAYED_SCREENSHOT;
             msg.arg1 = id;
             msg.arg2 = delay - 1;
-            mMainHandler.sendMessageDelayed(msg, DateUtils.SECOND_IN_MILLIS);
+            mServiceHandler.sendMessageDelayed(msg, DateUtils.SECOND_IN_MILLIS);
             return;
         }
 
@@ -696,7 +704,7 @@ public class BugreportProgressService extends Service {
         boolean taken = takeScreenshot(mContext, screenshotFile);
         setTakingScreenshot(false);
 
-        Message.obtain(mMainHandler, MSG_SCREENSHOT_RESPONSE, requestMsg.arg1, taken ? 1 : 0,
+        Message.obtain(mServiceHandler, MSG_SCREENSHOT_RESPONSE, requestMsg.arg1, taken ? 1 : 0,
                 screenshotFile).sendToTarget();
     }
 
@@ -1103,6 +1111,12 @@ public class BugreportProgressService extends Service {
      * description will be saved on {@code description.txt}.
      */
     private void addDetailsToZipFile(BugreportInfo info) {
+        synchronized (mLock) {
+            addDetailsToZipFileLocked(info);
+        }
+    }
+
+    private void addDetailsToZipFileLocked(BugreportInfo info) {
         if (info.bugreportFile == null) {
             // One possible reason is a bug in the Parcelization code.
             Log.wtf(TAG, "addDetailsToZipFile(): no bugreportFile on " + info);
@@ -1424,6 +1438,7 @@ public class BugreportProgressService extends Service {
         /**
          * Sets its internal state and displays the dialog.
          */
+        @MainThread
         void initialize(final Context context, BugreportInfo info) {
             final String dialogTitle =
                     context.getString(R.string.bugreport_info_dialog_title, info.id);
