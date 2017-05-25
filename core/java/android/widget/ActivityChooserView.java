@@ -24,6 +24,8 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -403,6 +405,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             }
             popupWindow.getListView().setContentDescription(mContext.getString(
                     R.string.activitychooserview_choose_application));
+            popupWindow.getListView().setSelector(new ColorDrawable(Color.TRANSPARENT));
         }
     }
 
