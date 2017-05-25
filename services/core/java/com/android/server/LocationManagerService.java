@@ -1729,7 +1729,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                             record.mReceiver.mIdentity.mUid,
                             record.mReceiver.mIdentity.mPackageName,
                             record.mReceiver.mAllowedResolutionLevel)) {
-                        LocationRequest locationRequest = record.mRequest;
+                        LocationRequest locationRequest = record.mRealRequest;
                         long interval = locationRequest.getInterval();
 
                         if (!isThrottlingExemptLocked(record.mReceiver.mIdentity)) {
@@ -1742,6 +1742,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                             }
                         }
 
+                        record.mRequest = locationRequest;
                         providerRequest.locationRequests.add(locationRequest);
                         if (interval < providerRequest.interval) {
                             providerRequest.reportLocation = true;
@@ -1834,7 +1835,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private class UpdateRecord {
         final String mProvider;
-        final LocationRequest mRequest;
+        final LocationRequest mRealRequest;  // original request from client
+        LocationRequest mRequest;  // possibly throttled version of the request
         final Receiver mReceiver;
         boolean mIsForegroundUid;
         Location mLastFixBroadcast;
@@ -1845,6 +1847,7 @@ public class LocationManagerService extends ILocationManager.Stub {
          */
         UpdateRecord(String provider, LocationRequest request, Receiver receiver) {
             mProvider = provider;
+            mRealRequest = request;
             mRequest = request;
             mReceiver = receiver;
             mIsForegroundUid = isImportanceForeground(
@@ -1894,7 +1897,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         public String toString() {
             return "UpdateRecord[" + mProvider + " " + mReceiver.mIdentity.mPackageName
                     + "(" + mReceiver.mIdentity.mUid + (mIsForegroundUid ? " foreground" : " background")
-                    + ")" + " " + mRequest + "]";
+                    + ")" + " " + mRealRequest + "]";
         }
     }
 
@@ -2535,7 +2538,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // Check whether sufficient time has passed
-        long minTime = record.mRequest.getFastestInterval();
+        long minTime = record.mRealRequest.getFastestInterval();
         long delta = (loc.getElapsedRealtimeNanos() - lastLoc.getElapsedRealtimeNanos())
                 / NANOS_PER_MILLI;
         if (delta < minTime - MAX_PROVIDER_SCHEDULING_JITTER_MS) {
@@ -2543,7 +2546,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // Check whether sufficient distance has been traveled
-        double minDistance = record.mRequest.getSmallestDisplacement();
+        double minDistance = record.mRealRequest.getSmallestDisplacement();
         if (minDistance > 0.0) {
             if (loc.distanceTo(lastLoc) <= minDistance) {
                 return false;
@@ -2551,12 +2554,12 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // Check whether sufficient number of udpates is left
-        if (record.mRequest.getNumUpdates() <= 0) {
+        if (record.mRealRequest.getNumUpdates() <= 0) {
             return false;
         }
 
         // Check whether the expiry date has passed
-        return record.mRequest.getExpireAt() >= now;
+        return record.mRealRequest.getExpireAt() >= now;
     }
 
     private void handleLocationChangedLocked(Location location, boolean passive) {
@@ -2674,7 +2677,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                         Slog.w(TAG, "RemoteException calling onLocationChanged on " + receiver);
                         receiverDead = true;
                     }
-                    r.mRequest.decrementNumUpdates();
+                    r.mRealRequest.decrementNumUpdates();
                 }
             }
 
@@ -2690,7 +2693,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             // track expired records
-            if (r.mRequest.getNumUpdates() <= 0 || r.mRequest.getExpireAt() < now) {
+            if (r.mRealRequest.getNumUpdates() <= 0 || r.mRealRequest.getExpireAt() < now) {
                 if (deadUpdateRecords == null) {
                     deadUpdateRecords = new ArrayList<>();
                 }
