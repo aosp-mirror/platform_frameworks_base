@@ -2290,8 +2290,9 @@
 
         <!-- Sets the padding, in pixels, of all four edges. Padding is defined as
              space between the edges of the view and the view's content. This value will take
-             precedence over any of the edge-specific values, including
-             paddingHorizontal and paddingVertical, if set. A view's size
+             precedence over any of the edge-specific values (paddingLeft, paddingTop,
+             paddingRight, paddingBottom, paddingHorizontal and paddingVertical), but will
+             not override paddingStart or paddingEnd, if set. A view's size
              will include its padding. If a {@link android.R.attr#background}
              is provided, the padding will initially be set to that (0 if the
              drawable does not have padding). Explicitly setting a padding value
@@ -2299,7 +2300,7 @@
         <attr name="padding" format="dimension" />
         <!-- Sets the padding, in pixels, of the left and right edges; see
              {@link android.R.attr#padding}. This value will take precedence over
-             paddingLeft, paddingRight, paddingStart, and paddingEnd, if set. -->
+             paddingLeft and paddingRight, but not paddingStart or paddingEnd (if set). -->
         <attr name="paddingHorizontal" format="dimension" />
         <!-- Sets the padding, in pixels, of the top and bottom edges; see
              {@link android.R.attr#padding}. This value will take precedence over
@@ -3203,11 +3204,10 @@
         <attr name="layout_marginEnd" format="dimension"  />
         <!--  Specifies extra space on the left and right sides of this view.
               Specifying layout_marginHorizontal is equivalent to specifying
-              either layout_marginLeft and layout_marginRight or
-              layout_marginStart and layout_marginEnd with that same value.
-              If both layout_marginHorizontal and any of layout_marginLeft,
-              layout_marginRight, layout_marginStart, and layout_marginEnd are
-              also specified, the layout_marginHorizontal value will take precedence over the
+              layout_marginLeft and layout_marginRight.
+              If both layout_marginHorizontal and either/both of layout_marginLeft
+              and layout_marginRight are also specified, the layout_marginHorizontal
+              value will take precedence over the
               edge-specific values. Also, layout_margin will always take precedence over
               any of these values, including layout_marginHorizontal.
               This space is outside this view's bounds.
@@ -3216,7 +3216,7 @@
         <!--  Specifies extra space on the top and bottom sides of this view.
               Specifying layout_marginVertical is equivalent to specifying
               layout_marginTop and layout_marginBottom with that same value.
-              If both layout_marginVertical and either/both layout_marginTop and
+              If both layout_marginVertical and either/both of layout_marginTop and
               layout_marginBottom are also specified, the layout_marginVertical value
               will take precedence over the edge-specific values.
               Also, layout_margin will always take precedence over
