@@ -193,6 +193,11 @@ public class ApfFilter {
     private static final int IPV4_ANY_HOST_ADDRESS = 0;
     private static final int IPV4_BROADCAST_ADDRESS = -1; // 255.255.255.255
 
+    // Traffic class and Flow label are not byte aligned. Luckily we
+    // don't care about either value so we'll consider bytes 1-3 of the
+    // IPv6 header as don't care.
+    private static final int IPV6_FLOW_LABEL_OFFSET = ETH_HEADER_LEN + 1;
+    private static final int IPV6_FLOW_LABEL_LEN = 3;
     private static final int IPV6_NEXT_HEADER_OFFSET = ETH_HEADER_LEN + 6;
     private static final int IPV6_SRC_ADDR_OFFSET = ETH_HEADER_LEN + 8;
     private static final int IPV6_DEST_ADDR_OFFSET = ETH_HEADER_LEN + 24;
@@ -472,8 +477,13 @@ public class ApfFilter {
 
             RaEvent.Builder builder = new RaEvent.Builder();
 
-            // Ignore the checksum.
+            // Ignore the flow label and low 4 bits of traffic class.
             int lastNonLifetimeStart = addNonLifetime(0,
+                    IPV6_FLOW_LABEL_OFFSET,
+                    IPV6_FLOW_LABEL_LEN);
+
+            // Ignore the checksum.
+            lastNonLifetimeStart = addNonLifetime(lastNonLifetimeStart,
                     ICMP6_RA_CHECKSUM_OFFSET,
                     ICMP6_RA_CHECKSUM_LEN);
 
@@ -564,9 +574,14 @@ public class ApfFilter {
             for (int i = 0; (i + 1) < mNonLifetimes.size(); i++) {
                 int offset = mNonLifetimes.get(i).first + mNonLifetimes.get(i).second;
 
+                // The flow label is in mNonLifetimes, but it's not a lifetime.
+                if (offset == IPV6_FLOW_LABEL_OFFSET) {
+                    continue;
+                }
+
                 // The checksum is in mNonLifetimes, but it's not a lifetime.
                 if (offset == ICMP6_RA_CHECKSUM_OFFSET) {
-                     continue;
+                    continue;
                 }
 
                 final int lifetimeLength = mNonLifetimes.get(i+1).first - offset;
@@ -628,6 +643,11 @@ public class ApfFilter {
                 if ((i + 1) < mNonLifetimes.size()) {
                     Pair<Integer, Integer> nextNonLifetime = mNonLifetimes.get(i + 1);
                     int offset = nonLifetime.first + nonLifetime.second;
+
+                    // Skip the Flow label.
+                    if (offset == IPV6_FLOW_LABEL_OFFSET) {
+                        continue;
+                    }
                     // Skip the checksum.
                     if (offset == ICMP6_RA_CHECKSUM_OFFSET) {
                         continue;
