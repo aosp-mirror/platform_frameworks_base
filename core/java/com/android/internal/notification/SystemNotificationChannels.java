@@ -135,7 +135,7 @@ public class SystemNotificationChannels {
         channelsList.add(new NotificationChannel(
                 FOREGROUND_SERVICE,
                 context.getString(R.string.notification_channel_foreground_service),
-                NotificationManager.IMPORTANCE_MIN));
+                NotificationManager.IMPORTANCE_LOW));
 
         nm.createNotificationChannels(channelsList);
     }
