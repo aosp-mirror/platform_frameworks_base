@@ -90,7 +90,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
@@ -114,7 +113,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.VibrationEffect;
 import android.provider.Settings;
@@ -471,19 +469,6 @@ public class NotificationManagerService extends SystemService {
         mRankingHelper.writeXml(out, forBackup);
         out.endTag(null, TAG_NOTIFICATION_POLICY);
         out.endDocument();
-    }
-
-    /** Use this when you actually want to post a notification or toast.
-     *
-     * Unchecked. Not exposed via Binder, but can be called in the course of enqueue*().
-     */
-    private boolean noteNotificationOp(String pkg, int uid) {
-        if (mAppOps.noteOpNoThrow(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
-                != AppOpsManager.MODE_ALLOWED) {
-            Slog.v(TAG, "notifications are disabled by AppOps for " + pkg);
-            return false;
-        }
-        return true;
     }
 
     /** Use this to check if a package can post a notification or toast. */
@@ -1154,7 +1139,7 @@ public class NotificationManagerService extends SystemService {
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
 
-        syncBlockDb();
+        loadPolicyFile();
 
         // This is a ManagedServices object that keeps track of the listeners.
         mListeners = notificationListeners;
@@ -1267,46 +1252,6 @@ public class NotificationManagerService extends SystemService {
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL, null);
     }
 
-    /**
-     * Make sure the XML config and the the AppOps system agree about blocks.
-     */
-    private void syncBlockDb() {
-        loadPolicyFile();
-
-        // sync bans from ranker into app opps
-        Map<Integer, String> packageBans = mRankingHelper.getPackageBans();
-        for(Entry<Integer, String> ban : packageBans.entrySet()) {
-            final int uid = ban.getKey();
-            final String packageName = ban.getValue();
-            setNotificationsEnabledForPackageImpl(packageName, uid, false);
-        }
-
-        // sync bans from app opps into ranker
-        packageBans.clear();
-        for (UserInfo user : UserManager.get(getContext()).getUsers()) {
-            final int userId = user.getUserHandle().getIdentifier();
-            final PackageManager packageManager = getContext().getPackageManager();
-            List<PackageInfo> packages = packageManager.getInstalledPackagesAsUser(0, userId);
-            final int packageCount = packages.size();
-            for (int p = 0; p < packageCount; p++) {
-                final String packageName = packages.get(p).packageName;
-                try {
-                    final int uid = packageManager.getPackageUidAsUser(packageName, userId);
-                    if (!checkNotificationOp(packageName, uid)) {
-                        packageBans.put(uid, packageName);
-                    }
-                } catch (NameNotFoundException e) {
-                    // forget you
-                }
-            }
-        }
-        for (Entry<Integer, String> ban : packageBans.entrySet()) {
-            mRankingHelper.setImportance(ban.getValue(), ban.getKey(), IMPORTANCE_NONE);
-        }
-
-        savePolicyFile();
-    }
-
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
@@ -1325,19 +1270,6 @@ public class NotificationManagerService extends SystemService {
             mListeners.onBootPhaseAppsCanStart();
             mNotificationAssistants.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
-        }
-    }
-
-    void setNotificationsEnabledForPackageImpl(String pkg, int uid, boolean enabled) {
-        Slog.v(TAG, (enabled?"en":"dis") + "abling notifications for " + pkg);
-
-        mAppOps.setMode(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg,
-                enabled ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
-
-        // Now, cancel any outstanding notifications that are part of a just-disabled app
-        if (ENABLE_BLOCKED_NOTIFICATIONS && !enabled) {
-            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0, true,
-                    UserHandle.getUserId(uid), REASON_PACKAGE_BANNED, null);
         }
     }
 
@@ -1522,7 +1454,8 @@ public class NotificationManagerService extends SystemService {
                     isPackageSuspendedForUser(pkg, Binder.getCallingUid());
 
             if (ENABLE_BLOCKED_TOASTS && !isSystemToast &&
-                    (!noteNotificationOp(pkg, Binder.getCallingUid()) || isPackageSuspended)) {
+                    (!areNotificationsEnabledForPackage(pkg, Binder.getCallingUid())
+                            || isPackageSuspended)) {
                 Slog.e(TAG, "Suppressing toast from package " + pkg
                         + (isPackageSuspended
                                 ? " due to package suspended by administrator."
@@ -1643,8 +1576,12 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
             checkCallerIsSystem();
 
-            setNotificationsEnabledForPackageImpl(pkg, uid, enabled);
             mRankingHelper.setEnabled(pkg, uid, enabled);
+            // Now, cancel any outstanding notifications that are part of a just-disabled app
+            if (ENABLE_BLOCKED_NOTIFICATIONS && !enabled) {
+                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0, true,
+                        UserHandle.getUserId(uid), REASON_PACKAGE_BANNED, null);
+            }
             savePolicyFile();
         }
 
@@ -1662,8 +1599,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
             checkCallerIsSystemOrSameApp(pkg);
-            return (mAppOps.checkOpNoThrow(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
-                    == AppOpsManager.MODE_ALLOWED) && !isPackageSuspendedForUser(pkg, uid);
+
+            return mRankingHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
         }
 
         @Override
@@ -3400,8 +3337,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         final boolean isBlocked = r.getImportance() == NotificationManager.IMPORTANCE_NONE
-                || r.getChannel().getImportance() == NotificationManager.IMPORTANCE_NONE
-                || !noteNotificationOp(pkg, callingUid);
+                || r.getChannel().getImportance() == NotificationManager.IMPORTANCE_NONE;
         if (isBlocked) {
             Slog.e(TAG, "Suppressing notification from package by user request.");
             usageStats.registerBlocked(r);
