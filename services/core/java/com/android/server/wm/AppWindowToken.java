@@ -915,7 +915,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (mPendingRelaunchCount > 0) {
             mPendingRelaunchCount--;
+        } else {
+            // Update keyguard flags upon finishing relaunch.
+            checkKeyguardFlagsChanged();
         }
+
         updateAllDrawn();
     }
 
@@ -1505,6 +1509,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     boolean containsDismissKeyguardWindow() {
+        // Window state is transient during relaunch. We are not guaranteed to be frozen during the
+        // entirety of the relaunch.
+        if (isRelaunching()) {
+            return mLastContainsDismissKeyguardWindow;
+        }
+
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             if ((mChildren.get(i).mAttrs.flags & FLAG_DISMISS_KEYGUARD) != 0) {
                 return true;
@@ -1514,11 +1524,19 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     boolean containsShowWhenLockedWindow() {
+        // When we are relaunching, it is possible for us to be unfrozen before our previous
+        // windows have been added back. Using the cached value ensures that our previous
+        // showWhenLocked preference is honored until relaunching is complete.
+        if (isRelaunching()) {
+            return mLastContainsShowWhenLockedWindow;
+        }
+
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             if ((mChildren.get(i).mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
                 return true;
             }
         }
+
         return false;
     }
 

@@ -30,13 +30,15 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 /**
  * Tests for the {@link AppWindowToken} class.
  *
@@ -183,5 +185,32 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(SCREEN_ORIENTATION_UNSET, token.getOrientation());
         // Can specify orientation if the current orientation candidate is orientation behind.
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, token.getOrientation(SCREEN_ORIENTATION_BEHIND));
+    }
+
+    @Test
+    public void testKeyguardFlagsDuringRelaunch() throws Exception {
+        final WindowTestUtils.TestAppWindowToken token =
+                new WindowTestUtils.TestAppWindowToken(mDisplayContent);
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.flags |= FLAG_SHOW_WHEN_LOCKED | FLAG_DISMISS_KEYGUARD;
+        attrs.setTitle("AppWindow");
+        final WindowTestUtils.TestWindowState appWindow = createWindowState(attrs, token);
+
+        // Add window with show when locked flag
+        token.addWindow(appWindow);
+        assertTrue(token.containsShowWhenLockedWindow() && token.containsDismissKeyguardWindow());
+
+        // Start relaunching
+        token.startRelaunching();
+        assertTrue(token.containsShowWhenLockedWindow() && token.containsDismissKeyguardWindow());
+
+        // Remove window and make sure that we still report back flag
+        token.removeChild(appWindow);
+        assertTrue(token.containsShowWhenLockedWindow() && token.containsDismissKeyguardWindow());
+
+        // Finish relaunching and ensure flag is now not reported
+        token.finishRelaunching();
+        assertFalse(token.containsShowWhenLockedWindow() || token.containsDismissKeyguardWindow());
     }
 }
