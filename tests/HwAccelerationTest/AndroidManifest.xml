@@ -113,6 +113,15 @@
         </activity>
 
         <activity
+            android:name="DrawIntoHwBitmapActivity"
+            android:label="Bitmaps/DrawIntoHwBitmap">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="PathOffsetActivity"
                 android:label="Path/Offset">
             <intent-filter>
