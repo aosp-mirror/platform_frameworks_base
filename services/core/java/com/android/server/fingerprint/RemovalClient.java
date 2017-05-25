@@ -59,6 +59,10 @@ public abstract class RemovalClient extends ClientMonitor {
 
     @Override
     public int stop(boolean initiatedByClient) {
+        if (mAlreadyCancelled) {
+            Slog.w(TAG, "stopRemove: already cancelled!");
+            return 0;
+        }
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "stopRemoval: no fingerprint HAL!");
@@ -75,6 +79,7 @@ public abstract class RemovalClient extends ClientMonitor {
             Slog.e(TAG, "stopRemoval failed", e);
             return ERROR_ESRCH;
         }
+        mAlreadyCancelled = true;
         return 0; // success
     }
 
