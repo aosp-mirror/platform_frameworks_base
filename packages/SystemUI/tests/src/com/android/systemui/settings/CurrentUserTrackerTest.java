@@ -17,6 +17,7 @@
 package com.android.systemui.settings;
 
 import android.content.Intent;
+import android.support.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 
@@ -26,6 +27,7 @@ import org.junit.Test;
 /**
  * Testing functionality of the current user tracker
  */
+@SmallTest
 public class CurrentUserTrackerTest extends SysuiTestCase {
 
     private CurrentUserTracker mTracker;

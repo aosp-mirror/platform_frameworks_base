@@ -33,6 +33,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.widget.RemoteViews;
 
 import com.android.systemui.R;
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationTestHelper;
@@ -47,17 +48,14 @@ import java.util.concurrent.CountDownLatch;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@FlakyTest
-public class NotificationInflaterTest {
+public class NotificationInflaterTest extends SysuiTestCase {
 
-    private Context mContext;
     private NotificationInflater mNotificationInflater;
     private Notification.Builder mBuilder;
     private ExpandableNotificationRow mRow;
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getTargetContext();
         mBuilder = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setContentTitle("Title")

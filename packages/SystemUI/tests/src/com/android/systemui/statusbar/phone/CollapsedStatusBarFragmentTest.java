@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.StatusBarManager;
+import android.support.test.filters.SmallTest;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 
@@ -39,6 +40,7 @@ import org.mockito.Mockito;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
+@SmallTest
 public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     private NotificationIconAreaController mMockNotificiationAreaController;

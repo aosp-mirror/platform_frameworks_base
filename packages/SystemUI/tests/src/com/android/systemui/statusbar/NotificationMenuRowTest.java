@@ -16,6 +16,7 @@ package com.android.systemui.statusbar;
 
 import static junit.framework.Assert.assertTrue;
 
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -30,6 +31,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
+@SmallTest
 public class NotificationMenuRowTest extends LeakCheckedTest {
 
     @Before

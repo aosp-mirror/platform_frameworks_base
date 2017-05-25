@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
+import android.support.test.filters.SmallTest;
 
 import com.android.systemui.Dependency.DependencyKey;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -30,6 +31,7 @@ import org.junit.Test;
 
 import java.io.PrintWriter;
 
+@SmallTest
 public class DependencyTest extends SysuiTestCase {
 
     public static final DependencyKey<Dumpable> DUMPABLE = new DependencyKey<>("dumpable");

@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Looper;
 
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WorkLockActivity;
 
 import org.junit.Before;
@@ -46,7 +47,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class WorkLockActivityTest {
+public class WorkLockActivityTest extends SysuiTestCase {
     private static final @UserIdInt int USER_ID = 270;
     private static final String TASK_LABEL = "task label";
 

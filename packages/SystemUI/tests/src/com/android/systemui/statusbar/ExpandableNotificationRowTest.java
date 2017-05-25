@@ -29,6 +29,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
+import com.android.systemui.SysuiTestCase;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,16 +39,13 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@FlakyTest
-public class ExpandableNotificationRowTest {
+public class ExpandableNotificationRowTest extends SysuiTestCase {
 
-    private Context mContext;
     private ExpandableNotificationRow mGroup;
     private NotificationTestHelper mNotificationTestHelper;
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getTargetContext();
         mNotificationTestHelper = new NotificationTestHelper(mContext);
         mGroup = mNotificationTestHelper.createGroup();
     }

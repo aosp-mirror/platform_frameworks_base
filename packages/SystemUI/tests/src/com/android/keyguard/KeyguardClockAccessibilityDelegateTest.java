@@ -19,26 +19,26 @@ package com.android.keyguard;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.text.TextUtils;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
+
+import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
-public class KeyguardClockAccessibilityDelegateTest {
+@SmallTest
+public class KeyguardClockAccessibilityDelegateTest extends SysuiTestCase {
 
-    private Context mContext;
     private TextView mView;
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getContext();
         mView = new TextView(mContext);
         mView.setText(R.string.keyguard_widget_12_hours_format);
         mView.setContentDescription(mContext.getString(R.string.keyguard_widget_12_hours_format));

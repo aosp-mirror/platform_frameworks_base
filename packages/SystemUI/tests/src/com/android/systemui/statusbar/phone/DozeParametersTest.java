@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.DozeParameters.IntInOutMatcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +30,7 @@ import static junit.framework.Assert.fail;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class DozeParametersTest {
+public class DozeParametersTest extends SysuiTestCase {
 
     @Test
     public void test_inOutMatcher_defaultIn() {
