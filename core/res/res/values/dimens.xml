@@ -231,6 +231,15 @@
     <!-- The small size of the image if the height drawing doesn't work anymore -->
     <dimen name="media_notification_expanded_image_small_size">72dp</dimen>
 
+    <!-- The size of the media actions in the media notification. -->
+    <dimen name="media_notification_action_button_size">48dp</dimen>
+
+    <!-- The bottom padding for the media actions container. -->
+    <dimen name="media_notification_actions_padding_bottom">12dp</dimen>
+
+    <!-- The maximum size of the image in the expanded media notification -->
+    <dimen name="media_notification_expanded_image_max_size">94dp</dimen>
+
     <!-- The maximum size of the image in the expanded media notification -->
     <dimen name="media_notification_expanded_image_margin_bottom">20dp</dimen>
 
