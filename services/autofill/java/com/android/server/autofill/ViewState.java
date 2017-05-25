@@ -174,7 +174,7 @@ final class ViewState {
      * fill UI is ready to be displayed (i.e. when response and bounds are set).
      */
     void maybeCallOnFillReady() {
-        if ((mState & (STATE_AUTOFILLED | STATE_WAITING_DATASET_AUTH)) != 0) {
+        if ((mState & STATE_AUTOFILLED) != 0) {
             if (sDebug) Slog.d(TAG, "Ignoring UI for " + id + " on " + getStateAsString());
             return;
         }
