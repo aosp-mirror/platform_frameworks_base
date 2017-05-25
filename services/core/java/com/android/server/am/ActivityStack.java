@@ -4042,6 +4042,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStackSupervisor.moveHomeStackTaskToTop(reason);
             }
 
+            // The following block can be executed multiple times if there is more than one overlay.
+            // {@link ActivityStackSupervisor#removeTaskByIdLocked} handles this by reverse lookup
+            // of the task by id and exiting early if not found.
             if (onlyHasTaskOverlays) {
                 // When destroying a task, tell the supervisor to remove it so that any activity it
                 // has can be cleaned up correctly. This is currently the only place where we remove
@@ -4054,7 +4057,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY);
             }
 
-            // We must keep the task around until all activities are destroyed.
+            // We must keep the task around until all activities are destroyed. The following
+            // statement will only execute once since overlays are also considered activities.
             if (lastActivity) {
                 removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
             }
