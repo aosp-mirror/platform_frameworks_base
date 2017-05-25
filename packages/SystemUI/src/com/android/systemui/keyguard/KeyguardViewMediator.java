@@ -1173,6 +1173,7 @@ public class KeyguardViewMediator extends SystemUI {
 
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
+                mUpdateMonitor.setKeyguardOccluded(isOccluded);
                 mStatusBarKeyguardViewManager.setOccluded(isOccluded, animate
                         && mDeviceInteractive);
                 adjustStatusBarLocked();

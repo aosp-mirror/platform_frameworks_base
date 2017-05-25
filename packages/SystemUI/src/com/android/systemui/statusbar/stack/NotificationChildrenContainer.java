@@ -29,6 +29,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -1242,5 +1244,10 @@ public class NotificationChildrenContainer extends ViewGroup {
             return 0.0f;
         }
         return getGroupExpandFraction();
+    }
+
+    @VisibleForTesting
+    public boolean isUserLocked() {
+        return mUserLocked;
     }
 }

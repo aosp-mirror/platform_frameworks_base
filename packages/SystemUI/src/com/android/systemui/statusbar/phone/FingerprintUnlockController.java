@@ -98,7 +98,6 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     private StatusBar mStatusBar;
     private final UnlockMethodCache mUnlockMethodCache;
     private final Context mContext;
-    private boolean mGoingToSleep;
     private int mPendingAuthenticatedUserId = -1;
 
     public FingerprintUnlockController(Context context,
@@ -213,17 +212,19 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 Trace.endSection();
                 break;
             case MODE_WAKE_AND_UNLOCK_PULSING:
-                Trace.beginSection("MODE_WAKE_AND_UNLOCK_PULSING");
-                mStatusBar.updateMediaMetaData(false /* metaDataChanged */,
-                        true /* allowEnterAnimation */);
-                // Fall through.
-                Trace.endSection();
             case MODE_WAKE_AND_UNLOCK:
-                Trace.beginSection("MODE_WAKE_AND_UNLOCK");
+                if (mMode == MODE_WAKE_AND_UNLOCK_PULSING) {
+                    Trace.beginSection("MODE_WAKE_AND_UNLOCK_PULSING");
+                    mStatusBar.updateMediaMetaData(false /* metaDataChanged */,
+                            true /* allowEnterAnimation */);
+                } else {
+                    Trace.beginSection("MODE_WAKE_AND_UNLOCK");
+                    mDozeScrimController.abortDoze();
+                }
                 mStatusBarWindowManager.setStatusBarFocusable(false);
-                mDozeScrimController.abortDoze();
                 mKeyguardViewMediator.onWakeAndUnlocking();
                 mScrimController.setWakeAndUnlocking();
+                mDozeScrimController.setWakeAndUnlocking();
                 if (mStatusBar.getNavigationBarView() != null) {
                     mStatusBar.getNavigationBarView().setWakeAndUnlocking(true);
                 }
@@ -302,10 +303,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     private void cleanup() {
-        mMode = MODE_NONE;
         releaseFingerprintWakeLock();
-        mStatusBarWindowManager.setForceDozeBrightness(false);
-        mStatusBar.notifyFpAuthModeChanged();
     }
 
     public void startKeyguardFadingAway() {
@@ -321,6 +319,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     public void finishKeyguardFadingAway() {
         mMode = MODE_NONE;
+        mStatusBarWindowManager.setForceDozeBrightness(false);
         if (mStatusBar.getNavigationBarView() != null) {
             mStatusBar.getNavigationBarView().setWakeAndUnlocking(false);
         }

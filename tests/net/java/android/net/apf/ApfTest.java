@@ -1066,10 +1066,15 @@ public class ApfTest extends AndroidTestCase {
         final int ROUTE_LIFETIME  = 400;
         // Note that lifetime of 2000 will be ignored in favor of shorter route lifetime of 1000.
         final int DNSSL_LIFETIME  = 2000;
+        final int VERSION_TRAFFIC_CLASS_FLOW_LABEL_OFFSET = ETH_HEADER_LEN;
+        // IPv6, traffic class = 0, flow label = 0x12345
+        final int VERSION_TRAFFIC_CLASS_FLOW_LABEL = 0x60012345;
 
         // Verify RA is passed the first time
         ByteBuffer basePacket = ByteBuffer.wrap(new byte[ICMP6_RA_OPTION_OFFSET]);
         basePacket.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_IPV6);
+        basePacket.putInt(VERSION_TRAFFIC_CLASS_FLOW_LABEL_OFFSET,
+                VERSION_TRAFFIC_CLASS_FLOW_LABEL);
         basePacket.put(IPV6_NEXT_HEADER_OFFSET, (byte)IPPROTO_ICMPV6);
         basePacket.put(ICMP6_TYPE_OFFSET, (byte)ICMP6_ROUTER_ADVERTISEMENT);
         basePacket.putShort(ICMP6_RA_ROUTER_LIFETIME_OFFSET, (short)ROUTER_LIFETIME);
@@ -1079,6 +1084,13 @@ public class ApfTest extends AndroidTestCase {
 
         testRaLifetime(apfFilter, ipManagerCallback, basePacket, ROUTER_LIFETIME);
         verifyRaEvent(new RaEvent(ROUTER_LIFETIME, -1, -1, -1, -1, -1));
+
+        ByteBuffer newFlowLabelPacket = ByteBuffer.wrap(new byte[ICMP6_RA_OPTION_OFFSET]);
+        basePacket.clear();
+        newFlowLabelPacket.put(basePacket);
+        // Check that changes are ignored in every byte of the flow label.
+        newFlowLabelPacket.putInt(VERSION_TRAFFIC_CLASS_FLOW_LABEL_OFFSET,
+                VERSION_TRAFFIC_CLASS_FLOW_LABEL + 0x11111);
 
         // Ensure zero-length options cause the packet to be silently skipped.
         // Do this before we test other packets. http://b/29586253
@@ -1145,6 +1157,7 @@ public class ApfTest extends AndroidTestCase {
         // Verify that current program filters all five RAs:
         program = ipManagerCallback.getApfProgram();
         verifyRaLifetime(program, basePacket, ROUTER_LIFETIME);
+        verifyRaLifetime(program, newFlowLabelPacket, ROUTER_LIFETIME);
         verifyRaLifetime(program, prefixOptionPacket, PREFIX_PREFERRED_LIFETIME);
         verifyRaLifetime(program, rdnssOptionPacket, RDNSS_LIFETIME);
         verifyRaLifetime(program, routeInfoOptionPacket, ROUTE_LIFETIME);
