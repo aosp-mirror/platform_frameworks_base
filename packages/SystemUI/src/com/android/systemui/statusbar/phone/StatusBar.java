@@ -4386,7 +4386,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             final int userId = mCurrentProfiles.valueAt(i).id;
             boolean isProfilePublic = devicePublic;
             if (!devicePublic && userId != mCurrentUserId) {
-                if (mStatusBarKeyguardViewManager.isSecure(userId)) {
+                // We can't rely on KeyguardManager#isDeviceLocked() for unified profile challenge
+                // due to a race condition where this code could be called before
+                // TrustManagerService updates its internal records, resulting in an incorrect
+                // state being cached in mLockscreenPublicMode. (b/35951989)
+                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
+                        && mStatusBarKeyguardViewManager.isSecure(userId)) {
                     isProfilePublic = mKeyguardManager.isDeviceLocked(userId);
                 }
             }
