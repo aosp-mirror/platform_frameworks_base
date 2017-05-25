@@ -107,6 +107,10 @@ public class ImsReasonInfo implements Parcelable {
     //Call failures for FDN
     public static final int CODE_FDN_BLOCKED = 241;
 
+    // Network does not accept the emergency call request because IMEI was used as identification
+    // and this capability is not supported by the network.
+    public static final int CODE_IMEI_NOT_ACCEPTED = 243;
+
     /**
      * STATUSCODE (SIP response code) (IMS -> Telephony)
      */
