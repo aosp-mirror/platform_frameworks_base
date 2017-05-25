@@ -21,8 +21,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.util.Preconditions;
 
-import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -35,8 +33,6 @@ import android.content.pm.ParceledListSlice;
 import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.UserHandle;
-import android.os.UserManager;
-import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
@@ -189,6 +185,10 @@ public class RankingHelper implements RankingConfig {
                                 safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY),
                                 safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
                                 safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
+                        r.importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+                        r.priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
+                        r.visibility = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
+                        r.showBadge = safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
 
                         final int innerDepth = parser.getDepth();
                         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
