@@ -23,6 +23,8 @@
 #include "android_os_HwParcel.h"
 #include "android_os_HwRemoteBinder.h"
 
+#include <cstring>
+
 #include <JNIHelp.h>
 #include <android/hidl/manager/1.0/IServiceManager.h>
 #include <android/hidl/base/1.0/IBase.h>
@@ -331,8 +333,19 @@ static jobject JHwBinder_native_getService(
 
     IServiceManager::Transport transport = transportRet;
 
-    if (   transport != IServiceManager::Transport::EMPTY
-        && transport != IServiceManager::Transport::HWBINDER) {
+#ifdef __ANDROID_TREBLE__
+#ifdef __ANDROID_DEBUGGABLE__
+    const char* testingOverride = std::getenv("TREBLE_TESTING_OVERRIDE");
+    const bool vintfLegacy = (transport == IServiceManager::Transport::EMPTY)
+            && testingOverride && !strcmp(testingOverride, "true");
+#else // __ANDROID_TREBLE__ but not __ANDROID_DEBUGGABLE__
+    const bool vintfLegacy = false;
+#endif // __ANDROID_DEBUGGABLE__
+#else // not __ANDROID_TREBLE__
+    const bool vintfLegacy = (transport == IServiceManager::Transport::EMPTY);
+#endif // __ANDROID_TREBLE__";
+
+    if (transport != IServiceManager::Transport::HWBINDER && !vintfLegacy) {
         LOG(ERROR) << "service " << ifaceName << " declares transport method "
                    << toString(transport) << " but framework expects hwbinder.";
         signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
