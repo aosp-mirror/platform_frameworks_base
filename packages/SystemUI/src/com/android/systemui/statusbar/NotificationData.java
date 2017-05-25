@@ -24,7 +24,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.Context;
 import android.graphics.drawable.Icon;
-import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
@@ -84,7 +83,7 @@ public class NotificationData {
         public List<SnoozeCriterion> snoozeCriteria;
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
-        private Abortable mRunningTask = null;
+        private InflationTask mRunningTask = null;
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();
@@ -225,10 +224,14 @@ public class NotificationData {
             }
         }
 
-        public void setInflationTask(Abortable abortableTask) {
+        public void setInflationTask(InflationTask abortableTask) {
             // abort any existing inflation
+            InflationTask existing = mRunningTask;
             abortTask();
             mRunningTask = abortableTask;
+            if (existing != null && mRunningTask != null) {
+                mRunningTask.supersedeTask(existing);
+            }
         }
 
         public void onInflationTaskFinished() {
@@ -236,7 +239,7 @@ public class NotificationData {
         }
 
         @VisibleForTesting
-        public Abortable getRunningTask() {
+        public InflationTask getRunningTask() {
             return mRunningTask;
         }
     }
