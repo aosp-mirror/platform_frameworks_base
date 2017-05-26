@@ -99,6 +99,7 @@ cc_library_host_static {
         "link/PrivateAttributeMover.cpp",
         "link/ReferenceLinker.cpp",
         "link/TableMerger.cpp",
+        "link/XmlCompatVersioner.cpp",
         "link/XmlNamespaceRemover.cpp",
         "link/XmlReferenceLinker.cpp",
         "optimize/ResourceDeduper.cpp",

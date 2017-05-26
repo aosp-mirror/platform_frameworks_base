@@ -72,13 +72,13 @@ class XmlVisitor : public xml::PackageAwareVisitor {
   using xml::PackageAwareVisitor::Visit;
 
   XmlVisitor(const Source& source, const CallSite& callsite, IAaptContext* context,
-             SymbolTable* symbols, std::set<int>* sdk_levels_found)
+             SymbolTable* symbols)
       : source_(source),
         callsite_(callsite),
         context_(context),
         symbols_(symbols),
-        sdk_levels_found_(sdk_levels_found),
-        reference_visitor_(callsite, context, symbols, this) {}
+        reference_visitor_(callsite, context, symbols, this) {
+  }
 
   void Visit(xml::Element* el) override {
     // The default Attribute allows everything except enums or flags.
@@ -118,22 +118,12 @@ class XmlVisitor : public xml::PackageAwareVisitor {
           continue;
         }
 
-        // Find this compiled attribute's SDK level.
-        const xml::AaptAttribute& aapt_attr = attr.compiled_attribute.value();
-        if (aapt_attr.id) {
-          // Record all SDK levels from which the attributes were defined.
-          const size_t sdk_level = FindAttributeSdkLevel(aapt_attr.id.value());
-          if (sdk_level > 1) {
-            sdk_levels_found_->insert(sdk_level);
-          }
-        }
-        attribute = &aapt_attr.attribute;
+        attribute = &attr.compiled_attribute.value().attribute;
       }
 
       attr.compiled_value = ResourceUtils::TryParseItemForAttribute(attr.value, attribute);
       if (attr.compiled_value) {
-        // With a compiledValue, we must resolve the reference and assign it an
-        // ID.
+        // With a compiledValue, we must resolve the reference and assign it an ID.
         attr.compiled_value->SetSource(source);
         attr.compiled_value->Accept(&reference_visitor_);
       } else if ((attribute->type_mask & android::ResTable_map::TYPE_STRING) == 0) {
@@ -164,7 +154,6 @@ class XmlVisitor : public xml::PackageAwareVisitor {
   IAaptContext* context_;
   SymbolTable* symbols_;
 
-  std::set<int>* sdk_levels_found_;
   ReferenceVisitor reference_visitor_;
   bool error_ = false;
 };
@@ -172,10 +161,8 @@ class XmlVisitor : public xml::PackageAwareVisitor {
 }  // namespace
 
 bool XmlReferenceLinker::Consume(IAaptContext* context, xml::XmlResource* resource) {
-  sdk_levels_found_.clear();
   const CallSite callsite = {resource->file.name};
-  XmlVisitor visitor(resource->file.source, callsite, context, context->GetExternalSymbols(),
-                     &sdk_levels_found_);
+  XmlVisitor visitor(resource->file.source, callsite, context, context->GetExternalSymbols());
   if (resource->root) {
     resource->root->Accept(&visitor);
     return !visitor.HasError();
