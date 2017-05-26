@@ -36,14 +36,14 @@ import java.util.Objects;
  * session.
  */
 public final class AudioPlaybackConfiguration implements Parcelable {
-    private final static String TAG = new String("AudioPlaybackConfiguration");
+    private static final String TAG = new String("AudioPlaybackConfiguration");
 
-    private final static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     /** @hide */
-    public final static int PLAYER_PIID_INVALID = -1;
+    public static final int PLAYER_PIID_INVALID = -1;
     /** @hide */
-    public final static int PLAYER_UPID_INVALID = -1;
+    public static final int PLAYER_UPID_INVALID = -1;
 
     // information about the implementation
     /**
@@ -51,37 +51,62 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * An unknown type of player
      */
     @SystemApi
-    public final static int PLAYER_TYPE_UNKNOWN = -1;
+    public static final int PLAYER_TYPE_UNKNOWN = -1;
     /**
      * @hide
      * Player backed by a java android.media.AudioTrack player
      */
     @SystemApi
-    public final static int PLAYER_TYPE_JAM_AUDIOTRACK = 1;
+    public static final int PLAYER_TYPE_JAM_AUDIOTRACK = 1;
     /**
      * @hide
      * Player backed by a java android.media.MediaPlayer player
      */
     @SystemApi
-    public final static int PLAYER_TYPE_JAM_MEDIAPLAYER = 2;
+    public static final int PLAYER_TYPE_JAM_MEDIAPLAYER = 2;
     /**
      * @hide
      * Player backed by a java android.media.SoundPool player
      */
     @SystemApi
-    public final static int PLAYER_TYPE_JAM_SOUNDPOOL = 3;
+    public static final int PLAYER_TYPE_JAM_SOUNDPOOL = 3;
     /**
      * @hide
      * Player backed by a C OpenSL ES AudioPlayer player with a BufferQueue source
      */
     @SystemApi
-    public final static int PLAYER_TYPE_SLES_AUDIOPLAYER_BUFFERQUEUE = 11;
+    public static final int PLAYER_TYPE_SLES_AUDIOPLAYER_BUFFERQUEUE = 11;
     /**
      * @hide
      * Player backed by a C OpenSL ES AudioPlayer player with a URI or FD source
      */
     @SystemApi
-    public final static int PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD = 12;
+    public static final int PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD = 12;
+
+    /**
+     * @hide
+     * Player backed an AAudio player.
+     * Note this type is not in System API so it will not be returned in public API calls
+     */
+    // TODO unhide for SystemApi, update getPlayerType()
+    public static final int PLAYER_TYPE_AAUDIO = 13;
+
+    /**
+     * @hide
+     * Player backed a hardware source, whose state is visible in the Android audio policy manager.
+     * Note this type is not in System API so it will not be returned in public API calls
+     */
+    // TODO unhide for SystemApi, update getPlayerType()
+    public static final int PLAYER_TYPE_HW_SOURCE = 14;
+
+    /**
+     * @hide
+     * Player is a proxy for an audio player whose audio and state doesn't go through the Android
+     * audio framework.
+     * Note this type is not in System API so it will not be returned in public API calls
+     */
+    // TODO unhide for SystemApi, update getPlayerType()
+    public static final int PLAYER_TYPE_EXTERNAL_PROXY = 15;
 
     /** @hide */
     @IntDef({
@@ -251,11 +276,20 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * {@link #PLAYER_TYPE_JAM_AUDIOTRACK}, {@link #PLAYER_TYPE_JAM_MEDIAPLAYER},
      * {@link #PLAYER_TYPE_JAM_SOUNDPOOL}, {@link #PLAYER_TYPE_SLES_AUDIOPLAYER_BUFFERQUEUE},
      * {@link #PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD}, or {@link #PLAYER_TYPE_UNKNOWN}.
+     * <br>Note that player types not exposed in the system API will be represented as
+     * {@link #PLAYER_TYPE_UNKNOWN}.
      * @return the type of the player.
      */
     @SystemApi
     public @PlayerType int getPlayerType() {
-        return mPlayerType;
+        switch (mPlayerType) {
+            case PLAYER_TYPE_AAUDIO:
+            case PLAYER_TYPE_HW_SOURCE:
+            case PLAYER_TYPE_EXTERNAL_PROXY:
+                return PLAYER_TYPE_UNKNOWN;
+            default:
+                return mPlayerType;
+        }
     }
 
     /**
@@ -442,7 +476,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     //=====================================================================
     // Inner class for corresponding IPlayer and its death monitoring
-    final static class IPlayerShell implements IBinder.DeathRecipient {
+    static final class IPlayerShell implements IBinder.DeathRecipient {
 
         final AudioPlaybackConfiguration mMonitor; // never null
         private IPlayer mIPlayer;
@@ -494,6 +528,9 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 return "OpenSL ES AudioPlayer (Buffer Queue)";
             case PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD:
                 return "OpenSL ES AudioPlayer (URI/FD)";
+            case PLAYER_TYPE_AAUDIO: return "AAudio";
+            case PLAYER_TYPE_HW_SOURCE: return "hardware source";
+            case PLAYER_TYPE_EXTERNAL_PROXY: return "external proxy";
             default:
                 return "unknown player type - FIXME";
         }
