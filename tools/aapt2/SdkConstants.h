@@ -25,7 +25,9 @@
 
 namespace aapt {
 
-enum : int {
+using ApiVersion = int;
+
+enum : ApiVersion {
   SDK_CUPCAKE = 3,
   SDK_DONUT = 4,
   SDK_ECLAIR = 5,
@@ -49,12 +51,12 @@ enum : int {
   SDK_MARSHMALLOW = 23,
   SDK_NOUGAT = 24,
   SDK_NOUGAT_MR1 = 25,
-  SDK_O = 26,  // STOPSHIP Replace with real version
+  SDK_O = 26,
 };
 
-size_t FindAttributeSdkLevel(const ResourceId& id);
-size_t FindAttributeSdkLevel(const ResourceName& name);
-std::pair<android::StringPiece, int> GetDevelopmentSdkCodeNameAndVersion();
+ApiVersion FindAttributeSdkLevel(const ResourceId& id);
+ApiVersion FindAttributeSdkLevel(const ResourceName& name);
+std::pair<android::StringPiece, ApiVersion> GetDevelopmentSdkCodeNameAndVersion();
 
 }  // namespace aapt
 
