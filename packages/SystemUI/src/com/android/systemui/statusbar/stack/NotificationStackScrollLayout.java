@@ -4361,6 +4361,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             mStatusBar.setNotificationSnoozed(sbn, snoozeOption);
         }
 
+        public boolean isFalseGesture(MotionEvent ev) {
+            return super.isFalseGesture(ev);
+        }
+
         private void handleMenuCoveredOrDismissed() {
             if (mMenuExposedView != null && mMenuExposedView == mTranslatingParentView) {
                 mMenuExposedView = null;
