@@ -194,16 +194,9 @@ class XmlFlattenerVisitor : public xml::Visitor {
 
     // Filter the attributes.
     for (xml::Attribute& attr : node->attributes) {
-      if (options_.max_sdk_level && attr.compiled_attribute && attr.compiled_attribute.value().id) {
-        size_t sdk_level = FindAttributeSdkLevel(attr.compiled_attribute.value().id.value());
-        if (sdk_level > options_.max_sdk_level.value()) {
-          continue;
-        }
+      if (attr.namespace_uri != xml::kSchemaTools) {
+        filtered_attrs_.push_back(&attr);
       }
-      if (attr.namespace_uri == xml::kSchemaTools) {
-        continue;
-      }
-      filtered_attrs_.push_back(&attr);
     }
 
     if (filtered_attrs_.empty()) {

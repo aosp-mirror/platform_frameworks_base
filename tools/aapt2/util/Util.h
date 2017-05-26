@@ -44,6 +44,12 @@
 namespace aapt {
 namespace util {
 
+template <typename T>
+struct Range {
+  T start;
+  T end;
+};
+
 std::vector<std::string> Split(const android::StringPiece& str, char sep);
 std::vector<std::string> SplitAndLowercase(const android::StringPiece& str, char sep);
 
