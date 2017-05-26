@@ -43,15 +43,29 @@ public class SynchronousResultReceiver extends ResultReceiver {
     }
 
     private final CompletableFuture<Result> mFuture = new CompletableFuture<>();
+    private final String mName;
 
     public SynchronousResultReceiver() {
         super((Handler) null);
+        mName = null;
+    }
+
+    /**
+     * @param name Name for logging purposes
+     */
+    public SynchronousResultReceiver(String name) {
+        super((Handler) null);
+        mName = name;
     }
 
     @Override
     final protected void onReceiveResult(int resultCode, Bundle resultData) {
         super.onReceiveResult(resultCode, resultData);
         mFuture.complete(new Result(resultCode, resultData));
+    }
+
+    public String getName() {
+        return mName;
     }
 
     /**
