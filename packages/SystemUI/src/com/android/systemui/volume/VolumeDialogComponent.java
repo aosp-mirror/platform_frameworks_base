@@ -18,26 +18,25 @@ package com.android.systemui.volume;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.VolumePolicy;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.plugins.PluginDependency;
 import com.android.systemui.plugins.PluginDependencyProvider;
-import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
@@ -60,6 +59,9 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     private final SystemUI mSysui;
     private final Context mContext;
     private final VolumeDialogControllerImpl mController;
+    private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
+            ActivityInfo.CONFIG_FONT_SCALE);
+    private final Extension mExtension;
     private VolumeDialog mDialog;
     private VolumePolicy mVolumePolicy = new VolumePolicy(
             DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT,  // volumeDownToEnterSilent
@@ -76,7 +78,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
         // Allow plugins to reference the VolumeDialogController.
         Dependency.get(PluginDependencyProvider.class)
                 .allowPluginDependency(VolumeDialogController.class);
-        Dependency.get(ExtensionController.class).newExtension(VolumeDialog.class)
+        mExtension = Dependency.get(ExtensionController.class).newExtension(VolumeDialog.class)
                 .withPlugin(VolumeDialog.class)
                 .withDefault(this::createDefault)
                 .withCallback(dialog -> {
@@ -148,7 +150,9 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        // noop
+        if (mConfigChanges.applyNewConfig(mContext.getResources())) {
+            mExtension.reload();
+        }
     }
 
     @Override

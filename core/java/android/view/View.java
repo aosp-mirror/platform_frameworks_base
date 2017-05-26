@@ -1189,7 +1189,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @interface AutofillFlags {}
 
     /**
-     * Flag requesting you to add views not-important for autofill to the assist data.
+     * Flag requesting you to add views that are marked as not important for autofill
+     * (see {@link #setImportantForAutofill(int)}) to a {@link ViewStructure}.
      */
     public static final int AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x1;
 
@@ -7484,7 +7485,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>Call {@link AutofillManager#commit()} when the autofill context
      * of the view structure changed and you want the current autofill interaction if such
      * to be commited.
-     * <li>Call {@link AutofillManager#cancel()} ()} when the autofill context
+     * <li>Call {@link AutofillManager#cancel()} when the autofill context
      * of the view structure changed and you want the current autofill interaction if such
      * to be cancelled.
      * <li> The {@code left} and {@code top} values set in
