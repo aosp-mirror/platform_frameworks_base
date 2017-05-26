@@ -211,7 +211,8 @@ public class BackgroundDexOptService extends JobService {
             pm.performDexOpt(pkg,
                     /* checkProfiles */ false,
                     PackageManagerService.REASON_BOOT,
-                    /* force */ false);
+                    /* force */ false,
+                    /* bootComplete */ true);
         }
         // Ran to completion, so we abandon our timeslice and do not reschedule.
         jobFinished(jobParams, /* reschedule */ false);
@@ -288,7 +289,8 @@ public class BackgroundDexOptService extends JobService {
                     ? pm.performDexOpt(pkg,
                             /* checkProfiles */ true,
                             PackageManagerService.REASON_BACKGROUND_DEXOPT,
-                            /* force */ false)
+                            /* force */ false,
+                            /* bootComplete */ true)
                     : pm.performDexOptSecondary(pkg,
                             PackageManagerService.REASON_BACKGROUND_DEXOPT,
                             /* force */ false);
