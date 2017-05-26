@@ -360,7 +360,7 @@ interface IPackageManager {
      * the operation is completed
      */
      void freeStorageAndNotify(in String volumeUuid, in long freeStorageSize,
-             IPackageDataObserver observer);
+             int storageFlags, IPackageDataObserver observer);
 
     /**
      * Free storage by deleting LRU sorted list of cache files across
@@ -384,7 +384,7 @@ interface IPackageManager {
      * to indicate that no call back is desired.
      */
      void freeStorage(in String volumeUuid, in long freeStorageSize,
-             in IntentSender pi);
+             int storageFlags, in IntentSender pi);
 
     /**
      * Delete all the cache files in an applications cache directory

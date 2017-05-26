@@ -142,6 +142,24 @@ public class StorageStatsManager {
         return getFreeBytes(convert(uuid));
     }
 
+    /** {@hide} */
+    public @BytesLong long getCacheBytes(@NonNull UUID storageUuid) throws IOException {
+        try {
+            return mService.getCacheBytes(convert(storageUuid), mContext.getOpPackageName());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    @Deprecated
+    public long getCacheBytes(String uuid) throws IOException {
+        return getCacheBytes(convert(uuid));
+    }
+
     /**
      * Return storage statistics for a specific package on the requested storage
      * volume.

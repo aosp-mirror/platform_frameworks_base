@@ -62,6 +62,8 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.storage.CacheQuotaStrategy;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class StorageStatsService extends IStorageStatsManager.Stub {
@@ -181,29 +183,42 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     public long getFreeBytes(String volumeUuid, String callingPackage) {
         // NOTE: No permissions required
 
-        long cacheBytes = 0;
         final long token = Binder.clearCallingIdentity();
         try {
+            final File path;
+            try {
+                path = mStorage.findPathForUuid(volumeUuid);
+            } catch (FileNotFoundException e) {
+                throw new ParcelableException(e);
+            }
+
+            // Free space is usable bytes plus any cached data that we're
+            // willing to automatically clear. To avoid user confusion, this
+            // logic should be kept in sync with getAllocatableBytes().
             if (isQuotaSupported(volumeUuid, callingPackage)) {
-                for (UserInfo user : mUser.getUsers()) {
-                    final StorageStats stats = queryStatsForUser(volumeUuid, user.id, null);
-                    cacheBytes += stats.cacheBytes;
-                }
+                final long cacheTotal = getCacheBytes(volumeUuid, callingPackage);
+                final long cacheReserved = mStorage.getStorageCacheBytes(path);
+                final long cacheClearable = Math.max(0, cacheTotal - cacheReserved);
+
+                return path.getUsableSpace() + cacheClearable;
+            } else {
+                return path.getUsableSpace();
             }
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
 
-        if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
-            return Environment.getDataDirectory().getFreeSpace() + cacheBytes;
-        } else {
-            final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
-            if (vol == null) {
-                throw new ParcelableException(
-                        new IOException("Failed to find storage device for UUID " + volumeUuid));
-            }
-            return vol.getPath().getFreeSpace() + cacheBytes;
+    @Override
+    public long getCacheBytes(String volumeUuid, String callingPackage) {
+        enforcePermission(Binder.getCallingUid(), callingPackage);
+
+        long cacheBytes = 0;
+        for (UserInfo user : mUser.getUsers()) {
+            final StorageStats stats = queryStatsForUser(volumeUuid, user.id, null);
+            cacheBytes += stats.cacheBytes;
         }
+        return cacheBytes;
     }
 
     @Override
