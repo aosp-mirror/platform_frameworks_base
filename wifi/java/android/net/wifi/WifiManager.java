@@ -383,6 +383,21 @@ public class WifiManager {
     @SystemApi
     public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
     /**
+     * The interface used for the softap.
+     *
+     * @hide
+     */
+    public static final String EXTRA_WIFI_AP_INTERFACE_NAME = "wifi_ap_interface_name";
+    /**
+     * The intended ip mode for this softap.
+     * @see #IFACE_IP_MODE_TETHERED
+     * @see #IFACE_IP_MODE_LOCAL_ONLY
+     *
+     * @hide
+     */
+    public static final String EXTRA_WIFI_AP_MODE = "wifi_ap_mode";
+
+    /**
      * Wi-Fi AP is currently being disabled. The state will change to
      * {@link #WIFI_AP_STATE_DISABLED} if it finishes successfully.
      *
