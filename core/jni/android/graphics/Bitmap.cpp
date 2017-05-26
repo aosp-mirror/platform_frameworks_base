@@ -1019,6 +1019,12 @@ static void Bitmap_setHasMipMap(JNIEnv* env, jobject, jlong bitmapHandle,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// This is the maximum possible size because the SkColorSpace must be
+// representable (and therefore serializable) using a matrix and numerical
+// transfer function.  If we allow more color space representations in the
+// framework, we may need to update this maximum size.
+static constexpr uint32_t kMaxColorSpaceSerializedBytes = 80;
+
 static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     if (parcel == NULL) {
         SkDebugf("-------- unparcel parcel is NULL\n");
@@ -1035,7 +1041,17 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     if (kRGBA_F16_SkColorType == colorType) {
         colorSpace = SkColorSpace::MakeSRGBLinear();
     } else if (colorSpaceSize > 0) {
-        colorSpace = SkColorSpace::Deserialize(p->readInplace(colorSpaceSize), colorSpaceSize);
+        if (colorSpaceSize > kMaxColorSpaceSerializedBytes) {
+            ALOGD("Bitmap_createFromParcel: Serialized SkColorSpace is larger than expected: "
+                    "%d bytes\n", colorSpaceSize);
+        }
+
+        const void* data = p->readInplace(colorSpaceSize);
+        if (data) {
+            colorSpace = SkColorSpace::Deserialize(data, colorSpaceSize);
+        } else {
+            ALOGD("Bitmap_createFromParcel: Unable to read serialized SkColorSpace data\n");
+        }
     }
     const int         width = p->readInt32();
     const int         height = p->readInt32();
@@ -1178,6 +1194,11 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
         size_t size = data->size();
         p->writeUint32(size);
         if (size > 0) {
+            if (size > kMaxColorSpaceSerializedBytes) {
+                ALOGD("Bitmap_writeToParcel: Serialized SkColorSpace is larger than expected: "
+                        "%zu bytes\n", size);
+            }
+
             p->write(data->data(), size);
         }
     } else {
