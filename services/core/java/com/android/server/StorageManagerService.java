@@ -3296,6 +3296,9 @@ class StorageManagerService extends IStorageManager.Stub
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         final StorageStatsManager stats = mContext.getSystemService(StorageStatsManager.class);
 
+        // Apps can't defy reserved space
+        flags &= ~StorageManager.FLAG_ALLOCATE_DEFY_RESERVED;
+
         final boolean aggressive = (flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
         if (aggressive) {
             mContext.enforceCallingOrSelfPermission(
@@ -3306,24 +3309,31 @@ class StorageManagerService extends IStorageManager.Stub
         try {
             // In general, apps can allocate as much space as they want, except
             // we never let them eat into either the minimum cache space or into
-            // the low disk warning space.
+            // the low disk warning space. To avoid user confusion, this logic
+            // should be kept in sync with getFreeBytes().
             final File path = storage.findPathForUuid(volumeUuid);
+
+            final long usable = path.getUsableSpace();
+            final long lowReserved = storage.getStorageLowBytes(path);
+            final long fullReserved = storage.getStorageFullBytes(path);
+
             if (stats.isQuotaSupported(volumeUuid)) {
+                final long cacheTotal = stats.getCacheBytes(volumeUuid);
+                final long cacheReserved = storage.getStorageCacheBytes(path);
+                final long cacheClearable = Math.max(0, cacheTotal - cacheReserved);
+
                 if (aggressive) {
-                    return Math.max(0,
-                            stats.getFreeBytes(volumeUuid) - storage.getStorageFullBytes(path));
+                    return Math.max(0, (usable + cacheTotal) - fullReserved);
                 } else {
-                    return Math.max(0,
-                            stats.getFreeBytes(volumeUuid) - storage.getStorageLowBytes(path)
-                                    - storage.getStorageCacheBytes(path));
+                    return Math.max(0, (usable + cacheClearable) - lowReserved);
                 }
             } else {
                 // When we don't have fast quota information, we ignore cached
                 // data and only consider unused bytes.
                 if (aggressive) {
-                    return Math.max(0, path.getUsableSpace() - storage.getStorageFullBytes(path));
+                    return Math.max(0, usable - fullReserved);
                 } else {
-                    return Math.max(0, path.getUsableSpace() - storage.getStorageLowBytes(path));
+                    return Math.max(0, usable - lowReserved);
                 }
             }
         } catch (IOException e) {
@@ -3336,6 +3346,9 @@ class StorageManagerService extends IStorageManager.Stub
     @Override
     public void allocateBytes(String volumeUuid, long bytes, int flags) {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
+
+        // Apps can't defy reserved space
+        flags &= ~StorageManager.FLAG_ALLOCATE_DEFY_RESERVED;
 
         // This method call will enforce FLAG_ALLOCATE_AGGRESSIVE permissions so
         // we don't have to enforce them locally
@@ -3350,7 +3363,11 @@ class StorageManagerService extends IStorageManager.Stub
             // Free up enough disk space to satisfy both the requested allocation
             // and our low disk warning space.
             final File path = storage.findPathForUuid(volumeUuid);
-            bytes += storage.getStorageLowBytes(path);
+            if ((flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0) {
+                bytes += storage.getStorageFullBytes(path);
+            } else {
+                bytes += storage.getStorageLowBytes(path);
+            }
 
             mPms.freeStorage(volumeUuid, bytes, flags);
         } catch (IOException e) {

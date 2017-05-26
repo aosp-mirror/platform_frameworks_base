@@ -16,71 +16,60 @@
 
 package com.android.server.storage;
 
-import android.app.NotificationChannel;
-
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.util.DumpUtils;
-import com.android.server.EventLogTags;
-import com.android.server.SystemService;
-import com.android.server.pm.InstructionSets;
+import android.annotation.WorkerThread;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.IPackageDataObserver;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.net.TrafficStats;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
-import android.os.StatFs;
-import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.provider.Settings;
-import android.text.format.Formatter;
-import android.util.EventLog;
+import android.os.storage.VolumeInfo;
+import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.Slog;
-import android.util.TimeUtils;
 
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.EventLogTags;
+import com.android.server.IoThread;
+import com.android.server.SystemService;
+import com.android.server.pm.InstructionSets;
+import com.android.server.pm.PackageManagerService;
 
 import dalvik.system.VMRuntime;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
- * This class implements a service to monitor the amount of disk
- * storage space on the device.  If the free storage on device is less
- * than a tunable threshold value (a secure settings parameter;
- * default 10%) a low memory notification is displayed to alert the
- * user. If the user clicks on the low memory notification the
- * Application Manager application gets launched to let the user free
- * storage space.
- *
- * Event log events: A low memory event with the free storage on
- * device in bytes is logged to the event log when the device goes low
- * on storage space.  The amount of free storage on the device is
- * periodically logged to the event log. The log interval is a secure
- * settings parameter with a default value of 12 hours.  When the free
- * storage differential goes below a threshold (again a secure
- * settings parameter with a default value of 2MB), the free memory is
- * logged to the event log.
+ * Service that monitors and maintains free space on storage volumes.
+ * <p>
+ * As the free space on a volume nears the threshold defined by
+ * {@link StorageManager#getStorageLowBytes(File)}, this service will clear out
+ * cached data to keep the disk from entering this low state.
  */
 public class DeviceStorageMonitorService extends SystemService {
-    static final String TAG = "DeviceStorageMonitorService";
+    private static final String TAG = "DeviceStorageMonitorService";
 
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
@@ -88,68 +77,75 @@ public class DeviceStorageMonitorService extends SystemService {
      */
     public static final String EXTRA_SEQUENCE = "seq";
 
-    // TODO: extend to watch and manage caches on all private volumes
+    private static final int MSG_CHECK = 1;
 
-    static final boolean DEBUG = false;
-    static final boolean localLOGV = false;
-
-    static final int DEVICE_MEMORY_WHAT = 1;
-    static final int FORCE_MEMORY_WHAT = 2;
-    private static final int MONITOR_INTERVAL = 1; //in minutes
-
-    private static final int DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES = 12*60; //in minutes
-    private static final long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD = 2 * 1024 * 1024; // 2MB
-    private static final long DEFAULT_CHECK_INTERVAL = MONITOR_INTERVAL*60*1000;
+    private static final long DEFAULT_LOG_DELTA_BYTES = 64 * TrafficStats.MB_IN_BYTES;
+    private static final long DEFAULT_CHECK_INTERVAL = DateUtils.MINUTE_IN_MILLIS;
 
     // com.android.internal.R.string.low_internal_storage_view_text_no_boot
     // hard codes 250MB in the message as the storage space required for the
     // boot image.
-    private static final long BOOT_IMAGE_STORAGE_REQUIREMENT = 250 * 1024 * 1024;
+    private static final long BOOT_IMAGE_STORAGE_REQUIREMENT = 250 * TrafficStats.MB_IN_BYTES;
 
-    private long mFreeMem;  // on /data
-    private long mFreeMemAfterLastCacheClear;  // on /data
-    private long mLastReportedFreeMem;
-    private long mLastReportedFreeMemTime;
-    boolean mLowMemFlag=false;
-    private boolean mMemFullFlag=false;
-    private final boolean mIsBootImageOnDisk;
-    private final ContentResolver mResolver;
-    private final long mTotalMemory;  // on /data
-    private final StatFs mDataFileStats;
-    private final StatFs mSystemFileStats;
-    private final StatFs mCacheFileStats;
+    private NotificationManager mNotifManager;
 
-    private static final File DATA_PATH = Environment.getDataDirectory();
-    private static final File SYSTEM_PATH = Environment.getRootDirectory();
-    private static final File CACHE_PATH = Environment.getDownloadCacheDirectory();
+    /** Sequence number used for testing */
+    private final AtomicInteger mSeq = new AtomicInteger(1);
+    /** Forced level used for testing */
+    private volatile int mForceLevel = State.LEVEL_UNKNOWN;
 
-    private long mThreadStartTime = -1;
-    boolean mUpdatesStopped;
-    AtomicInteger mSeq = new AtomicInteger(1);
-    boolean mClearSucceeded = false;
-    boolean mClearingCache;
-    private final Intent mStorageLowIntent;
-    private final Intent mStorageOkIntent;
-    private final Intent mStorageFullIntent;
-    private final Intent mStorageNotFullIntent;
-    private CachePackageDataObserver mClearCacheObserver;
+    /** Map from storage volume UUID to internal state */
+    private final ArrayMap<UUID, State> mStates = new ArrayMap<>();
+
+    /**
+     * State for a specific storage volume, including the current "level" that
+     * we've alerted the user and apps about.
+     */
+    private static class State {
+        private static final int LEVEL_UNKNOWN = -1;
+        private static final int LEVEL_NORMAL = 0;
+        private static final int LEVEL_LOW = 1;
+        private static final int LEVEL_FULL = 2;
+
+        /** Last "level" that we alerted about */
+        public int level = LEVEL_NORMAL;
+        /** Last {@link File#getUsableSpace()} that we logged about */
+        public long lastUsableBytes = Long.MAX_VALUE;
+
+        /**
+         * Test if the given level transition is "entering" a specific level.
+         * <p>
+         * As an example, a transition from {@link #LEVEL_NORMAL} to
+         * {@link #LEVEL_FULL} is considered to "enter" both {@link #LEVEL_LOW}
+         * and {@link #LEVEL_FULL}.
+         */
+        private static boolean isEntering(int level, int oldLevel, int newLevel) {
+            return newLevel >= level && (oldLevel < level || oldLevel == LEVEL_UNKNOWN);
+        }
+
+        /**
+         * Test if the given level transition is "leaving" a specific level.
+         * <p>
+         * As an example, a transition from {@link #LEVEL_FULL} to
+         * {@link #LEVEL_NORMAL} is considered to "leave" both
+         * {@link #LEVEL_FULL} and {@link #LEVEL_LOW}.
+         */
+        private static boolean isLeaving(int level, int oldLevel, int newLevel) {
+            return newLevel < level && (oldLevel >= level || oldLevel == LEVEL_UNKNOWN);
+        }
+
+        private static String levelToString(int level) {
+            switch (level) {
+                case State.LEVEL_UNKNOWN: return "UNKNOWN";
+                case State.LEVEL_NORMAL: return "NORMAL";
+                case State.LEVEL_LOW: return "LOW";
+                case State.LEVEL_FULL: return "FULL";
+                default: return Integer.toString(level);
+            }
+        }
+    }
+
     private CacheFileDeletedObserver mCacheFileDeletedObserver;
-    private static final int _TRUE = 1;
-    private static final int _FALSE = 0;
-    // This is the raw threshold that has been set at which we consider
-    // storage to be low.
-    long mMemLowThreshold;
-    // This is the threshold at which we start trying to flush caches
-    // to get below the low threshold limit.  It is less than the low
-    // threshold; we will allow storage to get a bit beyond the limit
-    // before flushing and checking if we are actually low.
-    private long mMemCacheStartTrimThreshold;
-    // This is the threshold that we try to get to when deleting cache
-    // files.  This is greater than the low threshold so that we will flush
-    // more files than absolutely needed, to reduce the frequency that
-    // flushing takes place.
-    private long mMemCacheTrimToThreshold;
-    private long mMemFullThreshold;
 
     /**
      * This string is used for ServiceManager access to this class.
@@ -159,244 +155,107 @@ public class DeviceStorageMonitorService extends SystemService {
     private static final String TV_NOTIFICATION_CHANNEL_ID = "devicestoragemonitor.tv";
 
     /**
-    * Handler that checks the amount of disk space on the device and sends a
-    * notification if the device runs low on disk space
-    */
-    private final Handler mHandler = new Handler() {
+     * Handler that checks the amount of disk space on the device and sends a
+     * notification if the device runs low on disk space
+     */
+    private final Handler mHandler = new Handler(IoThread.get().getLooper()) {
         @Override
         public void handleMessage(Message msg) {
-            //don't handle an invalid message
             switch (msg.what) {
-                case DEVICE_MEMORY_WHAT:
-                    checkMemory(msg.arg1 == _TRUE);
-                    return;
-                case FORCE_MEMORY_WHAT:
-                    forceMemory(msg.arg1, msg.arg2);
-                    return;
-                default:
-                    Slog.w(TAG, "Will not process invalid message");
+                case MSG_CHECK:
+                    check();
                     return;
             }
         }
     };
 
-    private class CachePackageDataObserver extends IPackageDataObserver.Stub {
-        public void onRemoveCompleted(String packageName, boolean succeeded) {
-            mClearSucceeded = succeeded;
-            mClearingCache = false;
-            if(localLOGV) Slog.i(TAG, " Clear succeeded:"+mClearSucceeded
-                    +", mClearingCache:"+mClearingCache+" Forcing memory check");
-            postCheckMemoryMsg(false, 0);
+    private State findOrCreateState(UUID uuid) {
+        State state = mStates.get(uuid);
+        if (state == null) {
+            state = new State();
+            mStates.put(uuid, state);
         }
+        return state;
     }
 
-    private void restatDataDir() {
-        try {
-            mDataFileStats.restat(DATA_PATH.getAbsolutePath());
-            mFreeMem = (long) mDataFileStats.getAvailableBlocks() *
-                mDataFileStats.getBlockSize();
-        } catch (IllegalArgumentException e) {
-            // use the old value of mFreeMem
-        }
-        // Allow freemem to be overridden by debug.freemem for testing
-        String debugFreeMem = SystemProperties.get("debug.freemem");
-        if (!"".equals(debugFreeMem)) {
-            mFreeMem = Long.parseLong(debugFreeMem);
-        }
-        // Read the log interval from secure settings
-        long freeMemLogInterval = Settings.Global.getLong(mResolver,
-                Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
-                DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES)*60*1000;
-        //log the amount of free memory in event log
-        long currTime = SystemClock.elapsedRealtime();
-        if((mLastReportedFreeMemTime == 0) ||
-           (currTime-mLastReportedFreeMemTime) >= freeMemLogInterval) {
-            mLastReportedFreeMemTime = currTime;
-            long mFreeSystem = -1, mFreeCache = -1;
-            try {
-                mSystemFileStats.restat(SYSTEM_PATH.getAbsolutePath());
-                mFreeSystem = (long) mSystemFileStats.getAvailableBlocks() *
-                    mSystemFileStats.getBlockSize();
-            } catch (IllegalArgumentException e) {
-                // ignore; report -1
-            }
-            try {
-                mCacheFileStats.restat(CACHE_PATH.getAbsolutePath());
-                mFreeCache = (long) mCacheFileStats.getAvailableBlocks() *
-                    mCacheFileStats.getBlockSize();
-            } catch (IllegalArgumentException e) {
-                // ignore; report -1
-            }
-            EventLog.writeEvent(EventLogTags.FREE_STORAGE_LEFT,
-                                mFreeMem, mFreeSystem, mFreeCache);
-        }
-        // Read the reporting threshold from secure settings
-        long threshold = Settings.Global.getLong(mResolver,
-                Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
-                DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD);
-        // If mFree changed significantly log the new value
-        long delta = mFreeMem - mLastReportedFreeMem;
-        if (delta > threshold || delta < -threshold) {
-            mLastReportedFreeMem = mFreeMem;
-            EventLog.writeEvent(EventLogTags.FREE_STORAGE_CHANGED, mFreeMem);
-        }
-    }
+    /**
+     * Core logic that checks the storage state of every mounted private volume.
+     * Since this can do heavy I/O, callers should invoke indirectly using
+     * {@link #MSG_CHECK}.
+     */
+    @WorkerThread
+    private void check() {
+        final StorageManager storage = getContext().getSystemService(StorageManager.class);
+        final int seq = mSeq.get();
 
-    private void clearCache() {
-        if (mClearCacheObserver == null) {
-            // Lazy instantiation
-            mClearCacheObserver = new CachePackageDataObserver();
-        }
-        mClearingCache = true;
-        try {
-            if (localLOGV) Slog.i(TAG, "Clearing cache");
-            IPackageManager.Stub.asInterface(ServiceManager.getService("package")).
-                    freeStorageAndNotify(null, mMemCacheTrimToThreshold, mClearCacheObserver);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
-            mClearingCache = false;
-            mClearSucceeded = false;
-        }
-    }
+        // Check every mounted private volume to see if they're low on space
+        for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+            final File file = vol.getPath();
+            final long fullBytes = storage.getStorageFullBytes(file);
+            final long lowBytes = storage.getStorageLowBytes(file);
 
-    void forceMemory(int opts, int seq) {
-        if ((opts&OPTION_UPDATES_STOPPED) == 0) {
-            if (mUpdatesStopped) {
-                mUpdatesStopped = false;
-                checkMemory(true);
-            }
-        } else {
-            mUpdatesStopped = true;
-            final boolean forceLow = (opts&OPTION_STORAGE_LOW) != 0;
-            if (mLowMemFlag != forceLow || (opts&OPTION_FORCE_UPDATE) != 0) {
-                mLowMemFlag = forceLow;
-                if (forceLow) {
-                    sendNotification(seq);
-                } else {
-                    cancelNotification(seq);
+            // Automatically trim cached data when nearing the low threshold;
+            // when it's within 150% of the threshold, we try trimming usage
+            // back to 200% of the threshold.
+            if (file.getUsableSpace() < (lowBytes * 3) / 2) {
+                final PackageManagerService pms = (PackageManagerService) ServiceManager
+                        .getService("package");
+                try {
+                    pms.freeStorage(vol.getFsUuid(), lowBytes * 2, 0);
+                } catch (IOException e) {
+                    Slog.w(TAG, e);
                 }
             }
-        }
-    }
 
-    void checkMemory(boolean checkCache) {
-        if (mUpdatesStopped) {
-            return;
-        }
+            // Send relevant broadcasts and show notifications based on any
+            // recently noticed state transitions.
+            final UUID uuid = StorageManager.convert(vol.getFsUuid());
+            final State state = findOrCreateState(uuid);
+            final long totalBytes = file.getTotalSpace();
+            final long usableBytes = file.getUsableSpace();
 
-        //if the thread that was started to clear cache is still running do nothing till its
-        //finished clearing cache. Ideally this flag could be modified by clearCache
-        // and should be accessed via a lock but even if it does this test will fail now and
-        //hopefully the next time this flag will be set to the correct value.
-        if (mClearingCache) {
-            if(localLOGV) Slog.i(TAG, "Thread already running just skip");
-            //make sure the thread is not hung for too long
-            long diffTime = System.currentTimeMillis() - mThreadStartTime;
-            if(diffTime > (10*60*1000)) {
-                Slog.w(TAG, "Thread that clears cache file seems to run for ever");
-            }
-        } else {
-            restatDataDir();
-            if (localLOGV)  Slog.v(TAG, "freeMemory="+mFreeMem);
-
-            //post intent to NotificationManager to display icon if necessary
-            if (mFreeMem < mMemLowThreshold) {
-                if (checkCache) {
-                    // We are allowed to clear cache files at this point to
-                    // try to get down below the limit, because this is not
-                    // the initial call after a cache clear has been attempted.
-                    // In this case we will try a cache clear if our free
-                    // space has gone below the cache clear limit.
-                    if (mFreeMem < mMemCacheStartTrimThreshold) {
-                        // We only clear the cache if the free storage has changed
-                        // a significant amount since the last time.
-                        if ((mFreeMemAfterLastCacheClear-mFreeMem)
-                                >= ((mMemLowThreshold-mMemCacheStartTrimThreshold)/4)) {
-                            // See if clearing cache helps
-                            // Note that clearing cache is asynchronous and so we do a
-                            // memory check again once the cache has been cleared.
-                            mThreadStartTime = System.currentTimeMillis();
-                            mClearSucceeded = false;
-                            clearCache();
-                        }
-                    }
-                } else {
-                    // This is a call from after clearing the cache.  Note
-                    // the amount of free storage at this point.
-                    mFreeMemAfterLastCacheClear = mFreeMem;
-                    if (!mLowMemFlag) {
-                        // We tried to clear the cache, but that didn't get us
-                        // below the low storage limit.  Tell the user.
-                        Slog.i(TAG, "Running low on memory. Sending notification");
-                        sendNotification(0);
-                        mLowMemFlag = true;
-                    } else {
-                        if (localLOGV) Slog.v(TAG, "Running low on memory " +
-                                "notification already sent. do nothing");
-                    }
-                }
+            int oldLevel = state.level;
+            int newLevel;
+            if (mForceLevel != State.LEVEL_UNKNOWN) {
+                // When in testing mode, use unknown old level to force sending
+                // of any relevant broadcasts.
+                oldLevel = State.LEVEL_UNKNOWN;
+                newLevel = mForceLevel;
+            } else if (usableBytes <= fullBytes) {
+                newLevel = State.LEVEL_FULL;
+            } else if (usableBytes <= lowBytes) {
+                newLevel = State.LEVEL_LOW;
+            } else if (StorageManager.UUID_DEFAULT.equals(uuid) && !isBootImageOnDisk()
+                    && usableBytes < BOOT_IMAGE_STORAGE_REQUIREMENT) {
+                newLevel = State.LEVEL_LOW;
             } else {
-                mFreeMemAfterLastCacheClear = mFreeMem;
-                if (mLowMemFlag) {
-                    Slog.i(TAG, "Memory available. Cancelling notification");
-                    cancelNotification(0);
-                    mLowMemFlag = false;
-                }
+                newLevel = State.LEVEL_NORMAL;
             }
-            if (!mLowMemFlag && !mIsBootImageOnDisk && mFreeMem < BOOT_IMAGE_STORAGE_REQUIREMENT) {
-                Slog.i(TAG, "No boot image on disk due to lack of space. Sending notification");
-                sendNotification(0);
-                mLowMemFlag = true;
-            }
-            if (mFreeMem < mMemFullThreshold) {
-                if (!mMemFullFlag) {
-                    sendFullNotification();
-                    mMemFullFlag = true;
-                }
-            } else {
-                if (mMemFullFlag) {
-                    cancelFullNotification();
-                    mMemFullFlag = false;
-                }
-            }
-        }
-        if(localLOGV) Slog.i(TAG, "Posting Message again");
-        //keep posting messages to itself periodically
-        postCheckMemoryMsg(true, DEFAULT_CHECK_INTERVAL);
-    }
 
-    void postCheckMemoryMsg(boolean clearCache, long delay) {
-        // Remove queued messages
-        mHandler.removeMessages(DEVICE_MEMORY_WHAT);
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(DEVICE_MEMORY_WHAT,
-                clearCache ?_TRUE : _FALSE, 0),
-                delay);
+            // Log whenever we notice drastic storage changes
+            if ((Math.abs(state.lastUsableBytes - usableBytes) > DEFAULT_LOG_DELTA_BYTES)
+                    || oldLevel != newLevel) {
+                EventLogTags.writeStorageState(uuid.toString(), oldLevel, newLevel,
+                        usableBytes, totalBytes);
+                state.lastUsableBytes = usableBytes;
+            }
+
+            updateNotifications(vol, oldLevel, newLevel);
+            updateBroadcasts(vol, oldLevel, newLevel, seq);
+
+            state.level = newLevel;
+        }
+
+        // Loop around to check again in future; we don't remove messages since
+        // there might be an immediate request pending.
+        if (!mHandler.hasMessages(MSG_CHECK)) {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CHECK),
+                    DEFAULT_CHECK_INTERVAL);
+        }
     }
 
     public DeviceStorageMonitorService(Context context) {
         super(context);
-        mLastReportedFreeMemTime = 0;
-        mResolver = context.getContentResolver();
-        mIsBootImageOnDisk = isBootImageOnDisk();
-        //create StatFs object
-        mDataFileStats = new StatFs(DATA_PATH.getAbsolutePath());
-        mSystemFileStats = new StatFs(SYSTEM_PATH.getAbsolutePath());
-        mCacheFileStats = new StatFs(CACHE_PATH.getAbsolutePath());
-        //initialize total storage on device
-        mTotalMemory = (long)mDataFileStats.getBlockCount() *
-                        mDataFileStats.getBlockSize();
-        mStorageLowIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_LOW);
-        mStorageLowIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
-                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
-                | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-        mStorageOkIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_OK);
-        mStorageOkIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
-                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
-                | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-        mStorageFullIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_FULL);
-        mStorageFullIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        mStorageNotFullIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_NOT_FULL);
-        mStorageNotFullIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
     }
 
     private static boolean isBootImageOnDisk() {
@@ -408,35 +267,20 @@ public class DeviceStorageMonitorService extends SystemService {
         return true;
     }
 
-    /**
-    * Initializes the disk space threshold value and posts an empty message to
-    * kickstart the process.
-    */
     @Override
     public void onStart() {
-        // cache storage thresholds
-        Context context = getContext();
-        final StorageManager sm = StorageManager.from(context);
-        mMemLowThreshold = sm.getStorageLowBytes(DATA_PATH);
-        mMemFullThreshold = sm.getStorageFullBytes(DATA_PATH);
-
-        mMemCacheStartTrimThreshold = ((mMemLowThreshold*3)+mMemFullThreshold)/4;
-        mMemCacheTrimToThreshold = mMemLowThreshold
-                + ((mMemLowThreshold-mMemCacheStartTrimThreshold)*2);
-        mFreeMemAfterLastCacheClear = mTotalMemory;
-        checkMemory(true);
+        final Context context = getContext();
+        mNotifManager = context.getSystemService(NotificationManager.class);
 
         mCacheFileDeletedObserver = new CacheFileDeletedObserver();
         mCacheFileDeletedObserver.startWatching();
 
         // Ensure that the notification channel is set up
-        NotificationManager notificationMgr =
-            (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         PackageManager packageManager = context.getPackageManager();
         boolean isTv = packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
 
         if (isTv) {
-            notificationMgr.createNotificationChannel(new NotificationChannel(
+            mNotifManager.createNotificationChannel(new NotificationChannel(
                     TV_NOTIFICATION_CHANNEL_ID,
                     context.getString(
                         com.android.internal.R.string.device_storage_monitor_notification_channel),
@@ -445,23 +289,29 @@ public class DeviceStorageMonitorService extends SystemService {
 
         publishBinderService(SERVICE, mRemoteService);
         publishLocalService(DeviceStorageMonitorInternal.class, mLocalService);
+
+        // Kick off pass to examine storage state
+        mHandler.removeMessages(MSG_CHECK);
+        mHandler.obtainMessage(MSG_CHECK).sendToTarget();
     }
 
     private final DeviceStorageMonitorInternal mLocalService = new DeviceStorageMonitorInternal() {
         @Override
         public void checkMemory() {
-            // force an early check
-            postCheckMemoryMsg(true, 0);
+            // Kick off pass to examine storage state
+            mHandler.removeMessages(MSG_CHECK);
+            mHandler.obtainMessage(MSG_CHECK).sendToTarget();
         }
 
         @Override
         public boolean isMemoryLow() {
-            return mLowMemFlag;
+            return Environment.getDataDirectory().getUsableSpace() < getMemoryLowThreshold();
         }
 
         @Override
         public long getMemoryLowThreshold() {
-            return mMemLowThreshold;
+            return getContext().getSystemService(StorageManager.class)
+                    .getStorageLowBytes(Environment.getDataDirectory());
         }
     };
 
@@ -494,8 +344,6 @@ public class DeviceStorageMonitorService extends SystemService {
     }
 
     static final int OPTION_FORCE_UPDATE = 1<<0;
-    static final int OPTION_UPDATES_STOPPED = 1<<1;
-    static final int OPTION_STORAGE_LOW = 1<<2;
 
     int parseOptions(Shell shell) {
         String opt;
@@ -518,10 +366,11 @@ public class DeviceStorageMonitorService extends SystemService {
                 int opts = parseOptions(shell);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
+                mForceLevel = State.LEVEL_LOW;
                 int seq = mSeq.incrementAndGet();
-                mHandler.sendMessage(mHandler.obtainMessage(FORCE_MEMORY_WHAT,
-                        opts | OPTION_UPDATES_STOPPED | OPTION_STORAGE_LOW, seq));
                 if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                    mHandler.removeMessages(MSG_CHECK);
+                    mHandler.obtainMessage(MSG_CHECK).sendToTarget();
                     pw.println(seq);
                 }
             } break;
@@ -529,10 +378,11 @@ public class DeviceStorageMonitorService extends SystemService {
                 int opts = parseOptions(shell);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
+                mForceLevel = State.LEVEL_NORMAL;
                 int seq = mSeq.incrementAndGet();
-                mHandler.sendMessage(mHandler.obtainMessage(FORCE_MEMORY_WHAT,
-                        opts | OPTION_UPDATES_STOPPED, seq));
                 if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                    mHandler.removeMessages(MSG_CHECK);
+                    mHandler.obtainMessage(MSG_CHECK).sendToTarget();
                     pw.println(seq);
                 }
             } break;
@@ -540,10 +390,11 @@ public class DeviceStorageMonitorService extends SystemService {
                 int opts = parseOptions(shell);
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
+                mForceLevel = State.LEVEL_UNKNOWN;
                 int seq = mSeq.incrementAndGet();
-                mHandler.sendMessage(mHandler.obtainMessage(FORCE_MEMORY_WHAT,
-                        opts, seq));
                 if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                    mHandler.removeMessages(MSG_CHECK);
+                    mHandler.obtainMessage(MSG_CHECK).sendToTarget();
                     pw.println(seq);
                 }
             } break;
@@ -568,145 +419,125 @@ public class DeviceStorageMonitorService extends SystemService {
         pw.println("    -f: force a storage change broadcast be sent, prints new sequence.");
     }
 
-    void dumpImpl(FileDescriptor fd, PrintWriter pw, String[] args) {
+    void dumpImpl(FileDescriptor fd, PrintWriter _pw, String[] args) {
+        final IndentingPrintWriter pw = new IndentingPrintWriter(_pw, "  ");
         if (args == null || args.length == 0 || "-a".equals(args[0])) {
-            final Context context = getContext();
-
-            pw.println("Current DeviceStorageMonitor state:");
-
-            pw.print("  mFreeMem=");
-            pw.print(Formatter.formatFileSize(context, mFreeMem));
-            pw.print(" mTotalMemory=");
-            pw.println(Formatter.formatFileSize(context, mTotalMemory));
-
-            pw.print("  mFreeMemAfterLastCacheClear=");
-            pw.println(Formatter.formatFileSize(context, mFreeMemAfterLastCacheClear));
-
-            pw.print("  mLastReportedFreeMem=");
-            pw.print(Formatter.formatFileSize(context, mLastReportedFreeMem));
-            pw.print(" mLastReportedFreeMemTime=");
-            TimeUtils.formatDuration(mLastReportedFreeMemTime, SystemClock.elapsedRealtime(), pw);
+            pw.println("Known volumes:");
+            pw.increaseIndent();
+            for (int i = 0; i < mStates.size(); i++) {
+                final UUID uuid = mStates.keyAt(i);
+                final State state = mStates.valueAt(i);
+                if (StorageManager.UUID_DEFAULT.equals(uuid)) {
+                    pw.println("Default:");
+                } else {
+                    pw.println(uuid + ":");
+                }
+                pw.increaseIndent();
+                pw.printPair("level", State.levelToString(state.level));
+                pw.printPair("lastUsableBytes", state.lastUsableBytes);
+                pw.println();
+                pw.decreaseIndent();
+            }
+            pw.decreaseIndent();
             pw.println();
 
-            if (mUpdatesStopped) {
-                pw.print("  mUpdatesStopped=");
-                pw.print(mUpdatesStopped);
-                pw.print(" mSeq=");
-                pw.println(mSeq.get());
-            } else {
-                pw.print("  mClearSucceeded=");
-                pw.print(mClearSucceeded);
-                pw.print(" mClearingCache=");
-                pw.println(mClearingCache);
-            }
+            pw.printPair("mSeq", mSeq.get());
+            pw.printPair("mForceState", State.levelToString(mForceLevel));
+            pw.println();
+            pw.println();
 
-            pw.print("  mLowMemFlag=");
-            pw.print(mLowMemFlag);
-            pw.print(" mMemFullFlag=");
-            pw.println(mMemFullFlag);
-
-            pw.print("  mMemLowThreshold=");
-            pw.print(Formatter.formatFileSize(context, mMemLowThreshold));
-            pw.print(" mMemFullThreshold=");
-            pw.println(Formatter.formatFileSize(context, mMemFullThreshold));
-
-            pw.print("  mMemCacheStartTrimThreshold=");
-            pw.print(Formatter.formatFileSize(context, mMemCacheStartTrimThreshold));
-            pw.print(" mMemCacheTrimToThreshold=");
-            pw.println(Formatter.formatFileSize(context, mMemCacheTrimToThreshold));
-
-            pw.print("  mIsBootImageOnDisk="); pw.println(mIsBootImageOnDisk);
         } else {
             Shell shell = new Shell();
             shell.exec(mRemoteService, null, fd, null, args, null, new ResultReceiver(null));
         }
     }
 
-    /**
-    * This method sends a notification to NotificationManager to display
-    * an error dialog indicating low disk space and launch the Installer
-    * application
-    */
-    private void sendNotification(int seq) {
+    private void updateNotifications(VolumeInfo vol, int oldLevel, int newLevel) {
         final Context context = getContext();
-        if(localLOGV) Slog.i(TAG, "Sending low memory notification");
-        //log the event to event log with the amount of free storage(in bytes) left on the device
-        EventLog.writeEvent(EventLogTags.LOW_STORAGE, mFreeMem);
-        //  Pack up the values and broadcast them to everyone
-        Intent lowMemIntent = new Intent(StorageManager.ACTION_MANAGE_STORAGE);
-        lowMemIntent.putExtra("memory", mFreeMem);
-        lowMemIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        NotificationManager notificationMgr =
-                (NotificationManager)context.getSystemService(
-                        Context.NOTIFICATION_SERVICE);
-        CharSequence title = context.getText(
-                com.android.internal.R.string.low_internal_storage_view_title);
-        CharSequence details = context.getText(mIsBootImageOnDisk
-                ? com.android.internal.R.string.low_internal_storage_view_text
-                : com.android.internal.R.string.low_internal_storage_view_text_no_boot);
-        PendingIntent intent = PendingIntent.getActivityAsUser(context, 0,  lowMemIntent, 0,
-                null, UserHandle.CURRENT);
-        Notification notification =
-                new Notification.Builder(context, SystemNotificationChannels.ALERTS)
-                        .setSmallIcon(com.android.internal.R.drawable.stat_notify_disk_full)
-                        .setTicker(title)
-                        .setColor(context.getColor(
-                            com.android.internal.R.color.system_notification_accent_color))
-                        .setContentTitle(title)
-                        .setContentText(details)
-                        .setContentIntent(intent)
-                        .setStyle(new Notification.BigTextStyle()
-                              .bigText(details))
-                        .setVisibility(Notification.VISIBILITY_PUBLIC)
-                        .setCategory(Notification.CATEGORY_SYSTEM)
-                        .extend(new Notification.TvExtender()
-                                .setChannelId(TV_NOTIFICATION_CHANNEL_ID))
-                        .build();
-        notification.flags |= Notification.FLAG_NO_CLEAR;
-        notificationMgr.notifyAsUser(null, SystemMessage.NOTE_LOW_STORAGE, notification,
-                UserHandle.ALL);
-        Intent broadcast = new Intent(mStorageLowIntent);
-        if (seq != 0) {
-            broadcast.putExtra(EXTRA_SEQUENCE, seq);
+        final UUID uuid = StorageManager.convert(vol.getFsUuid());
+
+        if (State.isEntering(State.LEVEL_LOW, oldLevel, newLevel)) {
+            Intent lowMemIntent = new Intent(StorageManager.ACTION_MANAGE_STORAGE);
+            lowMemIntent.putExtra(StorageManager.EXTRA_UUID, uuid);
+            lowMemIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            final CharSequence title = context.getText(
+                    com.android.internal.R.string.low_internal_storage_view_title);
+
+            final CharSequence details;
+            if (StorageManager.UUID_DEFAULT.equals(uuid)) {
+                details = context.getText(isBootImageOnDisk()
+                        ? com.android.internal.R.string.low_internal_storage_view_text
+                        : com.android.internal.R.string.low_internal_storage_view_text_no_boot);
+            } else {
+                details = context.getText(
+                        com.android.internal.R.string.low_internal_storage_view_text);
+            }
+
+            PendingIntent intent = PendingIntent.getActivityAsUser(context, 0, lowMemIntent, 0,
+                    null, UserHandle.CURRENT);
+            Notification notification =
+                    new Notification.Builder(context, SystemNotificationChannels.ALERTS)
+                            .setSmallIcon(com.android.internal.R.drawable.stat_notify_disk_full)
+                            .setTicker(title)
+                            .setColor(context.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(title)
+                            .setContentText(details)
+                            .setContentIntent(intent)
+                            .setStyle(new Notification.BigTextStyle()
+                                  .bigText(details))
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .setCategory(Notification.CATEGORY_SYSTEM)
+                            .extend(new Notification.TvExtender()
+                                    .setChannelId(TV_NOTIFICATION_CHANNEL_ID))
+                            .build();
+            notification.flags |= Notification.FLAG_NO_CLEAR;
+            mNotifManager.notifyAsUser(uuid.toString(), SystemMessage.NOTE_LOW_STORAGE,
+                    notification, UserHandle.ALL);
+        } else if (State.isLeaving(State.LEVEL_LOW, oldLevel, newLevel)) {
+            mNotifManager.cancelAsUser(uuid.toString(), SystemMessage.NOTE_LOW_STORAGE,
+                    UserHandle.ALL);
         }
-        context.sendStickyBroadcastAsUser(broadcast, UserHandle.ALL);
     }
 
-    /**
-     * Cancels low storage notification and sends OK intent.
-     */
-    private void cancelNotification(int seq) {
-        final Context context = getContext();
-        if(localLOGV) Slog.i(TAG, "Canceling low memory notification");
-        NotificationManager mNotificationMgr =
-                (NotificationManager)context.getSystemService(
-                        Context.NOTIFICATION_SERVICE);
-        //cancel notification since memory has been freed
-        mNotificationMgr.cancelAsUser(null, SystemMessage.NOTE_LOW_STORAGE, UserHandle.ALL);
-
-        context.removeStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
-        Intent broadcast = new Intent(mStorageOkIntent);
-        if (seq != 0) {
-            broadcast.putExtra(EXTRA_SEQUENCE, seq);
+    private void updateBroadcasts(VolumeInfo vol, int oldLevel, int newLevel, int seq) {
+        if (!Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, vol.getFsUuid())) {
+            // We don't currently send broadcasts for secondary volumes
+            return;
         }
-        context.sendBroadcastAsUser(broadcast, UserHandle.ALL);
-    }
 
-    /**
-     * Send a notification when storage is full.
-     */
-    private void sendFullNotification() {
-        if(localLOGV) Slog.i(TAG, "Sending memory full notification");
-        getContext().sendStickyBroadcastAsUser(mStorageFullIntent, UserHandle.ALL);
-    }
+        final Intent lowIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_LOW)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                        | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
+                        | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS)
+                .putExtra(EXTRA_SEQUENCE, seq);
+        final Intent notLowIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_OK)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                        | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
+                        | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS)
+                .putExtra(EXTRA_SEQUENCE, seq);
 
-    /**
-     * Cancels memory full notification and sends "not full" intent.
-     */
-    private void cancelFullNotification() {
-        if(localLOGV) Slog.i(TAG, "Canceling memory full notification");
-        getContext().removeStickyBroadcastAsUser(mStorageFullIntent, UserHandle.ALL);
-        getContext().sendBroadcastAsUser(mStorageNotFullIntent, UserHandle.ALL);
+        if (State.isEntering(State.LEVEL_LOW, oldLevel, newLevel)) {
+            getContext().sendStickyBroadcastAsUser(lowIntent, UserHandle.ALL);
+        } else if (State.isLeaving(State.LEVEL_LOW, oldLevel, newLevel)) {
+            getContext().removeStickyBroadcastAsUser(lowIntent, UserHandle.ALL);
+            getContext().sendBroadcastAsUser(notLowIntent, UserHandle.ALL);
+        }
+
+        final Intent fullIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_FULL)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)
+                .putExtra(EXTRA_SEQUENCE, seq);
+        final Intent notFullIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_NOT_FULL)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)
+                .putExtra(EXTRA_SEQUENCE, seq);
+
+        if (State.isEntering(State.LEVEL_FULL, oldLevel, newLevel)) {
+            getContext().sendStickyBroadcastAsUser(fullIntent, UserHandle.ALL);
+        } else if (State.isLeaving(State.LEVEL_FULL, oldLevel, newLevel)) {
+            getContext().removeStickyBroadcastAsUser(fullIntent, UserHandle.ALL);
+            getContext().sendBroadcastAsUser(notFullIntent, UserHandle.ALL);
+        }
     }
 
     private static class CacheFileDeletedObserver extends FileObserver {
