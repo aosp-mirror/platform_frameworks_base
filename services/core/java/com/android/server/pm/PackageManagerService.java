@@ -2662,7 +2662,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
 
                 int[] stats = performDexOptUpgrade(coreApps, false,
-                        getCompilerFilterForReason(REASON_CORE_APP));
+                        getCompilerFilterForReason(REASON_CORE_APP), /* bootComplete */ false);
 
                 final int elapsedTimeSeconds =
                         (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start);
@@ -7309,7 +7309,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final long startTime = System.nanoTime();
         final int[] stats = performDexOptUpgrade(pkgs, mIsPreNUpgrade /* showDialog */,
-                    getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT));
+                    getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT),
+                    false /* bootComplete */);
 
         final int elapsedTimeSeconds =
                 (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
@@ -7328,7 +7329,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * and {@code numberOfPackagesFailed}.
      */
     private int[] performDexOptUpgrade(List<PackageParser.Package> pkgs, boolean showDialog,
-            String compilerFilter) {
+            String compilerFilter, boolean bootComplete) {
 
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
@@ -7385,7 +7386,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             int dexOptStatus = performDexOptTraced(pkg.packageName,
                     false /* checkProfiles */,
                     compilerFilter,
-                    false /* force */);
+                    false /* force */,
+                    bootComplete);
             switch (dexOptStatus) {
                 case PackageDexOptimizer.DEX_OPT_PERFORMED:
                     numberOfPackagesOptimized++;
@@ -7429,36 +7431,30 @@ public class PackageManagerService extends IPackageManager.Stub {
         mDexManager.notifyDexLoad(ai, dexPaths, loaderIsa, userId);
     }
 
-    // TODO: this is not used nor needed. Delete it.
-    @Override
-    public boolean performDexOptIfNeeded(String packageName) {
-        int dexOptStatus = performDexOptTraced(packageName,
-                false /* checkProfiles */, getFullCompilerFilter(), false /* force */);
-        return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
-    }
-
     @Override
     public boolean performDexOpt(String packageName,
-            boolean checkProfiles, int compileReason, boolean force) {
+            boolean checkProfiles, int compileReason, boolean force, boolean bootComplete) {
         int dexOptStatus = performDexOptTraced(packageName, checkProfiles,
-                getCompilerFilterForReason(compileReason), force);
+                getCompilerFilterForReason(compileReason), force, bootComplete);
         return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     @Override
     public boolean performDexOptMode(String packageName,
-            boolean checkProfiles, String targetCompilerFilter, boolean force) {
+            boolean checkProfiles, String targetCompilerFilter, boolean force,
+            boolean bootComplete) {
         int dexOptStatus = performDexOptTraced(packageName, checkProfiles,
-                targetCompilerFilter, force);
+                targetCompilerFilter, force, bootComplete);
         return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     private int performDexOptTraced(String packageName,
-                boolean checkProfiles, String targetCompilerFilter, boolean force) {
+                boolean checkProfiles, String targetCompilerFilter, boolean force,
+                boolean bootComplete) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
             return performDexOptInternal(packageName, checkProfiles,
-                    targetCompilerFilter, force);
+                    targetCompilerFilter, force, bootComplete);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -7467,7 +7463,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Run dexopt on a given package. Returns true if dexopt did not fail, i.e.
     // if the package can now be considered up to date for the given filter.
     private int performDexOptInternal(String packageName,
-                boolean checkProfiles, String targetCompilerFilter, boolean force) {
+                boolean checkProfiles, String targetCompilerFilter, boolean force,
+                boolean bootComplete) {
         PackageParser.Package p;
         synchronized (mPackages) {
             p = mPackages.get(packageName);
@@ -7482,7 +7479,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             synchronized (mInstallLock) {
                 return performDexOptInternalWithDependenciesLI(p, checkProfiles,
-                        targetCompilerFilter, force);
+                        targetCompilerFilter, force, bootComplete);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -7503,7 +7500,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private int performDexOptInternalWithDependenciesLI(PackageParser.Package p,
             boolean checkProfiles, String targetCompilerFilter,
-            boolean force) {
+            boolean force, boolean bootComplete) {
         // Select the dex optimizer based on the force parameter.
         // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
         //       allocate an object here.
@@ -7523,12 +7520,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                         false /* checkProfiles */,
                         getCompilerFilterForReason(REASON_NON_SYSTEM_LIBRARY),
                         getOrCreateCompilerPackageStats(depPackage),
-                        mDexManager.isUsedByOtherApps(p.packageName));
+                        mDexManager.isUsedByOtherApps(p.packageName),
+                        bootComplete);
             }
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
                 targetCompilerFilter, getOrCreateCompilerPackageStats(p),
-                mDexManager.isUsedByOtherApps(p.packageName));
+                mDexManager.isUsedByOtherApps(p.packageName), bootComplete);
     }
 
     // Performs dexopt on the used secondary dex files belonging to the given package.
@@ -7674,7 +7672,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Don't use profiles since that may cause compilation to be skipped.
             final int res = performDexOptInternalWithDependenciesLI(pkg,
                     false /* checkProfiles */, getCompilerFilterForReason(REASON_FORCED_DEXOPT),
-                    true /* force */);
+                    true /* force */,
+                    true /* bootComplete */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -15260,7 +15259,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     null /* instructionSets */, false /* checkProfiles */,
                     getCompilerFilterForReason(REASON_INSTALL),
                     getOrCreateCompilerPackageStats(pkg),
-                    mDexManager.isUsedByOtherApps(pkg.packageName));
+                    mDexManager.isUsedByOtherApps(pkg.packageName),
+                    true /* bootComplete */);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             // Notify BackgroundDexOptService that the package has been changed.
