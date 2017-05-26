@@ -7651,6 +7651,16 @@ public final class Settings {
         public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
 
         /**
+         * Whether any profile has ever been downloaded onto a eUICC on the device.
+         *
+         * <p>Used to hide eUICC UI from users who have never made use of it and would only be
+         * confused by seeing references to it in settings.
+         * (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String EUICC_PROVISIONED = "euicc_provisioned";
+
+        /**
          * Whether any activity can be resized. When this is true, any
          * activity, regardless of manifest values, can be resized for multi-window.
          * (0 = false, 1 = true)
