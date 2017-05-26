@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
@@ -3659,14 +3660,6 @@ public class NotificationManagerService extends SystemService {
                             " intercept=" + record.isIntercepted()
             );
 
-        final int currentUser;
-        final long token = Binder.clearCallingIdentity();
-        try {
-            currentUser = ActivityManager.getCurrentUser();
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-
         // If we're not supposed to beep, vibrate, etc. then don't.
         final String disableEffects = disableNotificationEffects(record);
         if (disableEffects != null) {
@@ -3676,50 +3669,53 @@ public class NotificationManagerService extends SystemService {
         // Remember if this notification already owns the notification channels.
         boolean wasBeep = key != null && key.equals(mSoundNotificationKey);
         boolean wasBuzz = key != null && key.equals(mVibrateNotificationKey);
-
         // These are set inside the conditional if the notification is allowed to make noise.
         boolean hasValidVibrate = false;
         boolean hasValidSound = false;
-        if (disableEffects == null
-                && (record.getUserId() == UserHandle.USER_ALL ||
-                    record.getUserId() == currentUser ||
-                    mUserProfiles.isCurrentProfile(record.getUserId()))
-                && canInterrupt
-                && mSystemReady
-                && mAudioManager != null) {
-            if (DBG) Slog.v(TAG, "Interrupting!");
 
-            Uri soundUri = record.getSound();
-            hasValidSound = soundUri != null && !Uri.EMPTY.equals(soundUri);
-            long[] vibration = record.getVibration();
-            // Demote sound to vibration if vibration missing & phone in vibration mode.
-            if (vibration == null
-                    && hasValidSound
-                    && (mAudioManager.getRingerModeInternal()
-                            == AudioManager.RINGER_MODE_VIBRATE)) {
-                vibration = mFallbackVibrationPattern;
-            }
-            hasValidVibrate = vibration != null;
-
-            if (!shouldMuteNotificationLocked(record)) {
+        if (isNotificationForCurrentUser(record)) {
+            // If the notification will appear in the status bar, it should send an accessibility
+            // event
+            if (!record.isUpdate && record.getImportance() > IMPORTANCE_MIN) {
                 sendAccessibilityEvent(notification, record.sbn.getPackageName());
+            }
 
-                if (hasValidSound) {
-                    mSoundNotificationKey = key;
-                    if (mInCall) {
-                        playInCallNotification();
-                        beep = true;
-                    } else {
-                        beep = playSound(record, soundUri);
-                    }
+            if (disableEffects == null
+                    && canInterrupt
+                    && mSystemReady
+                    && mAudioManager != null) {
+                if (DBG) Slog.v(TAG, "Interrupting!");
+                Uri soundUri = record.getSound();
+                hasValidSound = soundUri != null && !Uri.EMPTY.equals(soundUri);
+                long[] vibration = record.getVibration();
+                // Demote sound to vibration if vibration missing & phone in vibration mode.
+                if (vibration == null
+                        && hasValidSound
+                        && (mAudioManager.getRingerModeInternal()
+                        == AudioManager.RINGER_MODE_VIBRATE)) {
+                    vibration = mFallbackVibrationPattern;
                 }
+                hasValidVibrate = vibration != null;
 
-                final boolean ringerModeSilent =
-                        mAudioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT;
-                if (!mInCall && hasValidVibrate && !ringerModeSilent) {
-                    mVibrateNotificationKey = key;
+                if (!shouldMuteNotificationLocked(record)) {
+                    if (hasValidSound) {
+                        mSoundNotificationKey = key;
+                        if (mInCall) {
+                            playInCallNotification();
+                            beep = true;
+                        } else {
+                            beep = playSound(record, soundUri);
+                        }
+                    }
 
-                    buzz = playVibration(record, vibration);
+                    final boolean ringerModeSilent =
+                            mAudioManager.getRingerModeInternal()
+                                    == AudioManager.RINGER_MODE_SILENT;
+                    if (!mInCall && hasValidVibrate && !ringerModeSilent) {
+                        mVibrateNotificationKey = key;
+
+                        buzz = playVibration(record, vibration);
+                    }
                 }
             }
         }
@@ -3817,6 +3813,19 @@ public class NotificationManagerService extends SystemService {
         } finally{
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private boolean isNotificationForCurrentUser(NotificationRecord record) {
+        final int currentUser;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            currentUser = ActivityManager.getCurrentUser();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return (record.getUserId() == UserHandle.USER_ALL ||
+                record.getUserId() == currentUser ||
+                mUserProfiles.isCurrentProfile(record.getUserId()));
     }
 
     private void playInCallNotification() {
