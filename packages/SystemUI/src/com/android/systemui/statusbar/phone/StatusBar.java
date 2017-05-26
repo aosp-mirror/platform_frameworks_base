@@ -2898,6 +2898,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         mHandler.post(mAnimateCollapsePanels);
     }
 
+    public void postAnimateForceCollapsePanels() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+            }
+        });
+    }
+
     public void postAnimateOpenPanels() {
         mHandler.sendEmptyMessage(MSG_OPEN_SETTINGS_PANEL);
     }
