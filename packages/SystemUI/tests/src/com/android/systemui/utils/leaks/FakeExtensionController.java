@@ -97,5 +97,10 @@ public class FakeExtensionController implements ExtensionController {
         public void destroy() {
             mTracker.getLeakInfo(mAllocation).clearAllocations();
         }
+
+        @Override
+        public T reload() {
+            return null;
+        }
     }
 }
