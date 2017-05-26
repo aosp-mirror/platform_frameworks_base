@@ -31,7 +31,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Message;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -120,33 +120,10 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     final Rect mTmpRect = new Rect();
     final Configuration mConfiguration = new Configuration();
 
-    static final int KEEP_SCREEN_ON_MSG = 1;
-    static final int DRAW_FINISHED_MSG = 2;
-
     int mSubLayer = APPLICATION_MEDIA_SUBLAYER;
 
     boolean mIsCreating = false;
     private volatile boolean mRtHandlingPositionUpdates = false;
-
-    final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case KEEP_SCREEN_ON_MSG: {
-                    setKeepScreenOn(msg.arg1 != 0);
-                } break;
-                case DRAW_FINISHED_MSG: {
-                    mDrawFinished = true;
-                    if (mAttachedToWindow) {
-                        mParent.requestTransparentRegion(SurfaceView.this);
-
-                        notifyDrawFinished();
-                        invalidate();
-                    }
-                } break;
-            }
-        }
-    };
 
     private final ViewTreeObserver.OnScrollChangedListener mScrollChangedListener
             = new ViewTreeObserver.OnScrollChangedListener() {
@@ -751,7 +728,14 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             mDeferredDestroySurfaceControl = null;
         }
 
-        mHandler.sendEmptyMessage(DRAW_FINISHED_MSG);
+        runOnUiThread(() -> {
+            mDrawFinished = true;
+            if (mAttachedToWindow) {
+                mParent.requestTransparentRegion(SurfaceView.this);
+                notifyDrawFinished();
+                invalidate();
+            }
+        });
     }
 
     private void setParentSpaceRectangle(Rect position, long frameNumber) {
@@ -880,6 +864,15 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 + "type=" + type, new Throwable());
     }
 
+    private void runOnUiThread(Runnable runnable) {
+        Handler handler = getHandler();
+        if (handler != null && handler.getLooper() != Looper.myLooper()) {
+            handler.post(runnable);
+        } else {
+            runnable.run();
+        }
+    }
+
     /**
      * Check to see if the surface has fixed size dimensions or if the surface's
      * dimensions are dimensions are dependent on its current layout.
@@ -960,9 +953,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
         @Override
         public void setKeepScreenOn(boolean screenOn) {
-            Message msg = mHandler.obtainMessage(KEEP_SCREEN_ON_MSG);
-            msg.arg1 = screenOn ? 1 : 0;
-            mHandler.sendMessage(msg);
+            runOnUiThread(() -> SurfaceView.this.setKeepScreenOn(screenOn));
         }
 
         /**
