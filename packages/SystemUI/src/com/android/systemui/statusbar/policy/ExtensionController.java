@@ -14,9 +14,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.Dependency;
-import com.android.systemui.plugins.Plugin;
-
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -32,6 +29,11 @@ public interface ExtensionController {
     interface Extension<T> {
         T get();
         void destroy();
+        /**
+         * Triggers the extension to cycle through each of the sources again because something
+         * (like configuration) may have changed.
+         */
+        T reload();
     }
 
     interface ExtensionBuilder<T> {
