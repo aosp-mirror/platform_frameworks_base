@@ -938,7 +938,7 @@ public final class NdefRecord implements Parcelable {
      */
     void writeToByteBuffer(ByteBuffer buffer, boolean mb, boolean me) {
         boolean sr = mPayload.length < 256;
-        boolean il = mId.length > 0;
+        boolean il = mTnf == TNF_EMPTY ? true : mId.length > 0;
 
         byte flags = (byte)((mb ? FLAG_MB : 0) | (me ? FLAG_ME : 0) |
                 (sr ? FLAG_SR : 0) | (il ? FLAG_IL : 0) | mTnf);
@@ -966,7 +966,7 @@ public final class NdefRecord implements Parcelable {
         int length = 3 + mType.length + mId.length + mPayload.length;
 
         boolean sr = mPayload.length < 256;
-        boolean il = mId.length > 0;
+        boolean il = mTnf == TNF_EMPTY ? true : mId.length > 0;
 
         if (!sr) length += 3;
         if (il) length += 1;
