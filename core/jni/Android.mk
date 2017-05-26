@@ -318,6 +318,13 @@ LOCAL_CFLAGS += -Wall -Werror -Wno-error=deprecated-declarations -Wunused -Wunre
 #                        is not being compiled with that level. Remove once this has changed.
 LOCAL_CLANG_CFLAGS += -Wno-c++11-extensions
 
+ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))
+LOCAL_CFLAGS += -D__ANDROID_DEBUGGABLE__
+endif
+ifneq (,$(filter true, $(PRODUCT_FULL_TREBLE)))
+LOCAL_CFLAGS += -D__ANDROID_TREBLE__
+endif
+
 include $(BUILD_SHARED_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
