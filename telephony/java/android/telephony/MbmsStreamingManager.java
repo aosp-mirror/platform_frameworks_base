@@ -156,7 +156,6 @@ public class MbmsStreamingManager {
      *
      * This may throw an {@link MbmsException} containing one of the following errors:
      * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
-     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION}
      * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
      * {@link MbmsException#ERROR_SERVICE_LOST}
      *
@@ -174,12 +173,10 @@ public class MbmsStreamingManager {
             if (returnCode != MbmsException.SUCCESS) {
                 throw new MbmsException(returnCode);
             }
-        } catch (DeadObjectException e) {
+        } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
             throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
-        } catch (RemoteException e) {
-            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
         }
     }
 
@@ -191,7 +188,6 @@ public class MbmsStreamingManager {
      *
      * May throw an {@link MbmsException} containing any of the following error codes:
      * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
-     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION}
      * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
      * {@link MbmsException#ERROR_SERVICE_LOST}
      *
@@ -211,12 +207,10 @@ public class MbmsStreamingManager {
             if (returnCode != MbmsException.SUCCESS) {
                 throw new MbmsException(returnCode);
             }
-        } catch (DeadObjectException e) {
+        } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
             throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
-        } catch (RemoteException e) {
-            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
         }
 
         return new StreamingService(
@@ -280,11 +274,7 @@ public class MbmsStreamingManager {
             } catch (RemoteException e) {
                 mService = null;
                 Log.e(LOG_TAG, "Service died before initialization");
-                if (e instanceof DeadObjectException) {
-                    throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
-                } else {
-                    throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
-                }
+                throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
             }
         }
     }
