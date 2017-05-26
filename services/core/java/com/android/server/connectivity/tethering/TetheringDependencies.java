@@ -16,6 +16,9 @@
 
 package com.android.server.connectivity.tethering;
 
+import android.os.Handler;
+import android.net.util.SharedLog;
+
 
 /**
  * Capture tethering dependencies, for injection.
@@ -23,7 +26,7 @@ package com.android.server.connectivity.tethering;
  * @hide
  */
 public class TetheringDependencies {
-    public OffloadHardwareInterface getOffloadHardwareInterface() {
-        return new OffloadHardwareInterface();
+    public OffloadHardwareInterface getOffloadHardwareInterface(Handler h, SharedLog log) {
+        return new OffloadHardwareInterface(h, log);
     }
 }
