@@ -121,6 +121,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     private boolean mBlockEthernet;
     private boolean mActivityEnabled;
     private boolean mForceBlockWifi;
+    private boolean mQsSignal;
 
     public SignalClusterView(Context context) {
         this(context, null);
@@ -152,9 +153,10 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         updateActivityEnabled();
     }
 
-    public void setForceBlockWifi() {
+    public void setQsSignalCluster() {
         mForceBlockWifi = true;
         mBlockWifi = true;
+        mQsSignal = true;
         if (isAttachedToWindow()) {
             // Re-register to get new callbacks.
             mNetworkController.removeCallback(this);
@@ -299,19 +301,23 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     }
 
     @Override
-    public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
+    public void setMobileDataIndicators(IconState icon, IconState qsIcon, int type,
             int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
             String description, boolean isWide, int subId, boolean roaming) {
         PhoneState state = getState(subId);
         if (state == null) {
             return;
         }
-        state.mMobileVisible = statusIcon.visible && !mBlockMobile;
-        state.mMobileStrengthId = statusIcon.icon;
-        state.mMobileTypeId = statusType;
-        state.mMobileDescription = statusIcon.contentDescription;
+        if (mQsSignal) {
+            icon = qsIcon;
+            type = qsType;
+        }
+        state.mMobileVisible = icon.visible && !mBlockMobile;
+        state.mMobileStrengthId = icon.icon;
+        state.mMobileTypeId = type;
+        state.mMobileDescription = icon.contentDescription;
         state.mMobileTypeDescription = typeContentDescription;
-        state.mIsMobileTypeIconWide = statusType != 0 && isWide;
+        state.mIsMobileTypeIconWide = type != 0 && isWide;
         state.mRoaming = roaming;
         state.mActivityIn = activityIn && mActivityEnabled;
         state.mActivityOut = activityOut && mActivityEnabled;
