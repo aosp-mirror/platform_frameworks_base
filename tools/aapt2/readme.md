@@ -1,5 +1,9 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.17
+### `aapt2 compile ...`
+- Fixed an issue where symlinks would not be followed when compiling PNGs. (bug 62144459)
+
 ## Version 2.16
 ### `aapt2 link ...`
 - Versioning of XML files is more intelligent, using a small set of rules to degrade

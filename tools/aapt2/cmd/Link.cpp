@@ -632,7 +632,7 @@ static bool WriteStableIdMapToPath(IDiagnostics* diag,
 static bool LoadStableIdMap(IDiagnostics* diag, const std::string& path,
                             std::unordered_map<ResourceName, ResourceId>* out_id_map) {
   std::string content;
-  if (!android::base::ReadFileToString(path, &content)) {
+  if (!android::base::ReadFileToString(path, &content, true /*follow_symlinks*/)) {
     diag->Error(DiagMessage(path) << "failed reading stable ID file");
     return false;
   }
