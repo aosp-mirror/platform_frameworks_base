@@ -3759,13 +3759,7 @@ public class NotificationManagerService extends SystemService {
             return true;
         }
         if (record.sbn.isGroup()) {
-            if (notification.isGroupSummary()
-                    && notification.getGroupAlertBehavior() == Notification.GROUP_ALERT_CHILDREN) {
-                return true;
-            } else if (notification.isGroupChild()
-                    && notification.getGroupAlertBehavior() == Notification.GROUP_ALERT_SUMMARY) {
-                return true;
-            }
+            return notification.suppressAlertingDueToGrouping();
         }
         return false;
     }
