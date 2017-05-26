@@ -551,7 +551,7 @@ public class RankingHelper implements RankingConfig {
         }
 
         NotificationChannel existing = r.channels.get(channel.getId());
-        // Keep existing settings, except deleted status and name
+        // Keep most of the existing settings
         if (existing != null && fromTargetApp) {
             if (existing.isDeleted()) {
                 existing.setDeleted(false);
@@ -559,6 +559,7 @@ public class RankingHelper implements RankingConfig {
 
             existing.setName(channel.getName().toString());
             existing.setDescription(channel.getDescription());
+            existing.setBlockableSystem(channel.isBlockableSystem());
 
             MetricsLogger.action(getChannelLog(channel, pkg));
             updateConfig();
