@@ -49,6 +49,8 @@ public interface NotificationSwipeActionHelper {
 
     public boolean isDismissGesture(MotionEvent ev);
 
+    public boolean isFalseGesture(MotionEvent ev);
+
     public boolean swipedFarEnough(float translation, float viewSize);
 
     public boolean swipedFastEnough(float translation, float velocity);
