@@ -34,6 +34,7 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.content.pm.ApplicationInfo;
+import android.content.res.ResourceId;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -169,7 +170,7 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     Dialog(@NonNull Context context, @StyleRes int themeResId, boolean createContextThemeWrapper) {
         if (createContextThemeWrapper) {
-            if (themeResId == 0) {
+            if (themeResId == ResourceId.ID_NULL) {
                 final TypedValue outValue = new TypedValue();
                 context.getTheme().resolveAttribute(R.attr.dialogTheme, outValue, true);
                 themeResId = outValue.resourceId;
