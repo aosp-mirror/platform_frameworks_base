@@ -19,6 +19,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -58,6 +59,7 @@ public final class KeyboardShortcutGroup implements Parcelable {
      * @param isSystemGroup Set this to {@code true} if this is s system group.
      * @hide
      */
+    @TestApi
     public KeyboardShortcutGroup(@Nullable CharSequence label,
             @NonNull List<KeyboardShortcutInfo> items, boolean isSystemGroup) {
         mLabel = label;
@@ -70,6 +72,7 @@ public final class KeyboardShortcutGroup implements Parcelable {
      * @param isSystemGroup Set this to {@code true} if this is s system group.
      * @hide
      */
+    @TestApi
     public KeyboardShortcutGroup(@Nullable CharSequence label, boolean isSystemGroup) {
         this(label, Collections.<KeyboardShortcutInfo>emptyList(), isSystemGroup);
     }
@@ -96,6 +99,7 @@ public final class KeyboardShortcutGroup implements Parcelable {
     }
 
     /** @hide **/
+    @TestApi
     public boolean isSystemGroup() {
         return mSystemGroup;
     }
@@ -123,11 +127,11 @@ public final class KeyboardShortcutGroup implements Parcelable {
 
     public static final Creator<KeyboardShortcutGroup> CREATOR =
             new Creator<KeyboardShortcutGroup>() {
-        public KeyboardShortcutGroup createFromParcel(Parcel source) {
-            return new KeyboardShortcutGroup(source);
-        }
-        public KeyboardShortcutGroup[] newArray(int size) {
-            return new KeyboardShortcutGroup[size];
-        }
-    };
+                public KeyboardShortcutGroup createFromParcel(Parcel source) {
+                    return new KeyboardShortcutGroup(source);
+                }
+                public KeyboardShortcutGroup[] newArray(int size) {
+                    return new KeyboardShortcutGroup[size];
+                }
+            };
 }
