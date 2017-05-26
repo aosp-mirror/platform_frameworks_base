@@ -71,7 +71,7 @@ class LockSettingsShellCommand extends ShellCommand {
                     runClear();
                     break;
                 case COMMAND_SP:
-                    runChangeSp();
+                    runEnableSp();
                     break;
                 case COMMAND_SET_DISABLED:
                     runSetDisabled();
@@ -107,15 +107,10 @@ class LockSettingsShellCommand extends ShellCommand {
         mNew = getNextArg();
     }
 
-    private void runChangeSp() {
-        if (mNew != null ) {
-            if ("1".equals(mNew)) {
-                mLockPatternUtils.enableSyntheticPassword();
-                getOutPrintWriter().println("Synthetic password enabled");
-            } else if ("0".equals(mNew)) {
-                mLockPatternUtils.disableSyntheticPassword();
-                getOutPrintWriter().println("Synthetic password disabled");
-            }
+    private void runEnableSp() {
+        if (mNew != null) {
+            mLockPatternUtils.enableSyntheticPassword();
+            getOutPrintWriter().println("Synthetic password enabled");
         }
         getOutPrintWriter().println(String.format("SP Enabled = %b",
                 mLockPatternUtils.isSyntheticPasswordEnabled()));
