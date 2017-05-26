@@ -3287,7 +3287,7 @@ public class NotificationManagerService extends SystemService {
                 Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS, defaultWarningEnabled) != 0;
         if (warningEnabled) {
             Toast toast = Toast.makeText(getContext(), mHandler.getLooper(), toastText,
-                    Toast.LENGTH_LONG);
+                    Toast.LENGTH_SHORT);
             toast.show();
         }
     }
