@@ -120,7 +120,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mSwipingInProgress;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private final Paint mBackgroundPaint = new Paint();
-    private boolean mShouldDrawNotificationBackground;
+    private final boolean mShouldDrawNotificationBackground;
 
     private float mExpandedHeight;
     private int mOwnScrollY;
@@ -451,7 +451,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     protected void onDraw(Canvas canvas) {
-        if (mShouldDrawNotificationBackground && mCurrentBounds.top < mCurrentBounds.bottom) {
+        if (mShouldDrawNotificationBackground && !mAmbientState.isDark()
+                && mCurrentBounds.top < mCurrentBounds.bottom) {
             canvas.drawRect(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom,
                     mBackgroundPaint);
         }
@@ -3688,11 +3689,8 @@ public class NotificationStackScrollLayout extends ViewGroup
      * {@link #mAmbientState}'s dark mode is toggled.
      */
     private void updateWillNotDraw() {
-       if (mAmbientState.isDark()) {
-           setWillNotDraw(!DEBUG);
-       } else {
-           setWillNotDraw(!mShouldDrawNotificationBackground && !DEBUG);
-       }
+        boolean willDraw = !mAmbientState.isDark() && mShouldDrawNotificationBackground || DEBUG;
+        setWillNotDraw(!willDraw);
     }
 
     private void setBackgroundFadeAmount(float fadeAmount) {
