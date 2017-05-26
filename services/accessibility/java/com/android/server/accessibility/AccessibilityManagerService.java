@@ -487,15 +487,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (pip != null) {
                     int pipId = pip.getId();
                     event.setWindowId(pipId);
-                    event.setSealed(true);
-                    AccessibilityNodeInfo info = event.getSource();
-                    info.setSealed(false);
-                    event.setSealed(false);
-                    if (info != null) {
-                        info.setSourceNodeId(info.getSourceNodeId(), pipId);
-                        event.setSource(info);
-                        info.recycle();
-                    }
                 }
             }
 
