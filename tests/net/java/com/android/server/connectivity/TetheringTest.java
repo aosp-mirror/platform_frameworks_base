@@ -43,6 +43,7 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.NetworkRequest;
+import android.net.util.SharedLog;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -142,8 +143,8 @@ public class TetheringTest {
         };
         mServiceContext.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
-        when(mTetheringDependencies.getOffloadHardwareInterface())
-                .thenReturn(mOffloadHardwareInterface);
+        when(mTetheringDependencies.getOffloadHardwareInterface(
+                any(Handler.class), any(SharedLog.class))).thenReturn(mOffloadHardwareInterface);
         mTethering = new Tethering(mServiceContext, mNMService, mStatsService, mPolicyManager,
                                    mLooper.getLooper(), mSystemProperties,
                                    mTetheringDependencies);
