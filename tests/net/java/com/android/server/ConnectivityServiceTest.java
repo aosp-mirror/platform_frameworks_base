@@ -97,6 +97,7 @@ import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.NetworkMonitor.CaptivePortalProbeResult;
 import com.android.server.net.NetworkPinner;
 
+import org.junit.Ignore;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -2409,6 +2410,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCm.unregisterNetworkCallback(fgCallback);
     }
 
+    @Ignore // This test has instrinsic chances of spurious failures: ignore for continuous testing.
     @SmallTest
     public void testRequestBenchmark() throws Exception {
         // TODO: turn this unit test into a real benchmarking test.
