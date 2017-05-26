@@ -447,7 +447,9 @@ public class RankingHelper implements RankingConfig {
                 boolean isGroupSummary = record.getNotification().isGroupSummary();
                 record.setGlobalSortKey(
                         String.format("intrsv=%c:grnk=0x%04x:gsmry=%c:%s:rnk=0x%04x",
-                        record.isRecentlyIntrusive() ? '0' : '1',
+                        record.isRecentlyIntrusive()
+                                && record.getImportance() > NotificationManager.IMPORTANCE_MIN
+                                ? '0' : '1',
                         groupProxy.getAuthoritativeRank(),
                         isGroupSummary ? '0' : '1',
                         groupSortKeyPortion,
