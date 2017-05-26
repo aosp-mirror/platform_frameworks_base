@@ -91,6 +91,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private LayoutListener mLayoutListener;
+    private boolean mLowPriorityStateUpdated;
     private final NotificationInflater mNotificationInflater;
     private int mIconTransformContentShift;
     private int mIconTransformContentShiftNoIcon;
@@ -1119,6 +1120,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mChildrenContainer != null) {
             mChildrenContainer.setIsLowPriority(isLowPriority);
         }
+    }
+
+
+    public void setLowPriorityStateUpdated(boolean lowPriorityStateUpdated) {
+        mLowPriorityStateUpdated = lowPriorityStateUpdated;
+    }
+
+    public boolean hasLowPriorityStateUpdated() {
+        return mLowPriorityStateUpdated;
     }
 
     public boolean isLowPriority() {
