@@ -471,7 +471,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     ? mInterface.performDexOptSecondary(packageName,
                             targetCompilerFilter, forceCompilation)
                     : mInterface.performDexOptMode(packageName,
-                            checkProfiles, targetCompilerFilter, forceCompilation);
+                            checkProfiles, targetCompilerFilter, forceCompilation,
+                            true /* bootComplete */);
             if (!result) {
                 failedPackages.add(packageName);
             }
