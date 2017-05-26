@@ -16,39 +16,30 @@
 
 package com.android.systemui.statusbar;
 
+import static junit.framework.Assert.assertEquals;
+
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-
-import android.graphics.drawable.VectorDrawable;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.support.test.filters.SmallTest;
 import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.ScrimView;
 
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
+import com.google.android.colorextraction.ColorExtractor;
+import com.google.android.colorextraction.drawable.GradientDrawable;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static junit.framework.Assert.assertEquals;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
@@ -68,6 +59,16 @@ public class ScrimViewTest extends SysuiTestCase {
         Drawable drawable = new ColorDrawable(Color.GREEN);
         mView.setDrawable(drawable);
         assertEquals(drawable, mView.getDrawable());
+    }
+
+    @Test
+    public void testCreation_initialColor() {
+        GradientDrawable drawable = (GradientDrawable) mView.getDrawable();
+        ColorExtractor.GradientColors colors = mView.getColors();
+        assertEquals("Main color should be set upon creation",
+                drawable.getMainColor(), colors.getMainColor());
+        assertEquals("Secondary color should be set upon creation",
+                drawable.getSecondaryColor(), colors.getSecondaryColor());
     }
 
     @Test
