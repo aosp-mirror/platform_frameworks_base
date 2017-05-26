@@ -74,8 +74,9 @@ final class SelectionActionModeHelper {
             startActionMode(null);
         } else {
             resetTextClassificationHelper(true /* resetSelectionTag */);
+            final TextView tv = mEditor.getTextView();
             mTextClassificationAsyncTask = new TextClassificationAsyncTask(
-                    mEditor.getTextView(),
+                    tv,
                     TIMEOUT_DURATION,
                     adjustSelection
                             ? mTextClassificationHelper::suggestSelection
@@ -340,6 +341,7 @@ final class SelectionActionModeHelper {
                 @NonNull TextView textView, int timeOut,
                 @NonNull Supplier<SelectionResult> selectionResultSupplier,
                 @NonNull Consumer<SelectionResult> selectionResultCallback) {
+            super(textView != null ? textView.getHandler() : null);
             mTextView = Preconditions.checkNotNull(textView);
             mTimeOutDuration = timeOut;
             mSelectionResultSupplier = Preconditions.checkNotNull(selectionResultSupplier);
