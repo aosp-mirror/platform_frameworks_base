@@ -1779,6 +1779,12 @@ public final class Settings {
                 return mContentProvider;
             }
         }
+
+        public void clearProviderForTest() {
+            synchronized (mLock) {
+                mContentProvider = null;
+            }
+        }
     }
 
     // Thread-safe.
@@ -1994,6 +2000,16 @@ public final class Settings {
                 if (c != null) c.close();
             }
         }
+
+        public void clearGenerationTrackerForTest() {
+            synchronized (NameValueCache.this) {
+                if (mGenerationTracker != null) {
+                    mGenerationTracker.destroy();
+                }
+                mValues.clear();
+                mGenerationTracker = null;
+            }
+        }
     }
 
     /**
@@ -2180,6 +2196,12 @@ public final class Settings {
         /** @hide */
         public static void getNonLegacyMovedKeys(HashSet<String> outKeySet) {
             outKeySet.addAll(MOVED_TO_GLOBAL);
+        }
+
+        /** @hide */
+        public static void clearProviderForTest() {
+            sProviderHolder.clearProviderForTest();
+            sNameValueCache.clearGenerationTrackerForTest();
         }
 
         /**
@@ -4593,6 +4615,12 @@ public final class Settings {
         /** @hide */
         public static void getMovedToGlobalSettings(Set<String> outKeySet) {
             outKeySet.addAll(MOVED_TO_GLOBAL);
+        }
+
+        /** @hide */
+        public static void clearProviderForTest() {
+            sProviderHolder.clearProviderForTest();
+            sNameValueCache.clearGenerationTrackerForTest();
         }
 
         /**
@@ -10035,6 +10063,12 @@ public final class Settings {
         /** @hide */
         public static void getMovedToSecureSettings(Set<String> outKeySet) {
             outKeySet.addAll(MOVED_TO_SECURE);
+        }
+
+        /** @hide */
+        public static void clearProviderForTest() {
+            sProviderHolder.clearProviderForTest();
+            sNameValueCache.clearGenerationTrackerForTest();
         }
 
         /**

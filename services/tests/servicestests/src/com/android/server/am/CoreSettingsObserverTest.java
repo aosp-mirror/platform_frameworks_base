@@ -34,6 +34,7 @@ import android.test.mock.MockContentResolver;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.AppOpsService;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -59,7 +60,6 @@ import java.io.File;
  * Run: adb shell am instrument -e class com.android.server.am.CoreSettingsObserverTest -w \
  *     com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
-@Ignore
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class CoreSettingsObserverTest {
@@ -79,9 +79,15 @@ public class CoreSettingsObserverTest {
 
     @BeforeClass
     public static void setupOnce() {
+        FakeSettingsProvider.clearSettingsProvider();
         CoreSettingsObserver.sSecureSettingToTypeMap.put(TEST_SETTING_SECURE_INT, int.class);
         CoreSettingsObserver.sGlobalSettingToTypeMap.put(TEST_SETTING_GLOBAL_FLOAT, float.class);
         CoreSettingsObserver.sSystemSettingToTypeMap.put(TEST_SETTING_SYSTEM_STRING, String.class);
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        FakeSettingsProvider.clearSettingsProvider();
     }
 
     @Before
