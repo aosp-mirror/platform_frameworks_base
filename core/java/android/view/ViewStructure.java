@@ -304,13 +304,6 @@ public abstract class ViewStructure {
     public abstract void setAutofillId(@NonNull AutofillId parentId, int virtualId);
 
     /**
-     * @deprecated - use {@link #setAutofillId(AutofillId, int)} instead
-     * @hide
-     */
-    @Deprecated
-    public abstract void setAutofillId(@NonNull ViewStructure parent, int virtualId);
-
-    /**
      * Sets the {@link View#getAutofillType()} that can be used to autofill this node.
      */
     public abstract void setAutofillType(@View.AutofillType int type);
