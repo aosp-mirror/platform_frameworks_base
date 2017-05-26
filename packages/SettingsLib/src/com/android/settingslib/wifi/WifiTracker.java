@@ -250,10 +250,17 @@ public class WifiTracker {
             mLastNetworkInfo = mConnectivityManager.getNetworkInfo(mWifiManager.getCurrentNetwork());
             updateAccessPointsLocked();
 
+            if (DBG) {
+                Log.d(TAG, "force update - internal access point list:\n" + mInternalAccessPoints);
+            }
+
             // Synchronously copy access points
             mMainHandler.removeMessages(MainHandler.MSG_ACCESS_POINT_CHANGED);
             mMainHandler.handleMessage(
                     Message.obtain(mMainHandler, MainHandler.MSG_ACCESS_POINT_CHANGED));
+            if (DBG) {
+                Log.d(TAG, "force update - external access point list:\n" + mAccessPoints);
+            }
         }
     }
 
