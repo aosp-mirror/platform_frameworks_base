@@ -8257,6 +8257,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Automatically computes and sets the text size.
      */
     private void autoSizeText() {
+        if (getMeasuredWidth() <= 0 || getMeasuredHeight() <= 0) return;
         final int maxWidth = getWidth() - getTotalPaddingLeft() - getTotalPaddingRight();
         final int maxHeight = getHeight() - getExtendedPaddingBottom() - getExtendedPaddingTop();
 
