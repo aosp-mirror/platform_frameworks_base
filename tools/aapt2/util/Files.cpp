@@ -181,12 +181,13 @@ Maybe<android::FileMap> MmapPath(const StringPiece& path,
   return std::move(filemap);
 }
 
-bool AppendArgsFromFile(const StringPiece& path,
-                        std::vector<std::string>* out_arglist,
+bool AppendArgsFromFile(const StringPiece& path, std::vector<std::string>* out_arglist,
                         std::string* out_error) {
   std::string contents;
-  if (!android::base::ReadFileToString(path.to_string(), &contents)) {
-    if (out_error) *out_error = "failed to read argument-list file";
+  if (!android::base::ReadFileToString(path.to_string(), &contents, true /*follow_symlinks*/)) {
+    if (out_error) {
+      *out_error = "failed to read argument-list file";
+    }
     return false;
   }
 
