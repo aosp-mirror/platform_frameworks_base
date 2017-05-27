@@ -55,8 +55,7 @@ public class StreamingService {
     /**
      * Retreive the Uri used to play this stream.
      *
-     * This may throw a {@link MbmsException} with the error codes
-     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION} or
+     * This may throw a {@link MbmsException} with the error code
      * {@link MbmsException#ERROR_SERVICE_LOST}
      *
      * @return The {@link Uri} to pass to the streaming client.
@@ -68,13 +67,10 @@ public class StreamingService {
 
         try {
             return mService.getPlaybackUri(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
-        } catch (DeadObjectException e) {
+        } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
             throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
-        } catch (RemoteException e) {
-            Log.w(LOG_TAG, "Caught remote exception calling getPlaybackUri: " + e);
-            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
         }
     }
 
@@ -88,7 +84,6 @@ public class StreamingService {
     /**
      * Stop streaming this service.
      * This may throw a {@link MbmsException} with the error code
-     * {@link MbmsException#ERROR_UNKNOWN_REMOTE_EXCEPTION} or
      * {@link MbmsException#ERROR_SERVICE_LOST}
      */
     public void stopStreaming() throws MbmsException {
@@ -98,13 +93,10 @@ public class StreamingService {
 
         try {
             mService.stopStreaming(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
-        } catch (DeadObjectException e) {
+        } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
             throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
-        } catch (RemoteException e) {
-            Log.w(LOG_TAG, "Caught remote exception calling stopStreaming: " + e);
-            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
         }
     }
 
@@ -115,13 +107,10 @@ public class StreamingService {
 
         try {
             mService.disposeStream(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
-        } catch (DeadObjectException e) {
+        } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
             throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
-        } catch (RemoteException e) {
-            Log.w(LOG_TAG, "Caught remote exception calling dispose: " + e);
-            throw new MbmsException(MbmsException.ERROR_UNKNOWN_REMOTE_EXCEPTION);
         }
     }
 }
