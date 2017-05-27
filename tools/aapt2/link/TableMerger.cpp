@@ -243,8 +243,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
   bool error = false;
 
   for (auto& src_type : src_package->types) {
-    ResourceTableType* dst_type =
-        master_package_->FindOrCreateType(src_type->type);
+    ResourceTableType* dst_type = master_package_->FindOrCreateType(src_type->type);
     if (!MergeType(context_, src, dst_type, src_type.get())) {
       error = true;
       continue;
@@ -253,27 +252,24 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
     for (auto& src_entry : src_type->entries) {
       std::string entry_name = src_entry->name;
       if (mangle_package) {
-        entry_name =
-            NameMangler::MangleEntry(src_package->name, src_entry->name);
+        entry_name = NameMangler::MangleEntry(src_package->name, src_entry->name);
       }
 
       ResourceEntry* dst_entry;
-      if (allow_new_resources) {
+      if (allow_new_resources || src_entry->symbol_status.allow_new) {
         dst_entry = dst_type->FindOrCreateEntry(entry_name);
       } else {
         dst_entry = dst_type->FindEntry(entry_name);
       }
 
-      const ResourceNameRef res_name(src_package->name, src_type->type,
-                                     src_entry->name);
+      const ResourceNameRef res_name(src_package->name, src_type->type, src_entry->name);
 
       if (!dst_entry) {
-        context_->GetDiagnostics()->Error(
-            DiagMessage(src) << "resource " << res_name
-                             << " does not override an existing resource");
-        context_->GetDiagnostics()->Note(
-            DiagMessage(src) << "define an <add-resource> tag or use "
-                             << "--auto-add-overlay");
+        context_->GetDiagnostics()->Error(DiagMessage(src)
+                                          << "resource " << res_name
+                                          << " does not override an existing resource");
+        context_->GetDiagnostics()->Note(DiagMessage(src) << "define an <add-resource> tag or use "
+                                                          << "--auto-add-overlay");
         error = true;
         continue;
       }
