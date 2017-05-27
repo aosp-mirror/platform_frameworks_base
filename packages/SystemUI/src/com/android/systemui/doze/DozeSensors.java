@@ -100,10 +100,14 @@ public class DozeSensors {
     }
 
     private Sensor findSensorWithType(String type) {
+        return findSensorWithType(mSensorManager, type);
+    }
+
+    static Sensor findSensorWithType(SensorManager sensorManager, String type) {
         if (TextUtils.isEmpty(type)) {
             return null;
         }
-        List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        List<Sensor> sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL);
         for (Sensor s : sensorList) {
             if (type.equals(s.getStringType())) {
                 return s;

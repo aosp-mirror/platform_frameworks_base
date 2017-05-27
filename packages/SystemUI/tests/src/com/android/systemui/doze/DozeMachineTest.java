@@ -215,54 +215,6 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
-    public void testScreen_offInDoze() {
-        mMachine.requestState(INITIALIZED);
-
-        mMachine.requestState(DOZE);
-
-        assertEquals(Display.STATE_OFF, mServiceFake.screenState);
-    }
-
-    @Test
-    public void testScreen_onInAod() {
-        mMachine.requestState(INITIALIZED);
-
-        mMachine.requestState(DOZE_AOD);
-
-        assertEquals(Display.STATE_DOZE_SUSPEND, mServiceFake.screenState);
-    }
-
-    @Test
-    public void testScreen_onInPulse() {
-        mMachine.requestState(INITIALIZED);
-
-        mMachine.requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
-        mMachine.requestState(DOZE_PULSING);
-
-        assertEquals(Display.STATE_ON, mServiceFake.screenState);
-    }
-
-    @Test
-    public void testScreen_offInRequestPulseWithoutAoD() {
-        mMachine.requestState(INITIALIZED);
-
-        mMachine.requestState(DOZE);
-        mMachine.requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
-
-        assertEquals(Display.STATE_OFF, mServiceFake.screenState);
-    }
-
-    @Test
-    public void testScreen_onInRequestPulseWithoutAoD() {
-        mMachine.requestState(INITIALIZED);
-
-        mMachine.requestState(DOZE_AOD);
-        mMachine.requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
-
-        assertEquals(Display.STATE_DOZE_SUSPEND, mServiceFake.screenState);
-    }
-
-    @Test
     public void testTransitions_canRequestTransitions() {
         mMachine.requestState(INITIALIZED);
         mMachine.requestState(DOZE);
