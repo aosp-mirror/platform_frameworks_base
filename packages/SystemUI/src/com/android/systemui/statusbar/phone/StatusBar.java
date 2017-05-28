@@ -2829,7 +2829,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void onColorsChanged(ColorExtractor.GradientColors colors, int which) {
+    public void onColorsChanged(ColorExtractor extractor, int which) {
         updateTheme();
     }
 
@@ -4501,6 +4501,8 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     private void updateTheme() {
         boolean useDarkTheme;
+        // Ignore visibility since we calculate the theme based on the real colors,
+        // not the current state.
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             useDarkTheme = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK)
                     .supportsDarkText();

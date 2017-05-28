@@ -1099,14 +1099,14 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable,
     };
 
     @Override
-    public void onColorsChanged(ColorExtractor.GradientColors colors, int which) {
+    public void onColorsChanged(ColorExtractor extractor, int which) {
         if (mKeyguard.isKeyguardLocked()) {
             if ((WallpaperManager.FLAG_LOCK & which) != 0) {
-                mGradientDrawable.setColors(colors);
+                mGradientDrawable.setColors(extractor.getColors(WallpaperManager.FLAG_LOCK));
             }
         } else {
             if ((WallpaperManager.FLAG_SYSTEM & which) != 0) {
-                mGradientDrawable.setColors(colors);
+                mGradientDrawable.setColors(extractor.getColors(WallpaperManager.FLAG_SYSTEM));
             }
         }
     }

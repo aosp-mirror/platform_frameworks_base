@@ -27,7 +27,7 @@ import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Range;
 
-import com.google.android.colorextraction.ColorExtractor;
+import com.google.android.colorextraction.ColorExtractor.GradientColors;
 
 /**
  * Implementation of tonal color extraction
@@ -43,25 +43,25 @@ public class Tonal implements ExtractionType {
     // When extracting the main color, only consider colors
     // present in at least MIN_COLOR_OCCURRENCE of the image
     private static final float MIN_COLOR_OCCURRENCE = 0.1f;
+    private static final boolean DEBUG = true;
 
-    // Secondary color will be darker than the main color when
-    // main color is brighter than this variable.
-    private static final float MAX_COLOR_LUMINOSITY = 0.8f;
-    // Luminosity difference between main and secondary colors
-    // should never be greater then this.
-    private static final float MAX_LUMINOSITY_DISTANCE = 0.35f;
+    // Temporary variable to avoid allocations
+    private float[] mTmpHSL = new float[3];
 
     /**
      * Grab colors from WallpaperColors as set them into GradientColors
      *
-     * @param wallpaperColors input
-     * @param gradientColors output
+     * @param inWallpaperColors input
+     * @param outColorsNormal colors for normal theme
+     * @param outColorsDark colors for dar theme
+     * @param outColorsExtraDark colors for extra dark theme
      * @return true if successful
      */
-    public boolean extractInto(WallpaperColors wallpaperColors,
-            ColorExtractor.GradientColors gradientColors) {
+    public boolean extractInto(@NonNull WallpaperColors inWallpaperColors,
+            @NonNull GradientColors outColorsNormal, @NonNull GradientColors outColorsDark,
+            @NonNull GradientColors outColorsExtraDark) {
 
-        if (wallpaperColors.getColors().size() == 0) {
+        if (inWallpaperColors.getColors().size() == 0) {
             return false;
         }
         // Tonal is not really a sort, it takes a color from the extracted
@@ -70,17 +70,17 @@ public class Tonal implements ExtractionType {
         // and replaces the original palette
 
         // First find the most representative color in the image
-        populationSort(wallpaperColors);
+        populationSort(inWallpaperColors);
         // Calculate total
         int total = 0;
-        for (Pair<Color, Integer> weightedColor : wallpaperColors.getColors()) {
+        for (Pair<Color, Integer> weightedColor : inWallpaperColors.getColors()) {
             total += weightedColor.second;
         }
 
         // Get bright colors that occur often enough in this image
         Pair<Color, Integer> bestColor = null;
         float[] hsl = new float[3];
-        for (Pair<Color, Integer> weightedColor : wallpaperColors.getColors()) {
+        for (Pair<Color, Integer> weightedColor : inWallpaperColors.getColors()) {
             float colorOccurrence = weightedColor.second / (float) total;
             if (colorOccurrence < MIN_COLOR_OCCURRENCE) {
                 break;
@@ -97,7 +97,7 @@ public class Tonal implements ExtractionType {
             }
         }
 
-        // Fallback to first color
+        // Fail if not found
         if (bestColor == null) {
             return false;
         }
@@ -107,57 +107,95 @@ public class Tonal implements ExtractionType {
                 hsl);
 
         // The Android HSL definition requires the hue to go from 0 to 360 but
-        // the Material Tonal Palette defines hues from 0 to 1
-        hsl[0] /= 360.0f; // normalize
+        // the Material Tonal Palette defines hues from 0 to 1.
+        hsl[0] /= 360f;
 
         // Find the palette that contains the closest color
         TonalPalette palette = findTonalPalette(hsl[0]);
-
         if (palette == null) {
             Log.w(TAG, "Could not find a tonal palette!");
             return false;
         }
 
+        // Figure out what's the main color index in the optimal palette
         int fitIndex = bestFit(palette, hsl[0], hsl[1], hsl[2]);
         if (fitIndex == -1) {
             Log.w(TAG, "Could not find best fit!");
             return false;
         }
+
+        // Generate the 10 colors palette by offsetting each one of them
         float[] h = fit(palette.h, hsl[0], fitIndex,
                 Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
         float[] s = fit(palette.s, hsl[1], fitIndex, 0.0f, 1.0f);
         float[] l = fit(palette.l, hsl[2], fitIndex, 0.0f, 1.0f);
 
-        hsl[0] = fract(h[fitIndex]) * 360.0f;
-        hsl[1] = s[fitIndex];
-        hsl[2] = l[fitIndex];
-        gradientColors.setMainColor(ColorUtils.HSLToColor(hsl));
+        final int textInversionIndex = h.length - 3;
+        if (DEBUG) {
+            StringBuilder builder = new StringBuilder("Tonal Palette - index: " + fitIndex +
+                    ". Main color: " + Integer.toHexString(getColorInt(fitIndex, h, s, l)) +
+                    "\nColors: ");
 
-        int secondColorIndex = fitIndex;
-        if (hsl[2] > MAX_COLOR_LUMINOSITY) {
-            for (int i = secondColorIndex - 1; i >= 0; i--) {
-                float distance = Math.abs(hsl[2] - l[i]);
-                if (distance > MAX_LUMINOSITY_DISTANCE) {
-                    break;
+            for (int i=0; i < h.length; i++) {
+                builder.append(Integer.toHexString(getColorInt(i, h, s, l)));
+                if (i < h.length - 1) {
+                    builder.append(", ");
                 }
-                secondColorIndex = i;
             }
-        } else {
-            for (int i = secondColorIndex + 1; i < h.length; i++) {
-                float distance = Math.abs(hsl[2] - l[i]);
-                if (distance > MAX_LUMINOSITY_DISTANCE) {
-                    break;
-                }
-                secondColorIndex = i;
-            }
+            Log.d(TAG, builder.toString());
         }
 
-        hsl[0] = fract(h[secondColorIndex]) * 360.0f;
-        hsl[1] = s[secondColorIndex];
-        hsl[2] = l[secondColorIndex];
-        gradientColors.setSecondaryColor(ColorUtils.HSLToColor(hsl));
+        // Normal colors:
+        // best fit + a 2 colors offset
+        int primaryIndex = fitIndex;
+        int secondaryIndex = primaryIndex + (primaryIndex >= 2 ? -2 : 2);
+        outColorsNormal.setMainColor(getColorInt(primaryIndex, h, s, l));
+        outColorsNormal.setSecondaryColor(getColorInt(secondaryIndex, h, s, l));
+
+        // Dark colors:
+        // Stops at 4th color, only lighter if dark text is supported
+        if (fitIndex < 2) {
+            primaryIndex = 0;
+        } else if (fitIndex < textInversionIndex) {
+            primaryIndex = Math.min(fitIndex, 3);
+        } else {
+            primaryIndex = h.length - 1;
+        }
+        secondaryIndex = primaryIndex + (primaryIndex >= 2 ? -2 : 2);
+        outColorsDark.setMainColor(getColorInt(primaryIndex, h, s, l));
+        outColorsDark.setSecondaryColor(getColorInt(secondaryIndex, h, s, l));
+
+        // Extra Dark:
+        // Stay close to dark colors until dark text is supported
+        if (fitIndex < 2) {
+            primaryIndex = 0;
+        } else if (fitIndex < textInversionIndex) {
+            primaryIndex = 2;
+        } else {
+            primaryIndex = h.length - 1;
+        }
+        secondaryIndex = primaryIndex + (primaryIndex >= 2 ? -2 : 2);
+        outColorsExtraDark.setMainColor(getColorInt(primaryIndex, h, s, l));
+        outColorsExtraDark.setSecondaryColor(getColorInt(secondaryIndex, h, s, l));
+
+        final boolean supportsDarkText = fitIndex >= textInversionIndex;
+        outColorsNormal.setSupportsDarkText(supportsDarkText);
+        outColorsDark.setSupportsDarkText(supportsDarkText);
+        outColorsExtraDark.setSupportsDarkText(supportsDarkText);
+
+        if (DEBUG) {
+            Log.d(TAG, "Gradients: \n\tNormal " + outColorsNormal + "\n\tDark " + outColorsDark
+            + "\n\tExtra dark: " + outColorsExtraDark);
+        }
 
         return true;
+    }
+
+    private int getColorInt(int fitIndex, float[] h, float[] s, float[] l) {
+        mTmpHSL[0] = fract(h[fitIndex]) * 360.0f;
+        mTmpHSL[1] = s[fitIndex];
+        mTmpHSL[2] = l[fitIndex];
+        return ColorUtils.HSLToColor(mTmpHSL);
     }
 
     /**
