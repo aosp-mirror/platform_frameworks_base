@@ -157,6 +157,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -732,6 +733,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mClearAllEnabled;
     @Nullable private View mAmbientIndicationContainer;
     private ColorExtractor mColorExtractor;
+    private ForegroundServiceController mForegroundServiceController;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -781,6 +783,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mColorExtractor.addOnColorsChangedListener(this);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+
+        mForegroundServiceController = Dependency.get(ForegroundServiceController.class);
+
         mDisplay = mWindowManager.getDefaultDisplay();
         updateDisplaySize();
 
@@ -1614,6 +1619,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
         abortExistingInflation(key);
+
+        mForegroundServiceController.addNotification(notification,
+                mNotificationData.getImportance(key));
+
         mPendingNotifications.put(key, shadeEntry);
     }
 
@@ -1750,6 +1759,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLatestRankingMap = ranking;
             mRemoteInputEntriesToRemoveOnCollapse.add(entry);
             return;
+        }
+
+        if (entry != null) {
+            mForegroundServiceController.removeNotification(entry.notification);
         }
 
         if (entry != null && entry.row != null) {
@@ -6942,6 +6955,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         entry.updateIcons(mContext, n);
         inflateViews(entry, mStackScroller);
 
+        mForegroundServiceController.updateNotification(notification,
+                mNotificationData.getImportance(key));
+
         boolean shouldPeek = shouldPeek(entry, notification);
         boolean alertAgain = alertAgain(entry, n);
 
@@ -6959,6 +6975,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             boolean isForCurrentUser = isNotificationForCurrentProfiles(notification);
             Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
         }
+
         setAreThereNotifications();
     }
 
