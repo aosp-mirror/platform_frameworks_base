@@ -214,7 +214,8 @@ public class BackgroundDexOptService extends JobService {
             int result = pm.performDexOptWithStatus(pkg,
                     /* checkProfiles */ false,
                     PackageManagerService.REASON_BOOT,
-                    /* force */ false);
+                    /* force */ false,
+                    /* bootComplete */ true);
             if (result == PackageDexOptimizer.DEX_OPT_PERFORMED)  {
                 updatedPackages.add(pkg);
             }
@@ -297,7 +298,8 @@ public class BackgroundDexOptService extends JobService {
                 int result = pm.performDexOptWithStatus(pkg,
                         /* checkProfiles */ true,
                         PackageManagerService.REASON_BACKGROUND_DEXOPT,
-                        /* force */ false);
+                        /* force */ false,
+                        /* bootComplete */ true);
                 success = result != PackageDexOptimizer.DEX_OPT_FAILED;
                 if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
                     updatedPackages.add(pkg);

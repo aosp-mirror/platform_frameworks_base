@@ -452,6 +452,37 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     private CameraDeviceImpl.CaptureCallback createCaptureCallbackProxy(
             Handler handler, CaptureCallback callback) {
         CameraDeviceImpl.CaptureCallback localCallback = new CameraDeviceImpl.CaptureCallback() {
+
+            @Override
+            public void onCaptureStarted(CameraDevice camera,
+                    CaptureRequest request, long timestamp, long frameNumber) {
+                // Do nothing
+            }
+
+            @Override
+            public void onCapturePartial(CameraDevice camera,
+                    CaptureRequest request, android.hardware.camera2.CaptureResult result) {
+                // Do nothing
+            }
+
+            @Override
+            public void onCaptureProgressed(CameraDevice camera,
+                    CaptureRequest request, android.hardware.camera2.CaptureResult partialResult) {
+                // Do nothing
+            }
+
+            @Override
+            public void onCaptureCompleted(CameraDevice camera,
+                    CaptureRequest request, android.hardware.camera2.TotalCaptureResult result) {
+                // Do nothing
+            }
+
+            @Override
+            public void onCaptureFailed(CameraDevice camera,
+                    CaptureRequest request, android.hardware.camera2.CaptureFailure failure) {
+                // Do nothing
+            }
+
             @Override
             public void onCaptureSequenceCompleted(CameraDevice camera,
                     int sequenceId, long frameNumber) {
@@ -463,6 +494,13 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                     int sequenceId) {
                 finishPendingSequence(sequenceId);
             }
+
+            @Override
+            public void onCaptureBufferLost(CameraDevice camera,
+                    CaptureRequest request, Surface target, long frameNumber) {
+                // Do nothing
+            }
+
         };
 
         /*

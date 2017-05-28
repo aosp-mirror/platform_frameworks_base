@@ -30,11 +30,6 @@ struct XmlFlattenerOptions {
    * Keep attribute raw string values along with typed values.
    */
   bool keep_raw_values = false;
-
-  /**
-   * If set, the max SDK level of attribute to flatten. All others are ignored.
-   */
-  Maybe<size_t> max_sdk_level;
 };
 
 class XmlFlattener : public IXmlResourceConsumer {

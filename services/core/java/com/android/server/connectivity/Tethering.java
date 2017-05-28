@@ -52,6 +52,7 @@ import android.net.util.SharedLog;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
@@ -198,8 +199,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
-        mOffloadController = new OffloadController(mTetherMasterSM.getHandler(),
-                deps.getOffloadHardwareInterface(), mLog);
+        final Handler smHandler = mTetherMasterSM.getHandler();
+        mOffloadController = new OffloadController(smHandler,
+                deps.getOffloadHardwareInterface(smHandler, mLog),
+                mLog);
         mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
                 mContext, mTetherMasterSM, TetherMasterSM.EVENT_UPSTREAM_CALLBACK, mLog);
         mForwardedDownstreams = new HashSet<>();
@@ -1100,7 +1103,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         TetherMasterSM(String name, Looper looper) {
             super(name, looper);
 
-            //Add states
             mInitialState = new InitialState();
             mTetherModeAliveState = new TetherModeAliveState();
             mSetIpForwardingEnabledErrorState = new SetIpForwardingEnabledErrorState();
@@ -1414,10 +1416,11 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
                 mSimChange.startListening();
                 mUpstreamNetworkMonitor.start();
-                mOffloadController.start();
 
+                // TODO: De-duplicate with updateUpstreamWanted() below.
                 if (upstreamWanted()) {
                     mUpstreamWanted = true;
+                    mOffloadController.start();
                     chooseUpstreamType(true);
                     mTryCell = false;
                 }
@@ -1436,6 +1439,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             private boolean updateUpstreamWanted() {
                 final boolean previousUpstreamWanted = mUpstreamWanted;
                 mUpstreamWanted = upstreamWanted();
+                if (mUpstreamWanted != previousUpstreamWanted) {
+                    if (mUpstreamWanted) {
+                        mOffloadController.start();
+                    } else {
+                        mOffloadController.stop();
+                    }
+                }
                 return previousUpstreamWanted;
             }
 

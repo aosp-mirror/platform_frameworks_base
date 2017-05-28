@@ -593,12 +593,12 @@ import java.util.function.Predicate;
  * a single tag using the {@link android.R.styleable#View_tag android:tag}
  * attribute or multiple tags using the {@code <tag>} child element:
  * <pre>
- *     &ltView ...
+ *     &lt;View ...
  *           android:tag="@string/mytag_value" /&gt;
- *     &ltView ...&gt;
- *         &lttag android:id="@+id/mytag"
+ *     &lt;View ...&gt;
+ *         &lt;tag android:id="@+id/mytag"
  *              android:value="@string/mytag_value" /&gt;
- *     &lt/View>
+ *     &lt;/View>
  * </pre>
  * </p>
  * <p>
@@ -628,11 +628,11 @@ import java.util.function.Predicate;
  * {@link android.R.styleable#Theme_colorAccent android:colorAccent} defined on
  * the inflation context's theme (e.g. the Activity theme) will be preserved.
  * <pre>
- *     &ltLinearLayout
+ *     &lt;LinearLayout
  *             ...
  *             android:theme="@android:theme/ThemeOverlay.Material.Dark"&gt;
- *         &ltView ...&gt;
- *     &lt/LinearLayout&gt;
+ *         &lt;View ...&gt;
+ *     &lt;/LinearLayout&gt;
  * </pre>
  * </p>
  *
@@ -1189,7 +1189,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @interface AutofillFlags {}
 
     /**
-     * Flag requesting you to add views not-important for autofill to the assist data.
+     * Flag requesting you to add views that are marked as not important for autofill
+     * (see {@link #setImportantForAutofill(int)}) to a {@link ViewStructure}.
      */
     public static final int AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x1;
 
@@ -7484,7 +7485,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>Call {@link AutofillManager#commit()} when the autofill context
      * of the view structure changed and you want the current autofill interaction if such
      * to be commited.
-     * <li>Call {@link AutofillManager#cancel()} ()} when the autofill context
+     * <li>Call {@link AutofillManager#cancel()} when the autofill context
      * of the view structure changed and you want the current autofill interaction if such
      * to be cancelled.
      * <li> The {@code left} and {@code top} values set in
@@ -7514,15 +7515,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>Passing the actual value to the equivalent setter in the view.
      * </ol>
      *
-     * <p>For example, a text-field view would call:
+     * <p>For example, a text-field view could implement the method this way:
+     *
      * <pre class="prettyprint">
-     * CharSequence text = value.getTextValue();
-     * if (text != null) {
-     *     setText(text);
+     * &#64;Override
+     * public void autofill(AutofillValue value) {
+     *   if (!value.isText() || !this.isEditable()) {
+     *      return;
+     *   }
+     *   CharSequence text = value.getTextValue();
+     *   if (text != null) {
+     *     this.setText(text);
+     *   }
      * }
      * </pre>
      *
-     * <p>If the value is updated asyncronously the next call to
+     * <p>If the value is updated asynchronously the next call to
      * {@link AutofillManager#notifyValueChanged(View)} must happen <u>after</u> the value was
      * changed to the autofilled value. If not, the view will not be considered autofilled.
      *

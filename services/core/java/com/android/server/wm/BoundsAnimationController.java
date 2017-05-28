@@ -139,8 +139,14 @@ public class BoundsAnimationController {
         private final boolean mSkipAnimationStart;
         // True if this animation was canceled by the user, not as a part of a replacing animation
         private boolean mSkipAnimationEnd;
+
+        // True if the animation target is animating from the fullscreen. Only one of
+        // {@link mMoveToFullscreen} or {@link mMoveFromFullscreen} can be true at any time in the
+        // animation.
+        private boolean mMoveFromFullscreen;
         // True if the animation target should be moved to the fullscreen stack at the end of this
-        // animation
+        // animation. Only one of {@link mMoveToFullscreen} or {@link mMoveFromFullscreen} can be
+        // true at any time in the animation.
         private boolean mMoveToFullscreen;
 
         // Whether to schedule PiP mode changes on animation start/end
@@ -151,15 +157,21 @@ public class BoundsAnimationController {
         private final int mFrozenTaskWidth;
         private final int mFrozenTaskHeight;
 
+        // Timeout callback to ensure we continue the animation if waiting for resuming or app
+        // windows drawn fails
+        private final Runnable mResumeRunnable = () -> resume();
+
         BoundsAnimator(BoundsAnimationTarget target, Rect from, Rect to,
                 @SchedulePipModeChangedState int schedulePipModeChangedState,
-                boolean moveToFullscreen, boolean replacingExistingAnimation) {
+                boolean moveFromFullscreen, boolean moveToFullscreen,
+                boolean replacingExistingAnimation) {
             super();
             mTarget = target;
             mFrom.set(from);
             mTo.set(to);
             mSkipAnimationStart = replacingExistingAnimation;
             mSchedulePipModeChangedState = schedulePipModeChangedState;
+            mMoveFromFullscreen = moveFromFullscreen;
             mMoveToFullscreen = moveToFullscreen;
             addUpdateListener(this);
             addListener(this);
@@ -177,13 +189,6 @@ public class BoundsAnimationController {
             }
         }
 
-        final Runnable mResumeRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    resume();
-                }
-        };
-
         @Override
         public void onAnimationStart(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
@@ -199,6 +204,12 @@ public class BoundsAnimationController {
             if (!mSkipAnimationStart) {
                 mTarget.onAnimationStart(mSchedulePipModeChangedState ==
                         SCHEDULE_PIP_MODE_CHANGED_ON_START);
+
+                // When starting an animation from fullscreen, pause here and wait for the
+                // windows-drawn signal before we start the rest of the transition down into PiP.
+                if (mMoveFromFullscreen) {
+                    pause();
+                }
             }
 
             // Immediately update the task bounds if they have to become larger, but preserve
@@ -213,13 +224,20 @@ public class BoundsAnimationController {
                 // correct logic to make this resize seamless.
                 if (mMoveToFullscreen) {
                     pause();
-                    mHandler.postDelayed(mResumeRunnable, WAIT_FOR_DRAW_TIMEOUT_MS);
                 }
             }
         }
 
         @Override
+        public void pause() {
+            if (DEBUG) Slog.d(TAG, "pause: waiting for windows drawn");
+            super.pause();
+            mHandler.postDelayed(mResumeRunnable, WAIT_FOR_DRAW_TIMEOUT_MS);
+        }
+
+        @Override
         public void resume() {
+            if (DEBUG) Slog.d(TAG, "resume:");
             mHandler.removeCallbacks(mResumeRunnable);
             super.resume();
         }
@@ -336,15 +354,15 @@ public class BoundsAnimationController {
 
     public void animateBounds(final BoundsAnimationTarget target, Rect from, Rect to,
             int animationDuration, @SchedulePipModeChangedState int schedulePipModeChangedState,
-            boolean moveToFullscreen) {
+            boolean moveFromFullscreen, boolean moveToFullscreen) {
         animateBoundsImpl(target, from, to, animationDuration, schedulePipModeChangedState,
-                moveToFullscreen);
+                moveFromFullscreen, moveToFullscreen);
     }
 
     @VisibleForTesting
     BoundsAnimator animateBoundsImpl(final BoundsAnimationTarget target, Rect from, Rect to,
             int animationDuration, @SchedulePipModeChangedState int schedulePipModeChangedState,
-            boolean moveToFullscreen) {
+            boolean moveFromFullscreen, boolean moveToFullscreen) {
         final BoundsAnimator existing = mRunningAnimations.get(target);
         final boolean replacing = existing != null;
 
@@ -387,7 +405,7 @@ public class BoundsAnimationController {
             existing.cancel();
         }
         final BoundsAnimator animator = new BoundsAnimator(target, from, to,
-                schedulePipModeChangedState, moveToFullscreen, replacing);
+                schedulePipModeChangedState, moveFromFullscreen, moveToFullscreen, replacing);
         mRunningAnimations.put(target, animator);
         animator.setFloatValues(0f, 1f);
         animator.setDuration((animationDuration != -1 ? animationDuration
@@ -397,14 +415,19 @@ public class BoundsAnimationController {
         return animator;
     }
 
+    public Handler getHandler() {
+        return mHandler;
+    }
+
+    public void onAllWindowsDrawn() {
+        if (DEBUG) Slog.d(TAG, "onAllWindowsDrawn:");
+        mHandler.post(this::resume);
+    }
+
     private void resume() {
         for (int i = 0; i < mRunningAnimations.size(); i++) {
             final BoundsAnimator b = mRunningAnimations.valueAt(i);
             b.resume();
         }
-    }
-
-    public void onAllWindowsDrawn() {
-        mHandler.post(this::resume);
     }
 }

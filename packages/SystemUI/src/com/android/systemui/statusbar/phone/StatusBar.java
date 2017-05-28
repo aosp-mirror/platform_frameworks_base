@@ -1626,7 +1626,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onAsyncInflationFinished(Entry entry) {
         mPendingNotifications.remove(entry.key);
-        if (mNotificationData.get(entry.key) == null) {
+        // If there was an async task started after the removal, we don't want to add it back to
+        // the list, otherwise we might get leaks.
+        if (mNotificationData.get(entry.key) == null && !entry.row.isRemoved()) {
             addEntry(entry);
         }
     }
@@ -1776,10 +1778,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                     continue;
                 }
                 toRemove.add(row);
-                toRemove.get(i).setKeepInParent(true);
+                row.setKeepInParent(true);
                 // we need to set this state earlier as otherwise we might generate some weird
                 // animations
-                toRemove.get(i).setRemoved();
+                row.setRemoved();
             }
         }
     }
@@ -2894,6 +2896,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void postAnimateCollapsePanels() {
         mHandler.post(mAnimateCollapsePanels);
+    }
+
+    public void postAnimateForceCollapsePanels() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+            }
+        });
     }
 
     public void postAnimateOpenPanels() {
@@ -6768,6 +6779,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         // another "changeViewPosition" call is ever added.
         mStackScroller.changeViewPosition(mNotificationShelf,
                 mStackScroller.getChildCount() - offsetFromEnd);
+
+        // Scrim opacity varies based on notification count
+        mScrimController.setNotificationCount(mStackScroller.getNotGoneChildCount());
     }
 
     public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {

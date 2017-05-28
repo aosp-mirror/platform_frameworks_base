@@ -71,6 +71,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_USER_LOCKED = "locked";
     private static final String ATT_GROUP = "group";
+    private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
     private static final String DELIMITER = ",";
 
     /**
@@ -140,6 +141,7 @@ public final class NotificationChannel implements Parcelable {
     private boolean mDeleted = DEFAULT_DELETED;
     private String mGroup;
     private AudioAttributes mAudioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+    private boolean mBlockableSystem = false;
 
     /**
      * Creates a notification channel.
@@ -199,6 +201,7 @@ public final class NotificationChannel implements Parcelable {
         }
         mAudioAttributes = in.readInt() > 0 ? AudioAttributes.CREATOR.createFromParcel(in) : null;
         mLightColor = in.readInt();
+        mBlockableSystem = in.readBoolean();
     }
 
     @Override
@@ -249,6 +252,7 @@ public final class NotificationChannel implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(mLightColor);
+        dest.writeBoolean(mBlockableSystem);
     }
 
     /**
@@ -272,6 +276,12 @@ public final class NotificationChannel implements Parcelable {
         mDeleted = deleted;
     }
 
+    /**
+     * @hide
+     */
+    public void setBlockableSystem(boolean blockableSystem) {
+        mBlockableSystem = blockableSystem;
+    }
     // Modifiable by apps post channel creation
 
     /**
@@ -421,7 +431,6 @@ public final class NotificationChannel implements Parcelable {
         this.mLockscreenVisibility = lockscreenVisibility;
     }
 
-
     /**
      * Returns the id of this channel.
      */
@@ -549,6 +558,13 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    public boolean isBlockableSystem() {
+        return mBlockableSystem;
+    }
+
+    /**
+     * @hide
+     */
     @SystemApi
     public void populateFromXml(XmlPullParser parser) {
         // Name, id, and importance are set in the constructor.
@@ -565,6 +581,7 @@ public final class NotificationChannel implements Parcelable {
         setDeleted(safeBool(parser, ATT_DELETED, false));
         setGroup(parser.getAttributeValue(null, ATT_GROUP));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
+        setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
     }
 
     /**
@@ -625,6 +642,9 @@ public final class NotificationChannel implements Parcelable {
         if (getGroup() != null) {
             out.attribute(null, ATT_GROUP, getGroup());
         }
+        if (isBlockableSystem()) {
+            out.attribute(null, ATT_BLOCKABLE_SYSTEM, Boolean.toString(isBlockableSystem()));
+        }
 
         out.endTag(null, TAG_CHANNEL);
     }
@@ -665,6 +685,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
         record.put(ATT_GROUP, getGroup());
+        record.put(ATT_BLOCKABLE_SYSTEM, isBlockableSystem());
         return record;
     }
 
@@ -764,6 +785,7 @@ public final class NotificationChannel implements Parcelable {
         if (mVibrationEnabled != that.mVibrationEnabled) return false;
         if (mShowBadge != that.mShowBadge) return false;
         if (isDeleted() != that.isDeleted()) return false;
+        if (isBlockableSystem() != that.isBlockableSystem()) return false;
         if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
         if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) {
             return false;
@@ -802,6 +824,7 @@ public final class NotificationChannel implements Parcelable {
         result = 31 * result + (isDeleted() ? 1 : 0);
         result = 31 * result + (getGroup() != null ? getGroup().hashCode() : 0);
         result = 31 * result + (getAudioAttributes() != null ? getAudioAttributes().hashCode() : 0);
+        result = 31 * result + (isBlockableSystem() ? 1 : 0);
         return result;
     }
 
@@ -824,6 +847,7 @@ public final class NotificationChannel implements Parcelable {
                 ", mDeleted=" + mDeleted +
                 ", mGroup='" + mGroup + '\'' +
                 ", mAudioAttributes=" + mAudioAttributes +
+                ", mBlockableSystem=" + mBlockableSystem +
                 '}';
     }
 }

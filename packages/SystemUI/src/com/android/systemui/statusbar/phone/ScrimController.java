@@ -25,9 +25,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.support.v4.graphics.ColorUtils;
 import android.util.Log;
-import android.util.TypedValue;
+import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -57,8 +56,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             = new PathInterpolator(0f, 0, 0.7f, 1f);
     public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED
             = new PathInterpolator(0.3f, 0f, 0.8f, 1f);
-    public static final float GRADIENT_SCRIM_ALPHA = 0.75f;
-    protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.45f;
+    // Default alpha value for most scrims, if unsure use this constant
+    public static final float GRADIENT_SCRIM_ALPHA = 0.60f;
+    // A scrim varies its opacity based on a busyness factor, for example
+    // how many notifications are currently visible.
+    public static final float GRADIENT_SCRIM_ALPHA_BUSY = 0.90f;
+    protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = GRADIENT_SCRIM_ALPHA;
     protected static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
     private static final float SCRIM_IN_FRONT_ALPHA = GRADIENT_SCRIM_ALPHA;
     private static final float SCRIM_IN_FRONT_ALPHA_LOCKED = GRADIENT_SCRIM_ALPHA;
@@ -254,6 +257,19 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public float getDozeInFrontAlpha() {
         return mDozeInFrontAlpha;
+    }
+
+    public void setNotificationCount(int notificationCount) {
+        final float maxNotificationDensity = 3;
+        float notificationDensity = Math.min(notificationCount / maxNotificationDensity, 1f);
+        float newAlpha = MathUtils.map(0, 1,
+                GRADIENT_SCRIM_ALPHA, GRADIENT_SCRIM_ALPHA_BUSY,
+                notificationDensity);
+        if (mScrimBehindAlphaKeyguard != newAlpha) {
+            mScrimBehindAlphaKeyguard = newAlpha;
+            mAnimateChange = true;
+            scheduleUpdate();
+        }
     }
 
     private float getScrimInFrontAlpha() {

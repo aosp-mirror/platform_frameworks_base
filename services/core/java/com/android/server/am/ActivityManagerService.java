@@ -10574,8 +10574,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 mStackSupervisor.getStack(PINNED_STACK_ID);
                         if (pinnedStack != null) {
                             pinnedStack.animateResizePinnedStack(null /* sourceHintBounds */,
-                                    destBounds, animationDuration,
-                                    false /* schedulePipModeChangedOnAnimationEnd */);
+                                    destBounds, animationDuration, false /* fromFullscreen */);
                         }
                     } else {
                         throw new IllegalArgumentException("Stack: " + stackId

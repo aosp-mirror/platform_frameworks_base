@@ -931,7 +931,7 @@ please see styles_device_defaults.xml.
          <item name="textStyle">normal</item>
          <item name="textColor">?textColorPrimaryInverse</item>
          <item name="textColorHint">?textColorHintInverse</item>
-     </style>	
+     </style>
 
      <!-- @hide -->
      <style name="TextAppearance.SearchResult.Title">
@@ -1490,6 +1490,17 @@ please see styles_device_defaults.xml.
     <style name="AutofillDatasetPicker">
         <item name="elevation">4dp</item>
         <item name="background">@drawable/autofill_dataset_picker_background</item>
+    </style>
+
+    <!-- The style for the container of media actions in a notification. -->
+    <!-- @hide -->
+    <style name="NotificationMediaActionContainer">
+        <item name="layout_width">wrap_content</item>
+        <item name="layout_height">wrap_content</item>
+        <item name="layout_marginTop">-21dp</item>
+        <item name="paddingStart">8dp</item>
+        <item name="paddingBottom">@dimen/media_notification_actions_padding_bottom</item>
+        <item name="gravity">top</item>
     </style>
 
 </resources>

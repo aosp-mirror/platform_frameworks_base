@@ -26,9 +26,9 @@ using android::StringPiece;
 namespace aapt {
 
 static const char* sDevelopmentSdkCodeName = "O";
-static int sDevelopmentSdkLevel = 26;
+static ApiVersion sDevelopmentSdkLevel = 26;
 
-static const std::vector<std::pair<uint16_t, size_t>> sAttrIdMap = {
+static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
     {0x021c, 1},
     {0x021d, 2},
     {0x0269, SDK_CUPCAKE},
@@ -48,26 +48,29 @@ static const std::vector<std::pair<uint16_t, size_t>> sAttrIdMap = {
     {0x03f1, SDK_KITKAT},
     {0x03f6, SDK_KITKAT_WATCH},
     {0x04ce, SDK_LOLLIPOP},
+    {0x04d8, SDK_LOLLIPOP_MR1},
+    {0x04f1, SDK_MARSHMALLOW},
+    {0x0527, SDK_NOUGAT},
+    {0x0530, SDK_NOUGAT_MR1},
+    {0x0568, SDK_O},
 };
 
-static bool less_entry_id(const std::pair<uint16_t, size_t>& p,
-                        uint16_t entryId) {
+static bool less_entry_id(const std::pair<uint16_t, ApiVersion>& p, uint16_t entryId) {
   return p.first < entryId;
 }
 
-size_t FindAttributeSdkLevel(const ResourceId& id) {
-  if (id.package_id() != 0x01 && id.type_id() != 0x01) {
+ApiVersion FindAttributeSdkLevel(const ResourceId& id) {
+  if (id.package_id() != 0x01 || id.type_id() != 0x01) {
     return 0;
   }
-  auto iter = std::lower_bound(sAttrIdMap.begin(), sAttrIdMap.end(),
-                               id.entry_id(), less_entry_id);
+  auto iter = std::lower_bound(sAttrIdMap.begin(), sAttrIdMap.end(), id.entry_id(), less_entry_id);
   if (iter == sAttrIdMap.end()) {
     return SDK_LOLLIPOP_MR1;
   }
   return iter->second;
 }
 
-static const std::unordered_map<std::string, size_t> sAttrMap = {
+static const std::unordered_map<std::string, ApiVersion> sAttrMap = {
     {"marqueeRepeatLimit", 2},
     {"windowNoDisplay", 3},
     {"backgroundDimEnabled", 3},
@@ -729,7 +732,7 @@ static const std::unordered_map<std::string, size_t> sAttrMap = {
     {"windowActivityTransitions", 21},
     {"colorEdgeEffect", 21}};
 
-size_t FindAttributeSdkLevel(const ResourceName& name) {
+ApiVersion FindAttributeSdkLevel(const ResourceName& name) {
   if (name.package != "android" && name.type != ResourceType::kAttr) {
     return 0;
   }
@@ -741,9 +744,8 @@ size_t FindAttributeSdkLevel(const ResourceName& name) {
   return SDK_LOLLIPOP_MR1;
 }
 
-std::pair<StringPiece, int> GetDevelopmentSdkCodeNameAndVersion() {
-  return std::make_pair(StringPiece(sDevelopmentSdkCodeName),
-                        sDevelopmentSdkLevel);
+std::pair<StringPiece, ApiVersion> GetDevelopmentSdkCodeNameAndVersion() {
+  return std::make_pair(StringPiece(sDevelopmentSdkCodeName), sDevelopmentSdkLevel);
 }
 
 }  // namespace aapt

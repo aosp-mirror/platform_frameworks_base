@@ -57,7 +57,7 @@ public class NotificationSnooze extends LinearLayout
     private ViewGroup mSnoozeOptionContainer;
     private List<SnoozeOption> mSnoozeOptions;
     private int mCollapsedHeight;
-
+    private SnoozeOption mDefaultOption;
     private SnoozeOption mSelectedOption;
     private boolean mSnoozing;
     private boolean mExpanded;
@@ -86,7 +86,7 @@ public class NotificationSnooze extends LinearLayout
         createOptionViews();
 
         // Default to first option in list
-        setSelected(mSnoozeOptions.get(0));
+        setSelected(mDefaultOption);
     }
 
     public void setSnoozeOptions(final List<SnoozeCriterion> snoozeList) {
@@ -119,7 +119,9 @@ public class NotificationSnooze extends LinearLayout
         ArrayList<SnoozeOption> options = new ArrayList<>();
         options.add(createOption(R.string.snooze_option_15_min, 15));
         options.add(createOption(R.string.snooze_option_30_min, 30));
-        options.add(createOption(R.string.snooze_option_1_hour, 60));
+        mDefaultOption = createOption(R.string.snooze_option_1_hour, 60);
+        options.add(mDefaultOption);
+        options.add(createOption(R.string.snooze_option_2_hour, 60 * 2));
         return options;
     }
 
@@ -232,7 +234,7 @@ public class NotificationSnooze extends LinearLayout
     @Override
     public View getContentView() {
         // Reset the view before use
-        setSelected(mSnoozeOptions.get(0));
+        setSelected(mDefaultOption);
         return this;
     }
 

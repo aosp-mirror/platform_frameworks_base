@@ -333,6 +333,12 @@ void BinaryPrimitive::Print(std::ostream* out) const {
   }
 }
 
+Attribute::Attribute()
+    : type_mask(0u),
+      min_int(std::numeric_limits<int32_t>::min()),
+      max_int(std::numeric_limits<int32_t>::max()) {
+}
+
 Attribute::Attribute(bool w, uint32_t t)
     : type_mask(t),
       min_int(std::numeric_limits<int32_t>::min()),

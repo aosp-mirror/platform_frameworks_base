@@ -1789,7 +1789,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private static final String[] SETTINGS_TO_BACKUP = new String[] {
             Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
-            Secure.LOCK_SCREEN_OWNER_INFO
+            Secure.LOCK_SCREEN_OWNER_INFO,
+            Secure.LOCK_PATTERN_VISIBLE,
+            LockPatternUtils.LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS
     };
 
     private class GateKeeperDiedRecipient implements IBinder.DeathRecipient {

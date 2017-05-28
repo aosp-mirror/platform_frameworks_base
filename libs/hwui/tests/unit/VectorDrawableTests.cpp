@@ -382,47 +382,24 @@ TEST(VectorDrawable, groupProperties) {
 
 }
 
-static SkShader* createShader(bool* isDestroyed) {
-    class TestShader : public SkShader {
-    public:
-        TestShader(bool* isDestroyed) : SkShader(), mDestroyed(isDestroyed) {
-        }
-        ~TestShader() {
-            *mDestroyed = true;
-        }
-
-        Factory getFactory() const override { return nullptr; }
-    private:
-        bool* mDestroyed;
-    };
-    return new TestShader(isDestroyed);
-}
-
 TEST(VectorDrawable, drawPathWithoutIncrementingShaderRefCount) {
     VectorDrawable::FullPath path("m1 1", 4);
     SkBitmap bitmap;
-    SkImageInfo info = SkImageInfo::Make(5, 5, kN32_SkColorType, kPremul_SkAlphaType);
-    bitmap.setInfo(info);
-    bitmap.allocPixels(info);
+    bitmap.allocN32Pixels(5, 5, false);
     SkCanvas canvas(bitmap);
 
-    bool shaderIsDestroyed = false;
-
+    sk_sp<SkShader> shader = SkShader::MakeColorShader(SK_ColorBLACK);
     // Initial ref count is 1
-    SkShader* shader = createShader(&shaderIsDestroyed);
+    EXPECT_TRUE(shader->unique());
 
     // Setting the fill gradient increments the ref count of the shader by 1
-    path.mutateStagingProperties()->setFillGradient(shader);
+    path.mutateStagingProperties()->setFillGradient(shader.get());
+    EXPECT_FALSE(shader->unique());
     path.draw(&canvas, true);
     // Resetting the fill gradient decrements the ref count of the shader by 1
     path.mutateStagingProperties()->setFillGradient(nullptr);
 
-    // Expect ref count to be 1 again, i.e. nothing else to have a ref to the shader now. Unref()
-    // again should bring the ref count to zero and consequently trigger detor.
-    shader->unref();
-
-    // Verify that detor is called.
-    EXPECT_TRUE(shaderIsDestroyed);
+    EXPECT_TRUE(shader->unique());
 }
 
 }; // namespace uirenderer
