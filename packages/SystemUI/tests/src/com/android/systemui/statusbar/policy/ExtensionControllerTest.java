@@ -20,6 +20,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import android.support.test.filters.SmallTest;
+
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.OverlayPlugin;
@@ -34,6 +36,7 @@ import org.junit.Test;
 import java.util.Map;
 import java.util.function.Consumer;
 
+@SmallTest
 public class ExtensionControllerTest extends SysuiTestCase {
 
     private PluginManager mPluginManager;

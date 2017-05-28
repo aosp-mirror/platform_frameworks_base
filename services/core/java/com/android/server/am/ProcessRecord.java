@@ -302,6 +302,10 @@ final class ProcessRecord {
                     pw.print(" hasAboveClient="); pw.print(hasAboveClient);
                     pw.print(" treatLikeActivity="); pw.println(treatLikeActivity);
         }
+        if (hasTopUi || hasOverlayUi) {
+            pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi);
+                    pw.print(" hasOverlayUi="); pw.println(hasOverlayUi);
+        }
         if (foregroundServices || forcingToImportant != null) {
             pw.print(prefix); pw.print("foregroundServices="); pw.print(foregroundServices);
                     pw.print(" forcingToImportant="); pw.println(forcingToImportant);
@@ -427,12 +431,6 @@ final class ProcessRecord {
             for (int i=0; i<receivers.size(); i++) {
                 pw.print(prefix); pw.print("  - "); pw.println(receivers.valueAt(i));
             }
-        }
-        if (hasTopUi) {
-            pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi);
-        }
-        if (hasOverlayUi) {
-            pw.print(prefix); pw.print("hasOverlayUi="); pw.print(hasOverlayUi);
         }
     }
 

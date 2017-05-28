@@ -356,17 +356,16 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnos
   return util::make_unique<XmlResource>(ResourceFile{}, std::move(string_pool), std::move(root));
 }
 
-std::unique_ptr<Node> Namespace::Clone() {
+std::unique_ptr<Node> Namespace::Clone(const ElementCloneFunc& el_cloner) {
   auto ns = util::make_unique<Namespace>();
   ns->comment = comment;
   ns->line_number = line_number;
   ns->column_number = column_number;
   ns->namespace_prefix = namespace_prefix;
   ns->namespace_uri = namespace_uri;
-
   ns->children.reserve(children.size());
   for (const std::unique_ptr<xml::Node>& child : children) {
-    ns->AppendChild(child->Clone());
+    ns->AppendChild(child->Clone(el_cloner));
   }
   return std::move(ns);
 }
@@ -405,6 +404,15 @@ void Node::InsertChild(size_t index, std::unique_ptr<Node> child) {
 Attribute* Element::FindAttribute(const StringPiece& ns,
                                   const StringPiece& name) {
   for (auto& attr : attributes) {
+    if (ns == attr.namespace_uri && name == attr.name) {
+      return &attr;
+    }
+  }
+  return nullptr;
+}
+
+const Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece& name) const {
+  for (const auto& attr : attributes) {
     if (ns == attr.namespace_uri && name == attr.name) {
       return &attr;
     }
@@ -464,29 +472,23 @@ std::vector<Element*> Element::GetChildElements() {
   return elements;
 }
 
-std::unique_ptr<Node> Element::Clone() {
+std::unique_ptr<Node> Element::Clone(const ElementCloneFunc& el_cloner) {
   auto el = util::make_unique<Element>();
   el->comment = comment;
   el->line_number = line_number;
   el->column_number = column_number;
   el->name = name;
   el->namespace_uri = namespace_uri;
-
   el->attributes.reserve(attributes.size());
-  for (xml::Attribute& attr : attributes) {
-    // Don't copy compiled values or attributes.
-    el->attributes.push_back(
-        xml::Attribute{attr.namespace_uri, attr.name, attr.value});
-  }
-
+  el_cloner(*this, el.get());
   el->children.reserve(children.size());
   for (const std::unique_ptr<xml::Node>& child : children) {
-    el->AppendChild(child->Clone());
+    el->AppendChild(child->Clone(el_cloner));
   }
   return std::move(el);
 }
 
-std::unique_ptr<Node> Text::Clone() {
+std::unique_ptr<Node> Text::Clone(const ElementCloneFunc&) {
   auto t = util::make_unique<Text>();
   t->comment = comment;
   t->line_number = line_number;

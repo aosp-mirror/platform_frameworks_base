@@ -388,9 +388,10 @@ public final class AutofillManager {
     /**
      * Explicitly requests a new autofill context.
      *
-     * <p>Normally, the autofill context is automatically started when autofillable views are
-     * focused, but this method should be used in the cases where it must be explicitly requested,
-     * like a view that provides a contextual menu allowing users to autofill the activity.
+     * <p>Normally, the autofill context is automatically started if necessary when
+     * {@link #notifyViewEntered(View)} is called, but this method should be used in the
+     * cases where it must be explicitly started. For example, when the view offers an AUTOFILL
+     * option on its contextual overflow menu, and the user selects it.
      *
      * @param view view requesting the new autofill context.
      */
@@ -401,16 +402,29 @@ public final class AutofillManager {
     /**
      * Explicitly requests a new autofill context for virtual views.
      *
-     * <p>Normally, the autofill context is automatically started when autofillable views are
-     * focused, but this method should be used in the cases where it must be explicitly requested,
-     * like a virtual view that provides a contextual menu allowing users to autofill the activity.
+     * <p>Normally, the autofill context is automatically started if necessary when
+     * {@link #notifyViewEntered(View, int, Rect)} is called, but this method should be used in the
+     * cases where it must be explicitly started. For example, when the virtual view offers an
+     * AUTOFILL option on its contextual overflow menu, and the user selects it.
      *
-     * @param view the {@link View} whose descendant is the virtual view.
-     * @param childId id identifying the virtual child inside the view.
-     * @param bounds child boundaries, relative to the top window.
+     * <p>The virtual view boundaries must be absolute screen coordinates. For example, if the
+     * parent view uses {@code bounds} to draw the virtual view inside its Canvas,
+     * the absolute bounds could be calculated by:
+     *
+     * <pre class="prettyprint">
+     *   int offset[] = new int[2];
+     *   getLocationOnScreen(offset);
+     *   Rect absBounds = new Rect(bounds.left + offset[0],
+     *       bounds.top + offset[1],
+     *       bounds.right + offset[0], bounds.bottom + offset[1]);
+     * </pre>
+     *
+     * @param view the virtual view parent.
+     * @param virtualId id identifying the virtual child inside the parent view.
+     * @param absBounds absolute boundaries of the virtual view in the screen.
      */
-    public void requestAutofill(@NonNull View view, int childId, @NonNull Rect bounds) {
-        notifyViewEntered(view, childId, bounds, FLAG_MANUAL_REQUEST);
+    public void requestAutofill(@NonNull View view, int virtualId, @NonNull Rect absBounds) {
+        notifyViewEntered(view, virtualId, absBounds, FLAG_MANUAL_REQUEST);
     }
 
     /**
@@ -502,15 +516,27 @@ public final class AutofillManager {
     /**
      * Called when a virtual view that supports autofill is entered.
      *
-     * @param view the {@link View} whose descendant is the virtual view.
-     * @param childId id identifying the virtual child inside the view.
-     * @param bounds child boundaries, relative to the top window.
+     * <p>The virtual view boundaries must be absolute screen coordinates. For example, if the
+     * parent, non-virtual view uses {@code bounds} to draw the virtual view inside its Canvas,
+     * the absolute bounds could be calculated by:
+     *
+     * <pre class="prettyprint">
+     *   int offset[] = new int[2];
+     *   getLocationOnScreen(offset);
+     *   Rect absBounds = new Rect(bounds.left + offset[0],
+     *       bounds.top + offset[1],
+     *       bounds.right + offset[0], bounds.bottom + offset[1]);
+     * </pre>
+     *
+     * @param view the virtual view parent.
+     * @param virtualId id identifying the virtual child inside the parent view.
+     * @param absBounds absolute boundaries of the virtual view in the screen.
      */
-    public void notifyViewEntered(@NonNull View view, int childId, @NonNull Rect bounds) {
-        notifyViewEntered(view, childId, bounds, 0);
+    public void notifyViewEntered(@NonNull View view, int virtualId, @NonNull Rect absBounds) {
+        notifyViewEntered(view, virtualId, absBounds, 0);
     }
 
-    private void notifyViewEntered(View view, int childId, Rect bounds, int flags) {
+    private void notifyViewEntered(View view, int virtualId, Rect bounds, int flags) {
         if (!hasAutofillFeature()) {
             return;
         }
@@ -523,7 +549,7 @@ public final class AutofillManager {
                     callback = mCallback;
                 }
             } else {
-                final AutofillId id = getAutofillId(view, childId);
+                final AutofillId id = getAutofillId(view, virtualId);
 
                 if (mSessionId == NO_SESSION) {
                     // Starts new session.
@@ -536,7 +562,7 @@ public final class AutofillManager {
         }
 
         if (callback != null) {
-            callback.onAutofillEvent(view, childId,
+            callback.onAutofillEvent(view, virtualId,
                     AutofillCallback.EVENT_INPUT_UNAVAILABLE);
         }
     }
@@ -544,10 +570,10 @@ public final class AutofillManager {
     /**
      * Called when a virtual view that supports autofill is exited.
      *
-     * @param view the {@link View} whose descendant is the virtual view.
-     * @param childId id identifying the virtual child inside the view.
+     * @param view the virtual view parent.
+     * @param virtualId id identifying the virtual child inside the parent view.
      */
-    public void notifyViewExited(@NonNull View view, int childId) {
+    public void notifyViewExited(@NonNull View view, int virtualId) {
         if (!hasAutofillFeature()) {
             return;
         }
@@ -555,7 +581,7 @@ public final class AutofillManager {
             ensureServiceClientAddedIfNeededLocked();
 
             if (mEnabled && mSessionId != NO_SESSION) {
-                final AutofillId id = getAutofillId(view, childId);
+                final AutofillId id = getAutofillId(view, virtualId);
 
                 // Update focus on existing session.
                 updateSessionLocked(id, null, null, ACTION_VIEW_EXITED, 0);
@@ -615,13 +641,13 @@ public final class AutofillManager {
     }
 
     /**
-     * Called to indicate the value of an autofillable virtual {@link View} changed.
+     * Called to indicate the value of an autofillable virtual view has changed.
      *
-     * @param view the {@link View} whose descendant is the virtual view.
-     * @param childId id identifying the virtual child inside the parent view.
+     * @param view the virtual view parent.
+     * @param virtualId id identifying the virtual child inside the parent view.
      * @param value new value of the child.
      */
-    public void notifyValueChanged(View view, int childId, AutofillValue value) {
+    public void notifyValueChanged(View view, int virtualId, AutofillValue value) {
         if (!hasAutofillFeature()) {
             return;
         }
@@ -630,7 +656,7 @@ public final class AutofillManager {
                 return;
             }
 
-            final AutofillId id = getAutofillId(view, childId);
+            final AutofillId id = getAutofillId(view, virtualId);
             updateSessionLocked(id, null, value, ACTION_VALUE_CHANGED, 0);
         }
     }
@@ -765,8 +791,8 @@ public final class AutofillManager {
         return new AutofillId(view.getAccessibilityViewId());
     }
 
-    private static AutofillId getAutofillId(View parent, int childId) {
-        return new AutofillId(parent.getAccessibilityViewId(), childId);
+    private static AutofillId getAutofillId(View parent, int virtualId) {
+        return new AutofillId(parent.getAccessibilityViewId(), virtualId);
     }
 
     private void startSessionLocked(@NonNull AutofillId id, @NonNull Rect bounds,
@@ -1470,11 +1496,12 @@ public final class AutofillManager {
          * Called after a change in the autofill state associated with a virtual view.
          *
          * @param view parent view associated with the change.
-         * @param childId id identifying the virtual child inside the parent view.
+         * @param virtualId id identifying the virtual child inside the parent view.
          *
          * @param event currently either {@link #EVENT_INPUT_SHOWN} or {@link #EVENT_INPUT_HIDDEN}.
          */
-        public void onAutofillEvent(@NonNull View view, int childId, @AutofillEventType int event) {
+        public void onAutofillEvent(@NonNull View view, int virtualId,
+                @AutofillEventType int event) {
         }
     }
 

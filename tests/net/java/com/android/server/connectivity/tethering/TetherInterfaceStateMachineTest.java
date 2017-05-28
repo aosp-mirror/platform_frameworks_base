@@ -38,6 +38,7 @@ import static com.android.server.connectivity.tethering.IControlsTethering.STATE
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
+import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
@@ -63,12 +64,14 @@ public class TetherInterfaceStateMachineTest {
     @Mock private IControlsTethering mTetherHelper;
     @Mock private InterfaceConfiguration mInterfaceConfiguration;
     @Mock private IPv6TetheringInterfaceServices mIPv6TetheringInterfaceServices;
+    @Mock private SharedLog mSharedLog;
 
     private final TestLooper mLooper = new TestLooper();
     private TetherInterfaceStateMachine mTestedSm;
 
     private void initStateMachine(int interfaceType) throws Exception {
-        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), interfaceType,
+        mTestedSm = new TetherInterfaceStateMachine(
+                IFACE_NAME, mLooper.getLooper(), interfaceType, mSharedLog,
                 mNMService, mStatsService, mTetherHelper, mIPv6TetheringInterfaceServices);
         mTestedSm.start();
         // Starting the state machine always puts us in a consistent state and notifies
@@ -90,12 +93,13 @@ public class TetherInterfaceStateMachineTest {
 
     @Before public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        when(mSharedLog.forSubComponent(anyString())).thenReturn(mSharedLog);
     }
 
     @Test
     public void startsOutAvailable() {
         mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(),
-                TETHERING_BLUETOOTH, mNMService, mStatsService, mTetherHelper,
+                TETHERING_BLUETOOTH, mSharedLog, mNMService, mStatsService, mTetherHelper,
                 mIPv6TetheringInterfaceServices);
         mTestedSm.start();
         mLooper.dispatchAll();

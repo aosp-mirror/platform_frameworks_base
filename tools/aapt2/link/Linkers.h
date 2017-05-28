@@ -23,6 +23,7 @@
 #include "android-base/macros.h"
 
 #include "Resource.h"
+#include "SdkConstants.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
 
@@ -44,9 +45,12 @@ struct CallSite {
  * Determines whether a versioned resource should be created. If a versioned
  * resource already exists, it takes precedence.
  */
-bool ShouldGenerateVersionedResource(const ResourceEntry* entry,
-                                     const ConfigDescription& config,
-                                     const int sdk_version_to_generate);
+bool ShouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDescription& config,
+                                     const ApiVersion sdk_version_to_generate);
+
+// Finds the next largest ApiVersion of the config which is identical to the given config except
+// for sdkVersion.
+ApiVersion FindNextApiVersionForConfig(const ResourceEntry* entry, const ConfigDescription& config);
 
 class AutoVersioner : public IResourceTableConsumer {
  public:
@@ -105,11 +109,10 @@ class ResourceConfigValue;
 
 class ProductFilter : public IResourceTableConsumer {
  public:
-  using ResourceConfigValueIter =
-      std::vector<std::unique_ptr<ResourceConfigValue>>::iterator;
+  using ResourceConfigValueIter = std::vector<std::unique_ptr<ResourceConfigValue>>::iterator;
 
-  explicit ProductFilter(std::unordered_set<std::string> products)
-      : products_(products) {}
+  explicit ProductFilter(std::unordered_set<std::string> products) : products_(products) {
+  }
 
   ResourceConfigValueIter SelectProductToKeep(
       const ResourceNameRef& name, const ResourceConfigValueIter begin,
@@ -118,19 +121,9 @@ class ProductFilter : public IResourceTableConsumer {
   bool Consume(IAaptContext* context, ResourceTable* table) override;
 
  private:
-  std::unordered_set<std::string> products_;
-
   DISALLOW_COPY_AND_ASSIGN(ProductFilter);
-};
 
-class XmlAutoVersioner : public IXmlResourceConsumer {
- public:
-  XmlAutoVersioner() = default;
-
-  bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(XmlAutoVersioner);
+  std::unordered_set<std::string> products_;
 };
 
 /**
@@ -143,8 +136,7 @@ class XmlAutoVersioner : public IXmlResourceConsumer {
  */
 class XmlNamespaceRemover : public IXmlResourceConsumer {
  public:
-  explicit XmlNamespaceRemover(bool keep_uris = false)
-      : keep_uris_(keep_uris){};
+  explicit XmlNamespaceRemover(bool keep_uris = false) : keep_uris_(keep_uris){};
 
   bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
 
@@ -165,17 +157,8 @@ class XmlReferenceLinker : public IXmlResourceConsumer {
 
   bool Consume(IAaptContext* context, xml::XmlResource* resource) override;
 
-  /**
-   * Once the XmlResource has been consumed, this returns the various SDK levels
-   * in which
-   * framework attributes used within the XML document were defined.
-   */
-  inline const std::set<int>& sdk_levels() const { return sdk_levels_found_; }
-
  private:
   DISALLOW_COPY_AND_ASSIGN(XmlReferenceLinker);
-
-  std::set<int> sdk_levels_found_;
 };
 
 }  // namespace aapt

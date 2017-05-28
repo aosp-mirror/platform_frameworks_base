@@ -194,6 +194,11 @@ public class KeyButtonRipple extends Drawable {
         return true;
     }
 
+    @Override
+    public boolean hasFocusStateSpecified() {
+        return true;
+    }
+
     public void setPressed(boolean pressed) {
         if (mDark != mLastDark && pressed) {
             mRipplePaint = null;

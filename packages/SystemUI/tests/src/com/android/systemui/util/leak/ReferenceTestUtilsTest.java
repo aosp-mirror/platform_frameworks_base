@@ -21,12 +21,14 @@ import static org.junit.Assert.assertEquals;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.systemui.SysuiTestCase;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ReferenceTestUtilsTest {
+public class ReferenceTestUtilsTest extends SysuiTestCase {
 
     @Test
     public void testCollectionWaiter_doesntBlockIndefinitely() {

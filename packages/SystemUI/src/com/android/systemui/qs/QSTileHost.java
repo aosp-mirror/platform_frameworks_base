@@ -143,6 +143,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
     }
 
     @Override
+    public void forceCollapsePanels() {
+        mStatusBar.postAnimateForceCollapsePanels();
+    }
+
+    @Override
     public void openPanels() {
         mStatusBar.postAnimateOpenPanels();
     }

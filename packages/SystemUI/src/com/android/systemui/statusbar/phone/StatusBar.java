@@ -1612,9 +1612,16 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onAsyncInflationFinished(Entry entry) {
         mPendingNotifications.remove(entry.key);
-        if (mNotificationData.get(entry.key) == null) {
+        // If there was an async task started after the removal, we don't want to add it back to
+        // the list, otherwise we might get leaks.
+        boolean isNew = mNotificationData.get(entry.key) == null;
+        if (isNew && !entry.row.isRemoved()) {
             addEntry(entry);
+        } else if (!isNew && entry.row.hasLowPriorityStateUpdated()) {
+            mVisualStabilityManager.onLowPriorityUpdated(entry);
+            updateNotificationShade();
         }
+        entry.row.setLowPriorityStateUpdated(false);
     }
 
     private boolean shouldSuppressFullScreenIntent(String key) {
@@ -1762,10 +1769,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                     continue;
                 }
                 toRemove.add(row);
-                toRemove.get(i).setKeepInParent(true);
+                row.setKeepInParent(true);
                 // we need to set this state earlier as otherwise we might generate some weird
                 // animations
-                toRemove.get(i).setRemoved();
+                row.setRemoved();
             }
         }
     }
@@ -2874,6 +2881,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void postAnimateCollapsePanels() {
         mHandler.post(mAnimateCollapsePanels);
+    }
+
+    public void postAnimateForceCollapsePanels() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+            }
+        });
     }
 
     public void postAnimateOpenPanels() {
@@ -6233,7 +6249,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarNotification sbn, ExpandableNotificationRow row) {
         row.setNeedsRedaction(needsRedaction(entry));
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
+        boolean isUpdate = mNotificationData.get(entry.key) != null;
+        boolean wasLowPriority = row.isLowPriority();
         row.setIsLowPriority(isLowPriority);
+        row.setLowPriorityStateUpdated(isUpdate && (wasLowPriority != isLowPriority));
         // bind the click event to the content area
         mNotificationClicker.register(row, sbn);
 

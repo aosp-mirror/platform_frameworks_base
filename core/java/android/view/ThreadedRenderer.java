@@ -872,6 +872,15 @@ public final class ThreadedRenderer {
         }
     }
 
+    /**
+     * Creates a {@link android.graphics.Bitmap.Config#HARDWARE} bitmap from the given
+     * RenderNode. Note that the RenderNode should be created as a root node (so x/y of 0,0), and
+     * not the RenderNode from a View.
+     **/
+    public static Bitmap createHardwareBitmap(RenderNode node, int width, int height) {
+        return nCreateHardwareBitmap(node.getNativeDisplayList(), width, height);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -1015,4 +1024,6 @@ public final class ThreadedRenderer {
 
     private static native int nCopySurfaceInto(Surface surface,
             int srcLeft, int srcTop, int srcRight, int srcBottom, Bitmap bitmap);
+
+    private static native Bitmap nCreateHardwareBitmap(long renderNode, int width, int height);
 }

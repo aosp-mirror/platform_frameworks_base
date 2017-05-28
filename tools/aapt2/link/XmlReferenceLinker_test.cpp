@@ -160,16 +160,6 @@ TEST_F(XmlReferenceLinkerTest, PrivateSymbolsAreLinkedWhenReferenceHasStarPrefix
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 }
 
-TEST_F(XmlReferenceLinkerTest, SdkLevelsAreRecorded) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
-        <View xmlns:android="http://schemas.android.com/apk/res/android"
-              android:colorAccent="#ffffff" />)EOF");
-
-  XmlReferenceLinker linker;
-  ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
-  EXPECT_TRUE(linker.sdk_levels().count(21) == 1);
-}
-
 TEST_F(XmlReferenceLinkerTest, LinkMangledAttributes) {
   std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
             <View xmlns:support="http://schemas.android.com/apk/res/com.android.support"

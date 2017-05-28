@@ -22,9 +22,12 @@ import android.annotation.SystemApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
 import libcore.io.Streams;
 
@@ -570,7 +573,16 @@ public class RecoverySystem {
 
             // Having set up the BCB (bootloader control block), go ahead and reboot
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            pm.reboot(PowerManager.REBOOT_RECOVERY_UPDATE);
+            String reason = PowerManager.REBOOT_RECOVERY_UPDATE;
+
+            // On TV, reboot quiescently if the screen is off
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                if (wm.getDefaultDisplay().getState() != Display.STATE_ON) {
+                    reason += ",quiescent";
+                }
+            }
+            pm.reboot(reason);
 
             throw new IOException("Reboot failed (no permissions?)");
         }

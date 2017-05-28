@@ -2986,18 +2986,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mWindowManager.continueSurfaceLayout();
         }
 
-        // The task might have already been running and its visibility needs to be synchronized
-        // with the visibility of the stack / windows.
+        // Calculate the default bounds (don't use existing stack bounds as we may have just created
+        // the stack, and schedule the start of the animation into PiP (the bounds animator that
+        // is triggered by this is posted on another thread)
+        final Rect destBounds = stack.getPictureInPictureBounds(aspectRatio,
+                false /* useExistingStackBounds */);
+        stack.animateResizePinnedStack(sourceHintBounds, destBounds, -1 /* animationDuration */,
+                true /* fromFullscreen */);
+
+        // Update the visibility of all activities after the they have been reparented to the new
+        // stack.  This MUST run after the animation above is scheduled to ensure that the windows
+        // drawn signal is scheduled after the bounds animation start call on the bounds animator
+        // thread.
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        // Calculate the default bounds (don't use existing stack bounds as we may have just created
-        // the stack
-        final Rect destBounds = stack.getPictureInPictureBounds(aspectRatio,
-                false /* useExistingStackBounds */);
-
-        stack.animateResizePinnedStack(sourceHintBounds, destBounds, -1 /* animationDuration */,
-                true /* schedulePipModeChangedOnAnimationEnd */);
         mService.mTaskChangeNotificationController.notifyActivityPinned(r.packageName,
                 r.getTask().taskId);
     }

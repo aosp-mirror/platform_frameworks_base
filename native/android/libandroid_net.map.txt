@@ -1,0 +1,10 @@
+# These functions have been part of the NDK since API 24.
+# They are also all available to vendor code.
+LIBANDROID_NET {
+  global:
+    android_setsocknetwork; # vndk
+    android_setprocnetwork; # vndk
+    android_getaddrinfofornetwork; # vndk
+  local:
+    *;
+};

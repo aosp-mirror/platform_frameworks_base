@@ -593,12 +593,12 @@ import java.util.function.Predicate;
  * a single tag using the {@link android.R.styleable#View_tag android:tag}
  * attribute or multiple tags using the {@code <tag>} child element:
  * <pre>
- *     &ltView ...
+ *     &lt;View ...
  *           android:tag="@string/mytag_value" /&gt;
- *     &ltView ...&gt;
- *         &lttag android:id="@+id/mytag"
+ *     &lt;View ...&gt;
+ *         &lt;tag android:id="@+id/mytag"
  *              android:value="@string/mytag_value" /&gt;
- *     &lt/View>
+ *     &lt;/View>
  * </pre>
  * </p>
  * <p>
@@ -628,11 +628,11 @@ import java.util.function.Predicate;
  * {@link android.R.styleable#Theme_colorAccent android:colorAccent} defined on
  * the inflation context's theme (e.g. the Activity theme) will be preserved.
  * <pre>
- *     &ltLinearLayout
+ *     &lt;LinearLayout
  *             ...
  *             android:theme="@android:theme/ThemeOverlay.Material.Dark"&gt;
- *         &ltView ...&gt;
- *     &lt/LinearLayout&gt;
+ *         &lt;View ...&gt;
+ *     &lt;/LinearLayout&gt;
  * </pre>
  * </p>
  *
@@ -964,115 +964,155 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int[] VISIBILITY_FLAGS = {VISIBLE, INVISIBLE, GONE};
 
     /**
-     * This view contains an email address.
+     * Hint indicating that this view can be autofilled with an email address.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value #AUTOFILL_HINT_EMAIL_ADDRESS}"
-     * to <a href="#attr_android:autofillHint"> {@code android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_EMAIL_ADDRESS}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_EMAIL_ADDRESS = "emailAddress";
 
     /**
-     * The view contains a real name.
+     * Hint indicating that this view can be autofilled with a user's real name.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value #AUTOFILL_HINT_NAME}" to
-     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_NAME}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_NAME = "name";
 
     /**
-     * The view contains a user name.
+     * Hint indicating that this view can be autofilled with a username.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value #AUTOFILL_HINT_USERNAME}" to
-     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_USERNAME}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_USERNAME = "username";
 
     /**
-     * The view contains a password.
+     * Hint indicating that this view can be autofilled with a password.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value #AUTOFILL_HINT_PASSWORD}" to
-     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_PASSWORD}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_PASSWORD = "password";
 
     /**
-     * The view contains a phone number.
+     * Hint indicating that this view can be autofilled with a phone number.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value #AUTOFILL_HINT_PHONE}" to
-     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_PHONE}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_PHONE = "phone";
 
     /**
-     * The view contains a postal address.
+     * Hint indicating that this view can be autofilled with a postal address.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value #AUTOFILL_HINT_POSTAL_ADDRESS}"
-     * to <a href="#attr_android:autofillHint"> {@code android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_POSTAL_ADDRESS}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_POSTAL_ADDRESS = "postalAddress";
 
     /**
-     * The view contains a postal code.
+     * Hint indicating that this view can be autofilled with a postal code.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value #AUTOFILL_HINT_POSTAL_CODE}" to
-     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_POSTAL_CODE}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_POSTAL_CODE = "postalCode";
 
     /**
-     * The view contains a credit card number.
+     * Hint indicating that this view can be autofilled with a credit card number.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value
-     * #AUTOFILL_HINT_CREDIT_CARD_NUMBER}" to <a href="#attr_android:autofillHint"> {@code
-     * android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_NUMBER}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_NUMBER = "creditCardNumber";
 
     /**
-     * The view contains a credit card security code.
+     * Hint indicating that this view can be autofilled with a credit card security code.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value
-     * #AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE}" to <a href="#attr_android:autofillHint"> {@code
-     * android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE = "creditCardSecurityCode";
 
     /**
-     * The view contains a credit card expiration date.
+     * Hint indicating that this view can be autofilled with a credit card expiration date.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value
-     * #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE}" to <a href="#attr_android:autofillHint"> {@code
-     * android:autofillHint}.
+     * <p>It should be used when the credit card expiration date is represented by just one view;
+     * if it is represented by more than one (for example, one view for the month and another view
+     * for the year), then each of these views should use the hint specific for the unit
+     * ({@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH},
+     * or {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR}).
+     *
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE =
             "creditCardExpirationDate";
 
     /**
-     * The view contains the month a credit card expires.
+     * Hint indicating that this view can be autofilled with a credit card expiration month.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value
-     * #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH}" to <a href="#attr_android:autofillHint"> {@code
-     * android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH =
             "creditCardExpirationMonth";
 
     /**
-     * The view contains the year a credit card expires.
+     * Hint indicating that this view can be autofilled with a credit card expiration year.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value
-     * #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR}" to <a href="#attr_android:autofillHint"> {@code
-     * android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR =
             "creditCardExpirationYear";
 
     /**
-     * The view contains the day a credit card expires.
+     * Hint indicating that this view can be autofilled with a credit card expiration day.
      *
-     * Use with {@link #setAutofillHints(String[])}, or set "{@value
-     * #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY}" to <a href="#attr_android:autofillHint"> {@code
-     * android:autofillHint}.
+     * <p>Can be used with either {@link #setAutofillHints(String[])} or
+     * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
+     * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY}</code>).
+     *
+     * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY = "creditCardExpirationDay";
 
@@ -1189,7 +1229,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @interface AutofillFlags {}
 
     /**
-     * Flag requesting you to add views not-important for autofill to the assist data.
+     * Flag requesting you to add views that are marked as not important for autofill
+     * (see {@link #setImportantForAutofill(int)}) to a {@link ViewStructure}.
      */
     public static final int AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x1;
 
@@ -7486,7 +7527,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>Call {@link AutofillManager#commit()} when the autofill context
      * of the view structure changed and you want the current autofill interaction if such
      * to be commited.
-     * <li>Call {@link AutofillManager#cancel()} ()} when the autofill context
+     * <li>Call {@link AutofillManager#cancel()} when the autofill context
      * of the view structure changed and you want the current autofill interaction if such
      * to be cancelled.
      * <li> The {@code left} and {@code top} values set in
@@ -7516,15 +7557,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <li>Passing the actual value to the equivalent setter in the view.
      * </ol>
      *
-     * <p>For example, a text-field view would call:
+     * <p>For example, a text-field view could implement the method this way:
+     *
      * <pre class="prettyprint">
-     * CharSequence text = value.getTextValue();
-     * if (text != null) {
-     *     setText(text);
+     * &#64;Override
+     * public void autofill(AutofillValue value) {
+     *   if (!value.isText() || !this.isEditable()) {
+     *      return;
+     *   }
+     *   CharSequence text = value.getTextValue();
+     *   if (text != null) {
+     *     this.setText(text);
+     *   }
      * }
      * </pre>
      *
-     * <p>If the value is updated asyncronously the next call to
+     * <p>If the value is updated asynchronously the next call to
      * {@link AutofillManager#notifyValueChanged(View)} must happen <u>after</u> the value was
      * changed to the autofilled value. If not, the view will not be considered autofilled.
      *
@@ -7575,9 +7623,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Describes the content of a view so that a autofill service can fill in the appropriate data.
+     * Gets the hints that help an {@link android.service.autofill.AutofillService} determine how
+     * to autofill the view with the user's data.
      *
-     * @return The hints set via the attribute or {@code null} if no hint it set.
+     * <p>See {@link #setAutofillHints(String...)} for more info about these hints.
+     *
+     * @return The hints set via the attribute or {@link #setAutofillHints(String...)}, or
+     * {@code null} if no hints were set.
      *
      * @attr ref android.R.styleable#View_autofillHints
      */
@@ -9242,8 +9294,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets the hints that helps the autofill service to select the appropriate data to fill the
-     * view.
+     * Sets the hints that help an {@link android.service.autofill.AutofillService} determine how
+     * to autofill the view with the user's data.
+     *
+     * <p>Typically, there is only one way to autofill a view, but there could be more than one.
+     * For example, if the application accepts either an username or email address to identify
+     * an user.
+     *
+     * <p>These hints are not validated by the Android System, but passed "as is" to the service.
+     * Hence, they can have any value, but it's recommended to use the {@code AUTOFILL_HINT_}
+     * constants such as:
+     * {@link #AUTOFILL_HINT_USERNAME}, {@link #AUTOFILL_HINT_PASSWORD},
+     * {@link #AUTOFILL_HINT_EMAIL_ADDRESS},
+     * {@link #AUTOFILL_HINT_NAME},
+     * {@link #AUTOFILL_HINT_PHONE},
+     * {@link #AUTOFILL_HINT_POSTAL_ADDRESS}, {@link #AUTOFILL_HINT_POSTAL_CODE},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_NUMBER}, {@link #AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH} or
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR}.
      *
      * @param autofillHints The autofill hints to set. If the array is emtpy, {@code null} is set.
      * @attr ref android.R.styleable#View_autofillHints
@@ -19801,18 +19871,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Check whether we need to draw a default focus highlight when this view gets focused,
      * which requires:
      * <ul>
-     *     <li>In the background, {@link android.R.attr#state_focused} is not defined.</li>
+     *     <li>In both background and foreground, {@link android.R.attr#state_focused}
+     *         is not defined.</li>
      *     <li>This view is not in touch mode.</li>
      *     <li>This view doesn't opt out for a default focus highlight, via
      *         {@link #setDefaultFocusHighlightEnabled(boolean)}.</li>
      *     <li>This view is attached to window.</li>
      * </ul>
      * @return {@code true} if a default focus highlight is needed.
+     * @hide
      */
-    private boolean isDefaultFocusHighlightNeeded(Drawable background) {
-        final boolean hasFocusStateSpecified = background == null || !background.isStateful()
-                || !background.hasFocusStateSpecified();
-        return !isInTouchMode() && getDefaultFocusHighlightEnabled() && hasFocusStateSpecified
+    @TestApi
+    public boolean isDefaultFocusHighlightNeeded(Drawable background, Drawable foreground) {
+        final boolean lackFocusState = (background == null || !background.isStateful()
+                || !background.hasFocusStateSpecified())
+                && (foreground == null || !foreground.isStateful()
+                || !foreground.hasFocusStateSpecified());
+        return !isInTouchMode() && getDefaultFocusHighlightEnabled() && lackFocusState
                 && isAttachedToWindow() && sUseDefaultFocusHighlight;
     }
 
@@ -19824,7 +19899,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void switchDefaultFocusHighlight() {
         if (isFocused()) {
-            final boolean needed = isDefaultFocusHighlightNeeded(mBackground);
+            final boolean needed = isDefaultFocusHighlightNeeded(mBackground,
+                    mForegroundInfo == null ? null : mForegroundInfo.mDrawable);
             final boolean active = mDefaultFocusHighlight != null;
             if (needed && !active) {
                 setDefaultFocusHighlight(getDefaultFocusHighlightDrawable());

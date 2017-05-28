@@ -58,20 +58,3 @@ LOCAL_MODULE := libandroid
 LOCAL_CFLAGS += $(common_cflags)
 
 include $(BUILD_SHARED_LIBRARY)
-
-# Network library.
-include $(CLEAR_VARS)
-LOCAL_MODULE := libandroid_net
-LOCAL_CFLAGS := $(common_cflags)
-LOCAL_SRC_FILES:= \
-    net.c \
-
-LOCAL_SHARED_LIBRARIES := \
-    libnetd_client \
-
-LOCAL_C_INCLUDES += \
-    frameworks/base/native/include \
-    bionic/libc/dns/include \
-    system/netd/include \
-
-include $(BUILD_SHARED_LIBRARY)

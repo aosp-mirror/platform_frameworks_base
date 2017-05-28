@@ -100,7 +100,7 @@ class AlertWindowNotification {
         final String appName = (aInfo != null)
                 ? pm.getApplicationLabel(aInfo).toString() : mPackageName;
 
-        createNotificationChannelIfNeeded(context, appName);
+        createNotificationChannel(context, appName);
 
         final String message = context.getString(R.string.alert_windows_notification_message,
                 appName);
@@ -134,16 +134,14 @@ class AlertWindowNotification {
         return PendingIntent.getActivity(context, mRequestCode, intent, FLAG_CANCEL_CURRENT);
     }
 
-    private void createNotificationChannelIfNeeded(Context context, String appName) {
-        if (mNotificationManager.getNotificationChannel(mNotificationTag) != null) {
-            return;
-        }
+    private void createNotificationChannel(Context context, String appName) {
         final String nameChannel =
                 context.getString(R.string.alert_windows_notification_channel_name, appName);
         final NotificationChannel channel =
                 new NotificationChannel(mNotificationTag, nameChannel, IMPORTANCE_MIN);
         channel.enableLights(false);
         channel.enableVibration(false);
+        channel.setBlockableSystem(true);
         mNotificationManager.createNotificationChannel(channel);
     }
 

@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Looper;
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.LeakCheck.Tracker;
 import android.view.Display;
@@ -46,6 +47,7 @@ import org.mockito.stubbing.Answer;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
+@SmallTest
 public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
 
     public NavigationBarFragmentTest() {

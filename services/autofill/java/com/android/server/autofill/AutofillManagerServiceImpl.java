@@ -51,7 +51,6 @@ import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -98,6 +97,12 @@ final class AutofillManagerServiceImpl {
      * Whether service was disabled for user due to {@link UserManager} restrictions.
      */
     private boolean mDisabled;
+
+    /**
+     * Caches whether the setup completed for the current user.
+     */
+    @GuardedBy("mLock")
+    private boolean mSetupComplete;
 
     private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
         switch (msg.what) {
@@ -171,6 +176,12 @@ final class AutofillManagerServiceImpl {
         }
     }
 
+    private boolean isSetupCompletedLocked() {
+        final String setupComplete = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(), Settings.Secure.USER_SETUP_COMPLETE, mUserId);
+        return "1".equals(setupComplete);
+    }
+
     private String getComponentNameFromSettings() {
         return Settings.Secure.getStringForUser(
                 mContext.getContentResolver(), Settings.Secure.AUTOFILL_SERVICE, mUserId);
@@ -178,6 +189,12 @@ final class AutofillManagerServiceImpl {
 
     void updateLocked(boolean disabled) {
         final boolean wasEnabled = isEnabled();
+        if (sVerbose) {
+            Slog.v(TAG, "updateLocked(u=" + mUserId + "): wasEnabled=" + wasEnabled
+                    + ", mSetupComplete= " + mSetupComplete
+                    + ", disabled=" + disabled + ", mDisabled=" + mDisabled);
+        }
+        mSetupComplete = isSetupCompletedLocked();
         mDisabled = disabled;
         ComponentName serviceComponent = null;
         ServiceInfo serviceInfo = null;
@@ -199,8 +216,9 @@ final class AutofillManagerServiceImpl {
             } else {
                 mInfo = null;
             }
-            if (wasEnabled != isEnabled()) {
-                if (!isEnabled()) {
+            final boolean isEnabled = isEnabled();
+            if (wasEnabled != isEnabled) {
+                if (!isEnabled) {
                     final int sessionCount = mSessions.size();
                     for (int i = sessionCount - 1; i >= 0; i--) {
                         final Session session = mSessions.valueAt(i);
@@ -534,6 +552,7 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Default component: ");
             pw.println(mContext.getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
+        pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
         final int size = mSessions.size();
@@ -617,7 +636,7 @@ final class AutofillManagerServiceImpl {
     }
 
     boolean isEnabled() {
-        return mInfo != null && !mDisabled;
+        return mSetupComplete && mInfo != null && !mDisabled;
     }
 
     @Override

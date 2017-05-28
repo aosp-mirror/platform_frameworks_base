@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -1639,5 +1640,14 @@ public class ImageView extends View {
     protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
         super.encodeProperties(stream);
         stream.addProperty("layout:baseline", getBaseline());
+    }
+
+    /** @hide */
+    @Override
+    @TestApi
+    public boolean isDefaultFocusHighlightNeeded(Drawable background, Drawable foreground) {
+        final boolean lackFocusState = mDrawable == null || !mDrawable.isStateful()
+                || !mDrawable.hasFocusStateSpecified();
+        return super.isDefaultFocusHighlightNeeded(background, foreground) && lackFocusState;
     }
 }
