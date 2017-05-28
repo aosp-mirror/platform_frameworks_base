@@ -25,7 +25,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
+import android.net.util.SharedLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -74,7 +74,9 @@ public class TetheringConfiguration {
     public final String[] dhcpRanges;
     public final String[] defaultIPv4DNS;
 
-    public TetheringConfiguration(Context ctx) {
+    public TetheringConfiguration(Context ctx, SharedLog log) {
+        final SharedLog configLog = log.forSubComponent("config");
+
         tetherableUsbRegexs = ctx.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_usb_regexs);
         tetherableWifiRegexs = ctx.getResources().getStringArray(
@@ -83,11 +85,15 @@ public class TetheringConfiguration {
                 com.android.internal.R.array.config_tether_bluetooth_regexs);
 
         final int dunCheck = checkDunRequired(ctx);
+        configLog.log("DUN check returned: " + dunCheckString(dunCheck));
+
         preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(ctx, dunCheck);
         isDunRequired = preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN);
 
         dhcpRanges = getDhcpRanges(ctx);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
+
+        configLog.log(toString());
     }
 
     public boolean isUsb(String iface) {
@@ -110,19 +116,23 @@ public class TetheringConfiguration {
         pw.print("isDunRequired: ");
         pw.println(isDunRequired);
 
-        String[] upstreamTypes = null;
-        if (preferredUpstreamIfaceTypes != null) {
-            upstreamTypes = new String[preferredUpstreamIfaceTypes.size()];
-            int i = 0;
-            for (Integer netType : preferredUpstreamIfaceTypes) {
-                upstreamTypes[i] = ConnectivityManager.getNetworkTypeName(netType);
-                i++;
-            }
-        }
-        dumpStringArray(pw, "preferredUpstreamIfaceTypes", upstreamTypes);
+        dumpStringArray(pw, "preferredUpstreamIfaceTypes",
+                preferredUpstreamNames(preferredUpstreamIfaceTypes));
 
         dumpStringArray(pw, "dhcpRanges", dhcpRanges);
         dumpStringArray(pw, "defaultIPv4DNS", defaultIPv4DNS);
+    }
+
+    public String toString() {
+        final StringJoiner sj = new StringJoiner(" ");
+        sj.add(String.format("tetherableUsbRegexs:%s", makeString(tetherableUsbRegexs)));
+        sj.add(String.format("tetherableWifiRegexs:%s", makeString(tetherableWifiRegexs)));
+        sj.add(String.format("tetherableBluetoothRegexs:%s",
+                makeString(tetherableBluetoothRegexs)));
+        sj.add(String.format("isDunRequired:%s", isDunRequired));
+        sj.add(String.format("preferredUpstreamIfaceTypes:%s",
+                makeString(preferredUpstreamNames(preferredUpstreamIfaceTypes))));
+        return String.format("TetheringConfiguration{%s}", sj.toString());
     }
 
     private static void dumpStringArray(PrintWriter pw, String label, String[] values) {
@@ -140,9 +150,40 @@ public class TetheringConfiguration {
         pw.println();
     }
 
+    private static String makeString(String[] strings) {
+        final StringJoiner sj = new StringJoiner(",", "[", "]");
+        for (String s : strings) sj.add(s);
+        return sj.toString();
+    }
+
+    private static String[] preferredUpstreamNames(Collection<Integer> upstreamTypes) {
+        String[] upstreamNames = null;
+
+        if (upstreamTypes != null) {
+            upstreamNames = new String[upstreamTypes.size()];
+            int i = 0;
+            for (Integer netType : upstreamTypes) {
+                upstreamNames[i] = ConnectivityManager.getNetworkTypeName(netType);
+                i++;
+            }
+        }
+
+        return upstreamNames;
+    }
+
     private static int checkDunRequired(Context ctx) {
         final TelephonyManager tm = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
         return (tm != null) ? tm.getTetherApnRequired() : DUN_UNSPECIFIED;
+    }
+
+    private static String dunCheckString(int dunCheck) {
+        switch (dunCheck) {
+            case DUN_NOT_REQUIRED: return "DUN_NOT_REQUIRED";
+            case DUN_REQUIRED:     return "DUN_REQUIRED";
+            case DUN_UNSPECIFIED:  return "DUN_UNSPECIFIED";
+            default:
+                return String.format("UNKNOWN (%s)", dunCheck);
+        }
     }
 
     private static Collection<Integer> getUpstreamIfaceTypes(Context ctx, int dunCheck) {
