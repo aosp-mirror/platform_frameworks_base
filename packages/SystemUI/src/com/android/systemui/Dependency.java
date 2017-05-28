@@ -264,6 +264,9 @@ public class Dependency extends SystemUI {
         mProviders.put(AccessibilityManagerWrapper.class,
                 () -> new AccessibilityManagerWrapper(mContext));
 
+        mProviders.put(ForegroundServiceController.class,
+                () -> new ForegroundServiceControllerImpl(mContext));
+
         mProviders.put(UiOffloadThread.class, UiOffloadThread::new);
 
         // Put all dependencies above here so the factory can override them if it wants.
