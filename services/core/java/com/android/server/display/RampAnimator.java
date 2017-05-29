@@ -59,7 +59,7 @@ final class RampAnimator<T> {
      */
     public boolean animateTo(int target, int rate) {
         // Immediately jump to the target the first time.
-        if (mFirstTime || rate <= 0) {
+        if (mFirstTime || rate <= 0 || mCurrentValue == 0) {
             if (mFirstTime || target != mCurrentValue) {
                 mFirstTime = false;
                 mRate = 0;
