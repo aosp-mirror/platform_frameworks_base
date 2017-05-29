@@ -2411,8 +2411,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     @Ignore // This test has instrinsic chances of spurious failures: ignore for continuous testing.
-    @SmallTest
-    public void testRequestBenchmark() throws Exception {
+    public void benchmarkRequestRegistrationAndCallbackDispatch() throws Exception {
         // TODO: turn this unit test into a real benchmarking test.
         // Benchmarks connecting and switching performance in the presence of a large number of
         // NetworkRequests.
@@ -2422,9 +2421,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         //    and NUM_REQUESTS onAvailable callbacks to fire.
         // See how long it took.
         final int NUM_REQUESTS = 90;
-        final int REGISTER_TIME_LIMIT_MS = 180;
-        final int CONNECT_TIME_LIMIT_MS = 50;
-        final int SWITCH_TIME_LIMIT_MS = 50;
+        final int REGISTER_TIME_LIMIT_MS = 200;
+        final int CONNECT_TIME_LIMIT_MS = 60;
+        final int SWITCH_TIME_LIMIT_MS = 60;
         final int UNREGISTER_TIME_LIMIT_MS = 20;
 
         final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
