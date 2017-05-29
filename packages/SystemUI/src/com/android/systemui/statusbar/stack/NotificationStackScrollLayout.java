@@ -2220,14 +2220,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         ActivatableNotificationView firstView = mFirstVisibleBackgroundChild;
         int top = 0;
         if (firstView != null) {
-            int finalTranslationY = (int) ViewState.getFinalTranslationY(firstView);
+            // Round Y up to avoid seeing the background during animation
+            int finalTranslationY = (int) Math.ceil(ViewState.getFinalTranslationY(firstView));
             if (mAnimateNextBackgroundTop
                     || mTopAnimator == null && mCurrentBounds.top == finalTranslationY
                     || mTopAnimator != null && mEndAnimationRect.top == finalTranslationY) {
                 // we're ending up at the same location as we are now, lets just skip the animation
                 top = finalTranslationY;
             } else {
-                top = (int) firstView.getTranslationY();
+                top = (int) Math.ceil(firstView.getTranslationY());
             }
         }
         ActivatableNotificationView lastView = mShelf.hasItemsInStableShelf()
