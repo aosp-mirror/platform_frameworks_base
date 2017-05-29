@@ -198,6 +198,10 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         }
     }
 
+    @Override
+    public synchronized void onWakeupEvent(String prefix, int uid, int gid, long timestampNs) {
+    }
+
     public synchronized void flushStatistics(List<IpConnectivityEvent> events) {
         events.add(flushConnectStats());
         // TODO: migrate DnsEventBatch to IpConnectivityLogClass.DNSLatencies
