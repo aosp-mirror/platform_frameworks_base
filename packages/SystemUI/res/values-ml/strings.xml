@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ മാനേജുചെയ്യുന്നത്. <xliff:g id="APPLICATION">%2$s</xliff:g> ആപ്പിലേക്ക് പ്രൊഫൈൽ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്പുകൾ, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും.\n\nകൂടുതൽ വിവരങ്ങൾക്ക് നിങ്ങളുടെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ മാനേജുചെയ്യുന്നത്. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ആപ്പിലേക്ക് പ്രൊഫൈൽ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്പുകൾ, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും.\n\n<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ആപ്പിലേക്കും നിങ്ങൾ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് നിങ്ങളുടെ വ്യക്തിഗത നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> എന്നയാൾക്കായി അൺലോക്കുചെയ്‌തു"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"നിങ്ങൾ സ്വമേധയാ അൺലോക്കുചെയ്യുന്നതുവരെ ഉപകരണം ലോക്കുചെയ്‌തതായി തുടരും"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"അറിയിപ്പുകൾ വേഗത്തിൽ സ്വീകരിക്കുക"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"അൺലോക്കുചെയ്യുന്നതിന് മുമ്പ് അവ കാണുക"</string>

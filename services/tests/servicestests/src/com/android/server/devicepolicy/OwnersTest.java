@@ -20,6 +20,7 @@ import com.android.server.devicepolicy.DevicePolicyManagerServiceTestable.Owners
 
 import android.content.ComponentName;
 import android.os.UserHandle;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Tests for the DeviceOwner object that saves & loads device and policy owner information.
@@ -32,6 +33,7 @@ import android.os.UserHandle;
 
  (mmma frameworks/base/services/tests/servicestests/ for non-ninja build)
  */
+@SmallTest
 public class OwnersTest extends DpmTestBase {
     public void testUpgrade01() throws Exception {
         getServices().addUsers(10, 11, 20, 21);

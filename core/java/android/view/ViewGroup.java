@@ -57,6 +57,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
+
 import com.android.internal.R;
 
 import java.util.ArrayList;
@@ -7716,13 +7717,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         mMarginFlags |= RIGHT_MARGIN_UNDEFINED_MASK;
                         rightMargin = DEFAULT_MARGIN_RESOLVED;
                     }
-                    startMargin = a.getDimensionPixelSize(
-                            R.styleable.ViewGroup_MarginLayout_layout_marginStart,
-                            DEFAULT_MARGIN_RELATIVE);
-                    endMargin = a.getDimensionPixelSize(
-                            R.styleable.ViewGroup_MarginLayout_layout_marginEnd,
-                            DEFAULT_MARGIN_RELATIVE);
                 }
+
+                startMargin = a.getDimensionPixelSize(
+                        R.styleable.ViewGroup_MarginLayout_layout_marginStart,
+                        DEFAULT_MARGIN_RELATIVE);
+                endMargin = a.getDimensionPixelSize(
+                        R.styleable.ViewGroup_MarginLayout_layout_marginEnd,
+                        DEFAULT_MARGIN_RELATIVE);
 
                 if (verticalMargin >= 0) {
                     topMargin = verticalMargin;

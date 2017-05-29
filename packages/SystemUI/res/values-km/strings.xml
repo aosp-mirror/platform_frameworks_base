@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"កម្រង​ព័ត៌មាន​ការងារ​របស់អ្នក​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ។ កម្រងព័ត៌មាន​នេះត្រូវ​បាន​ភ្ជាប់ទៅ <xliff:g id="APPLICATION">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​របស់​អ្នក។"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​ស្ថិតក្រោម​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ។ កម្រង​ព័ត៌មាននេះ​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។\n\nអ្នកក៏ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​ផ្ទាល់ខ្លួន​របស់​អ្នក។"</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"បាន​ដោះសោ​សម្រាប់ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ឧបករណ៍​នឹង​ចាក់​សោ​រហូត​ដល់​អ្នក​ដោះ​សោ​ដោយ​ដៃ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ទទួល​បាន​ការ​ជូន​ដំណឹង​កាន់តែ​លឿន"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ឃើញ​ពួកវា​មុន​ពេល​ដោះ​សោ"</string>

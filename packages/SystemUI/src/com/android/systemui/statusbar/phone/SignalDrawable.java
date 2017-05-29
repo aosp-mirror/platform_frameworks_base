@@ -30,6 +30,7 @@ import android.graphics.Path.Op;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.util.LayoutDirection;
 import android.util.Log;
 
 import com.android.settingslib.R;
@@ -192,6 +193,13 @@ public class SignalDrawable extends Drawable {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        boolean isRtl = getLayoutDirection() == LayoutDirection.RTL;
+        if (isRtl) {
+            canvas.save();
+            // Mirror the drawable
+            canvas.translate(canvas.getWidth(), 0);
+            canvas.scale(-1.0f, 1.0f);
+        }
         mFullPath.reset();
         mFullPath.setFillType(FillType.WINDING);
         float width = getBounds().width();
@@ -249,6 +257,9 @@ public class SignalDrawable extends Drawable {
                 mXPath.rLineTo(X_PATH[i][0] * width, X_PATH[i][1] * height);
             }
             canvas.drawPath(mXPath, mForegroundPaint);
+        }
+        if (isRtl) {
+            canvas.restore();
         }
     }
 

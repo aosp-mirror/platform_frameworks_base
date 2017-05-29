@@ -27,13 +27,15 @@
 
 namespace aapt {
 
-bool ShouldGenerateVersionedResource(const ResourceEntry* entry,
-                                     const ConfigDescription& config,
-                                     const int sdk_version_to_generate) {
-  // We assume the caller is trying to generate a version greater than the
-  // current configuration.
+bool ShouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDescription& config,
+                                     const ApiVersion sdk_version_to_generate) {
+  // We assume the caller is trying to generate a version greater than the current configuration.
   CHECK(sdk_version_to_generate > config.sdkVersion);
+  return sdk_version_to_generate < FindNextApiVersionForConfig(entry, config);
+}
 
+ApiVersion FindNextApiVersionForConfig(const ResourceEntry* entry,
+                                       const ConfigDescription& config) {
   const auto end_iter = entry->values.end();
   auto iter = entry->values.begin();
   for (; iter != end_iter; ++iter) {
@@ -46,26 +48,23 @@ bool ShouldGenerateVersionedResource(const ResourceEntry* entry,
   CHECK(iter != entry->values.end());
   ++iter;
 
-  // The next configuration either only varies in sdkVersion, or it is
-  // completely different
-  // and therefore incompatible. If it is incompatible, we must generate the
-  // versioned resource.
+  // The next configuration either only varies in sdkVersion, or it is completely different
+  // and therefore incompatible. If it is incompatible, we must generate the versioned resource.
 
-  // NOTE: The ordering of configurations takes sdkVersion as higher precedence
-  // than other
+  // NOTE: The ordering of configurations takes sdkVersion as higher precedence than other
   // qualifiers, so we need to iterate through the entire list to be sure there
   // are no higher sdk level versions of this resource.
   ConfigDescription temp_config(config);
   for (; iter != end_iter; ++iter) {
     temp_config.sdkVersion = (*iter)->config.sdkVersion;
     if (temp_config == (*iter)->config) {
-      // The two configs are the same, check the sdk version.
-      return sdk_version_to_generate < (*iter)->config.sdkVersion;
+      // The two configs are the same, return the sdkVersion.
+      return (*iter)->config.sdkVersion;
     }
   }
 
-  // No match was found, so we should generate the versioned resource.
-  return true;
+  // Didn't find another config with a different sdk version, so return the highest possible value.
+  return std::numeric_limits<ApiVersion>::max();
 }
 
 bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
@@ -86,7 +85,7 @@ bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
           }
 
           if (Style* style = ValueCast<Style>(config_value->value.get())) {
-            Maybe<size_t> min_sdk_stripped;
+            Maybe<ApiVersion> min_sdk_stripped;
             std::vector<Style::Entry> stripped;
 
             auto iter = style->entries.begin();
@@ -95,17 +94,14 @@ bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
 
               // Find the SDK level that is higher than the configuration
               // allows.
-              const size_t sdk_level =
-                  FindAttributeSdkLevel(iter->key.id.value());
-              if (sdk_level >
-                  std::max<size_t>(config_value->config.sdkVersion, 1)) {
+              const ApiVersion sdk_level = FindAttributeSdkLevel(iter->key.id.value());
+              if (sdk_level > std::max<ApiVersion>(config_value->config.sdkVersion, 1)) {
                 // Record that we are about to strip this.
                 stripped.emplace_back(std::move(*iter));
 
                 // We use the smallest SDK level to generate the new style.
                 if (min_sdk_stripped) {
-                  min_sdk_stripped =
-                      std::min(min_sdk_stripped.value(), sdk_level);
+                  min_sdk_stripped = std::min(min_sdk_stripped.value(), sdk_level);
                 } else {
                   min_sdk_stripped = sdk_level;
                 }
@@ -126,10 +122,9 @@ bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
                                                   min_sdk_stripped.value())) {
                 // Let's create a new Style for this versioned resource.
                 ConfigDescription new_config(config_value->config);
-                new_config.sdkVersion = min_sdk_stripped.value();
+                new_config.sdkVersion = static_cast<uint16_t>(min_sdk_stripped.value());
 
-                std::unique_ptr<Style> new_style(
-                    style->Clone(&table->string_pool));
+                std::unique_ptr<Style> new_style(style->Clone(&table->string_pool));
                 new_style->SetComment(style->GetComment());
                 new_style->SetSource(style->GetSource());
 
@@ -140,8 +135,7 @@ bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
                     std::make_move_iterator(stripped.end()));
 
                 // Insert the new Resource into the correct place.
-                entry->FindOrCreateValue(new_config, {})->value =
-                    std::move(new_style);
+                entry->FindOrCreateValue(new_config, {})->value = std::move(new_style);
               }
             }
           }

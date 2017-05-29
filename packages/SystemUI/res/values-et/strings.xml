@@ -469,6 +469,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Teie tööprofiili haldab <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profiil on ühendatud rakendusega <xliff:g id="APPLICATION">%2$s</xliff:g>, mis saab jälgida teie töökoha võrgutegevusi, sh meile, rakendusi ja veebisaite.\n\nLisateabe saamiseks võtke ühendust administraatoriga."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Teie tööprofiili haldab <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profiil on ühendatud rakendusega <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, mis saab jälgida teie töökoha võrgutegevusi, sh meile, rakendusi ja veebisaite.\n\nOlete ühendatud ka rakendusega <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, mis saab jälgida teie isiklikke võrgutegevusi."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Avatud kasutaja <xliff:g id="USER_NAME">%1$s</xliff:g> jaoks"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Seade jääb lukku, kuni selle käsitsi avate"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Saate märguandeid kiiremini"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Näete neid enne avamist"</string>

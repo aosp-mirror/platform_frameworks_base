@@ -16,15 +16,19 @@
 
 package com.android.systemui.statusbar;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 
+import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Assert;
@@ -35,7 +39,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@Ignore("flaking")
+@FlakyTest
 public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mGroup;
@@ -63,5 +67,26 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         Assert.assertTrue(mGroup.getChildrenContainer().getVisibleHeader().getVisibility()
                 == View.VISIBLE);
     }
+
+    @Test
+    public void testUserLockedResetEvenWhenNoChildren() {
+        mGroup.setUserLocked(true);
+        mGroup.removeAllChildren();
+        mGroup.setUserLocked(false);
+        Assert.assertFalse("The childrencontainer should not be userlocked but is, the state "
+                + "seems out of sync.", mGroup.getChildrenContainer().isUserLocked());
+    }
+
+    @Test
+    public void testReinflatedOnDensityChange() {
+        mGroup.setUserLocked(true);
+        mGroup.removeAllChildren();
+        mGroup.setUserLocked(false);
+        NotificationChildrenContainer mockContainer = mock(NotificationChildrenContainer.class);
+        mGroup.setChildrenContainer(mockContainer);
+        mGroup.onDensityOrFontScaleChanged();
+        verify(mockContainer).reInflateViews(any(), any());
+    }
+
 
 }

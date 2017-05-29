@@ -115,7 +115,8 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(layoutResourceId, mDelegator, true);
+        final View view = inflater.inflate(layoutResourceId, mDelegator, true);
+        view.setSaveFromParentEnabled(false);
 
         OnValueChangeListener onChangeListener = new OnValueChangeListener() {
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {

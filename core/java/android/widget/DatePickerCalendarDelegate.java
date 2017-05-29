@@ -112,6 +112,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
         // Set up and attach container.
         mContainer = (ViewGroup) inflater.inflate(layoutResourceId, mDelegator, false);
+        mContainer.setSaveFromParentEnabled(false);
         mDelegator.addView(mContainer);
 
         // Set up header views.

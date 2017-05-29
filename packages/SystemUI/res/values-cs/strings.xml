@@ -473,6 +473,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nDalší informace vám poskytne administrátor."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nTaké jste připojeni k aplikaci <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Odemknuto pro uživatele <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Zařízení zůstane uzamčeno, dokud je ručně neodemknete"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Čtěte si oznámení rychleji"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Můžete si je přečíst před odemčením obrazovky."</string>

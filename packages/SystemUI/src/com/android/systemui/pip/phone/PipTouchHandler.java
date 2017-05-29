@@ -376,10 +376,7 @@ public class PipTouchHandler {
                 if (!mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
-                    AccessibilityNodeInfo info =
-                            PipAccessibilityInteractionConnection.obtainRootAccessibilityNodeInfo();
-                    event.setSource(info);
-                    info.recycle();
+                    event.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID);
                     mAccessibilityManager.sendAccessibilityEvent(event);
                     mSendingHoverAccessibilityEvents = true;
                 }
@@ -389,10 +386,7 @@ public class PipTouchHandler {
                 if (mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
-                    AccessibilityNodeInfo info =
-                            PipAccessibilityInteractionConnection.obtainRootAccessibilityNodeInfo();
-                    event.setSource(info);
-                    info.recycle();
+                    event.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID);
                     mAccessibilityManager.sendAccessibilityEvent(event);
                     mSendingHoverAccessibilityEvents = false;
                 }

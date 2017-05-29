@@ -1112,8 +1112,11 @@ public class CameraDeviceImpl extends CameraDevice
      * <p>A callback for tracking the progress of a {@link CaptureRequest}
      * submitted to the camera device.</p>
      *
+     * An interface instead of an abstract class because this is internal and
+     * we want to make sure we always implement all its callbacks until we reach
+     * the public layer.
      */
-    public static abstract class CaptureCallback {
+    public interface CaptureCallback {
 
         /**
          * This constant is used to indicate that no images were captured for
@@ -1130,9 +1133,7 @@ public class CameraDeviceImpl extends CameraDevice
          * @see android.media.MediaActionSound
          */
         public void onCaptureStarted(CameraDevice camera,
-                CaptureRequest request, long timestamp, long frameNumber) {
-            // default empty implementation
-        }
+                CaptureRequest request, long timestamp, long frameNumber);
 
         /**
          * This method is called when some results from an image capture are
@@ -1141,9 +1142,7 @@ public class CameraDeviceImpl extends CameraDevice
          * @hide
          */
         public void onCapturePartial(CameraDevice camera,
-                CaptureRequest request, CaptureResult result) {
-            // default empty implementation
-        }
+                CaptureRequest request, CaptureResult result);
 
         /**
          * This method is called when an image capture makes partial forward progress; some
@@ -1151,18 +1150,14 @@ public class CameraDeviceImpl extends CameraDevice
          *
          */
         public void onCaptureProgressed(CameraDevice camera,
-                CaptureRequest request, CaptureResult partialResult) {
-            // default empty implementation
-        }
+                CaptureRequest request, CaptureResult partialResult);
 
         /**
          * This method is called when an image capture has fully completed and all the
          * result metadata is available.
          */
         public void onCaptureCompleted(CameraDevice camera,
-                CaptureRequest request, TotalCaptureResult result) {
-            // default empty implementation
-        }
+                CaptureRequest request, TotalCaptureResult result);
 
         /**
          * This method is called instead of {@link #onCaptureCompleted} when the
@@ -1170,9 +1165,7 @@ public class CameraDeviceImpl extends CameraDevice
          * request.
          */
         public void onCaptureFailed(CameraDevice camera,
-                CaptureRequest request, CaptureFailure failure) {
-            // default empty implementation
-        }
+                CaptureRequest request, CaptureFailure failure);
 
         /**
          * This method is called independently of the others in CaptureCallback,
@@ -1180,9 +1173,7 @@ public class CameraDeviceImpl extends CameraDevice
          * or {@link CaptureFailure} for it have been returned via this callback.
          */
         public void onCaptureSequenceCompleted(CameraDevice camera,
-                int sequenceId, long frameNumber) {
-            // default empty implementation
-        }
+                int sequenceId, long frameNumber);
 
         /**
          * This method is called independently of the others in CaptureCallback,
@@ -1190,14 +1181,16 @@ public class CameraDeviceImpl extends CameraDevice
          * or {@link CaptureFailure} for it have been returned via this callback.
          */
         public void onCaptureSequenceAborted(CameraDevice camera,
-                int sequenceId) {
-            // default empty implementation
-        }
+                int sequenceId);
 
+        /**
+         * This method is called independently of the others in CaptureCallback, if an output buffer
+         * is dropped for a particular capture request.
+         *
+         * Loss of metadata is communicated via onCaptureFailed, independently of any buffer loss.
+         */
         public void onCaptureBufferLost(CameraDevice camera,
-                CaptureRequest request, Surface target, long frameNumber) {
-            // default empty implementation
-        }
+                CaptureRequest request, Surface target, long frameNumber);
     }
 
     /**

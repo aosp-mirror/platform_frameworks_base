@@ -62,6 +62,9 @@ public interface QS extends FragmentBase {
 
     View getHeader();
 
+    default void setHasNotifications(boolean hasNotifications) {
+    }
+
     @ProvidesInterface(version = HeightListener.VERSION)
     public interface HeightListener {
         public static final int VERSION = 1;

@@ -18,6 +18,7 @@
 #define AAPT_RESOURCE_VALUES_H
 
 #include <array>
+#include <limits>
 #include <ostream>
 #include <vector>
 
@@ -251,6 +252,7 @@ struct Attribute : public BaseValue<Attribute> {
   int32_t max_int;
   std::vector<Symbol> symbols;
 
+  Attribute();
   explicit Attribute(bool w, uint32_t t = 0u);
 
   bool Equals(const Value* value) const override;

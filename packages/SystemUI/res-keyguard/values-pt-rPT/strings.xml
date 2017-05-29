@@ -93,13 +93,13 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"Código PIN do cartão SIM incorreto. Tem de contactar o seu operador para desbloquear o dispositivo."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+      <item quantity="one">Incorrect SIM PIN code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
       <item quantity="other">Código PIN do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas.</item>
-      <item quantity="one">Código PIN do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de precisar de contactar o seu operador para desbloquear o dispositivo.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"Cartão SIM inutilizável. Contacte o seu operador."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+      <item quantity="one">Incorrect SIM PUK code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.</item>
       <item quantity="other">Código PUK do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas antes de o cartão SIM ficar permanentemente inutilizável.</item>
-      <item quantity="one">Código PUK do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar permanentemente inutilizável.</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="8769990811451236223">"Falha ao introduzir o PIN do cartão SIM!"</string>
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"Falha ao introduzir o PUK do cartão SIM!"</string>
@@ -119,16 +119,16 @@
     <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Dispositivo bloqueado pelo administrador"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"O dispositivo foi bloqueado manualmente"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+      <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="NUMBER_1">%d</xliff:g> hours. Confirm pattern.</item>
       <item quantity="other">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirme o padrão.</item>
-      <item quantity="one">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirme o padrão.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+      <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="NUMBER_1">%d</xliff:g> hours. Confirm PIN.</item>
       <item quantity="other">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirme o PIN.</item>
-      <item quantity="one">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirme o PIN.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+      <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="NUMBER_1">%d</xliff:g> hours. Confirm password.</item>
       <item quantity="other">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirme a palavra-passe.</item>
-      <item quantity="one">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirme a palavra-passe.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Não reconhecido"</string>
 </resources>

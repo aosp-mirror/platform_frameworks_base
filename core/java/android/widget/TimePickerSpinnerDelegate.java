@@ -83,7 +83,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         a.recycle();
 
         final LayoutInflater inflater = LayoutInflater.from(mContext);
-        inflater.inflate(layoutResourceId, mDelegator, true);
+        final View view = inflater.inflate(layoutResourceId, mDelegator, true);
+        view.setSaveFromParentEnabled(false);
 
         // hour
         mHourSpinner = delegator.findViewById(R.id.hour);

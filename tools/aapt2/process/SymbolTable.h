@@ -53,16 +53,12 @@ class NameMangler;
 class SymbolTable {
  public:
   struct Symbol {
-    Symbol() : Symbol(Maybe<ResourceId>{}) {}
+    Symbol() = default;
 
-    explicit Symbol(const Maybe<ResourceId>& i) : Symbol(i, nullptr) {}
-
-    Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr)
-        : Symbol(i, attr, false) {}
-
-    Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr,
-           bool pub)
-        : id(i), attribute(attr), is_public(pub) {}
+    explicit Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr = {},
+                    bool pub = false)
+        : id(i), attribute(attr), is_public(pub) {
+    }
 
     Symbol(const Symbol&) = default;
     Symbol(Symbol&&) = default;

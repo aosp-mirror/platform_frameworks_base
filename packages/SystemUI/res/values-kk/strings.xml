@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Жұмыс профиліңізді <xliff:g id="ORGANIZATION">%1$s</xliff:g> басқарады. Бұл профиль жұмыс желісіндегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="APPLICATION">%2$s</xliff:g> қолданбасына қосылған.\n\nҚосымша ақпарат алу үшін әкімшіге хабарласыңыз."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Жұмыс профиліңізді <xliff:g id="ORGANIZATION">%1$s</xliff:g> басқарады. Бұл профиль жұмыс желісіндегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> қолданбасына қосылған.\n\nСондай-ақ сіз жеке желідегі белсенділігіңізді бақылай алатын <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> қолданбасына қосылғансыз."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> үшін құлпы ашылды"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Қолмен бекітпесін ашқанша құрылғы бекітілген күйде қалады"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Хабарландыруларды тезірек алу"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Бекітпесін ашу алдында оларды көру"</string>

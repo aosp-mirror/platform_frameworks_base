@@ -27,6 +27,7 @@ import android.content.Context;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.widget.RemoteViews;
@@ -36,6 +37,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.InflationTask;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,7 +49,7 @@ import java.util.concurrent.CountDownLatch;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@Ignore("flaking")
+@FlakyTest
 public class NotificationInflaterTest extends SysuiTestCase {
 
     private NotificationInflater mNotificationInflater;
@@ -130,7 +132,29 @@ public class NotificationInflaterTest extends SysuiTestCase {
         mRow.getEntry().abortTask();
         runThenWaitForInflation(() -> mNotificationInflater.inflateNotificationViews(),
                 mNotificationInflater);
-        Assert.assertNull(mRow.getEntry().getRunningTask() );
+        verify(mRow).onNotificationUpdated();
+    }
+
+    @Test
+    public void testRemovedNotInflated() throws Exception {
+        mRow.setRemoved();
+        mNotificationInflater.inflateNotificationViews();
+        Assert.assertNull(mRow.getEntry().getRunningTask());
+    }
+
+
+    @Test
+    public void testSupersedesExistingTask() throws Exception {
+        mNotificationInflater.inflateNotificationViews();
+        mNotificationInflater.setIsLowPriority(true);
+        mNotificationInflater.setIsChildInGroup(true);
+        InflationTask runningTask = mRow.getEntry().getRunningTask();
+        NotificationInflater.AsyncInflationTask asyncInflationTask =
+                (NotificationInflater.AsyncInflationTask) runningTask;
+        Assert.assertSame("Successive inflations don't inherit the previous flags!",
+                asyncInflationTask.getReInflateFlags(),
+                NotificationInflater.FLAG_REINFLATE_ALL);
+        runningTask.abort();
     }
 
     public static void runThenWaitForInflation(Runnable block,

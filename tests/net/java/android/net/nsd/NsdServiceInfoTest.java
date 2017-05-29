@@ -1,11 +1,32 @@
-package android.core;
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import android.test.AndroidTestCase;
+package android.net.nsd;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.StrictMode;
 import android.net.nsd.NsdServiceInfo;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -14,8 +35,12 @@ import java.util.Map;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class NsdServiceInfoTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class NsdServiceInfoTest {
 
     public final static InetAddress LOCALHOST;
     static {
@@ -30,6 +55,7 @@ public class NsdServiceInfoTest extends AndroidTestCase {
         LOCALHOST = _host;
     }
 
+    @Test
     public void testLimits() throws Exception {
         NsdServiceInfo info = new NsdServiceInfo();
 
@@ -85,6 +111,7 @@ public class NsdServiceInfoTest extends AndroidTestCase {
         assertTrue(info.getTxtRecord().length == 1300);
     }
 
+    @Test
     public void testParcel() throws Exception {
         NsdServiceInfo emptyInfo = new NsdServiceInfo();
         checkParcelable(emptyInfo);
@@ -139,25 +166,25 @@ public class NsdServiceInfoTest extends AndroidTestCase {
         NsdServiceInfo result = reader.getParcelable("test_info");
 
         // Assert equality of base fields.
-        assertEquality(original.getServiceName(), result.getServiceName());
-        assertEquality(original.getServiceType(), result.getServiceType());
-        assertEquality(original.getHost(), result.getHost());
+        assertEquals(original.getServiceName(), result.getServiceName());
+        assertEquals(original.getServiceType(), result.getServiceType());
+        assertEquals(original.getHost(), result.getHost());
         assertTrue(original.getPort() == result.getPort());
 
         // Assert equality of attribute map.
         Map<String, byte[]> originalMap = original.getAttributes();
         Map<String, byte[]> resultMap = result.getAttributes();
-        assertEquality(originalMap.keySet(), resultMap.keySet());
+        assertEquals(originalMap.keySet(), resultMap.keySet());
         for (String key : originalMap.keySet()) {
             assertTrue(Arrays.equals(originalMap.get(key), resultMap.get(key)));
         }
     }
 
-    public void assertEquality(Object expected, Object result) {
-        assertTrue(expected == result || expected.equals(result));
-    }
-
     public void assertEmptyServiceInfo(NsdServiceInfo shouldBeEmpty) {
-        assertTrue(null == shouldBeEmpty.getTxtRecord());
+        byte[] txtRecord = shouldBeEmpty.getTxtRecord();
+        if (txtRecord == null || txtRecord.length == 0) {
+            return;
+        }
+        fail("NsdServiceInfo.getTxtRecord did not return null but " + Arrays.toString(txtRecord));
     }
 }

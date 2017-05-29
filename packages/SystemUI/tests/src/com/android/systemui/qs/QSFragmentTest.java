@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import android.app.FragmentController;
 import android.app.FragmentManagerNonConfig;
 import android.os.Looper;
+import android.support.test.filters.FlakyTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.CarrierText;
@@ -50,8 +51,8 @@ import android.widget.FrameLayout;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
-@Ignore("flaking")
 @SmallTest
+@FlakyTest
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private MetricsLogger mMockMetricsLogger;

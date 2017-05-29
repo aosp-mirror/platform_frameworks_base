@@ -4005,6 +4005,35 @@ message MetricsEvent {
     // FIELD: The numeric preference value (of type float) when it is changed in Settings
     FIELD_SETTINGS_PREFERENCE_CHANGE_FLOAT_VALUE = 995;
 
+    // OPEN: Settings > System > Languages & input > Assist gesture
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE = 996;
+
+    // ACTION: Assist gesture released without triggering
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ASSIST_GESTURE_RELEASED = 997;
+
+    // ACTION: Assist gesture primed
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ASSIST_GESTURE_PRIMED = 998;
+
+    // ACTION: Assist gesture triggered
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O DR
+    ASSIST_GESTURE_TRIGGERED = 999;
+
+    // ACTION: Update default app from Settings
+    ACTION_SETTINGS_UPDATE_DEFAULT_APP = 1000;
+
+    // FIELD - Query length when Settings search result is clicked
+    FIELD_SETTINGS_SERACH_QUERY_LENGTH = 1001;
+
+    // FIELD - Number of results when Settings search result is clicked
+    FIELD_SETTINGS_SERACH_RESULT_COUNT = 1002;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

@@ -35,6 +35,8 @@ namespace xml {
 
 class RawVisitor;
 
+class Element;
+
 /**
  * Base class for all XML nodes.
  */
@@ -51,7 +53,11 @@ class Node {
   void AppendChild(std::unique_ptr<Node> child);
   void InsertChild(size_t index, std::unique_ptr<Node> child);
   virtual void Accept(RawVisitor* visitor) = 0;
-  virtual std::unique_ptr<Node> Clone() = 0;
+
+  using ElementCloneFunc = std::function<void(const Element&, Element*)>;
+
+  // Clones the Node subtree, using the given function to decide how to clone an Element.
+  virtual std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) = 0;
 };
 
 /**
@@ -72,12 +78,16 @@ class Namespace : public BaseNode<Namespace> {
   std::string namespace_prefix;
   std::string namespace_uri;
 
-  std::unique_ptr<Node> Clone() override;
+  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
 };
 
 struct AaptAttribute {
-  Maybe<ResourceId> id;
+  explicit AaptAttribute(const ::aapt::Attribute& attr, const Maybe<ResourceId>& resid = {})
+      : attribute(attr), id(resid) {
+  }
+
   aapt::Attribute attribute;
+  Maybe<ResourceId> id;
 };
 
 /**
@@ -102,6 +112,8 @@ class Element : public BaseNode<Element> {
   std::vector<Attribute> attributes;
 
   Attribute* FindAttribute(const android::StringPiece& ns, const android::StringPiece& name);
+  const Attribute* FindAttribute(const android::StringPiece& ns,
+                                 const android::StringPiece& name) const;
   xml::Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name);
   xml::Element* FindChildWithAttribute(const android::StringPiece& ns,
                                        const android::StringPiece& name,
@@ -109,7 +121,7 @@ class Element : public BaseNode<Element> {
                                        const android::StringPiece& attr_name,
                                        const android::StringPiece& attr_value);
   std::vector<xml::Element*> GetChildElements();
-  std::unique_ptr<Node> Clone() override;
+  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
 };
 
 /**
@@ -119,7 +131,7 @@ class Text : public BaseNode<Text> {
  public:
   std::string text;
 
-  std::unique_ptr<Node> Clone() override;
+  std::unique_ptr<Node> Clone(const ElementCloneFunc& el_cloner) override;
 };
 
 /**

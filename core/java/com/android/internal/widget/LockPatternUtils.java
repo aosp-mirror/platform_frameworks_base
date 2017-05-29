@@ -539,6 +539,14 @@ public class LockPatternUtils {
     }
 
     /**
+     * Records that the user has chosen a pattern at some time, even if the pattern is
+     * currently cleared.
+     */
+    public void reportPatternWasChosen(int userId) {
+        setBoolean(PATTERN_EVER_CHOSEN_KEY, true, userId);
+    }
+
+    /**
      * Used by device policy manager to validate the current password
      * information it has.
      */
@@ -656,7 +664,7 @@ public class LockPatternUtils {
                 }
             }
 
-            setBoolean(PATTERN_EVER_CHOSEN_KEY, true, userId);
+            reportPatternWasChosen(userId);
             onAfterChangingPassword(userId);
         } catch (RemoteException re) {
             Log.e(TAG, "Couldn't save lock pattern " + re);
@@ -1125,6 +1133,10 @@ public class LockPatternUtils {
         }
     }
 
+    public boolean isVisiblePatternEverChosen(int userId) {
+        return getString(Settings.Secure.LOCK_PATTERN_VISIBLE, userId) != null;
+    }
+
     /**
      * Set whether the visible password is enabled for cryptkeeper screen.
      */
@@ -1250,6 +1262,10 @@ public class LockPatternUtils {
 
     public boolean getPowerButtonInstantlyLocks(int userId) {
         return getBoolean(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, true, userId);
+    }
+
+    public boolean isPowerButtonInstantlyLocksEverChosen(int userId) {
+        return getString(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, userId) != null;
     }
 
     public void setEnabledTrustAgents(Collection<ComponentName> activeTrustAgents, int userId) {

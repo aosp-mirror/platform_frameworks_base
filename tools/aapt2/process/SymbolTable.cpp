@@ -237,14 +237,12 @@ static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
   }
 
   // We found a resource.
-  std::unique_ptr<SymbolTable::Symbol> s = util::make_unique<SymbolTable::Symbol>();
-  s->id = id;
+  std::unique_ptr<SymbolTable::Symbol> s = util::make_unique<SymbolTable::Symbol>(id);
 
   // Check to see if it is an attribute.
   for (size_t i = 0; i < (size_t)count; i++) {
     if (entry[i].map.name.ident == android::ResTable_map::ATTR_TYPE) {
-      s->attribute = std::make_shared<Attribute>(false);
-      s->attribute->type_mask = entry[i].map.value.data;
+      s->attribute = std::make_shared<Attribute>(false, entry[i].map.value.data);
       break;
     }
   }

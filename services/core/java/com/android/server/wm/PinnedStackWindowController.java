@@ -83,7 +83,7 @@ public class PinnedStackWindowController extends StackWindowController {
      * Animates the pinned stack.
      */
     public void animateResizePinnedStack(Rect toBounds, Rect sourceHintBounds,
-            int animationDuration, boolean schedulePipModeChangedOnAnimationEnd) {
+            int animationDuration, boolean fromFullscreen) {
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 throw new IllegalArgumentException("Pinned stack container not found :(");
@@ -98,7 +98,7 @@ public class PinnedStackWindowController extends StackWindowController {
                 NO_PIP_MODE_CHANGED_CALLBACKS;
             final boolean toFullscreen = toBounds == null;
             if (toFullscreen) {
-                if (schedulePipModeChangedOnAnimationEnd) {
+                if (fromFullscreen) {
                     throw new IllegalArgumentException("Should not defer scheduling PiP mode"
                             + " change on animation to fullscreen.");
                 }
@@ -113,7 +113,7 @@ public class PinnedStackWindowController extends StackWindowController {
                     toBounds = new Rect();
                     mContainer.getDisplayContent().getLogicalDisplayRect(toBounds);
                 }
-            } else if (schedulePipModeChangedOnAnimationEnd) {
+            } else if (fromFullscreen) {
                 schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_END;
             }
 
@@ -122,13 +122,13 @@ public class PinnedStackWindowController extends StackWindowController {
             final Rect finalToBounds = toBounds;
             final @SchedulePipModeChangedState int finalSchedulePipModeChangedState =
                 schedulePipModeChangedState;
-            UiThread.getHandler().post(() -> {
+            mService.mBoundsAnimationController.getHandler().post(() -> {
                 if (mContainer == null) {
                     return;
                 }
                 mService.mBoundsAnimationController.animateBounds(mContainer, fromBounds,
                         finalToBounds, animationDuration, finalSchedulePipModeChangedState,
-                        toFullscreen);
+                        fromFullscreen, toFullscreen);
             });
         }
     }
@@ -152,7 +152,7 @@ public class PinnedStackWindowController extends StackWindowController {
             if (Float.compare(aspectRatio, pinnedStackController.getAspectRatio()) != 0) {
                 if (!toBounds.equals(targetBounds)) {
                     animateResizePinnedStack(toBounds, null /* sourceHintBounds */,
-                            -1 /* duration */, false /* schedulePipModeChangedOnAnimationEnd */);
+                            -1 /* duration */, false /* fromFullscreen */);
                 }
                 pinnedStackController.setAspectRatio(
                         pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)

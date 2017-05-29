@@ -1,5 +1,11 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.16
+### `aapt2 link ...`
+- Versioning of XML files is more intelligent, using a small set of rules to degrade
+  specific newer attributes to backwards compatible versions of them.
+  Ex: `android:paddingHorizontal` degrades to `android:paddingLeft` and `android:paddingRight`.
+
 ## Version 2.15
 ### `aapt2 compile ...`
 - Add `--no-crunch` option to avoid processing PNGs during the compile phase. Note that this

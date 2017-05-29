@@ -7629,22 +7629,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * STOPSHIP (b/37622682) Remove it before release.
-     * @removed
-     */
-    public void setAffiliationIds(@NonNull ComponentName admin, @NonNull List<String> ids) {
-        throwIfParentInstance("setAffiliationIds");
-        if (ids == null) {
-            throw new IllegalArgumentException("ids must not be null");
-        }
-        try {
-            mService.setAffiliationIds(admin, ids);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Returns the set of affiliation ids previously set via {@link #setAffiliationIds}, or an
      * empty set if none have been set.
      */

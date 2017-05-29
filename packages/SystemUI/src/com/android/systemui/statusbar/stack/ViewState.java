@@ -657,6 +657,22 @@ public class ViewState {
         }
     }
 
+    /**
+     * Get the end value of the zTranslation animation running on a view or the zTranslation
+     * if no animation is running.
+     */
+    public static float getFinalTranslationZ(View view) {
+        if (view == null) {
+            return 0;
+        }
+        ValueAnimator zAnimator = getChildTag(view, TAG_ANIMATOR_TRANSLATION_Z);
+        if (zAnimator == null) {
+            return view.getTranslationZ();
+        } else {
+            return getChildTag(view, TAG_END_TRANSLATION_Z);
+        }
+    }
+
     public static boolean isAnimatingY(View child) {
         return getChildTag(child, TAG_ANIMATOR_TRANSLATION_Y) != null;
     }

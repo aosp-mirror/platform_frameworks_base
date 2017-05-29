@@ -1206,7 +1206,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tocca per selezionare la lingua e il layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Attività app"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"App <xliff:g id="NAME">%s</xliff:g> visualizzata sopra altre app"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"App <xliff:g id="NAME">%s</xliff:g> mostrata sopra altre app"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se non desideri che l\'app <xliff:g id="NAME">%s</xliff:g> utilizzi questa funzione, tocca per aprire le impostazioni e disattivarla."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"DISATTIVA"</string>

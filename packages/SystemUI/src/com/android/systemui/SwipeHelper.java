@@ -659,15 +659,19 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     public boolean isDismissGesture(MotionEvent ev) {
+        return ev.getActionMasked() == MotionEvent.ACTION_UP
+                && !isFalseGesture(ev) && (swipedFastEnough() || swipedFarEnough())
+                && mCallback.canChildBeDismissed(mCurrView);
+    }
+
+    public boolean isFalseGesture(MotionEvent ev) {
         boolean falsingDetected = mCallback.isAntiFalsingNeeded();
         if (mFalsingManager.isClassiferEnabled()) {
             falsingDetected = falsingDetected && mFalsingManager.isFalseTouch();
         } else {
             falsingDetected = falsingDetected && !mTouchAboveFalsingThreshold;
         }
-        return !falsingDetected && (swipedFastEnough() || swipedFarEnough())
-                && ev.getActionMasked() == MotionEvent.ACTION_UP
-                && mCallback.canChildBeDismissed(mCurrView);
+        return falsingDetected;
     }
 
     protected boolean swipedFastEnough() {

@@ -14,6 +14,8 @@
 
 package com.android.systemui.globalactions;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -21,13 +23,17 @@ import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.HardwareUiLayout;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
+import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.volume.VolumeDialogImpl;
 import com.android.systemui.volume.VolumeDialogMotion.LogAccelerateInterpolator;
 import com.android.systemui.volume.VolumeDialogMotion.LogDecelerateInterpolator;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -37,6 +43,8 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.database.DataSetObserver;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -59,9 +67,12 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
@@ -72,6 +83,10 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.google.android.colorextraction.ColorExtractor;
+import com.google.android.colorextraction.ColorExtractor.GradientColors;
+import com.google.android.colorextraction.drawable.GradientDrawable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -208,8 +223,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
             mDialog.getWindow().setAttributes(attrs);
             mDialog.show();
             mWindowManagerFuncs.onGlobalActionsShown();
-            mDialog.getWindow().getDecorView().setSystemUiVisibility(
-                    View.STATUS_BAR_DISABLE_EXPAND);
         }
     }
 
@@ -332,7 +345,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         };
         ActionsDialog dialog = new ActionsDialog(mContext, this, mAdapter, onItemLongClickListener);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        dialog.setKeyguardShowing(mKeyguardShowing);
 
         dialog.setOnDismissListener(this);
 
@@ -637,7 +650,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         refreshSilentMode();
         mAirplaneModeOn.updateState(mAirplaneState);
         mAdapter.notifyDataSetChanged();
-        mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         if (mShowSilentToggle) {
             IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
             mContext.registerReceiver(mRingerModeReceiver, filter);
@@ -1194,7 +1206,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         }
     }
 
-    private static final class ActionsDialog extends Dialog implements DialogInterface {
+    private static final class ActionsDialog extends Dialog implements DialogInterface,
+            ColorExtractor.OnColorsChangedListener {
 
         private final Context mContext;
         private final MyAdapter mAdapter;
@@ -1202,16 +1215,35 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         private final HardwareUiLayout mHardwareLayout;
         private final OnClickListener mClickListener;
         private final OnItemLongClickListener mLongClickListener;
+        private final GradientDrawable mGradientDrawable;
+        private final ColorExtractor mColorExtractor;
+        private boolean mKeyguardShowing;
 
         public ActionsDialog(Context context, OnClickListener clickListener, MyAdapter adapter,
                 OnItemLongClickListener longClickListener) {
-            super(context, android.R.style.Theme_DeviceDefault_Light_NoActionBar_Fullscreen);
+            super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = getContext();
             mAdapter = adapter;
             mClickListener = clickListener;
             mLongClickListener = longClickListener;
+            mGradientDrawable = new GradientDrawable(mContext);
+            mColorExtractor = Dependency.get(ColorExtractor.class);
+
+            // Window initialization
+            Window window = getWindow();
+            window.requestFeature(Window.FEATURE_NO_TITLE);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR);
+            window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+            window.setBackgroundDrawable(mGradientDrawable);
+            window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
+
             setContentView(com.android.systemui.R.layout.global_actions_wrapped);
-            getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             mListView = findViewById(android.R.id.list);
             mHardwareLayout = HardwareUiLayout.get(mListView);
             mHardwareLayout.setOutsideTouchListener(view -> dismiss());
@@ -1234,16 +1266,26 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
             super.setCanceledOnTouchOutside(true);
             super.onStart();
             updateList();
+
+            Point displaySize = new Point();
+            mContext.getDisplay().getRealSize(displaySize);
+            mColorExtractor.addOnColorsChangedListener(this);
+            mGradientDrawable.setScreenSize(displaySize.x, displaySize.y);
+            GradientColors colors = mColorExtractor.getColors(mKeyguardShowing ?
+                    WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM);
+            mGradientDrawable.setColors(colors, false);
         }
 
         @Override
         protected void onStop() {
             super.onStop();
+            mColorExtractor.removeOnColorsChangedListener(this);
         }
 
         @Override
         public void show() {
             super.show();
+            mGradientDrawable.setAlpha(0);
             mHardwareLayout.setTranslationX(getAnimTranslation());
             mHardwareLayout.setAlpha(0);
             mHardwareLayout.animate()
@@ -1251,6 +1293,11 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                     .translationX(0)
                     .setDuration(300)
                     .setInterpolator(new LogDecelerateInterpolator())
+                    .setUpdateListener(animation -> {
+                        int alpha = (int) ((Float) animation.getAnimatedValue()
+                                * ScrimController.GRADIENT_SCRIM_ALPHA * 255);
+                        mGradientDrawable.setAlpha(alpha);
+                    })
                     .start();
         }
 
@@ -1264,6 +1311,11 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                     .setDuration(300)
                     .withEndAction(() -> super.dismiss())
                     .setInterpolator(new LogAccelerateInterpolator())
+                    .setUpdateListener(animation -> {
+                        int alpha = (int) ((1f - (Float) animation.getAnimatedValue())
+                                * ScrimController.GRADIENT_SCRIM_ALPHA * 255);
+                        mGradientDrawable.setAlpha(alpha);
+                    })
                     .start();
         }
 
@@ -1284,6 +1336,23 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                 }
             }
             return super.dispatchPopulateAccessibilityEvent(event);
+        }
+
+        @Override
+        public void onColorsChanged(GradientColors colors, int which) {
+            if (mKeyguardShowing) {
+                if ((WallpaperManager.FLAG_LOCK & which) != 0) {
+                    mGradientDrawable.setColors(colors);
+                }
+            } else {
+                if ((WallpaperManager.FLAG_SYSTEM & which) != 0) {
+                    mGradientDrawable.setColors(colors);
+                }
+            }
+        }
+
+        public void setKeyguardShowing(boolean keyguardShowing) {
+            mKeyguardShowing = keyguardShowing;
         }
     }
 }

@@ -255,6 +255,9 @@ message WifiLog {
   // Indicates the number of times an error was encountered in
   // Wificond when wifi was turned on.
   optional int32 num_wifi_on_failure_due_to_wificond = 56;
+
+  // Wi-Fi Aware metrics
+  optional WifiAwareLog wifi_aware_log = 57;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -676,3 +679,189 @@ message StaEvent {
   // Authentication failure reason, as reported by WifiManager (calculated from state & deauth code)
   optional AuthFailureReason auth_failure_reason = 13 [default = AUTH_FAILURE_UNKNOWN];
 }
+
+// Wi-Fi Aware metrics
+message WifiAwareLog {
+  // total number of unique apps that used Aware (measured on attach)
+  optional int32 num_apps = 1;
+
+  // total number of unique apps that used an identity callback when attaching
+  optional int32 num_apps_using_identity_callback = 2;
+
+  // maximum number of attaches for an app
+  optional int32 max_concurrent_attach_sessions_in_app = 3;
+
+  // histogram of attach request results
+  repeated NanStatusHistogramBucket histogram_attach_session_status = 4;
+
+  // maximum number of concurrent publish sessions in a single app
+  optional int32 max_concurrent_publish_in_app = 5;
+
+  // maximum number of concurrent subscribe sessions in a single app
+  optional int32 max_concurrent_subscribe_in_app = 6;
+
+  // maximum number of concurrent discovery (publish+subscribe) sessions in a single app
+  optional int32 max_concurrent_discovery_sessions_in_app = 7;
+
+  // maximum number of concurrent publish sessions in the system
+  optional int32 max_concurrent_publish_in_system = 8;
+
+  // maximum number of concurrent subscribe sessions in the system
+  optional int32 max_concurrent_subscribe_in_system = 9;
+
+  // maximum number of concurrent discovery (publish+subscribe) sessions in the system
+  optional int32 max_concurrent_discovery_sessions_in_system = 10;
+
+  // histogram of publish request results
+  repeated NanStatusHistogramBucket histogram_publish_status = 11;
+
+  // histogram of subscribe request results
+  repeated NanStatusHistogramBucket histogram_subscribe_status = 12;
+
+  // number of unique apps which experienced a discovery session creation failure due to lack of
+  // resources
+  optional int32 num_apps_with_discovery_session_failure_out_of_resources = 13;
+
+  // histogram of create ndp request results
+  repeated NanStatusHistogramBucket histogram_request_ndp_status = 14;
+
+  // histogram of create ndp out-of-band (OOB) request results
+  repeated NanStatusHistogramBucket histogram_request_ndp_oob_status = 15;
+
+  // maximum number of concurrent active data-interfaces (NDI) in a single app
+  optional int32 max_concurrent_ndi_in_app = 19;
+
+  // maximum number of concurrent active data-interfaces (NDI) in the system
+  optional int32 max_concurrent_ndi_in_system = 20;
+
+  // maximum number of concurrent data-paths (NDP) in a single app
+  optional int32 max_concurrent_ndp_in_app = 21;
+
+  // maximum number of concurrent data-paths (NDP) in the system
+  optional int32 max_concurrent_ndp_in_system = 22;
+
+  // maximum number of concurrent secure data-paths (NDP) in a single app
+  optional int32 max_concurrent_secure_ndp_in_app = 23;
+
+  // maximum number of concurrent secure data-paths (NDP) in the system
+  optional int32 max_concurrent_secure_ndp_in_system = 24;
+
+  // maximum number of concurrent data-paths (NDP) per data-interface (NDI)
+  optional int32 max_concurrent_ndp_per_ndi = 25;
+
+  // histogram of durations of Aware being available
+  repeated HistogramBucket histogram_aware_available_duration_ms = 26;
+
+  // histogram of durations of Aware being enabled
+  repeated HistogramBucket histogram_aware_enabled_duration_ms = 27;
+
+  // histogram of duration (in ms) of attach sessions
+  repeated HistogramBucket histogram_attach_duration_ms = 28;
+
+  // histogram of duration (in ms) of publish sessions
+  repeated HistogramBucket histogram_publish_session_duration_ms = 29;
+
+  // histogram of duration (in ms) of subscribe sessions
+  repeated HistogramBucket histogram_subscribe_session_duration_ms = 30;
+
+  // histogram of duration (in ms) of data-paths (NDP)
+  repeated HistogramBucket histogram_ndp_session_duration_ms = 31;
+
+  // histogram of usage (in MB) of data-paths (NDP)
+  repeated HistogramBucket histogram_ndp_session_data_usage_mb = 32;
+
+  // histogram of usage (in MB) of data-path creation time (in ms) measured as request -> confirm
+  repeated HistogramBucket histogram_ndp_creation_time_ms = 33;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: minimum
+  optional int64 ndp_creation_time_ms_min = 34;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: maximum
+  optional int64 ndp_creation_time_ms_max = 35;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: sum
+  optional int64 ndp_creation_time_ms_sum = 36;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: sum of sq
+  optional int64 ndp_creation_time_ms_sum_of_sq = 37;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: number of
+  // samples
+  optional int64 ndp_creation_time_ms_num_samples = 38;
+
+  // total time within the logging window that aware was available
+  optional int64 available_time_ms = 39;
+
+  // total time within the logging window that aware was enabled
+  optional int64 enabled_time_ms = 40;
+
+  // Histogram bucket for Wi-Fi Aware logs. Range is [start, end)
+  message HistogramBucket {
+    // lower range of the bucket (inclusive)
+    optional int64 start = 1;
+
+    // upper range of the bucket (exclusive)
+    optional int64 end = 2;
+
+    // number of samples in the bucket
+    optional int32 count = 3;
+  }
+
+  // Status of various NAN operations
+  enum NanStatusTypeEnum {
+    // constant to be used by proto
+    UNKNOWN = 0;
+
+    // NAN operation succeeded
+    SUCCESS = 1;
+
+    // NAN Discovery Engine/Host driver failures
+    INTERNAL_FAILURE = 2;
+
+    // NAN OTA failures
+    PROTOCOL_FAILURE = 3;
+
+    // The publish/subscribe discovery session id is invalid
+    INVALID_SESSION_ID = 4;
+
+    // Out of resources to fufill request
+    NO_RESOURCES_AVAILABLE = 5;
+
+    // Invalid arguments passed
+    INVALID_ARGS = 6;
+
+    // Invalid peer id
+    INVALID_PEER_ID = 7;
+
+    // Invalid NAN data-path (ndp) id
+    INVALID_NDP_ID = 8;
+
+    // Attempting to enable NAN when not available, e.g. wifi is disabled
+    NAN_NOT_ALLOWED = 9;
+
+    // Over the air ACK not received
+    NO_OTA_ACK = 10;
+
+    // Attempting to enable NAN when already enabled
+    ALREADY_ENABLED = 11;
+
+    // Can't queue tx followup message foor transmission
+    FOLLOWUP_TX_QUEUE_FULL = 12;
+
+    // Unsupported concurrency of NAN and another feature - NAN disabled
+    UNSUPPORTED_CONCURRENCY_NAN_DISABLED = 13;
+
+    // Unknown NanStatusType
+    UNKNOWN_HAL_STATUS = 14;
+  }
+
+  // Histogram bucket for Wi-Fi Aware (NAN) status.
+  message NanStatusHistogramBucket {
+    // status type defining the bucket
+    optional NanStatusTypeEnum nan_status_type = 1;
+
+    // number of samples in the bucket
+    optional int32 count = 2;
+  }
+}
+

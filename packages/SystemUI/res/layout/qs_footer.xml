@@ -27,20 +27,22 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:paddingTop="0dp"
-    android:paddingEnd="8dp"
-    android:paddingStart="16dp"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
     <include
         android:id="@+id/date_time_alarm_group"
         layout="@layout/status_bar_alarm_group"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
         android:layout_width="wrap_content"
         android:layout_height="match_parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
         android:gravity="end">
 
         <com.android.systemui.statusbar.phone.MultiUserSwitch
@@ -112,5 +114,10 @@
             android:contentDescription="@string/accessibility_quick_settings_expand"
             android:padding="14dp" />
     </LinearLayout>
+
+    <include layout="@layout/qs_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom" />
 
 </com.android.systemui.qs.QSFooter>

@@ -1206,7 +1206,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՈՒՓՔԵւՕՖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Հավելվածների պատմություն"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ԱՆՋԱՏԵԼ"</string>
@@ -1303,7 +1303,7 @@
     <string name="submit" msgid="1602335572089911941">"Ուղարկել"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Մեքենայի ռեժիմը միացված է"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Հպեք` մեքենայի ռեժիմից դուրս գալու համար:"</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Մուտքը կամ թեժ կետը ակտիվ է"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Մոդեմի ռեժիմը միացված է"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Հպեք՝ կարգավորելու համար:"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Հետ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Հաջորդը"</string>

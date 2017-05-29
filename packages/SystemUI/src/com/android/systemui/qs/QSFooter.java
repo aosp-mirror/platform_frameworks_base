@@ -235,6 +235,7 @@ public class QSFooter extends FrameLayout implements
         }
 
         TouchAnimator.Builder animatorBuilder = new TouchAnimator.Builder();
+        animatorBuilder.setStartDelay(QSAnimator.EXPANDED_TILE_DELAY);
 
         if (mShowEditIcon) {
             animatorBuilder.addFloat(mEdit, "alpha", 0, 1);

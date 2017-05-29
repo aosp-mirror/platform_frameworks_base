@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Жумуш профилиңизди <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат. Ал электрондук почта, колдонмолор жана вебсайттар сыяктуу жумуш тармагыңыздагы аракеттерди көзөмөлдөй турган <xliff:g id="APPLICATION">%2$s</xliff:g> колдонмосуна туташкан.\n\nКөбүрөөк маалымат алуу үчүн администраторуңузга кайрылыңыз."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Жумуш профилиңизди <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат. Ал электрондук почта, колдонмолор жана вебсайттар сыяктуу жумуш тармагыңыздагы аракеттерди көзөмөлдөй турган <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> колдонмосуна туташкан.\n\nМындан тышкары, тармактагы жеке аракеттериңизди көзөмөлдөгөн <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> колдонмосуна туташып турасыз."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> үчүн кулпусу ачылды"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Түзмөктүн кулпусу кол менен ачылмайынча кулпуланган бойдон алат"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Эскертмелерди тезирээк алуу"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Аларды кулпудан чыгараардан мурун көрүңүз"</string>

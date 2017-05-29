@@ -51,6 +51,35 @@ public final class ParcelableConnection implements Parcelable {
     private final DisconnectCause mDisconnectCause;
     private final List<String> mConferenceableConnectionIds;
     private final Bundle mExtras;
+    private String mParentCallId;
+
+    /** @hide */
+    public ParcelableConnection(
+            PhoneAccountHandle phoneAccount,
+            int state,
+            int capabilities,
+            int properties,
+            int supportedAudioRoutes,
+            Uri address,
+            int addressPresentation,
+            String callerDisplayName,
+            int callerDisplayNamePresentation,
+            IVideoProvider videoProvider,
+            int videoState,
+            boolean ringbackRequested,
+            boolean isVoipAudioMode,
+            long connectTimeMillis,
+            StatusHints statusHints,
+            DisconnectCause disconnectCause,
+            List<String> conferenceableConnectionIds,
+            Bundle extras,
+            String parentCallId) {
+        this(phoneAccount, state, capabilities, properties, supportedAudioRoutes, address,
+                addressPresentation, callerDisplayName, callerDisplayNamePresentation,
+                videoProvider, videoState, ringbackRequested, isVoipAudioMode, connectTimeMillis,
+                statusHints, disconnectCause, conferenceableConnectionIds, extras);
+        mParentCallId = parentCallId;
+    }
 
     /** @hide */
     public ParcelableConnection(
@@ -90,6 +119,7 @@ public final class ParcelableConnection implements Parcelable {
         mDisconnectCause = disconnectCause;
         mConferenceableConnectionIds = conferenceableConnectionIds;
         mExtras = extras;
+        mParentCallId = null;
     }
 
     public PhoneAccountHandle getPhoneAccount() {
@@ -176,6 +206,10 @@ public final class ParcelableConnection implements Parcelable {
         return mExtras;
     }
 
+    public final String getParentCallId() {
+        return mParentCallId;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -189,6 +223,8 @@ public final class ParcelableConnection implements Parcelable {
                 .append(Connection.propertiesToString(mConnectionProperties))
                 .append(", extras:")
                 .append(mExtras)
+                .append(", parent:")
+                .append(mParentCallId)
                 .toString();
     }
 
@@ -218,6 +254,7 @@ public final class ParcelableConnection implements Parcelable {
             Bundle extras = Bundle.setDefusable(source.readBundle(classLoader), true);
             int properties = source.readInt();
             int supportedAudioRoutes = source.readInt();
+            String parentCallId = source.readString();
 
             return new ParcelableConnection(
                     phoneAccount,
@@ -237,7 +274,8 @@ public final class ParcelableConnection implements Parcelable {
                     statusHints,
                     disconnectCause,
                     conferenceableConnectionIds,
-                    extras);
+                    extras,
+                    parentCallId);
         }
 
         @Override
@@ -274,5 +312,6 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeBundle(mExtras);
         destination.writeInt(mConnectionProperties);
         destination.writeInt(mSupportedAudioRoutes);
+        destination.writeString(mParentCallId);
     }
 }
