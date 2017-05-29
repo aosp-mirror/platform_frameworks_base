@@ -185,6 +185,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     public static final String DIAG_ARG = "--diag";
     public static final String SHORT_ARG = "--short";
+    public static final String TETHERING_ARG = "tethering";
 
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
@@ -1929,7 +1930,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private boolean argsContain(String[] args, String target) {
         for (String arg : args) {
-            if (arg.equals(target)) return true;
+            if (target.equals(arg)) return true;
         }
         return false;
     }
@@ -1966,6 +1967,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (argsContain(args, DIAG_ARG)) {
             dumpNetworkDiagnostics(pw);
+            return;
+        } else if (argsContain(args, TETHERING_ARG)) {
+            mTethering.dump(fd, pw, args);
             return;
         }
 

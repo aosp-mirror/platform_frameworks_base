@@ -1685,6 +1685,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 pw.println(" - lastError = " + tetherState.lastError);
             }
             pw.println("Upstream wanted: " + upstreamWanted());
+            pw.println("Current upstream interface: " + mCurrentUpstreamIface);
             pw.decreaseIndent();
         }
 
@@ -1702,7 +1703,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
     private static boolean argsContain(String[] args, String target) {
         for (String arg : args) {
-            if (arg.equals(target)) return true;
+            if (target.equals(arg)) return true;
         }
         return false;
     }
