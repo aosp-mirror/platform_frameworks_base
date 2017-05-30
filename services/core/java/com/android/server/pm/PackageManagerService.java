@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
@@ -15645,6 +15646,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 callingUid == getPackageUid(mStorageManagerPackage, 0, callingUserId)) {
             return true;
         }
+
+        // Allow caller having MANAGE_PROFILE_AND_DEVICE_OWNERS permission to silently
+        // uninstall for device owner provisioning.
+        if (checkUidPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, callingUid)
+                == PERMISSION_GRANTED) {
+            return true;
+        }
+
         return false;
     }
 
