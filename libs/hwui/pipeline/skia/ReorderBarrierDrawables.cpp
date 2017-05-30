@@ -21,7 +21,6 @@
 
 #include <SkBlurMask.h>
 #include <SkBlurMaskFilter.h>
-#include <SkGaussianEdgeShader.h>
 #include <SkPathOps.h>
 #include <SkRRectsGaussianEdgeMaskFilter.h>
 #include <SkShadowUtils.h>
