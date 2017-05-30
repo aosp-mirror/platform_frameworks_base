@@ -70,7 +70,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected static final int DEFAULT_SIGNAL_STRENGTH = DEFAULT_LEVEL;
     protected static final int DEFAULT_QS_SIGNAL_STRENGTH = DEFAULT_LEVEL;
     protected static final int DEFAULT_ICON = TelephonyIcons.ICON_3G;
-    protected static final int DEFAULT_QS_ICON = TelephonyIcons.QS_DATA_3G;
+    protected static final int DEFAULT_QS_ICON = DEFAULT_ICON;
 
     protected NetworkControllerImpl mNetworkController;
     protected MobileSignalController mMobileSignalController;
