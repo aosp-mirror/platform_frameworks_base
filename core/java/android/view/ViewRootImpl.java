@@ -2330,7 +2330,7 @@ public final class ViewRootImpl implements ViewParent,
 
         // Remember if we must report the next draw.
         if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
-            mReportNextDraw = true;
+            reportNextDraw();
         }
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
@@ -2731,11 +2731,8 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * A count of the number of calls to pendingDrawFinished we
      * require to notify the WM drawing is complete.
-     *
-     * This starts at 1, for the ViewRootImpl surface itself.
-     * Subsurfaces may debt the value with drawPending.
      */
-    int mDrawsNeededToReport = 1;
+    int mDrawsNeededToReport = 0;
 
     /**
      * Delay notifying WM of draw finished until
@@ -2761,7 +2758,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private void reportDrawFinished() {
         try {
-            mDrawsNeededToReport = 1;
+            mDrawsNeededToReport = 0;
             mWindowSession.finishDrawing(mWindow);
         } catch (RemoteException e) {
             // Have fun!
@@ -3772,13 +3769,12 @@ public final class ViewRootImpl implements ViewParent,
                     args.recycle();
 
                     if (msg.what == MSG_RESIZED_REPORT) {
-                        mReportNextDraw = true;
+                        reportNextDraw();
                     }
 
                     if (mView != null && framesChanged) {
                         forceLayout(mView);
                     }
-
                     requestLayout();
                 }
                 break;
@@ -7343,6 +7339,14 @@ public final class ViewRootImpl implements ViewParent,
         return false;
     }
 
+
+    private void reportNextDraw() {
+        if (mReportNextDraw == false) {
+            drawPending();
+        }
+        mReportNextDraw = true;
+    }
+
     /**
      * Force the window to report its next draw.
      * <p>
@@ -7352,7 +7356,7 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     public void setReportNextDraw() {
-        mReportNextDraw = true;
+        reportNextDraw();
         invalidate();
     }
 
