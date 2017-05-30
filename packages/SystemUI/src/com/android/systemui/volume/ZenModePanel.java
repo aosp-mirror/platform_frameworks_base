@@ -57,7 +57,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.R.string;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.FileDescriptor;
@@ -292,11 +291,6 @@ public class ZenModePanel extends FrameLayout {
     private void onAttach() {
         setExpanded(true);
         mAttached = true;
-        for (int i = 0; i < mZenRadioGroupContent.getChildCount(); i++) {
-            ConditionTag tag = getConditionTagAt(i);
-            if (tag != null) tag.rb.setChecked(false);
-            mZenRadioGroupContent.getChildAt(i).setTag(null);
-        }
         mAttachedZen = mController.getZen();
         ZenRule manualRule = mController.getManualRule();
         mExitCondition = manualRule != null ? manualRule.condition : null;
@@ -309,6 +303,7 @@ public class ZenModePanel extends FrameLayout {
         setSessionExitCondition(copy(mExitCondition));
         updateWidgets();
         setRequestingConditions(!mHidden);
+        ensureSelection();
     }
 
     private void onDetach() {
@@ -364,9 +359,6 @@ public class ZenModePanel extends FrameLayout {
         if (expanded == mExpanded) return;
         if (DEBUG) Log.d(mTag, "setExpanded " + expanded);
         mExpanded = expanded;
-        if (mExpanded) {
-            ensureSelection();
-        }
         updateWidgets();
         fireExpanded();
     }
@@ -462,7 +454,8 @@ public class ZenModePanel extends FrameLayout {
                     ActivityManager.getCurrentUser(), false);
             return c;
         }
-        return null;
+        // If there is a manual rule, but it has no condition listed then it is forever.
+        return forever();
     }
 
     private void handleUpdateZen(int zen) {
@@ -489,6 +482,7 @@ public class ZenModePanel extends FrameLayout {
             final ConditionTag tag = getConditionTagAt(i);
             if (tag != null && sameConditionId(tag.condition, mExitCondition)) {
                 bind(exitCondition, mZenRadioGroupContent.getChildAt(i), i);
+                tag.rb.setChecked(true);
                 return;
             }
         }
@@ -496,6 +490,7 @@ public class ZenModePanel extends FrameLayout {
                 exitCondition.id)) {
             bind(exitCondition, mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
                     COUNTDOWN_CONDITION_INDEX);
+            getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
         }
     }
 
