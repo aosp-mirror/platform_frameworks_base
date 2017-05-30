@@ -33,6 +33,11 @@ public interface ExtensionController {
         Context getContext();
         void destroy();
         void addCallback(Consumer<T> callback);
+        /**
+         * Triggers the extension to cycle through each of the sources again because something
+         * (like configuration) may have changed.
+         */
+        T reload();
     }
 
     interface ExtensionBuilder<T> {
