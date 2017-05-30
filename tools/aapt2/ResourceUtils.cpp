@@ -496,17 +496,15 @@ Maybe<int> ParseSdkVersion(const StringPiece& str) {
 
 std::unique_ptr<BinaryPrimitive> TryParseBool(const StringPiece& str) {
   if (Maybe<bool> maybe_result = ParseBool(str)) {
-    android::Res_value value = {};
-    value.dataType = android::Res_value::TYPE_INT_BOOLEAN;
-
-    if (maybe_result.value()) {
-      value.data = 0xffffffffu;
-    } else {
-      value.data = 0;
-    }
-    return util::make_unique<BinaryPrimitive>(value);
+    const uint32_t data = maybe_result.value() ? 0xffffffffu : 0u;
+    return util::make_unique<BinaryPrimitive>(android::Res_value::TYPE_INT_BOOLEAN, data);
   }
   return {};
+}
+
+std::unique_ptr<BinaryPrimitive> MakeBool(bool val) {
+  return util::make_unique<BinaryPrimitive>(android::Res_value::TYPE_INT_BOOLEAN,
+                                            val ? 0xffffffffu : 0u);
 }
 
 std::unique_ptr<BinaryPrimitive> TryParseInt(const StringPiece& str) {

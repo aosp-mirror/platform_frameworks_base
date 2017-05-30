@@ -20,6 +20,14 @@
 #include "io/FileSystem.h"
 #include "test/Test.h"
 
+using ::aapt::test::ValueEq;
+using ::testing::Contains;
+using ::testing::NotNull;
+using ::testing::UnorderedElementsAreArray;
+using ::testing::Pointee;
+using ::testing::Field;
+using ::testing::Eq;
+
 namespace aapt {
 
 struct TableMergerTest : public ::testing::Test {
@@ -62,26 +70,20 @@ TEST_F(TableMergerTest, SimpleMerge) {
   io::FileCollection collection;
 
   ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(
-      merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
+  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
 
   EXPECT_TRUE(merger.merged_packages().count("com.app.b") != 0);
 
   // Entries from com.app.a should not be mangled.
-  AAPT_EXPECT_TRUE(
-      final_table.FindResource(test::ParseNameOrDie("com.app.a:id/foo")));
-  AAPT_EXPECT_TRUE(
-      final_table.FindResource(test::ParseNameOrDie("com.app.a:id/bar")));
-  AAPT_EXPECT_TRUE(final_table.FindResource(
-      test::ParseNameOrDie("com.app.a:styleable/view")));
+  EXPECT_TRUE(final_table.FindResource(test::ParseNameOrDie("com.app.a:id/foo")));
+  EXPECT_TRUE(final_table.FindResource(test::ParseNameOrDie("com.app.a:id/bar")));
+  EXPECT_TRUE(final_table.FindResource(test::ParseNameOrDie("com.app.a:styleable/view")));
 
   // The unmangled name should not be present.
-  AAPT_EXPECT_FALSE(
-      final_table.FindResource(test::ParseNameOrDie("com.app.b:id/foo")));
+  EXPECT_FALSE(final_table.FindResource(test::ParseNameOrDie("com.app.b:id/foo")));
 
   // Look for the mangled name.
-  AAPT_EXPECT_TRUE(final_table.FindResource(
-      test::ParseNameOrDie("com.app.a:id/com.app.b$foo")));
+  EXPECT_TRUE(final_table.FindResource(test::ParseNameOrDie("com.app.a:id/com.app.b$foo")));
 }
 
 TEST_F(TableMergerTest, MergeFile) {
@@ -100,7 +102,7 @@ TEST_F(TableMergerTest, MergeFile) {
 
   FileReference* file = test::GetValueForConfig<FileReference>(
       &final_table, "com.app.a:layout/main", test::ParseConfigOrDie("hdpi-v4"));
-  ASSERT_NE(nullptr, file);
+  ASSERT_THAT(file, NotNull());
   EXPECT_EQ(std::string("res/layout-hdpi-v4/main.xml"), *file->path);
 }
 
@@ -137,17 +139,14 @@ TEST_F(TableMergerTest, MergeFileReferences) {
   collection.InsertFile("res/xml/file.xml");
 
   ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(
-      merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
+  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
 
-  FileReference* f =
-      test::GetValue<FileReference>(&final_table, "com.app.a:xml/file");
-  ASSERT_NE(f, nullptr);
+  FileReference* f = test::GetValue<FileReference>(&final_table, "com.app.a:xml/file");
+  ASSERT_THAT(f, NotNull());
   EXPECT_EQ(std::string("res/xml/file.xml"), *f->path);
 
-  f = test::GetValue<FileReference>(&final_table,
-                                    "com.app.a:xml/com.app.b$file");
-  ASSERT_NE(f, nullptr);
+  f = test::GetValue<FileReference>(&final_table, "com.app.a:xml/com.app.b$file");
+  ASSERT_THAT(f, NotNull());
   EXPECT_EQ(std::string("res/xml/com.app.b$file.xml"), *f->path);
 }
 
@@ -171,10 +170,9 @@ TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
   ASSERT_TRUE(merger.Merge({}, base.get()));
   ASSERT_TRUE(merger.MergeOverlay({}, overlay.get()));
 
-  BinaryPrimitive* foo =
-      test::GetValue<BinaryPrimitive>(&final_table, "com.app.a:bool/foo");
-  ASSERT_NE(nullptr, foo);
-  EXPECT_EQ(0x0u, foo->value.data);
+  BinaryPrimitive* foo = test::GetValue<BinaryPrimitive>(&final_table, "com.app.a:bool/foo");
+  ASSERT_THAT(foo,
+              Pointee(Field(&BinaryPrimitive::value, Field(&android::Res_value::data, Eq(0u)))));
 }
 
 TEST_F(TableMergerTest, OverrideSameResourceIdsWithOverlay) {
@@ -301,7 +299,7 @@ TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
   ASSERT_FALSE(merger.MergeOverlay({}, table_b.get()));
 }
 
-TEST_F(TableMergerTest, OverlaidStyleablesShouldBeMerged) {
+TEST_F(TableMergerTest, OverlaidStyleablesAndStylesShouldBeMerged) {
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -310,15 +308,27 @@ TEST_F(TableMergerTest, OverlaidStyleablesShouldBeMerged) {
                         .AddItem("com.app.a:attr/bar")
                         .AddItem("com.app.a:attr/foo", ResourceId(0x01010000))
                         .Build())
+          .AddValue("com.app.a:style/Theme",
+                    test::StyleBuilder()
+                        .SetParent("com.app.a:style/Parent")
+                        .AddItem("com.app.a:attr/bar", util::make_unique<Id>())
+                        .AddItem("com.app.a:attr/foo", ResourceUtils::MakeBool(false))
+                        .Build())
           .Build();
 
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .AddValue("com.app.a:styleable/Foo",
-                    test::StyleableBuilder()
-                        .AddItem("com.app.a:attr/bat")
-                        .AddItem("com.app.a:attr/foo")
+          .AddValue("com.app.a:styleable/Foo", test::StyleableBuilder()
+                                                   .AddItem("com.app.a:attr/bat")
+                                                   .AddItem("com.app.a:attr/foo")
+                                                   .Build())
+          .AddValue("com.app.a:style/Theme",
+                    test::StyleBuilder()
+                        .SetParent("com.app.a:style/OverlayParent")
+                        .AddItem("com.app.a:attr/bat", util::make_unique<Id>())
+                        .AddItem("com.app.a:attr/foo", ResourceId(0x01010000),
+                                 ResourceUtils::MakeBool(true))
                         .Build())
           .Build();
 
@@ -330,18 +340,29 @@ TEST_F(TableMergerTest, OverlaidStyleablesShouldBeMerged) {
   ASSERT_TRUE(merger.Merge({}, table_a.get()));
   ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
 
-  Styleable* styleable =
-      test::GetValue<Styleable>(&final_table, "com.app.a:styleable/Foo");
-  ASSERT_NE(nullptr, styleable);
+  Styleable* styleable = test::GetValue<Styleable>(&final_table, "com.app.a:styleable/Foo");
+  ASSERT_THAT(styleable, NotNull());
 
   std::vector<Reference> expected_refs = {
       Reference(test::ParseNameOrDie("com.app.a:attr/bar")),
       Reference(test::ParseNameOrDie("com.app.a:attr/bat")),
-      Reference(test::ParseNameOrDie("com.app.a:attr/foo"),
-                ResourceId(0x01010000)),
+      Reference(test::ParseNameOrDie("com.app.a:attr/foo"), ResourceId(0x01010000)),
   };
+  EXPECT_THAT(styleable->entries, UnorderedElementsAreArray(expected_refs));
 
-  EXPECT_EQ(expected_refs, styleable->entries);
+  Style* style = test::GetValue<Style>(&final_table, "com.app.a:style/Theme");
+  ASSERT_THAT(style, NotNull());
+
+  std::vector<Reference> extracted_refs;
+  for (const auto& entry : style->entries) {
+    extracted_refs.push_back(entry.key);
+  }
+  EXPECT_THAT(extracted_refs, UnorderedElementsAreArray(expected_refs));
+
+  const auto expected = ResourceUtils::MakeBool(true);
+  EXPECT_THAT(style->entries, Contains(Field(&Style::Entry::value, Pointee(ValueEq(*expected)))));
+  EXPECT_THAT(style->parent,
+              Eq(make_value(Reference(test::ParseNameOrDie("com.app.a:style/OverlayParent")))));
 }
 
 }  // namespace aapt
