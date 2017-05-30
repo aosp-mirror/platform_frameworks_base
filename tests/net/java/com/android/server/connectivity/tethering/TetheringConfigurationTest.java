@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
+import android.net.util.SharedLog;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
@@ -47,6 +48,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class TetheringConfigurationTest {
+    private final SharedLog mLog = new SharedLog("TetheringConfigurationTest");
     @Mock private Context mContext;
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private Resources mResources;
@@ -91,7 +93,7 @@ public class TetheringConfigurationTest {
         mHasTelephonyManager = true;
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_REQUIRED);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext);
+        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
         assertTrue(cfg.isDunRequired);
         assertTrue(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN));
         assertFalse(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE));
@@ -107,7 +109,7 @@ public class TetheringConfigurationTest {
         mHasTelephonyManager = true;
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_NOT_REQUIRED);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext);
+        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
         assertFalse(cfg.isDunRequired);
         assertFalse(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN));
         assertTrue(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE));
@@ -123,7 +125,7 @@ public class TetheringConfigurationTest {
         mHasTelephonyManager = false;
         when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_UNSPECIFIED);
 
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext);
+        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
         assertTrue(cfg.isDunRequired);
         assertTrue(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN));
         // Just to prove we haven't clobbered Wi-Fi:
