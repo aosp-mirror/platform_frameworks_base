@@ -58,6 +58,16 @@ public class QSContainerImpl extends FrameLayout {
         mBackground = findViewById(R.id.qs_background);
         mGutterHeight = getContext().getResources().getDimensionPixelSize(R.dimen.qs_gutter_height);
         mFullElevation = mQSPanel.getElevation();
+
+        setClickable(true);
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    @Override
+    public boolean performClick() {
+        // Want to receive clicks so missing QQS tiles doesn't cause collapse, but
+        // don't want to do anything with them.
+        return true;
     }
 
     @Override

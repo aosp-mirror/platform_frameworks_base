@@ -60,6 +60,12 @@ public class QuickQSPanel extends QSPanel {
         mTileLayout = new HeaderTileLayout(context);
         mTileLayout.setListening(mListening);
         addView((View) mTileLayout, 0 /* Between brightness and footer */);
+        super.setPadding(0, 0, 0, 0);
+    }
+
+    @Override
+    public void setPadding(int left, int top, int right, int bottom) {
+        // Always have no padding.
     }
 
     @Override
