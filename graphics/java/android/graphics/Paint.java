@@ -1596,10 +1596,13 @@ public class Paint {
             return true;
         }
 
+        // The null typeface is valid and it is equivalent to Typeface.DEFAULT.
+        // To call isSupportedAxes method, use Typeface.DEFAULT instance.
+        Typeface targetTypeface = mTypeface == null ? Typeface.DEFAULT : mTypeface;
         FontVariationAxis[] axes = FontVariationAxis.fromFontVariationSettings(settings);
         final ArrayList<FontVariationAxis> filteredAxes = new ArrayList<FontVariationAxis>();
         for (final FontVariationAxis axis : axes) {
-            if (mTypeface.isSupportedAxes(axis.getOpenTypeTagValue())) {
+            if (targetTypeface.isSupportedAxes(axis.getOpenTypeTagValue())) {
                 filteredAxes.add(axis);
             }
         }
@@ -1607,7 +1610,7 @@ public class Paint {
             return false;
         }
         mFontVariationSettings = settings;
-        setTypeface(Typeface.createFromTypefaceWithVariation(mTypeface, filteredAxes));
+        setTypeface(Typeface.createFromTypefaceWithVariation(targetTypeface, filteredAxes));
         return true;
     }
 
