@@ -2640,6 +2640,20 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @hide
+     */
+    public boolean suppressAlertingDueToGrouping() {
+        if (isGroupSummary()
+                && getGroupAlertBehavior() == Notification.GROUP_ALERT_CHILDREN) {
+            return true;
+        } else if (isGroupChild()
+                && getGroupAlertBehavior() == Notification.GROUP_ALERT_SUMMARY) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Builder class for {@link Notification} objects.
      *
      * Provides a convenient way to set the various fields of a {@link Notification} and generate
