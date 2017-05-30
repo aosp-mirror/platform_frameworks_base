@@ -177,6 +177,12 @@
     <!-- height of the content margin on the bottom -->
     <dimen name="notification_content_margin_bottom">16dp</dimen>
 
+    <!-- The height of the progress bar. -->
+    <dimen name="notification_progress_bar_height">15dp</dimen>
+
+    <!-- The top margin before the notification progress bar. -->
+    <dimen name="notification_progress_margin_top">8dp</dimen>
+
     <!-- height of the notification header (for icon and package name) -->
     <dimen name="notification_header_height">48dp</dimen>
 
