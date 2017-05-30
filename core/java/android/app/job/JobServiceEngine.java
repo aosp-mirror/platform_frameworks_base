@@ -210,6 +210,9 @@ public abstract class JobServiceEngine {
      * information.
      */
     public void jobFinished(JobParameters params, boolean needsReschedule) {
+        if (params == null) {
+            throw new NullPointerException("params");
+        }
         Message m = Message.obtain(mHandler, MSG_JOB_FINISHED, params);
         m.arg2 = needsReschedule ? 1 : 0;
         m.sendToTarget();
