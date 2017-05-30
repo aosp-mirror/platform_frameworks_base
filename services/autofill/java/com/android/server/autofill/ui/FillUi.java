@@ -158,6 +158,7 @@ final class FillUi {
                     final RemoteViews presentation = dataset.getFieldPresentation(index);
                     final View view;
                     try {
+                        if (sVerbose) Slog.v(TAG, "setting remote view for " + focusedViewId);
                         view = presentation.apply(context, null, interceptionHandler);
                     } catch (RuntimeException e) {
                         Slog.e(TAG, "Error inflating remote views", e);
@@ -203,6 +204,7 @@ final class FillUi {
                 return;
             }
             if (count <= 0) {
+                if (sDebug) Slog.d(TAG, "No dataset matches filter: " + mFilterText);
                 mCallback.requestHideFillUi();
             } else {
                 if (updateContentSize()) {
@@ -382,6 +384,7 @@ final class FillUi {
          * Shows the window.
          */
         public void show(WindowManager.LayoutParams params) {
+            if (sVerbose) Slog.v(TAG, "show(): showing=" + mShowing + ", params="+  params);
             try {
                 if (!mShowing) {
                     params.accessibilityTitle = mContentView.getContext()
