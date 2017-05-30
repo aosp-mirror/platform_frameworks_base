@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 
 /**
  * Class to write to a protobuf stream.
@@ -1593,7 +1592,7 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_FIXED64);
 
-        writeRepeatedFixed64(id, val);
+        writeRepeatedFixed64Impl(id, val);
     }
 
     private void writeRepeatedFixed64Impl(int id, long val) {
@@ -1720,7 +1719,7 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_SFIXED64);
 
-        writeRepeatedSFixed64(id, val);
+        writeRepeatedSFixed64Impl(id, val);
     }
 
     private void writeRepeatedSFixed64Impl(int id, long val) {
@@ -1785,7 +1784,7 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_BOOL);
 
-        writeRepeatedBool(id, val);
+        writeRepeatedBoolImpl(id, val);
     }
 
     private void writeRepeatedBoolImpl(int id, boolean val) {
