@@ -82,7 +82,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
     public void testAppRemoved() throws Exception {
         final AppWindowToken token = new WindowTestUtils.TestAppWindowToken(mDisplayContent);
         sWm.mUnknownAppVisibilityController.notifyLaunched(token);
-        sWm.mUnknownAppVisibilityController.appRemoved(token);
+        sWm.mUnknownAppVisibilityController.appRemovedOrHidden(token);
         assertTrue(sWm.mUnknownAppVisibilityController.allResolved());
     }
 }
