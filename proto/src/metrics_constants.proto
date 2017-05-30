@@ -4034,6 +4034,11 @@ message MetricsEvent {
     // FIELD - Number of results when Settings search result is clicked
     FIELD_SETTINGS_SERACH_RESULT_COUNT = 1002;
 
+    // OPEN: Settings > Display > Ambient Display
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    AMBIENT_DISPLAY_SETTINGS = 1003;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
