@@ -440,8 +440,7 @@ bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceI
   return true;
 }
 
-bool ResourceTable::SetSymbolState(const ResourceNameRef& name,
-                                   const ResourceId& res_id,
+bool ResourceTable::SetSymbolState(const ResourceNameRef& name, const ResourceId& res_id,
                                    const Symbol& symbol, IDiagnostics* diag) {
   return SetSymbolStateImpl(name, res_id, symbol, ValidateName, diag);
 }
@@ -489,8 +488,7 @@ bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name, const Resour
     diag->Error(DiagMessage(symbol.source)
                 << "trying to add resource '" << name << "' with ID " << res_id
                 << " but resource already has ID "
-                << ResourceId(package->id.value(), type->id.value(),
-                              entry->id.value()));
+                << ResourceId(package->id.value(), type->id.value(), entry->id.value()));
     return false;
   }
 
@@ -505,6 +503,11 @@ bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name, const Resour
     type->symbol_status.state = SymbolState::kPublic;
   }
 
+  if (symbol.allow_new) {
+    // This symbol can be added as a new resource when merging (if it belongs to an overlay).
+    entry->symbol_status.allow_new = true;
+  }
+
   if (symbol.state == SymbolState::kUndefined &&
       entry->symbol_status.state != SymbolState::kUndefined) {
     // We can't undefine a symbol (remove its visibility). Ignore.
@@ -517,7 +520,10 @@ bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name, const Resour
     return true;
   }
 
-  entry->symbol_status = std::move(symbol);
+  // This symbol definition takes precedence, replace.
+  entry->symbol_status.state = symbol.state;
+  entry->symbol_status.source = symbol.source;
+  entry->symbol_status.comment = symbol.comment;
   return true;
 }
 

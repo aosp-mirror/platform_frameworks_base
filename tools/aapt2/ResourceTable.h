@@ -50,6 +50,10 @@ enum class SymbolState {
 struct Symbol {
   SymbolState state = SymbolState::kUndefined;
   Source source;
+
+  // Whether this entry (originating from an overlay) can be added as a new resource.
+  bool allow_new = false;
+
   std::string comment;
 };
 
@@ -223,8 +227,7 @@ class ResourceTable {
   bool SetSymbolState(const ResourceNameRef& name, const ResourceId& res_id,
                       const Symbol& symbol, IDiagnostics* diag);
 
-  bool SetSymbolStateAllowMangled(const ResourceNameRef& name,
-                                  const ResourceId& res_id,
+  bool SetSymbolStateAllowMangled(const ResourceNameRef& name, const ResourceId& res_id,
                                   const Symbol& symbol, IDiagnostics* diag);
 
   struct SearchResult {
