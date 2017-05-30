@@ -257,7 +257,6 @@
     <dimen name="qs_panel_padding_bottom">0dp</dimen>
     <dimen name="qs_detail_header_height">56dp</dimen>
     <dimen name="qs_detail_header_padding">0dp</dimen>
-    <dimen name="qs_detail_header_bottom_padding">0dp</dimen>
     <dimen name="qs_detail_image_width">56dp</dimen>
     <dimen name="qs_detail_image_height">56dp</dimen>
     <dimen name="qs_detail_image_padding">16dp</dimen>
