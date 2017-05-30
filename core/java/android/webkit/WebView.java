@@ -31,15 +31,15 @@ import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.http.SslCertificate;
 import android.net.Uri;
+import android.net.http.SslCertificate;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.StrictMode;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.print.PrintDocumentAdapter;
 import android.security.KeyChain;
 import android.util.AttributeSet;
@@ -49,10 +49,10 @@ import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewStructure;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
+import android.view.ViewStructure;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -1618,6 +1618,23 @@ public class WebView extends AbsoluteLayout
      */
     public static void clearClientCertPreferences(Runnable onCleared) {
         getFactory().getStatics().clearClientCertPreferences(onCleared);
+    }
+
+    /**
+     * Starts Safe Browsing initialization. This should only be called once.
+     * @param context is the activity context the WebView will be used in.
+     * @param callback will be called with the value true if initialization is
+     * successful. The callback will be run on the UI thread.
+     */
+    public static void initSafeBrowsing(Context context, ValueCallback<Boolean> callback) {
+        getFactory().getStatics().initSafeBrowsing(context, callback);
+    }
+
+    /**
+     * Shuts down Safe Browsing. This should only be called once.
+     */
+    public static void shutdownSafeBrowsing() {
+        getFactory().getStatics().shutdownSafeBrowsing();
     }
 
     /**
