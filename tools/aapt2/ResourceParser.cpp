@@ -92,14 +92,14 @@ struct ParsedResource {
   Source source;
   ResourceId id;
   Maybe<SymbolState> symbol_state;
+  bool allow_new = false;
   std::string comment;
   std::unique_ptr<Value> value;
   std::list<ParsedResource> child_resources;
 };
 
 // Recursively adds resources to the ResourceTable.
-static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag,
-                                ParsedResource* res) {
+static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag, ParsedResource* res) {
   StringPiece trimmed_comment = util::TrimWhitespace(res->comment);
   if (trimmed_comment.size() != res->comment.size()) {
     // Only if there was a change do we re-assign.
@@ -111,6 +111,7 @@ static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag,
     symbol.state = res->symbol_state.value();
     symbol.source = res->source;
     symbol.comment = res->comment;
+    symbol.allow_new = res->allow_new;
     if (!table->SetSymbolState(res->name, res->id, symbol, diag)) {
       return false;
     }
@@ -121,8 +122,8 @@ static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag,
     res->value->SetComment(std::move(res->comment));
     res->value->SetSource(std::move(res->source));
 
-    if (!table->AddResource(res->name, res->id, res->config, res->product,
-                            std::move(res->value), diag)) {
+    if (!table->AddResource(res->name, res->id, res->config, res->product, std::move(res->value),
+                            diag)) {
       return false;
     }
   }
@@ -849,6 +850,7 @@ bool ResourceParser::ParseAddResource(xml::XmlPullParser* parser,
                                       ParsedResource* out_resource) {
   if (ParseSymbolImpl(parser, out_resource)) {
     out_resource->symbol_state = SymbolState::kUndefined;
+    out_resource->allow_new = true;
     return true;
   }
   return false;

@@ -248,18 +248,18 @@ TEST_F(TableMergerTest, FailToOverrideConflictingEntryIdsWithOverlay) {
 
 TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
   std::unique_ptr<ResourceTable> table_a =
-      test::ResourceTableBuilder()
-          .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", {}, SymbolState::kUndefined)
-          .Build();
+      test::ResourceTableBuilder().SetPackageId("", 0x7f).Build();
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
+          .SetSymbolState("bool/foo", {}, SymbolState::kUndefined, true /*allow new overlay*/)
           .AddValue("bool/foo", ResourceUtils::TryParseBool("true"))
           .Build();
 
   ResourceTable final_table;
-  TableMerger merger(context_.get(), &final_table, TableMergerOptions{});
+  TableMergerOptions options;
+  options.auto_add_overlay = false;
+  TableMerger merger(context_.get(), &final_table, options);
 
   ASSERT_TRUE(merger.Merge({}, table_a.get()));
   ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
