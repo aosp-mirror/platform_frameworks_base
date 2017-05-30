@@ -3816,20 +3816,22 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
 
         try {
-            final boolean rotationChanged;
             // TODO(multi-display): Update rotation for different displays separately.
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
+            final boolean rotationChanged;
+            final int displayId;
             synchronized (mWindowMap) {
+                final DisplayContent displayContent = getDefaultDisplayContentLocked();
                 rotationChanged = displayContent.updateRotationUnchecked(
                         false /* inTransaction */);
                 if (!rotationChanged || forceRelayout) {
-                    getDefaultDisplayContentLocked().setLayoutNeeded();
+                    displayContent.setLayoutNeeded();
                     mWindowPlacerLocked.performSurfacePlacement();
                 }
+                displayId = displayContent.getDisplayId();
             }
 
             if (rotationChanged || alwaysSendConfiguration) {
-                sendNewConfiguration(displayContent.getDisplayId());
+                sendNewConfiguration(displayId);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -6890,9 +6892,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 "registerDockedStackListener()")) {
             return;
         }
-        // TODO(multi-display): The listener is registered on the default display only.
-        getDefaultDisplayContentLocked().mDividerControllerLocked.registerDockedStackListener(
-                listener);
+        synchronized (mWindowMap) {
+            // TODO(multi-display): The listener is registered on the default display only.
+            getDefaultDisplayContentLocked().mDividerControllerLocked.registerDockedStackListener(
+                    listener);
+        }
     }
 
     @Override
