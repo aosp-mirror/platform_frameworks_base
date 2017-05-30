@@ -24,6 +24,7 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.os.Build.VERSION_CODES;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -334,6 +335,14 @@ import java.util.List;
  * your app can complete this process on a particular device, check the return value of
  * {@link #isRequestPinShortcutSupported()}. Based on this return value, you might decide to hide
  * the option in your app that allows users to pin a shortcut.
+ *
+ * <p class="note"><strong>Note:</strong> See also the support library APIs
+ * {@link android.support.v4.content.pm.ShortcutManagerCompat#isRequestPinShortcutSupported(
+ * Context)} and
+ * {@link android.support.v4.content.pm.ShortcutManagerCompat#requestPinShortcut(
+ * Context, ShortcutInfoCompat, IntentSender)}, which works on Android versions lower than
+ * {@link VERSION_CODES#O} by falling back to the deprecated private intent
+ * {@code com.android.launcher.action.INSTALL_SHORTCUT}.
  *
  * <h4>Custom Activity for Pinning Shortcuts</h4>
  *
@@ -889,7 +898,7 @@ public class ShortcutManager {
      *
      * <p> Note that this method returns max width of icon's visible part. Hence, it does not take
      * into account the inset introduced by {@link AdaptiveIconDrawable}. To calculate bitmap image
-     * to function as {@link AcaptiveIconDrawable}, multiply
+     * to function as {@link AdaptiveIconDrawable}, multiply
      * 1 + 2 * {@link AdaptiveIconDrawable#getExtraInsetFraction()} to the returned size.
      */
     public int getIconMaxWidth() {
@@ -938,8 +947,15 @@ public class ShortcutManager {
      * Return {@code TRUE} if the app is running on a device whose default launcher supports
      * {@link #requestPinShortcut(ShortcutInfo, IntentSender)}.
      *
-     * <p><b>Note:</b> The return value may change in subsequent calls, if the user changes
-     * the default launcher app.
+     * <p>The return value may change in subsequent calls if the user changes the default launcher
+     * app.
+     *
+     * <p><b>Note:</b> See also the support library counterpart
+     * {@link android.support.v4.content.pm.ShortcutManagerCompat#isRequestPinShortcutSupported(
+     * Context)}, which supports Android versions lower than {@link VERSION_CODES#O} using the
+     * legacy private intent {@code com.android.launcher.action.INSTALL_SHORTCUT}.
+     *
+     * @see #requestPinShortcut(ShortcutInfo, IntentSender)
      */
     public boolean isRequestPinShortcutSupported() {
         try {
@@ -962,6 +978,12 @@ public class ShortcutManager {
      * <p>It's up to the launcher to decide how to handle previous pending requests when the same
      * package calls this API multiple times in a row. One possible strategy is to ignore any
      * previous requests.
+     *
+     * <p><b>Note:</b> See also the support library counterpart
+     * {@link android.support.v4.content.pm.ShortcutManagerCompat#requestPinShortcut(
+     * Context, ShortcutInfoCompat, IntentSender)},
+     * which supports Android versions lower than {@link VERSION_CODES#O} using the
+     * legacy private intent {@code com.android.launcher.action.INSTALL_SHORTCUT}.
      *
      * @param shortcut Shortcut to pin.  If an app wants to pin an existing (either static
      *     or dynamic) shortcut, then it only needs to have an ID. Although other fields don't have
