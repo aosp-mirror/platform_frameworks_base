@@ -966,17 +966,24 @@ public class BugreportProgressService extends Service {
         }
 
         final Intent notifIntent;
+        boolean useChooser = true;
 
         // Send through warning dialog by default
         if (getWarningState(mContext, STATE_UNKNOWN) != STATE_HIDE) {
             notifIntent = buildWarningIntent(mContext, sendIntent);
+            // No need to show a chooser in this case.
+            useChooser = false;
         } else {
             notifIntent = sendIntent;
         }
         notifIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Send the share intent...
-        sendShareIntent(mContext, notifIntent);
+        if (useChooser) {
+            sendShareIntent(mContext, notifIntent);
+        } else {
+            mContext.startActivity(notifIntent);
+        }
 
         // ... and stop watching this process.
         stopProgress(id);
