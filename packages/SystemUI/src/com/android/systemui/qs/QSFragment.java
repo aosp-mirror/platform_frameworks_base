@@ -222,6 +222,7 @@ public class QSFragment extends Fragment implements QS {
             mQSAnimator.setOnKeyguard(keyguardShowing);
         }
 
+        mFooter.setKeyguardShowing(keyguardShowing);
         updateQsState();
     }
 
