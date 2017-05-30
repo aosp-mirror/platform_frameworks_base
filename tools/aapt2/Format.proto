@@ -69,6 +69,7 @@ message SymbolStatus {
 	optional Visibility visibility = 1;
 	optional Source source = 2;
 	optional string comment = 3;
+	optional bool allow_new = 4;
 }
 
 message Entry {

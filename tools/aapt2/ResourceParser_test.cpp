@@ -777,8 +777,7 @@ TEST_F(ResourceParserTest, ExternalTypesShouldOnlyBeReferences) {
   ASSERT_FALSE(TestParse(input));
 }
 
-TEST_F(ResourceParserTest,
-       AddResourcesElementShouldAddEntryWithUndefinedSymbol) {
+TEST_F(ResourceParserTest, AddResourcesElementShouldAddEntryWithUndefinedSymbol) {
   std::string input = R"EOF(<add-resource name="bar" type="string" />)EOF";
   ASSERT_TRUE(TestParse(input));
 
@@ -788,6 +787,7 @@ TEST_F(ResourceParserTest,
   const ResourceEntry* entry = result.value().entry;
   ASSERT_NE(nullptr, entry);
   EXPECT_EQ(SymbolState::kUndefined, entry->symbol_status.state);
+  EXPECT_TRUE(entry->symbol_status.allow_new);
 }
 
 TEST_F(ResourceParserTest, ParseItemElementWithFormat) {
