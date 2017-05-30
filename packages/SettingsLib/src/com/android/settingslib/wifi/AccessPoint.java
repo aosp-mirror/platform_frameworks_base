@@ -16,6 +16,7 @@
 
 package com.android.settingslib.wifi;
 
+import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -639,6 +640,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // Update to new summary
         StringBuilder summary = new StringBuilder();
 
+        // TODO(b/62354743): Standardize and international delimiter usage
+        final String concatenator = " / ";
+
+        if (mBadge != NetworkBadging.BADGING_NONE) {
+            summary.append(getSpeedLabel() + concatenator);
+        }
+
         if (isActive() && config != null && config.isPasspoint()) {
             // This is the active connection on passpoint
             summary.append(getSummary(mContext, getDetailedState(),
@@ -718,6 +726,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 }
             }
         }
+
+        // Strip trailing delimiter if applicable
+        int concatLength = concatenator.length();
+        if (summary.length() >= concatLength && summary.substring(
+                summary.length() - concatLength, summary.length()).equals(concatenator)) {
+            summary.delete(summary.length() - concatLength, summary.length());
+        }
+
         return summary.toString();
     }
 
@@ -745,8 +761,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
             visibility.append(" rssi=").append(mInfo.getRssi());
             visibility.append(" ");
             visibility.append(" score=").append(mInfo.score);
-            visibility.append(" rankingScore=").append(getRankingScore());
-            visibility.append(" badge=").append(getBadge());
+            if (mRankingScore != Integer.MIN_VALUE) {
+                visibility.append(" rankingScore=").append(getRankingScore());
+            }
+            if (mBadge != NetworkBadging.BADGING_NONE) {
+                visibility.append(" speed=").append(getSpeedLabel());
+            }
             visibility.append(String.format(" tx=%.1f,", mInfo.txSuccessRate));
             visibility.append(String.format("%.1f,", mInfo.txRetriesRate));
             visibility.append(String.format("%.1f ", mInfo.txBadRate));
@@ -1042,8 +1062,21 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return mRankingScore;
     }
 
-    int getBadge() {
-        return mBadge;
+    int getBadge() { return mBadge;}
+
+    @Nullable
+    String getSpeedLabel() {
+        switch (mBadge) {
+            case NetworkBadging.BADGING_4K:
+                return mContext.getString(R.string.speed_label_very_fast);
+            case NetworkBadging.BADGING_HD:
+                return mContext.getString(R.string.speed_label_fast);
+            case NetworkBadging.BADGING_SD:
+                return mContext.getString(R.string.speed_label_okay);
+            case NetworkBadging.BADGING_NONE:
+            default:
+                return null;
+        }
     }
 
     /** Return true if the current RSSI is reachable, and false otherwise. */

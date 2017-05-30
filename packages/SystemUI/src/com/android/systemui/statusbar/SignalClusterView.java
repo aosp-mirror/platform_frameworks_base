@@ -28,6 +28,7 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.net.NetworkBadging;
 import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -581,10 +582,11 @@ public class SignalClusterView extends LinearLayout implements NetworkController
      */
     private void setBadgedWifiIconForView(ImageView imageView, @DrawableRes int wifiPieId,
             @DrawableRes int badgeId) {
+        // TODO(sghuman): Delete this method and revert to N badging logic
         // Using the imageView's context to retrieve the Drawable so that theme is preserved.;
         LayerDrawable icon = new LayerDrawable(new Drawable[] {
                 imageView.getContext().getDrawable(wifiPieId),
-                imageView.getContext().getDrawable(badgeId)});
+                imageView.getContext().getDrawable(NetworkBadging.BADGING_NONE)});
 
         // The LayerDrawable shares an underlying state so we must mutate the object to change the
         // color between the light and dark themes.

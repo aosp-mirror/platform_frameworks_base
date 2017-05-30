@@ -161,7 +161,10 @@ public class AccessPointPreference extends Preference {
             return;
         }
         TronUtils.logWifiSettingsBadge(context, mWifiBadge);
-        Drawable drawable = NetworkBadging.getWifiIcon(level, mWifiBadge, getContext().getTheme());
+
+        // TODO(b/62355275): Revert this to N code after deleting NetworkBadging API
+        Drawable drawable = NetworkBadging.getWifiIcon(
+                level, NetworkBadging.BADGING_NONE, getContext().getTheme());
         if (!mForSavedNetworks && drawable != null) {
             drawable.setTint(Utils.getColorAttr(context, android.R.attr.colorControlNormal));
             setIcon(drawable);
