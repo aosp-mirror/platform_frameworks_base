@@ -575,8 +575,8 @@ public final class NotificationChannel implements Parcelable {
         setSound(safeUri(parser, ATT_SOUND), safeAudioAttributes(parser));
         enableLights(safeBool(parser, ATT_LIGHTS, false));
         setLightColor(safeInt(parser, ATT_LIGHT_COLOR, DEFAULT_LIGHT_COLOR));
-        enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
         setVibrationPattern(safeLongArray(parser, ATT_VIBRATION, null));
+        enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
         setShowBadge(safeBool(parser, ATT_SHOW_BADGE, false));
         setDeleted(safeBool(parser, ATT_DELETED, false));
         setGroup(parser.getAttributeValue(null, ATT_GROUP));

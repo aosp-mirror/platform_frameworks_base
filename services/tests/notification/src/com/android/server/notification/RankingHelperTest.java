@@ -364,11 +364,14 @@ public class RankingHelperTest extends NotificationTestCase {
         channel2.enableVibration(false);
         channel2.setGroup(ncg.getId());
         channel2.setLightColor(Color.BLUE);
+        NotificationChannel channel3 = new NotificationChannel("id3", "NAM3", IMPORTANCE_HIGH);
+        channel3.enableVibration(true);
 
         mHelper.createNotificationChannelGroup(PKG, UID, ncg, true);
         mHelper.createNotificationChannelGroup(PKG, UID, ncg2, true);
         mHelper.createNotificationChannel(PKG, UID, channel1, true);
         mHelper.createNotificationChannel(PKG, UID, channel2, false);
+        mHelper.createNotificationChannel(PKG, UID, channel3, false);
         mHelper.createNotificationChannel(UPDATED_PKG, UID2, getChannel(), true);
 
         mHelper.setShowBadge(PKG, UID, true);
@@ -376,8 +379,9 @@ public class RankingHelperTest extends NotificationTestCase {
         mHelper.setImportance(UPDATED_PKG, UID2, IMPORTANCE_NONE);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, true, channel1.getId(),
-                channel2.getId(), NotificationChannel.DEFAULT_CHANNEL_ID);
-        mHelper.onPackagesChanged(true, UserHandle.myUserId(), new String[]{PKG, UPDATED_PKG}, new int[]{UID, UID2});
+                channel2.getId(), channel3.getId(), NotificationChannel.DEFAULT_CHANNEL_ID);
+        mHelper.onPackagesChanged(true, UserHandle.myUserId(), new String[]{PKG, UPDATED_PKG},
+                new int[]{UID, UID2});
 
         mHelper.setShowBadge(UPDATED_PKG, UID2, true);
 
@@ -388,6 +392,8 @@ public class RankingHelperTest extends NotificationTestCase {
         assertEquals(channel1, mHelper.getNotificationChannel(PKG, UID, channel1.getId(), false));
         compareChannels(channel2,
                 mHelper.getNotificationChannel(PKG, UID, channel2.getId(), false));
+        compareChannels(channel3,
+                mHelper.getNotificationChannel(PKG, UID, channel3.getId(), false));
 
         List<NotificationChannelGroup> actualGroups =
                 mHelper.getNotificationChannelGroups(PKG, UID, false).getList();
