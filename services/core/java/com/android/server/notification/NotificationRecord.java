@@ -45,6 +45,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -359,8 +360,13 @@ public final class NotificationRecord {
         }
     }
 
+    String formatRemoteViews(RemoteViews rv) {
+        if (rv == null) return "null";
+        return String.format("%s/0x%08x (%d bytes): %s",
+            rv.getPackage(), rv.getLayoutId(), rv.estimateMemoryUsage(), rv.toString());
+    }
+
     void dump(PrintWriter pw, String prefix, Context baseContext, boolean redact) {
-        prefix = prefix + "  ";
         final Notification notification = sbn.getNotification();
         final Icon icon = notification.getSmallIcon();
         String iconStr = String.valueOf(icon);
@@ -368,6 +374,7 @@ public final class NotificationRecord {
             iconStr += " / " + idDebugString(baseContext, icon.getResPackage(), icon.getResId());
         }
         pw.println(prefix + this);
+        prefix = prefix + "  ";
         pw.println(prefix + "uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
         pw.println(prefix + "icon=" + iconStr);
         pw.println(prefix + "pri=" + notification.priority);
@@ -391,8 +398,11 @@ public final class NotificationRecord {
         } else {
             pw.println("null");
         }
-        pw.println(prefix + "contentView=" + notification.contentView);
-        pw.println(prefix + String.format("color=0x%08x", notification.color));
+        pw.println(prefix + "contentView=" + formatRemoteViews(notification.contentView));
+        pw.println(prefix + "bigContentView=" + formatRemoteViews(notification.bigContentView));
+        pw.println(prefix + "headsUpContentView="
+                + formatRemoteViews(notification.headsUpContentView));
+        pw.print(prefix + String.format("color=0x%08x", notification.color));
         pw.println(prefix + "timeout="
                 + TimeUtils.formatForLogging(notification.getTimeoutAfter()));
         if (notification.actions != null && notification.actions.length > 0) {
