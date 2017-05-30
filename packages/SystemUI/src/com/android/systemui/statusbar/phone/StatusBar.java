@@ -1628,9 +1628,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPendingNotifications.remove(entry.key);
         // If there was an async task started after the removal, we don't want to add it back to
         // the list, otherwise we might get leaks.
-        if (mNotificationData.get(entry.key) == null && !entry.row.isRemoved()) {
+        boolean isNew = mNotificationData.get(entry.key) == null;
+        if (isNew && !entry.row.isRemoved()) {
             addEntry(entry);
+        } else if (!isNew && entry.row.hasLowPriorityStateUpdated()) {
+            mVisualStabilityManager.onLowPriorityUpdated(entry);
+            updateNotificationShade();
         }
+        entry.row.setLowPriorityStateUpdated(false);
     }
 
     private boolean shouldSuppressFullScreenIntent(String key) {
@@ -6314,7 +6319,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarNotification sbn, ExpandableNotificationRow row) {
         row.setNeedsRedaction(needsRedaction(entry));
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
+        boolean isUpdate = mNotificationData.get(entry.key) != null;
+        boolean wasLowPriority = row.isLowPriority();
         row.setIsLowPriority(isLowPriority);
+        row.setLowPriorityStateUpdated(isUpdate && (wasLowPriority != isLowPriority));
         // bind the click event to the content area
         mNotificationClicker.register(row, sbn);
 
