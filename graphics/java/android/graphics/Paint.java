@@ -529,6 +529,7 @@ public class Paint {
         setTextLocales(LocaleList.getAdjustedDefault());
         setElegantTextHeight(false);
         mFontFeatureSettings = null;
+        mFontVariationSettings = null;
     }
 
     /**
@@ -565,6 +566,7 @@ public class Paint {
         mBidiFlags = paint.mBidiFlags;
         mLocales = paint.mLocales;
         mFontFeatureSettings = paint.mFontFeatureSettings;
+        mFontVariationSettings = paint.mFontVariationSettings;
     }
 
     /** @hide */
