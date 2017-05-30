@@ -166,7 +166,7 @@ static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
             buffer->getWidth(),
             buffer->getHeight(),
             buffer->getPixelFormat(),
-            buffer->getUsage(),
+            (jint)buffer->getUsage(),
             (jlong)buffer.get());
 }
 
