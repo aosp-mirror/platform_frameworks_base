@@ -711,10 +711,13 @@ public final class AutofillManagerService extends SystemService {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.AUTOFILL_SERVICE), false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.USER_SETUP_COMPLETE), false, this, UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
+            if (sVerbose) Slog.v(TAG, "onChange(): uri=" + uri + ", userId=" + userId);
             synchronized (mLock) {
                 updateCachedServiceLocked(userId);
             }
