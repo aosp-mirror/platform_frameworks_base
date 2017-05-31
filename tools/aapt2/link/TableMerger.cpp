@@ -179,21 +179,26 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
   return true;
 }
 
-/**
- * Modified CollisionResolver which will merge Styleables. Used with overlays.
- *
- * Styleables are not actual resources, but they are treated as such during the
- * compilation phase. Styleables don't simply overlay each other, their
- * definitions merge
- * and accumulate. If both values are Styleables, we just merge them into the
- * existing value.
- */
-static ResourceTable::CollisionResult ResolveMergeCollision(Value* existing,
-                                                            Value* incoming) {
+// Modified CollisionResolver which will merge Styleables and Styles. Used with overlays.
+//
+// Styleables are not actual resources, but they are treated as such during the
+// compilation phase.
+//
+// Styleables and Styles don't simply overlay each other, their definitions merge
+// and accumulate. If both values are Styleables/Styles, we just merge them into the
+// existing value.
+static ResourceTable::CollisionResult ResolveMergeCollision(Value* existing, Value* incoming,
+                                                            StringPool* pool) {
   if (Styleable* existing_styleable = ValueCast<Styleable>(existing)) {
     if (Styleable* incoming_styleable = ValueCast<Styleable>(incoming)) {
       // Styleables get merged.
       existing_styleable->MergeWith(incoming_styleable);
+      return ResourceTable::CollisionResult::kKeepOriginal;
+    }
+  } else if (Style* existing_style = ValueCast<Style>(existing)) {
+    if (Style* incoming_style = ValueCast<Style>(incoming)) {
+      // Styles get merged.
+      existing_style->MergeWith(incoming_style, pool);
       return ResourceTable::CollisionResult::kKeepOriginal;
     }
   }
@@ -201,10 +206,12 @@ static ResourceTable::CollisionResult ResolveMergeCollision(Value* existing,
   return ResourceTable::ResolveValueCollision(existing, incoming);
 }
 
-static ResourceTable::CollisionResult MergeConfigValue(
-    IAaptContext* context, const ResourceNameRef& res_name, const bool overlay,
-    ResourceConfigValue* dst_config_value,
-    ResourceConfigValue* src_config_value) {
+static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
+                                                       const ResourceNameRef& res_name,
+                                                       const bool overlay,
+                                                       ResourceConfigValue* dst_config_value,
+                                                       ResourceConfigValue* src_config_value,
+                                                       StringPool* pool) {
   using CollisionResult = ResourceTable::CollisionResult;
 
   Value* dst_value = dst_config_value->value.get();
@@ -212,10 +219,9 @@ static ResourceTable::CollisionResult MergeConfigValue(
 
   CollisionResult collision_result;
   if (overlay) {
-    collision_result = ResolveMergeCollision(dst_value, src_value);
+    collision_result = ResolveMergeCollision(dst_value, src_value, pool);
   } else {
-    collision_result =
-        ResourceTable::ResolveValueCollision(dst_value, src_value);
+    collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value);
   }
 
   if (collision_result == CollisionResult::kConflict) {
@@ -224,10 +230,9 @@ static ResourceTable::CollisionResult MergeConfigValue(
     }
 
     // Error!
-    context->GetDiagnostics()->Error(
-        DiagMessage(src_value->GetSource())
-        << "resource '" << res_name << "' has a conflicting value for "
-        << "configuration (" << src_config_value->config << ")");
+    context->GetDiagnostics()->Error(DiagMessage(src_value->GetSource())
+                                     << "resource '" << res_name << "' has a conflicting value for "
+                                     << "configuration (" << src_config_value->config << ")");
     context->GetDiagnostics()->Note(DiagMessage(dst_value->GetSource())
                                     << "originally defined here");
     return CollisionResult::kConflict;
@@ -287,7 +292,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
         if (dst_config_value) {
           CollisionResult collision_result =
               MergeConfigValue(context_, res_name, overlay, dst_config_value,
-                               src_config_value.get());
+                               src_config_value.get(), &master_table_->string_pool);
           if (collision_result == CollisionResult::kConflict) {
             error = true;
             continue;
@@ -295,25 +300,22 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
             continue;
           }
         } else {
-          dst_config_value = dst_entry->FindOrCreateValue(
-              src_config_value->config, src_config_value->product);
+          dst_config_value =
+              dst_entry->FindOrCreateValue(src_config_value->config, src_config_value->product);
         }
 
         // Continue if we're taking the new resource.
 
-        if (FileReference* f =
-                ValueCast<FileReference>(src_config_value->value.get())) {
+        if (FileReference* f = ValueCast<FileReference>(src_config_value->value.get())) {
           std::unique_ptr<FileReference> new_file_ref;
           if (mangle_package) {
             new_file_ref = CloneAndMangleFile(src_package->name, *f);
           } else {
-            new_file_ref = std::unique_ptr<FileReference>(
-                f->Clone(&master_table_->string_pool));
+            new_file_ref = std::unique_ptr<FileReference>(f->Clone(&master_table_->string_pool));
           }
 
           if (callback) {
-            if (!callback(res_name, src_config_value->config,
-                          new_file_ref.get(), f)) {
+            if (!callback(res_name, src_config_value->config, new_file_ref.get(), f)) {
               error = true;
               continue;
             }
@@ -337,18 +339,15 @@ std::unique_ptr<FileReference> TableMerger::CloneAndMangleFile(
     std::string mangled_entry = NameMangler::MangleEntry(package, entry.to_string());
     std::string newPath = prefix.to_string() + mangled_entry + suffix.to_string();
     std::unique_ptr<FileReference> new_file_ref =
-        util::make_unique<FileReference>(
-            master_table_->string_pool.MakeRef(newPath));
+        util::make_unique<FileReference>(master_table_->string_pool.MakeRef(newPath));
     new_file_ref->SetComment(file_ref.GetComment());
     new_file_ref->SetSource(file_ref.GetSource());
     return new_file_ref;
   }
-  return std::unique_ptr<FileReference>(
-      file_ref.Clone(&master_table_->string_pool));
+  return std::unique_ptr<FileReference>(file_ref.Clone(&master_table_->string_pool));
 }
 
-bool TableMerger::MergeFileImpl(const ResourceFile& file_desc, io::IFile* file,
-                                bool overlay) {
+bool TableMerger::MergeFileImpl(const ResourceFile& file_desc, io::IFile* file, bool overlay) {
   ResourceTable table;
   std::string path = ResourceUtils::BuildResourceFileName(file_desc);
   std::unique_ptr<FileReference> file_ref =
