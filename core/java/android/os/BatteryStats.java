@@ -226,9 +226,10 @@ public abstract class BatteryStats implements Parcelable {
     private static final String STATE_TIME_DATA = "st";
     // wl line is:
     // BATTERY_STATS_CHECKIN_VERSION, uid, which, "wl", name,
-    // full totalTime,    'f', count, current duration, max duration, total duration,
-    // partial totalTime, 'p', count, current duration, max duration, total duration,
-    // window totalTime,  'w', count, current duration, max duration, total duration
+    // full        totalTime, 'f',  count, current duration, max duration, total duration,
+    // partial     totalTime, 'p',  count, current duration, max duration, total duration,
+    // bg partial  totalTime, 'bp', count, current duration, max duration, total duration,
+    // window      totalTime, 'w',  count, current duration, max duration, total duration
     // [Currently, full and window wakelocks have durations current = max = total = -1]
     private static final String WAKELOCK_DATA = "wl";
     // awl line is:
@@ -3500,8 +3501,11 @@ public abstract class BatteryStats implements Parcelable {
                 sb.setLength(0);
                 linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_FULL),
                         rawRealtime, "f", which, linePrefix);
-                linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_PARTIAL),
+                final Timer pTimer = wl.getWakeTime(WAKE_TYPE_PARTIAL);
+                linePrefix = printWakeLockCheckin(sb, pTimer,
                         rawRealtime, "p", which, linePrefix);
+                linePrefix = printWakeLockCheckin(sb, pTimer != null ? pTimer.getSubTimer() : null,
+                        rawRealtime, "bp", which, linePrefix);
                 linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_WINDOW),
                         rawRealtime, "w", which, linePrefix);
 
@@ -4787,8 +4791,11 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append(wakelocks.keyAt(iw));
                 linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_FULL), rawRealtime,
                         "full", which, linePrefix);
-                linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_PARTIAL), rawRealtime,
+                final Timer pTimer = wl.getWakeTime(WAKE_TYPE_PARTIAL);
+                linePrefix = printWakeLock(sb, pTimer, rawRealtime,
                         "partial", which, linePrefix);
+                linePrefix = printWakeLock(sb, pTimer != null ? pTimer.getSubTimer() : null,
+                        rawRealtime, "background partial", which, linePrefix);
                 linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_WINDOW), rawRealtime,
                         "window", which, linePrefix);
                 linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_DRAW), rawRealtime,
