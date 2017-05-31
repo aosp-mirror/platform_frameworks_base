@@ -429,15 +429,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Vibrator pattern for haptic feedback of a long press.
     long[] mLongPressVibePattern;
 
-    // Vibrator pattern for haptic feedback of virtual key press.
-    long[] mVirtualKeyVibePattern;
-
-    // Vibrator pattern for a short vibration.
-    long[] mKeyboardTapVibePattern;
-
-    // Vibrator pattern for a short vibration when tapping on an hour/minute tick of a Clock.
-    long[] mClockTickVibePattern;
-
     // Vibrator pattern for a short vibration when tapping on a day/month/year date of a Calendar.
     long[] mCalendarDateVibePattern;
 
@@ -446,9 +437,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Vibrator pattern for haptic feedback during boot when safe mode is enabled.
     long[] mSafeModeEnabledVibePattern;
-
-    // Vibrator pattern for haptic feedback of a context click.
-    long[] mContextClickVibePattern;
 
     /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
     boolean mEnableShiftMenuBugReports = false;
@@ -2052,20 +2040,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_longPressVibePattern);
-        mVirtualKeyVibePattern = getLongIntArray(mContext.getResources(),
-                com.android.internal.R.array.config_virtualKeyVibePattern);
-        mKeyboardTapVibePattern = getLongIntArray(mContext.getResources(),
-                com.android.internal.R.array.config_keyboardTapVibePattern);
-        mClockTickVibePattern = getLongIntArray(mContext.getResources(),
-                com.android.internal.R.array.config_clockTickVibePattern);
         mCalendarDateVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_calendarDateVibePattern);
         mSafeModeDisabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeDisabledVibePattern);
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
-        mContextClickVibePattern = getLongIntArray(mContext.getResources(),
-                com.android.internal.R.array.config_contextClickVibePattern);
 
         mScreenshotChordEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableScreenshotChord);
@@ -7692,8 +7672,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.KEYBOARD_TAP:
                 return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
             case HapticFeedbackConstants.CLOCK_TICK:
-                pattern = mClockTickVibePattern;
-                break;
+                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             case HapticFeedbackConstants.CALENDAR_DATE:
                 pattern = mCalendarDateVibePattern;
                 break;
@@ -7704,8 +7683,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pattern = mSafeModeEnabledVibePattern;
                 break;
             case HapticFeedbackConstants.CONTEXT_CLICK:
-                pattern = mContextClickVibePattern;
-                break;
+                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             default:
                 return null;
         }

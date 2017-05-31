@@ -18,6 +18,7 @@
 
 #include <android/hardware/vibrator/1.0/IVibrator.h>
 #include <android/hardware/vibrator/1.0/types.h>
+#include <android/hardware/vibrator/1.1/IVibrator.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -35,6 +36,8 @@ using android::hardware::vibrator::V1_0::Effect;
 using android::hardware::vibrator::V1_0::EffectStrength;
 using android::hardware::vibrator::V1_0::IVibrator;
 using android::hardware::vibrator::V1_0::Status;
+using android::hardware::vibrator::V1_1::Effect_1_1;
+using IVibrator_1_1 = android::hardware::vibrator::V1_1::IVibrator;
 
 namespace android
 {
@@ -108,11 +111,26 @@ static jlong vibratorPerformEffect(JNIEnv*, jobject, jlong effect, jint strength
     if (mHal != nullptr) {
         Status status;
         uint32_t lengthMs;
-        mHal->perform(static_cast<Effect>(effect), static_cast<EffectStrength>(strength),
-                [&status, &lengthMs](Status retStatus, uint32_t retLengthMs) {
-                    status = retStatus;
-                    lengthMs = retLengthMs;
-                });
+        auto callback = [&status, &lengthMs](Status retStatus, uint32_t retLengthMs) {
+            status = retStatus;
+            lengthMs = retLengthMs;
+        };
+        EffectStrength effectStrength(static_cast<EffectStrength>(strength));
+
+        if (effect < 0  || effect > static_cast<uint32_t>(Effect_1_1::TICK)) {
+            ALOGW("Unable to perform haptic effect, invalid effect ID (%" PRId32 ")",
+                    static_cast<int32_t>(effect));
+        } else if (effect == static_cast<uint32_t>(Effect_1_1::TICK)) {
+            sp<IVibrator_1_1> hal_1_1 = IVibrator_1_1::castFrom(mHal);
+            if (hal_1_1 != nullptr) {
+                hal_1_1->perform_1_1(static_cast<Effect_1_1>(effect), effectStrength, callback);
+            } else {
+                ALOGW("Failed to perform effect (%" PRId32 "), insufficient HAL version",
+                        static_cast<int32_t>(effect));
+            }
+        } else {
+            mHal->perform(static_cast<Effect>(effect), effectStrength, callback);
+        }
         if (status == Status::OK) {
             return lengthMs;
         } else if (status != Status::UNSUPPORTED_OPERATION) {

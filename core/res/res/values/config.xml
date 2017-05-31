@@ -965,14 +965,6 @@
         <item>10</item>
     </integer-array>
 
-    <!-- Vibrator pattern for feedback about a context click -->
-    <integer-array name="config_contextClickVibePattern">
-        <item>0</item>
-        <item>1</item>
-        <item>20</item>
-        <item>21</item>
-    </integer-array>
-
     <bool name="config_use_strict_phone_number_comparation">false</bool>
 
     <!-- Display low battery warning when battery level dips to this value.
