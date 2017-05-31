@@ -573,6 +573,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"১৫ মিনিট"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"৩০ মিনিট"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"১ ঘণ্টা"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"পূর্বাবস্থায় ফিরুন"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> পরে আবার মনে করানো হবে"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ব্যাটারির ব্যবহার"</string>

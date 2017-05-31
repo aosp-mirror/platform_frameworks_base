@@ -268,7 +268,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"乙太網路"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"零打擾"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"僅限優先通知"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"僅允許鬧鐘"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"僅限鬧鐘"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"完全靜音"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"藍牙"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"藍牙 (<xliff:g id="NUMBER">%d</xliff:g> 個裝置)"</string>
@@ -369,7 +369,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"完全靜音。這也會關閉螢幕閱讀器的音訊。"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"完全靜音"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"僅限優先通知"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"僅允許鬧鐘"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"僅限鬧鐘"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"完全\n靜音"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"僅允許\n優先通知"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"僅允許\n鬧鐘"</string>
@@ -573,6 +573,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 分鐘"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 分鐘"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 小時"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"復原"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"已延後 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"電池用量"</string>
