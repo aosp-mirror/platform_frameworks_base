@@ -149,6 +149,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -933,6 +934,13 @@ public final class ActivityThread {
             sendMessage(H.BIND_APPLICATION, data);
         }
 
+        public final void runIsolatedEntryPoint(String entryPoint, String[] entryPointArgs) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = entryPoint;
+            args.arg2 = entryPointArgs;
+            sendMessage(H.RUN_ISOLATED_ENTRY_POINT, args);
+        }
+
         public final void scheduleExit() {
             sendMessage(H.EXIT_APPLICATION, null);
         }
@@ -1516,6 +1524,7 @@ public final class ActivityThread {
         public static final int ATTACH_AGENT = 155;
         public static final int APPLICATION_INFO_CHANGED = 156;
         public static final int ACTIVITY_MOVED_TO_DISPLAY = 157;
+        public static final int RUN_ISOLATED_ENTRY_POINT = 158;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1573,6 +1582,7 @@ public final class ActivityThread {
                     case LOCAL_VOICE_INTERACTION_STARTED: return "LOCAL_VOICE_INTERACTION_STARTED";
                     case ATTACH_AGENT: return "ATTACH_AGENT";
                     case APPLICATION_INFO_CHANGED: return "APPLICATION_INFO_CHANGED";
+                    case RUN_ISOLATED_ENTRY_POINT: return "RUN_ISOLATED_ENTRY_POINT";
                 }
             }
             return Integer.toString(code);
@@ -1842,6 +1852,10 @@ public final class ActivityThread {
                     } finally {
                         mUpdatingSystemConfig = false;
                     }
+                    break;
+                case RUN_ISOLATED_ENTRY_POINT:
+                    handleRunIsolatedEntryPoint((String) ((SomeArgs) msg.obj).arg1,
+                            (String[]) ((SomeArgs) msg.obj).arg2);
                     break;
             }
             Object obj = msg.obj;
@@ -6306,6 +6320,17 @@ public final class ActivityThread {
             }
         }
         return retHolder;
+    }
+
+    private void handleRunIsolatedEntryPoint(String entryPoint, String[] entryPointArgs) {
+        try {
+            Method main = Class.forName(entryPoint).getMethod("main", String[].class);
+            main.invoke(null, new Object[]{entryPointArgs});
+        } catch (ReflectiveOperationException e) {
+            throw new AndroidRuntimeException("runIsolatedEntryPoint failed", e);
+        }
+        // The process will be empty after this method returns; exit the VM now.
+        System.exit(0);
     }
 
     private void attach(boolean system) {

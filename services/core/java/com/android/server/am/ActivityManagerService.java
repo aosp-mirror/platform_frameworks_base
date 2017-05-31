@@ -3704,6 +3704,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return null;
             }
             app.crashHandler = crashHandler;
+            app.isolatedEntryPoint = entryPoint;
+            app.isolatedEntryPointArgs = entryPointArgs;
             checkTime(startTime, "startProcess: done creating new process record");
         } else {
             // If this is a new package in the process, add the package to the list
@@ -3726,8 +3728,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         checkTime(startTime, "startProcess: stepping in to startProcess");
-        startProcessLocked(
-                app, hostingType, hostingNameStr, abiOverride, entryPoint, entryPointArgs);
+        startProcessLocked(app, hostingType, hostingNameStr, abiOverride);
         checkTime(startTime, "startProcess: done starting proc!");
         return (app.pid != 0) ? app : null;
     }
@@ -3738,12 +3739,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final void startProcessLocked(ProcessRecord app,
             String hostingType, String hostingNameStr) {
-        startProcessLocked(app, hostingType, hostingNameStr, null /* abiOverride */,
-                null /* entryPoint */, null /* entryPointArgs */);
+        startProcessLocked(app, hostingType, hostingNameStr, null /* abiOverride */);
     }
 
     private final void startProcessLocked(ProcessRecord app, String hostingType,
-            String hostingNameStr, String abiOverride, String entryPoint, String[] entryPointArgs) {
+            String hostingNameStr, String abiOverride) {
         long startTime = SystemClock.elapsedRealtime();
         if (app.pid > 0 && app.pid != MY_PID) {
             checkTime(startTime, "startProcess: removing from pids map");
@@ -3888,8 +3888,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + (TextUtils.isEmpty(app.info.seInfoUser) ? "" : app.info.seInfoUser);
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
-            boolean isActivityProcess = (entryPoint == null);
-            if (entryPoint == null) entryPoint = "android.app.ActivityThread";
+            final String entryPoint = "android.app.ActivityThread";
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
                     app.processName);
             checkTime(startTime, "startProcess: asking zygote to start proc");
@@ -3898,12 +3897,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, debugFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, null, entryPointArgs);
+                        app.info.dataDir, null, null);
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, debugFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, invokeWith, entryPointArgs);
+                        app.info.dataDir, invokeWith, null);
             }
             checkTime(startTime, "startProcess: returned from zygote!");
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -3936,9 +3935,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             buf.append(app.processName);
             buf.append('/');
             UserHandle.formatUid(buf, uid);
-            if (!isActivityProcess) {
+            if (app.isolatedEntryPoint != null) {
                 buf.append(" [");
-                buf.append(entryPoint);
+                buf.append(app.isolatedEntryPoint);
                 buf.append("]");
             }
             buf.append(" for ");
@@ -3968,12 +3967,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             synchronized (mPidsSelfLocked) {
                 this.mPidsSelfLocked.put(startResult.pid, app);
-                if (isActivityProcess) {
-                    Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
-                    msg.obj = app;
-                    mHandler.sendMessageDelayed(msg, startResult.usingWrapper
-                            ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
-                }
+                Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
+                msg.obj = app;
+                mHandler.sendMessageDelayed(msg, startResult.usingWrapper
+                        ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
             }
             checkTime(startTime, "startProcess: done updating pids map");
         } catch (RuntimeException e) {
@@ -7005,7 +7002,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             mStackSupervisor.mActivityMetricsLogger.notifyBindApplication(app);
-            if (app.instr != null) {
+            if (app.isolatedEntryPoint != null) {
+                // This is an isolated process which should just call an entry point instead of
+                // being bound to an application.
+                thread.runIsolatedEntryPoint(app.isolatedEntryPoint, app.isolatedEntryPointArgs);
+            } else if (app.instr != null) {
                 thread.bindApplication(processName, appInfo, providers,
                         app.instr.mClass,
                         profilerInfo, app.instr.mArguments,
@@ -12249,6 +12250,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             r.persistent = true;
             r.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
         }
+        if (isolated && isolatedUid != 0) {
+            // Special case for startIsolatedProcess (internal only) - assume the process
+            // is required by the system server to prevent it being killed.
+            r.maxAdj = ProcessList.PERSISTENT_SERVICE_ADJ;
+        }
         addProcessNameLocked(r);
         return r;
     }
@@ -12316,8 +12322,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (app.thread == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
             startProcessLocked(app, "added application",
-                    customProcess != null ? customProcess : app.processName, abiOverride,
-                    null /* entryPoint */, null /* entryPointArgs */);
+                    customProcess != null ? customProcess : app.processName, abiOverride);
         }
 
         return app;
@@ -22557,9 +22562,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         break;
                 }
 
-                if (app.isolated && app.services.size() <= 0) {
-                    // If this is an isolated process, and there are no
-                    // services running in it, then the process is no longer
+                if (app.isolated && app.services.size() <= 0 && app.isolatedEntryPoint == null) {
+                    // If this is an isolated process, there are no services
+                    // running in it, and it's not a special process with a
+                    // custom entry point, then the process is no longer
                     // needed.  We agressively kill these because we can by
                     // definition not re-use the same process again, and it is
                     // good to avoid having whatever code was running in them
