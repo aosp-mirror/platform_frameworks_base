@@ -703,7 +703,7 @@
     <string name="relationTypeFriend" msgid="7313106762483391262">"صديق"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"مدير"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"أم"</string>
-    <string name="relationTypeParent" msgid="4755635567562925226">"الأبوان"</string>
+    <string name="relationTypeParent" msgid="4755635567562925226">"الوالدان"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"شريك"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"جهة الإحالة"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"قريب"</string>

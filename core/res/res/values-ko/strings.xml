@@ -291,7 +291,7 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"사진 및 동영상 촬영"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"전화"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"전화 걸기 및 관리"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"신체 센서"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"인체 감지 센서"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"생체 신호에 관한 센서 데이터에 액세스"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"창 콘텐츠 가져오기"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
@@ -381,7 +381,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"앱에서 수신 및 발신 통화 데이터를 포함하여 TV의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 삭제하거나 수정할 수도 있습니다."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"신체 센서(예: 심박수 모니터)에 액세스"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"인체 감지 센서(예: 심박수 모니터)에 액세스"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"앱이 심박수와 같은 신체 상태를 확인하는 센서의 데이터에 접근하도록 허용합니다."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"캘린더 일정 및 세부정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"이 앱은 태블릿에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
