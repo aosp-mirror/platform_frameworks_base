@@ -93,6 +93,7 @@ public class ScrimView extends View implements ConfigurationController.Configura
         mDrawable.setCallback(this);
         mColors = new ColorExtractor.GradientColors();
         updateScreenSize();
+        updateColorWithTint(false);
 
         // We need to know about configuration changes to update the gradient size
         // since it's independent from view bounds.
@@ -187,6 +188,11 @@ public class ScrimView extends View implements ConfigurationController.Configura
     @VisibleForTesting
     Drawable getDrawable() {
         return mDrawable;
+    }
+
+    @VisibleForTesting
+    ColorExtractor.GradientColors getColors() {
+        return mColors;
     }
 
     public void setTint(int color) {
