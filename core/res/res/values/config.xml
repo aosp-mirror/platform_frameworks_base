@@ -475,6 +475,9 @@
     <integer translatable="false" name="config_wifi_framework_SECURITY_AWARD">80</integer>
     <!-- Integer specifying the base interval in seconds for the exponential backoff scan for autojoin -->
     <integer translatable="false" name="config_wifi_framework_exponential_backoff_scan_base_interval">20</integer>
+    <!-- Integers specifying the max packet Tx/Rx rates for full scan -->
+    <integer translatable="false" name="config_wifi_framework_max_tx_rate_for_full_scan">8</integer>
+    <integer translatable="false" name="config_wifi_framework_max_rx_rate_for_full_scan">16</integer>
     <!-- Integer parameters of the wifi to cellular handover feature
          wifi should not stick to bad networks -->
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-82</integer>
