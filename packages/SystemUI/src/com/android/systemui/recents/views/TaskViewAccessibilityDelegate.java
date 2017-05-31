@@ -59,7 +59,7 @@ public class TaskViewAccessibilityDelegate extends View.AccessibilityDelegate {
     @Override
     public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(host, info);
-        if (ActivityManager.supportsSplitScreenMultiWindow()
+        if (ActivityManager.supportsSplitScreenMultiWindow(mTaskView.getContext())
                 && !Recents.getSystemServices().hasDockedTask()) {
             TaskStack.DockState[] dockStates = Recents.getConfiguration()
                     .getDockStatesForCurrentOrientation();
