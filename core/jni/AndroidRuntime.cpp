@@ -16,7 +16,7 @@
 
 #define ATRACE_TAG ATRACE_TAG_DALVIK
 #define LOG_TAG "AndroidRuntime"
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 1
 
 #include <android_runtime/AndroidRuntime.h>
 #include <binder/IBinder.h>
@@ -659,7 +659,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
             checkJni = true;
         }
     }
-    ALOGD("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
+    ALOGV("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
     if (checkJni) {
         /* extended JNI checking */
         addOption("-Xcheck:jni");
