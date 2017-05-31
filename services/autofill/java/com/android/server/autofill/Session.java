@@ -1496,15 +1496,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    void destroyLocked() {
+    RemoteFillService destroyLocked() {
         if (mDestroyed) {
-            return;
+            return null;
         }
-        mRemoteFillService.destroy();
         hideAllUiIfOwnedByMe();
         mUi.clearCallback(this);
         mDestroyed = true;
         mMetricsLogger.action(MetricsEvent.AUTOFILL_SESSION_FINISHED, mPackageName);
+        return mRemoteFillService;
     }
 
     private void hideAllUiIfOwnedByMe() {
@@ -1528,8 +1528,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
-        destroyLocked();
+        final RemoteFillService remoteFillService = destroyLocked();
         mService.removeSessionLocked(id);
+        if (remoteFillService != null) {
+            remoteFillService.destroy();
+        }
     }
 
     private int getLastResponseIndex() {
