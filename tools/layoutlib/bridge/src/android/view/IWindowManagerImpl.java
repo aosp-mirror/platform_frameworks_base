@@ -18,6 +18,7 @@ package android.view;
 
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -210,13 +211,13 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX, int startY,
+    public void overridePendingAppTransitionThumb(GraphicBuffer srcThumb, int startX, int startY,
             IRemoteCallback startedCallback, boolean scaleUp) throws RemoteException {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX,
+    public void overridePendingAppTransitionAspectScaledThumb(GraphicBuffer srcThumb, int startX,
             int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
             boolean scaleUp) {
         // TODO Auto-generated method stub
