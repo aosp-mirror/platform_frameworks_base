@@ -1029,7 +1029,7 @@ static void android_os_Debug_dumpNativeBacktraceToFileTimeout(JNIEnv* env, jobje
         return;
     }
 
-    dump_backtrace_to_file_timeout(pid, fd, timeoutSecs);
+    dump_backtrace_to_file_timeout(pid, kDebuggerdNativeBacktrace, timeoutSecs, fd);
 
     close(fd);
 }
