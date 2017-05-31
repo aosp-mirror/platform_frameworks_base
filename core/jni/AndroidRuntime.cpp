@@ -606,7 +606,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
 {
     JavaVMInitArgs initArgs;
     char propBuf[PROPERTY_VALUE_MAX];
-    char stackTraceDirBuf[sizeof("-Xstacktracedir:")-1 + PROPERTY_VALUE_MAX];
     char stackTraceFileBuf[sizeof("-Xstacktracefile:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
     char heapstartsizeOptsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
@@ -687,7 +686,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     // If dalvik.vm.stack-trace-dir is set, it enables the "new" stack trace
     // dump scheme and a new file is created for each stack dump. If it isn't set,
     // the old scheme is enabled.
-    if (!parseRuntimeOption("dalvik.vm.stack-trace-dir", stackTraceDirBuf, "-Xstacktracedir:")) {
+    property_get("dalvik.vm.stack-trace-dir", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        addOption("-Xusetombstonedtraces");
+    } else {
         parseRuntimeOption("dalvik.vm.stack-trace-file", stackTraceFileBuf, "-Xstacktracefile:");
     }
 
