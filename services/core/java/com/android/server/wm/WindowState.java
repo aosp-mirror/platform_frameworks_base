@@ -3419,7 +3419,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.print(prefix); pw.print("mOrientationChanging=");
                     pw.print(mOrientationChanging);
                     pw.print(" mAppFreezing="); pw.print(mAppFreezing);
-                    pw.print(" mTurnOnScreen="); pw.println(mTurnOnScreen);
+                    pw.print(" mTurnOnScreen="); pw.print(mTurnOnScreen);
                     pw.print(" mReportOrientationChanged="); pw.println(mReportOrientationChanged);
         }
         if (mLastFreezeDuration != 0) {

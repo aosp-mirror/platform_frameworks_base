@@ -3492,10 +3492,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             if (win != null) {
                 final int req = win.mAttrs.screenOrientation;
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, win + " forcing orientation to " + req);
                 if (policy.isKeyguardHostWindow(win.mAttrs)) {
                     mLastKeyguardForcedOrientation = req;
+                    if (mService.mKeyguardGoingAway) {
+                        // Keyguard can't affect the orientation if it is going away...
+                        mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+                        return SCREEN_ORIENTATION_UNSET;
+                    }
                 }
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, win + " forcing orientation to " + req);
                 return (mLastWindowForcedOrientation = req);
             }
 

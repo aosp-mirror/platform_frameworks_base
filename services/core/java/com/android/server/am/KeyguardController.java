@@ -97,7 +97,7 @@ class KeyguardController {
         mKeyguardShowing = showing;
         dismissDockedStackIfNeeded();
         if (showing) {
-            mKeyguardGoingAway = false;
+            setKeyguardGoingAway(false);
             mDismissalRequested = false;
         }
         mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
@@ -114,7 +114,7 @@ class KeyguardController {
         if (mKeyguardShowing) {
             mWindowManager.deferSurfaceLayout();
             try {
-                mKeyguardGoingAway = true;
+                setKeyguardGoingAway(true);
                 mWindowManager.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
                         false /* alwaysKeepCurrent */, convertTransitFlags(flags),
                         false /* forceOverride */);
@@ -137,6 +137,11 @@ class KeyguardController {
             return;
         }
         mWindowManager.dismissKeyguard(callback);
+    }
+
+    private void setKeyguardGoingAway(boolean keyguardGoingAway) {
+        mKeyguardGoingAway = keyguardGoingAway;
+        mWindowManager.setKeyguardGoingAway(keyguardGoingAway);
     }
 
     private void failCallback(IKeyguardDismissCallback callback) {
