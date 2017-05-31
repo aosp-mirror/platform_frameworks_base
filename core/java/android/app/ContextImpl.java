@@ -89,6 +89,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Objects;
 
 class ReceiverRestrictedContext extends ContextWrapper {
@@ -415,6 +416,26 @@ class ContextImpl extends Context {
         }
 
         return packagePrefs;
+    }
+
+    @Override
+    public void reloadSharedPreferences() {
+        // Build the list of all per-context impls (i.e. caches) we know about
+        ArrayList<SharedPreferencesImpl> spImpls = new ArrayList<>();
+        synchronized (ContextImpl.class) {
+            final ArrayMap<File, SharedPreferencesImpl> cache = getSharedPreferencesCacheLocked();
+            for (int i = 0; i < cache.size(); i++) {
+                final SharedPreferencesImpl sp = cache.valueAt(i);
+                if (sp != null) {
+                    spImpls.add(sp);
+                }
+            }
+        }
+
+        // Issue the reload outside the cache lock
+        for (int i = 0; i < spImpls.size(); i++) {
+            spImpls.get(i).startReloadIfChangedUnexpectedly();
+        }
     }
 
     /**

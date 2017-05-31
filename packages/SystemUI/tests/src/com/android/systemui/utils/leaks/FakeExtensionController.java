@@ -111,7 +111,10 @@ public class FakeExtensionController implements ExtensionController {
 
         @Override
         public void addCallback(Consumer<T> callback) {
+        }
 
+        public T reload() {
+            return null;
         }
     }
 }

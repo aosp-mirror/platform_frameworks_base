@@ -29,7 +29,6 @@
     android:clickable="false"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingBottom="48dp"
     android:paddingTop="0dp"
     android:paddingEnd="0dp"
     android:paddingStart="0dp">
@@ -83,10 +82,9 @@
     <com.android.systemui.qs.QuickQSPanel
         android:id="@+id/quick_qs_panel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="36dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="31dp"
         android:layout_alignParentTop="true"
         android:accessibilityTraversalAfter="@+id/date_time_group"
         android:accessibilityTraversalBefore="@id/expand_indicator"
@@ -95,8 +93,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:focusable="true"
-        android:importantForAccessibility="yes"
-        android:paddingTop="0dp"/>
+        android:importantForAccessibility="yes" />
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"

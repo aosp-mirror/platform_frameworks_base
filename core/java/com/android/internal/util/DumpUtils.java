@@ -31,7 +31,7 @@ import java.io.StringWriter;
  */
 public final class DumpUtils {
     private static final String TAG = "DumpUtils";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private DumpUtils() {
     }

@@ -26,10 +26,6 @@
     android:paddingBottom="8dp"
     android:visibility="invisible">
 
-    <com.android.systemui.ResizingSpace
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/qs_detail_margin_top" />
-
     <include
         android:id="@+id/qs_detail_header"
         layout="@layout/qs_detail_header"

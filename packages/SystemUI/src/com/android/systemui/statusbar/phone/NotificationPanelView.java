@@ -1672,6 +1672,10 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
                 ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+        View ambientIndicationContainer = mStatusBar.getAmbientIndicationContainer();
+        if (ambientIndicationContainer != null) {
+            ambientIndicationContainer.setAlpha(alpha);
+        }
     }
 
     private float getNotificationsTopY() {

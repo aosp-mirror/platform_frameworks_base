@@ -725,8 +725,8 @@ public class Typeface {
     }
 
     /** @hide */
-    public static Typeface createFromTypefaceWithVariation(Typeface family,
-            List<FontVariationAxis> axes) {
+    public static Typeface createFromTypefaceWithVariation(@Nullable Typeface family,
+            @NonNull List<FontVariationAxis> axes) {
         final long ni = family == null ? 0 : family.native_instance;
         return new Typeface(nativeCreateFromTypefaceWithVariation(ni, axes));
     }
@@ -1056,7 +1056,7 @@ public class Typeface {
                 }
             }
         }
-        return Arrays.binarySearch(mSupportedAxes, axis) > 0;
+        return Arrays.binarySearch(mSupportedAxes, axis) >= 0;
     }
 
     private static native long nativeCreateFromTypeface(long native_instance, int style);

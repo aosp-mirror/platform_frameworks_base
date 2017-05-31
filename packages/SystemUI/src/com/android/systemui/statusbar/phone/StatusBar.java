@@ -36,6 +36,7 @@ import android.R.style;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
@@ -730,6 +731,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mReinflateNotificationsOnUserSwitched;
     private HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
+    @Nullable private View mAmbientIndicationContainer;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -771,6 +773,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBatteryController = Dependency.get(BatteryController.class);
         mAssistManager = Dependency.get(AssistManager.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
+        mSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWindowManager.getDefaultDisplay();
@@ -1079,6 +1082,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 (ViewGroup) mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
                 mKeyguardBottomArea.getLockIcon());
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
+
+        mAmbientIndicationContainer = mStatusBarWindow.findViewById(
+                R.id.ambient_indication_container);
 
         // set the initial view visibility
         setAreThereNotifications();
@@ -1628,9 +1634,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPendingNotifications.remove(entry.key);
         // If there was an async task started after the removal, we don't want to add it back to
         // the list, otherwise we might get leaks.
-        if (mNotificationData.get(entry.key) == null && !entry.row.isRemoved()) {
+        boolean isNew = mNotificationData.get(entry.key) == null;
+        if (isNew && !entry.row.isRemoved()) {
             addEntry(entry);
+        } else if (!isNew && entry.row.hasLowPriorityStateUpdated()) {
+            mVisualStabilityManager.onLowPriorityUpdated(entry);
+            updateNotificationShade();
         }
+        entry.row.setLowPriorityStateUpdated(false);
     }
 
     private boolean shouldSuppressFullScreenIntent(String key) {
@@ -2777,6 +2788,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public KeyguardIndicationController getKeyguardIndicationController() {
         return mKeyguardIndicationController;
+    }
+
+    @Nullable
+    public View getAmbientIndicationContainer() {
+        return mAmbientIndicationContainer;
     }
 
     /**
@@ -4387,6 +4403,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mKeyguardUserSwitcher.setKeyguard(true, fromShadeLocked);
             }
             mStatusBarView.removePendingHideExpandedRunnables();
+            if (mAmbientIndicationContainer != null) {
+                mAmbientIndicationContainer.setVisibility(View.VISIBLE);
+            }
         } else {
             mKeyguardIndicationController.setVisible(false);
             if (mKeyguardUserSwitcher != null) {
@@ -4394,6 +4413,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                         goingToFullShade ||
                         mState == StatusBarState.SHADE_LOCKED ||
                         fromShadeLocked);
+            }
+            if (mAmbientIndicationContainer != null) {
+                mAmbientIndicationContainer.setVisibility(View.INVISIBLE);
             }
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
@@ -5253,6 +5275,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected KeyguardManager mKeyguardManager;
     private LockPatternUtils mLockPatternUtils;
     private DeviceProvisionedController mDeviceProvisionedController;
+    protected SystemServicesProxy mSystemServicesProxy;
 
     // UI-specific methods
 
@@ -6314,7 +6337,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarNotification sbn, ExpandableNotificationRow row) {
         row.setNeedsRedaction(needsRedaction(entry));
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
+        boolean isUpdate = mNotificationData.get(entry.key) != null;
+        boolean wasLowPriority = row.isLowPriority();
         row.setIsLowPriority(isLowPriority);
+        row.setLowPriorityStateUpdated(isUpdate && (wasLowPriority != isLowPriority));
         // bind the click event to the content area
         mNotificationClicker.register(row, sbn);
 
@@ -6900,6 +6926,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected boolean shouldPeek(Entry entry, StatusBarNotification sbn) {
         if (!mUseHeadsUp || isDeviceInVrMode()) {
+            if (DEBUG) Log.d(TAG, "No peeking: no huns or vr mode");
             return false;
         }
 
@@ -6908,8 +6935,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        boolean inUse = mPowerManager.isScreenOn()
-                && !SystemServicesProxy.getInstance(mContext).isDreaming();
+        boolean inUse = mPowerManager.isScreenOn() && !mSystemServicesProxy.isDreaming();
 
         if (!inUse && !isDozing()) {
             if (DEBUG) {
@@ -6950,6 +6976,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                 return !mStatusBarKeyguardViewManager.isShowing()
                         || mStatusBarKeyguardViewManager.isOccluded();
             }
+        }
+
+        // Don't peek notifications that are suppressed due to group alert behavior
+        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
+            if (DEBUG) Log.d(TAG, "No peeking: suppressed due to group alert behavior");
+            return false;
         }
 
         return true;

@@ -813,6 +813,9 @@ public abstract class Context {
      */
     public abstract boolean deleteSharedPreferences(String name);
 
+    /** @hide */
+    public abstract void reloadSharedPreferences();
+
     /**
      * Open a private file associated with this Context's application package
      * for reading.

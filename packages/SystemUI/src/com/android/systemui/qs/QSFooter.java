@@ -101,6 +101,8 @@ public class QSFooter extends FrameLayout implements
     private boolean mShowEditIcon;
     private TouchAnimator mAnimator;
     private View mDateTimeGroup;
+    private boolean mKeyguardShowing;
+    private TouchAnimator mAlarmAnimator;
 
     public QSFooter(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -163,13 +165,14 @@ public class QSFooter extends FrameLayout implements
         int remaining = (width - numTiles * size) / (numTiles - 1);
         int defSpace = mContext.getResources().getDimensionPixelOffset(R.dimen.default_gear_space);
 
-        final Builder builder = new Builder()
+        mAnimator = new Builder()
                 .addFloat(mSettingsContainer, "translationX", -(remaining - defSpace), 0)
                 .addFloat(mSettingsButton, "rotation", -120, 0)
-                .addFloat(mAlarmStatus, "alpha", 0, 1);
+                .build();
         if (mAlarmShowing) {
-            builder.addFloat(mDate, "alpha", 1, 0)
+            mAlarmAnimator = new Builder().addFloat(mDate, "alpha", 1, 0)
                     .addFloat(mDateTimeGroup, "translationX", 0, -mDate.getWidth())
+                    .addFloat(mAlarmStatus, "alpha", 0, 1)
                     .setListener(new ListenerAdapter() {
                         @Override
                         public void onAnimationAtStart() {
@@ -180,13 +183,13 @@ public class QSFooter extends FrameLayout implements
                         public void onAnimationStarted() {
                             mAlarmStatus.setVisibility(View.VISIBLE);
                         }
-                    });
+                    }).build();
         } else {
+            mAlarmAnimator = null;
             mAlarmStatus.setVisibility(View.GONE);
             mDate.setAlpha(1);
             mDateTimeGroup.setTranslationX(0);
         }
-        mAnimator = builder.build();
         setExpansion(mExpansionAmount);
     }
 
@@ -248,6 +251,11 @@ public class QSFooter extends FrameLayout implements
         return animatorBuilder.build();
     }
 
+    public void setKeyguardShowing(boolean keyguardShowing) {
+        mKeyguardShowing = keyguardShowing;
+        setExpansion(mExpansionAmount);
+    }
+
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
@@ -275,6 +283,8 @@ public class QSFooter extends FrameLayout implements
     public void setExpansion(float headerExpansionFraction) {
         mExpansionAmount = headerExpansionFraction;
         if (mAnimator != null) mAnimator.setPosition(headerExpansionFraction);
+        if (mAlarmAnimator != null) mAlarmAnimator.setPosition(
+                mKeyguardShowing ? 0 : headerExpansionFraction);
 
         if (mSettingsAlpha != null) {
             mSettingsAlpha.setPosition(headerExpansionFraction);

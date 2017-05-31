@@ -20,6 +20,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.support.annotation.DimenRes;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewStub;
@@ -32,7 +33,6 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -91,14 +91,16 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        reloadWidth(mQsFrame);
-        reloadWidth(mStackScroller);
+        reloadWidth(mQsFrame, R.dimen.qs_panel_width);
+        reloadWidth(mStackScroller, R.dimen.notification_panel_width);
     }
 
-    private void reloadWidth(View view) {
+    /**
+     * Loads the given width resource and sets it on the given View.
+     */
+    private void reloadWidth(View view, @DimenRes int width) {
         LayoutParams params = (LayoutParams) view.getLayoutParams();
-        params.width = getContext().getResources().getDimensionPixelSize(
-                R.dimen.qs_panel_width);
+        params.width = getResources().getDimensionPixelSize(width);
         view.setLayoutParams(params);
     }
 

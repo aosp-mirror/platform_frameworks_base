@@ -3005,8 +3005,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Calculate the default bounds (don't use existing stack bounds as we may have just created
         // the stack, and schedule the start of the animation into PiP (the bounds animator that
         // is triggered by this is posted on another thread)
-        final Rect destBounds = stack.getPictureInPictureBounds(aspectRatio,
-                false /* useExistingStackBounds */);
+        final Rect destBounds = stack.getDefaultPictureInPictureBounds(aspectRatio);
+
         stack.animateResizePinnedStack(sourceHintBounds, destBounds, -1 /* animationDuration */,
                 true /* fromFullscreen */);
 

@@ -64,10 +64,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := android_uiautomator
 LOCAL_JAVA_LIBRARIES := $(uiautomator.core_java_libraries)
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
-include $(BUILD_STATIC_JAVA_LIBRARY)
 # Make sure to run droiddoc first to generate the stub source files.
-$(full_classes_compiled_jar) : $(uiautomator_stubs_stamp)
-$(built_dex_intermediate) : $(uiautomator_stubs_stamp)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(uiautomator_stubs_stamp)
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 ###############################################
 # API check

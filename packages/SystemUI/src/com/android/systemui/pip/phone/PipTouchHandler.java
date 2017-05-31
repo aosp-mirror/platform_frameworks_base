@@ -710,9 +710,15 @@ public class PipTouchHandler {
      * Updates the current movement bounds based on whether the menu is currently visible.
      */
     private void updateMovementBounds(int menuState) {
-        mMovementBounds = menuState == MENU_STATE_FULL
+        boolean isMenuExpanded = menuState == MENU_STATE_FULL;
+        mMovementBounds = isMenuExpanded
                 ? mExpandedMovementBounds
                 : mNormalMovementBounds;
+        try {
+            mPinnedStackController.setMinEdgeSize(isMenuExpanded ? mExpandedShortestEdgeSize : 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not set minimized state", e);
+        }
     }
 
     /**

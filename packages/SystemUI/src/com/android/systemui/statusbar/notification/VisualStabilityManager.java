@@ -38,6 +38,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     private boolean mReorderingAllowed;
     private VisibilityLocationProvider mVisibilityLocationProvider;
     private ArraySet<View> mAllowedReorderViews = new ArraySet<>();
+    private ArraySet<View> mLowPriorityReorderingViews = new ArraySet<>();
     private ArraySet<View> mAddedChildren = new ArraySet<>();
     private boolean mPulsing;
 
@@ -115,6 +116,9 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
         if (mAddedChildren.contains(row)) {
             return true;
         }
+        if (mLowPriorityReorderingViews.contains(row)) {
+            return true;
+        }
         if (mAllowedReorderViews.contains(row)
                 && !mVisibilityLocationProvider.isInVisibleLocation(row)) {
             return true;
@@ -130,6 +134,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
     public void onReorderingFinished() {
         mAllowedReorderViews.clear();
         mAddedChildren.clear();
+        mLowPriorityReorderingViews.clear();
     }
 
     @Override
@@ -139,6 +144,10 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
             // view and stay at the current location if they aren't.
             mAllowedReorderViews.add(entry.row);
         }
+    }
+
+    public void onLowPriorityUpdated(NotificationData.Entry entry) {
+        mLowPriorityReorderingViews.add(entry.row);
     }
 
     /**

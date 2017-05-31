@@ -30,7 +30,7 @@ import java.io.PrintWriter;
  */
 public class KeyguardServiceDelegate {
     private static final String TAG = "KeyguardServiceDelegate";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final int SCREEN_STATE_OFF = 0;
     private static final int SCREEN_STATE_TURNING_ON = 1;
