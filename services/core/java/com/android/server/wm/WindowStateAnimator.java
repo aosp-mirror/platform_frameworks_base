@@ -687,6 +687,7 @@ class WindowStateAnimator {
             mSurfaceController = new WindowSurfaceController(mSession.mSurfaceSession,
                     attrs.getTitle().toString(),
                     width, height, format, flags, this, windowType, ownerUid);
+            mSurfaceFormat = format;
 
             w.setHasSurface(true);
 

@@ -47,7 +47,9 @@ public final class ScanRecord {
     private static final int DATA_TYPE_LOCAL_NAME_SHORT = 0x08;
     private static final int DATA_TYPE_LOCAL_NAME_COMPLETE = 0x09;
     private static final int DATA_TYPE_TX_POWER_LEVEL = 0x0A;
-    private static final int DATA_TYPE_SERVICE_DATA = 0x16;
+    private static final int DATA_TYPE_SERVICE_DATA_16_BIT = 0x16;
+    private static final int DATA_TYPE_SERVICE_DATA_32_BIT = 0x20;
+    private static final int DATA_TYPE_SERVICE_DATA_128_BIT = 0x21;
     private static final int DATA_TYPE_MANUFACTURER_SPECIFIC_DATA = 0xFF;
 
     // Flags of the advertising data.
@@ -224,10 +226,16 @@ public final class ScanRecord {
                     case DATA_TYPE_TX_POWER_LEVEL:
                         txPowerLevel = scanRecord[currentPos];
                         break;
-                    case DATA_TYPE_SERVICE_DATA:
-                        // The first two bytes of the service data are service data UUID in little
-                        // endian. The rest bytes are service data.
+                    case DATA_TYPE_SERVICE_DATA_16_BIT:
+                    case DATA_TYPE_SERVICE_DATA_32_BIT:
+                    case DATA_TYPE_SERVICE_DATA_128_BIT:
                         int serviceUuidLength = BluetoothUuid.UUID_BYTES_16_BIT;
+                        if (fieldType == DATA_TYPE_SERVICE_DATA_32_BIT) {
+                         serviceUuidLength = BluetoothUuid.UUID_BYTES_32_BIT;
+                        } else if (fieldType == DATA_TYPE_SERVICE_DATA_128_BIT) {
+                         serviceUuidLength = BluetoothUuid.UUID_BYTES_128_BIT;
+                        }
+
                         byte[] serviceDataUuidBytes = extractBytes(scanRecord, currentPos,
                                 serviceUuidLength);
                         ParcelUuid serviceDataUuid = BluetoothUuid.parseUuidFrom(

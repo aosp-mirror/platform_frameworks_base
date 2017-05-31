@@ -237,7 +237,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             float notificationClipEnd;
-            boolean aboveShelf = row.getTranslationZ() > baseZHeight;
+            boolean aboveShelf = ViewState.getFinalTranslationZ(row) > baseZHeight;
             boolean isLastChild = child == lastChild;
             float rowTranslationY = row.getTranslationY();
             if (isLastChild || aboveShelf || backgroundForceHidden) {
@@ -294,10 +294,15 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private void updateNotificationClipHeight(ExpandableNotificationRow row,
             float notificationClipEnd) {
         float viewEnd = row.getTranslationY() + row.getActualHeight();
+        boolean isPinned = row.isPinned() || row.isHeadsUpAnimatingAway();
         if (viewEnd > notificationClipEnd
-                && (mAmbientState.isShadeExpanded()
-                        || (!row.isPinned() && !row.isHeadsUpAnimatingAway()))) {
-            row.setClipBottomAmount((int) (viewEnd - notificationClipEnd));
+                && (mAmbientState.isShadeExpanded() || !isPinned)) {
+            int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
+            if (isPinned) {
+                clipBottomAmount = Math.min(row.getIntrinsicHeight() - row.getCollapsedHeight(),
+                        clipBottomAmount);
+            }
+            row.setClipBottomAmount(clipBottomAmount);
         } else {
             row.setClipBottomAmount(0);
         }
@@ -391,7 +396,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 ? fullTransitionAmount
                 : transitionAmount;
         iconState.clampedAppearAmount = clampedAmount;
-        float contentTransformationAmount = isLastChild || iconState.translateContent
+        float contentTransformationAmount = !row.isAboveShelf()
+                    && (isLastChild || iconState.translateContent)
                 ? iconTransitionAmount
                 : 0.0f;
         row.setContentTransformationAmount(contentTransformationAmount, isLastChild);

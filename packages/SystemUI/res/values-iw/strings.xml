@@ -471,6 +471,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>. הפרופיל מחובר לאפליקציה <xliff:g id="APPLICATION">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nלמידע נוסף, פנה למנהל המערכת."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>. הפרופיל מחובר לאפליקציה <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nהפרופיל מחובר גם לאפליקציה <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"הנעילה בוטלה על ידי <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"המכשיר יישאר נעול עד שתבטל את נעילתו באופן ידני"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"קבל התראות מהר יותר"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"צפה בהן לפני שתבטל נעילה"</string>

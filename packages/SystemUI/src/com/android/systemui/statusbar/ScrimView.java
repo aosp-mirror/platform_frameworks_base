@@ -250,8 +250,7 @@ public class ScrimView extends View implements ConfigurationController.Configura
         }
     }
 
-    @VisibleForTesting
-    float getViewAlpha() {
+    public float getViewAlpha() {
         return mViewAlpha;
     }
 

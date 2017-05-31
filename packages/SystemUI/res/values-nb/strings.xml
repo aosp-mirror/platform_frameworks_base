@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Jobbprofilen din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profilen er koblet til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din på jobben, inkludert e-poster, apper og nettsteder.\n\nTa kontakt med administratoren hvis du vil ha mer informasjon."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Jobbprofilen din administreres av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profilen er koblet til <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din på jobben, inkludert e-poster, apper og nettsteder.\n\nDu er også koblet til <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan overvåke den personlige nettverksaktiviteten din."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Låst opp for <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheten forblir låst til du låser den opp manuelt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Motta varsler raskere"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Se dem før du låser opp"</string>

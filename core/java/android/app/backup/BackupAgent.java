@@ -942,6 +942,11 @@ public abstract class BackupAgent extends ContextWrapper {
             long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doRestore() invoked");
+
+            // Ensure that any side-effect SharedPreferences writes have landed *before*
+            // we may be about to rewrite the file out from underneath
+            waitForSharedPrefs();
+
             BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
             try {
                 BackupAgent.this.onRestore(input, appVersionCode, newState);
@@ -952,8 +957,8 @@ public abstract class BackupAgent extends ContextWrapper {
                 Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
-                // Ensure that any side-effect SharedPreferences writes have landed
-                waitForSharedPrefs();
+                // And bring live SharedPreferences instances up to date
+                reloadSharedPreferences();
 
                 Binder.restoreCallingIdentity(ident);
                 try {
@@ -1053,6 +1058,8 @@ public abstract class BackupAgent extends ContextWrapper {
             } finally {
                 // Ensure that any side-effect SharedPreferences writes have landed
                 waitForSharedPrefs();
+                // And bring live SharedPreferences instances up to date
+                reloadSharedPreferences();
 
                 Binder.restoreCallingIdentity(ident);
                 try {

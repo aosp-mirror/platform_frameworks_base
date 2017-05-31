@@ -91,6 +91,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private LayoutListener mLayoutListener;
+    private boolean mLowPriorityStateUpdated;
     private final NotificationInflater mNotificationInflater;
     private int mIconTransformContentShift;
     private int mIconTransformContentShiftNoIcon;
@@ -827,10 +828,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void onDensityOrFontScaleChanged() {
         super.onDensityOrFontScaleChanged();
         initDimens();
-        if (mIsSummaryWithChildren) {
-            if (mChildrenContainer != null) {
-                mChildrenContainer.reInflateViews(mExpandClickListener, mEntry.notification);
-            }
+        // Let's update our childrencontainer. This is intentionally not guarded with
+        // mIsSummaryWithChildren since we might have had children but not anymore.
+        if (mChildrenContainer != null) {
+            mChildrenContainer.reInflateViews(mExpandClickListener, mEntry.notification);
         }
         if (mGuts != null) {
             View oldGuts = mGuts;
@@ -1133,6 +1134,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mChildrenContainer != null) {
             mChildrenContainer.setIsLowPriority(isLowPriority);
         }
+    }
+
+
+    public void setLowPriorityStateUpdated(boolean lowPriorityStateUpdated) {
+        mLowPriorityStateUpdated = lowPriorityStateUpdated;
+    }
+
+    public boolean hasLowPriorityStateUpdated() {
+        return mLowPriorityStateUpdated;
     }
 
     public boolean isLowPriority() {
@@ -1496,9 +1506,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setUserLocked(boolean userLocked) {
         mUserLocked = userLocked;
         mPrivateLayout.setUserExpanding(userLocked);
-        if (mIsSummaryWithChildren) {
+        // This is intentionally not guarded with mIsSummaryWithChildren since we might have had
+        // children but not anymore.
+        if (mChildrenContainer != null) {
             mChildrenContainer.setUserLocked(userLocked);
-            if (userLocked || !isGroupExpanded()) {
+            if (mIsSummaryWithChildren && (userLocked || !isGroupExpanded())) {
                 updateBackgroundForGroupState();
             }
         }
@@ -2227,5 +2239,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 row.startChildAnimation(mOverallState, properties);
             }
         }
+    }
+
+    @VisibleForTesting
+    protected void setChildrenContainer(NotificationChildrenContainer childrenContainer) {
+        mChildrenContainer = childrenContainer;
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import android.util.MergedConfiguration;
+import android.view.WindowManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -203,5 +205,21 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(mediaOverlayChild, windows.pollFirst());
         assertEquals(mediaChild, windows.pollFirst());
         assertTrue(windows.isEmpty());
+    }
+
+    @Test
+    public void testPrepareWindowToDisplayDuringRelayout() throws Exception {
+        testPrepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
+        testPrepareWindowToDisplayDuringRelayout(true /*wasVisible*/);
+    }
+
+    private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {
+        final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
+        root.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+        root.mTurnOnScreen = false;
+
+        root.prepareWindowToDisplayDuringRelayout(new MergedConfiguration(),
+                wasVisible /*wasVisible*/);
+        assertTrue(root.mTurnOnScreen);
     }
 }

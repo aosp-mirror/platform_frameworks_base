@@ -1672,6 +1672,10 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
                 ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+        View ambientIndicationContainer = mStatusBar.getAmbientIndicationContainer();
+        if (ambientIndicationContainer != null) {
+            ambientIndicationContainer.setAlpha(alpha);
+        }
     }
 
     private float getNotificationsTopY() {
@@ -2418,17 +2422,26 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void setAlpha(float alpha) {
         super.setAlpha(alpha);
-        updateFullyVisibleState();
+        updateFullyVisibleState(false /* forceNotFullyVisible */);
+    }
+
+    /**
+     * Must be called before starting a ViewPropertyAnimator alpha animation because those
+     * do NOT call setAlpha and therefore don't properly update the fullyVisibleState.
+     */
+    public void notifyStartFading() {
+        updateFullyVisibleState(true /* forceNotFullyVisible */);
     }
 
     @Override
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
-        updateFullyVisibleState();
+        updateFullyVisibleState(false /* forceNotFullyVisible */);
     }
 
-    private void updateFullyVisibleState() {
-        mNotificationStackScroller.setParentNotFullyVisible(getAlpha() != 1.0f
+    private void updateFullyVisibleState(boolean forceNotFullyVisible) {
+        mNotificationStackScroller.setParentNotFullyVisible(forceNotFullyVisible
+                || getAlpha() != 1.0f
                 || getVisibility() != VISIBLE);
     }
 
@@ -2543,6 +2556,9 @@ public class NotificationPanelView extends PanelView implements
 
     public void setNoVisibleNotifications(boolean noNotifications) {
         mNoVisibleNotifications = noNotifications;
+        if (mQs != null) {
+            mQs.setHasNotifications(!noNotifications);
+        }
     }
 
     public void setPulsing(boolean pulsing) {

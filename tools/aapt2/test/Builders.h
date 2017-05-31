@@ -117,12 +117,12 @@ class ResourceTableBuilder {
   }
 
   ResourceTableBuilder& SetSymbolState(const android::StringPiece& name, const ResourceId& id,
-                                       SymbolState state) {
+                                       SymbolState state, bool allow_new = false) {
     ResourceName res_name = ParseNameOrDie(name);
     Symbol symbol;
     symbol.state = state;
-    CHECK(table_->SetSymbolStateAllowMangled(res_name, id, symbol,
-                                             &diagnostics_));
+    symbol.allow_new = allow_new;
+    CHECK(table_->SetSymbolStateAllowMangled(res_name, id, symbol, &diagnostics_));
     return *this;
   }
 

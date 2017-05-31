@@ -16,25 +16,43 @@
 
 package android.net.wifi;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Unit tests for {@link android.net.wifi.WifiSsid}.
  */
 public class WifiSsidTest {
 
-    private static final byte[] TEST_SSID =
-            new byte[] {'G', 'o', 'o', 'g', 'l', 'e', 'G', 'u', 'e', 's', 't'};
+    private static final String TEST_SSID = "Test SSID";
+    private static final byte[] TEST_SSID_BYTES = TEST_SSID.getBytes(StandardCharsets.US_ASCII);
+
     /**
      * Check that createFromByteArray() works.
      */
     @Test
     public void testCreateFromByteArray() {
-        WifiSsid wifiSsid = WifiSsid.createFromByteArray(TEST_SSID);
+        WifiSsid wifiSsid = WifiSsid.createFromByteArray(TEST_SSID_BYTES);
         assertTrue(wifiSsid != null);
-        assertEquals(new String(TEST_SSID), wifiSsid.toString());
+        assertEquals(TEST_SSID, wifiSsid.toString());
+    }
+
+    /**
+     * Verify that SSID created from byte array and string with the same content are equal.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testEquals() throws Exception {
+        WifiSsid fromBytes = WifiSsid.createFromByteArray(TEST_SSID_BYTES);
+        WifiSsid fromString = WifiSsid.createFromAsciiEncoded(TEST_SSID);
+        assertTrue(fromBytes != null);
+        assertTrue(fromString != null);
+        assertEquals(fromBytes, fromString);
     }
 }

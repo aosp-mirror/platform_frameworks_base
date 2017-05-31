@@ -28,12 +28,11 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .AddFileReference("com.app.a:layout/main", ResourceId(0x7f020000),
-                            "res/layout/main.xml")
-          .AddReference("com.app.a:layout/other", ResourceId(0x7f020001),
-                        "com.app.a:layout/main")
+          .AddFileReference("com.app.a:layout/main", ResourceId(0x7f020000), "res/layout/main.xml")
+          .AddReference("com.app.a:layout/other", ResourceId(0x7f020001), "com.app.a:layout/main")
           .AddString("com.app.a:string/text", {}, "hi")
           .AddValue("com.app.a:id/foo", {}, util::make_unique<Id>())
+          .SetSymbolState("com.app.a:bool/foo", {}, SymbolState::kUndefined, true /*allow_new*/)
           .Build();
 
   Symbol public_symbol;
@@ -94,21 +93,23 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
   EXPECT_EQ(SymbolState::kPublic, result.value().type->symbol_status.state);
   EXPECT_EQ(SymbolState::kPublic, result.value().entry->symbol_status.state);
 
+  result = new_table->FindResource(test::ParseNameOrDie("com.app.a:bool/foo"));
+  ASSERT_TRUE(result);
+  EXPECT_EQ(SymbolState::kUndefined, result.value().entry->symbol_status.state);
+  EXPECT_TRUE(result.value().entry->symbol_status.allow_new);
+
   // Find the product-dependent values
   BinaryPrimitive* prim = test::GetValueForConfigAndProduct<BinaryPrimitive>(
-      new_table.get(), "com.app.a:integer/one", test::ParseConfigOrDie("land"),
-      "");
+      new_table.get(), "com.app.a:integer/one", test::ParseConfigOrDie("land"), "");
   ASSERT_NE(nullptr, prim);
   EXPECT_EQ(123u, prim->value.data);
 
   prim = test::GetValueForConfigAndProduct<BinaryPrimitive>(
-      new_table.get(), "com.app.a:integer/one", test::ParseConfigOrDie("land"),
-      "tablet");
+      new_table.get(), "com.app.a:integer/one", test::ParseConfigOrDie("land"), "tablet");
   ASSERT_NE(nullptr, prim);
   EXPECT_EQ(321u, prim->value.data);
 
-  Reference* actual_ref =
-      test::GetValue<Reference>(new_table.get(), "com.app.a:layout/abc");
+  Reference* actual_ref = test::GetValue<Reference>(new_table.get(), "com.app.a:layout/abc");
   ASSERT_NE(nullptr, actual_ref);
   AAPT_ASSERT_TRUE(actual_ref->name);
   AAPT_ASSERT_TRUE(actual_ref->id);

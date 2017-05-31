@@ -36,6 +36,7 @@ import android.graphics.FontFamily;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableContainer;
 import android.icu.text.PluralRules;
 import android.os.Build;
 import android.os.LocaleList;
@@ -590,12 +591,19 @@ public class ResourcesImpl {
             }
 
             Drawable dr;
+            boolean needsNewDrawableAfterCache = false;
             if (cs != null) {
                 dr = cs.newDrawable(wrapper);
             } else if (isColorDrawable) {
                 dr = new ColorDrawable(value.data);
             } else {
                 dr = loadDrawableForCookie(wrapper, value, id, density, null);
+            }
+            // DrawableContainer' constant state has drawables instances. In order to leave the
+            // constant state intact in the cache, we need to create a new DrawableContainer after
+            // added to cache.
+            if (dr instanceof DrawableContainer)  {
+                needsNewDrawableAfterCache = true;
             }
 
             // Determine if the drawable has unresolved theme attributes. If it
@@ -615,6 +623,12 @@ public class ResourcesImpl {
                 dr.setChangingConfigurations(value.changingConfigurations);
                 if (useCache) {
                     cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
+                    if (needsNewDrawableAfterCache) {
+                        Drawable.ConstantState state = dr.getConstantState();
+                        if (state != null) {
+                            dr = state.newDrawable(wrapper);
+                        }
+                    }
                 }
             }
 

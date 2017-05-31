@@ -307,6 +307,8 @@
 
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
 
+    <style name="Theme.SystemUI.Dialog.GlobalActions" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
+
     <style name="QSBorderlessButton">
         <item name="android:padding">12dp</item>
         <item name="android:background">@drawable/qs_btn_borderless_rect</item>

@@ -480,7 +480,8 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
 
   {
     std::string content;
-    if (!android::base::ReadFileToString(path_data.source.path, &content)) {
+    if (!android::base::ReadFileToString(path_data.source.path, &content,
+                                         true /*follow_symlinks*/)) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
                                        << "failed to open file: "
                                        << android::base::SystemErrorCodeToString(errno));

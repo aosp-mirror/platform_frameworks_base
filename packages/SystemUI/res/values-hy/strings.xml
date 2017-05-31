@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Բջջային ինտերնետ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Բջջային տվյալները միացված են"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Բջջային տվյալներն անջատված են"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-ը կապվում է:"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth մոդեմ"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ինքնաթիռի ռեժիմ"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"Միացնել VPN-ը։"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM քարտ չկա:"</string>
@@ -311,7 +311,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Պատրաստ է"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Կապակցված է"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Միանում է..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Միացում"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Մոդեմի ռեժիմ"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Թեժ կետ"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Ծանուցումներ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Լապտեր"</string>
@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Ձեր աշխատանքային պրոֆիլի կառավարիչն է <xliff:g id="ORGANIZATION">%1$s</xliff:g> կազմակերպությունը: Այն կապակցված է <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածին, որը կարող է վերահսկել աշխատանքային ցանցում կատարած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԼրացուցիչ տեղեկություններ ստանալու համար դիմեք ձեր ադմինիստրատորին։"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Ձեր աշխատանքային պրոֆիլի կառավարիչն է <xliff:g id="ORGANIZATION">%1$s</xliff:g> կազմակերպությունը: Այն կապակցված է <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> հավելվածին, որը կարող է վերահսկել աշխատանքային ցանցում կատարած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԴուք կապակցված եք նաև <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> հավելվածին, որը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները:"</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Ապակողպվել է <xliff:g id="USER_NAME">%1$s</xliff:g> օգտատիրոջ համար"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Սարքը կմնա արգելափակված՝ մինչև ձեռքով չբացեք"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ավելի արագ ստացեք ծանուցումները"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Տեսեք դրանք մինչև ապակողպելը"</string>

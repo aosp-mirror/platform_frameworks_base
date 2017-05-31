@@ -20,10 +20,12 @@ import android.app.WallpaperColors;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.ColorUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Pair;
+import android.util.Range;
 
 import com.google.android.colorextraction.ColorExtractor;
 
@@ -41,9 +43,6 @@ public class Tonal implements ExtractionType {
     // When extracting the main color, only consider colors
     // present in at least MIN_COLOR_OCCURRENCE of the image
     private static final float MIN_COLOR_OCCURRENCE = 0.1f;
-    // When extracting the main color, ignore colors darker
-    // than this.
-    private static final float PREFERRED_LUMINOSITY = 0.2f;
 
     // Secondary color will be darker than the main color when
     // main color is brighter than this variable.
@@ -90,8 +89,9 @@ public class Tonal implements ExtractionType {
             int colorValue = weightedColor.first.toArgb();
             ColorUtils.RGBToHSL(Color.red(colorValue), Color.green(colorValue),
                     Color.blue(colorValue), hsl);
-            // Stop at the most common color that's bright enough
-            if (hsl[2] > PREFERRED_LUMINOSITY) {
+
+            // Stop when we find a color that meets our criteria
+            if (!isBlacklisted(hsl)) {
                 bestColor = weightedColor;
                 break;
             }
@@ -99,12 +99,15 @@ public class Tonal implements ExtractionType {
 
         // Fallback to first color
         if (bestColor == null) {
-            bestColor = wallpaperColors.getColors().get(0);
+            return false;
         }
 
         int colorValue = bestColor.first.toArgb();
         ColorUtils.RGBToHSL(Color.red(colorValue), Color.green(colorValue), Color.blue(colorValue),
                 hsl);
+
+        // The Android HSL definition requires the hue to go from 0 to 360 but
+        // the Material Tonal Palette defines hues from 0 to 1
         hsl[0] /= 360.0f; // normalize
 
         // Find the palette that contains the closest color
@@ -155,6 +158,20 @@ public class Tonal implements ExtractionType {
         gradientColors.setSecondaryColor(ColorUtils.HSLToColor(hsl));
 
         return true;
+    }
+
+    /**
+     * Checks if a given color exists in the blacklist
+     * @param hsl float array with 3 components (H 0..360, S 0..1 and L 0..1)
+     * @return true if color should be avoided
+     */
+    private boolean isBlacklisted(float[] hsl) {
+        for (ColorRange badRange: BLACKLISTED_COLORS) {
+            if (badRange.containsColor(hsl[0], hsl[1], hsl[2])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void populationSort(@NonNull WallpaperColors wallpaperColors) {
@@ -548,4 +565,195 @@ public class Tonal implements ExtractionType {
                             0.9411764705882353f}
             )
     };
+
+    @SuppressWarnings("WeakerAccess")
+    @VisibleForTesting
+    static final ColorRange[] BLACKLISTED_COLORS = new ColorRange[] {
+
+            // Red
+            new ColorRange(
+                    new Range<>(0f, 20f) /* H */,
+                    new Range<>(0.7f, 1f) /* S */,
+                    new Range<>(0.21f, 0.79f)) /* L */,
+            new ColorRange(
+                    new Range<>(0f, 20f),
+                    new Range<>(0.3f, 0.7f),
+                    new Range<>(0.355f, 0.653f)),
+
+            // Red Orange
+            new ColorRange(
+                    new Range<>(20f, 40f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.28f, 0.643f)),
+            new ColorRange(
+                    new Range<>(20f, 40f),
+                    new Range<>(0.3f, 0.7f),
+                    new Range<>(0.414f, 0.561f)),
+            new ColorRange(
+                    new Range<>(20f, 40f),
+                    new Range<>(0f, 3f),
+                    new Range<>(0.343f, 0.584f)),
+
+            // Orange
+            new ColorRange(
+                    new Range<>(40f, 60f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.173f, 0.349f)),
+            new ColorRange(
+                    new Range<>(40f, 60f),
+                    new Range<>(0.3f, 0.7f),
+                    new Range<>(0.233f, 0.427f)),
+            new ColorRange(
+                    new Range<>(40f, 60f),
+                    new Range<>(0f, 0.3f),
+                    new Range<>(0.231f, 0.484f)),
+
+            // Yellow 60
+            new ColorRange(
+                    new Range<>(60f, 80f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.488f, 0.737f)),
+            new ColorRange(
+                    new Range<>(60f, 80f),
+                    new Range<>(0.3f, 0.7f),
+                    new Range<>(0.673f, 0.837f)),
+
+            // Yellow Green 80
+            new ColorRange(
+                    new Range<>(80f, 100f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.469f, 0.61f)),
+
+            // Yellow green 100
+            new ColorRange(
+                    new Range<>(100f, 120f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.388f, 0.612f)),
+            new ColorRange(
+                    new Range<>(100f, 120f),
+                    new Range<>(0.3f, 0.7f),
+                    new Range<>(0.424f, 0.541f)),
+
+            // Green
+            new ColorRange(
+                    new Range<>(120f, 140f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.375f, 0.52f)),
+            new ColorRange(
+                    new Range<>(120f, 140f),
+                    new Range<>(0.3f, 0.7f),
+                    new Range<>(0.435f, 0.524f)),
+
+            // Green Blue 140
+            new ColorRange(
+                    new Range<>(140f, 160f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.496f, 0.641f)),
+
+            // Seafoam
+            new ColorRange(
+                    new Range<>(160f, 180f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.496f, 0.567f)),
+
+            // Cyan
+            new ColorRange(
+                    new Range<>(180f, 200f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.52f, 0.729f)),
+
+            // Blue
+            new ColorRange(
+                    new Range<>(220f, 240f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.396f, 0.571f)),
+            new ColorRange(
+                    new Range<>(220f, 240f),
+                    new Range<>(0.3f, 0.7f),
+                    new Range<>(0.425f, 0.551f)),
+
+            // Blue Purple 240
+            new ColorRange(
+                    new Range<>(240f, 260f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.418f, 0.639f)),
+            new ColorRange(
+                    new Range<>(220f, 240f),
+                    new Range<>(0.3f, 0.7f),
+                    new Range<>(0.441f, 0.576f)),
+
+            // Blue Purple 260
+            new ColorRange(
+                    new Range<>(260f, 280f),
+                    new Range<>(0.3f, 1f), // Bigger range
+                    new Range<>(0.461f, 0.553f)),
+
+            // Fuchsia
+            new ColorRange(
+                    new Range<>(300f, 320f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.484f, 0.588f)),
+            new ColorRange(
+                    new Range<>(300f, 320f),
+                    new Range<>(0.3f, 0.7f),
+                    new Range<>(0.48f, 0.592f)),
+
+            // Pink
+            new ColorRange(
+                    new Range<>(320f, 340f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.466f, 0.629f)),
+
+            // Soft red
+            new ColorRange(
+                    new Range<>(340f, 360f),
+                    new Range<>(0.7f, 1f),
+                    new Range<>(0.437f, 0.596f))
+    };
+
+    /**
+     * Representation of an HSL color range.
+     * <ul>
+     * <li>hsl[0] is Hue [0 .. 360)</li>
+     * <li>hsl[1] is Saturation [0...1]</li>
+     * <li>hsl[2] is Lightness [0...1]</li>
+     * </ul>
+     */
+    @VisibleForTesting
+    static class ColorRange {
+        private Range<Float> mHue;
+        private Range<Float> mSaturation;
+        private Range<Float> mLightness;
+
+        ColorRange(Range<Float> hue, Range<Float> saturation, Range<Float> lightness) {
+            mHue = hue;
+            mSaturation = saturation;
+            mLightness = lightness;
+        }
+
+        boolean containsColor(float h, float s, float l) {
+            if (!mHue.contains(h)) {
+                return false;
+            } else if (!mSaturation.contains(s)) {
+                return false;
+            } else if (!mLightness.contains(l)) {
+                return false;
+            }
+            return true;
+        }
+
+        @VisibleForTesting
+        float[] getCenter() {
+            return new float[] {
+                    mHue.getLower() + (mHue.getUpper() - mHue.getLower()) / 2f,
+                    mSaturation.getLower() + (mSaturation.getUpper() - mSaturation.getLower()) / 2f,
+                    mLightness.getLower() + (mLightness.getUpper() - mLightness.getLower()) / 2f
+            };
+        }
+
+        @Override
+        public String toString() {
+            return String.format("H: %s, S: %s, L %s", mHue, mSaturation, mLightness);
+        }
+    }
 }

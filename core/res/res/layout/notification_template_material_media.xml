@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginStart="10dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="@dimen/media_notification_actions_padding_bottom"
             android:layoutDirection="ltr"
             android:orientation="horizontal"
             >

@@ -60,7 +60,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_ST
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TASK_SNAPSHOT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
@@ -1128,16 +1127,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + ", mOrientationSensorEnabled=" + mOrientationSensorEnabled
                 + ", mKeyguardDrawComplete=" + mKeyguardDrawComplete
                 + ", mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
+        final boolean keyguardGoingAway = mWindowManagerInternal.isKeyguardGoingAway();
+
         boolean disable = true;
         // Note: We postpone the rotating of the screen until the keyguard as well as the
-        // window manager have reported a draw complete.
-        if (mScreenOnEarly && mAwake &&
-                mKeyguardDrawComplete && mWindowManagerDrawComplete) {
+        // window manager have reported a draw complete or the keyguard is going away in dismiss
+        // mode.
+        if (mScreenOnEarly && mAwake && ((mKeyguardDrawComplete && mWindowManagerDrawComplete)
+                || keyguardGoingAway)) {
             if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
                 if (!mOrientationSensorEnabled) {
-                    mOrientationListener.enable();
+                    // Don't clear the current sensor orientation if the keyguard is going away in
+                    // dismiss mode. This allows window manager to use the last sensor reading to
+                    // determine the orientation vs. falling back to the last known orientation if
+                    // the sensor reading was cleared which can cause it to relaunch the app that
+                    // will show in the wrong orientation first before correcting leading to app
+                    // launch delays.
+                    mOrientationListener.enable(!keyguardGoingAway /* clearCurrentRotation */);
                     if(localLOGV) Slog.v(TAG, "Enabling listeners");
                     mOrientationSensorEnabled = true;
                 }
@@ -5027,17 +5035,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // A window that has requested to fill the entire screen just
                 // gets everything, period.
                 if (attrs.type == TYPE_STATUS_BAR_PANEL
-                        || attrs.type == TYPE_STATUS_BAR_SUB_PANEL
-                        || attrs.type == TYPE_VOLUME_OVERLAY) {
+                        || attrs.type == TYPE_STATUS_BAR_SUB_PANEL) {
                     pf.left = df.left = of.left = cf.left = hasNavBar
                             ? mDockLeft : mUnrestrictedScreenLeft;
                     pf.top = df.top = of.top = cf.top = mUnrestrictedScreenTop;
                     pf.right = df.right = of.right = cf.right = hasNavBar
-                                        ? mRestrictedScreenLeft+mRestrictedScreenWidth
-                                        : mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
+                            ? mRestrictedScreenLeft + mRestrictedScreenWidth
+                            : mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom = hasNavBar
-                                          ? mRestrictedScreenTop+mRestrictedScreenHeight
-                                          : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
+                            ? mRestrictedScreenTop + mRestrictedScreenHeight
+                            : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
+                    if (DEBUG_LAYOUT) Slog.v(TAG, String.format(
+                            "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
+                            pf.left, pf.top, pf.right, pf.bottom));
+                } else if (attrs.type == TYPE_VOLUME_OVERLAY) {
+                    // Volume overlay covers everything, including the status and navbar
+                    pf.left = df.left = of.left = cf.left = mUnrestrictedScreenLeft;
+                    pf.top = df.top = of.top = cf.top = mUnrestrictedScreenTop;
+                    pf.right = df.right = of.right = cf.right =
+                            mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
+                    pf.bottom = df.bottom = of.bottom = cf.bottom =
+                            mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
                     if (DEBUG_LAYOUT) Slog.v(TAG, String.format(
                                     "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
                                     pf.left, pf.top, pf.right, pf.bottom));
@@ -7691,7 +7709,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             default:
                 return null;
         }
-        if (pattern.length == 1) {
+        if (pattern.length == 0) {
+            // No vibration
+            return null;
+        } else if (pattern.length == 1) {
             // One-shot vibration
             return VibrationEffect.createOneShot(pattern[0], VibrationEffect.DEFAULT_AMPLITUDE);
         } else {

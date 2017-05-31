@@ -244,7 +244,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     static final int REMOVE_TASK_MODE_MOVING = 1;
     // Similar to {@link #REMOVE_TASK_MODE_MOVING} and the task will be added to the top of its new
     // stack and the new stack will be on top of all stacks.
-    private static final int REMOVE_TASK_MODE_MOVING_TO_TOP = 2;
+    static final int REMOVE_TASK_MODE_MOVING_TO_TOP = 2;
 
     // The height/width divide used when fitting a task within a bounds with method
     // {@link #fitWithinBounds}.
@@ -4042,6 +4042,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStackSupervisor.moveHomeStackTaskToTop(reason);
             }
 
+            // The following block can be executed multiple times if there is more than one overlay.
+            // {@link ActivityStackSupervisor#removeTaskByIdLocked} handles this by reverse lookup
+            // of the task by id and exiting early if not found.
             if (onlyHasTaskOverlays) {
                 // When destroying a task, tell the supervisor to remove it so that any activity it
                 // has can be cleaned up correctly. This is currently the only place where we remove
@@ -4053,7 +4056,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
                         !REMOVE_FROM_RECENTS, PAUSE_IMMEDIATELY);
             }
-            removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
+
+            // We must keep the task around until all activities are destroyed. The following
+            // statement will only execute once since overlays are also considered activities.
+            if (lastActivity) {
+                removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
+            }
         }
         cleanUpActivityServicesLocked(r);
         r.removeUriPermissionsLocked();

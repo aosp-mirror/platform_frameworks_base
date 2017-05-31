@@ -140,6 +140,12 @@ public class ExtensionControllerImpl implements ExtensionController {
             }
         }
 
+        @Override
+        public T reload() {
+            notifyChanged();
+            return get();
+        }
+
         private void notifyChanged() {
             mItem = null;
             for (int i = 0; i < mProducers.size(); i++) {

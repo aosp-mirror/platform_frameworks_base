@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 
 import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
@@ -36,7 +35,8 @@ import java.util.List;
  */
 public class PinnedStackWindowController extends StackWindowController {
 
-    private Rect mTmpBoundsRect = new Rect();
+    private Rect mTmpFromBounds = new Rect();
+    private Rect mTmpToBounds = new Rect();
 
     public PinnedStackWindowController(int stackId, PinnedStackWindowListener listener,
             int displayId, boolean onTop, Rect outBounds) {
@@ -44,16 +44,16 @@ public class PinnedStackWindowController extends StackWindowController {
     }
 
     /**
-     * @param useExistingStackBounds Apply {@param aspectRatio} to the existing target stack bounds
-     *                               if possible
+     * @return the {@param currentStackBounds} transformed to the give {@param aspectRatio}.  If
+     *         {@param currentStackBounds} is null, then the {@param aspectRatio} is applied to the
+     *         default bounds.
      */
-    public Rect getPictureInPictureBounds(float aspectRatio, boolean useExistingStackBounds) {
+    public Rect getPictureInPictureBounds(float aspectRatio, Rect stackBounds) {
         synchronized (mWindowMap) {
             if (!mService.mSupportsPictureInPicture || mContainer == null) {
                 return null;
             }
 
-            final Rect stackBounds;
             final DisplayContent displayContent = mContainer.getDisplayContent();
             if (displayContent == null) {
                 return null;
@@ -61,18 +61,14 @@ public class PinnedStackWindowController extends StackWindowController {
 
             final PinnedStackController pinnedStackController =
                     displayContent.getPinnedStackController();
-            if (useExistingStackBounds) {
-                // If the stack exists, then use its final bounds to calculate the new aspect ratio
-                // bounds
-                stackBounds = new Rect();
-                mContainer.getAnimationOrCurrentBounds(stackBounds);
-            } else {
-                // Otherwise, just calculate the aspect ratio bounds from the default bounds
+            if (stackBounds == null) {
+                // Calculate the aspect ratio bounds from the default bounds
                 stackBounds = pinnedStackController.getDefaultBounds();
             }
 
             if (pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)) {
-                return pinnedStackController.transformBoundsToAspectRatio(stackBounds, aspectRatio);
+                return pinnedStackController.transformBoundsToAspectRatio(stackBounds, aspectRatio,
+                        true /* useCurrentMinEdgeSize */);
             } else {
                 return stackBounds;
             }
@@ -83,7 +79,7 @@ public class PinnedStackWindowController extends StackWindowController {
      * Animates the pinned stack.
      */
     public void animateResizePinnedStack(Rect toBounds, Rect sourceHintBounds,
-            int animationDuration, boolean schedulePipModeChangedOnAnimationEnd) {
+            int animationDuration, boolean fromFullscreen) {
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 throw new IllegalArgumentException("Pinned stack container not found :(");
@@ -98,22 +94,22 @@ public class PinnedStackWindowController extends StackWindowController {
                 NO_PIP_MODE_CHANGED_CALLBACKS;
             final boolean toFullscreen = toBounds == null;
             if (toFullscreen) {
-                if (schedulePipModeChangedOnAnimationEnd) {
+                if (fromFullscreen) {
                     throw new IllegalArgumentException("Should not defer scheduling PiP mode"
                             + " change on animation to fullscreen.");
                 }
                 schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_START;
 
-                mService.getStackBounds(FULLSCREEN_WORKSPACE_STACK_ID, mTmpBoundsRect);
-                if (!mTmpBoundsRect.isEmpty()) {
+                mService.getStackBounds(FULLSCREEN_WORKSPACE_STACK_ID, mTmpToBounds);
+                if (!mTmpToBounds.isEmpty()) {
                     // If there is a fullscreen bounds, use that
-                    toBounds = new Rect(mTmpBoundsRect);
+                    toBounds = new Rect(mTmpToBounds);
                 } else {
                     // Otherwise, use the display bounds
                     toBounds = new Rect();
                     mContainer.getDisplayContent().getLogicalDisplayRect(toBounds);
                 }
-            } else if (schedulePipModeChangedOnAnimationEnd) {
+            } else if (fromFullscreen) {
                 schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_END;
             }
 
@@ -122,13 +118,13 @@ public class PinnedStackWindowController extends StackWindowController {
             final Rect finalToBounds = toBounds;
             final @SchedulePipModeChangedState int finalSchedulePipModeChangedState =
                 schedulePipModeChangedState;
-            UiThread.getHandler().post(() -> {
+            mService.mBoundsAnimationController.getHandler().post(() -> {
                 if (mContainer == null) {
                     return;
                 }
                 mService.mBoundsAnimationController.animateBounds(mContainer, fromBounds,
                         finalToBounds, animationDuration, finalSchedulePipModeChangedState,
-                        toFullscreen);
+                        fromFullscreen, toFullscreen);
             });
         }
     }
@@ -142,17 +138,16 @@ public class PinnedStackWindowController extends StackWindowController {
                 return;
             }
 
-            final Rect toBounds = getPictureInPictureBounds(aspectRatio,
-                    true /* useExistingStackBounds */);
-            final Rect targetBounds = new Rect();
-            mContainer.getAnimationOrCurrentBounds(targetBounds);
             final PinnedStackController pinnedStackController =
                     mContainer.getDisplayContent().getPinnedStackController();
 
             if (Float.compare(aspectRatio, pinnedStackController.getAspectRatio()) != 0) {
-                if (!toBounds.equals(targetBounds)) {
-                    animateResizePinnedStack(toBounds, null /* sourceHintBounds */,
-                            -1 /* duration */, false /* schedulePipModeChangedOnAnimationEnd */);
+                mContainer.getAnimationOrCurrentBounds(mTmpFromBounds);
+                mTmpToBounds.set(mTmpFromBounds);
+                getPictureInPictureBounds(aspectRatio, mTmpToBounds);
+                if (!mTmpToBounds.equals(mTmpFromBounds)) {
+                    animateResizePinnedStack(mTmpToBounds, null /* sourceHintBounds */,
+                            -1 /* duration */, false /* fromFullscreen */);
                 }
                 pinnedStackController.setAspectRatio(
                         pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)

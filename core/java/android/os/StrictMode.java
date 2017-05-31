@@ -342,6 +342,18 @@ public final class StrictMode {
     private static volatile int sVmPolicyMask = 0;
     private static volatile VmPolicy sVmPolicy = VmPolicy.LAX;
 
+    /** {@hide} */
+    public interface ViolationListener {
+        public void onViolation(String message);
+    }
+
+    private static volatile ViolationListener sListener;
+
+    /** {@hide} */
+    public static void setViolationListener(ViolationListener listener) {
+        sListener = listener;
+    }
+
     /**
      * The number of threads trying to do an async dropbox write.
      * Just to limit ourselves out of paranoia.
@@ -1581,6 +1593,9 @@ public final class StrictMode {
             long timeSinceLastViolationMillis = lastViolationTime == 0 ?
                     Long.MAX_VALUE : (now - lastViolationTime);
 
+            if ((info.policy & PENALTY_LOG) != 0 && sListener != null) {
+                sListener.onViolation(info.crashInfo.stackTrace);
+            }
             if ((info.policy & PENALTY_LOG) != 0 &&
                 timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
                 if (info.durationMillis != -1) {
@@ -2024,6 +2039,9 @@ public final class StrictMode {
             }
         }
 
+        if (penaltyLog && sListener != null) {
+            sListener.onViolation(originStack.toString());
+        }
         if (penaltyLog && timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
             Log.e(TAG, message, originStack);
         }

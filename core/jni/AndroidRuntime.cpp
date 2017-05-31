@@ -16,7 +16,7 @@
 
 #define ATRACE_TAG ATRACE_TAG_DALVIK
 #define LOG_TAG "AndroidRuntime"
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 1
 
 #include <android_runtime/AndroidRuntime.h>
 #include <binder/IBinder.h>
@@ -265,8 +265,6 @@ AndroidRuntime::AndroidRuntime(char* argBlockStart, const size_t argBlockLength)
         mArgBlockLength(argBlockLength)
 {
     SkGraphics::Init();
-    // There is also a global font cache, but its budget is specified by
-    // SK_DEFAULT_FONT_CACHE_COUNT_LIMIT and SK_DEFAULT_FONT_CACHE_LIMIT.
 
     // Pre-allocate enough space to hold a fair number of options.
     mOptions.setCapacity(20);
@@ -277,7 +275,6 @@ AndroidRuntime::AndroidRuntime(char* argBlockStart, const size_t argBlockLength)
 
 AndroidRuntime::~AndroidRuntime()
 {
-    SkGraphics::Term();
 }
 
 /*
@@ -662,7 +659,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
             checkJni = true;
         }
     }
-    ALOGD("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
+    ALOGV("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
     if (checkJni) {
         /* extended JNI checking */
         addOption("-Xcheck:jni");

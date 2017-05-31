@@ -376,10 +376,7 @@ public class PipTouchHandler {
                 if (!mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
-                    AccessibilityNodeInfo info =
-                            PipAccessibilityInteractionConnection.obtainRootAccessibilityNodeInfo();
-                    event.setSource(info);
-                    info.recycle();
+                    event.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID);
                     mAccessibilityManager.sendAccessibilityEvent(event);
                     mSendingHoverAccessibilityEvents = true;
                 }
@@ -389,10 +386,7 @@ public class PipTouchHandler {
                 if (mSendingHoverAccessibilityEvents) {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
-                    AccessibilityNodeInfo info =
-                            PipAccessibilityInteractionConnection.obtainRootAccessibilityNodeInfo();
-                    event.setSource(info);
-                    info.recycle();
+                    event.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID);
                     mAccessibilityManager.sendAccessibilityEvent(event);
                     mSendingHoverAccessibilityEvents = false;
                 }
@@ -716,9 +710,15 @@ public class PipTouchHandler {
      * Updates the current movement bounds based on whether the menu is currently visible.
      */
     private void updateMovementBounds(int menuState) {
-        mMovementBounds = menuState == MENU_STATE_FULL
+        boolean isMenuExpanded = menuState == MENU_STATE_FULL;
+        mMovementBounds = isMenuExpanded
                 ? mExpandedMovementBounds
                 : mNormalMovementBounds;
+        try {
+            mPinnedStackController.setMinEdgeSize(isMenuExpanded ? mExpandedShortestEdgeSize : 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not set minimized state", e);
+        }
     }
 
     /**

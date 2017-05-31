@@ -39,7 +39,9 @@ import android.test.mock.MockContentResolver;
 import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -64,6 +66,12 @@ public class PreloadAppsInstallerTest {
     private ArrayList<String> mPreloadedAppPaths = new ArrayList<>();
 
     private PreloadAppsInstaller mInstaller;
+
+    @BeforeClass
+    @AfterClass
+    public static void clearSettingsProvider() {
+        FakeSettingsProvider.clearSettingsProvider();
+    }
 
     @Before
     public void setUp() throws Exception {

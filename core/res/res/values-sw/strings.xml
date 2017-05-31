@@ -81,7 +81,7 @@
     <string name="CnirMmi" msgid="3062102121430548731">"Kupiga nambari kumezuiwa"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Upigaji simu kwa njia tatu"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Ukataaji wa simu zinazokera zisizohitajika"</string>
-    <string name="CndMmi" msgid="3116446237081575808">"Uwasilishaji nambari ya kupiga simu"</string>
+    <string name="CndMmi" msgid="3116446237081575808">"Kuonyeshwa kwa nambari inayopiga"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Usisumbue"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Chaguo-msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Imezuiliwa"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Chaguo-msingi za kitambulisho cha mpigaji simu huwa kuzuiwa. Simu ifuatayo: Haijazuiliwa"</string>
@@ -1204,7 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Gonga ili uchague lugha na muundo"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_name" msgid="7684862527629252655">"Shughuli za programu"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> inachomoza juu ya programu zingine"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> inachomoza juu ya programu zingine."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ikiwa hutaki <xliff:g id="NAME">%s</xliff:g> kutumia kipengele hiki, gonga ili ufungue mipangilio na ukizime."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ZIMA"</string>

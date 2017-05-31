@@ -342,7 +342,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 null /* ISAs */, false /* checkProfiles */,
                 getCompilerFilterForReason(compilationReason),
                 null /* CompilerStats.PackageStats */,
-                mPackageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName));
+                mPackageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName),
+                true /* bootComplete */);
 
         return commands;
     }

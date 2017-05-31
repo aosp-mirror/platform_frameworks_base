@@ -113,7 +113,8 @@ public class PackageDexOptimizer {
      */
     int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
             String[] instructionSets, boolean checkProfiles, String targetCompilationFilter,
-            CompilerStats.PackageStats packageStats, boolean isUsedByOtherApps) {
+            CompilerStats.PackageStats packageStats, boolean isUsedByOtherApps,
+            boolean bootComplete) {
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
@@ -121,7 +122,7 @@ public class PackageDexOptimizer {
             final long acquireTime = acquireWakeLockLI(pkg.applicationInfo.uid);
             try {
                 return performDexOptLI(pkg, sharedLibraries, instructionSets, checkProfiles,
-                        targetCompilationFilter, packageStats, isUsedByOtherApps);
+                        targetCompilationFilter, packageStats, isUsedByOtherApps, bootComplete);
             } finally {
                 releaseWakeLockLI(acquireTime);
             }
@@ -136,7 +137,7 @@ public class PackageDexOptimizer {
     private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
             String[] targetInstructionSets, boolean checkForProfileUpdates,
             String targetCompilerFilter, CompilerStats.PackageStats packageStats,
-            boolean isUsedByOtherApps) {
+            boolean isUsedByOtherApps, boolean bootComplete) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
@@ -150,7 +151,7 @@ public class PackageDexOptimizer {
 
         final String sharedLibrariesPath = getSharedLibrariesPath(sharedLibraries);
         // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
-        final int dexoptFlags = getDexFlags(pkg, compilerFilter);
+        final int dexoptFlags = getDexFlags(pkg, compilerFilter, bootComplete);
         // Get the dependencies of each split in the package. For each code path in the package,
         // this array contains the relative paths of each split it depends on, separated by colons.
         String[] splitDependencies = getSplitDependencies(pkg);
@@ -296,7 +297,9 @@ public class PackageDexOptimizer {
             String compilerFilter, boolean isUsedByOtherApps) {
         compilerFilter = getRealCompilerFilter(info, compilerFilter, isUsedByOtherApps);
         // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
-        int dexoptFlags = getDexFlags(info, compilerFilter) | DEXOPT_SECONDARY_DEX;
+        // Secondary dex files are currently not compiled at boot.
+        int dexoptFlags = getDexFlags(info, compilerFilter, /* bootComplete */ true)
+                | DEXOPT_SECONDARY_DEX;
         // Check the app storage and add the appropriate flags.
         if (info.deviceProtectedDataDir != null &&
                 FileUtils.contains(info.deviceProtectedDataDir, path)) {
@@ -397,11 +400,12 @@ public class PackageDexOptimizer {
      * Computes the dex flags that needs to be pass to installd for the given package and compiler
      * filter.
      */
-    private int getDexFlags(PackageParser.Package pkg, String compilerFilter) {
-        return getDexFlags(pkg.applicationInfo, compilerFilter);
+    private int getDexFlags(PackageParser.Package pkg, String compilerFilter,
+            boolean bootComplete) {
+        return getDexFlags(pkg.applicationInfo, compilerFilter, bootComplete);
     }
 
-    private int getDexFlags(ApplicationInfo info, String compilerFilter) {
+    private int getDexFlags(ApplicationInfo info, String compilerFilter, boolean bootComplete) {
         int flags = info.flags;
         boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         // Profile guide compiled oat files should not be public.
@@ -412,7 +416,7 @@ public class PackageDexOptimizer {
                 (isPublic ? DEXOPT_PUBLIC : 0)
                 | (debuggable ? DEXOPT_DEBUGGABLE : 0)
                 | profileFlag
-                | DEXOPT_BOOTCOMPLETE;
+                | (bootComplete ? DEXOPT_BOOTCOMPLETE : 0);
         return adjustDexoptFlags(dexFlags);
     }
 

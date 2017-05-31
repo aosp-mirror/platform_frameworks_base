@@ -473,6 +473,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Ваш працоўны профіль знаходзіцца пад кіраваннем <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ён падключаны да праграмы <xliff:g id="APPLICATION">%2$s</xliff:g>, якая можа сачыць за вашай працоўнай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты.\n\nДля атрымання дадатковай інфармацыі звярніцеся да адміністратара."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Ваш працоўны профіль знаходзіцца пад кіраваннем <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ён падключаны да праграмы <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, якая можа сачыць за вашай працоўнай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты.\n\nВы таксама падключаны да праграмы <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, якая можа сачыць за вашай асабістай сеткавай актыўнасцю."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Разблакіравана для карыстальніка <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Прылада будзе заставацца заблакіраванай, пакуль вы не разблакіруеце яе ўручную"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Атрымлівайце апавяшчэнні хутчэй"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Праглядайце іх перад разблакіроўкай"</string>

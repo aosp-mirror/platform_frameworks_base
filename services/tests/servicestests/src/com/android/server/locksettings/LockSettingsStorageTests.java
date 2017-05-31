@@ -22,8 +22,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.pm.UserInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.FileUtils;
@@ -33,6 +31,8 @@ import android.test.AndroidTestCase;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
+import com.android.server.locksettings.LockSettingsStorage.PersistentData;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,10 +43,13 @@ import java.util.concurrent.CountDownLatch;
  * runtest frameworks-services -c com.android.server.locksettings.LockSettingsStorageTests
  */
 public class LockSettingsStorageTests extends AndroidTestCase {
+    private static final int SOME_USER_ID = 1034;
     private final byte[] PASSWORD_0 = "thepassword0".getBytes();
     private final byte[] PASSWORD_1 = "password1".getBytes();
     private final byte[] PATTERN_0 = "123654".getBytes();
     private final byte[] PATTERN_1 = "147852369".getBytes();
+
+    public static final byte[] PAYLOAD = new byte[] {1, 2, -1, -2, 33};
 
     LockSettingsStorage mStorage;
     File mStorageDir;
@@ -340,6 +343,83 @@ public class LockSettingsStorageTests extends AndroidTestCase {
 
         mStorage.deleteSyntheticPasswordState(10, 1234L, "state");
         assertEquals(null, mStorage.readSyntheticPasswordState(10, 1234L, "state"));
+    }
+
+    public void testPersistentData_serializeUnserialize() {
+        byte[] serialized = PersistentData.toBytes(PersistentData.TYPE_GATEKEEPER, SOME_USER_ID,
+                DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, PAYLOAD);
+        PersistentData deserialized = PersistentData.fromBytes(serialized);
+
+        assertEquals(PersistentData.TYPE_GATEKEEPER, deserialized.type);
+        assertEquals(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, deserialized.qualityForUi);
+        assertArrayEquals(PAYLOAD, deserialized.payload);
+    }
+
+    public void testPersistentData_unserializeNull() {
+        PersistentData deserialized = PersistentData.fromBytes(null);
+        assertSame(PersistentData.NONE, deserialized);
+    }
+
+    public void testPersistentData_unserializeEmptyArray() {
+        PersistentData deserialized = PersistentData.fromBytes(new byte[0]);
+        assertSame(PersistentData.NONE, deserialized);
+    }
+
+    public void testPersistentData_unserialize_version1() {
+        // This test ensures that we can read serialized VERSION_1 PersistentData even if we change
+        // the wire format in the future.
+        byte[] serializedVersion1 = new byte[] {
+                1, /* PersistentData.VERSION_1 */
+                2, /* PersistentData.TYPE_SP */
+                0x00, 0x00, 0x04, 0x0A,  /* SOME_USER_ID */
+                0x00, 0x03, 0x00, 0x00,  /* PASSWORD_NUMERIC_COMPLEX */
+                1, 2, -1, -2, 33, /* PAYLOAD */
+        };
+        PersistentData deserialized = PersistentData.fromBytes(serializedVersion1);
+        assertEquals(PersistentData.TYPE_SP, deserialized.type);
+        assertEquals(SOME_USER_ID, deserialized.userId);
+        assertEquals(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX,
+                deserialized.qualityForUi);
+        assertArrayEquals(PAYLOAD, deserialized.payload);
+
+        // Make sure the constants we use on the wire do not change.
+        assertEquals(0, PersistentData.TYPE_NONE);
+        assertEquals(1, PersistentData.TYPE_GATEKEEPER);
+        assertEquals(2, PersistentData.TYPE_SP);
+        assertEquals(3, PersistentData.TYPE_SP_WEAVER);
+    }
+
+    public void testCredentialHash_serializeUnserialize() {
+        byte[] serialized = CredentialHash.create(
+                PAYLOAD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD).toBytes();
+        CredentialHash deserialized = CredentialHash.fromBytes(serialized);
+
+        assertEquals(CredentialHash.VERSION_GATEKEEPER, deserialized.version);
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, deserialized.type);
+        assertArrayEquals(PAYLOAD, deserialized.hash);
+        assertFalse(deserialized.isBaseZeroPattern);
+    }
+
+    public void testCredentialHash_unserialize_versionGatekeeper() {
+        // This test ensures that we can read serialized VERSION_GATEKEEPER CredentialHashes
+        // even if we change the wire format in the future.
+        byte[] serialized = new byte[] {
+                1, /* VERSION_GATEKEEPER */
+                2, /* CREDENTIAL_TYPE_PASSWORD */
+                0, 0, 0, 5, /* hash length */
+                1, 2, -1, -2, 33, /* hash */
+        };
+        CredentialHash deserialized = CredentialHash.fromBytes(serialized);
+
+        assertEquals(CredentialHash.VERSION_GATEKEEPER, deserialized.version);
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, deserialized.type);
+        assertArrayEquals(PAYLOAD, deserialized.hash);
+        assertFalse(deserialized.isBaseZeroPattern);
+
+        // Make sure the constants we use on the wire do not change.
+        assertEquals(-1, LockPatternUtils.CREDENTIAL_TYPE_NONE);
+        assertEquals(1, LockPatternUtils.CREDENTIAL_TYPE_PATTERN);
+        assertEquals(2, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
     }
 
     private static void assertArrayEquals(byte[] expected, byte[] actual) {

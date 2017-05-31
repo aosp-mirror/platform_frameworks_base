@@ -71,7 +71,9 @@ import com.android.server.SystemService;
 import com.android.server.retaildemo.RetailDemoModeService.Injector;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -85,6 +87,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
+@SmallTest
 public class RetailDemoModeServiceTest {
     private static final int TEST_DEMO_USER = 111;
     private static final long SETUP_COMPLETE_TIMEOUT_MS = 2000; // 2 sec
@@ -110,6 +113,12 @@ public class RetailDemoModeServiceTest {
 
     private RetailDemoModeService mService;
     private TestInjector mInjector;
+
+    @BeforeClass
+    @AfterClass
+    public static void clearSettingsProvider() {
+        FakeSettingsProvider.clearSettingsProvider();
+    }
 
     @Before
     public void setUp() throws Exception {

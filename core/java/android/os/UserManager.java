@@ -899,11 +899,8 @@ public class UserManager {
      * @return the user name
      */
     public String getUserName() {
-        try {
-            return mService.getUserInfo(getUserHandle()).name;
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        UserInfo user = getUserInfo(getUserHandle());
+        return user == null ? "" : user.name;
     }
 
     /**

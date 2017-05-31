@@ -15,7 +15,7 @@
 ** limitations under the License.
 */
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 1
 #define LOG_TAG "Radio-JNI"
 #include <utils/Log.h>
 
@@ -961,7 +961,7 @@ int register_android_hardware_Radio(JNIEnv *env)
 
     int ret = RegisterMethodsOrDie(env, kRadioModuleClassPathName, gModuleMethods, NELEM(gModuleMethods));
 
-    ALOGI("%s DONE", __FUNCTION__);
+    ALOGV("%s DONE", __FUNCTION__);
 
     return ret;
 }

@@ -67,7 +67,10 @@ public class DynamicLayoutBlocksTest {
     }
 
     private void update(int startLine, int endLine, int newLineCount) {
-        dl.setBlocksDataForTest(initialBlockEnds, initialBlockIndices, initialBlockEnds.length);
+        final int totalLines = initialBlockEnds[initialBlockEnds.length - 1]
+                + newLineCount - endLine + startLine;
+        dl.setBlocksDataForTest(
+                initialBlockEnds, initialBlockIndices, initialBlockEnds.length, totalLines);
         checkInvariants();
         dl.updateBlocks(startLine, endLine, newLineCount);
     }

@@ -221,7 +221,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         boolean nonBlockable = false;
         try {
             final PackageInfo pkgInfo = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
-            nonBlockable = Utils.isSystemPackage(getResources(), pm, pkgInfo);
+            nonBlockable = Utils.isSystemPackage(getResources(), pm, pkgInfo)
+                    && (mSingleNotificationChannel == null
+                    || !mSingleNotificationChannel.isBlockableSystem());
         } catch (PackageManager.NameNotFoundException e) {
             // unlikely.
         }

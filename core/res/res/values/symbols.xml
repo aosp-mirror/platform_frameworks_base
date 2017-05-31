@@ -1479,7 +1479,6 @@
   <java-symbol type="xml" name="password_kbd_symbols" />
   <java-symbol type="xml" name="password_kbd_symbols_shift" />
   <java-symbol type="xml" name="power_profile" />
-  <java-symbol type="xml" name="time_zones_by_country" />
   <java-symbol type="xml" name="sms_short_codes" />
   <java-symbol type="xml" name="audio_assets" />
   <java-symbol type="xml" name="global_keys" />
@@ -2640,7 +2639,6 @@
 
   <java-symbol type="dimen" name="media_notification_expanded_image_small_size" />
   <java-symbol type="dimen" name="media_notification_expanded_image_margin_bottom" />
-  <java-symbol type="dimen" name="media_notification_header_height" />
   <java-symbol type="dimen" name="notification_content_image_margin_end" />
 
   <java-symbol type="bool" name="config_strongAuthRequiredOnBoot" />

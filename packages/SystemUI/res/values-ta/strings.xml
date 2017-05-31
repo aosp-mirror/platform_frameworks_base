@@ -467,6 +467,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"உங்கள் பணி விவரத்தை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nமேலும் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"உங்கள் பணி விவரத்தை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nஉங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> உடனும் இணைக்கப்பட்டுள்ளீர்கள்."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g>க்குத் திறக்கப்பட்டது"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"நீங்கள் கைமுறையாகத் திறக்கும் வரை, சாதனம் பூட்டப்பட்டிருக்கும்"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"விரைவாக அறிவிப்புகளைப் பெறுதல்"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"திறக்கும் முன் அவற்றைப் பார்க்கவும்"</string>

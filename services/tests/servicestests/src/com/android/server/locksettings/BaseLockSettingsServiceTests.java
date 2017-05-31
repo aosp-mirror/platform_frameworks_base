@@ -96,7 +96,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
             storageDir.mkdirs();
         }
 
-        mSpManager = new MockSyntheticPasswordManager(mStorage, mGateKeeperService);
+        mSpManager = new MockSyntheticPasswordManager(mStorage, mGateKeeperService, mUserManager);
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils,
                 mStorage, mGateKeeperService, mKeyStore, mStorageManager, mActivityManager,
                 mSpManager);
@@ -164,4 +164,3 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         assertFalse(Arrays.equals(expected, actual));
     }
 }
-

@@ -19,7 +19,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.RetentionPolicy.CLASS;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * Denotes that the annotated element of integer type, represents
@@ -48,7 +48,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  *
  * @hide
  */
-@Retention(CLASS)
+@Retention(SOURCE)
 @Target({ANNOTATION_TYPE})
 public @interface IntDef {
     /** Defines the constant prefix for this element */

@@ -469,6 +469,8 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ce profil est connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>, qui peut contrôler votre activité professionnelle sur le réseau, y compris l\'activité relative aux courriels, aux applications et aux sites Web.\n\nPour en savoir plus, communiquez avec votre administrateur."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ce profil est connecté à <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, qui peut contrôler votre activité professionnelle sur le réseau, y compris l\'activité relative aux courriels, aux applications et aux sites Web.\n\nVous êtes également connecté à <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, qui peut contrôler votre activité personnelle sur le réseau."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Déverrouillé pour for <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Voir les notifications plus rapidement"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Afficher les notifications avant de déverrouiller l\'appareil"</string>
