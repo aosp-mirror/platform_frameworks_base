@@ -116,7 +116,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 158 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 159 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -7114,7 +7114,8 @@ public class BatteryStatsImpl extends BatteryStats {
             for (int j = 0; j < numWakelocks; j++) {
                 String wakelockName = in.readString();
                 Uid.Wakelock wakelock = new Wakelock(mBsi, this);
-                wakelock.readFromParcelLocked(timeBase, screenOffTimeBase, in);
+                wakelock.readFromParcelLocked(
+                        timeBase, screenOffTimeBase, mOnBatteryScreenOffBackgroundTimeBase, in);
                 mWakelockStats.add(wakelockName, wakelock);
             }
 
@@ -7391,8 +7392,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
             /**
              * How long (in ms) this uid has been keeping the device partially awake.
+             * Tracks both the total time and the time while the app was in the background.
              */
-            DurationTimer mTimerPartial;
+            DualTimer mTimerPartial;
 
             /**
              * How long (in ms) this uid has been keeping the device fully awake.
@@ -7437,13 +7439,13 @@ public class BatteryStatsImpl extends BatteryStats {
              * @param in the Parcel to be read from.
              * return a new Timer, or null.
              */
-            private DurationTimer readDurationTimerFromParcel(int type,
-                    ArrayList<StopwatchTimer> pool, TimeBase timeBase, Parcel in) {
+            private DualTimer readDualTimerFromParcel(int type, ArrayList<StopwatchTimer> pool,
+                    TimeBase timeBase, TimeBase bgTimeBase, Parcel in) {
                 if (in.readInt() == 0) {
                     return null;
                 }
 
-                return new DurationTimer(mBsi.mClocks, mUid, type, pool, timeBase, in);
+                return new DualTimer(mBsi.mClocks, mUid, type, pool, timeBase, bgTimeBase, in);
             }
 
             boolean reset() {
@@ -7481,9 +7483,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 return !wlactive;
             }
 
-            void readFromParcelLocked(TimeBase timeBase, TimeBase screenOffTimeBase, Parcel in) {
-                mTimerPartial = readDurationTimerFromParcel(WAKE_TYPE_PARTIAL,
-                        mBsi.mPartialTimers, screenOffTimeBase, in);
+            void readFromParcelLocked(TimeBase timeBase, TimeBase screenOffTimeBase,
+                    TimeBase screenOffBgTimeBase, Parcel in) {
+                mTimerPartial = readDualTimerFromParcel(WAKE_TYPE_PARTIAL,
+                        mBsi.mPartialTimers, screenOffTimeBase, screenOffBgTimeBase, in);
                 mTimerFull = readStopwatchTimerFromParcel(WAKE_TYPE_FULL,
                         mBsi.mFullTimers, timeBase, in);
                 mTimerWindow = readStopwatchTimerFromParcel(WAKE_TYPE_WINDOW,
@@ -7507,49 +7510,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 case WAKE_TYPE_WINDOW: return mTimerWindow;
                 case WAKE_TYPE_DRAW: return mTimerDraw;
                 default: throw new IllegalArgumentException("type = " + type);
-                }
-            }
-
-            public StopwatchTimer getStopwatchTimer(int type) {
-                switch (type) {
-                    case WAKE_TYPE_PARTIAL: {
-                        DurationTimer t = mTimerPartial;
-                        if (t == null) {
-                            t = new DurationTimer(mBsi.mClocks, mUid, WAKE_TYPE_PARTIAL,
-                                    mBsi.mPartialTimers, mBsi.mOnBatteryScreenOffTimeBase);
-                            mTimerPartial = t;
-                        }
-                        return t;
-                    }
-                    case WAKE_TYPE_FULL: {
-                        StopwatchTimer t = mTimerFull;
-                        if (t == null) {
-                            t = new StopwatchTimer(mBsi.mClocks, mUid, WAKE_TYPE_FULL,
-                                    mBsi.mFullTimers, mBsi.mOnBatteryTimeBase);
-                            mTimerFull = t;
-                        }
-                        return t;
-                    }
-                    case WAKE_TYPE_WINDOW: {
-                        StopwatchTimer t = mTimerWindow;
-                        if (t == null) {
-                            t = new StopwatchTimer(mBsi.mClocks, mUid, WAKE_TYPE_WINDOW,
-                                    mBsi.mWindowTimers, mBsi.mOnBatteryTimeBase);
-                            mTimerWindow = t;
-                        }
-                        return t;
-                    }
-                    case WAKE_TYPE_DRAW: {
-                        StopwatchTimer t = mTimerDraw;
-                        if (t == null) {
-                            t = new StopwatchTimer(mBsi.mClocks, mUid, WAKE_TYPE_DRAW,
-                                    mBsi.mDrawTimers, mBsi.mOnBatteryTimeBase);
-                            mTimerDraw = t;
-                        }
-                        return t;
-                    }
-                    default:
-                        throw new IllegalArgumentException("type=" + type);
                 }
             }
         }
@@ -8444,16 +8404,16 @@ public class BatteryStatsImpl extends BatteryStats {
             Wakelock wl = new Wakelock(mBsi, this);
             mWakelockStats.add(wlName, wl);
             if (in.readInt() != 0) {
-                wl.getStopwatchTimer(WAKE_TYPE_FULL).readSummaryFromParcelLocked(in);
+                getWakelockTimerLocked(wl, WAKE_TYPE_FULL).readSummaryFromParcelLocked(in);
             }
             if (in.readInt() != 0) {
-                wl.getStopwatchTimer(WAKE_TYPE_PARTIAL).readSummaryFromParcelLocked(in);
+                getWakelockTimerLocked(wl, WAKE_TYPE_PARTIAL).readSummaryFromParcelLocked(in);
             }
             if (in.readInt() != 0) {
-                wl.getStopwatchTimer(WAKE_TYPE_WINDOW).readSummaryFromParcelLocked(in);
+                getWakelockTimerLocked(wl, WAKE_TYPE_WINDOW).readSummaryFromParcelLocked(in);
             }
             if (in.readInt() != 0) {
-                wl.getStopwatchTimer(WAKE_TYPE_DRAW).readSummaryFromParcelLocked(in);
+                getWakelockTimerLocked(wl, WAKE_TYPE_DRAW).readSummaryFromParcelLocked(in);
             }
         }
 
@@ -8509,10 +8469,57 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        public StopwatchTimer getWakelockTimerLocked(Wakelock wl, int type) {
+            if (wl == null) {
+                return null;
+            }
+            switch (type) {
+                case WAKE_TYPE_PARTIAL: {
+                    DualTimer t = wl.mTimerPartial;
+                    if (t == null) {
+                        t = new DualTimer(mBsi.mClocks, this, WAKE_TYPE_PARTIAL,
+                                mBsi.mPartialTimers, mBsi.mOnBatteryScreenOffTimeBase,
+                                mOnBatteryScreenOffBackgroundTimeBase);
+                        wl.mTimerPartial = t;
+                    }
+                    return t;
+                }
+                case WAKE_TYPE_FULL: {
+                    StopwatchTimer t = wl.mTimerFull;
+                    if (t == null) {
+                        t = new StopwatchTimer(mBsi.mClocks, this, WAKE_TYPE_FULL,
+                                mBsi.mFullTimers, mBsi.mOnBatteryTimeBase);
+                        wl.mTimerFull = t;
+                    }
+                    return t;
+                }
+                case WAKE_TYPE_WINDOW: {
+                    StopwatchTimer t = wl.mTimerWindow;
+                    if (t == null) {
+                        t = new StopwatchTimer(mBsi.mClocks, this, WAKE_TYPE_WINDOW,
+                                mBsi.mWindowTimers, mBsi.mOnBatteryTimeBase);
+                        wl.mTimerWindow = t;
+                    }
+                    return t;
+                }
+                case WAKE_TYPE_DRAW: {
+                    StopwatchTimer t = wl.mTimerDraw;
+                    if (t == null) {
+                        t = new StopwatchTimer(mBsi.mClocks, this, WAKE_TYPE_DRAW,
+                                mBsi.mDrawTimers, mBsi.mOnBatteryTimeBase);
+                        wl.mTimerDraw = t;
+                    }
+                    return t;
+                }
+                default:
+                    throw new IllegalArgumentException("type=" + type);
+            }
+        }
+
         public void noteStartWakeLocked(int pid, String name, int type, long elapsedRealtimeMs) {
             Wakelock wl = mWakelockStats.startObject(name);
             if (wl != null) {
-                wl.getStopwatchTimer(type).startRunningLocked(elapsedRealtimeMs);
+                getWakelockTimerLocked(wl, type).startRunningLocked(elapsedRealtimeMs);
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 createAggregatedPartialWakelockTimerLocked().startRunningLocked(elapsedRealtimeMs);
@@ -8528,7 +8535,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteStopWakeLocked(int pid, String name, int type, long elapsedRealtimeMs) {
             Wakelock wl = mWakelockStats.stopObject(name);
             if (wl != null) {
-                wl.getStopwatchTimer(type).stopRunningLocked(elapsedRealtimeMs);
+                getWakelockTimerLocked(wl, type).stopRunningLocked(elapsedRealtimeMs);
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 if (mAggregatedPartialWakelockTimer != null) {
