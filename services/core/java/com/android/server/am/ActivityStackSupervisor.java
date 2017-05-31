@@ -470,7 +470,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     Configuration getDisplayOverrideConfiguration(int displayId) {
-        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (activityDisplay == null) {
             throw new IllegalArgumentException("No display found with id: " + displayId);
         }
@@ -479,7 +479,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void setDisplayOverrideConfiguration(Configuration overrideConfiguration, int displayId) {
-        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (activityDisplay == null) {
             throw new IllegalArgumentException("No display found with id: " + displayId);
         }
@@ -507,7 +507,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (displayId == INVALID_DISPLAY) {
             return false;
         }
-        final ActivityDisplay targetDisplay = mActivityDisplays.get(displayId);
+        final ActivityDisplay targetDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (targetDisplay == null) {
             throw new IllegalArgumentException("No display found with id: " + displayId);
         }
@@ -1672,7 +1672,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check: displayId=" + launchDisplayId
                 + " callingPid=" + callingPid + " callingUid=" + callingUid);
 
-        final ActivityDisplay activityDisplay = mActivityDisplays.get(launchDisplayId);
+        final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(launchDisplayId);
         if (activityDisplay == null) {
             Slog.w(TAG, "Launch on display check: display not found");
             return false;
@@ -2191,7 +2191,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @return Existing stack if there is a valid one, new dynamic stack if it is valid or null.
      */
     ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r) {
-        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (activityDisplay == null) {
             throw new IllegalArgumentException(
                     "Display with displayId=" + displayId + " not found.");
@@ -2242,10 +2242,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         for (int i = mTmpOrderedDisplayIds.size() - 1; i >= 0; --i) {
             final int displayId = mTmpOrderedDisplayIds.get(i);
-            final List<ActivityStack> stacks = mActivityDisplays.get(displayId).mStacks;
-            if (stacks == null) {
-                continue;
-            }
+            // If a display is registered in WM, it must also be available in AM.
+            @SuppressWarnings("ConstantConditions")
+            final List<ActivityStack> stacks = getActivityDisplayOrCreateLocked(displayId).mStacks;
             for (int j = stacks.size() - 1; j >= 0; --j) {
                 final ActivityStack stack = stacks.get(j);
                 if (stack != currentFocus && stack.isFocusable()
@@ -2576,7 +2575,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     ActivityStack createStackOnDisplay(int stackId, int displayId, boolean onTop) {
-        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (activityDisplay == null) {
             return null;
         }
@@ -2808,7 +2807,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @param onTop Indicates whether container should be place on top or on bottom.
      */
     void moveStackToDisplayLocked(int stackId, int displayId, boolean onTop) {
-        final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (activityDisplay == null) {
             throw new IllegalArgumentException("moveStackToDisplayLocked: Unknown displayId="
                     + displayId);
@@ -3915,25 +3914,44 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     private void handleDisplayAdded(int displayId) {
-        boolean newDisplay;
         synchronized (mService) {
-            newDisplay = mActivityDisplays.get(displayId) == null;
-            if (newDisplay) {
-                ActivityDisplay activityDisplay = new ActivityDisplay(displayId);
-                if (activityDisplay.mDisplay == null) {
-                    Slog.w(TAG, "Display " + displayId + " gone before initialization complete");
-                    return;
-                }
-                mActivityDisplays.put(displayId, activityDisplay);
-                calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
-                mWindowManager.onDisplayAdded(displayId);
-            }
+            getActivityDisplayOrCreateLocked(displayId);
         }
     }
 
     /** Check if display with specified id is added to the list. */
     boolean isDisplayAdded(int displayId) {
-        return mActivityDisplays.get(displayId) != null;
+        return getActivityDisplayOrCreateLocked(displayId) != null;
+    }
+
+    /**
+     * Get an existing instance of {@link ActivityDisplay} or create new if there is a
+     * corresponding record in display manager.
+     */
+    private ActivityDisplay getActivityDisplayOrCreateLocked(int displayId) {
+        ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+        if (activityDisplay != null) {
+            return activityDisplay;
+        }
+        if (mDisplayManager == null) {
+            // The system isn't fully initialized yet.
+            return null;
+        }
+        final Display display = mDisplayManager.getDisplay(displayId);
+        if (display == null) {
+            // The display is not registered in DisplayManager.
+            return null;
+        }
+        // The display hasn't been added to ActivityManager yet, create a new record now.
+        activityDisplay = new ActivityDisplay(displayId);
+        if (activityDisplay.mDisplay == null) {
+            Slog.w(TAG, "Display " + displayId + " gone before initialization complete");
+            return null;
+        }
+        mActivityDisplays.put(displayId, activityDisplay);
+        calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
+        mWindowManager.onDisplayAdded(displayId);
+        return activityDisplay;
     }
 
     private void calculateDefaultMinimalSizeOfResizeableTasks(ActivityDisplay display) {
@@ -3991,6 +4009,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         info.stackId = stack.mStackId;
         info.userId = stack.mCurrentUser;
         info.visible = stack.shouldBeVisible(null) == STACK_VISIBLE;
+        // A stack might be not attached to a display.
         info.position = display != null
                 ? display.mStacks.indexOf(stack)
                 : 0;
@@ -4618,7 +4637,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         @Override
         public void addToDisplay(int displayId) {
             synchronized (mService) {
-                ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
+                final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
                 if (activityDisplay == null) {
                     return;
                 }
