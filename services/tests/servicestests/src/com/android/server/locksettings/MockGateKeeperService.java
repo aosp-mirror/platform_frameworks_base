@@ -173,6 +173,10 @@ public class MockGateKeeperService implements IGateKeeperService {
     }
 
     @Override
+    public void reportDeviceSetupComplete() throws RemoteException {
+    }
+
+    @Override
     public long getSecureUserId(int userId) throws RemoteException {
         if (sidMap.containsKey(userId)) {
             return sidMap.get(userId);

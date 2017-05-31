@@ -28,11 +28,12 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.service.persistentdata.IPersistentDataBlockService;
 import android.util.Log;
 import android.view.IOnKeyguardExitResult;
 import android.view.IWindowManager;
@@ -40,6 +41,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.widget.LockPatternUtils;
 
 import java.util.List;
 
@@ -74,6 +76,13 @@ public class KeyguardManager {
             "android.app.action.CONFIRM_DEVICE_CREDENTIAL_WITH_USER";
 
     /**
+     * Intent used to prompt user for factory reset credentials.
+     * @hide
+     */
+    public static final String ACTION_CONFIRM_FRP_CREDENTIAL =
+            "android.app.action.CONFIRM_FRP_CREDENTIAL";
+
+    /**
      * A CharSequence dialog title to show to the user when used with a
      * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
      * @hide
@@ -86,6 +95,23 @@ public class KeyguardManager {
      * @hide
      */
     public static final String EXTRA_DESCRIPTION = "android.app.extra.DESCRIPTION";
+
+    /**
+     * A CharSequence description to show to the user on the alternate button when used with
+     * {@link #ACTION_CONFIRM_FRP_CREDENTIAL}.
+     * @hide
+     */
+    public static final String EXTRA_ALTERNATE_BUTTON_LABEL =
+            "android.app.extra.ALTERNATE_BUTTON_LABEL";
+
+    /**
+     * Result code returned by the activity started by
+     * {@link #createConfirmFactoryResetCredentialIntent} indicating that the user clicked the
+     * alternate button.
+     *
+     * @hide
+     */
+    public static final int RESULT_ALTERNATE = 1;
 
     /**
      * Get an intent to prompt the user to confirm credentials (pin, pattern or password)
@@ -123,6 +149,63 @@ public class KeyguardManager {
         intent.putExtra(EXTRA_TITLE, title);
         intent.putExtra(EXTRA_DESCRIPTION, description);
         intent.putExtra(Intent.EXTRA_USER_ID, userId);
+
+        // explicitly set the package for security
+        intent.setPackage(getSettingsPackageForIntent(intent));
+
+        return intent;
+    }
+
+    /**
+     * Get an intent to prompt the user to confirm credentials (pin, pattern or password)
+     * for the previous owner of the device. The caller is expected to launch this activity using
+     * {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
+     * {@link android.app.Activity#RESULT_OK} if the user successfully completes the challenge.
+     *
+     * @param alternateButtonLabel if not empty, a button is provided with the given label. Upon
+     *                             clicking this button, the activity returns
+     *                             {@link #RESULT_ALTERNATE}
+     *
+     * @return  the intent for launching the activity or null if the credential of the previous
+     * owner can not be verified (e.g. because there was none, or the device does not support
+     * verifying credentials after a factory reset, or device setup has already been completed).
+     *
+     * @hide
+     */
+    public Intent createConfirmFactoryResetCredentialIntent(
+            CharSequence title, CharSequence description, CharSequence alternateButtonLabel) {
+        if (!LockPatternUtils.frpCredentialEnabled()) {
+            Log.w(TAG, "Factory reset credentials not supported.");
+            return null;
+        }
+
+        // Cannot verify credential if the device is provisioned
+        if (Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
+            Log.e(TAG, "Factory reset credential cannot be verified after provisioning.");
+            return null;
+        }
+
+        // Make sure we have a credential
+        try {
+            IPersistentDataBlockService pdb = IPersistentDataBlockService.Stub.asInterface(
+                    ServiceManager.getService(Context.PERSISTENT_DATA_BLOCK_SERVICE));
+            if (pdb == null) {
+                Log.e(TAG, "No persistent data block service");
+                return null;
+            }
+            if (!pdb.hasFrpCredentialHandle()) {
+                Log.i(TAG, "The persistent data block does not have a factory reset credential.");
+                return null;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        Intent intent = new Intent(ACTION_CONFIRM_FRP_CREDENTIAL);
+        intent.putExtra(EXTRA_TITLE, title);
+        intent.putExtra(EXTRA_DESCRIPTION, description);
+        intent.putExtra(EXTRA_ALTERNATE_BUTTON_LABEL, alternateButtonLabel);
 
         // explicitly set the package for security
         intent.setPackage(getSettingsPackageForIntent(intent));

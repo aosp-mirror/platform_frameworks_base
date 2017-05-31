@@ -27,6 +27,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -34,6 +35,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
@@ -65,6 +67,8 @@ public class LockPatternUtils {
 
     private static final String TAG = "LockPatternUtils";
     private static final boolean DEBUG = false;
+    private static final boolean FRP_CREDENTIAL_ENABLED =
+            Build.IS_DEBUGGABLE && SystemProperties.getBoolean("debug.frpcredential.enable", false);
 
     /**
      * The key to identify when the lock pattern enabled flag is being accessed for legacy reasons.
@@ -111,6 +115,11 @@ public class LockPatternUtils {
     public static final int CREDENTIAL_TYPE_PATTERN = 1;
 
     public static final int CREDENTIAL_TYPE_PASSWORD = 2;
+
+    /**
+     * Special user id for triggering the FRP verification flow.
+     */
+    public static final int USER_FRP = UserHandle.USER_NULL + 1;
 
     @Deprecated
     public final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
@@ -295,24 +304,39 @@ public class LockPatternUtils {
     }
 
     public void reportFailedPasswordAttempt(int userId) {
+        if (userId == USER_FRP && frpCredentialEnabled()) {
+            return;
+        }
         getDevicePolicyManager().reportFailedPasswordAttempt(userId);
         getTrustManager().reportUnlockAttempt(false /* authenticated */, userId);
     }
 
     public void reportSuccessfulPasswordAttempt(int userId) {
+        if (userId == USER_FRP && frpCredentialEnabled()) {
+            return;
+        }
         getDevicePolicyManager().reportSuccessfulPasswordAttempt(userId);
         getTrustManager().reportUnlockAttempt(true /* authenticated */, userId);
     }
 
     public void reportPasswordLockout(int timeoutMs, int userId) {
+        if (userId == USER_FRP && frpCredentialEnabled()) {
+            return;
+        }
         getTrustManager().reportUnlockLockout(timeoutMs, userId);
     }
 
     public int getCurrentFailedPasswordAttempts(int userId) {
+        if (userId == USER_FRP && frpCredentialEnabled()) {
+            return 0;
+        }
         return getDevicePolicyManager().getCurrentFailedPasswordAttempts(userId);
     }
 
     public int getMaximumFailedPasswordsForWipe(int userId) {
+        if (userId == USER_FRP && frpCredentialEnabled()) {
+            return 0;
+        }
         return getDevicePolicyManager().getMaximumFailedPasswordsForWipe(
                 null /* componentName */, userId);
     }
@@ -586,7 +610,7 @@ public class LockPatternUtils {
 
         try{
             getLockSettings().setLockCredential(null, CREDENTIAL_TYPE_NONE, savedCredential,
-                    userHandle);
+                    DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userHandle);
         } catch (RemoteException e) {
             // well, we tried...
         }
@@ -651,7 +675,7 @@ public class LockPatternUtils {
 
             setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, userId);
             getLockSettings().setLockCredential(patternToString(pattern), CREDENTIAL_TYPE_PATTERN,
-                    savedPattern, userId);
+                    savedPattern, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, userId);
 
             // Update the device encryption password.
             if (userId == UserHandle.USER_SYSTEM
@@ -765,10 +789,10 @@ public class LockPatternUtils {
      * password.
      * @param password The password to save
      * @param savedPassword The previously saved lock password, or null if none
-     * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     * @param requestedQuality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
      * @param userHandle The userId of the user to change the password for
      */
-    public void saveLockPassword(String password, String savedPassword, int quality,
+    public void saveLockPassword(String password, String savedPassword, int requestedQuality,
             int userHandle) {
         try {
             if (password == null || password.length() < MIN_LOCK_PASSWORD_SIZE) {
@@ -777,9 +801,9 @@ public class LockPatternUtils {
             }
 
             final int computedQuality = PasswordMetrics.computeForPassword(password).quality;
-            setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality), userHandle);
+            setLong(PASSWORD_TYPE_KEY, Math.max(requestedQuality, computedQuality), userHandle);
             getLockSettings().setLockCredential(password, CREDENTIAL_TYPE_PASSWORD, savedPassword,
-                    userHandle);
+                    requestedQuality, userHandle);
 
             updateEncryptionPasswordIfNeeded(password, computedQuality, userHandle);
             updatePasswordHistory(password, userHandle);
@@ -1474,12 +1498,13 @@ public class LockPatternUtils {
                 }
 
                 final int computedQuality = PasswordMetrics.computeForPassword(credential).quality;
+                int quality = Math.max(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC,
+                        computedQuality);
                 if (!getLockSettings().setLockCredentialWithToken(credential, type, tokenHandle,
-                        token, userId)) {
+                        token, quality, userId)) {
                     return false;
                 }
-                setLong(PASSWORD_TYPE_KEY, Math.max(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC,
-                        computedQuality), userId);
+                setLong(PASSWORD_TYPE_KEY, quality, userId);
 
                 updateEncryptionPasswordIfNeeded(credential, computedQuality, userId);
                 updatePasswordHistory(credential, userId);
@@ -1488,7 +1513,8 @@ public class LockPatternUtils {
                     throw new IllegalArgumentException("password must be emtpy for NONE type");
                 }
                 if (!getLockSettings().setLockCredentialWithToken(null, CREDENTIAL_TYPE_NONE,
-                        tokenHandle, token, userId)) {
+                        tokenHandle, token, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
+                        userId)) {
                     return false;
                 }
                 setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
@@ -1690,5 +1716,13 @@ public class LockPatternUtils {
 
     public boolean isSyntheticPasswordEnabled() {
         return getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM) != 0;
+    }
+
+    public static boolean userOwnsFrpCredential(UserInfo info) {
+        return info != null && info.isPrimary() && info.isAdmin() && frpCredentialEnabled();
+    }
+
+    public static boolean frpCredentialEnabled() {
+        return FRP_CREDENTIAL_ENABLED;
     }
 }

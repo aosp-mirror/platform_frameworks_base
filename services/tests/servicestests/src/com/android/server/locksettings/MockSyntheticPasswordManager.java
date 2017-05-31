@@ -17,6 +17,7 @@ package com.android.server.locksettings;
 
 import android.hardware.weaver.V1_0.IWeaver;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.util.ArrayMap;
 
 import junit.framework.AssertionFailedError;
@@ -35,8 +36,8 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
     private IWeaver mWeaverService;
 
     public MockSyntheticPasswordManager(LockSettingsStorage storage,
-            MockGateKeeperService gatekeeper) {
-        super(storage);
+            MockGateKeeperService gatekeeper, UserManager userManager) {
+        super(storage, userManager);
         mGateKeeper = gatekeeper;
     }
 
