@@ -945,10 +945,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public void noteBleScanStarted(WorkSource ws) {
+    public void noteBleScanStarted(WorkSource ws, boolean isUnoptimized) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteBluetoothScanStartedFromSourceLocked(ws);
+            mStats.noteBluetoothScanStartedFromSourceLocked(ws, isUnoptimized);
         }
     }
 

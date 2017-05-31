@@ -162,6 +162,11 @@ public abstract class BatteryStats implements Parcelable {
     public static final int AGGREGATED_WAKE_TYPE_PARTIAL = 20;
 
     /**
+     * A constant indicating a bluetooth scan timer for unoptimized scans.
+     */
+    public static final int BLUETOOTH_UNOPTIMIZED_SCAN_ON = 21;
+
+    /**
      * Include all of the data in the stats, including previously saved data.
      */
     public static final int STATS_SINCE_CHARGED = 0;
@@ -191,8 +196,12 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 21:
      *   - Actual (not just apportioned) Wakelock time is also recorded.
      *   - Aggregated partial wakelock time (per uid, instead of per wakelock) is recorded.
+     *   - BLE scan result count
+     *   - CPU frequency time per uid
+     * New in version 22:
+     *   - BLE scan result background count, BLE unoptimized scan time
      */
-    static final String CHECKIN_VERSION = "21";
+    static final String CHECKIN_VERSION = "22";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -217,9 +226,10 @@ public abstract class BatteryStats implements Parcelable {
     private static final String STATE_TIME_DATA = "st";
     // wl line is:
     // BATTERY_STATS_CHECKIN_VERSION, uid, which, "wl", name,
-    // full totalTime,    'f', count, current duration, max duration, total duration,
-    // partial totalTime, 'p', count, current duration, max duration, total duration,
-    // window totalTime,  'w', count, current duration, max duration, total duration
+    // full        totalTime, 'f',  count, current duration, max duration, total duration,
+    // partial     totalTime, 'p',  count, current duration, max duration, total duration,
+    // bg partial  totalTime, 'bp', count, current duration, max duration, total duration,
+    // window      totalTime, 'w',  count, current duration, max duration, total duration
     // [Currently, full and window wakelocks have durations current = max = total = -1]
     private static final String WAKELOCK_DATA = "wl";
     // awl line is:
@@ -565,7 +575,10 @@ public abstract class BatteryStats implements Parcelable {
         public abstract Timer getForegroundActivityTimer();
         public abstract Timer getBluetoothScanTimer();
         public abstract Timer getBluetoothScanBackgroundTimer();
+        public abstract Timer getBluetoothUnoptimizedScanTimer();
+        public abstract Timer getBluetoothUnoptimizedScanBackgroundTimer();
         public abstract Counter getBluetoothScanResultCounter();
+        public abstract Counter getBluetoothScanResultBgCounter();
 
         public abstract long[] getCpuFreqTimes(int which);
         public abstract long[] getScreenOffCpuFreqTimes(int which);
@@ -3429,10 +3442,29 @@ public abstract class BatteryStats implements Parcelable {
                     final long actualTime = bleTimer.getTotalDurationMsLocked(rawRealtimeMs);
                     final long actualTimeBg = bleTimerBg != null ?
                             bleTimerBg.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                    // Result counters
                     final int resultCount = u.getBluetoothScanResultCounter() != null ?
                             u.getBluetoothScanResultCounter().getCountLocked(which) : 0;
+                    final int resultCountBg = u.getBluetoothScanResultBgCounter() != null ?
+                            u.getBluetoothScanResultBgCounter().getCountLocked(which) : 0;
+                    // Unoptimized scan timer. Unpooled and since reset (regardless of 'which').
+                    final Timer unoptimizedScanTimer = u.getBluetoothUnoptimizedScanTimer();
+                    final long unoptimizedScanTotalTime = unoptimizedScanTimer != null ?
+                            unoptimizedScanTimer.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                    final long unoptimizedScanMaxTime = unoptimizedScanTimer != null ?
+                            unoptimizedScanTimer.getMaxDurationMsLocked(rawRealtimeMs) : 0;
+                    // Unoptimized bg scan timer. Unpooled and since reset (regardless of 'which').
+                    final Timer unoptimizedScanTimerBg =
+                            u.getBluetoothUnoptimizedScanBackgroundTimer();
+                    final long unoptimizedScanTotalTimeBg = unoptimizedScanTimerBg != null ?
+                            unoptimizedScanTimerBg.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                    final long unoptimizedScanMaxTimeBg = unoptimizedScanTimerBg != null ?
+                            unoptimizedScanTimerBg.getMaxDurationMsLocked(rawRealtimeMs) : 0;
+
                     dumpLine(pw, uid, category, BLUETOOTH_MISC_DATA, totalTime, count,
-                            countBg, actualTime, actualTimeBg, resultCount);
+                            countBg, actualTime, actualTimeBg, resultCount, resultCountBg,
+                            unoptimizedScanTotalTime, unoptimizedScanTotalTimeBg,
+                            unoptimizedScanMaxTime, unoptimizedScanMaxTimeBg);
                 }
             }
 
@@ -3469,8 +3501,11 @@ public abstract class BatteryStats implements Parcelable {
                 sb.setLength(0);
                 linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_FULL),
                         rawRealtime, "f", which, linePrefix);
-                linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_PARTIAL),
+                final Timer pTimer = wl.getWakeTime(WAKE_TYPE_PARTIAL);
+                linePrefix = printWakeLockCheckin(sb, pTimer,
                         rawRealtime, "p", which, linePrefix);
+                linePrefix = printWakeLockCheckin(sb, pTimer != null ? pTimer.getSubTimer() : null,
+                        rawRealtime, "bp", which, linePrefix);
                 linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_WINDOW),
                         rawRealtime, "w", which, linePrefix);
 
@@ -4625,34 +4660,94 @@ public abstract class BatteryStats implements Parcelable {
                     final long actualTimeMs = bleTimer.getTotalDurationMsLocked(rawRealtimeMs);
                     final long actualTimeMsBg = bleTimerBg != null ?
                             bleTimerBg.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                    // Result counters
                     final int resultCount = u.getBluetoothScanResultCounter() != null ?
                             u.getBluetoothScanResultCounter().getCountLocked(which) : 0;
+                    final int resultCountBg = u.getBluetoothScanResultBgCounter() != null ?
+                            u.getBluetoothScanResultBgCounter().getCountLocked(which) : 0;
+                    // Unoptimized scan timer. Unpooled and since reset (regardless of 'which').
+                    final Timer unoptimizedScanTimer = u.getBluetoothUnoptimizedScanTimer();
+                    final long unoptimizedScanTotalTime = unoptimizedScanTimer != null ?
+                            unoptimizedScanTimer.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                    final long unoptimizedScanMaxTime = unoptimizedScanTimer != null ?
+                            unoptimizedScanTimer.getMaxDurationMsLocked(rawRealtimeMs) : 0;
+                    // Unoptimized bg scan timer. Unpooled and since reset (regardless of 'which').
+                    final Timer unoptimizedScanTimerBg =
+                            u.getBluetoothUnoptimizedScanBackgroundTimer();
+                    final long unoptimizedScanTotalTimeBg = unoptimizedScanTimerBg != null ?
+                            unoptimizedScanTimerBg.getTotalDurationMsLocked(rawRealtimeMs) : 0;
+                    final long unoptimizedScanMaxTimeBg = unoptimizedScanTimerBg != null ?
+                            unoptimizedScanTimerBg.getMaxDurationMsLocked(rawRealtimeMs) : 0;
 
                     sb.setLength(0);
-                    sb.append(prefix);
-                    sb.append("    ");
-                    sb.append("Bluetooth Scan");
-                    sb.append(": ");
                     if (actualTimeMs != totalTimeMs) {
+                        sb.append(prefix);
+                        sb.append("    Bluetooth Scan (total blamed realtime): ");
                         formatTimeMs(sb, totalTimeMs);
-                        sb.append("blamed realtime, ");
+                        sb.append(" (");
+                        sb.append(count);
+                        sb.append(" times)");
+                        if (bleTimer.isRunningLocked()) {
+                            sb.append(" (currently running)");
+                        }
+                        sb.append("\n");
                     }
-                    formatTimeMs(sb, actualTimeMs); // since reset, regardless of 'which'
-                    sb.append("realtime (");
+
+                    sb.append(prefix);
+                    sb.append("    Bluetooth Scan (total actual realtime): ");
+                    formatTimeMs(sb, actualTimeMs); // since reset, ignores 'which'
+                    sb.append(" (");
                     sb.append(count);
                     sb.append(" times)");
                     if (bleTimer.isRunningLocked()) {
-                            sb.append(" (running)");
+                            sb.append(" (currently running)");
                     }
-                    if (actualTimeMsBg != 0 || countBg > 0) {
-                        sb.append(", ");
-                        formatTimeMs(sb, actualTimeMsBg); // since reset, regardless of 'which'
-                        sb.append("background (");
+                    sb.append("\n");
+                    if (actualTimeMsBg > 0 || countBg > 0) {
+                        sb.append(prefix);
+                        sb.append("    Bluetooth Scan (background realtime): ");
+                        formatTimeMs(sb, actualTimeMsBg); // since reset, ignores 'which'
+                        sb.append(" (");
                         sb.append(countBg);
                         sb.append(" times)");
+                        if (bleTimerBg != null && bleTimerBg.isRunningLocked()) {
+                            sb.append(" (currently running in background)");
+                        }
+                        sb.append("\n");
                     }
-                    sb.append("; Results count ");
+
+                    sb.append(prefix);
+                    sb.append("    Bluetooth Scan Results: ");
                     sb.append(resultCount);
+                    sb.append(" (");
+                    sb.append(resultCountBg);
+                    sb.append(" in background)");
+
+                    if (unoptimizedScanTotalTime > 0 || unoptimizedScanTotalTimeBg > 0) {
+                        sb.append("\n");
+                        sb.append(prefix);
+                        sb.append("    Unoptimized Bluetooth Scan (realtime): ");
+                        formatTimeMs(sb, unoptimizedScanTotalTime); // since reset, ignores 'which'
+                        sb.append(" (max ");
+                        formatTimeMs(sb, unoptimizedScanMaxTime); // since reset, ignores 'which'
+                        sb.append(")");
+                        if (unoptimizedScanTimer != null
+                                && unoptimizedScanTimer.isRunningLocked()) {
+                            sb.append(" (currently running unoptimized)");
+                        }
+                        if (unoptimizedScanTimerBg != null && unoptimizedScanTotalTimeBg > 0) {
+                            sb.append("\n");
+                            sb.append(prefix);
+                            sb.append("    Unoptimized Bluetooth Scan (background realtime): ");
+                            formatTimeMs(sb, unoptimizedScanTotalTimeBg); // since reset
+                            sb.append(" (max ");
+                            formatTimeMs(sb, unoptimizedScanMaxTimeBg); // since reset
+                            sb.append(")");
+                            if (unoptimizedScanTimerBg.isRunningLocked()) {
+                                sb.append(" (currently running unoptimized in background)");
+                            }
+                        }
+                    }
                     pw.println(sb.toString());
                     uidActivity = true;
                 }
@@ -4696,8 +4791,11 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append(wakelocks.keyAt(iw));
                 linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_FULL), rawRealtime,
                         "full", which, linePrefix);
-                linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_PARTIAL), rawRealtime,
+                final Timer pTimer = wl.getWakeTime(WAKE_TYPE_PARTIAL);
+                linePrefix = printWakeLock(sb, pTimer, rawRealtime,
                         "partial", which, linePrefix);
+                linePrefix = printWakeLock(sb, pTimer != null ? pTimer.getSubTimer() : null,
+                        rawRealtime, "background partial", which, linePrefix);
                 linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_WINDOW), rawRealtime,
                         "window", which, linePrefix);
                 linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_DRAW), rawRealtime,

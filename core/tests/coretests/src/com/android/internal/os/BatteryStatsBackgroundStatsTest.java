@@ -205,9 +205,9 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         // App in foreground
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
 
-        // Start timer
+        // Start timer (optimized)
         curr = 1000 * (clocks.realtime = clocks.uptime = 202);
-        bi.noteBluetoothScanStartedFromSourceLocked(ws);
+        bi.noteBluetoothScanStartedFromSourceLocked(ws, false);
 
         // Move to background
         curr = 1000 * (clocks.realtime = clocks.uptime = 254);
@@ -221,21 +221,44 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         curr = 1000 * (clocks.realtime = clocks.uptime = 409);
         bi.noteBluetoothScanStoppedFromSourceLocked(ws);
 
+        // Start timer (unoptimized)
+        curr = 1000 * (clocks.realtime = clocks.uptime = 1000);
+        bi.noteBluetoothScanStartedFromSourceLocked(ws, true);
+
+        // On battery
+        curr = 1000 * (clocks.realtime = clocks.uptime = 2001);
+        bi.updateTimeBasesLocked(true, false, curr, curr); // on battery
+
+        // Move to foreground
+        curr = 1000 * (clocks.realtime = clocks.uptime = 3004);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        // Stop timer
+        curr = 1000 * (clocks.realtime = clocks.uptime = 4008);
+        bi.noteBluetoothScanStoppedFromSourceLocked(ws);
+
         // Test
-        curr = 1000 * (clocks.realtime = clocks.uptime = 657);
+        curr = 1000 * (clocks.realtime = clocks.uptime = 5000);
         BatteryStats.Timer timer = bi.getUidStats().get(UID).getBluetoothScanTimer();
         BatteryStats.Timer bgTimer = bi.getUidStats().get(UID).getBluetoothScanBackgroundTimer();
+        BatteryStats.Timer badTimer = bi.getUidStats().get(UID).getBluetoothUnoptimizedScanTimer();
+        BatteryStats.Timer badBgTimer = bi.getUidStats().get(UID)
+                .getBluetoothUnoptimizedScanBackgroundTimer();
 
         long time = timer.getTotalTimeLocked(curr, STATS_SINCE_CHARGED);
         int count = timer.getCountLocked(STATS_SINCE_CHARGED);
         int bgCount = bgTimer.getCountLocked(STATS_SINCE_CHARGED);
         long actualTime = timer.getTotalDurationMsLocked(clocks.realtime) * 1000;
         long bgTime = bgTimer.getTotalDurationMsLocked(clocks.realtime) * 1000;
-        assertEquals((305 - 202) * 1000, time);
-        assertEquals(1, count);
-        assertEquals(0, bgCount);
-        assertEquals((305 - 202) * 1000, actualTime);
-        assertEquals((305 - 254) * 1000, bgTime);
+        long badTime = badTimer.getTotalDurationMsLocked(clocks.realtime) * 1000;
+        long badBgTime = badBgTimer.getTotalDurationMsLocked(clocks.realtime) * 1000;
+        assertEquals((305 - 202 + 4008 - 2001) * 1000, time);
+        assertEquals(1, count); // second scan starts off-battery
+        assertEquals(0, bgCount); // first scan starts in fg, second starts off-battery
+        assertEquals((305 - 202 + 4008 - 2001) * 1000, actualTime);
+        assertEquals((305 - 254 + 3004 - 2001) * 1000, bgTime);
+        assertEquals((4008 - 2001) * 1000, badTime);
+        assertEquals((3004 - 2001) * 1000, badBgTime);
     }
 
     @SmallTest
