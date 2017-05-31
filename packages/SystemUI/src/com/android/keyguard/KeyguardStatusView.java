@@ -147,8 +147,10 @@ public class KeyguardStatusView extends GridLayout {
         mClockView.setLayoutParams(layoutParams);
         mDateView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
-        mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+        if (mOwnerInfo != null) {
+            mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+        }
     }
 
     public void refreshTime() {
