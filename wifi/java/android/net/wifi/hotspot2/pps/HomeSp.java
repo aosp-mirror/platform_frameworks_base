@@ -52,9 +52,19 @@ public final class HomeSp implements Parcelable {
      * FQDN (Fully Qualified Domain Name) of this home service provider.
      */
     private String mFqdn = null;
+    /**
+     * Set the FQDN (Fully Qualified Domain Name) associated with this home service provider.
+     *
+     * @param fqdn The FQDN to set to
+     */
     public void setFqdn(String fqdn) {
         mFqdn = fqdn;
     }
+    /**
+     * Get the FQDN (Fully Qualified Domain Name) associated with this home service provider.
+     *
+     * @return the FQDN associated with this home service provider
+     */
     public String getFqdn() {
         return mFqdn;
     }
@@ -63,9 +73,19 @@ public final class HomeSp implements Parcelable {
      * Friendly name of this home service provider.
      */
     private String mFriendlyName = null;
+    /**
+     * Set the friendly name associated with this home service provider.
+     *
+     * @param friendlyName The friendly name to set to
+     */
     public void setFriendlyName(String friendlyName) {
         mFriendlyName = friendlyName;
     }
+    /**
+     * Get the friendly name associated with this home service provider.
+     *
+     * @return the friendly name associated with this home service provider
+     */
     public String getFriendlyName() {
         return mFriendlyName;
     }
@@ -184,9 +204,21 @@ public final class HomeSp implements Parcelable {
      * which this provider is a member.
      */
     private long[] mRoamingConsortiumOis = null;
+    /**
+     * Set the Organization Identifiers (OIs) identifying a roaming consortium of which this
+     * provider is a member.
+     *
+     * @param roamingConsortiumOis Array of roaming consortium OIs
+     */
     public void setRoamingConsortiumOis(long[] roamingConsortiumOis) {
         mRoamingConsortiumOis = roamingConsortiumOis;
     }
+    /**
+     * Get the Organization Identifiers (OIs) identifying a roaming consortium of which this
+     * provider is a member.
+     *
+     * @return array of roaming consortium OIs
+     */
     public long[] getRoamingConsortiumOis() {
         return mRoamingConsortiumOis;
     }
