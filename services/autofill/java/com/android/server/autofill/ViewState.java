@@ -16,6 +16,7 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
@@ -157,7 +158,7 @@ final class ViewState {
     // TODO: refactor / rename / document this method (and maybeCallOnFillReady) to make it clear
     // that it can change the value and update the UI; similarly, should replace code that
     // directly sets mAutofillValue to use encapsulation.
-    void update(@Nullable AutofillValue autofillValue, @Nullable Rect virtualBounds) {
+    void update(@Nullable AutofillValue autofillValue, @Nullable Rect virtualBounds, int flags) {
         if (autofillValue != null) {
             mCurrentValue = autofillValue;
         }
@@ -165,7 +166,7 @@ final class ViewState {
             mVirtualBounds = virtualBounds;
         }
 
-        maybeCallOnFillReady();
+        maybeCallOnFillReady(flags);
     }
 
     /**
@@ -173,8 +174,8 @@ final class ViewState {
      * Listener#onFillReady(FillResponse, AutofillId, AutofillValue)} if the
      * fill UI is ready to be displayed (i.e. when response and bounds are set).
      */
-    void maybeCallOnFillReady() {
-        if ((mState & STATE_AUTOFILLED) != 0) {
+    void maybeCallOnFillReady(int flags) {
+        if ((mState & STATE_AUTOFILLED) != 0 && (flags & FLAG_MANUAL_REQUEST) == 0) {
             if (sDebug) Slog.d(TAG, "Ignoring UI for " + id + " on " + getStateAsString());
             return;
         }
