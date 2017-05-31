@@ -160,7 +160,7 @@ cc_library_host_shared {
 cc_test_host {
     name: "aapt2_tests",
     srcs: ["**/*_test.cpp"],
-    static_libs: ["libaapt2"],
+    static_libs: ["libaapt2", "libgmock"],
     defaults: ["aapt_defaults"],
 }
 
