@@ -25,7 +25,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center">
-    <TextClock android:id="@+id/date_view"
+    <com.android.systemui.statusbar.policy.DateView
+        android:id="@+id/date_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/clock_white"
