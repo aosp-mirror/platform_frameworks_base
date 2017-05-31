@@ -24,6 +24,7 @@ interface IStorageStatsManager {
     boolean isQuotaSupported(String volumeUuid, String callingPackage);
     long getTotalBytes(String volumeUuid, String callingPackage);
     long getFreeBytes(String volumeUuid, String callingPackage);
+    long getCacheBytes(String volumeUuid, String callingPackage);
     long getCacheQuotaBytes(String volumeUuid, int uid, String callingPackage);
     StorageStats queryStatsForPackage(String volumeUuid, String packageName, int userId, String callingPackage);
     StorageStats queryStatsForUid(String volumeUuid, int uid, String callingPackage);

@@ -395,10 +395,11 @@ public class Installer extends SystemService {
         }
     }
 
-    public void freeCache(String uuid, long freeStorageSize, int flags) throws InstallerException {
+    public void freeCache(String uuid, long targetFreeBytes, long cacheReservedBytes, int flags)
+            throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.freeCache(uuid, freeStorageSize, flags);
+            mInstalld.freeCache(uuid, targetFreeBytes, cacheReservedBytes, flags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
