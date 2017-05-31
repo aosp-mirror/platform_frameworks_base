@@ -60,7 +60,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_ST
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TASK_SNAPSHOT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
@@ -1128,16 +1127,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + ", mOrientationSensorEnabled=" + mOrientationSensorEnabled
                 + ", mKeyguardDrawComplete=" + mKeyguardDrawComplete
                 + ", mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
+        final boolean keyguardGoingAway = mWindowManagerInternal.isKeyguardGoingAway();
+
         boolean disable = true;
         // Note: We postpone the rotating of the screen until the keyguard as well as the
-        // window manager have reported a draw complete.
-        if (mScreenOnEarly && mAwake &&
-                mKeyguardDrawComplete && mWindowManagerDrawComplete) {
+        // window manager have reported a draw complete or the keyguard is going away in dismiss
+        // mode.
+        if (mScreenOnEarly && mAwake && ((mKeyguardDrawComplete && mWindowManagerDrawComplete)
+                || keyguardGoingAway)) {
             if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
                 if (!mOrientationSensorEnabled) {
-                    mOrientationListener.enable();
+                    // Don't clear the current sensor orientation if the keyguard is going away in
+                    // dismiss mode. This allows window manager to use the last sensor reading to
+                    // determine the orientation vs. falling back to the last known orientation if
+                    // the sensor reading was cleared which can cause it to relaunch the app that
+                    // will show in the wrong orientation first before correcting leading to app
+                    // launch delays.
+                    mOrientationListener.enable(!keyguardGoingAway /* clearCurrentRotation */);
                     if(localLOGV) Slog.v(TAG, "Enabling listeners");
                     mOrientationSensorEnabled = true;
                 }
