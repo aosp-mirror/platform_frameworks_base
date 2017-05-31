@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_CPU;
+import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_RADIO;
+import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI;
 
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -231,10 +233,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void publish(Context context) {
         mContext = context;
-        mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_radioScanningTimeout)
-                * 1000L);
-        mStats.setPowerProfile(new PowerProfile(context));
+        synchronized (mStats) {
+            mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_radioScanningTimeout)
+                    * 1000L);
+            mStats.setPowerProfileLocked(new PowerProfile(context));
+        }
         ServiceManager.addService(BatteryStats.SERVICE_NAME, asBinder());
     }
 
@@ -245,9 +249,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void initPowerManagement() {
         final PowerManagerInternal powerMgr = LocalServices.getService(PowerManagerInternal.class);
         powerMgr.registerLowPowerModeObserver(this);
-        mStats.notePowerSaveMode(
-                powerMgr.getLowPowerState(ServiceType.BATTERY_STATS)
-                        .batterySaverEnabled);
+        synchronized (mStats) {
+            mStats.notePowerSaveModeLocked(
+                    powerMgr.getLowPowerState(ServiceType.BATTERY_STATS)
+                            .batterySaverEnabled);
+        }
         (new WakeupReasonThread()).start();
     }
 
@@ -280,7 +286,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     public void onLowPowerModeChanged(PowerSaveState result) {
         synchronized (mStats) {
-            mStats.notePowerSaveMode(result.batterySaverEnabled);
+            mStats.notePowerSaveModeLocked(result.batterySaverEnabled);
         }
     }
 
@@ -606,8 +612,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteMobileRadioPowerState(int powerState, long timestampNs, int uid) {
         enforceCallingPermission();
+        boolean update;
         synchronized (mStats) {
-            mStats.noteMobileRadioPowerState(powerState, timestampNs, uid);
+            update = mStats.noteMobileRadioPowerStateLocked(powerState, timestampNs, uid);
+        }
+
+        if (update) {
+            mHandler.scheduleSync("modem-data", UPDATE_RADIO);
         }
     }
 
@@ -759,7 +770,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM) ? "active"
                         : "inactive";
                 mHandler.scheduleSync("wifi-data: " + type,
-                        BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI);
+                        UPDATE_WIFI);
             }
             mStats.noteWifiRadioPowerState(powerState, tsNanos, uid);
         }
@@ -917,9 +928,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     public void noteNetworkStatsEnabled() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteNetworkStatsEnabledLocked();
-        }
+        mHandler.scheduleSync("network-stats-enabled", UPDATE_RADIO | UPDATE_WIFI);
     }
 
     @Override
@@ -985,9 +994,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return;
         }
 
-        synchronized (mStats) {
-            mStats.updateWifiStateLocked(info);
-        }
+        mStats.updateWifiState(info);
     }
 
     @Override
@@ -1012,9 +1019,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return;
         }
 
-        synchronized (mStats) {
-            mStats.updateMobileRadioStateLocked(SystemClock.elapsedRealtime(), info);
-        }
+        mStats.updateMobileRadioState(info);
     }
 
     public boolean isOnBattery() {
@@ -1489,7 +1494,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 return;
             }
 
-            if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI) != 0) {
+            if ((updateFlags & UPDATE_WIFI) != 0) {
                 if (mWifiManager == null) {
                     mWifiManager = IWifiManager.Stub.asInterface(
                             ServiceManager.getService(Context.WIFI_SERVICE));
@@ -1558,14 +1563,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 mStats.updateKernelWakelocksLocked();
                 mStats.updateKernelMemoryBandwidthLocked();
 
-                if (wifiInfo != null) {
-                    if (wifiInfo.isValid()) {
-                        mStats.updateWifiStateLocked(extractDelta(wifiInfo));
-                    } else {
-                        Slog.e(TAG, "wifi info is invalid: " + wifiInfo);
-                    }
-                }
-
                 if (bluetoothInfo != null) {
                     if (bluetoothInfo.isValid()) {
                         mStats.updateBluetoothStateLocked(bluetoothInfo);
@@ -1573,14 +1570,21 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         Slog.e(TAG, "bluetooth info is invalid: " + bluetoothInfo);
                     }
                 }
+            }
 
-                if (modemInfo != null) {
-                    if (modemInfo.isValid()) {
-                        mStats.updateMobileRadioStateLocked(SystemClock.elapsedRealtime(),
-                                modemInfo);
-                    } else {
-                        Slog.e(TAG, "modem info is invalid: " + modemInfo);
-                    }
+            if (wifiInfo != null) {
+                if (wifiInfo.isValid()) {
+                    mStats.updateWifiState(extractDelta(wifiInfo));
+                } else {
+                    Slog.e(TAG, "wifi info is invalid: " + wifiInfo);
+                }
+            }
+
+            if (modemInfo != null) {
+                if (modemInfo.isValid()) {
+                    mStats.updateMobileRadioState(modemInfo);
+                } else {
+                    Slog.e(TAG, "modem info is invalid: " + modemInfo);
                 }
             }
         }
