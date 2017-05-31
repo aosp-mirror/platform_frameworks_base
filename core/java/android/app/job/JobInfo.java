@@ -35,6 +35,7 @@ import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -501,7 +502,7 @@ public class JobInfo implements Parcelable {
         if (constraintFlags != j.constraintFlags) {
             return false;
         }
-        if (!Objects.deepEquals(triggerContentUris, j.triggerContentUris)) {
+        if (!Arrays.equals(triggerContentUris, j.triggerContentUris)) {
             return false;
         }
         if (triggerContentUpdateDelay != j.triggerContentUpdateDelay) {
@@ -556,37 +557,37 @@ public class JobInfo implements Parcelable {
     public int hashCode() {
         int hashCode = jobId;
         if (extras != null) {
-            hashCode = 31*hashCode + extras.hashCode();
+            hashCode = 31 * hashCode + extras.hashCode();
         }
         if (transientExtras != null) {
-            hashCode = 31*hashCode + transientExtras.hashCode();
+            hashCode = 31 * hashCode + transientExtras.hashCode();
         }
         if (clipData != null) {
-            hashCode = 31*hashCode + clipData.hashCode();
+            hashCode = 31 * hashCode + clipData.hashCode();
         }
         hashCode = 31*hashCode + clipGrantFlags;
         if (service != null) {
-            hashCode = 31*hashCode + service.hashCode();
+            hashCode = 31 * hashCode + service.hashCode();
         }
-        hashCode = 31*hashCode + constraintFlags;
+        hashCode = 31 * hashCode + constraintFlags;
         if (triggerContentUris != null) {
-            hashCode = 31*hashCode + triggerContentUris.hashCode();
+            hashCode = 31 * hashCode + Arrays.hashCode(triggerContentUris);
         }
-        hashCode = 31*hashCode + Long.hashCode(triggerContentUpdateDelay);
-        hashCode = 31*hashCode + Long.hashCode(triggerContentMaxDelay);
-        hashCode = 31*hashCode + Boolean.hashCode(hasEarlyConstraint);
-        hashCode = 31*hashCode + Boolean.hashCode(hasLateConstraint);
-        hashCode = 31*hashCode + networkType;
-        hashCode = 31*hashCode + Long.hashCode(minLatencyMillis);
-        hashCode = 31*hashCode + Long.hashCode(maxExecutionDelayMillis);
-        hashCode = 31*hashCode + Boolean.hashCode(isPeriodic);
-        hashCode = 31*hashCode + Boolean.hashCode(isPersisted);
-        hashCode = 31*hashCode + Long.hashCode(intervalMillis);
-        hashCode = 31*hashCode + Long.hashCode(flexMillis);
-        hashCode = 31*hashCode + Long.hashCode(initialBackoffMillis);
-        hashCode = 31*hashCode + backoffPolicy;
-        hashCode = 31*hashCode + priority;
-        hashCode = 31*hashCode + flags;
+        hashCode = 31 * hashCode + Long.hashCode(triggerContentUpdateDelay);
+        hashCode = 31 * hashCode + Long.hashCode(triggerContentMaxDelay);
+        hashCode = 31 * hashCode + Boolean.hashCode(hasEarlyConstraint);
+        hashCode = 31 * hashCode + Boolean.hashCode(hasLateConstraint);
+        hashCode = 31 * hashCode + networkType;
+        hashCode = 31 * hashCode + Long.hashCode(minLatencyMillis);
+        hashCode = 31 * hashCode + Long.hashCode(maxExecutionDelayMillis);
+        hashCode = 31 * hashCode + Boolean.hashCode(isPeriodic);
+        hashCode = 31 * hashCode + Boolean.hashCode(isPersisted);
+        hashCode = 31 * hashCode + Long.hashCode(intervalMillis);
+        hashCode = 31 * hashCode + Long.hashCode(flexMillis);
+        hashCode = 31 * hashCode + Long.hashCode(initialBackoffMillis);
+        hashCode = 31 * hashCode + backoffPolicy;
+        hashCode = 31 * hashCode + priority;
+        hashCode = 31 * hashCode + flags;
         return hashCode;
     }
 
