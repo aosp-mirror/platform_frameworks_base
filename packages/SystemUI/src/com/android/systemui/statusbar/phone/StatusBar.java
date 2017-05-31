@@ -36,6 +36,7 @@ import android.R.style;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
@@ -730,6 +731,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mReinflateNotificationsOnUserSwitched;
     private HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
+    @Nullable private View mAmbientIndicationContainer;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -1080,6 +1082,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 (ViewGroup) mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
                 mKeyguardBottomArea.getLockIcon());
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
+
+        mAmbientIndicationContainer = mStatusBarWindow.findViewById(
+                R.id.ambient_indication_container);
 
         // set the initial view visibility
         setAreThereNotifications();
@@ -2785,6 +2790,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mKeyguardIndicationController;
     }
 
+    @Nullable
+    public View getAmbientIndicationContainer() {
+        return mAmbientIndicationContainer;
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
@@ -4393,6 +4403,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mKeyguardUserSwitcher.setKeyguard(true, fromShadeLocked);
             }
             mStatusBarView.removePendingHideExpandedRunnables();
+            if (mAmbientIndicationContainer != null) {
+                mAmbientIndicationContainer.setVisibility(View.VISIBLE);
+            }
         } else {
             mKeyguardIndicationController.setVisible(false);
             if (mKeyguardUserSwitcher != null) {
@@ -4400,6 +4413,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                         goingToFullShade ||
                         mState == StatusBarState.SHADE_LOCKED ||
                         fromShadeLocked);
+            }
+            if (mAmbientIndicationContainer != null) {
+                mAmbientIndicationContainer.setVisibility(View.INVISIBLE);
             }
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {

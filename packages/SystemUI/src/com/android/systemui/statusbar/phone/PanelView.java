@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
@@ -1071,21 +1072,25 @@ public abstract class PanelView extends FrameLayout {
         });
         animator.start();
         mHeightAnimator = animator;
-        mKeyguardBottomArea.getIndicationArea().animate()
-                .translationY(-mHintDistance)
-                .setDuration(250)
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        mKeyguardBottomArea.getIndicationArea().animate()
-                                .translationY(0)
-                                .setDuration(450)
-                                .setInterpolator(mBounceInterpolator)
-                                .start();
-                    }
-                })
-                .start();
+
+        View[] viewsToAnimate = {
+                mKeyguardBottomArea.getIndicationArea(),
+                mStatusBar.getAmbientIndicationContainer()};
+        for (View v : viewsToAnimate) {
+            if (v == null) {
+                continue;
+            }
+            v.animate()
+                    .translationY(-mHintDistance)
+                    .setDuration(250)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                    .withEndAction(() -> v.animate()
+                            .translationY(0)
+                            .setDuration(450)
+                            .setInterpolator(mBounceInterpolator)
+                            .start())
+                    .start();
+        }
     }
 
     /**
