@@ -694,8 +694,7 @@ class WindowSurfacePlacer {
             SurfaceControl surfaceControl = new SurfaceControl(mService.mFxSession,
                     "thumbnail anim", dirty.width(), dirty.height(),
                     PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN,
-                    appToken.windowType,
-                    window != null ? window.mOwnerUid : Binder.getCallingUid());
+                    appToken.windowType, window.mOwnerUid);
             surfaceControl.setLayerStack(display.getLayerStack());
             if (SHOW_TRANSACTIONS) {
                 Slog.i(TAG, "  THUMBNAIL " + surfaceControl + ": CREATE");
