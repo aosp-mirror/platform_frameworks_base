@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"背景處理程序限制"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"顯示所有無回應程式"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"為背景應用程式顯示「應用程式無回應」對話方塊"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"顯示通知管道警告"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"當應用程式未經有效管道發佈通知時，在畫面上顯示警告"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"強制允許將應用程式寫入外部儲存空間"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"允許將任何應用程式寫入外部儲存空間 (無論資訊清單值為何)"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"將活動強制設為可調整大小"</string>
@@ -323,15 +321,12 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"這是一項實驗性功能，可能會對效能造成影響。"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"已改為<xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"還有大約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_duration_only_enhanced (5992456722677973678) -->
-    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"根據你的使用情形，剩餘時間大約還有 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"再過 <xliff:g id="TIME">%1$s</xliff:g>就能完成充電"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"還剩 <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_duration_only_short_enhanced (7450425624026394823) -->
-    <skip />
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"根據你的使用情形，剩餘時間還有 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - 約剩 <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (4401782117770255046) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - 根據你的使用情形，剩餘時間大約還有 <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - 還剩 <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充飽"</string>
