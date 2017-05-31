@@ -467,8 +467,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Wasifu wako wa kazini unasimamiwa na <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Wasifu umeunganishwa kwenye <xliff:g id="APPLICATION">%2$s</xliff:g>, ambayo inaweza kufuatilia shughuli za mtandao wako wa kazini, ikiwa ni pamoja na barua pepe, programu na tovuti.\n\n Wasiliana na msimamizi wako kwa maelezo zaidi."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Wasifu wako wa kazini unasimamiwa na <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Wasifu umeunganishwa kwenye <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ambayo inaweza kufuatilia shughuli zako kwenye mtandao wa kazini, ikiwa ni pamoja na barua pepe, programu na tovuti.\n\n Umeunganishwa pia kwenye  <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ambayo inaweza kufuatilia shughuli zako kwenye mtandao wa binafsi."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Imefunguliwa kwa ajili ya <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> inatumika"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Kifaa kitaendelea kuwa katika hali ya kufungwa hadi utakapokifungua mwenyewe"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Pata arifa kwa haraka"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Zitazame kabla hujafungua"</string>
@@ -575,6 +574,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"Dakika 15"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"Dakika 30"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"Saa 1"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"TENDUA"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Imeahirishwa kwa <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Matumizi ya betri"</string>

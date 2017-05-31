@@ -467,8 +467,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"ඔබේ කාර්ය පැතිකඩ කළමනාකරණය කරන්නේ <xliff:g id="ORGANIZATION">%1$s</xliff:g> මගිනි. ඔබේ ඊ-තැපැල්, යෙදුම්, සහ වෙබ් අඩවි ඇතුළු, ඔබේ ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION">%2$s</xliff:g> වෙත පැතිකඩ සම්බන්ධය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබගේ පරිපාලක අමතන්න."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"ඔබේ කාර්යාල පැතිකඩ කළමනාකරණය කරන්නේ <xliff:g id="ORGANIZATION">%1$s</xliff:g> විසිනි. ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ කාර්යාල ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, වෙත පැතිකඩ සම්බන්ධ වී ඇත.\n\nඔබ ඔබේ පෞද්ගලික ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> වෙතද සම්බන්ධ වී ඇත."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> සඳහා අගුලු හරින ලදී"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> ධාවනය වේ"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ඔබ අතින් අගුළු අරින තුරු උපකරණය අගුළු වැටි තිබේ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"දැනුම්දීම් ඉක්මනින් ලබාගන්න"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ඔබ අඟුළු හැරීමට කලින් ඒවා බලන්න"</string>
@@ -575,6 +574,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"මිනිත්තු 15"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"මිනිත්තු 30"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"පැය 1"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"අස් කරන්න"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g>ක් මදක් නතර කරන ලදී"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"බැටරි භාවිතය"</string>
