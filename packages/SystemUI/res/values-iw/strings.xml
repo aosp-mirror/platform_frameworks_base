@@ -471,8 +471,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>. הפרופיל מחובר לאפליקציה <xliff:g id="APPLICATION">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nלמידע נוסף, פנה למנהל המערכת."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"פרופיל העבודה שלך מנוהל על ידי <xliff:g id="ORGANIZATION">%1$s</xliff:g>. הפרופיל מחובר לאפליקציה <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת, כולל הודעות אימייל, אפליקציות ואתרים.\n\nהפרופיל מחובר גם לאפליקציה <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, שיכולה לעקוב אחר הפעילות שלך ברשת."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"הנעילה בוטלה על ידי <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> פועל"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"המכשיר יישאר נעול עד שתבטל את נעילתו באופן ידני"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"קבל התראות מהר יותר"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"צפה בהן לפני שתבטל נעילה"</string>
@@ -583,6 +582,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 דקות"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 דקות"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"שעה אחת"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"ביטול"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"נדחה לטיפול בעוד <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"שימוש בסוללה"</string>
@@ -640,7 +641,7 @@
     <string name="headset" msgid="4534219457597457353">"אוזניות"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"אוזניות מחוברות"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"אוזניות מחוברות"</string>
-    <string name="data_saver" msgid="5037565123367048522">"‏חוסך הנתונים&lt;br&gt;(Data Saver)"</string>
+    <string name="data_saver" msgid="5037565123367048522">"‏חוסך הנתונים (Data Saver)"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"‏חוסך הנתונים (Data Saver) פועל"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"‏חוסך הנתונים (Data Saver) כבוי"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"פועל"</string>

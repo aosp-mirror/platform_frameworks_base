@@ -467,8 +467,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Het profiel is verbonden met <xliff:g id="APPLICATION">%2$s</xliff:g>, waarmee je werkgerelateerde netwerkactiviteit (waaronder e-mails, apps en websites) kan worden bijgehouden.\n\nNeem contact op met je beheerder voor meer informatie."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Het profiel is verbonden met <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, waarmee je werkgerelateerde netwerkactiviteit (waaronder e-mails, apps en websites) kan worden bijgehouden.\n\nJe bent ook verbonden met <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, waarmee je persoonlijke netwerkactiviteit kan worden bijgehouden."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Ontgrendeld voor <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> is actief"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Het apparaat blijft vergrendeld totdat u het handmatig ontgrendelt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Sneller meldingen ontvangen"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Weergeven voordat u ontgrendelt"</string>
@@ -575,6 +574,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minuten"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 minuten"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 uur"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"ONGEDAAN MAKEN"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Snoozefunctie <xliff:g id="TIME_AMOUNT">%1$s</xliff:g> actief"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Accugebruik"</string>

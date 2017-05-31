@@ -467,8 +467,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು <xliff:g id="ORGANIZATION">%1$s</xliff:g> ನಿರ್ವಹಿಸುತ್ತಿದೆ. <xliff:g id="APPLICATION">%2$s</xliff:g> ಗೆ ಪ್ರೊಫೈಲ್ ಸಂಪರ್ಕಗೊಂಡಿರುವ ಕಾರಣ, ಅದು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಾಗೂ ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು.\n\nಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ, ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು <xliff:g id="ORGANIZATION">%1$s</xliff:g> ನಿರ್ವಹಿಸುತ್ತಿದೆ. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ಗೆ ಪ್ರೊಫೈಲ್ ಸಂಪರ್ಕಗೊಂಡಿರುವ ಕಾರಣ, ಅದು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು.\n\nನೀವು <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ಗೆ ಕೂಡಾ ಸಂಪರ್ಕಗೊಂಡಿದ್ದೀರಿ, ಇದು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> ಗಾಗಿ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> ಚಾಲನೆಯಲ್ಲಿದೆ"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ನೀವಾಗಿಯೇ ಅನ್‌ಲಾಕ್‌ ಮಾಡುವವರೆಗೆ ಸಾಧನವು ಲಾಕ್‌ ಆಗಿಯೇ ಇರುತ್ತದೆ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ವೇಗವಾಗಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಿ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ನೀವು ಅನ್‌ಲಾಕ್‌ ಮಾಡುವ ಮೊದಲೇ ಅವುಗಳನ್ನು ನೋಡಿ"</string>
@@ -575,6 +574,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 ನಿಮಿಷಗಳು"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 ನಿಮಿಷಗಳು"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ಗಂಟೆ"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"ರದ್ದುಮಾಡಿ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ಗೆ ಸ್ನೂಜ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ಬ್ಯಾಟರಿ ಬಳಕೆ"</string>
