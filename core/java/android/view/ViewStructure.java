@@ -269,6 +269,9 @@ public abstract class ViewStructure {
      * Create a new child {@link ViewStructure} in this view, putting into the list of
      * children at <var>index</var>.
      *
+     * <p><b>NOTE: </b>you must pre-allocate space for the child first, by calling either
+     * {@link #addChildCount(int)} or {@link #setChildCount(int)}.
+     *
      * @return Returns an fresh {@link ViewStructure} ready to be filled in.
      */
     public abstract ViewStructure newChild(int index);
@@ -279,6 +282,10 @@ public abstract class ViewStructure {
      * to build its content (and children etc).  Once done, some thread must call
      * {@link #asyncCommit} to tell the containing {@link ViewStructure} that the async
      * population is done.
+     *
+     * <p><b>NOTE: </b>you must pre-allocate space for the child first, by calling either
+     * {@link #addChildCount(int)} or {@link #setChildCount(int)}.
+     *
      * @return Returns an fresh {@link ViewStructure} ready to be filled in.
      */
     public abstract ViewStructure asyncNewChild(int index);
