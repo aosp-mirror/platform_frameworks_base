@@ -1777,7 +1777,7 @@ final class TaskRecord {
         pw.print(prefix + "hasBeenVisible=" + hasBeenVisible);
                 pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
                 pw.print(" isResizeable=" + isResizeable());
-                pw.print(" firstActiveTime=" + lastActiveTime);
+                pw.print(" firstActiveTime=" + firstActiveTime);
                 pw.print(" lastActiveTime=" + lastActiveTime);
                 pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
     }
