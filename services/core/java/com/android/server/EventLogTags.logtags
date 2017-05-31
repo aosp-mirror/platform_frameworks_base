@@ -41,14 +41,10 @@ option java_package com.android.server
 # ---------------------------
 # DeviceStorageMonitorService.java
 # ---------------------------
-# The disk space free on the /data partition, in bytes
-2744 free_storage_changed (data|2|2)
-# Device low memory notification and disk space free on the /data partition, in bytes at that time
-2745 low_storage (data|2|2)
-# disk space free on the /data, /system, and /cache partitions in bytes
-2746 free_storage_left (data|2|2),(system|2|2),(cache|2|2)
-# file on cache partition was deleted
+# File on cache partition was deleted
 2748 cache_file_deleted (path|3)
+# Storage volume state and usable space in bytes
+2749 storage_state (uuid|3),(old_state|1),(new_state|1),(usable|2),(total|2)
 
 
 # ---------------------------
