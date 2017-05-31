@@ -29,6 +29,11 @@
 
 namespace aapt {
 
+std::ostream& operator<<(std::ostream& out, const Value& value) {
+  value.Print(&out);
+  return out;
+}
+
 template <typename Derived>
 void BaseValue<Derived>::Accept(RawValueVisitor* visitor) {
   visitor->Visit(static_cast<Derived*>(this));
@@ -346,6 +351,15 @@ Attribute::Attribute(bool w, uint32_t t)
   weak_ = w;
 }
 
+std::ostream& operator<<(std::ostream& out, const Attribute::Symbol& s) {
+  if (s.symbol.name) {
+    out << s.symbol.name.value().entry;
+  } else {
+    out << "???";
+  }
+  return out << "=" << s.value;
+}
+
 template <typename T>
 constexpr T* add_pointer(T& val) {
   return &val;
@@ -361,31 +375,27 @@ bool Attribute::Equals(const Value* value) const {
     return false;
   }
 
-  if (type_mask != other->type_mask || min_int != other->min_int ||
-      max_int != other->max_int) {
+  if (type_mask != other->type_mask || min_int != other->min_int || max_int != other->max_int) {
     return false;
   }
 
   std::vector<const Symbol*> sorted_a;
   std::transform(symbols.begin(), symbols.end(), std::back_inserter(sorted_a),
                  add_pointer<const Symbol>);
-  std::sort(sorted_a.begin(), sorted_a.end(),
-            [](const Symbol* a, const Symbol* b) -> bool {
-              return a->symbol.name < b->symbol.name;
-            });
+  std::sort(sorted_a.begin(), sorted_a.end(), [](const Symbol* a, const Symbol* b) -> bool {
+    return a->symbol.name < b->symbol.name;
+  });
 
   std::vector<const Symbol*> sorted_b;
-  std::transform(other->symbols.begin(), other->symbols.end(),
-                 std::back_inserter(sorted_b), add_pointer<const Symbol>);
-  std::sort(sorted_b.begin(), sorted_b.end(),
-            [](const Symbol* a, const Symbol* b) -> bool {
-              return a->symbol.name < b->symbol.name;
-            });
+  std::transform(other->symbols.begin(), other->symbols.end(), std::back_inserter(sorted_b),
+                 add_pointer<const Symbol>);
+  std::sort(sorted_b.begin(), sorted_b.end(), [](const Symbol* a, const Symbol* b) -> bool {
+    return a->symbol.name < b->symbol.name;
+  });
 
   return std::equal(sorted_a.begin(), sorted_a.end(), sorted_b.begin(),
                     [](const Symbol* a, const Symbol* b) -> bool {
-                      return a->symbol.Equals(&b->symbol) &&
-                             a->value == b->value;
+                      return a->symbol.Equals(&b->symbol) && a->value == b->value;
                     });
 }
 
@@ -588,14 +598,50 @@ bool Attribute::Matches(const Item* item, DiagMessage* out_msg) const {
   return true;
 }
 
+std::ostream& operator<<(std::ostream& out, const Style::Entry& entry) {
+  if (entry.key.name) {
+    out << entry.key.name.value();
+  } else if (entry.key.id) {
+    out << entry.key.id.value();
+  } else {
+    out << "???";
+  }
+  out << " = " << entry.value;
+  return out;
+}
+
+template <typename T>
+std::vector<T*> ToPointerVec(std::vector<T>& src) {
+  std::vector<T*> dst;
+  dst.reserve(src.size());
+  for (T& in : src) {
+    dst.push_back(&in);
+  }
+  return dst;
+}
+
+template <typename T>
+std::vector<const T*> ToPointerVec(const std::vector<T>& src) {
+  std::vector<const T*> dst;
+  dst.reserve(src.size());
+  for (const T& in : src) {
+    dst.push_back(&in);
+  }
+  return dst;
+}
+
+static bool KeyNameComparator(const Style::Entry* a, const Style::Entry* b) {
+  return a->key.name < b->key.name;
+}
+
 bool Style::Equals(const Value* value) const {
   const Style* other = ValueCast<Style>(value);
   if (!other) {
     return false;
   }
+
   if (bool(parent) != bool(other->parent) ||
-      (parent && other->parent &&
-       !parent.value().Equals(&other->parent.value()))) {
+      (parent && other->parent && !parent.value().Equals(&other->parent.value()))) {
     return false;
   }
 
@@ -603,26 +649,15 @@ bool Style::Equals(const Value* value) const {
     return false;
   }
 
-  std::vector<const Entry*> sorted_a;
-  std::transform(entries.begin(), entries.end(), std::back_inserter(sorted_a),
-                 add_pointer<const Entry>);
-  std::sort(sorted_a.begin(), sorted_a.end(),
-            [](const Entry* a, const Entry* b) -> bool {
-              return a->key.name < b->key.name;
-            });
+  std::vector<const Entry*> sorted_a = ToPointerVec(entries);
+  std::sort(sorted_a.begin(), sorted_a.end(), KeyNameComparator);
 
-  std::vector<const Entry*> sorted_b;
-  std::transform(other->entries.begin(), other->entries.end(),
-                 std::back_inserter(sorted_b), add_pointer<const Entry>);
-  std::sort(sorted_b.begin(), sorted_b.end(),
-            [](const Entry* a, const Entry* b) -> bool {
-              return a->key.name < b->key.name;
-            });
+  std::vector<const Entry*> sorted_b = ToPointerVec(other->entries);
+  std::sort(sorted_b.begin(), sorted_b.end(), KeyNameComparator);
 
   return std::equal(sorted_a.begin(), sorted_a.end(), sorted_b.begin(),
                     [](const Entry* a, const Entry* b) -> bool {
-                      return a->key.Equals(&b->key) &&
-                             a->value->Equals(b->value.get());
+                      return a->key.Equals(&b->key) && a->value->Equals(b->value.get());
                     });
 }
 
@@ -633,8 +668,7 @@ Style* Style::Clone(StringPool* new_pool) const {
   style->comment_ = comment_;
   style->source_ = source_;
   for (auto& entry : entries) {
-    style->entries.push_back(
-        Entry{entry.key, std::unique_ptr<Item>(entry.value->Clone(new_pool))});
+    style->entries.push_back(Entry{entry.key, std::unique_ptr<Item>(entry.value->Clone(new_pool))});
   }
   return style;
 }
@@ -642,26 +676,73 @@ Style* Style::Clone(StringPool* new_pool) const {
 void Style::Print(std::ostream* out) const {
   *out << "(style) ";
   if (parent && parent.value().name) {
-    if (parent.value().private_reference) {
+    const Reference& parent_ref = parent.value();
+    if (parent_ref.private_reference) {
       *out << "*";
     }
-    *out << parent.value().name.value();
+    *out << parent_ref.name.value();
   }
   *out << " [" << util::Joiner(entries, ", ") << "]";
 }
 
-static ::std::ostream& operator<<(::std::ostream& out,
-                                  const Style::Entry& value) {
-  if (value.key.name) {
-    out << value.key.name.value();
-  } else if (value.key.id) {
-    out << value.key.id.value();
-  } else {
-    out << "???";
+Style::Entry CloneEntry(const Style::Entry& entry, StringPool* pool) {
+  Style::Entry cloned_entry{entry.key};
+  if (entry.value != nullptr) {
+    cloned_entry.value.reset(entry.value->Clone(pool));
   }
-  out << " = ";
-  value.value->Print(&out);
-  return out;
+  return cloned_entry;
+}
+
+void Style::MergeWith(Style* other, StringPool* pool) {
+  if (other->parent) {
+    parent = other->parent;
+  }
+
+  // We can't assume that the entries are sorted alphabetically since they're supposed to be
+  // sorted by Resource Id. Not all Resource Ids may be set though, so we can't sort and merge
+  // them keying off that.
+  //
+  // Instead, sort the entries of each Style by their name in a separate structure. Then merge
+  // those.
+
+  std::vector<Entry*> this_sorted = ToPointerVec(entries);
+  std::sort(this_sorted.begin(), this_sorted.end(), KeyNameComparator);
+
+  std::vector<Entry*> other_sorted = ToPointerVec(other->entries);
+  std::sort(other_sorted.begin(), other_sorted.end(), KeyNameComparator);
+
+  auto this_iter = this_sorted.begin();
+  const auto this_end = this_sorted.end();
+
+  auto other_iter = other_sorted.begin();
+  const auto other_end = other_sorted.end();
+
+  std::vector<Entry> merged_entries;
+  while (this_iter != this_end) {
+    if (other_iter != other_end) {
+      if ((*this_iter)->key.name < (*other_iter)->key.name) {
+        merged_entries.push_back(std::move(**this_iter));
+        ++this_iter;
+      } else {
+        // The other overrides.
+        merged_entries.push_back(CloneEntry(**other_iter, pool));
+        if ((*this_iter)->key.name == (*other_iter)->key.name) {
+          ++this_iter;
+        }
+        ++other_iter;
+      }
+    } else {
+      merged_entries.push_back(std::move(**this_iter));
+      ++this_iter;
+    }
+  }
+
+  while (other_iter != other_end) {
+    merged_entries.push_back(CloneEntry(**other_iter, pool));
+    ++other_iter;
+  }
+
+  entries = std::move(merged_entries);
 }
 
 bool Array::Equals(const Value* value) const {
@@ -758,11 +839,6 @@ void Plural::Print(std::ostream* out) const {
   }
 }
 
-static ::std::ostream& operator<<(::std::ostream& out,
-                                  const std::unique_ptr<Item>& item) {
-  return out << *item;
-}
-
 bool Styleable::Equals(const Value* value) const {
   const Styleable* other = ValueCast<Styleable>(value);
   if (!other) {
@@ -810,8 +886,7 @@ struct NameOnlyComparator {
 
 void Styleable::MergeWith(Styleable* other) {
   // Compare only names, because some References may already have their IDs
-  // assigned
-  // (framework IDs that don't change).
+  // assigned (framework IDs that don't change).
   std::set<Reference, NameOnlyComparator> references;
   references.insert(entries.begin(), entries.end());
   references.insert(other->entries.begin(), other->entries.end());

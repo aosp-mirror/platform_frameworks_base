@@ -17,6 +17,7 @@
 #ifndef AAPT_TEST_TEST_H
 #define AAPT_TEST_TEST_H
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "test/Builders.h"
