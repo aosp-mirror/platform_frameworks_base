@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Intent;
 import android.content.pm.InstantAppInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,6 +33,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -76,7 +79,16 @@ class InstantAppRegistry {
 
     private static final String LOG_TAG = "InstantAppRegistry";
 
-    private static final long DEFAULT_UNINSTALLED_INSTANT_APP_CACHE_DURATION_MILLIS =
+    static final long DEFAULT_INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD =
+            DEBUG ? 30 * 1000L /* thirty seconds */ : 7 * 24 * 60 * 60 * 1000L; /* one week */
+
+    private static final long DEFAULT_INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD =
+            DEBUG ? 60 * 1000L /* one min */ : 6 * 30 * 24 * 60 * 60 * 1000L; /* six months */
+
+    static final long DEFAULT_UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD =
+            DEBUG ? 30 * 1000L /* thirty seconds */ : 7 * 24 * 60 * 60 * 1000L; /* one week */
+
+    private static final long DEFAULT_UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD =
             DEBUG ? 60 * 1000L /* one min */ : 6 * 30 * 24 * 60 * 60 * 1000L; /* six months */
 
     private static final String INSTANT_APPS_FOLDER = "instant";
@@ -535,46 +547,195 @@ class InstantAppRegistry {
         }
     }
 
-    public void pruneInstantAppsLPw() {
-        // For now we prune only state for uninstalled instant apps
-        final long maxCacheDurationMillis = Settings.Global.getLong(
+    void pruneInstantApps() {
+        final long maxInstalledCacheDuration = Settings.Global.getLong(
                 mService.mContext.getContentResolver(),
-                Settings.Global.UNINSTALLED_INSTANT_APP_CACHE_DURATION_MILLIS,
-                DEFAULT_UNINSTALLED_INSTANT_APP_CACHE_DURATION_MILLIS);
+                Settings.Global.INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
+                DEFAULT_INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD);
 
-        for (int userId : UserManagerService.getInstance().getUserIds()) {
-            // Prune in-memory state
-            removeUninstalledInstantAppStateLPw((UninstalledInstantAppState state) -> {
-                final long elapsedCachingMillis = System.currentTimeMillis() - state.mTimestamp;
-                return (elapsedCachingMillis > maxCacheDurationMillis);
-            }, userId);
+        final long maxUninstalledCacheDuration = Settings.Global.getLong(
+                mService.mContext.getContentResolver(),
+                Settings.Global.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
+                DEFAULT_UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD);
 
-            // Prune on-disk state
-            File instantAppsDir = getInstantApplicationsDir(userId);
-            if (!instantAppsDir.exists()) {
-                continue;
-            }
-            File[] files = instantAppsDir.listFiles();
-            if (files == null) {
-                continue;
-            }
-            for (File instantDir : files) {
-                if (!instantDir.isDirectory()) {
+        try {
+            pruneInstantApps(Long.MAX_VALUE,
+                    maxInstalledCacheDuration, maxUninstalledCacheDuration);
+        } catch (IOException e) {
+            Slog.e(LOG_TAG, "Error pruning installed and uninstalled instant apps", e);
+        }
+    }
+
+    boolean pruneInstalledInstantApps(long neededSpace, long maxInstalledCacheDuration) {
+        try {
+            return pruneInstantApps(neededSpace, maxInstalledCacheDuration, Long.MAX_VALUE);
+        } catch (IOException e) {
+            Slog.e(LOG_TAG, "Error pruning installed instant apps", e);
+            return false;
+        }
+    }
+
+    boolean pruneUninstalledInstantApps(long neededSpace, long maxUninstalledCacheDuration) {
+        try {
+            return pruneInstantApps(neededSpace, Long.MAX_VALUE, maxUninstalledCacheDuration);
+        } catch (IOException e) {
+            Slog.e(LOG_TAG, "Error pruning uninstalled instant apps", e);
+            return false;
+        }
+    }
+
+    /**
+     * Prunes instant apps until there is enough <code>neededSpace</code>. Both
+     * installed and uninstalled instant apps are pruned that are older than
+     * <code>maxInstalledCacheDuration</code> and <code>maxUninstalledCacheDuration</code>
+     * respectively. All times are in milliseconds.
+     *
+     * @param neededSpace The space to ensure is free.
+     * @param maxInstalledCacheDuration The max duration for caching installed apps in millis.
+     * @param maxUninstalledCacheDuration The max duration for caching uninstalled apps in millis.
+     * @return Whether enough space was freed.
+     *
+     * @throws IOException
+     */
+    private boolean pruneInstantApps(long neededSpace, long maxInstalledCacheDuration,
+            long maxUninstalledCacheDuration) throws IOException {
+        final StorageManager storage = mService.mContext.getSystemService(StorageManager.class);
+        final File file = storage.findPathForUuid(StorageManager.UUID_PRIVATE_INTERNAL);
+
+        if (file.getUsableSpace() >= neededSpace) {
+            return true;
+        }
+
+        List<String> packagesToDelete = null;
+
+        final int[] allUsers;
+        final long now = System.currentTimeMillis();
+
+        // Prune first installed instant apps
+        synchronized (mService.mPackages) {
+            allUsers = PackageManagerService.sUserManager.getUserIds();
+
+            final int packageCount = mService.mPackages.size();
+            for (int i = 0; i < packageCount; i++) {
+                final PackageParser.Package pkg = mService.mPackages.valueAt(i);
+                if (now - pkg.getLatestPackageUseTimeInMills() < maxInstalledCacheDuration) {
                     continue;
                 }
-
-                File metadataFile = new File(instantDir, INSTANT_APP_METADATA_FILE);
-                if (!metadataFile.exists()) {
+                if (!(pkg.mExtras instanceof PackageSetting)) {
                     continue;
                 }
+                final PackageSetting  ps = (PackageSetting) pkg.mExtras;
+                boolean installedOnlyAsInstantApp = false;
+                for (int userId : allUsers) {
+                    if (ps.getInstalled(userId)) {
+                        if (ps.getInstantApp(userId)) {
+                            installedOnlyAsInstantApp = true;
+                        } else {
+                            installedOnlyAsInstantApp = false;
+                            break;
+                        }
+                    }
+                }
+                if (installedOnlyAsInstantApp) {
+                    if (packagesToDelete == null) {
+                        packagesToDelete = new ArrayList<>();
+                    }
+                    packagesToDelete.add(pkg.packageName);
+                }
+            }
 
-                final long elapsedCachingMillis = System.currentTimeMillis()
-                        - metadataFile.lastModified();
-                if (elapsedCachingMillis > maxCacheDurationMillis) {
-                    deleteDir(instantDir);
+            if (packagesToDelete != null) {
+                packagesToDelete.sort((String lhs, String rhs) -> {
+                    final PackageParser.Package lhsPkg = mService.mPackages.get(lhs);
+                    final PackageParser.Package rhsPkg = mService.mPackages.get(rhs);
+                    if (lhsPkg == null && rhsPkg == null) {
+                        return 0;
+                    } else if (lhsPkg == null) {
+                        return -1;
+                    } else if (rhsPkg == null) {
+                        return 1;
+                    } else {
+                        if (lhsPkg.getLatestPackageUseTimeInMills() >
+                                rhsPkg.getLatestPackageUseTimeInMills()) {
+                            return 1;
+                        } else if (lhsPkg.getLatestPackageUseTimeInMills() <
+                                rhsPkg.getLatestPackageUseTimeInMills()) {
+                            return -1;
+                        } else {
+                            if (lhsPkg.mExtras instanceof PackageSetting
+                                    && rhsPkg.mExtras instanceof PackageSetting) {
+                                final PackageSetting lhsPs = (PackageSetting) lhsPkg.mExtras;
+                                final PackageSetting rhsPs = (PackageSetting) rhsPkg.mExtras;
+                                if (lhsPs.firstInstallTime > rhsPs.firstInstallTime) {
+                                    return 1;
+                                } else {
+                                    return -1;
+                                }
+                            } else {
+                                return 0;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        if (packagesToDelete != null) {
+            final int packageCount = packagesToDelete.size();
+            for (int i = 0; i < packageCount; i++) {
+                final String packageToDelete = packagesToDelete.get(i);
+                if (mService.deletePackageX(packageToDelete, PackageManager.VERSION_CODE_HIGHEST,
+                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS)
+                                == PackageManager.DELETE_SUCCEEDED) {
+                    if (file.getUsableSpace() >= neededSpace) {
+                        return true;
+                    }
                 }
             }
         }
+
+        // Prune uninstalled instant apps
+        synchronized (mService.mPackages) {
+            // TODO: Track last used time for uninstalled instant apps for better pruning
+            for (int userId : UserManagerService.getInstance().getUserIds()) {
+                // Prune in-memory state
+                removeUninstalledInstantAppStateLPw((UninstalledInstantAppState state) -> {
+                    final long elapsedCachingMillis = System.currentTimeMillis() - state.mTimestamp;
+                    return (elapsedCachingMillis > maxUninstalledCacheDuration);
+                }, userId);
+
+                // Prune on-disk state
+                File instantAppsDir = getInstantApplicationsDir(userId);
+                if (!instantAppsDir.exists()) {
+                    continue;
+                }
+                File[] files = instantAppsDir.listFiles();
+                if (files == null) {
+                    continue;
+                }
+                for (File instantDir : files) {
+                    if (!instantDir.isDirectory()) {
+                        continue;
+                    }
+
+                    File metadataFile = new File(instantDir, INSTANT_APP_METADATA_FILE);
+                    if (!metadataFile.exists()) {
+                        continue;
+                    }
+
+                    final long elapsedCachingMillis = System.currentTimeMillis()
+                            - metadataFile.lastModified();
+                    if (elapsedCachingMillis > maxUninstalledCacheDuration) {
+                        deleteDir(instantDir);
+                        if (file.getUsableSpace() >= neededSpace) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private @Nullable List<InstantAppInfo> getInstalledInstantApplicationsLPr(

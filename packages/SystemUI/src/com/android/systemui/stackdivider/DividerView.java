@@ -832,7 +832,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 .setDuration(animDuration)
                 .start();
         mAdjustedForIme = adjustedForIme;
-        if (mHomeStackResizable && adjustedForIme) {
+
+        // Only get new position if home stack is resizable, ime is open and not minimized
+        // (including the animation)
+        if (mHomeStackResizable && adjustedForIme && !mIsInMinimizeInteraction) {
             mDividerPositionBeforeMinimized = getCurrentPosition();
         }
     }

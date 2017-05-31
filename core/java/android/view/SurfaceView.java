@@ -264,6 +264,22 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         updateSurface();
     }
 
+    private void performDrawFinished() {
+        if (mPendingReportDraws > 0) {
+            mDrawFinished = true;
+            if (mAttachedToWindow) {
+                mParent.requestTransparentRegion(SurfaceView.this);
+                
+                notifyDrawFinished();
+                invalidate();
+            }
+        } else {
+            Log.e(TAG, System.identityHashCode(this) + "finished drawing"
+                    + " but no pending report draw (extra call"
+                    + " to draw completion runnable?)");
+        }
+    }
+
     void notifyDrawFinished() {
         ViewRootImpl viewRoot = getViewRootImpl();
         if (viewRoot != null) {
@@ -729,12 +745,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         }
 
         runOnUiThread(() -> {
-            mDrawFinished = true;
-            if (mAttachedToWindow) {
-                mParent.requestTransparentRegion(SurfaceView.this);
-                notifyDrawFinished();
-                invalidate();
-            }
+            performDrawFinished();
         });
     }
 

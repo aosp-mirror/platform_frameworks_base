@@ -9817,13 +9817,49 @@ public final class Settings {
         public static final String ENABLE_EPHEMERAL_FEATURE = "enable_ephemeral_feature";
 
         /**
-         * The duration for caching uninstalled instant apps.
+         * The min period for caching installed instant apps in milliseconds.
          * <p>
          * Type: long
          * @hide
          */
-        public static final String UNINSTALLED_INSTANT_APP_CACHE_DURATION_MILLIS =
-                "uninstalled_instant_app_cache_duration_millis";
+        public static final String INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD =
+                "installed_instant_app_min_cache_period";
+
+        /**
+         * The max period for caching installed instant apps in milliseconds.
+         * <p>
+         * Type: long
+         * @hide
+         */
+        public static final String INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD =
+                "installed_instant_app_max_cache_period";
+
+        /**
+         * The min period for caching uninstalled instant apps in milliseconds.
+         * <p>
+         * Type: long
+         * @hide
+         */
+        public static final String UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD =
+                "uninstalled_instant_app_min_cache_period";
+
+        /**
+         * The max period for caching uninstalled instant apps in milliseconds.
+         * <p>
+         * Type: long
+         * @hide
+         */
+        public static final String UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD =
+                "uninstalled_instant_app_max_cache_period";
+
+        /**
+         * The min period for caching unused static shared libs in milliseconds.
+         * <p>
+         * Type: long
+         * @hide
+         */
+        public static final String UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
+                "unused_static_shared_lib_min_cache_period";
 
         /**
          * Allows switching users when system user is locked.

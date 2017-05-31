@@ -759,6 +759,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBatteryController = Dependency.get(BatteryController.class);
         mAssistManager = Dependency.get(AssistManager.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
+        mSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
 
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWindowManager.getDefaultDisplay();
@@ -5192,6 +5193,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected KeyguardManager mKeyguardManager;
     private LockPatternUtils mLockPatternUtils;
     private DeviceProvisionedController mDeviceProvisionedController;
+    protected SystemServicesProxy mSystemServicesProxy;
 
     // UI-specific methods
 
@@ -6816,6 +6818,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected boolean shouldPeek(Entry entry, StatusBarNotification sbn) {
         if (!mUseHeadsUp || isDeviceInVrMode()) {
+            if (DEBUG) Log.d(TAG, "No peeking: no huns or vr mode");
             return false;
         }
 
@@ -6824,8 +6827,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        boolean inUse = mPowerManager.isScreenOn()
-                && !SystemServicesProxy.getInstance(mContext).isDreaming();
+        boolean inUse = mPowerManager.isScreenOn() && !mSystemServicesProxy.isDreaming();
 
         if (!inUse && !isDozing()) {
             if (DEBUG) {
@@ -6866,6 +6868,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                 return !mStatusBarKeyguardViewManager.isShowing()
                         || mStatusBarKeyguardViewManager.isOccluded();
             }
+        }
+
+        // Don't peek notifications that are suppressed due to group alert behavior
+        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
+            if (DEBUG) Log.d(TAG, "No peeking: suppressed due to group alert behavior");
+            return false;
         }
 
         return true;

@@ -115,6 +115,7 @@ import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
@@ -673,8 +674,11 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             mWindowContainerController.reparent(toStack.getWindowContainerController(), position,
                     moveStackMode == REPARENT_MOVE_STACK_TO_FRONT);
 
+            final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
+                    || (moveStackMode == REPARENT_KEEP_STACK_AT_FRONT && (wasFocused || wasFront));
             // Move the task
-            sourceStack.removeTask(this, reason, REMOVE_TASK_MODE_MOVING);
+            sourceStack.removeTask(this, reason, moveStackToFront
+                    ? REMOVE_TASK_MODE_MOVING_TO_TOP : REMOVE_TASK_MODE_MOVING);
             toStack.addTask(this, position, false /* schedulePictureInPictureModeChange */, reason);
 
             if (schedulePictureInPictureModeChange) {
@@ -693,8 +697,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
             // If the task had focus before (or we're requested to move focus), move focus to the
             // new stack by moving the stack to the front.
-            final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
-                    || (moveStackMode == REPARENT_KEEP_STACK_AT_FRONT && (wasFocused || wasFront));
             if (r != null) {
                 toStack.moveToFrontAndResumeStateIfNeeded(r, moveStackToFront, wasResumed,
                         wasPaused, reason);

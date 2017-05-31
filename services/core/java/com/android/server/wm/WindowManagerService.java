@@ -349,6 +349,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int ANIMATION_DURATION_SCALE = 2;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
+    boolean mKeyguardGoingAway;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -2873,6 +2874,12 @@ public class WindowManagerService extends IWindowManager.Stub
     public boolean isKeyguardTrusted() {
         synchronized (mWindowMap) {
             return mPolicy.isKeyguardTrustedLw();
+        }
+    }
+
+    public void setKeyguardGoingAway(boolean keyguardGoingAway) {
+        synchronized (mWindowMap) {
+            mKeyguardGoingAway = keyguardGoingAway;
         }
     }
 
@@ -6457,7 +6464,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
                     pw.print(" transition="); pw.print(mTransitionAnimationScaleSetting);
                     pw.print(" animator="); pw.println(mAnimatorDurationScaleSetting);
-            pw.print(" mSkipAppTransitionAnimation=");pw.println(mSkipAppTransitionAnimation);
+            pw.print("  mSkipAppTransitionAnimation=");pw.println(mSkipAppTransitionAnimation);
             pw.println("  mLayoutToAnim:");
             mAppTransition.dump(pw, "    ");
         }
@@ -7170,6 +7177,11 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean isKeyguardLocked() {
             return WindowManagerService.this.isKeyguardLocked();
+        }
+
+        @Override
+        public boolean isKeyguardGoingAway() {
+            return WindowManagerService.this.mKeyguardGoingAway;
         }
 
         @Override

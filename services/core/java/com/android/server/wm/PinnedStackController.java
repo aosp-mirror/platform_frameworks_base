@@ -92,16 +92,15 @@ class PinnedStackController {
     private final Rect mStableInsets = new Rect();
 
     // The size and position information that describes where the pinned stack will go by default.
+    private int mDefaultMinSize;
     private int mDefaultStackGravity;
     private float mDefaultAspectRatio;
     private Point mScreenEdgeInsets;
+    private int mCurrentMinSize;
 
     // The aspect ratio bounds of the PIP.
     private float mMinAspectRatio;
     private float mMaxAspectRatio;
-
-    // The minimum edge size of the normal PiP bounds.
-    private int mMinSize;
 
     // Temp vars for calculation
     private final DisplayMetrics mTmpMetrics = new DisplayMetrics();
@@ -120,6 +119,13 @@ class PinnedStackController {
             mHandler.post(() -> {
                 mIsMinimized = isMinimized;
                 mSnapAlgorithm.setMinimized(isMinimized);
+            });
+        }
+
+        @Override
+        public void setMinEdgeSize(int minEdgeSize) {
+            mHandler.post(() -> {
+                mCurrentMinSize = Math.max(mDefaultMinSize, minEdgeSize);
             });
         }
 
@@ -160,10 +166,12 @@ class PinnedStackController {
      */
     private void reloadResources() {
         final Resources res = mService.mContext.getResources();
-        mMinSize = res.getDimensionPixelSize(
+        mDefaultMinSize = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.default_minimal_size_pip_resizable_task);
+        mCurrentMinSize = mDefaultMinSize;
         mDefaultAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio);
+        mAspectRatio = mDefaultAspectRatio;
         final String screenEdgeInsetsDpString = res.getString(
                 com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets);
         final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
@@ -212,11 +220,15 @@ class PinnedStackController {
      * Returns the current bounds (or the default bounds if there are no current bounds) with the
      * specified aspect ratio.
      */
-    Rect transformBoundsToAspectRatio(Rect stackBounds, float aspectRatio) {
+    Rect transformBoundsToAspectRatio(Rect stackBounds, float aspectRatio,
+            boolean useCurrentMinEdgeSize) {
         // Save the snap fraction, calculate the aspect ratio based on screen size
         final float snapFraction = mSnapAlgorithm.getSnapFraction(stackBounds,
                 getMovementBounds(stackBounds));
-        final Size size = getSize(aspectRatio);
+
+        final int minEdgeSize = useCurrentMinEdgeSize ? mCurrentMinSize : mDefaultMinSize;
+        final Size size = mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, minEdgeSize,
+                mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
         final int left = (int) (stackBounds.centerX() - size.getWidth() / 2f);
         final int top = (int) (stackBounds.centerY() - size.getHeight() / 2f);
         stackBounds.set(left, top, left + size.getWidth(), top + size.getHeight());
@@ -228,16 +240,6 @@ class PinnedStackController {
     }
 
     /**
-     * @return the size of the PIP based on the given {@param aspectRatio}.
-     */
-    Size getSize(float aspectRatio) {
-        synchronized (mService.mWindowMap) {
-            return mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, mMinSize,
-                    mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
-        }
-    }
-
-    /**
      * @return the default bounds to show the PIP when there is no active PIP.
      */
     Rect getDefaultBounds() {
@@ -246,7 +248,8 @@ class PinnedStackController {
             getInsetBounds(insetBounds);
 
             final Rect defaultBounds = new Rect();
-            final Size size = getSize(mDefaultAspectRatio);
+            final Size size = mSnapAlgorithm.getSizeForAspectRatio(mDefaultAspectRatio,
+                    mDefaultMinSize, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
             Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
                     0, mIsImeShowing ? mImeHeight : 0, defaultBounds);
             return defaultBounds;
@@ -401,7 +404,8 @@ class PinnedStackController {
                     getInsetBounds(insetBounds);
                     final Rect normalBounds = getDefaultBounds();
                     if (isValidPictureInPictureAspectRatio(mAspectRatio)) {
-                        transformBoundsToAspectRatio(normalBounds, mAspectRatio);
+                        transformBoundsToAspectRatio(normalBounds, mAspectRatio,
+                                false /* useCurrentMinEdgeSize */);
                     }
                     final Rect animatingBounds = mTmpAnimatingBoundsRect;
                     final TaskStack pinnedStack = mDisplayContent.getStackById(PINNED_STACK_ID);

@@ -244,7 +244,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     static final int REMOVE_TASK_MODE_MOVING = 1;
     // Similar to {@link #REMOVE_TASK_MODE_MOVING} and the task will be added to the top of its new
     // stack and the new stack will be on top of all stacks.
-    private static final int REMOVE_TASK_MODE_MOVING_TO_TOP = 2;
+    static final int REMOVE_TASK_MODE_MOVING_TO_TOP = 2;
 
     // The height/width divide used when fitting a task within a bounds with method
     // {@link #fitWithinBounds}.

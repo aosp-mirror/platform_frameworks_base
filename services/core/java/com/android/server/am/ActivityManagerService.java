@@ -8447,8 +8447,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         synchronized (mPidsSelfLocked) {
                             proc = mPidsSelfLocked.get(callingPid);
                         }
-                        if (proc != null && proc.curProcState
-                                < ActivityManager.PROCESS_STATE_RECEIVER) {
+                        if (proc != null &&
+                                !ActivityManager.isProcStateBackground(proc.curProcState)) {
                             // Whoever is instigating this is in the foreground, so we will allow it
                             // to go through.
                             return ActivityManager.APP_START_MODE_NORMAL;
@@ -13545,7 +13545,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         return;
                     }
                     if (pr.hasTopUi != hasTopUi) {
-                        Slog.i(TAG, "Setting hasTopUi=" + hasTopUi + " for pid=" + pid);
+                        if (DEBUG_OOM_ADJ) {
+                            Slog.d(TAG, "Setting hasTopUi=" + hasTopUi + " for pid=" + pid);
+                        }
                         pr.hasTopUi = hasTopUi;
                         changed = true;
                     }

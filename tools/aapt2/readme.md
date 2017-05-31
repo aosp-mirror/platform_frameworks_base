@@ -3,6 +3,7 @@
 ## Version 2.17
 ### `aapt2 compile ...`
 - Fixed an issue where symlinks would not be followed when compiling PNGs. (bug 62144459)
+- Fixed issue where overlays that declared `<add-resource>` did not compile. (bug 38355988)
 
 ## Version 2.16
 ### `aapt2 link ...`

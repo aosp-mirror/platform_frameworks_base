@@ -16,13 +16,27 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.Notification;
 import android.metrics.LogMaker;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IPowerManager;
+import android.os.Looper;
+import android.os.PowerManager;
+import android.os.UserHandle;
+import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.support.test.runner.AndroidJUnit4;
@@ -33,9 +47,11 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
@@ -52,19 +68,34 @@ public class StatusBarTest extends SysuiTestCase {
     NotificationStackScrollLayout mStackScroller;
     StatusBar mStatusBar;
     FakeMetricsLogger mMetricsLogger;
+    HeadsUpManager mHeadsUpManager;
+    NotificationData mNotificationData;
+    PowerManager mPowerManager;
+    SystemServicesProxy mSystemServicesProxy;
 
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         mStatusBarKeyguardViewManager = mock(StatusBarKeyguardViewManager.class);
         mUnlockMethodCache = mock(UnlockMethodCache.class);
         mKeyguardIndicationController = mock(KeyguardIndicationController.class);
         mStackScroller = mock(NotificationStackScrollLayout.class);
         mMetricsLogger = new FakeMetricsLogger();
+        mHeadsUpManager = mock(HeadsUpManager.class);
+        mNotificationData = mock(NotificationData.class);
+        mSystemServicesProxy = mock(SystemServicesProxy.class);
+        IPowerManager powerManagerService = mock(IPowerManager.class);
+        HandlerThread handlerThread = new HandlerThread("TestThread");
+        handlerThread.start();
+        mPowerManager = new PowerManager(mContext, powerManagerService,
+                new Handler(handlerThread.getLooper()));
+        when(powerManagerService.isInteractive()).thenReturn(true);
+
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
-                mKeyguardIndicationController, mStackScroller);
+                mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
+                mNotificationData, mPowerManager, mSystemServicesProxy);
 
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
@@ -210,14 +241,62 @@ public class StatusBarTest extends SysuiTestCase {
                         .setType(MetricsEvent.TYPE_ACTION));
     }
 
+    @Test
+    public void testShouldPeek_nonSuppressedGroupSummary() {
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
+        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(false);
+        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
+        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
+
+        Notification n = new Notification.Builder(getContext(), "a")
+                .setGroup("a")
+                .setGroupSummary(true)
+                .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
+                UserHandle.of(0), null, 0);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+
+        assertTrue(mStatusBar.shouldPeek(entry, sbn));
+    }
+
+    @Test
+    public void testShouldPeek_suppressedGroupSummary() {
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
+        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(false);
+        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
+        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
+
+        Notification n = new Notification.Builder(getContext(), "a")
+                .setGroup("a")
+                .setGroupSummary(true)
+                .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
+                UserHandle.of(0), null, 0);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+
+        assertFalse(mStatusBar.shouldPeek(entry, sbn));
+    }
+
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
-                NotificationStackScrollLayout stack) {
+                NotificationStackScrollLayout stack, HeadsUpManager hum, NotificationData nd,
+                PowerManager pm, SystemServicesProxy ssp) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
             mStackScroller = stack;
+            mHeadsUpManager = hum;
+            mNotificationData = nd;
+            mUseHeadsUp = true;
+            mPowerManager = pm;
+            mSystemServicesProxy = ssp;
         }
 
         @Override

@@ -858,14 +858,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final int privateflags = attrs.privateFlags;
         boolean displayHasContent = false;
 
+        if (DEBUG_KEEP_SCREEN_ON && (attrFlags & FLAG_KEEP_SCREEN_ON) != 0
+                && w != mService.mLastWakeLockHoldingWindow) {
+            Slog.d(TAG_KEEP_SCREEN_ON, "handleNotObscuredLocked: " + w
+                    + " has FLAG_KEEP_SCREEN_ON set, hasSurface=" + w.mHasSurface
+                    + ", canBeSeen=" + canBeSeen);
+        }
+
         if (w.mHasSurface && canBeSeen) {
             if ((attrFlags & FLAG_KEEP_SCREEN_ON) != 0) {
                 mHoldScreen = w.mSession;
                 mHoldScreenWindow = w;
             } else if (DEBUG_KEEP_SCREEN_ON && w == mService.mLastWakeLockHoldingWindow) {
                 Slog.d(TAG_KEEP_SCREEN_ON, "handleNotObscuredLocked: " + w + " was holding "
-                        + "screen wakelock but no longer has FLAG_KEEP_SCREEN_ON!!! called by"
-                        + Debug.getCallers(10));
+                        + "screen wakelock but no longer has FLAG_KEEP_SCREEN_ON!!!");
             }
             if (!syswin && w.mAttrs.screenBrightness >= 0 && mScreenBrightness < 0) {
                 mScreenBrightness = w.mAttrs.screenBrightness;
