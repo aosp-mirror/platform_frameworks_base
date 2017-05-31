@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Límite de procesos en segundo plano"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Errores sin respuesta"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Mostrar diálogo cuando las aplic. en 2do plano no responden"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Alertas de notificaciones"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"App que publica notificación sin canal válido"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forzar permisos en almacenamiento externo"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Cualquier app puede escribirse en un almacenamiento externo, sin importar los valores del manifiesto"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forzar actividades para que cambien de tamaño"</string>

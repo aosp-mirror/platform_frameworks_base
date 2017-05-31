@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Atzeko planoko prozesuen muga"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Erakutsi ANR guztiak"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"\"Erantzunik ez\" mezua atz. planoko aplikazioetarako"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Erakutsi jakinarazpenen kanaleko abisuak"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Bistaratu abisuak aplikazioek baliozko kanalik gabeko jakinarazpenak argitaratzean"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Behartu aplikazioak onartzea kanpoko biltegian"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Aplikazioek kanpoko memorian idatz dezakete, manifestuaren balioak kontuan izan gabe"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Behartu jardueren tamaina doitu ahal izatea"</string>

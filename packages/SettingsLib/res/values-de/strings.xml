@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Hintergrundprozesslimit"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Alle ANRS anzeigen"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Dialogfeld \"App antwortet nicht\" für Hintergrund-Apps anzeigen"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Warnungen für Benachrichtigungskanäle einblenden"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Blendet Warnungen auf dem Display ein, wenn eine App eine Benachrichtigung ohne gültigen Kanal sendet"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Externe Speichernutzung von Apps erlauben"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Ermöglicht es jeder qualifizierten App, Daten auf externen Speicher zu schreiben, unabhängig von den Manifestwerten"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Anpassen der Größe von Aktivitäten erzwingen"</string>
