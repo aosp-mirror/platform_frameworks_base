@@ -267,6 +267,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             boolean forceOverflow = mSpeedBumpIndex != -1 && i >= mSpeedBumpIndex
                     && iconState.iconAppearAmount > 0.0f || i >= maxVisibleIcons;
             boolean noOverflowAfter = i == childCount - 1;
+            float drawingScale = mDark && view instanceof StatusBarIconView
+                    ? ((StatusBarIconView) view).getIconScaleFullyDark()
+                    : 1f;
             if (mOpenedAmount != 0.0f) {
                 noOverflowAfter = noOverflowAfter && !hasAmbient && !forceOverflow;
             }
@@ -303,7 +306,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     visualOverflowStart += mVisualOverflowAdaption * (1f - mOpenedAmount);
                 }
             }
-            translationX += iconState.iconAppearAmount * view.getWidth();
+            translationX += iconState.iconAppearAmount * view.getWidth() * drawingScale;
         }
         if (firstOverflowIndex != -1) {
             int numDots = 1;
