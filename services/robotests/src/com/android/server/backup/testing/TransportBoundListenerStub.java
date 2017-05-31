@@ -41,11 +41,24 @@ public class TransportBoundListenerStub implements
         return mAlwaysReturnSuccess;
     }
 
+    /**
+     * Returns whether the listener was called for the specified transport at least once.
+     */
     public boolean isCalledForTransport(IBackupTransport binder) {
         return mTransportsCalledFor.contains(binder);
     }
 
+    /**
+     * Returns whether the listener was called at least once.
+     */
     public boolean isCalled() {
         return !mTransportsCalledFor.isEmpty();
+    }
+
+    /**
+     * Resets listener calls.
+     */
+    public void resetState() {
+        mTransportsCalledFor.clear();
     }
 }
