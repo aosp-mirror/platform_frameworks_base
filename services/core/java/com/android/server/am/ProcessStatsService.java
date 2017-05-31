@@ -233,7 +233,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 updateFile();
             }
             mLastWriteTime = SystemClock.uptimeMillis();
-            Slog.i(TAG, "Prepared write state in " + (SystemClock.uptimeMillis()-now) + "ms");
+            if (DEBUG) Slog.d(TAG, "Prepared write state in "
+                    + (SystemClock.uptimeMillis()-now) + "ms");
             if (!sync) {
                 BackgroundThread.getHandler().post(new Runnable() {
                     @Override public void run() {
