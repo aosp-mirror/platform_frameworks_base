@@ -1449,6 +1449,11 @@ public class PhoneNumberUtils
      * @hide
      */
     public static boolean isInternationalNumber(String phoneNumber, String defaultCountryIso) {
+        // If no phone number is provided, it can't be international.
+        if (TextUtils.isEmpty(phoneNumber)) {
+            return false;
+        }
+
         // If it starts with # or * its not international.
         if (phoneNumber.startsWith("#") || phoneNumber.startsWith("*")) {
             return false;
