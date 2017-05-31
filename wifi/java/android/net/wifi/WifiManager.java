@@ -1080,11 +1080,9 @@ public class WifiManager {
      * Name).  In the case when there is an existing configuration with the same
      * FQDN, the new configuration will replace the existing configuration.
      *
-     * An {@link IllegalArgumentException} will be thrown on failure.
-     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
-     * on the device.
-     *
      * @param config The Passpoint configuration to be added
+     * @throws IllegalArgumentException if configuration is invalid
+     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      */
     public void addOrUpdatePasspointConfiguration(PasspointConfiguration config) {
         try {
@@ -1099,11 +1097,9 @@ public class WifiManager {
     /**
      * Remove the Passpoint configuration identified by its FQDN (Fully Qualified Domain Name).
      *
-     * An {@link IllegalArgumentException} will be thrown on failure.
-     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
-     * on the device.
-     *
      * @param fqdn The FQDN of the Passpoint configuration to be removed
+     * @throws IllegalArgumentException if no configuration is associated with the given FQDN.
+     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      */
     public void removePasspointConfiguration(String fqdn) {
         try {
@@ -1120,10 +1116,8 @@ public class WifiManager {
      *
      * An empty list will be returned when no configurations are installed.
      *
-     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
-     * on the device.
-     *
      * @return A list of {@link PasspointConfiguration}
+     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      */
     public List<PasspointConfiguration> getPasspointConfigurations() {
         try {
@@ -1139,12 +1133,10 @@ public class WifiManager {
      * {@link #EXTRA_ICON} will indicate the result of the request.
      * A missing intent extra {@link #EXTRA_ICON} will indicate a failure.
      *
-     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
-     * on the device.
-     *
      * @param bssid The BSSID of the AP
      * @param fileName Name of the icon file (remote file) to query from the AP
      *
+     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
     public void queryPasspointIcon(long bssid, String fileName) {
