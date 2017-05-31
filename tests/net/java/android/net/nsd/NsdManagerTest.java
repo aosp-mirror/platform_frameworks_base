@@ -333,7 +333,7 @@ public class NsdManagerTest {
     public static class MockServiceHandler extends Handler {
         public Context mContext;
         public AsyncChannel chan;
-        public Message lastMessage;
+        public volatile Message lastMessage;
 
         MockServiceHandler(Looper looper, Context context) {
             super(looper);
