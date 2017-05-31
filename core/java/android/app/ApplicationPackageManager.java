@@ -2112,7 +2112,7 @@ public class ApplicationPackageManager extends PackageManager {
     public void freeStorageAndNotify(String volumeUuid, long idealStorageSize,
             IPackageDataObserver observer) {
         try {
-            mPM.freeStorageAndNotify(volumeUuid, idealStorageSize, observer);
+            mPM.freeStorageAndNotify(volumeUuid, idealStorageSize, 0, observer);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2121,7 +2121,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void freeStorage(String volumeUuid, long freeStorageSize, IntentSender pi) {
         try {
-            mPM.freeStorage(volumeUuid, freeStorageSize, pi);
+            mPM.freeStorage(volumeUuid, freeStorageSize, 0, pi);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
