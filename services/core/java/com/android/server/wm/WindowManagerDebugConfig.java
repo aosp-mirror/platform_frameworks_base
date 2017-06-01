@@ -52,7 +52,7 @@ public class WindowManagerDebugConfig {
     static final boolean DEBUG_CONFIGURATION = false;
     static final boolean DEBUG_APP_TRANSITIONS = false;
     static final boolean DEBUG_STARTING_WINDOW_VERBOSE = false;
-    static final boolean DEBUG_STARTING_WINDOW = DEBUG_STARTING_WINDOW_VERBOSE || true;
+    static final boolean DEBUG_STARTING_WINDOW = DEBUG_STARTING_WINDOW_VERBOSE || false;
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
     static final boolean DEBUG_DRAG = false;
