@@ -20180,6 +20180,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         mTempConfig.setTo(getGlobalConfiguration());
         final int changes = mTempConfig.updateFrom(values);
         if (changes == 0) {
+            // Since calling to Activity.setRequestedOrientation leads to freezing the window with
+            // setting WindowManagerService.mWaitingForConfig to true, it is important that we call
+            // performDisplayOverrideConfigUpdate in order to send the new display configuration
+            // (even if there are no actual changes) to unfreeze the window.
+            performDisplayOverrideConfigUpdate(values, deferResume, DEFAULT_DISPLAY);
             return 0;
         }
 
@@ -20368,20 +20373,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             int displayId) {
         mTempConfig.setTo(mStackSupervisor.getDisplayOverrideConfiguration(displayId));
         final int changes = mTempConfig.updateFrom(values);
-        if (changes == 0) {
-            return 0;
-        }
+        if (changes != 0) {
+            Slog.i(TAG, "Override config changes=" + Integer.toHexString(changes) + " "
+                    + mTempConfig + " for displayId=" + displayId);
+            mStackSupervisor.setDisplayOverrideConfiguration(mTempConfig, displayId);
 
-        Slog.i(TAG, "Override config changes=" + Integer.toHexString(changes) + " " + mTempConfig
-                + " for displayId=" + displayId);
-        mStackSupervisor.setDisplayOverrideConfiguration(mTempConfig, displayId);
+            final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
+            if (isDensityChange && displayId == DEFAULT_DISPLAY) {
+                // Reset the unsupported display size dialog.
+                mUiHandler.sendEmptyMessage(SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG);
 
-        final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
-        if (isDensityChange && displayId == DEFAULT_DISPLAY) {
-            // Reset the unsupported display size dialog.
-            mUiHandler.sendEmptyMessage(SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG);
-
-            killAllBackgroundProcessesExcept(N, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                killAllBackgroundProcessesExcept(N,
+                        ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+            }
         }
 
         // Update the configuration with WM first and check if any of the stacks need to be resized
