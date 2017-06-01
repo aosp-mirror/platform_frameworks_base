@@ -13924,9 +13924,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean supportsPictureInPicture =
                 mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
 
-        final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow();
+        final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow(mContext);
         final boolean supportsSplitScreenMultiWindow =
-                ActivityManager.supportsSplitScreenMultiWindow();
+                ActivityManager.supportsSplitScreenMultiWindow(mContext);
         final boolean supportsMultiDisplay = mContext.getPackageManager()
                 .hasSystemFeature(FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS);
         final String debugApp = Settings.Global.getString(resolver, DEBUG_APP);
