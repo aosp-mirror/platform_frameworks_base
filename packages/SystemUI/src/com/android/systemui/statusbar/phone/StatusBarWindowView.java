@@ -277,7 +277,7 @@ public class StatusBarWindowView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mService.isDozing() && !mService.isPulsing()) {
+        if (mService.isDozing() && !mStackScrollLayout.hasPulsingNotifications()) {
             // Capture all touch events in always-on.
             return true;
         }
