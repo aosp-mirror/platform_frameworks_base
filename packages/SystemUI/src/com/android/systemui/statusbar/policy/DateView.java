@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
@@ -113,6 +114,17 @@ public class DateView extends TextView {
         if (!text.equals(mLastText)) {
             setText(text);
             mLastText = text;
+        }
+    }
+
+    public void setDatePattern(String pattern) {
+        if (TextUtils.equals(pattern, mDatePattern)) {
+            return;
+        }
+        mDatePattern = pattern;
+        mDateFormat = null;
+        if (isAttachedToWindow()) {
+            updateClock();
         }
     }
 }
