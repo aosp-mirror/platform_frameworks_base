@@ -94,8 +94,8 @@ bool Reference::Equals(const Value* value) const {
 
 bool Reference::Flatten(android::Res_value* out_value) const {
   const ResourceId resid = id.value_or_default(ResourceId(0));
-  const bool dynamic =
-      (resid.package_id() != kFrameworkPackageId && resid.package_id() != kAppPackageId);
+  const bool dynamic = resid.is_valid_dynamic() && resid.package_id() != kFrameworkPackageId &&
+                       resid.package_id() != kAppPackageId;
 
   if (reference_type == Reference::Type::kResource) {
     if (dynamic) {
@@ -119,22 +119,29 @@ Reference* Reference::Clone(StringPool* /*new_pool*/) const {
 }
 
 void Reference::Print(std::ostream* out) const {
-  *out << "(reference) ";
-  if (reference_type == Reference::Type::kResource) {
-    *out << "@";
-    if (private_reference) {
-      *out << "*";
+  if (reference_type == Type::kResource) {
+    *out << "(reference) @";
+    if (!name && !id) {
+      *out << "null";
+      return;
     }
   } else {
-    *out << "?";
+    *out << "(attr-reference) ?";
+  }
+
+  if (private_reference) {
+    *out << "*";
   }
 
   if (name) {
     *out << name.value();
   }
 
-  if (id && !Res_INTERNALID(id.value().id)) {
-    *out << " " << id.value();
+  if (id && id.value().is_valid_dynamic()) {
+    if (name) {
+      *out << " ";
+    }
+    *out << id.value();
   }
 }
 
@@ -314,7 +321,11 @@ BinaryPrimitive* BinaryPrimitive::Clone(StringPool* /*new_pool*/) const {
 void BinaryPrimitive::Print(std::ostream* out) const {
   switch (value.dataType) {
     case android::Res_value::TYPE_NULL:
-      *out << "(null)";
+      if (value.data == android::Res_value::DATA_NULL_EMPTY) {
+        *out << "(empty)";
+      } else {
+        *out << "(null)";
+      }
       break;
     case android::Res_value::TYPE_INT_DEC:
       *out << "(integer) " << static_cast<int32_t>(value.data);

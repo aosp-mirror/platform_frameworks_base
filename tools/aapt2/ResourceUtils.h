@@ -133,7 +133,16 @@ std::unique_ptr<Reference> TryParseReference(const android::StringPiece& str,
  * Returns a BinaryPrimitve object representing @null or @empty if the string
  * was parsed as one.
  */
-std::unique_ptr<BinaryPrimitive> TryParseNullOrEmpty(const android::StringPiece& str);
+std::unique_ptr<Item> TryParseNullOrEmpty(const android::StringPiece& str);
+
+// Returns a Reference representing @null.
+// Due to runtime compatibility issues, this is encoded as a reference with ID 0.
+// The runtime will convert this to TYPE_NULL.
+std::unique_ptr<Reference> MakeNull();
+
+// Returns a BinaryPrimitive representing @empty. This is encoded as a Res_value with
+// type Res_value::TYPE_NULL and data Res_value::DATA_NULL_EMPTY.
+std::unique_ptr<BinaryPrimitive> MakeEmpty();
 
 /*
  * Returns a BinaryPrimitve object representing a color if the string was parsed
