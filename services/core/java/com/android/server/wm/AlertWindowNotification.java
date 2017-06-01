@@ -25,6 +25,7 @@ import static android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -45,6 +46,7 @@ class AlertWindowNotification {
     private static final int NOTIFICATION_ID = 0;
 
     private static int sNextRequestCode = 0;
+    private static NotificationChannelGroup sChannelGroup;
     private final int mRequestCode;
     private final WindowManagerService mService;
     private String mNotificationTag;
@@ -61,6 +63,12 @@ class AlertWindowNotification {
         mNotificationTag = CHANNEL_PREFIX + mPackageName;
         mRequestCode = sNextRequestCode++;
         mIconUtilities = new IconUtilities(mService.mContext);
+        if (sChannelGroup == null) {
+            sChannelGroup = new NotificationChannelGroup(CHANNEL_PREFIX,
+                    mService.mContext.getString(
+                            R.string.alert_windows_notification_channel_group_name));
+            mNotificationManager.createNotificationChannelGroup(sChannelGroup);
+        }
     }
 
     void post() {
@@ -142,6 +150,7 @@ class AlertWindowNotification {
         channel.enableLights(false);
         channel.enableVibration(false);
         channel.setBlockableSystem(true);
+        channel.setGroup(sChannelGroup.getId());
         mNotificationManager.createNotificationChannel(channel);
     }
 
