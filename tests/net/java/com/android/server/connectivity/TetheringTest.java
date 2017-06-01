@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -52,11 +53,14 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.CarrierConfigManager;
+import android.test.mock.MockContentResolver;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.connectivity.tethering.OffloadHardwareInterface;
 import com.android.server.connectivity.tethering.TetheringDependencies;
 
@@ -96,6 +100,7 @@ public class TetheringTest {
 
     private Vector<Intent> mIntents;
     private BroadcastInterceptingContext mServiceContext;
+    private MockContentResolver mContentResolver;
     private BroadcastReceiver mBroadcastReceiver;
     private Tethering mTethering;
 
@@ -103,6 +108,12 @@ public class TetheringTest {
         MockContext(Context base) {
             super(base);
         }
+
+        @Override
+        public ContentResolver getContentResolver() { return mContentResolver; }
+
+        @Override
+        public String getPackageName() { return "TetheringTest"; }
 
         @Override
         public Resources getResources() { return mResources; }
@@ -134,6 +145,8 @@ public class TetheringTest {
                 .thenReturn(new InterfaceConfiguration());
 
         mServiceContext = new MockContext(mContext);
+        mContentResolver = new MockContentResolver(mServiceContext);
+        mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         mIntents = new Vector<>();
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
