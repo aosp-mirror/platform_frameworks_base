@@ -2776,7 +2776,7 @@ public class NotificationManagerService extends SystemService {
         if (n == null) {
             return;
         }
-        n.sbn.setOverrideGroupKey(GroupHelper.AUTOGROUP_KEY);
+        n.setOverrideGroupKey(GroupHelper.AUTOGROUP_KEY);
         EventLogTags.writeNotificationAutogrouped(key);
     }
 
@@ -2785,7 +2785,7 @@ public class NotificationManagerService extends SystemService {
         if (n == null) {
             return;
         }
-        n.sbn.setOverrideGroupKey(null);
+        n.setOverrideGroupKey(null);
         EventLogTags.writeNotificationUnautogrouped(key);
     }
 

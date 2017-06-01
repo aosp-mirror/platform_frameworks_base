@@ -3962,6 +3962,16 @@ message MetricsEvent {
     // OS: O
     APP_TRANSITION_BIND_APPLICATION_DELAY_MS = 945;
 
+    // FIELD - The group ID of a notification.
+    // Type: string
+    // OS: O
+    FIELD_NOTIFICATION_GROUP_ID = 946;
+
+    // FIELD - If the notification is a group summary: 1.
+    // Type: int encoded boolean
+    // OS: O
+    FIELD_NOTIFICATION_GROUP_SUMMARY = 947;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
