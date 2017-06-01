@@ -180,4 +180,14 @@ TEST(ResourceValuesTest, StyleMerges) {
   EXPECT_TRUE(a->Equals(expected.get()));
 }
 
+// TYPE_NULL is encoded as TYPE_REFERENCE with a value of 0. This is represented in AAPT2
+// by a default constructed Reference value.
+TEST(ResourcesValuesTest, EmptyReferenceFlattens) {
+  android::Res_value value = {};
+  ASSERT_TRUE(Reference().Flatten(&value));
+
+  EXPECT_EQ(android::Res_value::TYPE_REFERENCE, value.dataType);
+  EXPECT_EQ(0x0u, value.data);
+}
+
 } // namespace aapt

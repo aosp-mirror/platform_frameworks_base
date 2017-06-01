@@ -296,7 +296,10 @@ bool ReferenceLinker::LinkReference(const CallSite& callsite, Reference* referen
                                     IAaptContext* context, SymbolTable* symbols,
                                     xml::IPackageDeclStack* decls) {
   CHECK(reference != nullptr);
-  CHECK(reference->name || reference->id);
+  if (!reference->name && !reference->id) {
+    // This is @null.
+    return true;
+  }
 
   Reference transformed_reference = *reference;
   TransformReferenceFromNamespace(decls, context->GetCompilationPackage(), &transformed_reference);

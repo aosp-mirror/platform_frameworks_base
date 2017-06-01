@@ -78,42 +78,32 @@ class ResourceParser {
    * Item, then a
    * RawString is returned. Otherwise this returns false;
    */
-  std::unique_ptr<Item> ParseXml(xml::XmlPullParser* parser,
-                                 const uint32_t type_mask,
+  std::unique_ptr<Item> ParseXml(xml::XmlPullParser* parser, const uint32_t type_mask,
                                  const bool allow_raw_value);
 
   bool ParseResources(xml::XmlPullParser* parser);
   bool ParseResource(xml::XmlPullParser* parser, ParsedResource* out_resource);
 
-  bool ParseItem(xml::XmlPullParser* parser, ParsedResource* out_resource,
-                 uint32_t format);
+  bool ParseItem(xml::XmlPullParser* parser, ParsedResource* out_resource, uint32_t format);
   bool ParseString(xml::XmlPullParser* parser, ParsedResource* out_resource);
 
   bool ParsePublic(xml::XmlPullParser* parser, ParsedResource* out_resource);
-  bool ParsePublicGroup(xml::XmlPullParser* parser,
-                        ParsedResource* out_resource);
-  bool ParseSymbolImpl(xml::XmlPullParser* parser,
-                       ParsedResource* out_resource);
+  bool ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource* out_resource);
+  bool ParseSymbolImpl(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseSymbol(xml::XmlPullParser* parser, ParsedResource* out_resource);
-  bool ParseAddResource(xml::XmlPullParser* parser,
-                        ParsedResource* out_resource);
+  bool ParseAddResource(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseAttr(xml::XmlPullParser* parser, ParsedResource* out_resource);
-  bool ParseAttrImpl(xml::XmlPullParser* parser, ParsedResource* out_resource,
-                     bool weak);
+  bool ParseAttrImpl(xml::XmlPullParser* parser, ParsedResource* out_resource, bool weak);
   Maybe<Attribute::Symbol> ParseEnumOrFlagItem(xml::XmlPullParser* parser,
                                                const android::StringPiece& tag);
   bool ParseStyle(const ResourceType type, xml::XmlPullParser* parser,
                   ParsedResource* out_resource);
   bool ParseStyleItem(xml::XmlPullParser* parser, Style* style);
-  bool ParseDeclareStyleable(xml::XmlPullParser* parser,
-                             ParsedResource* out_resource);
+  bool ParseDeclareStyleable(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseArray(xml::XmlPullParser* parser, ParsedResource* out_resource);
-  bool ParseIntegerArray(xml::XmlPullParser* parser,
-                         ParsedResource* out_resource);
-  bool ParseStringArray(xml::XmlPullParser* parser,
-                        ParsedResource* out_resource);
-  bool ParseArrayImpl(xml::XmlPullParser* parser, ParsedResource* out_resource,
-                      uint32_t typeMask);
+  bool ParseIntegerArray(xml::XmlPullParser* parser, ParsedResource* out_resource);
+  bool ParseStringArray(xml::XmlPullParser* parser, ParsedResource* out_resource);
+  bool ParseArrayImpl(xml::XmlPullParser* parser, ParsedResource* out_resource, uint32_t typeMask);
   bool ParsePlural(xml::XmlPullParser* parser, ParsedResource* out_resource);
 
   IDiagnostics* diag_;
