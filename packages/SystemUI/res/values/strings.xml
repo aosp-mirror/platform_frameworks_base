@@ -1455,6 +1455,9 @@
         Hints that the user's only option is to block all of the app's notifications. -->
     <string name="notification_default_channel_desc">This app doesn\'t have notification categories</string>
 
+    <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
+    <string name="notification_unblockable_desc">Notifications from this app can\'t be turned off</string>
+
     <!-- Notification: Control panel: Label that shows how many channels this application has
         defined, describing the current notification channel as "1 out of n notification categories from this app". -->
     <plurals name="notification_num_channels_desc">
