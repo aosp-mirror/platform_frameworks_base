@@ -50,20 +50,20 @@ interface IMbmsDownloadService
     /**
      * should move the params into a DownloadRequest parcelable
      */
-    int download(String appName, in DownloadRequest downloadRequest, IDownloadCallback listener);
+    int download(in DownloadRequest downloadRequest, IDownloadCallback listener);
 
-    List<DownloadRequest> listPendingDownloads(String appName);
+    List<DownloadRequest> listPendingDownloads(String appName, int subscriptionId);
 
-    int cancelDownload(String appName, in DownloadRequest downloadRequest);
+    int cancelDownload(in DownloadRequest downloadRequest);
 
-    DownloadStatus getDownloadStatus(String appName, in DownloadRequest downloadRequest);
+    DownloadStatus getDownloadStatus(in DownloadRequest downloadRequest);
 
     /*
      * named this for 2 reasons:
      *  1 don't want 'State' here as it conflicts with 'Status' of the previous function
      *  2 want to perfect typing 'Knowledge'
      */
-    void resetDownloadKnowledge(String appName, in DownloadRequest downloadRequest);
+    void resetDownloadKnowledge(in DownloadRequest downloadRequest);
 
     /**
      * End of life for this MbmsDownloadManager.
