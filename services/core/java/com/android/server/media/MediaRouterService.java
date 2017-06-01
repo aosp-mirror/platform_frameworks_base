@@ -198,7 +198,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // A null routeId means that the client wants to unselect its current route.
     // The explicit flag indicates whether the change was explicitly requested by the
     // user or the application which may cause changes to propagate out to the rest
-    // of the system.  Should be false when the change is in response to a new globally
+    // of the system.  Should be false when the change is in response to a new
     // selected route or a default selection.
     @Override
     public void setSelectedRoute(IMediaRouterClient client, String routeId, boolean explicit) {
@@ -387,15 +387,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 }
 
                 clientRecord.mSelectedRouteId = routeId;
-                if (explicit) {
-                    // Any app can disconnect from the globally selected route.
+                // Only let the system connect to new global routes for now.
+                // A similar check exists in the display manager for wifi display.
+                if (explicit && clientRecord.mTrusted) {
                     if (oldRouteId != null) {
                         clientRecord.mUserRecord.mHandler.obtainMessage(
                                 UserHandler.MSG_UNSELECT_ROUTE, oldRouteId).sendToTarget();
                     }
-                    // Only let the system connect to new global routes for now.
-                    // A similar check exists in the display manager for wifi display.
-                    if (routeId != null && clientRecord.mTrusted) {
+                    if (routeId != null) {
                         clientRecord.mUserRecord.mHandler.obtainMessage(
                                 UserHandler.MSG_SELECT_ROUTE, routeId).sendToTarget();
                     }
@@ -517,7 +516,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
 
         MediaRouterClientState getState() {
-            return mTrusted ? mUserRecord.mTrustedState : mUserRecord.mUntrustedState;
+            return mTrusted ? mUserRecord.mRouterState : null;
         }
 
         public void dump(PrintWriter pw, String prefix) {
@@ -544,8 +543,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         public final int mUserId;
         public final ArrayList<ClientRecord> mClientRecords = new ArrayList<ClientRecord>();
         public final UserHandler mHandler;
-        public MediaRouterClientState mTrustedState;
-        public MediaRouterClientState mUntrustedState;
+        public MediaRouterClientState mRouterState;
 
         public UserRecord(int userId) {
             mUserId = userId;
@@ -566,8 +564,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             }
 
             pw.println(indent + "State");
-            pw.println(indent + "mTrustedState=" + mTrustedState);
-            pw.println(indent + "mUntrustedState=" + mUntrustedState);
+            pw.println(indent + "mRouterState=" + mRouterState);
 
             if (!mHandler.runWithScissors(new Runnable() {
                 @Override
@@ -591,13 +588,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
      * Since remote display providers are designed to be single-threaded by nature,
      * this class encapsulates all of the associated functionality and exports state
      * to the service as it evolves.
-     * </p><p>
-     * One important task of this class is to keep track of the current globally selected
-     * route id for certain routes that have global effects, such as remote displays.
-     * Global route selections override local selections made within apps.  The change
-     * is propagated to all apps so that they are all in sync.  Synchronization works
-     * both ways.  Whenever the globally selected route is explicitly unselected by any
-     * app, then it becomes unselected globally and all apps are informed.
      * </p><p>
      * This class is currently hardcoded to work with remote display providers but
      * it is intended to be eventually extended to support more general route providers
@@ -639,7 +629,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         private boolean mRunning;
         private int mDiscoveryMode = RemoteDisplayState.DISCOVERY_MODE_NONE;
-        private RouteRecord mGloballySelectedRouteRecord;
+        private RouteRecord mSelectedRouteRecord;
         private int mConnectionPhase = PHASE_NOT_AVAILABLE;
         private int mConnectionTimeoutReason;
         private long mConnectionTimeoutStartTime;
@@ -701,7 +691,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             final String indent = prefix + "  ";
             pw.println(indent + "mRunning=" + mRunning);
             pw.println(indent + "mDiscoveryMode=" + mDiscoveryMode);
-            pw.println(indent + "mGloballySelectedRouteRecord=" + mGloballySelectedRouteRecord);
+            pw.println(indent + "mSelectedRouteRecord=" + mSelectedRouteRecord);
             pw.println(indent + "mConnectionPhase=" + mConnectionPhase);
             pw.println(indent + "mConnectionTimeoutReason=" + mConnectionTimeoutReason);
             pw.println(indent + "mConnectionTimeoutStartTime=" + (mConnectionTimeoutReason != 0 ?
@@ -729,7 +719,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         private void stop() {
             if (mRunning) {
                 mRunning = false;
-                unselectGloballySelectedRoute();
+                unselectSelectedRoute();
                 mWatcher.stop(); // also stops all providers
             }
         }
@@ -768,15 +758,15 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         private void selectRoute(String routeId) {
             if (routeId != null
-                    && (mGloballySelectedRouteRecord == null
-                            || !routeId.equals(mGloballySelectedRouteRecord.getUniqueId()))) {
+                    && (mSelectedRouteRecord == null
+                            || !routeId.equals(mSelectedRouteRecord.getUniqueId()))) {
                 RouteRecord routeRecord = findRouteRecord(routeId);
                 if (routeRecord != null) {
-                    unselectGloballySelectedRoute();
+                    unselectSelectedRoute();
 
-                    Slog.i(TAG, "Selected global route:" + routeRecord);
-                    mGloballySelectedRouteRecord = routeRecord;
-                    checkGloballySelectedRouteState();
+                    Slog.i(TAG, "Selected route:" + routeRecord);
+                    mSelectedRouteRecord = routeRecord;
+                    checkSelectedRouteState();
                     routeRecord.getProvider().setSelectedDisplay(routeRecord.getDescriptorId());
 
                     scheduleUpdateClientState();
@@ -786,34 +776,34 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         private void unselectRoute(String routeId) {
             if (routeId != null
-                    && mGloballySelectedRouteRecord != null
-                    && routeId.equals(mGloballySelectedRouteRecord.getUniqueId())) {
-                unselectGloballySelectedRoute();
+                    && mSelectedRouteRecord != null
+                    && routeId.equals(mSelectedRouteRecord.getUniqueId())) {
+                unselectSelectedRoute();
             }
         }
 
-        private void unselectGloballySelectedRoute() {
-            if (mGloballySelectedRouteRecord != null) {
-                Slog.i(TAG, "Unselected global route:" + mGloballySelectedRouteRecord);
-                mGloballySelectedRouteRecord.getProvider().setSelectedDisplay(null);
-                mGloballySelectedRouteRecord = null;
-                checkGloballySelectedRouteState();
+        private void unselectSelectedRoute() {
+            if (mSelectedRouteRecord != null) {
+                Slog.i(TAG, "Unselected route:" + mSelectedRouteRecord);
+                mSelectedRouteRecord.getProvider().setSelectedDisplay(null);
+                mSelectedRouteRecord = null;
+                checkSelectedRouteState();
 
                 scheduleUpdateClientState();
             }
         }
 
         private void requestSetVolume(String routeId, int volume) {
-            if (mGloballySelectedRouteRecord != null
-                    && routeId.equals(mGloballySelectedRouteRecord.getUniqueId())) {
-                mGloballySelectedRouteRecord.getProvider().setDisplayVolume(volume);
+            if (mSelectedRouteRecord != null
+                    && routeId.equals(mSelectedRouteRecord.getUniqueId())) {
+                mSelectedRouteRecord.getProvider().setDisplayVolume(volume);
             }
         }
 
         private void requestUpdateVolume(String routeId, int direction) {
-            if (mGloballySelectedRouteRecord != null
-                    && routeId.equals(mGloballySelectedRouteRecord.getUniqueId())) {
-                mGloballySelectedRouteRecord.getProvider().adjustDisplayVolume(direction);
+            if (mSelectedRouteRecord != null
+                    && routeId.equals(mSelectedRouteRecord.getUniqueId())) {
+                mSelectedRouteRecord.getProvider().adjustDisplayVolume(direction);
             }
         }
 
@@ -839,7 +829,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 provider.setCallback(null);
                 provider.setDiscoveryMode(RemoteDisplayState.DISCOVERY_MODE_NONE);
 
-                checkGloballySelectedRouteState();
+                checkSelectedRouteState();
                 scheduleUpdateClientState();
             }
         }
@@ -856,35 +846,34 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             if (index >= 0) {
                 ProviderRecord providerRecord = mProviderRecords.get(index);
                 if (providerRecord.updateDescriptor(state)) {
-                    checkGloballySelectedRouteState();
+                    checkSelectedRouteState();
                     scheduleUpdateClientState();
                 }
             }
         }
 
         /**
-         * This function is called whenever the state of the globally selected route
-         * may have changed.  It checks the state and updates timeouts or unselects
-         * the route as appropriate.
+         * This function is called whenever the state of the selected route may have changed.
+         * It checks the state and updates timeouts or unselects the route as appropriate.
          */
-        private void checkGloballySelectedRouteState() {
+        private void checkSelectedRouteState() {
             // Unschedule timeouts when the route is unselected.
-            if (mGloballySelectedRouteRecord == null) {
+            if (mSelectedRouteRecord == null) {
                 mConnectionPhase = PHASE_NOT_AVAILABLE;
                 updateConnectionTimeout(0);
                 return;
             }
 
             // Ensure that the route is still present and enabled.
-            if (!mGloballySelectedRouteRecord.isValid()
-                    || !mGloballySelectedRouteRecord.isEnabled()) {
+            if (!mSelectedRouteRecord.isValid()
+                    || !mSelectedRouteRecord.isEnabled()) {
                 updateConnectionTimeout(TIMEOUT_REASON_NOT_AVAILABLE);
                 return;
             }
 
             // Make sure we haven't lost our connection.
             final int oldPhase = mConnectionPhase;
-            mConnectionPhase = getConnectionPhase(mGloballySelectedRouteRecord.getStatus());
+            mConnectionPhase = getConnectionPhase(mSelectedRouteRecord.getStatus());
             if (oldPhase >= PHASE_CONNECTING && mConnectionPhase < PHASE_CONNECTING) {
                 updateConnectionTimeout(TIMEOUT_REASON_CONNECTION_LOST);
                 return;
@@ -894,15 +883,13 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             switch (mConnectionPhase) {
                 case PHASE_CONNECTED:
                     if (oldPhase != PHASE_CONNECTED) {
-                        Slog.i(TAG, "Connected to global route: "
-                                + mGloballySelectedRouteRecord);
+                        Slog.i(TAG, "Connected to route: " + mSelectedRouteRecord);
                     }
                     updateConnectionTimeout(0);
                     break;
                 case PHASE_CONNECTING:
                     if (oldPhase != PHASE_CONNECTING) {
-                        Slog.i(TAG, "Connecting to global route: "
-                                + mGloballySelectedRouteRecord);
+                        Slog.i(TAG, "Connecting to route: " + mSelectedRouteRecord);
                     }
                     updateConnectionTimeout(TIMEOUT_REASON_WAITING_FOR_CONNECTED);
                     break;
@@ -943,7 +930,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
 
         private void connectionTimedOut() {
-            if (mConnectionTimeoutReason == 0 || mGloballySelectedRouteRecord == null) {
+            if (mConnectionTimeoutReason == 0 || mSelectedRouteRecord == null) {
                 // Shouldn't get here.  There must be a bug somewhere.
                 Log.wtf(TAG, "Handled connection timeout for no reason.");
                 return;
@@ -951,28 +938,28 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
             switch (mConnectionTimeoutReason) {
                 case TIMEOUT_REASON_NOT_AVAILABLE:
-                    Slog.i(TAG, "Global route no longer available: "
-                            + mGloballySelectedRouteRecord);
+                    Slog.i(TAG, "Selected route no longer available: "
+                            + mSelectedRouteRecord);
                     break;
                 case TIMEOUT_REASON_CONNECTION_LOST:
-                    Slog.i(TAG, "Global route connection lost: "
-                            + mGloballySelectedRouteRecord);
+                    Slog.i(TAG, "Selected route connection lost: "
+                            + mSelectedRouteRecord);
                     break;
                 case TIMEOUT_REASON_WAITING_FOR_CONNECTING:
-                    Slog.i(TAG, "Global route timed out while waiting for "
+                    Slog.i(TAG, "Selected route timed out while waiting for "
                             + "connection attempt to begin after "
                             + (SystemClock.uptimeMillis() - mConnectionTimeoutStartTime)
-                            + " ms: " + mGloballySelectedRouteRecord);
+                            + " ms: " + mSelectedRouteRecord);
                     break;
                 case TIMEOUT_REASON_WAITING_FOR_CONNECTED:
-                    Slog.i(TAG, "Global route timed out while connecting after "
+                    Slog.i(TAG, "Selected route timed out while connecting after "
                             + (SystemClock.uptimeMillis() - mConnectionTimeoutStartTime)
-                            + " ms: " + mGloballySelectedRouteRecord);
+                            + " ms: " + mSelectedRouteRecord);
                     break;
             }
             mConnectionTimeoutReason = 0;
 
-            unselectGloballySelectedRoute();
+            unselectSelectedRoute();
         }
 
         private void scheduleUpdateClientState() {
@@ -985,30 +972,17 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         private void updateClientState() {
             mClientStateUpdateScheduled = false;
 
-            final String globallySelectedRouteId = mGloballySelectedRouteRecord != null ?
-                    mGloballySelectedRouteRecord.getUniqueId() : null;
-
             // Build a new client state for trusted clients.
-            MediaRouterClientState trustedState = new MediaRouterClientState();
-            trustedState.globallySelectedRouteId = globallySelectedRouteId;
+            MediaRouterClientState routerState = new MediaRouterClientState();
             final int providerCount = mProviderRecords.size();
             for (int i = 0; i < providerCount; i++) {
-                mProviderRecords.get(i).appendClientState(trustedState);
-            }
-
-            // Build a new client state for untrusted clients that can only see
-            // the currently selected route.
-            MediaRouterClientState untrustedState = new MediaRouterClientState();
-            untrustedState.globallySelectedRouteId = globallySelectedRouteId;
-            if (globallySelectedRouteId != null) {
-                untrustedState.routes.add(trustedState.getRoute(globallySelectedRouteId));
+                mProviderRecords.get(i).appendClientState(routerState);
             }
 
             try {
                 synchronized (mService.mLock) {
                     // Update the UserRecord.
-                    mUserRecord.mTrustedState = trustedState;
-                    mUserRecord.mUntrustedState = untrustedState;
+                    mUserRecord.mRouterState = routerState;
 
                     // Collect all clients.
                     final int count = mUserRecord.mClientRecords.size();
