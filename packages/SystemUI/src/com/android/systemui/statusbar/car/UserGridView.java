@@ -17,11 +17,12 @@
 package com.android.systemui.statusbar.car;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.util.UserIcons;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.UserUtil;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -43,7 +45,7 @@ public class UserGridView extends ViewPager {
     private StatusBar mStatusBar;
     private UserSwitcherController mUserSwitcherController;
     private Adapter mAdapter;
-    private int mPendingUserId = UserHandle.USER_NULL;
+    private UserSelectionListener mUserSelectionListener;
 
     public UserGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,16 +60,12 @@ public class UserGridView extends ViewPager {
     }
 
     public void onUserSwitched(int newUserId) {
-        if (mPendingUserId == newUserId) {
-            // Bring up security view after user switch is completed.
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    showOfflineAuthUi();
-                }
-            });
-        }
-        mPendingUserId = UserHandle.USER_NULL;
+        // Bring up security view after user switch is completed.
+        post(this::showOfflineAuthUi);
+    }
+
+    public void setUserSelectionListener(UserSelectionListener userSelectionListener) {
+        mUserSelectionListener = userSelectionListener;
     }
 
     void showOfflineAuthUi() {
@@ -136,13 +134,17 @@ public class UserGridView extends ViewPager {
             for (int i = position * iconsPerPage; i < limit; i++) {
                 pods.addView(makeUserPod(inflater, context, i, pods));
             }
-
-            // Dynamic parameters since we specify the weightsum dynamically.
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT, limit);
-            container.addView(pods, params);
+            container.addView(pods);
             return pods;
+        }
+
+        private Drawable getUserIcon(Context context, UserSwitcherController.UserRecord record) {
+            if (record.isAddUser) {
+                Drawable icon = context.getDrawable(R.drawable.ic_add_circle_qs);
+                icon.setTint(Color.WHITE);
+                return icon;
+            }
+            return UserIcons.getDefaultUserIcon(record.resolveId(), /* light= */ true);
         }
 
         private View makeUserPod(LayoutInflater inflater, Context context,
@@ -160,43 +162,25 @@ public class UserGridView extends ViewPager {
 
             ImageView iconView = (ImageView) view.findViewById(R.id.user_avatar);
             if (record == null || record.picture == null) {
-                iconView.setImageDrawable(mUserAdapter.getDrawable(context, record));
+                iconView.setImageDrawable(getUserIcon(context, record));
             } else {
                 iconView.setImageBitmap(record.picture);
             }
 
             iconView.setOnClickListener(v -> {
-                mPendingUserId = UserHandle.USER_NULL;
                 if (record == null) {
                     return;
                 }
 
-                if (record.isGuest || record.isAddUser) {
-                    mUserSwitcherController.switchTo(record);
-                    return;
+                if (mUserSelectionListener != null) {
+                    mUserSelectionListener.onUserSelected(record);
                 }
 
                 if (record.isCurrent) {
                     showOfflineAuthUi();
                 } else {
-                    mPendingUserId = record.info.id;
                     mUserSwitcherController.switchTo(record);
                 }
-            });
-
-            iconView.setOnLongClickListener(v -> {
-                if (record == null || record.isAddUser) {
-                    return false;
-                }
-                if (record.isGuest) {
-                    if (record.isCurrent) {
-                        mUserSwitcherController.switchTo(record);
-                    }
-                    return true;
-                }
-                UserUtil.deleteUserWithPrompt(getContext(), record.info.id,
-                        mUserSwitcherController);
-                return true;
             });
 
             return view;
@@ -247,4 +231,8 @@ public class UserGridView extends ViewPager {
             mContainer.notifyDataSetChanged();
         }
     }
+
+    interface UserSelectionListener {
+        void onUserSelected(UserSwitcherController.UserRecord record);
+    };
 }
