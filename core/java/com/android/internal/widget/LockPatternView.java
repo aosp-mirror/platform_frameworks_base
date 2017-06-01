@@ -39,6 +39,7 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.DisplayListCanvas;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
@@ -54,7 +55,6 @@ import android.view.animation.Interpolator;
 import com.android.internal.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -1340,8 +1340,7 @@ public class LockPatternView extends View {
 
     private final class PatternExploreByTouchHelper extends ExploreByTouchHelper {
         private Rect mTempRect = new Rect();
-        private HashMap<Integer, VirtualViewContainer> mItems = new HashMap<Integer,
-                VirtualViewContainer>();
+        private final SparseArray<VirtualViewContainer> mItems = new SparseArray<>();
 
         class VirtualViewContainer {
             public VirtualViewContainer(CharSequence description) {
@@ -1352,6 +1351,9 @@ public class LockPatternView extends View {
 
         public PatternExploreByTouchHelper(View forView) {
             super(forView);
+            for (int i = VIRTUAL_BASE_VIEW_ID; i < VIRTUAL_BASE_VIEW_ID + 9; i++) {
+                mItems.put(i, new VirtualViewContainer(getTextForVirtualView(i)));
+            }
         }
 
         @Override
@@ -1369,10 +1371,6 @@ public class LockPatternView extends View {
                 return;
             }
             for (int i = VIRTUAL_BASE_VIEW_ID; i < VIRTUAL_BASE_VIEW_ID + 9; i++) {
-                if (!mItems.containsKey(i)) {
-                    VirtualViewContainer item = new VirtualViewContainer(getTextForVirtualView(i));
-                    mItems.put(i, item);
-                }
                 // Add all views. As views are added to the pattern, we remove them
                 // from notification by making them non-clickable below.
                 virtualViewIds.add(i);
@@ -1383,9 +1381,9 @@ public class LockPatternView extends View {
         protected void onPopulateEventForVirtualView(int virtualViewId, AccessibilityEvent event) {
             if (DEBUG_A11Y) Log.v(TAG, "onPopulateEventForVirtualView(" + virtualViewId + ")");
             // Announce this view
-            if (mItems.containsKey(virtualViewId)) {
-                CharSequence contentDescription = mItems.get(virtualViewId).description;
-                event.getText().add(contentDescription);
+            VirtualViewContainer container = mItems.get(virtualViewId);
+            if (container != null) {
+                event.getText().add(container.description);
             }
         }
 
