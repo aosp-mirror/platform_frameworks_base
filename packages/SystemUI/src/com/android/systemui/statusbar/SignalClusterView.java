@@ -308,7 +308,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         if (state == null) {
             return;
         }
-        if (mQsSignal) {
+        if (mQsSignal && qsIcon != null) {
             icon = qsIcon;
             type = qsType;
         }
