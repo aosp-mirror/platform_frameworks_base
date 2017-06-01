@@ -43,34 +43,34 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     }
 
     @Override
-    public int download(String appName, DownloadRequest downloadRequest, IDownloadCallback listener)
+    public int download(DownloadRequest downloadRequest, IDownloadCallback listener)
             throws RemoteException {
         return 0;
     }
 
     @Override
-    public List<DownloadRequest> listPendingDownloads(String appName) throws RemoteException {
+    public List<DownloadRequest> listPendingDownloads(String appName, int subscriptionId)
+            throws RemoteException {
         return null;
     }
 
     @Override
-    public int cancelDownload(String appName, DownloadRequest downloadRequest)
-            throws RemoteException {
+    public int cancelDownload(DownloadRequest downloadRequest) throws RemoteException {
         return 0;
     }
 
     @Override
-    public DownloadStatus getDownloadStatus(String appName, DownloadRequest downloadRequest)
+    public DownloadStatus getDownloadStatus(DownloadRequest downloadRequest)
             throws RemoteException {
         return null;
     }
 
     @Override
-    public void resetDownloadKnowledge(String appName, DownloadRequest downloadRequest)
+    public void resetDownloadKnowledge(DownloadRequest downloadRequest)
             throws RemoteException {
     }
 
     @Override
-    public void dispose(String appName, int subId) throws RemoteException {
+    public void dispose(String appName, int subscriptionId) throws RemoteException {
     }
 }

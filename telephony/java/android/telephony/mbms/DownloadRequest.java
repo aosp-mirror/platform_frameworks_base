@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.IllegalStateException;
 import java.net.URISyntaxException;
 
 /**
@@ -36,6 +37,7 @@ public class DownloadRequest implements Parcelable {
         private Uri dest;
         private int sub;
         private String appIntent;
+        private String appName;  // not the Android app Name, the embms app Name
 
         public Builder setId(int id) {
             this.id = id;
@@ -68,7 +70,7 @@ public class DownloadRequest implements Parcelable {
         }
 
         public DownloadRequest build() {
-            return new DownloadRequest(id, serviceInfo, source, dest, sub, appIntent);
+            return new DownloadRequest(id, serviceInfo, source, dest, sub, appIntent, appName);
         }
     }
 
@@ -78,16 +80,18 @@ public class DownloadRequest implements Parcelable {
     private final Uri destinationUri;
     private final int subId;
     private final String serializedResultIntentForApp;
+    private String appName; // not the Android app Name, the embms app name
 
     private DownloadRequest(int id, FileServiceInfo serviceInfo,
             Uri source, Uri dest,
-            int sub, String appIntent) {
+            int sub, String appIntent, String name) {
         downloadId = id;
         fileServiceInfo = serviceInfo;
         sourceUri = source;
         destinationUri = dest;
         subId = sub;
         serializedResultIntentForApp = appIntent;
+        appName = name;
     }
 
     public static DownloadRequest copy(DownloadRequest other) {
@@ -101,6 +105,7 @@ public class DownloadRequest implements Parcelable {
         destinationUri = dr.destinationUri;
         subId = dr.subId;
         serializedResultIntentForApp = dr.serializedResultIntentForApp;
+        appName = dr.appName;
     }
 
     private DownloadRequest(Parcel in) {
@@ -110,6 +115,7 @@ public class DownloadRequest implements Parcelable {
         destinationUri = in.readParcelable(getClass().getClassLoader());
         subId = in.readInt();
         serializedResultIntentForApp = in.readString();
+        appName = in.readString();
     }
 
     public int describeContents() {
@@ -123,6 +129,7 @@ public class DownloadRequest implements Parcelable {
         out.writeParcelable(destinationUri, flags);
         out.writeInt(subId);
         out.writeString(serializedResultIntentForApp);
+        out.writeString(appName);
     }
 
     public int getDownloadId() {
@@ -153,6 +160,18 @@ public class DownloadRequest implements Parcelable {
         }
     }
 
+    /** @hide */
+    public synchronized void setAppName(String newAppName) {
+        if (appName != null) {
+            throw new IllegalStateException("Attempting to reset appName");
+        }
+        appName = newAppName;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
     public static final Parcelable.Creator<DownloadRequest> CREATOR =
             new Parcelable.Creator<DownloadRequest>() {
         public DownloadRequest createFromParcel(Parcel in) {
@@ -162,5 +181,4 @@ public class DownloadRequest implements Parcelable {
             return new DownloadRequest[size];
         }
     };
-
 }
