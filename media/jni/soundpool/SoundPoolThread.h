@@ -58,6 +58,7 @@ private:
     Condition               mCondition;
     Vector<SoundPoolMsg>    mMsgQueue;
     SoundPool*              mSoundPool;
+    int32_t                 mNumWorkers;
     bool                    mRunning;
 };
 
