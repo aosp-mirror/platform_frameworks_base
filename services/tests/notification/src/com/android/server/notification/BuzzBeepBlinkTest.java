@@ -61,6 +61,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -102,6 +103,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     private static final long[] FALLBACK_VIBRATION_PATTERN = new long[] {100, 100, 100};
     private static final VibrationEffect FALLBACK_VIBRATION =
             VibrationEffect.createWaveform(FALLBACK_VIBRATION_PATTERN, -1);
+    private static final int MAX_VIBRATION_DELAY = 1000;
 
     @Before
     public void setUp() {
@@ -309,6 +311,11 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
                 (AudioAttributes) anyObject());
     }
 
+    private void verifyDelayedVibrateLooped() {
+        verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
+                argThat(mVibrateLoopMatcher), (AudioAttributes) anyObject());
+    }
+
     private void verifyStopVibrate() {
         verify(mVibrator, times(1)).cancel();
     }
@@ -506,8 +513,8 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         VibrationEffect effect = VibrationEffect.createWaveform(r.getVibration(), -1);
 
-        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), eq(effect),
-                    (AudioAttributes) anyObject());
+        verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
+                eq(effect), (AudioAttributes) anyObject());
     }
 
     @Test
@@ -521,8 +528,8 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         mService.buzzBeepBlinkLocked(r);
 
-        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), eq(FALLBACK_VIBRATION),
-                (AudioAttributes) anyObject());
+        verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
+                eq(FALLBACK_VIBRATION), (AudioAttributes) anyObject());
         verify(mRingtonePlayer, never()).playAsync
                 (anyObject(), anyObject(), anyBoolean(), anyObject());
     }
@@ -539,7 +546,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         mService.buzzBeepBlinkLocked(r);
 
-        verifyVibrateLooped();
+        verifyDelayedVibrateLooped();
     }
 
     @Test
