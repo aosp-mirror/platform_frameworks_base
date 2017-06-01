@@ -54,7 +54,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
@@ -1946,7 +1945,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         int numShownItems = 0;
         boolean finish = false;
         int maxDisplayedNotifications = mAmbientState.isDark()
-                ? (isPulsing() ? 1 : 0)
+                ? (hasPulsingNotifications() ? 1 : 0)
                 : mMaxDisplayedNotifications;
 
         for (int i = 0; i < getChildCount(); i++) {
@@ -1955,7 +1954,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                     && !expandableView.hasNoContentHeight()) {
                 boolean limitReached = maxDisplayedNotifications != -1
                         && numShownItems >= maxDisplayedNotifications;
-                boolean notificationOnAmbientThatIsNotPulsing = isPulsing()
+                boolean notificationOnAmbientThatIsNotPulsing = mAmbientState.isDark()
+                        && hasPulsingNotifications()
                         && expandableView instanceof ExpandableNotificationRow
                         && !isPulsing(((ExpandableNotificationRow) expandableView).getEntry());
                 if (limitReached || notificationOnAmbientThatIsNotPulsing) {
@@ -2013,7 +2013,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return false;
     }
 
-    private boolean isPulsing() {
+    public boolean hasPulsingNotifications() {
         return mPulsing != null;
     }
 
@@ -2843,7 +2843,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateNotificationAnimationStates() {
-        boolean running = mAnimationsEnabled || isPulsing();
+        boolean running = mAnimationsEnabled || hasPulsingNotifications();
         mShelf.setAnimationsEnabled(running);
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -2854,7 +2854,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateAnimationState(View child) {
-        updateAnimationState((mAnimationsEnabled || isPulsing())
+        updateAnimationState((mAnimationsEnabled || hasPulsingNotifications())
                 && (mIsExpanded || isPinnedHeadsUp(child)), child);
     }
 
@@ -4126,7 +4126,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             return;
         }
         mPulsing = pulsing;
-        mAmbientState.setPulsing(isPulsing());
+        mAmbientState.setHasPulsingNotifications(hasPulsingNotifications());
         updateNotificationAnimationStates();
         updateContentHeight();
         notifyHeightChangeListener(mShelf);

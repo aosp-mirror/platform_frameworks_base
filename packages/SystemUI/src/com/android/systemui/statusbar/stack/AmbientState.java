@@ -59,7 +59,7 @@ public class AmbientState {
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
     private boolean mPanelFullWidth;
-    private boolean mPulsing;
+    private boolean mHasPulsingNotifications;
     private boolean mUnlockHintRunning;
 
     public AmbientState(Context context) {
@@ -287,12 +287,12 @@ public class AmbientState {
         mPanelTracking = panelTracking;
     }
 
-    public boolean isPulsing() {
-        return mPulsing;
+    public boolean hasPulsingNotifications() {
+        return mHasPulsingNotifications;
     }
 
-    public void setPulsing(boolean pulsing) {
-        mPulsing = pulsing;
+    public void setHasPulsingNotifications(boolean hasPulsing) {
+        mHasPulsingNotifications = hasPulsing;
     }
 
     public boolean isPanelTracking() {
