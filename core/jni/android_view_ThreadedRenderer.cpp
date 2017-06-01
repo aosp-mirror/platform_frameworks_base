@@ -208,8 +208,15 @@ public:
 
     void detachAnimators() {
         // Remove animators from the list and post a delayed message in future to end the animator
+        // For infinite animators, remove the listener so we no longer hold a global ref to the AVD
+        // java object, and therefore the AVD objects in both native and Java can be properly
+        // released.
         for (auto& anim : mRunningVDAnimators) {
             detachVectorDrawableAnimator(anim.get());
+            anim->clearOneShotListener();
+        }
+        for (auto& anim : mPausedVDAnimators) {
+            anim->clearOneShotListener();
         }
         mRunningVDAnimators.clear();
         mPausedVDAnimators.clear();
