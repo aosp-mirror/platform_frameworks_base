@@ -221,7 +221,9 @@ abstract public class ManagedServices {
                         restoredSettingName(element),
                         newValue,
                         userid);
-                updateSettingsAccordingToInstalledServices(element, userid);
+                if (mConfig.secureSettingName.equals(element)) {
+                    updateSettingsAccordingToInstalledServices(element, userid);
+                }
                 rebuildRestoredPackages();
             }
         }

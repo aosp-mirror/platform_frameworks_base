@@ -63,6 +63,7 @@ import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -1471,7 +1472,8 @@ public final class Pm {
         }
         ClearDataObserver obs = new ClearDataObserver();
         try {
-            mPm.freeStorageAndNotify(volumeUuid, sizeVal, obs);
+            mPm.freeStorageAndNotify(volumeUuid, sizeVal,
+                    StorageManager.FLAG_ALLOCATE_DEFY_RESERVED, obs);
             synchronized (obs) {
                 while (!obs.finished) {
                     try {

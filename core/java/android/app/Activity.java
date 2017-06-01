@@ -6142,6 +6142,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param action the action to run on the UI thread
      */
+    @Override
     public final void runOnUiThread(Runnable action) {
         if (Thread.currentThread() != mUiThread) {
             mHandler.post(action);

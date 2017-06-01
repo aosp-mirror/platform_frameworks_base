@@ -7874,19 +7874,21 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void run() {
+            // mSource may be changed in calls below.
+            View source = mSource;
+            mSource = null;
             // The accessibility may be turned off while we were waiting so check again.
             if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                 mLastEventTimeMillis = SystemClock.uptimeMillis();
                 AccessibilityEvent event = AccessibilityEvent.obtain();
                 event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
                 event.setContentChangeTypes(mChangeTypes);
-                mSource.sendAccessibilityEventUnchecked(event);
+                source.sendAccessibilityEventUnchecked(event);
             } else {
                 mLastEventTimeMillis = 0;
             }
             // In any case reset to initial state.
-            mSource.resetSubtreeAccessibilityStateChanged();
-            mSource = null;
+            source.resetSubtreeAccessibilityStateChanged();
             mChangeTypes = 0;
         }
 

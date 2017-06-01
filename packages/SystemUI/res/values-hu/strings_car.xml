@@ -20,4 +20,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="unknown_user_label" msgid="4323896111737677955">"Ismeretlen"</string>
+    <string name="start_driving" msgid="864023351402918991">"Kezdhet vezetni"</string>
 </resources>

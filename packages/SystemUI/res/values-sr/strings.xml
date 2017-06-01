@@ -469,8 +469,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Профилом за Work управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Повезан је са апликацијом <xliff:g id="APPLICATION">%2$s</xliff:g>, која може да надгледа активности на пословној мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nВише информација потражите од администратора."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Профилом за Work управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Повезан је са апликацијом <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, која може да надгледа активности на пословној мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nПовезани сте и са апликацијом <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, која може да надгледа активности на личној мрежи."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Откључано за корисника <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"Функција <xliff:g id="TRUST_AGENT">%1$s</xliff:g> је покренута"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Уређај ће остати закључан док га не откључате ручно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Брже добијајте обавештења"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Прегледајте их пре откључавања"</string>
@@ -579,6 +578,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 минута"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 минута"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 сат"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"ОПОЗОВИ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Одложено је за <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Потрошња батерије"</string>

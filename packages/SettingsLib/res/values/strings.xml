@@ -89,6 +89,19 @@
     <!-- Summary for Connected wifi network without internet -->
     <string name="wifi_connected_no_internet">Connected, no Internet</string>
 
+    <!-- Speed label for very slow network speed -->
+    <string name="speed_label_very_slow">Very Slow</string>
+    <!-- Speed label for slow network speed -->
+    <string name="speed_label_slow">Slow</string>
+    <!-- Speed label for okay network speed -->
+    <string name="speed_label_okay">Okay</string>
+    <!-- Speed label for medium network speed -->
+    <string name="speed_label_medium">Medium</string>
+    <!-- Speed label for fast network speed -->
+    <string name="speed_label_fast">Fast</string>
+    <!-- Speed label for very fast network speed -->
+    <string name="speed_label_very_fast">Very Fast</string>
+
     <!-- Bluetooth settings.  Message when a device is disconnected -->
     <string name="bluetooth_disconnected">Disconnected</string>
     <!-- Bluetooth settings.  Message when disconnecting from a device -->

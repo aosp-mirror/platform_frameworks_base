@@ -1397,7 +1397,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (mStartTime < 0) {
             // First frame. If there is start delay, start delay count down will happen *after* this
             // frame.
-            mStartTime = mReversing ? frameTime : frameTime + mStartDelay;
+            mStartTime = mReversing ? frameTime : frameTime + (long) (mStartDelay * sDurationScale);
         }
 
         // Handle pause/resume

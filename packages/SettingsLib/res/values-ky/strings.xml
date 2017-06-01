@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Фондогу процесстер чеги"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Бардык ANR\'лерди көрсөтүү"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Фондогу колдонмолорго Колдонмо Жооп Бербейт деп көрсөтүү"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Эскертме каналынын эскертүүлөрүн көрсөтүү"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Колдонмодон жарактуу каналсыз эскертме жайгаштырылганда, экрандан эскертүү көрсөтүлөт"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Тышкы сактагычка сактоого уруксат берүү"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Манифест маанилерине карабастан бардык колдонмолорду тышкы сактагычка сактоого уруксат берет"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Аракеттердин өлчөмүн өзгөртүүнү мажбурлоо"</string>
@@ -323,15 +321,12 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Бул сынамык мүмкүнчүлүк болгондуктан, түзмөктүн иштешине таасир этиши мүмкүн."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> менен алмаштырылган"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Батарея түгөнгөнгө чейин калган убакыт: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_duration_only_enhanced (5992456722677973678) -->
-    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Колдонушуңузга караганда болжол менен <xliff:g id="TIME">%1$s</xliff:g> калды"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Батарея толгонго чейин калган убакыт: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> калды"</string>
-    <!-- no translation found for power_remaining_duration_only_short_enhanced (7450425624026394823) -->
-    <skip />
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"Колдонушуңузга караганда <xliff:g id="TIME">%1$s</xliff:g> калды"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – болжол менен <xliff:g id="TIME">%2$s</xliff:g> калды"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (4401782117770255046) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - колдонушуңузга караганда болжол менен <xliff:g id="TIME">%2$s</xliff:g> калды"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> калды"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> кийин толук кубатталат"</string>

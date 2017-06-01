@@ -316,7 +316,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         mNotificationHeaderWrapper.notifyContentUpdated(mContainingNotification);
         recreateLowPriorityHeader(builder);
         recreateAmbientHeader(builder);
-        resetHeaderVisibilityIfNeeded(mNotificationHeader, calculateDesiredHeader());
+        updateHeaderVisibility(false /* animate */);
         updateChildrenHeaderAppearance();
     }
 
@@ -854,6 +854,11 @@ public class NotificationChildrenContainer extends ViewGroup {
         return mNotificationHeaderLowPriority;
     }
 
+    @VisibleForTesting
+    public ViewGroup getCurrentHeaderView() {
+        return mCurrentHeader;
+    }
+
     public void notifyShowAmbientChanged() {
         updateHeaderVisibility(false);
     }
@@ -890,7 +895,12 @@ public class NotificationChildrenContainer extends ViewGroup {
                 desiredHeader.setVisibility(VISIBLE);
             }
             if (currentHeader != null) {
-                getWrapperForView(currentHeader).setVisible(false);
+                // Wrapper can be null if we were a low priority notification
+                // and just destroyed it by calling setIsLowPriority(false)
+                NotificationViewWrapper wrapper = getWrapperForView(currentHeader);
+                if (wrapper != null) {
+                    wrapper.setVisible(false);
+                }
                 currentHeader.setVisibility(INVISIBLE);
             }
         }
@@ -899,7 +909,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         resetHeaderVisibilityIfNeeded(mNotificationHeaderAmbient, desiredHeader);
         resetHeaderVisibilityIfNeeded(mNotificationHeaderLowPriority, desiredHeader);
 
-        mCurrentHeader = currentHeader;
+        mCurrentHeader = desiredHeader;
     }
 
     private void resetHeaderVisibilityIfNeeded(View header, View desiredHeader) {

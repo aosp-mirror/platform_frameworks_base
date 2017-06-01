@@ -372,6 +372,8 @@
   <java-symbol type="integer"  name="config_wifi_tx_cur_ma" />
   <java-symbol type="integer"  name="config_wifi_operating_voltage_mv" />
   <java-symbol type="string"  name="config_wifi_framework_sap_2G_channel_list" />
+  <java-symbol type="integer" name="config_wifi_framework_max_tx_rate_for_full_scan" />
+  <java-symbol type="integer" name="config_wifi_framework_max_rx_rate_for_full_scan" />
 
   <java-symbol type="bool" name="config_wifi_framework_cellular_handover_enable_user_triggered_adjustment" />
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_tx_packet_threshold" />

@@ -51,6 +51,7 @@ import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -465,10 +466,17 @@ final class AutofillManagerServiceImpl {
         if (sVerbose) Slog.v(TAG, "destroyLocked()");
 
         final int numSessions = mSessions.size();
+        final ArraySet<RemoteFillService> remoteFillServices = new ArraySet<>(numSessions);
         for (int i = 0; i < numSessions; i++) {
-            mSessions.valueAt(i).destroyLocked();
+            final RemoteFillService remoteFillService = mSessions.valueAt(i).destroyLocked();
+            if (remoteFillService != null) {
+                remoteFillServices.add(remoteFillService);
+            }
         }
         mSessions.clear();
+        for (int i = 0; i < remoteFillServices.size(); i++) {
+            remoteFillServices.valueAt(i).destroy();
+        }
 
         sendStateToClients(true);
     }

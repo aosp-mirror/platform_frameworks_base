@@ -469,8 +469,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 프로필이 <xliff:g id="APPLICATION">%2$s</xliff:g>에 연결되어 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용을 확인하려면 관리자에게 문의하세요."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 이 프로필은 <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>에 연결되어 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n개인 네트워크 활동을 모니터링할 수 있는 <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>에도 연결됩니다."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g>님 잠금 해제됨"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> 실행 중"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"수동으로 잠금 해제할 때까지 기기가 잠금 상태로 유지됩니다."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"알림을 더욱 빠르게 받기"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"잠금 해제하기 전에 알림을 봅니다."</string>
@@ -577,6 +576,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15분"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30분"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1시간"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"실행취소"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> 동안 일시 중지됨"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"배터리 사용량"</string>

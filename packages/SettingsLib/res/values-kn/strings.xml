@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"ಹಿನ್ನೆಲೆ ಪ್ರಕ್ರಿಯೆ ಮಿತಿ"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"ಎಲ್ಲ ANR ಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"ಹಿನ್ನೆಲೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಿಲ್ಲ ಎಂಬ ಸಂಭಾಷಣೆ ತೋರಿಸು"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ಅಧಿಸೂಚನೆ ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ಅಮಾನ್ಯ ಚಾನಲ್ ಅಧಿಸೂಚನೆಗಾಗಿ ಪರದೆಯಲ್ಲಿ ಎಚ್ಚರಿಕೆ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ಬಾಹ್ಯವಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಒತ್ತಾಯವಾಗಿ ಅನುಮತಿಸಿ"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳು ಯಾವುದೇ ಆಗಿದ್ದರೂ, ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಒತ್ತಾಯ ಮಾಡಿ"</string>
@@ -323,15 +321,12 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ಇದು ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯವಾಗಿದೆ. ಕಾರ್ಯಕ್ಷಮತೆ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರಬಹುದು."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ಮೂಲಕ ಅತಿಕ್ರಮಿಸುತ್ತದೆ"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"ಸುಮಾರು <xliff:g id="TIME">%1$s</xliff:g> ಬಾಕಿಯಿದೆ"</string>
-    <!-- no translation found for power_remaining_duration_only_enhanced (5992456722677973678) -->
-    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"ನಿಮ್ಮ ಬಳಕೆಯ ಆಧಾರದ ಮೇಲೆ ಸುಮಾರು <xliff:g id="TIME">%1$s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"ಸಂಪೂರ್ಣ ಚಾರ್ಜ್ ಆಗಲು <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ಉಳಿದಿದೆ"</string>
-    <!-- no translation found for power_remaining_duration_only_short_enhanced (7450425624026394823) -->
-    <skip />
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"ನಿಮ್ಮ ಬಳಕೆಯ ಆಧಾರದ ಮೇಲೆ <xliff:g id="TIME">%1$s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - ಸುಮಾರು <xliff:g id="TIME">%2$s</xliff:g> ಬಾಕಿಯಿದೆ"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (4401782117770255046) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - ನಿಮ್ಮ ಬಳಕೆಯ ಆಧಾರದ ಮೇಲೆ <xliff:g id="TIME">%2$s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - ಸಂಪೂರ್ಣ ಚಾರ್ಜ್ ಆಗಲು <xliff:g id="TIME">%2$s</xliff:g>"</string>

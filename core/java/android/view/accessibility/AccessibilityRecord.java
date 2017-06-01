@@ -117,7 +117,7 @@ public class AccessibilityRecord {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setSource(View source) {
-        setSource(source, AccessibilityNodeInfo.UNDEFINED_ITEM_ID);
+        setSource(source, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
     /**

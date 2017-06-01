@@ -467,8 +467,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"កម្រង​ព័ត៌មាន​ការងារ​របស់អ្នក​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ។ កម្រងព័ត៌មាន​នេះត្រូវ​បាន​ភ្ជាប់ទៅ <xliff:g id="APPLICATION">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​របស់​អ្នក។"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​ស្ថិតក្រោម​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ។ កម្រង​ព័ត៌មាននេះ​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។\n\nអ្នកក៏ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​ផ្ទាល់ខ្លួន​របស់​អ្នក។"</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"បាន​ដោះសោ​សម្រាប់ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> កំពុង​ដំណើរការ"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ឧបករណ៍​នឹង​ចាក់​សោ​រហូត​ដល់​អ្នក​ដោះ​សោ​ដោយ​ដៃ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ទទួល​បាន​ការ​ជូន​ដំណឹង​កាន់តែ​លឿន"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ឃើញ​ពួកវា​មុន​ពេល​ដោះ​សោ"</string>
@@ -575,6 +574,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 នាទី"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 នាទី"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ម៉ោង"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"មិន​ធ្វើវិញ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"បាន​ផ្អាក​រយៈពេល <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ការប្រើប្រាស់ថ្ម"</string>

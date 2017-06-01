@@ -467,8 +467,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Vinnusniðinu þínu er stýrt af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Sniðið er tengt <xliff:g id="APPLICATION">%2$s</xliff:g>, sem getur fylgst með netnotkun þinni, þ. á m. tölvupósti, forritum og vefsvæðum\n\nFrekari upplýsingar fást hjá kerfisstjóra."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Vinnusniðinu þínu er stýrt af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Sniðið er tengt <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, sem getur fylgst með netnotkun þinni, þ. á m. tölvupósti, forritum og vefsvæðum\n\nÞú ert einnig með tengingu við <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, sem getur fylgst með persónulegri netnotkun þinni."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Opnað fyrir <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> er í gangi"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Tækið verður læst þar til þú opnar það handvirkt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Fáðu tilkynningar hraðar"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Sjáðu þær áður en þú opnar"</string>
@@ -575,6 +574,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 mínútur"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 mínútur"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 klukkustund"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"AFTURKALLA"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Þaggað í <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Rafhlöðunotkun"</string>

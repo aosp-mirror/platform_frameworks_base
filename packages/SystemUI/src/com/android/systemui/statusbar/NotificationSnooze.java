@@ -117,22 +117,27 @@ public class NotificationSnooze extends LinearLayout
 
     private ArrayList<SnoozeOption> getDefaultSnoozeOptions() {
         ArrayList<SnoozeOption> options = new ArrayList<>();
-        options.add(createOption(R.string.snooze_option_15_min, 15));
-        options.add(createOption(R.string.snooze_option_30_min, 30));
-        mDefaultOption = createOption(R.string.snooze_option_1_hour, 60);
+        options.add(createOption(15 /* minutes */));
+        options.add(createOption(30 /* minutes */));
+        mDefaultOption = createOption(60 /* minutes */);
         options.add(mDefaultOption);
-        options.add(createOption(R.string.snooze_option_2_hour, 60 * 2));
+        options.add(createOption(60 * 2 /* minutes */));
         return options;
     }
 
-    private SnoozeOption createOption(int descriptionResId, int minutes) {
+    private SnoozeOption createOption(int minutes) {
         Resources res = getResources();
-        final String description = res.getString(descriptionResId);
+        boolean showInHours = minutes >= 60;
+        int pluralResId = showInHours
+                ? R.plurals.snoozeHourOptions
+                : R.plurals.snoozeMinuteOptions;
+        int count = showInHours ? (minutes / 60) : minutes;
+        String description = res.getQuantityString(pluralResId, count, count);
         String resultText = String.format(res.getString(R.string.snoozed_for_time), description);
         SpannableString string = new SpannableString(resultText);
         string.setSpan(new StyleSpan(Typeface.BOLD),
                 resultText.length() - description.length(), resultText.length(), 0 /* flags */);
-        return new SnoozeOption(null, minutes, res.getString(descriptionResId), string);
+        return new SnoozeOption(null, minutes, description, string);
     }
 
     private void createOptionViews() {
