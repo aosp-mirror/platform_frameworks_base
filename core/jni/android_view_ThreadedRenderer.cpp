@@ -865,7 +865,8 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     sp<IGraphicBufferProducer> producer;
     sp<IGraphicBufferConsumer> rawConsumer;
     BufferQueue::createBufferQueue(&producer, &rawConsumer);
-    rawConsumer->setMaxBufferCount(1);
+    // We only need 1 buffer but some drivers have bugs so workaround it by setting max count to 2
+    rawConsumer->setMaxBufferCount(2);
     sp<BufferItemConsumer> consumer = new BufferItemConsumer(rawConsumer,
             GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_NEVER);
     consumer->setDefaultBufferSize(width, height);
