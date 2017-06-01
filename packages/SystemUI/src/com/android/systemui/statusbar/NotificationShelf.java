@@ -165,7 +165,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             openedAmount = Math.min(1.0f, openedAmount);
             mShelfState.openedAmount = openedAmount;
             mShelfState.clipTopAmount = 0;
-            mShelfState.alpha = mAmbientState.isPulsing() ? 0 : 1;
+            mShelfState.alpha = mAmbientState.hasPulsingNotifications() ? 0 : 1;
             mShelfState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
             mShelfState.shadowAlpha = 1.0f;
             mShelfState.hideSensitive = false;
