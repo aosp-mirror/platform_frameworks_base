@@ -2382,7 +2382,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (res == null) {
             return -1;
         }
-        pw.println(ActivityManager.supportsMultiWindow());
+        pw.println(ActivityManager.supportsMultiWindow(mInternal.mContext));
         return 0;
     }
 
@@ -2391,7 +2391,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (res == null) {
             return -1;
         }
-        pw.println(ActivityManager.supportsSplitScreenMultiWindow());
+        pw.println(ActivityManager.supportsSplitScreenMultiWindow(mInternal.mContext));
         return 0;
     }
 

@@ -1155,8 +1155,12 @@ public class ActivityManager {
      * E.g. freeform, split-screen, picture-in-picture.
      * @hide
      */
-    static public boolean supportsMultiWindow() {
-        return !isLowRamDeviceStatic()
+    static public boolean supportsMultiWindow(Context context) {
+        // On watches, multi-window is used to present essential system UI, and thus it must be
+        // supported regardless of device memory characteristics.
+        boolean isWatch = context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_WATCH);
+        return (!isLowRamDeviceStatic() || isWatch)
                 && Resources.getSystem().getBoolean(
                     com.android.internal.R.bool.config_supportsMultiWindow);
     }
@@ -1165,8 +1169,8 @@ public class ActivityManager {
      * Returns true if the system supports split screen multi-window.
      * @hide
      */
-    static public boolean supportsSplitScreenMultiWindow() {
-        return supportsMultiWindow()
+    static public boolean supportsSplitScreenMultiWindow(Context context) {
+        return supportsMultiWindow(context)
                 && Resources.getSystem().getBoolean(
                     com.android.internal.R.bool.config_supportsSplitScreenMultiWindow);
     }
