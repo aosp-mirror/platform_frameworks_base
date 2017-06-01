@@ -58,7 +58,9 @@ const char* gVS_Header_Uniforms_HasBitmap =
         "uniform mat4 textureTransform;\n"
         "uniform mediump vec2 textureDimension;\n";
 const char* gVS_Header_Uniforms_HasRoundRectClip =
-        "uniform mat4 roundRectInvTransform;\n";
+        "uniform mat4 roundRectInvTransform;\n"
+        "uniform mediump vec4 roundRectInnerRectLTWH;\n"
+        "uniform mediump float roundRectRadius;\n";
 const char* gVS_Header_Varyings_HasTexture =
         "varying vec2 outTexCoords;\n";
 const char* gVS_Header_Varyings_HasColors =
@@ -87,7 +89,7 @@ const char* gVS_Header_Varyings_HasGradient[6] = {
         "varying vec2 ditherTexCoords;\n",
 };
 const char* gVS_Header_Varyings_HasRoundRectClip =
-        "varying highp vec2 roundRectPos;\n";
+        "varying mediump vec2 roundRectPos;\n";
 const char* gVS_Main =
         "\nvoid main(void) {\n";
 const char* gVS_Main_OutTexCoords =
@@ -125,7 +127,7 @@ const char* gVS_Main_VertexAlpha =
         "    alpha = vtxAlpha;\n";
 
 const char* gVS_Main_HasRoundRectClip =
-        "    roundRectPos = (roundRectInvTransform * transformedPosition).xy;\n";
+        "    roundRectPos = ((roundRectInvTransform * transformedPosition).xy / roundRectRadius) - roundRectInnerRectLTWH.xy;\n";
 const char* gVS_Footer =
         "}\n\n";
 
@@ -169,8 +171,8 @@ const char* gFS_Uniforms_ColorOp[3] = {
 };
 
 const char* gFS_Uniforms_HasRoundRectClip =
-        "uniform vec4 roundRectInnerRectLTRB;\n"
-        "uniform float roundRectRadius;\n";
+        "uniform mediump vec4 roundRectInnerRectLTWH;\n"
+        "uniform mediump float roundRectRadius;\n";
 
 const char* gFS_Main =
         "\nvoid main(void) {\n"
@@ -315,15 +317,18 @@ const char* gFS_Main_ApplyColorOp[3] = {
         "    fragColor = blendColors(colorBlend, fragColor);\n"
 };
 
-// Note: LTRB -> xyzw
+// Note: LTWH (left top width height) -> xyzw
+// roundRectPos is now divided by roundRectRadius in vertex shader
+// after we also subtract roundRectInnerRectLTWH.xy from roundRectPos
 const char* gFS_Main_FragColor_HasRoundRectClip =
-        "    mediump vec2 fragToLT = roundRectInnerRectLTRB.xy - roundRectPos;\n"
-        "    mediump vec2 fragFromRB = roundRectPos - roundRectInnerRectLTRB.zw;\n"
+        "    mediump vec2 fragToLT = -roundRectPos;\n"
+        "    mediump vec2 fragFromRB = roundRectPos - roundRectInnerRectLTWH.zw;\n"
 
-        // divide + multiply by 128 to avoid falling out of range in length() function
-        "    mediump vec2 dist = max(max(fragToLT, fragFromRB), vec2(0.0, 0.0)) / 128.0;\n"
-        "    mediump float linearDist = roundRectRadius - (length(dist) * 128.0);\n"
-        "    gl_FragColor *= clamp(linearDist, 0.0, 1.0);\n";
+        // since distance is divided by radius, it's in [0;1] so precision is not an issue
+        // this also lets us clamp(0.0, 1.0) instead of max() which is cheaper on GPUs
+        "    mediump vec2 dist = clamp(max(fragToLT, fragFromRB), 0.0, 1.0);\n"
+        "    mediump float linearDist = clamp(roundRectRadius - (length(dist) * roundRectRadius), 0.0, 1.0);\n"
+        "    gl_FragColor *= linearDist;\n";
 
 const char* gFS_Main_DebugHighlight =
         "    gl_FragColor.rgb = vec3(0.0, gl_FragColor.a, 0.0);\n";
