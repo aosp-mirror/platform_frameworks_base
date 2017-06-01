@@ -3484,7 +3484,7 @@ public final class Settings {
 
         /** @hide */
         public static final Validator TIME_12_24_VALIDATOR =
-                new DiscreteValueValidator(new String[] {"12", "24"});
+                new DiscreteValueValidator(new String[] {"12", "24", null});
 
         /**
          * Date format string
