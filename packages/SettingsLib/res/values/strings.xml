@@ -125,7 +125,7 @@
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
-    <string name="bluetooth_profile_headset">Phone audio</string>
+    <string name="bluetooth_profile_headset">Phone calls</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the OPP profile. -->
     <string name="bluetooth_profile_opp">File transfer</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the HID profile. -->
@@ -139,15 +139,15 @@
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (sharing this device's Internet connection). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan_nap">Internet connection sharing</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the map profile. -->
-    <string name="bluetooth_profile_map">Message Access</string>
+    <string name="bluetooth_profile_map">Text Messages</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the SAP profile (sharing SIM card). -->
     <string name="bluetooth_profile_sap">SIM Access</string>
 
     <!-- Bluetooth settings. The user-visible string for the setting controlling whether to use a high-quality codec if the device supports it, along with the name of the codec (eg AAC, LDAC, aptX) -->
-    <string name="bluetooth_profile_a2dp_high_quality">Use high quality audio: <xliff:g id="codec_name">%1$s</xliff:g></string>
+    <string name="bluetooth_profile_a2dp_high_quality">HD audio: <xliff:g id="codec_name">%1$s</xliff:g></string>
 
     <!-- Bluetooth settings. Similar to bluetooth_profile_a2dp_high_quality, but used when the device supports high quality audio but we don't know which codec that will be used. -->
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec">Use high quality audio</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec">HD audio</string>
 
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
