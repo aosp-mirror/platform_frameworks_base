@@ -437,8 +437,8 @@ void CanvasContext::draw() {
         if (mNativeSurface.get()) {
             int durationUs;
             nsecs_t dequeueStart = mNativeSurface->getLastDequeueStartTime();
-            if (dequeueStart < mCurrentFrameInfo->get(FrameInfoIndex::Vsync)) {
-                // Ignoring dequeue duration as it happened prior to vsync
+            if (dequeueStart < mCurrentFrameInfo->get(FrameInfoIndex::SyncStart)) {
+                // Ignoring dequeue duration as it happened prior to frame render start
                 // and thus is not part of the frame.
                 swap.dequeueDuration = 0;
             } else {
