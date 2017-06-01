@@ -199,6 +199,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         final Handler smHandler = mTetherMasterSM.getHandler();
         mOffloadController = new OffloadController(smHandler,
                 deps.getOffloadHardwareInterface(smHandler, mLog),
+                mContext.getContentResolver(),
                 mLog);
         mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
                 mContext, mTetherMasterSM, TetherMasterSM.EVENT_UPSTREAM_CALLBACK, mLog);
