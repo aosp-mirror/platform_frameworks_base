@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
 
+import android.app.backup.BackupManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -34,6 +35,7 @@ import com.android.server.backup.testing.DefaultPackageManagerWithQueryIntentSer
 import com.android.server.backup.testing.ShadowBackupTransportStub;
 import com.android.server.backup.testing.ShadowContextImplForBackup;
 import com.android.server.backup.testing.TransportBoundListenerStub;
+import com.android.server.backup.testing.TransportReadyCallbackStub;
 
 import org.junit.After;
 import org.junit.Before;
@@ -74,6 +76,9 @@ public class TransportManagerTest {
 
     private final TransportBoundListenerStub mTransportBoundListenerStub =
             new TransportBoundListenerStub(true);
+
+    private final TransportReadyCallbackStub mTransportReadyCallbackStub =
+            new TransportReadyCallbackStub();
 
     @Before
     public void setUp() throws Exception {
@@ -415,6 +420,59 @@ public class TransportManagerTest {
 
         assertThat(transportManager.selectTransport(mTransport2.name)).isEqualTo(mTransport1.name);
         assertThat(transportManager.selectTransport(mTransport1.name)).isEqualTo(mTransport2.name);
+    }
+
+    @Test
+    public void ensureTransportReady_transportNotYetBound_callsListenerOnFailure()
+            throws Exception {
+        setUpPackageWithTransports(PACKAGE_NAME, Arrays.asList(mTransport1, mTransport2),
+                ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+
+        TransportManager transportManager = new TransportManager(
+                RuntimeEnvironment.application.getApplicationContext(),
+                new HashSet<>(Arrays.asList(mTransport1.componentName, mTransport2.componentName)),
+                mTransport1.name,
+                mTransportBoundListenerStub,
+                ShadowLooper.getMainLooper());
+
+        transportManager.ensureTransportReady(mTransport1.componentName,
+                mTransportReadyCallbackStub);
+
+        assertThat(mTransportReadyCallbackStub.getSuccessCalls()).isEmpty();
+        assertThat(mTransportReadyCallbackStub.getFailureCalls()).containsExactlyElementsIn(
+                Collections.singleton(
+                        BackupManager.ERROR_TRANSPORT_UNAVAILABLE));
+    }
+
+    @Test
+    public void ensureTransportReady_transportCannotBeBound_callsListenerOnFailure()
+            throws Exception {
+        TransportManager transportManager =
+                createTransportManagerAndSetUpTransports(Collections.singletonList(mTransport2),
+                        Collections.singletonList(mTransport1), mTransport1.name);
+
+        transportManager.ensureTransportReady(mTransport1.componentName,
+                mTransportReadyCallbackStub);
+
+        assertThat(mTransportReadyCallbackStub.getSuccessCalls()).isEmpty();
+        assertThat(mTransportReadyCallbackStub.getFailureCalls()).containsExactlyElementsIn(
+                Collections.singleton(
+                        BackupManager.ERROR_TRANSPORT_UNAVAILABLE));
+    }
+
+    @Test
+    public void ensureTransportReady_transportsAlreadyBound_callsListenerOnSuccess()
+            throws Exception {
+        TransportManager transportManager =
+                createTransportManagerAndSetUpTransports(Collections.singletonList(mTransport2),
+                        Collections.singletonList(mTransport1), mTransport1.name);
+
+        transportManager.ensureTransportReady(mTransport2.componentName,
+                mTransportReadyCallbackStub);
+
+        assertThat(mTransportReadyCallbackStub.getSuccessCalls()).containsExactlyElementsIn(
+                Collections.singleton(mTransport2.name));
+        assertThat(mTransportReadyCallbackStub.getFailureCalls()).isEmpty();
     }
 
     private void setUpPackageWithTransports(String packageName, List<TransportInfo> transports,

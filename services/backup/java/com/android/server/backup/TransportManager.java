@@ -95,6 +95,22 @@ public class TransportManager {
     @GuardedBy("mTransportLock")
     private final Map<String, ComponentName> mBoundTransports = new ArrayMap<>();
 
+    /**
+     * Callback interface for {@link #ensureTransportReady(ComponentName, TransportReadyCallback)}.
+     */
+    public interface TransportReadyCallback {
+
+        /**
+         * Will be called when the transport is ready.
+         */
+        void onSuccess(String transportName);
+
+        /**
+         * Will be called when it's not possible to make transport ready.
+         */
+        void onFailure(int reason);
+    }
+
     TransportManager(Context context, Set<ComponentName> whitelist, String defaultTransport,
             TransportBoundListener listener, Looper looper) {
         mContext = context;
@@ -217,7 +233,7 @@ public class TransportManager {
     }
 
     void ensureTransportReady(ComponentName transportComponent,
-            SelectBackupTransportCallback listener) {
+            TransportReadyCallback listener) {
         synchronized (mTransportLock) {
             TransportConnection conn = mValidTransports.get(transportComponent);
             if (conn == null) {
@@ -326,7 +342,7 @@ public class TransportManager {
 
         // Hold mTransportsLock to access these fields so as to provide a consistent view of them.
         private IBackupTransport mBinder;
-        private final List<SelectBackupTransportCallback> mListeners = new ArrayList<>();
+        private final List<TransportReadyCallback> mListeners = new ArrayList<>();
         private String mTransportName;
 
         private final ComponentName mTransportComponent;
@@ -359,7 +375,7 @@ public class TransportManager {
                     if (success) {
                         Slog.d(TAG, "Bound to transport: " + componentShortString);
                         mBoundTransports.put(mTransportName, component);
-                        for (SelectBackupTransportCallback listener : mListeners) {
+                        for (TransportReadyCallback listener : mListeners) {
                             listener.onSuccess(mTransportName);
                         }
                         // cancel rebinding on timeout for this component as we've already connected
@@ -372,7 +388,7 @@ public class TransportManager {
                         mContext.unbindService(this);
                         mValidTransports.remove(component);
                         mBinder = null;
-                        for (SelectBackupTransportCallback listener : mListeners) {
+                        for (TransportReadyCallback listener : mListeners) {
                             listener.onFailure(BackupManager.ERROR_TRANSPORT_INVALID);
                         }
                     }
@@ -432,7 +448,7 @@ public class TransportManager {
             }
         }
 
-        private void addListener(SelectBackupTransportCallback listener) {
+        private void addListener(TransportReadyCallback listener) {
             synchronized (mTransportLock) {
                 if (mBinder == null) {
                     // We are waiting for bind to complete. If mBinder is set to null after the bind
