@@ -13,16 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.android.multidexlegacyandexception;
+package com.android.multidexlegacyandexception.tests;
+
+import com.android.multidexlegacyandexception.CaughtOnlyByIntermediateException;
+import com.android.multidexlegacyandexception.CaughtOnlyException;
+import com.android.multidexlegacyandexception.ExceptionInMainDex;
+import com.android.multidexlegacyandexception.ExceptionInMainDex2;
+import com.android.multidexlegacyandexception.ExceptionInSecondaryDex;
+import com.android.multidexlegacyandexception.ExceptionInSecondaryDex2;
+import com.android.multidexlegacyandexception.ExceptionInSecondaryDexWithSuperInMain;
+import com.android.multidexlegacyandexception.IntermediateClass;
+import com.android.multidexlegacyandexception.MainActivity;
+import com.android.multidexlegacyandexception.MiniIntermediateClass;
+import com.android.multidexlegacyandexception.SuperExceptionInMainDex;
+import com.android.multidexlegacyandexception.SuperExceptionInSecondaryDex;
+import com.android.multidexlegacyandexception.TestApplication;
 
 /**
- * Run the tests with: <code>adb shell am instrument -w
- com.android.multidexlegacyandexception/android.test.InstrumentationTestRunner
+ * Run the tests with:
+ * <code>
+adb shell am instrument -w com.android.multidexlegacyandexception/com.android.multidexlegacyandexception.tests.MultiDexAndroidJUnitRunner
 </code>
  */
 @SuppressWarnings("deprecation")
-public class Test extends android.test.ActivityInstrumentationTestCase2<MainActivity> {
-    public Test() {
+public class ActivityTest extends android.test.ActivityInstrumentationTestCase2<MainActivity> {
+    public ActivityTest() {
         super(MainActivity.class);
     }
 
