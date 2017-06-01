@@ -9,7 +9,7 @@ cc_defaults {
         // Enables fine-grained GLES error checking
         // If enabled, every GLES call is wrapped & error checked
         // Has moderate overhead
-        "hwui_enable_opengl-validation",
+        //"hwui_enable_opengl-validation",
     ],
 
     cflags: [
