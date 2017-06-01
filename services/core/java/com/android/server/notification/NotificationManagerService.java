@@ -3714,7 +3714,7 @@ public class NotificationManagerService extends SystemService {
                     if (!mInCall && hasValidVibrate && !ringerModeSilent) {
                         mVibrateNotificationKey = key;
 
-                        buzz = playVibration(record, vibration);
+                        buzz = playVibration(record, vibration, hasValidSound);
                     }
                 }
             }
@@ -3788,22 +3788,41 @@ public class NotificationManagerService extends SystemService {
         return false;
     }
 
-    private boolean playVibration(final NotificationRecord record, long[] vibration) {
+    private boolean playVibration(final NotificationRecord record, long[] vibration,
+            boolean delayVibForSound) {
         // Escalate privileges so we can use the vibrator even if the
         // notifying app does not have the VIBRATE permission.
         long identity = Binder.clearCallingIdentity();
         try {
-            final boolean insistent =
-                (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
-            final VibrationEffect effect = VibrationEffect.createWaveform(
-                    vibration, insistent ? 0 : -1 /*repeatIndex*/);
-            mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
-                    effect, record.getAudioAttributes());
+            final VibrationEffect effect;
+            try {
+                final boolean insistent =
+                        (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
+                effect = VibrationEffect.createWaveform(
+                        vibration, insistent ? 0 : -1 /*repeatIndex*/);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Error creating vibration waveform with pattern: " +
+                        Arrays.toString(vibration));
+                return false;
+            }
+            if (delayVibForSound) {
+                new Thread(() -> {
+                    // delay the vibration by the same amount as the notification sound
+                    final int waitMs = mAudioManager.getFocusRampTimeMs(
+                            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+                            record.getAudioAttributes());
+                    if (DBG) Slog.v(TAG, "Delaying vibration by " + waitMs + "ms");
+                    try {
+                        Thread.sleep(waitMs);
+                    } catch (InterruptedException e) { }
+                    mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                            effect, record.getAudioAttributes());
+                }).start();
+            } else {
+                mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                        effect, record.getAudioAttributes());
+            }
             return true;
-        } catch (IllegalArgumentException e) {
-            Slog.e(TAG, "Error creating vibration waveform with pattern: " +
-                    Arrays.toString(vibration));
-            return false;
         } finally{
             Binder.restoreCallingIdentity(identity);
         }
