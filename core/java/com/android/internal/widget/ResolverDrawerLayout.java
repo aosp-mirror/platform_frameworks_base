@@ -22,9 +22,7 @@ import com.android.internal.R;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -504,7 +502,7 @@ public class ResolverDrawerLayout extends ViewGroup {
     }
 
     private void onCollapsedChanged(boolean isCollapsed) {
-        notifyViewAccessibilityStateChangedIfNeeded(
+        notifyAccessibilityStateChanged(
                 AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
 
         if (mScrollIndicatorDrawable != null) {
