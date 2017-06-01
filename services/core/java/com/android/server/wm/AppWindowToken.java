@@ -52,7 +52,6 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 
 import android.annotation.NonNull;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -526,7 +525,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
 
         mService.mOpeningApps.remove(this);
-        mService.mUnknownAppVisibilityController.appRemoved(this);
+        mService.mUnknownAppVisibilityController.appRemovedOrHidden(this);
         mService.mTaskSnapshotController.onAppRemoved(this);
         waitingToShow = false;
         if (mService.mClosingApps.contains(this)) {
