@@ -203,7 +203,13 @@ public class FileCollector {
             return 0;
         }
 
-        final long sharedDataSize = shared.getPath().getTotalSpace();
+        // In some cases, the path may be null -- we can't determine the size in this case.
+        final File sharedPath = shared.getPath();
+        if (sharedPath == null) {
+          return 0;
+        }
+
+        final long sharedDataSize = sharedPath.getTotalSpace();
         long systemSize = sm.getPrimaryStorageSize() - sharedDataSize;
 
         // This case is not exceptional -- we just fallback to the shared data volume in this case.
