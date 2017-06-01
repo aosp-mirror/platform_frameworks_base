@@ -3223,6 +3223,9 @@
 
     <!-- Alert windows notification strings -->
     <skip />
+    <!-- Name of notification channel group the system post notification to inform the use about apps
+         that are drawing ui on-top of other apps (alert-windows) [CHAR LIMIT=NONE] -->
+    <string name="alert_windows_notification_channel_group_name">Display over other apps</string>
     <!-- Name of notification channel the system post notification to inform the use about apps
          that are drawing ui on-top of other apps (alert-windows) [CHAR LIMIT=NONE] -->
     <string name="alert_windows_notification_channel_name"><xliff:g id="name" example="Google Maps">%s</xliff:g> displaying over other apps</string>
