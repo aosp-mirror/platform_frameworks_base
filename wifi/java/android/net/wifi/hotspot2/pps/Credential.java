@@ -97,9 +97,19 @@ public final class Credential implements Parcelable {
      * comparing the realm specified in that hotspot's ANQP element.
      */
     private String mRealm = null;
+    /**
+     * Set the realm associated with this credential.
+     *
+     * @param realm The realm to set to
+     */
     public void setRealm(String realm) {
         mRealm = realm;
     }
+    /**
+     * Get the realm associated with this credential.
+     *
+     * @return the realm associated with this credential
+     */
     public String getRealm() {
         return mRealm;
     }
@@ -162,9 +172,19 @@ public final class Credential implements Parcelable {
          * Username of the credential.
          */
         private String mUsername = null;
+        /**
+         * Set the username associated with this user credential.
+         *
+         * @param username The username to set to
+         */
         public void setUsername(String username) {
             mUsername = username;
         }
+        /**
+         * Get the username associated with this user credential.
+         *
+         * @return the username associated with this user credential
+         */
         public String getUsername() {
             return mUsername;
         }
@@ -173,9 +193,19 @@ public final class Credential implements Parcelable {
          * Base64-encoded password.
          */
         private String mPassword = null;
+        /**
+         * Set the Base64-encoded password associated with this user credential.
+         *
+         * @param password The password to set to
+         */
         public void setPassword(String password) {
             mPassword = password;
         }
+        /**
+         * Get the Base64-encoded password associated with this user credential.
+         *
+         * @return the Base64-encoded password associated with this user credential
+         */
         public String getPassword() {
             return mPassword;
         }
@@ -233,14 +263,30 @@ public final class Credential implements Parcelable {
 
         /**
          * EAP (Extensible Authentication Protocol) method type.
-         * Refer to http://www.iana.org/assignments/eap-numbers/eap-numbers.xml#eap-numbers-4
-         * for valid values.
+         * Refer to
+         * <a href="http://www.iana.org/assignments/eap-numbers/eap-numbers.xml#eap-numbers-4">
+         * EAP Numbers</a> for valid values.
          * Using Integer.MIN_VALUE to indicate unset value.
          */
         private int mEapType = Integer.MIN_VALUE;
+        /**
+         * Set the EAP (Extensible Authentication Protocol) method type associated with this
+         * user credential.
+         * Refer to
+         * <a href="http://www.iana.org/assignments/eap-numbers/eap-numbers.xml#eap-numbers-4">
+         * EAP Numbers</a> for valid values.
+         *
+         * @param eapType The EAP method type associated with this user credential
+         */
         public void setEapType(int eapType) {
             mEapType = eapType;
         }
+        /**
+         * Get the EAP (Extensible Authentication Protocol) method type associated with this
+         * user credential.
+         *
+         * @return EAP method type
+         */
         public int getEapType() {
             return mEapType;
         }
@@ -249,9 +295,19 @@ public final class Credential implements Parcelable {
          * Non-EAP inner authentication method.
          */
         private String mNonEapInnerMethod = null;
+        /**
+         * Set the inner non-EAP method associated with this user credential.
+         *
+         * @param nonEapInnerMethod The non-EAP inner method to set to
+         */
         public void setNonEapInnerMethod(String nonEapInnerMethod) {
             mNonEapInnerMethod = nonEapInnerMethod;
         }
+        /**
+         * Get the inner non-EAP method associated with this user credential.
+         *
+         * @return Non-EAP inner method associated with this user credential
+         */
         public String getNonEapInnerMethod() {
             return mNonEapInnerMethod;
         }
@@ -394,9 +450,19 @@ public final class Credential implements Parcelable {
             };
     }
     private UserCredential mUserCredential = null;
+    /**
+     * Set the user credential information.
+     *
+     * @param userCredential The user credential to set to
+     */
     public void setUserCredential(UserCredential userCredential) {
         mUserCredential = userCredential;
     }
+    /**
+     * Get the user credential information.
+     *
+     * @return user credential information
+     */
     public UserCredential getUserCredential() {
         return mUserCredential;
     }
@@ -421,9 +487,19 @@ public final class Credential implements Parcelable {
          * Certificate type.
          */
         private String mCertType = null;
+        /**
+         * Set the certificate type associated with this certificate credential.
+         *
+         * @param certType The certificate type to set to
+         */
         public void setCertType(String certType) {
             mCertType = certType;
         }
+        /**
+         * Get the certificate type associated with this certificate credential.
+         *
+         * @return certificate type
+         */
         public String getCertType() {
             return mCertType;
         }
@@ -432,9 +508,19 @@ public final class Credential implements Parcelable {
          * The SHA-256 fingerprint of the certificate.
          */
         private byte[] mCertSha256Fingerprint = null;
+        /**
+         * Set the certificate SHA-256 fingerprint associated with this certificate credential.
+         *
+         * @param certSha256Fingerprint The certificate fingerprint to set to
+         */
         public void setCertSha256Fingerprint(byte[] certSha256Fingerprint) {
             mCertSha256Fingerprint = certSha256Fingerprint;
         }
+        /**
+         * Get the certificate SHA-256 fingerprint associated with this certificate credential.
+         *
+         * @return certificate SHA-256 fingerprint
+         */
         public byte[] getCertSha256Fingerprint() {
             return mCertSha256Fingerprint;
         }
@@ -530,9 +616,19 @@ public final class Credential implements Parcelable {
             };
     }
     private CertificateCredential mCertCredential = null;
+    /**
+     * Set the certificate credential information.
+     *
+     * @param certCredential The certificate credential to set to
+     */
     public void setCertCredential(CertificateCredential certCredential) {
         mCertCredential = certCredential;
     }
+    /**
+     * Get the certificate credential information.
+     *
+     * @return certificate credential information
+     */
     public CertificateCredential getCertCredential() {
         return mCertCredential;
     }
@@ -553,9 +649,21 @@ public final class Credential implements Parcelable {
          * cellular networks
          */
         private String mImsi = null;
+        /**
+         * Set the IMSI (International Mobile Subscriber Identity) associated with this SIM
+         * credential.
+         *
+         * @param imsi The IMSI to set to
+         */
         public void setImsi(String imsi) {
             mImsi = imsi;
         }
+        /**
+         * Get the IMSI (International Mobile Subscriber Identity) associated with this SIM
+         * credential.
+         *
+         * @return IMSI associated with this SIM credential
+         */
         public String getImsi() {
             return mImsi;
         }
@@ -567,9 +675,21 @@ public final class Credential implements Parcelable {
          * Using Integer.MIN_VALUE to indicate unset value.
          */
         private int mEapType = Integer.MIN_VALUE;
+        /**
+         * Set the EAP (Extensible Authentication Protocol) method type associated with this
+         * SIM credential.
+         *
+         * @param eapType The EAP method type to set to
+         */
         public void setEapType(int eapType) {
             mEapType = eapType;
         }
+        /**
+         * Get the EAP (Extensible Authentication Protocol) method type associated with this
+         * SIM credential.
+         *
+         * @return EAP method type associated with this SIM credential
+         */
         public int getEapType() {
             return mEapType;
         }
@@ -704,9 +824,19 @@ public final class Credential implements Parcelable {
         }
     }
     private SimCredential mSimCredential = null;
+    /**
+     * Set the SIM credential information.
+     *
+     * @param simCredential The SIM credential to set to
+     */
     public void setSimCredential(SimCredential simCredential) {
         mSimCredential = simCredential;
     }
+    /**
+     * Get the SIM credential information.
+     *
+     * @return SIM credential information
+     */
     public SimCredential getSimCredential() {
         return mSimCredential;
     }
@@ -715,9 +845,19 @@ public final class Credential implements Parcelable {
      * CA (Certificate Authority) X509 certificate.
      */
     private X509Certificate mCaCertificate = null;
+    /**
+     * Set the CA (Certification Authority) certificate associated with this credential.
+     *
+     * @param caCertificate The CA certificate to set to
+     */
     public void setCaCertificate(X509Certificate caCertificate) {
         mCaCertificate = caCertificate;
     }
+    /**
+     * Get the CA (Certification Authority) certificate associated with this credential.
+     *
+     * @return CA certificate associated with this credential
+     */
     public X509Certificate getCaCertificate() {
         return mCaCertificate;
     }
@@ -726,9 +866,19 @@ public final class Credential implements Parcelable {
      * Client side X509 certificate chain.
      */
     private X509Certificate[] mClientCertificateChain = null;
+    /**
+     * Set the client certificate chain associated with this credential.
+     *
+     * @param certificateChain The client certificate chain to set to
+     */
     public void setClientCertificateChain(X509Certificate[] certificateChain) {
         mClientCertificateChain = certificateChain;
     }
+    /**
+     * Get the client certificate chain associated with this credential.
+     *
+     * @return client certificate chain associated with this credential
+     */
     public X509Certificate[] getClientCertificateChain() {
         return mClientCertificateChain;
     }
@@ -737,9 +887,19 @@ public final class Credential implements Parcelable {
      * Client side private key.
      */
     private PrivateKey mClientPrivateKey = null;
+    /**
+     * Set the client private key associated with this credential.
+     *
+     * @param clientPrivateKey the client private key to set to
+     */
     public void setClientPrivateKey(PrivateKey clientPrivateKey) {
         mClientPrivateKey = clientPrivateKey;
     }
+    /**
+     * Get the client private key associated with this credential.
+     *
+     * @return client private key associated with this credential.
+     */
     public PrivateKey getClientPrivateKey() {
         return mClientPrivateKey;
     }

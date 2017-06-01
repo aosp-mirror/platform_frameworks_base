@@ -353,13 +353,20 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
         private void updateItems() {
             if (mItems == null) return;
-            if (mSignalCallback.mInfo.enabled) {
-                mItems.setEmptyState(R.drawable.ic_qs_wifi_detail_empty,
-                        R.string.quick_settings_wifi_detail_empty_text);
-            } else {
+
+            // Wi-Fi is off
+            if (!mSignalCallback.mInfo.enabled) {
                 mItems.setEmptyState(R.drawable.ic_qs_wifi_detail_empty,
                         R.string.wifi_is_off);
+                mItems.setItems(null);
+                return;
             }
+
+            // No available access points
+            mItems.setEmptyState(R.drawable.ic_qs_wifi_detail_empty,
+                    R.string.quick_settings_wifi_detail_empty_text);
+
+            // Build the list
             Item[] items = null;
             if (mAccessPoints != null) {
                 items = new Item[mAccessPoints.length];

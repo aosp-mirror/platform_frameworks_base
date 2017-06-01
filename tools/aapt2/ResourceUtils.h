@@ -147,6 +147,9 @@ std::unique_ptr<BinaryPrimitive> TryParseColor(const android::StringPiece& str);
  */
 std::unique_ptr<BinaryPrimitive> TryParseBool(const android::StringPiece& str);
 
+// Returns a boolean BinaryPrimitive.
+std::unique_ptr<BinaryPrimitive> MakeBool(bool val);
+
 /*
  * Returns a BinaryPrimitve object representing an integer if the string was
  * parsed as one.

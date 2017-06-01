@@ -60,4 +60,12 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         Assert.assertTrue(lowPriorityHeaderView.getParent() == null);
         Assert.assertTrue(childrenContainer.getLowPriorityHeaderView() == null);
     }
+
+    @Test
+    public void testRecreateNotificationHeader_hasHeader() {
+        NotificationChildrenContainer childrenContainer = mGroup.getChildrenContainer();
+        childrenContainer.recreateNotificationHeader(null);
+        Assert.assertNotNull("Children container must have a header after recreation",
+                childrenContainer.getCurrentHeaderView());
+    }
 }

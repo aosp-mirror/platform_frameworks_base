@@ -152,8 +152,8 @@
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> หลังผ่านไป <xliff:g id="TIME_DELAY">{2}</xliff:g> วินาที"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
-    <string name="fcComplete" msgid="3118848230966886575">"รหัสคุณลักษณะเสร็จสมบูรณ์"</string>
-    <string name="fcError" msgid="3327560126588500777">"พบปัญหาในการเชื่อมต่อหรือรหัสคุณลักษณะไม่ถูกต้อง"</string>
+    <string name="fcComplete" msgid="3118848230966886575">"รหัสฟีเจอร์เสร็จสมบูรณ์"</string>
+    <string name="fcError" msgid="3327560126588500777">"พบปัญหาในการเชื่อมต่อหรือรหัสฟีเจอร์ไม่ถูกต้อง"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"ตกลง"</string>
     <string name="httpError" msgid="7956392511146698522">"เกิดข้อผิดพลาดของเครือข่าย"</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"ไม่พบ URL"</string>
@@ -414,7 +414,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"เข้าถึงบริการโทร IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"อนุญาตให้แอปใช้บริการ IMS เพื่อโทรออกโดยคุณไม่ต้องดำเนินการใดๆ เลย"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"อ่านสถานะและข้อมูลระบุตัวตนของโทรศัพท์"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"อนุญาตให้แอปพลิเคชันเข้าถึงคุณลักษณะโทรศัพท์ของอุปกรณ์ การอนุญาตนี้ทำให้แอปพลิเคชันสามารถตรวจสอบหมายเลขโทรศัพท์และรหัสอุปกรณ์ ตรวจสอบว่ามีการโทรที่ทำงานอยู่หรือไม่ และตรวจสอบหมายเลขระยะไกลที่เชื่อมต่อด้วยการโทร"</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"อนุญาตให้แอปพลิเคชันเข้าถึงฟีเจอร์โทรศัพท์ของอุปกรณ์ การอนุญาตนี้ทำให้แอปพลิเคชันสามารถตรวจสอบหมายเลขโทรศัพท์และรหัสอุปกรณ์ ตรวจสอบว่ามีการโทรที่ทำงานอยู่หรือไม่ และตรวจสอบหมายเลขระยะไกลที่เชื่อมต่อด้วยการโทร"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"กำหนดเส้นทางการโทรผ่านระบบ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"อนุญาตให้แอปกำหนดเส้นทางการโทรของแอปผ่านระบบเพื่อปรับปรุงประสบการณ์ในการโทร"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"อ่านหมายเลขโทรศัพท์"</string>
@@ -586,8 +586,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ข้อมูลของแอปพลิเคชันที่จัดเก็บต้องมีการเข้ารหัส"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ปิดใช้งานกล้องถ่ายรูป"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ป้องกันการใช้กล้องถ่ายรูปของอุปกรณ์ทั้งหมด"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ปิดคุณลักษณะล็อกหน้าจอบางอย่าง"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ป้องกันการใช้คุณลักษณะบางอย่างของการล็อกหน้าจอ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ปิดฟีเจอร์ล็อกหน้าจอบางอย่าง"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ป้องกันการใช้ฟีเจอร์บางอย่างของการล็อกหน้าจอ"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"บ้าน"</item>
     <item msgid="869923650527136615">"มือถือ"</item>
@@ -722,7 +722,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ถูกต้อง!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ลองอีกครั้ง"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ลองอีกครั้ง"</string>
-    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"ปลดล็อกคุณลักษณะและข้อมูลทั้งหมด"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"ปลดล็อกฟีเจอร์และข้อมูลทั้งหมด"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"มีความพยายามที่จะใช้ Face Unlock เกินขีดจำกัด"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ไม่มีซิมการ์ด"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ไม่มีซิมการ์ดในแท็บเล็ต"</string>
@@ -842,7 +842,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"อนุญาตให้แอปแก้ไขประวัติของเบราว์เซอร์หรือบุ๊กมาร์กที่เก็บไว้ในทีวี ซึ่งอาจอนุญาตให้แอปลบหรือแก้ไขข้อมูลเบราว์เซอร์ หมายเหตุ: สิทธิ์นี้ไม่สามารถใช้ได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นที่สามารถท่องเว็บได้"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในโทรศัพท์ ซึ่งทำให้แอปพลิเคชันสามารถลบหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ตั้งปลุก"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้คุณลักษณะนี้"</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้ฟีเจอร์นี้"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"เพิ่มข้อวามเสียง"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"อนุญาตให้แอปพลิเคชันเพิ่มข้อความลงในกล่องข้อความเสียงของคุณ"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
@@ -1206,7 +1206,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> แสดงทับแอปอื่นๆ"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> กำลังแสดงทับแอปอื่นๆ"</string>
-    <string name="alert_windows_notification_message" msgid="8917232109522912560">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้คุณลักษณะนี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดคุณลักษณะ"</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้ฟีเจอร์นี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดฟีเจอร์"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ปิด"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"กำลังเตรียม <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"กำลังตรวจหาข้อผิดพลาด"</string>
@@ -1480,13 +1480,13 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ลบ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"นี่เป็นการเพิ่มระดับเสียงเกินระดับที่แนะนำ\n\nการฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"ใช้ทางลัดการเข้าถึงพิเศษไหม"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มเป็นเวลา 3 วินาทีจะเริ่มคุณลักษณะการเข้าถึงพิเศษ\n\n คุณลักษณะการเข้าถึงพิเศษปัจจุบัน:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n คุณสามารถเปลี่ยนคุณลักษณะในการตั้งค่า &gt; การเข้าถึงพิเศษ"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มเป็นเวลา 3 วินาทีจะเริ่มฟีเจอร์การเข้าถึงพิเศษ\n\n ฟีเจอร์การเข้าถึงพิเศษปัจจุบัน:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n คุณสามารถเปลี่ยนฟีเจอร์ในการตั้งค่า &gt; การเข้าถึงพิเศษ"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"ปิดทางลัด"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"ใช้ทางลัด"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ทางลัดการเข้าถึงเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ทางลัดการเข้าถึงปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"เลือกคุณลักษณะที่จะใช้เมื่อคุณแตะปุ่ม \"การเข้าถึงพิเศษ\":"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"หากต้องการเปลี่ยนคุณลักษณะ ให้แตะปุ่ม \"การเข้าถึงพิเศษ\" ค้างไว้"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"เลือกฟีเจอร์ที่จะใช้เมื่อคุณแตะปุ่ม \"การเข้าถึงพิเศษ\":"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"หากต้องการเปลี่ยนฟีเจอร์ ให้แตะปุ่ม \"การเข้าถึงพิเศษ\" ค้างไว้"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"การขยาย"</string>
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"กำลังเปลี่ยนเป็น <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1708,7 +1708,7 @@
     <string name="region_picker_section_all" msgid="8966316787153001779">"ภูมิภาคทั้งหมด"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ค้นหา"</string>
     <string name="work_mode_off_title" msgid="2615362773958585967">"เปิดโหมดงานไหม"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"การดำเนินการนี้จะเปิดโปรไฟล์งานของคุณ รวมถึงแอป การซิงค์ในพื้นหลัง และคุณลักษณะที่เกี่ยวข้อง"</string>
+    <string name="work_mode_off_message" msgid="2961559609199223594">"การดำเนินการนี้จะเปิดโปรไฟล์งานของคุณ รวมถึงแอป การซิงค์ในพื้นหลัง และฟีเจอร์ที่เกี่ยวข้อง"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"เปิด"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"คุณมีข้อความใหม่"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"เปิดแอป SMS เพื่อดู"</string>

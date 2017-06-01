@@ -581,6 +581,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 דקות"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 דקות"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"שעה אחת"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"ביטול"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"נדחה לטיפול בעוד <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"שימוש בסוללה"</string>
@@ -638,7 +640,7 @@
     <string name="headset" msgid="4534219457597457353">"אוזניות"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"אוזניות מחוברות"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"אוזניות מחוברות"</string>
-    <string name="data_saver" msgid="5037565123367048522">"‏חוסך הנתונים&lt;br&gt;(Data Saver)"</string>
+    <string name="data_saver" msgid="5037565123367048522">"‏חוסך הנתונים (Data Saver)"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"‏חוסך הנתונים (Data Saver) פועל"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"‏חוסך הנתונים (Data Saver) כבוי"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"פועל"</string>

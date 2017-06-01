@@ -62,16 +62,36 @@ public final class PasspointConfiguration implements Parcelable {
      * Configurations under HomeSp subtree.
      */
     private HomeSp mHomeSp = null;
+    /**
+     * Set the Home SP (Service Provider) information.
+     *
+     * @param homeSp The Home SP information to set to
+     */
     public void setHomeSp(HomeSp homeSp) { mHomeSp = homeSp; }
+    /**
+     * Get the Home SP (Service Provider) information.
+     *
+     * @return Home SP information
+     */
     public HomeSp getHomeSp() { return mHomeSp; }
 
     /**
      * Configurations under Credential subtree.
      */
     private Credential mCredential = null;
+    /**
+     * Set the credential information.
+     *
+     * @param credential The credential information to set to
+     */
     public void setCredential(Credential credential) {
         mCredential = credential;
     }
+    /**
+     * Get the credential information.
+     *
+     * @return credential information
+     */
     public Credential getCredential() {
         return mCredential;
     }

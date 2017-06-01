@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"ลายนิ้วมือหลัก RSA ของคอมพิวเตอร์คือ:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"อนุญาตจากคอมพิวเตอร์เครื่องนี้เสมอ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"ไม่อนุญาตให้แก้ไขข้อบกพร่องผ่าน USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ผู้ใช้ที่ลงชื่อเข้าใช้อุปกรณ์นี้อยู่ในขณะนี้ไม่สามารถเปิดการแก้ปัญหาผ่าน USB ได้ หากต้องการใช้คุณลักษณะนี้ โปรดเปลี่ยนไปเป็นผู้ใช้ที่เป็นผู้ดูแลระบบ"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ผู้ใช้ที่ลงชื่อเข้าใช้อุปกรณ์นี้อยู่ในขณะนี้ไม่สามารถเปิดการแก้ปัญหาผ่าน USB ได้ หากต้องการใช้ฟีเจอร์นี้ โปรดเปลี่ยนไปเป็นผู้ใช้ที่เป็นผู้ดูแลระบบ"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ขยายจนเต็มหน้าจอ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ยืดจนเต็มหน้าจอ"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"กำลังบันทึกภาพหน้าจอ..."</string>
@@ -524,12 +524,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"ฮอตสปอต"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"โปรไฟล์งาน"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"เพลิดเพลินกับบางส่วนแต่ไม่ใช่ทั้งหมด"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"ตัวรับสัญญาณ UI ระบบช่วยให้คุณมีวิธีพิเศษในการปรับแต่งและกำหนดค่าส่วนติดต่อผู้ใช้ Android คุณลักษณะรุ่นทดลองเหล่านี้อาจมีการเปลี่ยนแปลง ขัดข้อง หรือหายไปในเวอร์ชันอนาคต โปรดดำเนินการด้วยความระมัดระวัง"</string>
-    <string name="tuner_persistent_warning" msgid="8597333795565621795">"คุณลักษณะรุ่นทดลองเหล่านี้อาจมีการเปลี่ยนแปลง ขัดข้อง หรือหายไปในเวอร์ชันอนาคต โปรดดำเนินการด้วยความระมัดระวัง"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"ตัวรับสัญญาณ UI ระบบช่วยให้คุณมีวิธีพิเศษในการปรับแต่งและกำหนดค่าส่วนติดต่อผู้ใช้ Android ฟีเจอร์รุ่นทดลองเหล่านี้อาจมีการเปลี่ยนแปลง ขัดข้อง หรือหายไปในเวอร์ชันอนาคต โปรดดำเนินการด้วยความระมัดระวัง"</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ฟีเจอร์รุ่นทดลองเหล่านี้อาจมีการเปลี่ยนแปลง ขัดข้อง หรือหายไปในเวอร์ชันอนาคต โปรดดำเนินการด้วยความระมัดระวัง"</string>
     <string name="got_it" msgid="2239653834387972602">"รับทราบ"</string>
     <string name="tuner_toast" msgid="603429811084428439">"ยินดีด้วย! เพิ่มตัวรับสัญญาณ UI ระบบไปยังการตั้งค่าแล้ว"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"นำออกจากการตั้งค่า"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"นำตัวรับสัญญาณ UI ระบบออกจากการตั้งค่าและหยุดใช้คุณลักษณะทั้งหมดของตัวรับสัญญาณใช่ไหม"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"นำตัวรับสัญญาณ UI ระบบออกจากการตั้งค่าและหยุดใช้ฟีเจอร์ทั้งหมดของตัวรับสัญญาณใช่ไหม"</string>
     <string name="activity_not_found" msgid="348423244327799974">"ยังไม่ได้ติดตั้งแอปพลิเคชันบนอุปกรณ์ของคุณ"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"แสดงวินาทีของนาฬิกา"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"แสดงวินาทีของนาฬิกาในแถบสถานะ อาจส่งผลต่ออายุแบตเตอรี"</string>
@@ -573,6 +573,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 นาที"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 นาที"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ชั่วโมง"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"เลิกทำ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"ปิดเสียงเตือนชั่วคราวไว้เป็นเวลา <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"การใช้งานแบตเตอรี่"</string>
@@ -719,7 +721,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ลากลงเพื่อปิด"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"เมนูการแสดงผลหลายแหล่งพร้อมกัน"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงผลหลายแหล่งพร้อมกัน"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้คุณลักษณะนี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดคุณลักษณะ"</string>
+    <string name="pip_notification_message" msgid="4171698133469539591">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้ฟีเจอร์นี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดฟีเจอร์"</string>
     <string name="pip_play" msgid="1417176722760265888">"เล่น"</string>
     <string name="pip_pause" msgid="8881063404466476571">"หยุดชั่วคราว"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"ข้ามไปรายการถัดไป"</string>
@@ -728,7 +730,7 @@
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"ขณะนี้โทรศัพท์ทำงานเป็นปกติ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"โทรศัพท์ร้อนเกินไปจึงปิดเครื่องเพื่อให้เย็นลง ขณะนี้โทรศัพท์ทำงานเป็นปกติ\n\nโทรศัพท์อาจร้อนเกินไปหากคุณ\n	• ใช้แอปที่ใช้ทรัพยากรมาก (เช่น เกม วิดีโอ หรือแอปการนำทาง)\n	• ดาวน์โหลดหรืออัปโหลดไฟล์ขนาดใหญ่\n	• ใช้โทรศัพท์ในอุณหภูมิที่สูง"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"โทรศัพท์เริ่มเครื่องร้อน"</string>
-    <string name="high_temp_notif_message" msgid="5642466103153429279">"คุณลักษณะบางอย่างจะใช้งานได้จำกัดขณะโทรศัพท์ลดอุณหภูมิลง"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"ฟีเจอร์บางอย่างจะใช้งานได้จำกัดขณะโทรศัพท์ลดอุณหภูมิลง"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"โทรศัพท์จะพยายามลดอุณหภูมิลงโดยอัตโนมัติ คุณยังสามารถใช้โทรศัพท์ได้ แต่โทรศัพท์อาจทำงานช้าลง\n\nโทรศัพท์จะทำงานตามปกติเมื่อเย็นลงแล้ว"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ทางลัดทางซ้าย"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ทางลัดทางขวา"</string>

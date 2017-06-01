@@ -16,6 +16,8 @@
 
 package android.view.autofill;
 
+import static android.view.autofill.Helper.sVerbose;
+
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -186,6 +188,10 @@ public class AutofillPopupWindow extends PopupWindow {
 
     @Override
     public void showAsDropDown(View anchor, int xoff, int yoff, int gravity) {
+        if (sVerbose) {
+            Log.v(TAG, "showAsDropDown(): anchor=" + anchor + ", xoff=" + xoff + ", yoff=" + yoff
+                    + ", isShowing(): " + isShowing());
+        }
         if (isShowing()) {
             return;
         }

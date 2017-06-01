@@ -258,6 +258,11 @@ public final class AutofillManager {
          * @return The view, or {@code null} if not found
          */
         @Nullable View findViewByAccessibilityIdTraversal(int viewId);
+
+        /**
+         * Runs the specified action on the UI thread.
+         */
+        void runOnUiThread(Runnable action);
     }
 
     /**
@@ -1233,6 +1238,15 @@ public final class AutofillManager {
         return mService != null;
     }
 
+    private void post(Runnable runnable) {
+        final AutofillClient client = getClientLocked();
+        if (client == null) {
+            if (sVerbose) Log.v(TAG, "ignoring post() because client is null");
+            return;
+        }
+        client.runOnUiThread(runnable);
+    }
+
     /**
      * View tracking information. Once all tracked views become invisible the session is finished.
      */
@@ -1516,8 +1530,7 @@ public final class AutofillManager {
         public void setState(boolean enabled, boolean resetSession, boolean resetClient) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(
-                        () -> afm.setState(enabled, resetSession, resetClient));
+                afm.post(() -> afm.setState(enabled, resetSession, resetClient));
             }
         }
 
@@ -1525,8 +1538,7 @@ public final class AutofillManager {
         public void autofill(int sessionId, List<AutofillId> ids, List<AutofillValue> values) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(
-                        () -> afm.autofill(sessionId, ids, values));
+                afm.post(() -> afm.autofill(sessionId, ids, values));
             }
         }
 
@@ -1535,8 +1547,7 @@ public final class AutofillManager {
                 Intent fillInIntent) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(
-                        () -> afm.authenticate(sessionId, authenticationId, intent, fillInIntent));
+                afm.post(() -> afm.authenticate(sessionId, authenticationId, intent, fillInIntent));
             }
         }
 
@@ -1545,9 +1556,8 @@ public final class AutofillManager {
                 Rect anchorBounds, IAutofillWindowPresenter presenter) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(
-                        () -> afm.requestShowFillUi(sessionId, id, width, height, anchorBounds,
-                                presenter));
+                afm.post(() -> afm.requestShowFillUi(sessionId, id, width, height, anchorBounds,
+                        presenter));
             }
         }
 
@@ -1555,7 +1565,7 @@ public final class AutofillManager {
         public void requestHideFillUi(int sessionId, AutofillId id) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() -> afm.requestHideFillUi(id));
+                afm.post(() -> afm.requestHideFillUi(id));
             }
         }
 
@@ -1563,7 +1573,7 @@ public final class AutofillManager {
         public void notifyNoFillUi(int sessionId, AutofillId id) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() -> afm.notifyNoFillUi(sessionId, id));
+                afm.post(() -> afm.notifyNoFillUi(sessionId, id));
             }
         }
 
@@ -1571,7 +1581,7 @@ public final class AutofillManager {
         public void startIntentSender(IntentSender intentSender) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() -> {
+                afm.post(() -> {
                     try {
                         afm.mContext.startIntentSender(intentSender, null, 0, 0, 0);
                     } catch (IntentSender.SendIntentException e) {
@@ -1586,7 +1596,7 @@ public final class AutofillManager {
                 boolean saveOnAllViewsInvisible, AutofillId[] fillableIds) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.mContext.getMainThreadHandler().post(() ->
+                afm.post(() ->
                         afm.setTrackedViews(sessionId, ids, saveOnAllViewsInvisible, fillableIds)
                 );
             }

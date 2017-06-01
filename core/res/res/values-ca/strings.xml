@@ -1116,7 +1116,7 @@
     <string name="wifi_no_internet" msgid="8451173622563841546">"La Wi-Fi no té accés a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca per veure les opcions"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Actualment en ús: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"El dispositiu utilitza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> en cas que <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tingui accés a Internet. És possible que s\'apliquin càrrecs."</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"El dispositiu utilitza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> en cas que <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tingui accés a Internet. És possible que s\'hi apliquin càrrecs."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Abans es feia servir la xarxa <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>; ara s\'utilitza <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"dades mòbils"</item>
