@@ -5,11 +5,6 @@ cc_defaults {
 
         //"hwui_bugreport_font_cache_usage",
         //"hwui_compile_for_perf",
-
-        // Enables fine-grained GLES error checking
-        // If enabled, every GLES call is wrapped & error checked
-        // Has moderate overhead
-        //"hwui_enable_opengl-validation",
     ],
 
     cflags: [
@@ -108,7 +103,6 @@ cc_defaults {
     name: "hwui_enable_opengl_validation",
     defaults: ["hwui_debug"],
     cflags: ["-DDEBUG_OPENGL=3"],
-    srcs: ["debug/wrap_gles.cpp"],
     include_dirs: ["frameworks/native/opengl/libs/GLES2"],
 }
 
@@ -242,7 +236,14 @@ cc_defaults {
 
 cc_library {
     name: "libhwui",
-    defaults: ["libhwui_defaults"],
+    defaults: [
+        "libhwui_defaults",
+
+        // Enables fine-grained GLES error checking
+        // If enabled, every GLES call is wrapped & error checked
+        // Has moderate overhead
+        "hwui_enable_opengl_validation",
+],
 }
 
 // ------------------------
