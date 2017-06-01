@@ -31,7 +31,6 @@ import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
-import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
@@ -58,14 +57,13 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
-import static com.android.internal.util.Preconditions.checkArgument;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
 import static com.android.server.NetworkManagementSocketTagger.setKernelCounterSet;
 
 import android.app.AlarmManager;
-import android.app.IAlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -1041,7 +1039,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // snapshot and record current counters; read UID stats first to
         // avoid over counting dev stats.
         final NetworkStats uidSnapshot = getNetworkStatsUidDetail();
-        final NetworkStats xtSnapshot = getNetworkStatsXtAndVt();
+        final NetworkStats xtSnapshot = getNetworkStatsXt();
         final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
 
 
@@ -1367,7 +1365,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     /**
      * Return snapshot of current UID statistics, including any
-     * {@link TrafficStats#UID_TETHERING} and {@link #mUidOperations} values.
+     * {@link TrafficStats#UID_TETHERING}, video calling data usage, and {@link #mUidOperations}
+     * values.
      */
     private NetworkStats getNetworkStatsUidDetail() throws RemoteException {
         final NetworkStats uidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL);
@@ -1375,43 +1374,34 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // fold tethering stats and operations into uid snapshot
         final NetworkStats tetherSnapshot = getNetworkStatsTethering();
         uidSnapshot.combineAllValues(tetherSnapshot);
+
+        final TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(
+                Context.TELEPHONY_SERVICE);
+
+        // fold video calling data usage stats into uid snapshot
+        final NetworkStats vtStats = telephonyManager.getVtDataUsage(true);
+        if (vtStats != null) {
+            uidSnapshot.combineAllValues(vtStats);
+        }
         uidSnapshot.combineAllValues(mUidOperations);
 
         return uidSnapshot;
     }
 
     /**
-     * Return snapshot of current XT plus VT statistics.
+     * Return snapshot of current XT statistics with video calling data usage statistics.
      */
-    private NetworkStats getNetworkStatsXtAndVt() throws RemoteException {
+    private NetworkStats getNetworkStatsXt() throws RemoteException {
         final NetworkStats xtSnapshot = mNetworkManager.getNetworkStatsSummaryXt();
 
-        TelephonyManager tm = (TelephonyManager) mContext.getSystemService(
+        final TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(
                 Context.TELEPHONY_SERVICE);
 
-        long usage = tm.getVtDataUsage();
-
-        if (LOGV) Slog.d(TAG, "VT call data usage = " + usage);
-
-        final NetworkStats vtSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 1);
-
-        final NetworkStats.Entry entry = new NetworkStats.Entry();
-        entry.iface = VT_INTERFACE;
-        entry.uid = -1;
-        entry.set = TAG_ALL;
-        entry.tag = TAG_NONE;
-
-        // Since modem only tell us the total usage instead of each usage for RX and TX,
-        // we need to split it up (though it might not quite accurate). At
-        // least we can make sure the data usage report to the user will still be accurate.
-        entry.rxBytes = usage / 2;
-        entry.rxPackets = 0;
-        entry.txBytes = usage - entry.rxBytes;
-        entry.txPackets = 0;
-        vtSnapshot.combineValues(entry);
-
-        // Merge VT int XT
-        xtSnapshot.combineAllValues(vtSnapshot);
+        // Merge video calling data usage into XT
+        final NetworkStats vtSnapshot = telephonyManager.getVtDataUsage(false);
+        if (vtSnapshot != null) {
+            xtSnapshot.combineAllValues(vtSnapshot);
+        }
 
         return xtSnapshot;
     }
