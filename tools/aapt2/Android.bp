@@ -84,6 +84,7 @@ cc_library_host_static {
         "compile/PseudolocaleGenerator.cpp",
         "compile/Pseudolocalizer.cpp",
         "compile/XmlIdCollector.cpp",
+        "configuration/ConfigurationParser.cpp",
         "filter/ConfigFilter.cpp",
         "flatten/Archive.cpp",
         "flatten/TableFlattener.cpp",
@@ -160,7 +161,10 @@ cc_library_host_shared {
 cc_test_host {
     name: "aapt2_tests",
     srcs: ["**/*_test.cpp"],
-    static_libs: ["libaapt2", "libgmock"],
+    static_libs: [
+        "libaapt2",
+        "libgmock",
+    ],
     defaults: ["aapt_defaults"],
 }
 
