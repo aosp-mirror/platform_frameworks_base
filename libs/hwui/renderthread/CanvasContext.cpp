@@ -585,15 +585,37 @@ void CanvasContext::destroyHardwareResources() {
 }
 
 void CanvasContext::trimMemory(RenderThread& thread, int level) {
-    // No context means nothing to free
-    if (!thread.eglManager().hasEglContext()) return;
-
-    ATRACE_CALL();
-    if (level >= TRIM_MEMORY_COMPLETE) {
-        thread.renderState().flush(Caches::FlushMode::Full);
-        thread.eglManager().destroy();
-    } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
-        thread.renderState().flush(Caches::FlushMode::Moderate);
+    auto renderType = Properties::getRenderPipelineType();
+    switch (renderType) {
+        case RenderPipelineType::OpenGL: {
+            // No context means nothing to free
+            if (!thread.eglManager().hasEglContext()) return;
+            ATRACE_CALL();
+            if (level >= TRIM_MEMORY_COMPLETE) {
+                thread.renderState().flush(Caches::FlushMode::Full);
+                thread.eglManager().destroy();
+            } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
+                thread.renderState().flush(Caches::FlushMode::Moderate);
+            }
+            break;
+        }
+        case RenderPipelineType::SkiaGL:
+        case RenderPipelineType::SkiaVulkan: {
+            // No context means nothing to free
+            if (!thread.getGrContext()) return;
+            ATRACE_CALL();
+            if (level >= TRIM_MEMORY_COMPLETE) {
+                thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+                thread.eglManager().destroy();
+                thread.vulkanManager().destroy();
+            } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
+                thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
+            }
+            break;
+        }
+        default:
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            break;
     }
 }
 
