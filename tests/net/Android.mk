@@ -42,6 +42,7 @@ LOCAL_JNI_SHARED_LIBRARIES := libframeworksnettestsjni \
     libui \
     libunwind \
     libutils \
+    libvndksupport \
     libcrypto \
     libhidl-gen-utils \
     libhidlbase \
