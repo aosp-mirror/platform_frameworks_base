@@ -29,8 +29,8 @@ import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.IContentProvider;
-import android.content.Intent;
 import android.content.IIntentReceiver;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -91,6 +91,7 @@ import android.provider.ContactsContract;
 import android.provider.Downloads;
 import android.provider.FontsContract;
 import android.provider.Settings;
+import android.renderscript.RenderScriptCacheDir;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
 import android.util.AndroidRuntimeException;
@@ -114,7 +115,6 @@ import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.renderscript.RenderScriptCacheDir;
 import android.webkit.WebView;
 
 import com.android.internal.annotations.GuardedBy;
@@ -128,7 +128,20 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
+
+import dalvik.system.BaseDexClassLoader;
+import dalvik.system.CloseGuard;
+import dalvik.system.VMDebug;
+import dalvik.system.VMRuntime;
+
 import com.google.android.collect.Lists;
+
+import libcore.io.DropBox;
+import libcore.io.EventLogger;
+import libcore.io.IoUtils;
+import libcore.net.event.NetworkEventDispatcher;
+
+import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -145,16 +158,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
-
-import libcore.io.DropBox;
-import libcore.io.EventLogger;
-import libcore.io.IoUtils;
-import libcore.net.event.NetworkEventDispatcher;
-import dalvik.system.BaseDexClassLoader;
-import dalvik.system.CloseGuard;
-import dalvik.system.VMDebug;
-import dalvik.system.VMRuntime;
-import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 
 final class RemoteServiceException extends AndroidRuntimeException {
     public RemoteServiceException(String msg) {
@@ -2887,6 +2890,9 @@ public final class ActivityThread {
             TAG, "Handling launch of " + r);
 
         // Initialize before creating the activity
+        if (!ThreadedRenderer.sRendererDisabled) {
+            GraphicsEnvironment.earlyInitEGL();
+        }
         WindowManagerGlobal.initialize();
 
         Activity a = performLaunchActivity(r, customIntent);
@@ -5372,26 +5378,45 @@ public final class ActivityThread {
         WindowManagerGlobal.getInstance().trimMemory(level);
     }
 
-    private void setupGraphicsSupport(Context context, File cacheDir) {
-        if (Process.isIsolated()) {
-            // Isolated processes aren't going to do UI.
-            return;
-        }
+    private void setupGraphicsSupport(Context context) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setupGraphicsSupport");
-        try {
-            int uid = Process.myUid();
-            String[] packages = getPackageManager().getPackagesForUid(uid);
 
-            if (packages != null) {
-                ThreadedRenderer.setupDiskCache(cacheDir);
-                RenderScriptCacheDir.setupDiskCache(cacheDir);
-                GraphicsEnvironment.setupGraphicsEnvironment(context);
+        // The system package doesn't have real data directories, so don't set up cache paths.
+        if (!"android".equals(context.getPackageName())) {
+            // This cache location probably points at credential-encrypted
+            // storage which may not be accessible yet; assign it anyway instead
+            // of pointing at device-encrypted storage.
+            final File cacheDir = context.getCacheDir();
+            if (cacheDir != null) {
+                // Provide a usable directory for temporary files
+                System.setProperty("java.io.tmpdir", cacheDir.getAbsolutePath());
+            } else {
+                Log.v(TAG, "Unable to initialize \"java.io.tmpdir\" property "
+                        + "due to missing cache directory");
             }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+            // Setup a location to store generated/compiled graphics code.
+            final Context deviceContext = context.createDeviceProtectedStorageContext();
+            final File codeCacheDir = deviceContext.getCodeCacheDir();
+            if (codeCacheDir != null) {
+                try {
+                    int uid = Process.myUid();
+                    String[] packages = getPackageManager().getPackagesForUid(uid);
+                    if (packages != null) {
+                        ThreadedRenderer.setupDiskCache(cacheDir);
+                        RenderScriptCacheDir.setupDiskCache(cacheDir);
+                    }
+                } catch (RemoteException e) {
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    throw e.rethrowFromSystemServer();
+                }
+            } else {
+                Log.w(TAG, "Unable to use shader/script cache: missing code-cache directory");
+            }
         }
+
+        GraphicsEnvironment.chooseDriver(context);
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     private void updateDefaultDensity() {
@@ -5664,27 +5689,8 @@ public final class ActivityThread {
         updateLocaleListFromAppContext(appContext,
                 mResourcesManager.getConfiguration().getLocales());
 
-        if (!Process.isIsolated() && !"android".equals(appContext.getPackageName())) {
-            // This cache location probably points at credential-encrypted
-            // storage which may not be accessible yet; assign it anyway instead
-            // of pointing at device-encrypted storage.
-            final File cacheDir = appContext.getCacheDir();
-            if (cacheDir != null) {
-                // Provide a usable directory for temporary files
-                System.setProperty("java.io.tmpdir", cacheDir.getAbsolutePath());
-            } else {
-                Log.v(TAG, "Unable to initialize \"java.io.tmpdir\" property "
-                        + "due to missing cache directory");
-            }
-
-            // Setup a location to store generated/compiled graphics code.
-            final Context deviceContext = appContext.createDeviceProtectedStorageContext();
-            final File codeCacheDir = deviceContext.getCodeCacheDir();
-            if (codeCacheDir != null) {
-                setupGraphicsSupport(appContext, codeCacheDir);
-            } else {
-                Log.e(TAG, "Unable to setupGraphicsSupport due to missing code-cache directory");
-            }
+        if (!Process.isIsolated()) {
+            setupGraphicsSupport(appContext);
         }
 
         // If we use profiles, setup the dex reporter to notify package manager
