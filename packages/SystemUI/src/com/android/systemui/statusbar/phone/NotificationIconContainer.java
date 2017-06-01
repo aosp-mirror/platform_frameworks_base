@@ -123,6 +123,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private boolean mDisallowNextAnimation;
     private boolean mAnimationsEnabled = true;
     private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
+    private int mDarkOffsetX;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -389,6 +390,14 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 iconState.xTranslation = getWidth() - iconState.xTranslation - view.getWidth();
             }
         }
+
+        if (mDark && mDarkOffsetX != 0) {
+            for (int i = 0; i < childCount; i++) {
+                View view = getChildAt(i);
+                IconState iconState = mIconStates.get(view);
+                iconState.xTranslation += mDarkOffsetX;
+            }
+        }
     }
 
     private float getLayoutEnd() {
@@ -510,6 +519,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
 
     public void setReplacingIcons(ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons) {
         mReplacingIcons = replacingIcons;
+    }
+
+    public void setDarkOffsetX(int offsetX) {
+        mDarkOffsetX = offsetX;
     }
 
     public class IconState extends ViewState {

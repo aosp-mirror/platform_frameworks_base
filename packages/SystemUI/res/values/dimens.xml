@@ -805,6 +805,14 @@
 
     <dimen name="global_actions_top_padding">100dp</dimen>
 
+    <!-- the maximum offset in either direction that elements are moved horizontally to prevent
+            burn-in on AOD -->
+    <dimen name="burn_in_prevention_offset_x">8dp</dimen>
+
+    <!-- the maximum offset in either direction that elements are moved vertically to prevent
+            burn-in on AOD -->
+    <dimen name="burn_in_prevention_offset_y">50dp</dimen>
+
     <dimen name="corner_size">16dp</dimen>
     <dimen name="top_padding">0dp</dimen>
     <dimen name="bottom_padding">48dp</dimen>
