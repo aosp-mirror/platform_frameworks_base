@@ -7874,9 +7874,14 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void run() {
-            // mSource may be changed in calls below.
+            // Protect against re-entrant code and attempt to do the right thing in the case that
+            // we're multithreaded.
             View source = mSource;
             mSource = null;
+            if (source == null) {
+                Log.e(TAG, "Accessibility content change has no source");
+                return;
+            }
             // The accessibility may be turned off while we were waiting so check again.
             if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                 mLastEventTimeMillis = SystemClock.uptimeMillis();
@@ -7893,6 +7898,22 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         public void runOrPost(View source, int changeType) {
+            if (mHandler.getLooper() != Looper.myLooper()) {
+                CalledFromWrongThreadException e = new CalledFromWrongThreadException("Only the "
+                        + "original thread that created a view hierarchy can touch its views.");
+                // TODO: Throw the exception
+                Log.e(TAG, "Accessibility content change on non-UI thread. Future Android "
+                        + "versions will throw an exception.", e);
+                // Attempt to recover. This code does not eliminate the thread safety issue, but
+                // it should force any issues to happen near the above log.
+                mHandler.removeCallbacks(this);
+                if (mSource != null) {
+                    // Dispatch whatever was pending. It's still possible that the runnable started
+                    // just before we removed the callbacks, and bad things will happen, but at
+                    // least they should happen very close to the logged error.
+                    run();
+                }
+            }
             if (mSource != null) {
                 // If there is no common predecessor, then mSource points to
                 // a removed view, hence in this case always prefer the source.
@@ -7909,12 +7930,12 @@ public final class ViewRootImpl implements ViewParent,
             if (timeSinceLastMillis >= minEventIntevalMillis) {
                 removeCallbacksAndRun();
             } else {
-                mSource.postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
+                mHandler.postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
             }
         }
 
         public void removeCallbacksAndRun() {
-            mSource.removeCallbacks(this);
+            mHandler.removeCallbacks(this);
             run();
         }
     }
