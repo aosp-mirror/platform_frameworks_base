@@ -1484,6 +1484,31 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testGetAccountsByTypeForPackageWhenTypeIsNull() throws Exception {
+        unlockSystemUser();
+        HashMap<String, Integer> visibility1 = new HashMap<>();
+        visibility1.put(AccountManagerServiceTestFixtures.CALLER_PACKAGE,
+            AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+
+        HashMap<String, Integer> visibility2 = new HashMap<>();
+        visibility2.put(AccountManagerServiceTestFixtures.CALLER_PACKAGE,
+            AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE);
+
+        mAms.addAccountExplicitlyWithVisibility(
+            AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "P11", null, visibility1);
+        mAms.addAccountExplicitlyWithVisibility(
+            AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "P12", null, visibility2);
+
+        Account[] accounts = mAms.getAccountsByTypeForPackage(
+            null, "otherPackageName",
+            AccountManagerServiceTestFixtures.CALLER_PACKAGE);
+        // Only get the USER_MANAGED_NOT_VISIBLE account.
+        assertEquals(1, accounts.length);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS, accounts[0].name);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, accounts[0].type);
+    }
+
+    @SmallTest
     public void testGetAuthTokenLabelWithNullAccountType() throws Exception {
         unlockSystemUser();
         try {

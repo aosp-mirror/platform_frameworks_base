@@ -52,6 +52,10 @@
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
 
+    <!-- Uses API introduced in O (26) -->
+    <uses-sdk android:minSdkVersion="1"
+          android:targetSdkVersion="26"/>
+
     <application>
         <uses-library android:name="android.test.runner" />
 
