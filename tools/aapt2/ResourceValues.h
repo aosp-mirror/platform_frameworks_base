@@ -40,7 +40,8 @@ struct RawValueVisitor;
 // type specific operations is to check the Value's type() and
 // cast it to the appropriate subclass. This isn't super clean,
 // but it is the simplest strategy.
-struct Value {
+class Value {
+ public:
   virtual ~Value() = default;
 
   // Whether this value is weak and can be overridden without warning or error. Default is false.
@@ -81,6 +82,8 @@ struct Value {
 
   // Human readable printout of this value.
   virtual void Print(std::ostream* out) const = 0;
+
+  friend std::ostream& operator<<(std::ostream& out, const Value& value);
 
  protected:
   Source source_;
@@ -245,6 +248,8 @@ struct Attribute : public BaseValue<Attribute> {
   struct Symbol {
     Reference symbol;
     uint32_t value;
+
+    friend std::ostream& operator<<(std::ostream& out, const Symbol& symbol);
   };
 
   uint32_t type_mask;
@@ -266,6 +271,8 @@ struct Style : public BaseValue<Style> {
   struct Entry {
     Reference key;
     std::unique_ptr<Item> value;
+
+    friend std::ostream& operator<<(std::ostream& out, const Entry& entry);
   };
 
   Maybe<Reference> parent;
@@ -278,6 +285,10 @@ struct Style : public BaseValue<Style> {
   bool Equals(const Value* value) const override;
   Style* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
+
+  // Merges `style` into this Style. All identical attributes of `style` take precedence, including
+  // the parent, if there is one.
+  void MergeWith(Style* style, StringPool* pool);
 };
 
 struct Array : public BaseValue<Array> {
@@ -307,20 +318,15 @@ struct Styleable : public BaseValue<Styleable> {
   void MergeWith(Styleable* styleable);
 };
 
-// Stream operator for printing Value objects.
-inline ::std::ostream& operator<<(::std::ostream& out, const Value& value) {
-  value.Print(&out);
-  return out;
-}
-
-inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const Attribute::Symbol& s) {
-  if (s.symbol.name) {
-    out << s.symbol.name.value().entry;
+template <typename T>
+typename std::enable_if<std::is_base_of<Value, T>::value, std::ostream&>::type operator<<(
+    std::ostream& out, const std::unique_ptr<T>& value) {
+  if (value == nullptr) {
+    out << "NULL";
   } else {
-    out << "???";
+    value->Print(&out);
   }
-  return out << "=" << s.value;
+  return out;
 }
 
 }  // namespace aapt

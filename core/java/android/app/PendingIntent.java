@@ -102,6 +102,7 @@ public final class PendingIntent implements Parcelable {
                     FLAG_NO_CREATE,
                     FLAG_CANCEL_CURRENT,
                     FLAG_UPDATE_CURRENT,
+                    FLAG_IMMUTABLE,
 
                     Intent.FILL_IN_ACTION,
                     Intent.FILL_IN_DATA,

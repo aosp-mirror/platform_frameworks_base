@@ -473,8 +473,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Цей профіль під’єднано до додатка <xliff:g id="APPLICATION">%2$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Цей профіль під’єднано до додатка <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема а електронній пошті, додатках і на веб-сайтах.\n\nВаш профіль також під’єднано до додатка <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, який може відстежувати вашу особисту активність у мережі."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Розблоковано для користувача <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> працює"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Пристрій залишатиметься заблокованим, доки ви не розблокуєте його вручну"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Швидше отримуйте сповіщення"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Переглядайте сповіщення, перш ніж розблокувати екран"</string>
@@ -585,6 +584,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 хвилин"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 хвилин"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 годину"</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"ВІДМІНИТИ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Відкладено на <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Використання заряду"</string>

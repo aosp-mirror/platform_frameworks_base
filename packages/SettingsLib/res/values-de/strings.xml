@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Hintergrundprozesslimit"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Alle ANRS anzeigen"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Dialogfeld \"App antwortet nicht\" für Hintergrund-Apps anzeigen"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Warnungen für Benachrichtigungskanäle einblenden"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Blendet Warnungen auf dem Display ein, wenn eine App eine Benachrichtigung ohne gültigen Kanal sendet"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Externe Speichernutzung von Apps erlauben"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Ermöglicht es jeder qualifizierten App, Daten auf externen Speicher zu schreiben, unabhängig von den Manifestwerten"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Anpassen der Größe von Aktivitäten erzwingen"</string>
@@ -323,15 +321,12 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Hierbei handelt es sich um eine experimentelle Funktion, die sich auf die Leistung auswirken kann."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Außer Kraft gesetzt von \"<xliff:g id="TITLE">%1$s</xliff:g>\""</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Ca. <xliff:g id="TIME">%1$s</xliff:g> übrig"</string>
-    <!-- no translation found for power_remaining_duration_only_enhanced (5992456722677973678) -->
-    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Noch ca. <xliff:g id="TIME">%1$s</xliff:g>, basierend auf deiner Nutzung"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> bis zur vollständigen Aufladung"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Noch <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_duration_only_short_enhanced (7450425624026394823) -->
-    <skip />
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"Noch <xliff:g id="TIME">%1$s</xliff:g>, basierend auf deiner Nutzung"</string>
     <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – ungefähr noch <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (4401782117770255046) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> – noch ca. <xliff:g id="TIME">%2$s</xliff:g>, basierend auf deiner Nutzung"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – noch <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> bis vollständig geladen"</string>

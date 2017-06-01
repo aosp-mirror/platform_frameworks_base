@@ -4159,13 +4159,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void freeStorageAndNotify(final String volumeUuid, final long freeStorageSize,
-            final IPackageDataObserver observer) {
+            final int storageFlags, final IPackageDataObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
         mHandler.post(() -> {
             boolean success = false;
             try {
-                freeStorage(volumeUuid, freeStorageSize, 0);
+                freeStorage(volumeUuid, freeStorageSize, storageFlags);
                 success = true;
             } catch (IOException e) {
                 Slog.w(TAG, e);
@@ -4182,13 +4182,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void freeStorage(final String volumeUuid, final long freeStorageSize,
-            final IntentSender pi) {
+            final int storageFlags, final IntentSender pi) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, TAG);
         mHandler.post(() -> {
             boolean success = false;
             try {
-                freeStorage(volumeUuid, freeStorageSize, 0);
+                freeStorage(volumeUuid, freeStorageSize, storageFlags);
                 success = true;
             } catch (IOException e) {
                 Slog.w(TAG, e);
@@ -4213,10 +4213,14 @@ public class PackageManagerService extends IPackageManager.Stub
         if (file.getUsableSpace() >= bytes) return;
 
         if (ENABLE_FREE_CACHE_V2) {
-            final boolean aggressive = (storageFlags
-                    & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
             final boolean internalVolume = Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL,
                     volumeUuid);
+            final boolean aggressive = (storageFlags
+                    & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
+            final boolean defyReserved = (storageFlags
+                    & StorageManager.FLAG_ALLOCATE_DEFY_RESERVED) != 0;
+            final long reservedBytes = (aggressive || defyReserved) ? 0
+                    : storage.getStorageCacheBytes(file);
 
             // 1. Pre-flight to determine if we have any chance to succeed
             // 2. Consider preloaded data (after 1w honeymoon, unless aggressive)
@@ -4234,7 +4238,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // 4. Consider cached app data (above quotas)
             try {
-                mInstaller.freeCache(volumeUuid, bytes, Installer.FLAG_FREE_CACHE_V2);
+                mInstaller.freeCache(volumeUuid, bytes, reservedBytes,
+                        Installer.FLAG_FREE_CACHE_V2);
             } catch (InstallerException ignored) {
             }
             if (file.getUsableSpace() >= bytes) return;
@@ -4260,8 +4265,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // 8. Consider cached app data (below quotas)
             try {
-                mInstaller.freeCache(volumeUuid, bytes, Installer.FLAG_FREE_CACHE_V2
-                        | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
+                mInstaller.freeCache(volumeUuid, bytes, reservedBytes,
+                        Installer.FLAG_FREE_CACHE_V2 | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
             } catch (InstallerException ignored) {
             }
             if (file.getUsableSpace() >= bytes) return;
@@ -4278,7 +4283,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         } else {
             try {
-                mInstaller.freeCache(volumeUuid, bytes, 0);
+                mInstaller.freeCache(volumeUuid, bytes, 0, 0);
             } catch (InstallerException ignored) {
             }
             if (file.getUsableSpace() >= bytes) return;
@@ -15643,7 +15648,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             origin.resolvedPath, isForwardLocked(), packageAbiOverride);
 
                     try {
-                        mInstaller.freeCache(null, sizeBytes + lowThreshold, 0);
+                        mInstaller.freeCache(null, sizeBytes + lowThreshold, 0, 0);
                         pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath,
                                 installFlags, packageAbiOverride);
                     } catch (InstallerException e) {

@@ -123,6 +123,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -2630,7 +2631,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
+    public void overridePendingAppTransitionThumb(GraphicBuffer srcThumb, int startX,
             int startY, IRemoteCallback startedCallback, boolean scaleUp) {
         synchronized(mWindowMap) {
             mAppTransition.overridePendingAppTransitionThumb(srcThumb, startX, startY,
@@ -2639,7 +2640,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX,
+    public void overridePendingAppTransitionAspectScaledThumb(GraphicBuffer srcThumb, int startX,
             int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
             boolean scaleUp) {
         synchronized(mWindowMap) {
@@ -3823,20 +3824,22 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
 
         try {
-            final boolean rotationChanged;
             // TODO(multi-display): Update rotation for different displays separately.
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
+            final boolean rotationChanged;
+            final int displayId;
             synchronized (mWindowMap) {
+                final DisplayContent displayContent = getDefaultDisplayContentLocked();
                 rotationChanged = displayContent.updateRotationUnchecked(
                         false /* inTransaction */);
                 if (!rotationChanged || forceRelayout) {
-                    getDefaultDisplayContentLocked().setLayoutNeeded();
+                    displayContent.setLayoutNeeded();
                     mWindowPlacerLocked.performSurfacePlacement();
                 }
+                displayId = displayContent.getDisplayId();
             }
 
             if (rotationChanged || alwaysSendConfiguration) {
-                sendNewConfiguration(displayContent.getDisplayId());
+                sendNewConfiguration(displayId);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -6897,9 +6900,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 "registerDockedStackListener()")) {
             return;
         }
-        // TODO(multi-display): The listener is registered on the default display only.
-        getDefaultDisplayContentLocked().mDividerControllerLocked.registerDockedStackListener(
-                listener);
+        synchronized (mWindowMap) {
+            // TODO(multi-display): The listener is registered on the default display only.
+            getDefaultDisplayContentLocked().mDividerControllerLocked.registerDockedStackListener(
+                    listener);
+        }
     }
 
     @Override

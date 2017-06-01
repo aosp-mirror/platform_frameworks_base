@@ -1642,11 +1642,20 @@ public class StorageManager {
      */
     @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE)
     @SystemApi
-    public static final int FLAG_ALLOCATE_AGGRESSIVE = 1;
+    public static final int FLAG_ALLOCATE_AGGRESSIVE = 1 << 0;
+
+    /**
+     * Flag indicating that a disk space allocation request should defy any
+     * reserved disk space.
+     *
+     * @hide
+     */
+    public static final int FLAG_ALLOCATE_DEFY_RESERVED = 1 << 1;
 
     /** @hide */
     @IntDef(flag = true, value = {
             FLAG_ALLOCATE_AGGRESSIVE,
+            FLAG_ALLOCATE_DEFY_RESERVED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllocateFlags {}

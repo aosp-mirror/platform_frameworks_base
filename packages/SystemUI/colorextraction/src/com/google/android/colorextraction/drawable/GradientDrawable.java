@@ -31,6 +31,7 @@ import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.graphics.ColorUtils;
 import android.view.animation.DecelerateInterpolator;
 
@@ -194,6 +195,16 @@ public class GradientDrawable extends Drawable {
 
         float radius = Math.max(w, h);
         canvas.drawRect(x - radius, y - radius, x + radius, y + radius, mPaint);
+    }
+
+    @VisibleForTesting
+    public int getMainColor() {
+        return mMainColor;
+    }
+
+    @VisibleForTesting
+    public int getSecondaryColor() {
+        return mSecondaryColor;
     }
 
     static final class Splat {

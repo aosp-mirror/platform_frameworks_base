@@ -130,6 +130,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -1419,19 +1420,17 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     break;
                 case ANIM_THUMBNAIL_SCALE_UP:
                 case ANIM_THUMBNAIL_SCALE_DOWN:
-                    boolean scaleUp = (animationType == ANIM_THUMBNAIL_SCALE_UP);
-                    service.mWindowManager.overridePendingAppTransitionThumb(
-                            pendingOptions.getThumbnail(),
+                    final boolean scaleUp = (animationType == ANIM_THUMBNAIL_SCALE_UP);
+                    final GraphicBuffer buffer = pendingOptions.getThumbnail();
+                    service.mWindowManager.overridePendingAppTransitionThumb(buffer,
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
                             pendingOptions.getOnAnimationStartListener(),
                             scaleUp);
                     if (intent.getSourceBounds() == null) {
                         intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
                                 pendingOptions.getStartY(),
-                                pendingOptions.getStartX()
-                                        + pendingOptions.getThumbnail().getWidth(),
-                                pendingOptions.getStartY()
-                                        + pendingOptions.getThumbnail().getHeight()));
+                                pendingOptions.getStartX() + buffer.getWidth(),
+                                pendingOptions.getStartY() + buffer.getHeight()));
                     }
                     break;
                 case ANIM_THUMBNAIL_ASPECT_SCALE_UP:

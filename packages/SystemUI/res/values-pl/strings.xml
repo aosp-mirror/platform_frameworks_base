@@ -471,8 +471,7 @@
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem do pracy. Profil jest połączony z aplikacją <xliff:g id="APPLICATION">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nSkontaktuj się z administratorem, aby uzyskać więcej informacji."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Organizacja <xliff:g id="ORGANIZATION">%1$s</xliff:g> zarządza Twoim profilem do pracy. Profil jest połączony z aplikacją <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nMasz też połączenie z aplikacją <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, która może monitorować Twoją osobistą aktywność w sieci."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Odblokowano dla: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for keyguard_indication_trust_managed (8319646760022357585) -->
-    <skip />
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"Aplikacja <xliff:g id="TRUST_AGENT">%1$s</xliff:g> jest uruchomiona"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Urządzenie pozostanie zablokowane, aż odblokujesz je ręcznie"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Szybszy dostęp do powiadomień"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Zobacz powiadomienia, jeszcze zanim odblokujesz ekran"</string>
@@ -583,6 +582,8 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 min"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 min"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 godz."</string>
+    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"COFNIJ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Odłożono na <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Wykorzystanie baterii"</string>

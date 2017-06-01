@@ -61,8 +61,17 @@ void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas, const Ski
 static void clipOutline(const Outline& outline, SkCanvas* canvas, const SkRect* pendingClip) {
     Rect possibleRect;
     float radius;
-    LOG_ALWAYS_FATAL_IF(!outline.getAsRoundRect(&possibleRect, &radius),
-            "clipping outlines should be at most roundedRects");
+
+    /* To match the existing HWUI behavior we only supports rectangles or
+     * rounded rectangles; passing in a more complicated outline fails silently.
+     */
+    if (!outline.getAsRoundRect(&possibleRect, &radius)) {
+        if (pendingClip) {
+            canvas->clipRect(*pendingClip);
+        }
+        return;
+    }
+
     SkRect rect = possibleRect.toSkRect();
     if (radius != 0.0f) {
         if (pendingClip && !pendingClip->contains(rect)) {

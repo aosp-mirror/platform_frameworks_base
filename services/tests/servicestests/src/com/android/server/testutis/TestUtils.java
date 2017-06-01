@@ -23,12 +23,14 @@ public class TestUtils {
     private TestUtils() {
     }
 
+    public interface ExceptionRunnable {
+        void run() throws Exception;
+    }
+
     public static void assertExpectException(Class<? extends Throwable> expectedExceptionType,
-            String expectedExceptionMessageRegex, Runnable r) {
+            String expectedExceptionMessageRegex, ExceptionRunnable r) {
         try {
             r.run();
-            Assert.fail("Expected exception type " + expectedExceptionType.getName()
-                    + " was not thrown");
         } catch (Throwable e) {
             Assert.assertTrue(
                     "Expected exception type was " + expectedExceptionType.getName()
@@ -37,6 +39,9 @@ public class TestUtils {
             if (expectedExceptionMessageRegex != null) {
                 MoreAsserts.assertContainsRegex(expectedExceptionMessageRegex, e.getMessage());
             }
+            return; // Pass.
         }
+        Assert.fail("Expected exception type " + expectedExceptionType.getName()
+                + " was not thrown");
     }
 }
