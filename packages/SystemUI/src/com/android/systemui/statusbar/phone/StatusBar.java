@@ -1845,23 +1845,20 @@ public class StatusBar extends SystemUI implements DemoMode,
                 // temporarily become children if they were isolated before.
                 continue;
             }
-            int vis = ent.notification.getNotification().visibility;
             int userId = ent.notification.getUserId();
 
             // Display public version of the notification if we need to redact.
-            boolean deviceSensitive = (isLockscreenPublicMode(mCurrentUserId)
-                    && !userAllowsPrivateNotificationsInPublic(mCurrentUserId));
-            boolean userSensitive = deviceSensitive || (isLockscreenPublicMode(userId)
-                    && !userAllowsPrivateNotificationsInPublic(userId));
-            boolean sensitiveNote = vis == Notification.VISIBILITY_PRIVATE;
-            boolean sensitivePackage = packageHasVisibilityOverride(ent.notification.getKey());
-            boolean sensitive = (sensitiveNote && userSensitive) || sensitivePackage;
-            boolean showingPublic = sensitive && isLockscreenPublicMode(userId);
-            if (showingPublic) {
+            boolean devicePublic = isLockscreenPublicMode(mCurrentUserId);
+            boolean userPublic = devicePublic || isLockscreenPublicMode(userId);
+            boolean needsRedaction = needsRedaction(ent);
+            boolean sensitive = userPublic && needsRedaction;
+            boolean deviceSensitive = devicePublic
+                    && !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
+            if (sensitive) {
                 updatePublicContentView(ent, ent.notification);
             }
             ent.row.setSensitive(sensitive, deviceSensitive);
-            ent.row.setNeedsRedaction(needsRedaction(ent));
+            ent.row.setNeedsRedaction(needsRedaction);
             if (mGroupManager.isChildInGroupWithSummary(ent.row.getStatusBarNotification())) {
                 ExpandableNotificationRow summary = mGroupManager.getGroupSummary(
                         ent.row.getStatusBarNotification());
