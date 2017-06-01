@@ -16,9 +16,13 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
+
+import android.content.ContentResolver;
 import android.net.LinkProperties;
-import android.os.Handler;
 import android.net.util.SharedLog;
+import android.os.Handler;
+import android.provider.Settings;
 
 /**
  * A class to encapsulate the business logic of programming the tethering
@@ -31,19 +35,22 @@ public class OffloadController {
 
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
+    private final ContentResolver mContentResolver;
     private final SharedLog mLog;
     private boolean mConfigInitialized;
     private boolean mControlInitialized;
     private LinkProperties mUpstreamLinkProperties;
 
-    public OffloadController(Handler h, OffloadHardwareInterface hwi, SharedLog log) {
+    public OffloadController(Handler h, OffloadHardwareInterface hwi,
+            ContentResolver contentResolver, SharedLog log) {
         mHandler = h;
         mHwInterface = hwi;
+        mContentResolver = contentResolver;
         mLog = log.forSubComponent(TAG);
     }
 
     public void start() {
-        if (started()) return;
+        if (isOffloadDisabled() || started()) return;
 
         if (!mConfigInitialized) {
             mConfigInitialized = mHwInterface.initOffloadConfig();
@@ -90,6 +97,11 @@ public class OffloadController {
     }
 
     // TODO: public void addDownStream(...)
+
+    private boolean isOffloadDisabled() {
+        // Defaults to |false| if not present.
+        return (Settings.Global.getInt(mContentResolver, TETHER_OFFLOAD_DISABLED, 0) != 0);
+    }
 
     private boolean started() {
         return mConfigInitialized && mControlInitialized;
