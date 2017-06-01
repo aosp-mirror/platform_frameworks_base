@@ -41,9 +41,7 @@ public class WakeLockTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        Context context = InstrumentationRegistry.getContext();
-
-        mInner = WakeLock.createPartialInner(context, WakeLockTest.class.getName());
+        mInner = WakeLock.createPartialInner(mContext, WakeLockTest.class.getName());
         mWakeLock = WakeLock.wrap(mInner);
     }
 
