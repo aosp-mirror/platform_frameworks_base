@@ -24,8 +24,6 @@ import android.text.Layout.TabStops;
 import android.text.style.CharacterStyle;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
-import android.text.style.UnderlineSpan;
-import android.util.IntArray;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
@@ -67,8 +65,6 @@ class TextLine {
             new SpanSet<CharacterStyle>(CharacterStyle.class);
     private final SpanSet<ReplacementSpan> mReplacementSpanSpanSet =
             new SpanSet<ReplacementSpan>(ReplacementSpan.class);
-
-    private final IntArray mUnderlines = new IntArray();
 
     private static final TextLine[] sCached = new TextLine[3];
 
@@ -699,37 +695,6 @@ class TextLine {
         fmi.leading = Math.max(fmi.leading, previousLeading);
     }
 
-    private static void drawUnderline(TextPaint wp, Canvas c, int color, float thickness,
-            float xstart, float xend, int baseline) {
-        // kStdUnderline_Offset = 1/9, defined in SkTextFormatParams.h
-        final float underlineTop = baseline + wp.baselineShift + (1.0f / 9.0f) * wp.getTextSize();
-
-        final int previousColor = wp.getColor();
-        final Paint.Style previousStyle = wp.getStyle();
-        final boolean previousAntiAlias = wp.isAntiAlias();
-
-        wp.setStyle(Paint.Style.FILL);
-        wp.setAntiAlias(true);
-
-        wp.setColor(color);
-        c.drawRect(xstart, underlineTop, xend, underlineTop + thickness, wp);
-
-        wp.setStyle(previousStyle);
-        wp.setColor(previousColor);
-        wp.setAntiAlias(previousAntiAlias);
-    }
-
-    private float getRunAdvance(TextPaint wp, int start, int end, int contextStart, int contextEnd,
-            boolean runIsRtl, int offset) {
-        if (mCharsValid) {
-            return wp.getRunAdvance(mChars, start, end, contextStart, contextEnd, runIsRtl, offset);
-        } else {
-            final int delta = mStart;
-            return wp.getRunAdvance(mText, delta + start, delta + end,
-                    delta + contextStart, delta + contextEnd, runIsRtl, delta + offset);
-        }
-    }
-
     /**
      * Utility function for measuring and rendering text.  The text must
      * not include a tab.
@@ -769,7 +734,14 @@ class TextLine {
         float ret = 0;
 
         if (needWidth || (c != null && (wp.bgColor != 0 || wp.underlineColor != 0 || runIsRtl))) {
-            ret = getRunAdvance(wp, start, end, contextStart, contextEnd, runIsRtl, offset);
+            if (mCharsValid) {
+                ret = wp.getRunAdvance(mChars, start, end, contextStart, contextEnd,
+                        runIsRtl, offset);
+            } else {
+                int delta = mStart;
+                ret = wp.getRunAdvance(mText, delta + start, delta + end,
+                        delta + contextStart, delta + contextEnd, runIsRtl, delta + offset);
+            }
         }
 
         if (c != null) {
@@ -790,23 +762,22 @@ class TextLine {
             }
 
             if (wp.underlineColor != 0) {
-                drawUnderline(wp, c, wp.underlineColor, wp.underlineThickness, x, x + ret, y);
-            }
+                // kStdUnderline_Offset = 1/9, defined in SkTextFormatParams.h
+                float underlineTop = y + wp.baselineShift + (1.0f / 9.0f) * wp.getTextSize();
 
-            final int numUnderlines = mUnderlines.size();
-            if (numUnderlines != 0) {
-                // kStdUnderline_Thickness = 1/18, defined in SkTextFormatParams.h
-                final float thickness = (1.0f / 18.0f) * wp.getTextSize();
-                for (int i = 0; i < numUnderlines; i += 2) {
-                    final int underlineStart = Math.max(mUnderlines.get(i), start);
-                    final int underlineEnd = Math.min(mUnderlines.get(i + 1), offset);
-                    final float underlineXStart = getRunAdvance(
-                            wp, start, end, contextStart, contextEnd, runIsRtl, underlineStart);
-                    final float underlineXEnd = getRunAdvance(
-                            wp, start, end, contextStart, contextEnd, runIsRtl, underlineEnd);
-                    drawUnderline(wp, c, wp.getColor(), thickness,
-                            underlineXStart, underlineXEnd, y);
-                }
+                int previousColor = wp.getColor();
+                Paint.Style previousStyle = wp.getStyle();
+                boolean previousAntiAlias = wp.isAntiAlias();
+
+                wp.setStyle(Paint.Style.FILL);
+                wp.setAntiAlias(true);
+
+                wp.setColor(wp.underlineColor);
+                c.drawRect(x, underlineTop, x + ret, underlineTop + wp.underlineThickness, wp);
+
+                wp.setStyle(previousStyle);
+                wp.setColor(previousColor);
+                wp.setAntiAlias(previousAntiAlias);
             }
 
             drawTextRun(c, wp, start, end, contextStart, contextEnd, runIsRtl,
@@ -979,27 +950,19 @@ class TextLine {
                 continue;
             }
 
-            mUnderlines.clear();
             for (int j = i, jnext; j < mlimit; j = jnext) {
-                jnext = mCharacterStyleSpanSet.getNextTransitionSkipping(
-                            UnderlineSpan.class, mStart + j, mStart + inext
-                        ) - mStart;
+                jnext = mCharacterStyleSpanSet.getNextTransition(mStart + j, mStart + inext) -
+                        mStart;
                 int offset = Math.min(jnext, mlimit);
 
                 wp.set(mPaint);
                 for (int k = 0; k < mCharacterStyleSpanSet.numberOfSpans; k++) {
-                    final int spanStart = mCharacterStyleSpanSet.spanStarts[k];
-                    final int spanEnd = mCharacterStyleSpanSet.spanEnds[k];
                     // Intentionally using >= and <= as explained above
-                    if ((spanStart >= mStart + offset) || (spanEnd <= mStart + j)) continue;
+                    if ((mCharacterStyleSpanSet.spanStarts[k] >= mStart + offset) ||
+                            (mCharacterStyleSpanSet.spanEnds[k] <= mStart + j)) continue;
 
                     CharacterStyle span = mCharacterStyleSpanSet.spans[k];
-                    if (span.getClass() == UnderlineSpan.class) {
-                        mUnderlines.add(spanStart);
-                        mUnderlines.add(spanEnd);
-                    } else {
-                        span.updateDrawState(wp);
-                    }
+                    span.updateDrawState(wp);
                 }
 
                 wp.setHyphenEdit(adjustHyphenEdit(j, jnext, wp.getHyphenEdit()));
