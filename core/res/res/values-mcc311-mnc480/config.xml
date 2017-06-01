@@ -23,6 +23,7 @@
     <string-array translatable="false" name="config_cdma_home_system">
         <item>64</item>
         <item>65</item>
+        <item>66</item>
         <item>76</item>
         <item>77</item>
         <item>78</item>
