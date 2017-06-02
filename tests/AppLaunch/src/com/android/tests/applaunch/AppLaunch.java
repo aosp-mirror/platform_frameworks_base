@@ -664,7 +664,8 @@ public class AppLaunch extends InstrumentationTestCase {
                     if (lineCount == 2 && line.contains(SUCCESS_MESSAGE)) {
                         launchSuccess = true;
                     }
-                    if (launchSuccess && lineCount == 4) {
+                    // Parse TotalTime which is the launch time
+                    if (launchSuccess && lineCount == 5) {
                         String launchSplit[] = line.split(":");
                         launchTime = launchSplit[1].trim();
                     }
