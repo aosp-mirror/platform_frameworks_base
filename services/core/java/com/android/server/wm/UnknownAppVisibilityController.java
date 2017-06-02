@@ -84,9 +84,9 @@ class UnknownAppVisibilityController {
         return builder.toString();
     }
 
-    void appRemoved(@NonNull AppWindowToken appWindow) {
+    void appRemovedOrHidden(@NonNull AppWindowToken appWindow) {
         if (DEBUG_UNKNOWN_APP_VISIBILITY) {
-            Slog.d(TAG, "App removed appWindow=" + appWindow);
+            Slog.d(TAG, "App removed or hidden appWindow=" + appWindow);
         }
         mUnknownApps.remove(appWindow);
     }
