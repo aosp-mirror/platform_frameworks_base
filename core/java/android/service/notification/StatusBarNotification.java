@@ -318,6 +318,17 @@ public class StatusBarNotification implements Parcelable {
     }
 
     /**
+     * The ID passed to setGroup(), or the override, or null.
+     * @hide
+     */
+    public String getGroup() {
+        if (overrideGroupKey != null) {
+            return overrideGroupKey;
+        }
+        return getNotification().getGroup();
+    }
+
+    /**
      * Sets the override group key.
      */
     public void setOverrideGroupKey(String overrideGroupKey) {
