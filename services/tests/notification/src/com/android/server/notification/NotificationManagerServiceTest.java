@@ -93,6 +93,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     private TestableLooper mTestableLooper;
     @Mock
     private RankingHelper mRankingHelper;
+    @Mock
+    private NotificationUsageStats mUsageStats;
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
     @Mock
@@ -149,7 +151,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
         mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
                 mPackageManagerClient, mockLightsManager, mNotificationListeners, mCompanionMgr,
-                mSnoozeHelper);
+                mSnoozeHelper, mUsageStats);
 
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
@@ -263,40 +265,37 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
     @Test
     public void testBlockedNotifications_suspended() throws Exception {
-        NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(true);
 
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_HIGH);
         NotificationRecord r = generateNotificationRecord(channel);
-        assertTrue(mNotificationManagerService.isBlocked(r, usageStats));
-        verify(usageStats, times(1)).registerSuspendedByAdmin(eq(r));
+        assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
+        verify(mUsageStats, times(1)).registerSuspendedByAdmin(eq(r));
     }
 
     @Test
     public void testBlockedNotifications_blockedChannel() throws Exception {
-        NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
 
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_HIGH);
         channel.setImportance(NotificationManager.IMPORTANCE_NONE);
         NotificationRecord r = generateNotificationRecord(channel);
-        assertTrue(mNotificationManagerService.isBlocked(r, usageStats));
-        verify(usageStats, times(1)).registerBlocked(eq(r));
+        assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
+        verify(mUsageStats, times(1)).registerBlocked(eq(r));
     }
 
     @Test
     public void testBlockedNotifications_blockedApp() throws Exception {
-        NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
 
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_HIGH);
         NotificationRecord r = generateNotificationRecord(channel);
         r.setUserImportance(NotificationManager.IMPORTANCE_NONE);
-        assertTrue(mNotificationManagerService.isBlocked(r, usageStats));
-        verify(usageStats, times(1)).registerBlocked(eq(r));
+        assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
+        verify(mUsageStats, times(1)).registerBlocked(eq(r));
     }
 
     @Test

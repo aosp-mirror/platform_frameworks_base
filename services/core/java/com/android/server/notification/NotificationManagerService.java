@@ -1051,7 +1051,8 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void init(Looper looper, IPackageManager packageManager, PackageManager packageManagerClient,
             LightsManager lightsManager, NotificationListeners notificationListeners,
-            ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper) {
+            ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
+            NotificationUsageStats usageStats) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1074,7 +1075,7 @@ public class NotificationManagerService extends SystemService {
         } catch (Resources.NotFoundException e) {
             extractorNames = new String[0];
         }
-        mUsageStats = new NotificationUsageStats(getContext());
+        mUsageStats = usageStats;
         mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
         mRankingHelper = new RankingHelper(getContext(),
                 getContext().getPackageManager(),
@@ -1243,7 +1244,7 @@ public class NotificationManagerService extends SystemService {
 
         init(Looper.myLooper(), AppGlobals.getPackageManager(), getContext().getPackageManager(),
                 getLocalService(LightsManager.class), new NotificationListeners(),
-                null, snoozeHelper);
+                null, snoozeHelper, new NotificationUsageStats(getContext()));
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
