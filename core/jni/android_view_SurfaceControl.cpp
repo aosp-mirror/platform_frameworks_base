@@ -221,11 +221,20 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
             return NULL;
         }
     }
+
+    sk_sp<SkColorSpace> colorSpace;
+    if (screenshot->getDataSpace() == HAL_DATASPACE_DISPLAY_P3) {
+        colorSpace = SkColorSpace::MakeRGB(
+                SkColorSpace::kSRGB_RenderTargetGamma, SkColorSpace::kDCIP3_D65_Gamut);
+    } else {
+        colorSpace = SkColorSpace::MakeSRGB();
+    }
+
     SkImageInfo screenshotInfo = SkImageInfo::Make(screenshot->getWidth(),
                                                    screenshot->getHeight(),
                                                    colorType,
                                                    alphaType,
-                                                   GraphicsJNI::defaultColorSpace());
+                                                   colorSpace);
 
     const size_t rowBytes =
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());

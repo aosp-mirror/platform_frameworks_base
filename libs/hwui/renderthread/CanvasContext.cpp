@@ -186,7 +186,8 @@ void CanvasContext::setSurface(Surface* surface) {
 
     mNativeSurface = surface;
 
-    bool hasSurface = mRenderPipeline->setSurface(surface, mSwapBehavior);
+    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::Srgb;
+    bool hasSurface = mRenderPipeline->setSurface(surface, mSwapBehavior, colorMode);
 
     mFrameNumber = -1;
 
@@ -239,6 +240,10 @@ void CanvasContext::setLightCenter(const Vector3& lightCenter) {
 
 void CanvasContext::setOpaque(bool opaque) {
     mOpaque = opaque;
+}
+
+void CanvasContext::setWideGamut(bool wideGamut) {
+    mWideColorGamut = wideGamut;
 }
 
 bool CanvasContext::makeCurrent() {

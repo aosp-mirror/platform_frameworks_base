@@ -100,7 +100,7 @@ final class Screenshooter {
         // Rotate the screenshot to the current orientation
         if (rotation != ROTATION_FREEZE_0) {
             Bitmap unrotatedScreenShot = Bitmap.createBitmap(displayWidth, displayHeight,
-                    Bitmap.Config.ARGB_8888);
+                    Bitmap.Config.ARGB_8888, screenShot.hasAlpha(), screenShot.getColorSpace());
             Canvas canvas = new Canvas(unrotatedScreenShot);
             canvas.translate(unrotatedScreenShot.getWidth() / 2,
                     unrotatedScreenShot.getHeight() / 2);

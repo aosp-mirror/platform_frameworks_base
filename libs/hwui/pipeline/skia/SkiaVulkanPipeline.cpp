@@ -131,13 +131,15 @@ DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
 void SkiaVulkanPipeline::onStop() {
 }
 
-bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior) {
+bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
+        ColorMode colorMode) {
     if (mVkSurface) {
         mVkManager.destroySurface(mVkSurface);
         mVkSurface = nullptr;
     }
 
     if (surface) {
+        // TODO: handle color mode
         mVkSurface = mVkManager.createSurface(surface);
     }
 

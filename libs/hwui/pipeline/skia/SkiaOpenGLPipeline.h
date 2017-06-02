@@ -40,7 +40,8 @@ public:
             FrameInfo* currentFrameInfo, bool* requireSwap) override;
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) override;
     DeferredLayerUpdater* createTextureLayer() override;
-    bool setSurface(Surface* window, renderthread::SwapBehavior swapBehavior) override;
+    bool setSurface(Surface* window, renderthread::SwapBehavior swapBehavior,
+            renderthread::ColorMode colorMode) override;
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
