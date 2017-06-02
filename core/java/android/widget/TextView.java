@@ -1587,7 +1587,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (textColorHighlight != 0) {
             setHighlightColor(textColorHighlight);
         }
-        setRawTextSize(textSize);
+        setRawTextSize(textSize, true /* shouldRequestLayout */);
         setElegantTextHeight(elegant);
         setLetterSpacing(letterSpacing);
         setFontFeatureSettings(fontFeatureSettings);
@@ -1757,7 +1757,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             autoSizeMinTextSizeInPx,
                             autoSizeMaxTextSizeInPx,
                             DEFAULT_AUTO_SIZE_GRANULARITY_IN_PX);
-                    setupAutoSizeText();
+                    if (setupAutoSizeText()) {
+                        autoSizeText();
+                        invalidate();
+                    }
                     break;
                 default:
                     throw new IllegalArgumentException(
@@ -1807,7 +1810,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             validateAndSetAutoSizeTextTypeUniformConfiguration(autoSizeMinTextSizeInPx,
                     autoSizeMaxTextSizeInPx,
                     autoSizeStepGranularityInPx);
-            setupAutoSizeText();
+
+            if (setupAutoSizeText()) {
+                autoSizeText();
+                invalidate();
+            }
         }
     }
 
@@ -1856,7 +1863,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 mHasPresetAutoSizeValues = false;
             }
-            setupAutoSizeText();
+
+            if (setupAutoSizeText()) {
+                autoSizeText();
+                invalidate();
+            }
         }
     }
 
@@ -2014,20 +2025,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             : uniqueValidSizes.toArray();
     }
 
-    private void setupAutoSizeText() {
+    private boolean setupAutoSizeText() {
         if (supportsAutoSizeText() && mAutoSizeTextType == AUTO_SIZE_TEXT_TYPE_UNIFORM) {
             // Calculate the sizes set based on minimum size, maximum size and step size if we do
             // not have a predefined set of sizes or if the current sizes array is empty.
             if (!mHasPresetAutoSizeValues || mAutoSizeTextSizesInPx.length == 0) {
-                // Calculate sizes to choose from based on the current auto-size configuration.
-                int autoSizeValuesLength = (int) Math.ceil(
-                        (mAutoSizeMaxTextSizeInPx - mAutoSizeMinTextSizeInPx)
-                                / mAutoSizeStepGranularityInPx);
-                // Also reserve a slot for the max size if it fits.
-                if ((mAutoSizeMaxTextSizeInPx - mAutoSizeMinTextSizeInPx)
-                        % mAutoSizeStepGranularityInPx == 0) {
+                int autoSizeValuesLength = 1;
+                float currentSize = Math.round(mAutoSizeMinTextSizeInPx);
+                while (Math.round(currentSize + mAutoSizeStepGranularityInPx)
+                        <= Math.round(mAutoSizeMaxTextSizeInPx)) {
                     autoSizeValuesLength++;
+                    currentSize += mAutoSizeStepGranularityInPx;
                 }
+
                 int[] autoSizeTextSizesInPx = new int[autoSizeValuesLength];
                 float sizeToAdd = mAutoSizeMinTextSizeInPx;
                 for (int i = 0; i < autoSizeValuesLength; i++) {
@@ -2038,8 +2048,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             mNeedsAutoSizeText = true;
-            autoSizeText();
+        } else {
+            mNeedsAutoSizeText = false;
         }
+
+        return mNeedsAutoSizeText;
     }
 
     private int[] parseDimensionArray(TypedArray dimens) {
@@ -3387,7 +3400,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int textSize = ta.getDimensionPixelSize(R.styleable.TextAppearance_textSize, 0);
         if (textSize != 0) {
-            setRawTextSize(textSize);
+            setRawTextSize(textSize, true /* shouldRequestLayout */);
         }
 
         final ColorStateList textColorHint = ta.getColorStateList(
@@ -3612,11 +3625,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public void setTextSize(int unit, float size) {
         if (!isAutoSizeEnabled()) {
-            setTextSizeInternal(unit, size);
+            setTextSizeInternal(unit, size, true /* shouldRequestLayout */);
         }
     }
 
-    private void setTextSizeInternal(int unit, float size) {
+    private void setTextSizeInternal(int unit, float size, boolean shouldRequestLayout) {
         Context c = getContext();
         Resources r;
 
@@ -3626,15 +3639,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             r = c.getResources();
         }
 
-        setRawTextSize(TypedValue.applyDimension(
-                unit, size, r.getDisplayMetrics()));
+        setRawTextSize(TypedValue.applyDimension(unit, size, r.getDisplayMetrics()),
+                shouldRequestLayout);
     }
 
-    private void setRawTextSize(float size) {
+    private void setRawTextSize(float size, boolean shouldRequestLayout) {
         if (size != mTextPaint.getTextSize()) {
             mTextPaint.setTextSize(size);
 
-            if (mLayout != null) {
+            if (shouldRequestLayout && mLayout != null) {
                 // Do not auto-size right after setting the text size.
                 mNeedsAutoSizeText = false;
                 nullLayouts();
@@ -8257,23 +8270,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Automatically computes and sets the text size.
      */
     private void autoSizeText() {
-        if (getMeasuredWidth() <= 0 || getMeasuredHeight() <= 0) return;
-        final int maxWidth = getWidth() - getTotalPaddingLeft() - getTotalPaddingRight();
-        final int maxHeight = getHeight() - getExtendedPaddingBottom() - getExtendedPaddingTop();
-
-        if (maxWidth <= 0 || maxHeight <= 0) {
+        if (!isAutoSizeEnabled()) {
             return;
         }
 
-        synchronized (TEMP_RECTF) {
-            TEMP_RECTF.setEmpty();
-            TEMP_RECTF.right = maxWidth;
-            TEMP_RECTF.bottom = maxHeight;
-            final float optimalTextSize = findLargestTextSizeWhichFits(TEMP_RECTF);
-            if (optimalTextSize != getTextSize()) {
-                setTextSizeInternal(TypedValue.COMPLEX_UNIT_PX, optimalTextSize);
+        if (mNeedsAutoSizeText) {
+            if (getMeasuredWidth() <= 0 || getMeasuredHeight() <= 0) {
+                return;
+            }
+
+            final int availableWidth = mHorizontallyScrolling
+                    ? VERY_WIDE
+                    : getMeasuredWidth() - getTotalPaddingLeft() - getTotalPaddingRight();
+            final int availableHeight = getMeasuredHeight() - getExtendedPaddingBottom()
+                    - getExtendedPaddingTop();
+
+            if (availableWidth <= 0 || availableHeight <= 0) {
+                return;
+            }
+
+            synchronized (TEMP_RECTF) {
+                TEMP_RECTF.setEmpty();
+                TEMP_RECTF.right = availableWidth;
+                TEMP_RECTF.bottom = availableHeight;
+                final float optimalTextSize = findLargestTextSizeWhichFits(TEMP_RECTF);
+
+                if (optimalTextSize != getTextSize()) {
+                    setTextSizeInternal(TypedValue.COMPLEX_UNIT_PX, optimalTextSize,
+                            false /* shouldRequestLayout */);
+
+                    makeNewLayout(availableWidth, 0 /* hintWidth */, UNKNOWN_BORING, UNKNOWN_BORING,
+                            mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight(),
+                            false /* bringIntoView */);
+                }
             }
         }
+        // Always try to auto-size if enabled. Functions that do not want to trigger auto-sizing
+        // after the next layout pass should set this to false.
+        mNeedsAutoSizeText = true;
     }
 
     /**
@@ -8315,11 +8349,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTempTextPaint.set(getPaint());
         mTempTextPaint.setTextSize(suggestedSizeInPx);
 
-        final int availableWidth = mHorizontallyScrolling
-                ? VERY_WIDE
-                : getMeasuredWidth() - getTotalPaddingLeft() - getTotalPaddingRight();
         final StaticLayout.Builder layoutBuilder = StaticLayout.Builder.obtain(
-                text, 0, text.length(),  mTempTextPaint, availableWidth);
+                text, 0, text.length(),  mTempTextPaint, Math.round(availableSpace.right));
 
         layoutBuilder.setAlignment(getLayoutAlignment())
                 .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
@@ -8469,6 +8500,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // In a fixed-height view, so use our new text layout.
                 if (mLayoutParams.height != LayoutParams.WRAP_CONTENT
                         && mLayoutParams.height != LayoutParams.MATCH_PARENT) {
+                    autoSizeText();
                     invalidate();
                     return;
                 }
@@ -8477,6 +8509,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // so use our new text layout.
                 if (mLayout.getHeight() == oldht
                         && (mHintLayout == null || mHintLayout.getHeight() == oldht)) {
+                    autoSizeText();
                     invalidate();
                     return;
                 }
@@ -8503,16 +8536,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mDeferScroll = -1;
             bringPointIntoView(Math.min(curs, mText.length()));
         }
-
-        if (isAutoSizeEnabled()) {
-            if (mNeedsAutoSizeText) {
-                // Call auto-size after the width and height have been calculated.
-                autoSizeText();
-            }
-            // Always try to auto-size if enabled. Functions that do not want to trigger auto-sizing
-            // after the next layout round should set this to false.
-            mNeedsAutoSizeText = true;
-        }
+        // Call auto-size after the width and height have been calculated.
+        autoSizeText();
     }
 
     private boolean isShowingHint() {
