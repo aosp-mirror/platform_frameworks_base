@@ -34,18 +34,19 @@ import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.statusbar.NotificationData.Entry;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.notification.AboveShelfObserver;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 /**
  * The container with notification stack scroller and quick settings inside.
  */
 public class NotificationsQuickSettingsContainer extends FrameLayout
-        implements OnInflateListener, FragmentListener, OnHeadsUpChangedListener {
+        implements OnInflateListener, FragmentListener,
+        AboveShelfObserver.HasViewAboveShelfChangedListener {
 
     private FrameLayout mQsFrame;
     private View mUserSwitcher;
-    private View mStackScroller;
+    private NotificationStackScrollLayout mStackScroller;
     private View mKeyguardStatusBar;
     private boolean mInflated;
     private boolean mQsExpanded;
@@ -53,8 +54,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
 
     private int mBottomPadding;
     private int mStackScrollerMargin;
-    private boolean mHeadsUp;
-    private HeadsUpManager mHeadsUpManager;
+    private boolean mHasViewsAboveShelf;
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,16 +76,12 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         FragmentHostManager.get(this).addTagListener(QS.TAG, this);
-        mHeadsUpManager = SysUiServiceProvider.getComponent(getContext(), StatusBar.class)
-                .mHeadsUpManager;
-        mHeadsUpManager.addListener(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         FragmentHostManager.get(this).removeTagListener(QS.TAG, this);
-        mHeadsUpManager.removeListener(this);
     }
 
     @Override
@@ -116,7 +112,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
         boolean userSwitcherVisible = mInflated && mUserSwitcher.getVisibility() == View.VISIBLE;
         boolean statusBarVisible = mKeyguardStatusBar.getVisibility() == View.VISIBLE;
 
-        final boolean qsBottom = mHeadsUp;
+        final boolean qsBottom = mHasViewsAboveShelf;
         View stackQsTop = qsBottom ? mStackScroller : mQsFrame;
         View stackQsBottom = !qsBottom ? mStackScroller : mQsFrame;
         // Invert the order of the scroll view and user switcher such that the notifications receive
@@ -183,7 +179,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
             setPadding(0, 0, 0, mBottomPadding);
             setBottomMargin(mStackScroller, mStackScrollerMargin);
         }
-
+        mStackScroller.setQsCustomizerShowing(isShowing);
     }
 
     private void setBottomMargin(View v, int bottomMargin) {
@@ -193,12 +189,8 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     }
 
     @Override
-    public void onHeadsUpStateChanged(Entry entry, boolean isHeadsUp) {
-        boolean hasHeadsUp = mHeadsUpManager.getAllEntries().size() != 0;
-        if (mHeadsUp == hasHeadsUp) {
-            return;
-        }
-        mHeadsUp = hasHeadsUp;
+    public void onHasViewsAboveShelfChanged(boolean hasViewsAboveShelf) {
+        mHasViewsAboveShelf = hasViewsAboveShelf;
         invalidate();
     }
 }

@@ -209,6 +209,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.RowInflaterTask;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -1000,6 +1001,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 R.id.notification_stack_scroller);
         mNotificationPanel.setStatusBar(this);
         mNotificationPanel.setGroupManager(mGroupManager);
+        mAboveShelfObserver = new AboveShelfObserver(mStackScroller);
+        mAboveShelfObserver.setListener(mStatusBarWindow.findViewById(
+                R.id.notification_container_parent));
         mKeyguardStatusBar = (KeyguardStatusBarView) mStatusBarWindow.findViewById(R.id.keyguard_header);
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
@@ -5333,6 +5337,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     // for heads up notifications
     protected HeadsUpManager mHeadsUpManager;
 
+    private AboveShelfObserver mAboveShelfObserver;
+
     // handling reordering
     protected VisualStabilityManager mVisualStabilityManager = new VisualStabilityManager();
 
@@ -6408,6 +6414,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         row.setExpansionLogger(this, entry.notification.getKey());
         row.setGroupManager(mGroupManager);
         row.setHeadsUpManager(mHeadsUpManager);
+        row.setAboveShelfChangedListener(mAboveShelfObserver);
         row.setRemoteInputController(mRemoteInputController);
         row.setOnExpandClickListener(this);
         row.setRemoteViewClickHandler(mOnClickHandler);

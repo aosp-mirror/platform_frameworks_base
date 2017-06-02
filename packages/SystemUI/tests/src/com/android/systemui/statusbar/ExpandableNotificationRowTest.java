@@ -29,6 +29,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 
+import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
 import com.android.systemui.SysuiTestCase;
 
@@ -95,5 +96,41 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.setSensitive(true, true);
         row.setHideSensitive(true, false, 0, 0);
         verify(row).updateShelfIconColor();
+    }
+
+    @Test
+    public void testAboveShelfChangedListenerCalled() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
+        row.setAboveShelfChangedListener(listener);
+        row.setHeadsUp(true);
+        verify(listener).onAboveShelfStateChanged(true);
+    }
+
+    @Test
+    public void testAboveShelfChangedListenerCalledPinned() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
+        row.setAboveShelfChangedListener(listener);
+        row.setPinned(true);
+        verify(listener).onAboveShelfStateChanged(true);
+    }
+
+    @Test
+    public void testAboveShelfChangedListenerCalledHeadsUpGoingAway() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
+        row.setAboveShelfChangedListener(listener);
+        row.setHeadsUpAnimatingAway(true);
+        verify(listener).onAboveShelfStateChanged(true);
+    }
+    @Test
+    public void testAboveShelfChangedListenerCalledWhenGoingBelow() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setHeadsUp(true);
+        AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
+        row.setAboveShelfChangedListener(listener);
+        row.setAboveShelf(false);
+        verify(listener).onAboveShelfStateChanged(false);
     }
 }
