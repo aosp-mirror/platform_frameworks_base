@@ -25,7 +25,9 @@
 #include "test/Test.h"
 #include "xml/XmlPullParser.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
+using ::testing::Eq;
+using ::testing::NotNull;
 
 namespace aapt {
 
@@ -791,15 +793,25 @@ TEST_F(ResourceParserTest, AddResourcesElementShouldAddEntryWithUndefinedSymbol)
 }
 
 TEST_F(ResourceParserTest, ParseItemElementWithFormat) {
-  std::string input =
-      R"EOF(<item name="foo" type="integer" format="float">0.3</item>)EOF";
+  std::string input = R"(<item name="foo" type="integer" format="float">0.3</item>)";
   ASSERT_TRUE(TestParse(input));
 
-  BinaryPrimitive* val =
-      test::GetValue<BinaryPrimitive>(&table_, "integer/foo");
-  ASSERT_NE(nullptr, val);
+  BinaryPrimitive* val = test::GetValue<BinaryPrimitive>(&table_, "integer/foo");
+  ASSERT_THAT(val, NotNull());
+  EXPECT_THAT(val->value.dataType, Eq(android::Res_value::TYPE_FLOAT));
 
-  EXPECT_EQ(uint32_t(android::Res_value::TYPE_FLOAT), val->value.dataType);
+  input = R"(<item name="bar" type="integer" format="fraction">100</item>)";
+  ASSERT_FALSE(TestParse(input));
+}
+
+// An <item> without a format specifier accepts all types of values.
+TEST_F(ResourceParserTest, ParseItemElementWithoutFormat) {
+  std::string input = R"(<item name="foo" type="integer">100%p</item>)";
+  ASSERT_TRUE(TestParse(input));
+
+  BinaryPrimitive* val = test::GetValue<BinaryPrimitive>(&table_, "integer/foo");
+  ASSERT_THAT(val, NotNull());
+  EXPECT_THAT(val->value.dataType, Eq(android::Res_value::TYPE_FRACTION));
 }
 
 TEST_F(ResourceParserTest, ParseConfigVaryingItem) {
