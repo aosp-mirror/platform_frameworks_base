@@ -163,6 +163,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     @VisibleForTesting
     boolean shouldDeferRemoval() {
+        // TODO: This should probably return false if mChildren.isEmpty() regardless if the stack
+        // is animating...
         return hasWindowsAlive() && mStack.isAnimating();
     }
 
