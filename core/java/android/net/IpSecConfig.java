@@ -40,7 +40,7 @@ public final class IpSecConfig implements Parcelable {
         // Minimum requirements for identifying a transform
         // SPI identifying the IPsec flow in packet processing
         // and a remote IP address
-        int spi;
+        int spiResourceId;
 
         // Encryption Algorithm
         IpSecAlgorithm encryption;
@@ -54,7 +54,7 @@ public final class IpSecConfig implements Parcelable {
     // For tunnel mode IPv4 UDP Encapsulation
     // IpSecTransform#ENCAP_ESP_*, such as ENCAP_ESP_OVER_UDP_IKE
     int encapType;
-    int encapLocalPort;
+    int encapLocalPortResourceId;
     int encapRemotePort;
 
     // An interval, in seconds between the NattKeepalive packets
@@ -69,8 +69,8 @@ public final class IpSecConfig implements Parcelable {
         return localAddress;
     }
 
-    public int getSpi(int direction) {
-        return flow[direction].spi;
+    public int getSpiResourceId(int direction) {
+        return flow[direction].spiResourceId;
     }
 
     public InetAddress getRemoteAddress() {
@@ -93,8 +93,8 @@ public final class IpSecConfig implements Parcelable {
         return encapType;
     }
 
-    public int getEncapLocalPort() {
-        return encapLocalPort;
+    public int getEncapLocalResourceId() {
+        return encapLocalPortResourceId;
     }
 
     public int getEncapRemotePort() {
@@ -119,14 +119,14 @@ public final class IpSecConfig implements Parcelable {
         // TODO: Use a byte array or other better method for storing IPs that can also include scope
         out.writeString((remoteAddress != null) ? remoteAddress.getHostAddress() : null);
         out.writeParcelable(network, flags);
-        out.writeInt(flow[IpSecTransform.DIRECTION_IN].spi);
+        out.writeInt(flow[IpSecTransform.DIRECTION_IN].spiResourceId);
         out.writeParcelable(flow[IpSecTransform.DIRECTION_IN].encryption, flags);
         out.writeParcelable(flow[IpSecTransform.DIRECTION_IN].authentication, flags);
-        out.writeInt(flow[IpSecTransform.DIRECTION_OUT].spi);
+        out.writeInt(flow[IpSecTransform.DIRECTION_OUT].spiResourceId);
         out.writeParcelable(flow[IpSecTransform.DIRECTION_OUT].encryption, flags);
         out.writeParcelable(flow[IpSecTransform.DIRECTION_OUT].authentication, flags);
         out.writeInt(encapType);
-        out.writeInt(encapLocalPort);
+        out.writeInt(encapLocalPortResourceId);
         out.writeInt(encapRemotePort);
     }
 
@@ -151,18 +151,18 @@ public final class IpSecConfig implements Parcelable {
         localAddress = readInetAddressFromParcel(in);
         remoteAddress = readInetAddressFromParcel(in);
         network = (Network) in.readParcelable(Network.class.getClassLoader());
-        flow[IpSecTransform.DIRECTION_IN].spi = in.readInt();
+        flow[IpSecTransform.DIRECTION_IN].spiResourceId = in.readInt();
         flow[IpSecTransform.DIRECTION_IN].encryption =
                 (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
         flow[IpSecTransform.DIRECTION_IN].authentication =
                 (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
-        flow[IpSecTransform.DIRECTION_OUT].spi = in.readInt();
+        flow[IpSecTransform.DIRECTION_OUT].spiResourceId = in.readInt();
         flow[IpSecTransform.DIRECTION_OUT].encryption =
                 (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
         flow[IpSecTransform.DIRECTION_OUT].authentication =
                 (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
         encapType = in.readInt();
-        encapLocalPort = in.readInt();
+        encapLocalPortResourceId = in.readInt();
         encapRemotePort = in.readInt();
     }
 
