@@ -51,7 +51,6 @@ import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.app.NightDisplayController;
 import com.android.internal.os.BinderInternal;
-import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.os.ZygoteInit;
 import com.android.internal.policy.EmergencyAffordanceManager;
 import com.android.internal.widget.ILockSettings;
@@ -280,18 +279,6 @@ public final class SystemServer {
             // running as root and we need to be the system user to set
             // the property. http://b/11463182
             SystemProperties.set("persist.sys.dalvik.vm.lib.2", VMRuntime.getRuntime().vmLibrary());
-
-            // Enable the sampling profiler.
-            if (SamplingProfilerIntegration.isEnabled()) {
-                SamplingProfilerIntegration.start();
-                mProfilerSnapshotTimer = new Timer();
-                mProfilerSnapshotTimer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            SamplingProfilerIntegration.writeSnapshot("system_server", null);
-                        }
-                    }, SNAPSHOT_INTERVAL, SNAPSHOT_INTERVAL);
-            }
 
             // Mmmmmm... more memory!
             VMRuntime.getRuntime().clearGrowthLimit();
@@ -567,8 +554,6 @@ public final class SystemServer {
         boolean disableTrustManager = SystemProperties.getBoolean("config.disable_trustmanager",
                 false);
         boolean disableTextServices = SystemProperties.getBoolean("config.disable_textservices",
-                false);
-        boolean disableSamplingProfiler = SystemProperties.getBoolean("config.disable_samplingprof",
                 false);
         boolean disableConsumerIr = SystemProperties.getBoolean("config.disable_consumerir", false);
         boolean disableVrManager = SystemProperties.getBoolean("config.disable_vrmanager", false);
@@ -1087,21 +1072,6 @@ public final class SystemServer {
                 reportWtf("starting DiskStats Service", e);
             }
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-
-            if (!disableSamplingProfiler) {
-                traceBeginAndSlog("StartSamplingProfilerService");
-                try {
-                    // need to add this service even if SamplingProfilerIntegration.isEnabled()
-                    // is false, because it is this service that detects system property change and
-                    // turns on SamplingProfilerIntegration. Plus, when sampling profiler doesn't work,
-                    // there is little overhead for running this service.
-                    ServiceManager.addService("samplingprofiler",
-                                new SamplingProfilerService(context));
-                } catch (Throwable e) {
-                    reportWtf("starting SamplingProfiler Service", e);
-                }
-                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-            }
 
             if (!disableNetwork && !disableNetworkTime) {
                 traceBeginAndSlog("StartNetworkTimeUpdateService");
