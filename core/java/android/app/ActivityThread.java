@@ -122,7 +122,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
-import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -1605,7 +1604,6 @@ public final class ActivityThread {
                     handlePauseActivity((IBinder) args.arg1, false,
                             (args.argi1 & USER_LEAVING) != 0, args.argi2,
                             (args.argi1 & DONT_REPORT) != 0, args.argi3);
-                    maybeSnapshot();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 } break;
                 case PAUSE_ACTIVITY_FINISHING: {
@@ -1675,7 +1673,6 @@ public final class ActivityThread {
                 case RECEIVER:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveComp");
                     handleReceiver((ReceiverData)msg.obj);
-                    maybeSnapshot();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CREATE_SERVICE:
@@ -1701,7 +1698,6 @@ public final class ActivityThread {
                 case STOP_SERVICE:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceStop");
                     handleStopService((IBinder)msg.obj);
-                    maybeSnapshot();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CONFIGURATION_CHANGED:
@@ -1862,32 +1858,6 @@ public final class ActivityThread {
                 ((SomeArgs) obj).recycle();
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
-        }
-
-        private void maybeSnapshot() {
-            if (mBoundApplication != null && SamplingProfilerIntegration.isEnabled()) {
-                // convert the *private* ActivityThread.PackageInfo to *public* known
-                // android.content.pm.PackageInfo
-                String packageName = mBoundApplication.info.mPackageName;
-                android.content.pm.PackageInfo packageInfo = null;
-                try {
-                    Context context = getSystemContext();
-                    if(context == null) {
-                        Log.e(TAG, "cannot get a valid context");
-                        return;
-                    }
-                    PackageManager pm = context.getPackageManager();
-                    if(pm == null) {
-                        Log.e(TAG, "cannot get a valid PackageManager");
-                        return;
-                    }
-                    packageInfo = pm.getPackageInfo(
-                            packageName, PackageManager.GET_ACTIVITIES);
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, "cannot get package info for " + packageName, e);
-                }
-                SamplingProfilerIntegration.writeSnapshot(mBoundApplication.processName, packageInfo);
-            }
         }
     }
 
@@ -6504,7 +6474,6 @@ public final class ActivityThread {
 
     public static void main(String[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
-        SamplingProfilerIntegration.start();
 
         // CloseGuard defaults to true and can be quite spammy.  We
         // disable it here, but selectively enable it later (via
