@@ -301,6 +301,19 @@ public class ActivityManager {
     public static final int START_INTENT_NOT_RESOLVED = FIRST_START_FATAL_ERROR_CODE + 9;
 
     /**
+     * Result for IActivityManager.startAssistantActivity: active session is currently hidden.
+     * @hide
+     */
+    public static final int START_ASSISTANT_HIDDEN_SESSION = FIRST_START_FATAL_ERROR_CODE + 10;
+
+    /**
+     * Result for IActivityManager.startAssistantActivity: active session does not match
+     * the requesting token.
+     * @hide
+     */
+    public static final int START_ASSISTANT_NOT_ACTIVE_SESSION = FIRST_START_FATAL_ERROR_CODE + 11;
+
+    /**
      * Result for IActivityManaqer.startActivity: the activity was started
      * successfully as normal.
      * @hide
