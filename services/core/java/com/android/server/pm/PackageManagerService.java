@@ -2186,12 +2186,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void grantRequestedRuntimePermissionsForUser(PackageParser.Package pkg, int userId,
             String[] grantedPermissions) {
-        SettingBase sb = (SettingBase) pkg.mExtras;
-        if (sb == null) {
+        PackageSetting ps = (PackageSetting) pkg.mExtras;
+        if (ps == null) {
             return;
         }
 
-        PermissionsState permissionsState = sb.getPermissionsState();
+        PermissionsState permissionsState = ps.getPermissionsState();
 
         final int immutableFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
                 | PackageManager.FLAG_PERMISSION_POLICY_FIXED;
@@ -4878,9 +4878,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void updateSequenceNumberLP(String packageName, int[] userList) {
+    private void updateSequenceNumberLP(PackageSetting pkgSetting, int[] userList) {
         for (int i = userList.length - 1; i >= 0; --i) {
             final int userId = userList[i];
+            // don't add instant app to the list of updates
+            if (pkgSetting.getInstantApp(userId)) {
+                continue;
+            }
             SparseArray<String> changedPackages = mChangedPackages.get(userId);
             if (changedPackages == null) {
                 changedPackages = new SparseArray<>();
@@ -4891,12 +4895,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 sequenceNumbers = new HashMap<>();
                 mChangedPackagesSequenceNumbers.put(userId, sequenceNumbers);
             }
-            final Integer sequenceNumber = sequenceNumbers.get(packageName);
+            final Integer sequenceNumber = sequenceNumbers.get(pkgSetting.name);
             if (sequenceNumber != null) {
                 changedPackages.remove(sequenceNumber);
             }
-            changedPackages.put(mChangedPackagesSequenceNumber, packageName);
-            sequenceNumbers.put(packageName, mChangedPackagesSequenceNumber);
+            changedPackages.put(mChangedPackagesSequenceNumber, pkgSetting.name);
+            sequenceNumbers.put(pkgSetting.name, mChangedPackagesSequenceNumber);
         }
         mChangedPackagesSequenceNumber++;
     }
@@ -5338,7 +5342,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "grantRuntimePermission");
 
         final int uid;
-        final SettingBase sb;
+        final PackageSetting ps;
 
         synchronized (mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
@@ -5349,12 +5353,9 @@ public class PackageManagerService extends IPackageManager.Stub
             if (bp == null) {
                 throw new IllegalArgumentException("Unknown permission: " + name);
             }
-            sb = (SettingBase) pkg.mExtras;
-            if (sb == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-            if (sb instanceof PackageSetting
-                    && filterAppAccessLPr((PackageSetting) sb, callingUid, userId)) {
+            ps = (PackageSetting) pkg.mExtras;
+            if (ps == null
+                    || filterAppAccessLPr(ps, callingUid, userId)) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
 
@@ -5372,7 +5373,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             uid = UserHandle.getUid(userId, pkg.applicationInfo.uid);
 
-            final PermissionsState permissionsState = sb.getPermissionsState();
+            final PermissionsState permissionsState = ps.getPermissionsState();
 
             final int flags = permissionsState.getPermissionFlags(name, userId);
             if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
@@ -5394,7 +5395,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 return;
             }
 
-            final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps.getInstantApp(userId) && !bp.isInstant()) {
                 throw new SecurityException("Cannot grant non-ephemeral permission"
                         + name + " for package " + packageName);
@@ -5478,7 +5478,11 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkg == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-
+            final PackageSetting ps = (PackageSetting) pkg.mExtras;
+            if (ps == null
+                    || filterAppAccessLPr(ps, Binder.getCallingUid(), userId)) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
             final BasePermission bp = mSettings.mPermissions.get(name);
             if (bp == null) {
                 throw new IllegalArgumentException("Unknown permission: " + name);
@@ -5496,12 +5500,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return;
             }
 
-            SettingBase sb = (SettingBase) pkg.mExtras;
-            if (sb == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-
-            final PermissionsState permissionsState = sb.getPermissionsState();
+            final PermissionsState permissionsState = ps.getPermissionsState();
 
             final int flags = permissionsState.getPermissionFlags(name, userId);
             if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
@@ -5654,15 +5653,12 @@ public class PackageManagerService extends IPackageManager.Stub
             if (bp == null) {
                 return 0;
             }
-            final SettingBase sb = (SettingBase) pkg.mExtras;
-            if (sb == null) {
+            final PackageSetting ps = (PackageSetting) pkg.mExtras;
+            if (ps == null
+                    || filterAppAccessLPr(ps, callingUid, userId)) {
                 return 0;
             }
-            if (sb instanceof PackageSetting
-                    && filterAppAccessLPr((PackageSetting) sb, callingUid, userId)) {
-                return 0;
-            }
-            PermissionsState permissionsState = sb.getPermissionsState();
+            PermissionsState permissionsState = ps.getPermissionsState();
             return permissionsState.getPermissionFlags(name, userId);
         }
     }
@@ -5676,7 +5672,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         enforceGrantRevokeRuntimePermissionPermissions("updatePermissionFlags");
 
-        enforceCrossUserPermission(Binder.getCallingUid(), userId,
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, true /* checkShell */,
                 "updatePermissionFlags");
 
@@ -5694,18 +5691,18 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkg == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
+            final PackageSetting ps = (PackageSetting) pkg.mExtras;
+            if (ps == null
+                    || filterAppAccessLPr(ps, callingUid, userId)) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
 
             final BasePermission bp = mSettings.mPermissions.get(name);
             if (bp == null) {
                 throw new IllegalArgumentException("Unknown permission: " + name);
             }
 
-            SettingBase sb = (SettingBase) pkg.mExtras;
-            if (sb == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-
-            PermissionsState permissionsState = sb.getPermissionsState();
+            PermissionsState permissionsState = ps.getPermissionsState();
 
             boolean hadState = permissionsState.getRuntimePermissionState(name, userId) != null;
 
@@ -5749,11 +5746,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final int packageCount = mPackages.size();
             for (int pkgIndex = 0; pkgIndex < packageCount; pkgIndex++) {
                 final PackageParser.Package pkg = mPackages.valueAt(pkgIndex);
-                SettingBase sb = (SettingBase) pkg.mExtras;
-                if (sb == null) {
+                final PackageSetting ps = (PackageSetting) pkg.mExtras;
+                if (ps == null) {
                     continue;
                 }
-                PermissionsState permissionsState = sb.getPermissionsState();
+                PermissionsState permissionsState = ps.getPermissionsState();
                 changed |= permissionsState.updatePermissionFlagsForAllPermissions(
                         userId, flagMask, flagValues);
             }
@@ -9545,6 +9542,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void reconcileSecondaryDexFiles(String packageName) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
+            return;
+        } else if (isInstantApp(packageName, UserHandle.getCallingUserId())) {
             return;
         }
         mDexManager.reconcileSecondaryDexFiles(packageName);
@@ -14323,8 +14322,8 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         PackageSetting pkgSetting;
-        final int uid = Binder.getCallingUid();
-        enforceCrossUserPermission(uid, userId,
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, true /* checkShell */,
                 "setApplicationHiddenSetting for user " + userId);
 
@@ -14343,6 +14342,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (pkgSetting == null) {
                     return false;
                 }
+                if (filterAppAccessLPr(pkgSetting, callingUid, userId)) {
+                    return false;
+                }
                 // Do not allow "android" is being disabled
                 if ("android".equals(packageName)) {
                     Slog.w(TAG, "Cannot hide package: android");
@@ -14359,7 +14361,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return false;
                 }
                 // Only allow protected packages to hide themselves.
-                if (hidden && !UserHandle.isSameApp(uid, pkgSetting.appId)
+                if (hidden && !UserHandle.isSameApp(callingUid, pkgSetting.appId)
                         && mProtectedPackages.isPackageStateProtected(userId, packageName)) {
                     Slog.w(TAG, "Not hiding protected package: " + packageName);
                     return false;
@@ -14476,6 +14478,20 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (pkgSetting == null) {
                     return PackageManager.INSTALL_FAILED_INVALID_URI;
                 }
+                if (!canViewInstantApps(callingUid, UserHandle.getUserId(callingUid))) {
+                    // only allow the existing package to be used if it's installed as a full
+                    // application for at least one user
+                    boolean installAllowed = false;
+                    for (int checkUserId : sUserManager.getUserIds()) {
+                        installAllowed = !pkgSetting.getInstantApp(checkUserId);
+                        if (installAllowed) {
+                            break;
+                        }
+                    }
+                    if (!installAllowed) {
+                        return PackageManager.INSTALL_FAILED_INVALID_URI;
+                    }
+                }
                 if (!pkgSetting.getInstalled(userId)) {
                     pkgSetting.setInstalled(true, userId);
                     pkgSetting.setHidden(false, userId);
@@ -14499,7 +14515,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 sendPackageAddedForUser(packageName, pkgSetting, userId);
                 synchronized (mPackages) {
-                    updateSequenceNumberLP(packageName, new int[]{ userId });
+                    updateSequenceNumberLP(pkgSetting, new int[]{ userId });
                 }
             }
         } finally {
@@ -14545,7 +14561,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
             int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
-        enforceCrossUserPermission(Binder.getCallingUid(), userId,
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, true /* checkShell */,
                 "setPackagesSuspended for user " + userId);
 
@@ -14566,7 +14583,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int appId;
                 synchronized (mPackages) {
                     final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
-                    if (pkgSetting == null) {
+                    if (pkgSetting == null
+                            || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
                         Slog.w(TAG, "Could not find package setting for package \"" + packageName
                                 + "\". Skipping suspending/un-suspending.");
                         unactionedPackages.add(packageName);
@@ -14976,6 +14994,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         boolean result = false;
         synchronized (mPackages) {
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (filterAppAccessLPr(ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+                return false;
+            }
             result = mSettings.updateIntentFilterVerificationStatusLPw(packageName, status, userId);
         }
         if (result) {
@@ -15076,7 +15098,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // writer
         synchronized (mPackages) {
             PackageSetting targetPackageSetting = mSettings.mPackages.get(targetPackage);
-            if (targetPackageSetting == null) {
+            if (targetPackageSetting == null
+                    || filterAppAccessLPr(
+                            targetPackageSetting, callingUid, UserHandle.getUserId(callingUid))) {
                 throw new IllegalArgumentException("Unknown target package: " + targetPackage);
             }
 
@@ -15157,7 +15181,9 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps == null) {
                 throw new IllegalArgumentException("Unknown target package " + packageName);
             }
-
+            if (filterAppAccessLPr(ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+                throw new IllegalArgumentException("Unknown target package " + packageName);
+            }
             if (!Objects.equals(callerPackageName, ps.installerPackageName)) {
                 throw new IllegalArgumentException("Calling package " + callerPackageName
                         + " is not installer for " + packageName);
@@ -18178,7 +18204,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                updateSequenceNumberLP(pkgName, res.newUsers);
+                updateSequenceNumberLP(ps, res.newUsers);
                 updateInstantAppInstallerLocked(pkgName);
             }
         }
@@ -18779,7 +18805,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (pkg != null) {
                         mInstantAppRegistry.onPackageUninstalledLPw(pkg, info.removedUsers);
                     }
-                    updateSequenceNumberLP(packageName, info.removedUsers);
+                    updateSequenceNumberLP(uninstalledPs, info.removedUsers);
                     updateInstantAppInstallerLocked(packageName);
                 }
             }
@@ -21135,7 +21161,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         // Limit who can change which apps
         if (!UserHandle.isSameApp(callingUid, pkgSetting.appId)) {
             // Don't allow apps that don't have permission to modify other apps
-            if (!allowedByPermission) {
+            if (!allowedByPermission
+                    || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
                 throw new SecurityException(
                         "Attempt to change component state; "
                         + "pid=" + Binder.getCallingPid()
@@ -21222,7 +21249,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
             }
             scheduleWritePackageRestrictionsLocked(userId);
-            updateSequenceNumberLP(packageName, new int[] { userId });
+            updateSequenceNumberLP(pkgSetting, new int[] { userId });
             final long callingId = Binder.clearCallingIdentity();
             try {
                 updateInstantAppInstallerLocked(packageName);
@@ -21319,8 +21346,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 true /* requireFullPermission */, true /* checkShell */, "stop package");
         // writer
         synchronized (mPackages) {
-            if (mSettings.setPackageStoppedStateLPw(this, packageName, stopped,
-                    allowedByPermission, callingUid, userId)) {
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (!filterAppAccessLPr(ps, callingUid, userId)
+                    && mSettings.setPackageStoppedStateLPw(this, packageName, stopped,
+                            allowedByPermission, callingUid, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
@@ -21328,11 +21357,16 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
     @Override
     public String getInstallerPackageName(String packageName) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
         // reader
         synchronized (mPackages) {
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
+                return null;
+            }
             return mSettings.getInstallerPackageNameLPr(packageName);
         }
     }
@@ -24081,7 +24115,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
     @Override
     public boolean isPackageSignedByKeySet(String packageName, KeySet ks) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
             return false;
         }
         if (packageName == null || ks == null) {
@@ -24089,7 +24124,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
         synchronized(mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
-            if (pkg == null) {
+            if (pkg == null
+                    || filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid,
+                            UserHandle.getUserId(callingUid))) {
                 Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
@@ -24104,7 +24141,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
     @Override
     public boolean isPackageSignedByKeySetExactly(String packageName, KeySet ks) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
             return false;
         }
         if (packageName == null || ks == null) {
@@ -24112,7 +24150,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
         synchronized(mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
-            if (pkg == null) {
+            if (pkg == null
+                    || filterAppAccessLPr((PackageSetting) pkg.mExtras, callingUid,
+                            UserHandle.getUserId(callingUid))) {
                 Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
