@@ -278,6 +278,7 @@ public class WebViewUpdateServiceImpl {
         pw.println("Current WebView Update Service state");
         pw.println(String.format("  Fallback logic enabled: %b",
                 mSystemInterface.isFallbackLogicEnabled()));
+        pw.println(String.format("  Multiprocess enabled: %b", isMultiProcessEnabled()));
         mWebViewUpdater.dumpState(pw);
     }
 }
