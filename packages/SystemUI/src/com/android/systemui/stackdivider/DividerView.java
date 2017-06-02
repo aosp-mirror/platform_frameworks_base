@@ -364,6 +364,17 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public void injectDependencies(DividerWindowManager windowManager, DividerState dividerState) {
         mWindowManager = windowManager;
         mState = dividerState;
+
+        // Set the previous position ratio before minimized state after attaching this divider
+        if (mStableInsets.isEmpty()) {
+            SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
+        }
+        int position = (int) (mState.mRatioPositionBeforeMinimized *
+                (isHorizontalDivision() ? mDisplayHeight : mDisplayWidth));
+        mSnapAlgorithm = null;
+        initializeSnapAlgorithm();
+        mDividerPositionBeforeMinimized = mSnapAlgorithm.calculateNonDismissingSnapTarget(position)
+                .position;
     }
 
     public WindowManagerProxy getWindowManagerProxy() {
@@ -719,19 +730,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mHandle.setAlpha(minimized ? 0f : 1f);
             mDockedStackMinimized = minimized;
         } else if (mDockedStackMinimized != minimized) {
-            if (mStableInsets.isEmpty()) {
-                SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
-            }
             mMinimizedSnapAlgorithm = null;
             mDockedStackMinimized = minimized;
             initializeSnapAlgorithm();
             if (mIsInMinimizeInteraction != minimized) {
                 if (minimized) {
                     mIsInMinimizeInteraction = true;
-                    mDividerPositionBeforeMinimized = DockedDividerUtils.calculateMiddlePosition(
-                            isHorizontalDivision(), mStableInsets, mDisplayWidth, mDisplayHeight,
-                            mDividerSize);
-
                     int position = mMinimizedSnapAlgorithm.getMiddleTarget().position;
                     resizeStack(position, position, mMinimizedSnapAlgorithm.getMiddleTarget());
                 } else {
@@ -776,7 +780,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mIsInMinimizeInteraction = true;
             if (minimized && (mCurrentAnimator == null || !mCurrentAnimator.isRunning())
                     && (mDividerPositionBeforeMinimized <= 0 || !mAdjustedForIme)) {
-                mDividerPositionBeforeMinimized = getCurrentPosition();
+                savePositionBeforeMinimized();
             }
             mMinimizedSnapAlgorithm = null;
             mDockedStackMinimized = minimized;
@@ -836,8 +840,14 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         // Only get new position if home stack is resizable, ime is open and not minimized
         // (including the animation)
         if (mHomeStackResizable && adjustedForIme && !mIsInMinimizeInteraction) {
-            mDividerPositionBeforeMinimized = getCurrentPosition();
+            savePositionBeforeMinimized();
         }
+    }
+
+    private void savePositionBeforeMinimized() {
+        mDividerPositionBeforeMinimized = getCurrentPosition();
+        mState.mRatioPositionBeforeMinimized = (float) mDividerPositionBeforeMinimized /
+                (isHorizontalDivision() ? mDisplayHeight : mDisplayWidth);
     }
 
     private void resetBackground() {
@@ -1197,14 +1207,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         int position = DockedDividerUtils.calculatePositionForBounds(event.initialRect,
                 mDockSide, mDividerSize);
         mEntranceAnimationRunning = true;
-
-        // Insets might not have been fetched yet, so fetch manually if needed.
-        if (mStableInsets.isEmpty()) {
-            SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
-            mSnapAlgorithm = null;
-            mMinimizedSnapAlgorithm = null;
-            initializeSnapAlgorithm();
-        }
 
         resizeStack(position, mSnapAlgorithm.getMiddleTarget().position,
                 mSnapAlgorithm.getMiddleTarget());
