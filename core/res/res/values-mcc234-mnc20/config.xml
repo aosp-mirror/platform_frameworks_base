@@ -32,15 +32,4 @@
     <!-- Configure mobile network MTU. Carrier specific value is set here.
     -->
     <integer name="config_mobile_mtu">1440</integer>
-    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
-        <item>23410</item>
-        <item>23426</item>
-        <item>23430</item>
-        <item>23431</item>
-        <item>23432</item>
-        <item>23433</item>
-        <item>23434</item>
-        <item>23486</item>
-    </string-array>
-
 </resources>
