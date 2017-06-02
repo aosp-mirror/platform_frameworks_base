@@ -2017,6 +2017,10 @@ public class KeyguardViewMediator extends SystemUI {
         Trace.endSection();
     }
 
+    public void onShortPowerPressedGoHome() {
+        // do nothing
+    }
+
     public ViewMediatorCallback getViewMediatorCallback() {
         return mViewMediatorCallback;
     }

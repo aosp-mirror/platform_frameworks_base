@@ -218,6 +218,15 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override
+    public void onShortPowerPressedGoHome() {
+        try {
+            mService.onShortPowerPressedGoHome();
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
     @Override // Binder interface
     public IBinder asBinder() {
         return mService.asBinder();

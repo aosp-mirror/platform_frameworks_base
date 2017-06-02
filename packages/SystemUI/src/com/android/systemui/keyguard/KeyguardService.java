@@ -194,6 +194,12 @@ public class KeyguardService extends Service {
             mKeyguardViewMediator.startKeyguardExitAnimation(startTime, fadeoutDuration);
             Trace.endSection();
         }
+
+        @Override
+        public void onShortPowerPressedGoHome() {
+            checkPermission();
+            mKeyguardViewMediator.onShortPowerPressedGoHome();
+        }
     };
 }
 

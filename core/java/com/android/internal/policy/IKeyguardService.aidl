@@ -93,4 +93,10 @@ oneway interface IKeyguardService {
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
     void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
+
+    /**
+     * Notifies the Keyguard that the power key was pressed while locked and launched Home rather
+     * than putting the device to sleep or waking up.
+     */
+    void onShortPowerPressedGoHome();
 }
