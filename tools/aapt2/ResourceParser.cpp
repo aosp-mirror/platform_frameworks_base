@@ -415,6 +415,10 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
   if (resource_type == "item") {
     can_be_bag = false;
 
+    // The default format for <item> is any. If a format attribute is present, that one will
+    // override the default.
+    resource_format = android::ResTable_map::TYPE_ANY;
+
     // Items have their type encoded in the type attribute.
     if (Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type")) {
       resource_type = maybe_type.value().to_string();
@@ -481,8 +485,8 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
       out_resource->name.type = item_iter->second.type;
       out_resource->name.entry = maybe_name.value().to_string();
 
-      // Only use the implicit format for this type if it wasn't overridden.
-      if (!resource_format) {
+      // Only use the implied format of the type when there is no explicit format.
+      if (resource_format == 0u) {
         resource_format = item_iter->second.format;
       }
 
