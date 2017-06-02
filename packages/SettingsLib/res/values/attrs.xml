@@ -46,14 +46,6 @@
     <attr name="wifi_signal" format="reference" />
     <attr name="wifi_friction" format="reference" />
 
-    <declare-styleable name="UsageView">
-        <attr name="android:colorAccent" />
-        <attr name="sideLabels" format="reference" />
-        <attr name="bottomLabels" format="reference" />
-        <attr name="textColor" format="color" />
-        <attr name="android:gravity" />
-    </declare-styleable>
-
     <attr name="footerPreferenceStyle" format="reference" />
 
 </resources>
