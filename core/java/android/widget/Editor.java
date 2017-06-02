@@ -3842,11 +3842,12 @@ public class Editor {
             }
 
             if (mTextView.canRequestAutofill()) {
-                final int mode = mTextView.getText().length() <= 0
-                        ? MenuItem.SHOW_AS_ACTION_IF_ROOM : MenuItem.SHOW_AS_ACTION_NEVER;
-                menu.add(Menu.NONE, TextView.ID_AUTOFILL, MENU_ITEM_ORDER_AUTOFILL,
-                        com.android.internal.R.string.autofill)
-                        .setShowAsAction(mode);
+                final String selected = mTextView.getSelectedText();
+                if (selected == null || selected.isEmpty()) {
+                    menu.add(Menu.NONE, TextView.ID_AUTOFILL, MENU_ITEM_ORDER_AUTOFILL,
+                            com.android.internal.R.string.autofill)
+                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                }
             }
 
             if (mTextView.canPasteAsPlainText()) {
