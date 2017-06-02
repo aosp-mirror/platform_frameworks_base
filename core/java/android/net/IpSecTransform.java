@@ -16,15 +16,12 @@
 package android.net;
 
 import static android.net.IpSecManager.INVALID_RESOURCE_ID;
-import static android.net.IpSecManager.KEY_RESOURCE_ID;
-import static android.net.IpSecManager.KEY_STATUS;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -78,23 +75,23 @@ public final class IpSecTransform implements AutoCloseable {
     public static final int ENCAP_NONE = 0;
 
     /**
-     * IpSec traffic will be encapsulated within UDP as per <a
-     * href="https://tools.ietf.org/html/rfc3948">RFC3498</a>.
-     *
-     * @hide
-     */
-    public static final int ENCAP_ESPINUDP = 1;
-
-    /**
      * IpSec traffic will be encapsulated within a UDP header with an additional 8-byte header pad
      * (of '0'-value bytes) that prevents traffic from being interpreted as IKE or as ESP over UDP.
      *
      * @hide
      */
-    public static final int ENCAP_ESPINUDP_NONIKE = 2;
+    public static final int ENCAP_ESPINUDP_NON_IKE = 1;
+
+    /**
+     * IpSec traffic will be encapsulated within UDP as per <a
+     * href="https://tools.ietf.org/html/rfc3948">RFC3498</a>.
+     *
+     * @hide
+     */
+    public static final int ENCAP_ESPINUDP = 2;
 
     /** @hide */
-    @IntDef(value = {ENCAP_NONE, ENCAP_ESPINUDP, ENCAP_ESPINUDP_NONIKE})
+    @IntDef(value = {ENCAP_NONE, ENCAP_ESPINUDP, ENCAP_ESPINUDP_NON_IKE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapType {}
 
@@ -139,10 +136,11 @@ public final class IpSecTransform implements AutoCloseable {
         synchronized (this) {
             try {
                 IIpSecService svc = getIpSecService();
-                Bundle result = svc.createTransportModeTransform(mConfig, new Binder());
-                int status = result.getInt(KEY_STATUS);
+                IpSecTransformResponse result =
+                        svc.createTransportModeTransform(mConfig, new Binder());
+                int status = result.status;
                 checkResultStatusAndThrow(status);
-                mResourceId = result.getInt(KEY_RESOURCE_ID, INVALID_RESOURCE_ID);
+                mResourceId = result.resourceId;
 
                 /* Keepalive will silently fail if not needed by the config; but, if needed and
                  * it fails to start, we need to bail because a transform will not be reliable
@@ -263,7 +261,10 @@ public final class IpSecTransform implements AutoCloseable {
                             mConfig.getNattKeepaliveInterval(),
                             mKeepaliveCallback,
                             mConfig.getLocalAddress(),
-                            mConfig.getEncapLocalPort(),
+                            0x1234, /* FIXME: get the real port number again,
+                                    which we need to retrieve from the provided
+                                    EncapsulationSocket, and which isn't currently
+                                    stashed in IpSecConfig */
                             mConfig.getRemoteAddress());
             try {
                 // FIXME: this is still a horrible way to fudge the synchronous callback
@@ -360,7 +361,7 @@ public final class IpSecTransform implements AutoCloseable {
                 @TransformDirection int direction, IpSecManager.SecurityParameterIndex spi) {
             // TODO: convert to using the resource Id of the SPI. Then build() can validate
             // the owner in the IpSecService
-            mConfig.flow[direction].spi = spi.getSpi();
+            mConfig.flow[direction].spiResourceId = spi.getResourceId();
             return this;
         }
 
@@ -394,7 +395,7 @@ public final class IpSecTransform implements AutoCloseable {
                 IpSecManager.UdpEncapsulationSocket localSocket, int remotePort) {
             // TODO: check encap type is valid.
             mConfig.encapType = ENCAP_ESPINUDP;
-            mConfig.encapLocalPort = localSocket.getPort(); // TODO: plug in the encap socket
+            mConfig.encapLocalPortResourceId = localSocket.getResourceId();
             mConfig.encapRemotePort = remotePort;
             return this;
         }
