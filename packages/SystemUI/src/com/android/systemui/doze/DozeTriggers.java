@@ -98,12 +98,14 @@ public class DozeTriggers implements DozeMachine.Part {
         requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */);
     }
 
-    private void onSensor(int pulseReason, boolean sensorPerformedProxCheck) {
+    private void onSensor(int pulseReason, boolean sensorPerformedProxCheck,
+            float screenX, float screenY) {
         boolean isDoubleTap = pulseReason == DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP;
         boolean isPickup = pulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
 
         if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
             if (isDoubleTap) {
+                mDozeHost.onDoubleTap(screenX, screenY);
                 mMachine.wakeUp();
             } else {
                 mDozeHost.extendPulse();
