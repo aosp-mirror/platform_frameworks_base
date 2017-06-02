@@ -7684,6 +7684,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case HapticFeedbackConstants.CONTEXT_CLICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+            case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
+                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             default:
                 return null;
         }

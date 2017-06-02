@@ -29,12 +29,12 @@ public class HapticFeedbackConstants {
      * in an action being performed.
      */
     public static final int LONG_PRESS = 0;
-    
+
     /**
      * The user has pressed on a virtual on-screen key.
      */
     public static final int VIRTUAL_KEY = 1;
-    
+
     /**
      * The user has pressed a soft keyboard key.
      */
@@ -57,24 +57,29 @@ public class HapticFeedbackConstants {
     public static final int CONTEXT_CLICK = 6;
 
     /**
+     * The user has released a virtual or software keyboard key.
+     */
+    public static final int VIRTUAL_KEY_RELEASE = 7;
+
+    /**
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */
     public static final int SAFE_MODE_DISABLED = 10000;
-    
+
     /**
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */
     public static final int SAFE_MODE_ENABLED = 10001;
-    
+
     /**
      * Flag for {@link View#performHapticFeedback(int, int)
      * View.performHapticFeedback(int, int)}: Ignore the setting in the
      * view for whether to perform haptic feedback, do it always.
      */
     public static final int FLAG_IGNORE_VIEW_SETTING = 0x0001;
-    
+
     /**
      * Flag for {@link View#performHapticFeedback(int, int)
      * View.performHapticFeedback(int, int)}: Ignore the global setting
