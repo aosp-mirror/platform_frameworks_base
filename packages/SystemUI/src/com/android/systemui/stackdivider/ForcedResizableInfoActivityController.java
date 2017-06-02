@@ -142,7 +142,9 @@ public class ForcedResizableInfoActivityController {
             Intent intent = new Intent(mContext, ForcedResizableInfoActivity.class);
             ActivityOptions options = ActivityOptions.makeBasic();
             options.setLaunchTaskId(pendingRecord.taskId);
-            options.setTaskOverlay(true, false /* canResume */);
+            // Set as task overlay and allow to resume, so that when an app enters split-screen and
+            // becomes paused, the overlay will still be shown.
+            options.setTaskOverlay(true, true /* canResume */);
             intent.putExtra(EXTRA_FORCED_RESIZEABLE_REASON, pendingRecord.reason);
             mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
         }
