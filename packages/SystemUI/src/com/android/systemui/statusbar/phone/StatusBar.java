@@ -4548,6 +4548,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onActivated(ActivatableNotificationView view) {
+        onActivated((View)view);
+        mStackScroller.setActivatedChild(view);
+    }
+
+    public void onActivated(View view) {
         mLockscreenGestureLogger.write(
                 MetricsEvent.ACTION_LS_NOTE,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
@@ -4556,7 +4561,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (previousView != null) {
             previousView.makeInactive(true /* animate */);
         }
-        mStackScroller.setActivatedChild(view);
     }
 
     /**
@@ -4589,9 +4593,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onActivationReset(ActivatableNotificationView view) {
         if (view == mStackScroller.getActivatedChild()) {
-            mKeyguardIndicationController.hideTransientIndication();
             mStackScroller.setActivatedChild(null);
+            onActivationReset((View)view);
         }
+    }
+
+    public void onActivationReset(View view) {
+        mKeyguardIndicationController.hideTransientIndication();
     }
 
     public void onTrackingStarted() {
