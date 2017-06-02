@@ -807,37 +807,31 @@
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
-    <string name="power_remaining_duration_only">About <xliff:g id="time">%1$s</xliff:g> left</string>
+    <string name="power_remaining_duration_only">About <xliff:g id="time">^1</xliff:g> left</string>
     <!-- [CHAR_LIMIT=60] Label for estimated remaining duration of battery discharging -->
-    <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time">%1$s</xliff:g> left based on your usage</string>
+    <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time">^1</xliff:g> left based on your usage</string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
-    <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until fully charged</string>
+    <string name="power_remaining_charging_duration_only"><xliff:g id="time">^1</xliff:g> left until fully charged</string>
 
     <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only_short"><xliff:g id="time">%1$s</xliff:g> left</string>
+    <string name="power_remaining_duration_only_short"><xliff:g id="time">^1</xliff:g> left</string>
     <!-- [CHAR_LIMIT=60] Short label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only_short_enhanced"><xliff:g id="time">%1$s</xliff:g> left based on your usage</string>
+    <string name="power_remaining_duration_only_short_enhanced"><xliff:g id="time">^1</xliff:g> left based on your usage</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
-    <string name="power_discharging_duration"><xliff:g id="level">%1$s</xliff:g>
-        - about <xliff:g id="time">%2$s</xliff:g> left</string>
+    <string name="power_discharging_duration"><xliff:g id="level">^1</xliff:g> - about <xliff:g id="time">^2</xliff:g> left</string>
     <!-- [CHAR_LIMIT=60] Label for battery level chart when discharging with duration and using enhanced estimate -->
-    <string name="power_discharging_duration_enhanced"><xliff:g id="level">%1$s</xliff:g>
-        - about <xliff:g id="time">%2$s</xliff:g> left based on your usage</string>
+    <string name="power_discharging_duration_enhanced"><xliff:g id="level">^1</xliff:g> - about <xliff:g id="time">^2</xliff:g> left based on your usage</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
-    <string name="power_discharging_duration_short"><xliff:g id="level">%1$s</xliff:g>
-        - <xliff:g id="time">%2$s</xliff:g> left</string>
+    <string name="power_discharging_duration_short"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g> left</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
-    <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="state">%2$s</xliff:g></string>
+    <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> -
-            <xliff:g id="time">%2$s</xliff:g> until fully charged</string>
+    <string name="power_charging_duration"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g> until fully charged</string>
     <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
-    <string name="power_charging_duration_short"><xliff:g id="level">%1$s</xliff:g> -
-        <xliff:g id="time">%2$s</xliff:g></string>
+    <string name="power_charging_duration_short"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g></string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
