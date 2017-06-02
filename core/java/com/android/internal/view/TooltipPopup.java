@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 public class TooltipPopup {
@@ -32,6 +33,7 @@ public class TooltipPopup {
 
     private final Context mContext;
 
+    private final PopupWindow mPopupWindow;
     private final View mContentView;
     private final TextView mMessageView;
 
@@ -43,6 +45,8 @@ public class TooltipPopup {
     public TooltipPopup(Context context) {
         mContext = context;
 
+        mPopupWindow = new PopupWindow(context);
+        mPopupWindow.setBackgroundDrawable(null);
         mContentView = LayoutInflater.from(mContext).inflate(
                 com.android.internal.R.layout.tooltip, null);
         mMessageView = (TextView) mContentView.findViewById(
@@ -70,17 +74,16 @@ public class TooltipPopup {
 
         computePosition(anchorView, anchorX, anchorY, fromTouch, mLayoutParams);
 
-        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-        wm.addView(mContentView, mLayoutParams);
+        mPopupWindow.setContentView(mContentView);
+        mPopupWindow.showAtLocation(
+            anchorView, mLayoutParams.gravity, mLayoutParams.x, mLayoutParams.y);
     }
 
     public void hide() {
         if (!isShowing()) {
             return;
         }
-
-        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-        wm.removeView(mContentView);
+        mPopupWindow.dismiss();
     }
 
     public View getContentView() {
@@ -88,7 +91,7 @@ public class TooltipPopup {
     }
 
     public boolean isShowing() {
-        return mContentView.getParent() != null;
+        return mPopupWindow.isShowing();
     }
 
     public void updateContent(CharSequence tooltipText) {
