@@ -1718,20 +1718,17 @@ public class GridView extends AbsListView {
                     break;
 
                 case KeyEvent.KEYCODE_TAB:
-                    // XXX Sometimes it is useful to be able to TAB through the items in
+                    // TODO: Sometimes it is useful to be able to TAB through the items in
                     //     a GridView sequentially.  Unfortunately this can create an
                     //     asymmetry in TAB navigation order unless the list selection
                     //     always reverts to the top or bottom when receiving TAB focus from
-                    //     another widget.  Leaving this behavior disabled for now but
-                    //     perhaps it should be configurable (and more comprehensive).
-                    if (false) {
-                        if (event.hasNoModifiers()) {
-                            handled = resurrectSelectionIfNeeded()
-                                    || sequenceScroll(FOCUS_FORWARD);
-                        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                            handled = resurrectSelectionIfNeeded()
-                                    || sequenceScroll(FOCUS_BACKWARD);
-                        }
+                    //     another widget.
+                    if (event.hasNoModifiers()) {
+                        handled = resurrectSelectionIfNeeded()
+                                || sequenceScroll(FOCUS_FORWARD);
+                    } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                        handled = resurrectSelectionIfNeeded()
+                                || sequenceScroll(FOCUS_BACKWARD);
                     }
                     break;
             }
@@ -1991,7 +1988,7 @@ public class GridView extends AbsListView {
 
         if (!mStackFromBottom) {
             rowStart = childIndex - (childIndex % mNumColumns);
-            rowEnd = Math.max(rowStart + mNumColumns - 1, count);
+            rowEnd = Math.min(rowStart + mNumColumns - 1, count);
         } else {
             rowEnd = count - 1 - (invertedIndex - (invertedIndex % mNumColumns));
             rowStart = Math.max(0, rowEnd - mNumColumns + 1);
