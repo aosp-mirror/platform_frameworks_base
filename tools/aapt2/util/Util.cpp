@@ -203,7 +203,7 @@ bool VerifyJavaStringFormat(const StringPiece& str) {
     if (*c == '%' && c + 1 < end) {
       c++;
 
-      if (*c == '%') {
+      if (*c == '%' || *c == 'n') {
         c++;
         continue;
       }
