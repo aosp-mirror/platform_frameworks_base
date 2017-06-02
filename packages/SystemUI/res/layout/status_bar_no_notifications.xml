@@ -27,7 +27,7 @@
             android:layout_height="64dp"
             android:paddingTop="28dp"
             android:gravity="top|center_horizontal"
-            android:textColor="#e6ffffff"
+            android:textColor="?attr/bgProtectTextColor"
             android:textSize="16sp"
             android:text="@string/empty_shade_text"/>
 </com.android.systemui.statusbar.EmptyShadeView>

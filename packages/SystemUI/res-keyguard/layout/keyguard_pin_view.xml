@@ -54,6 +54,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginRight="72dp"
                     androidprv:scaledTextSize="28"
+                    android:textColor="?attr/bgProtectTextColor"
                     android:contentDescription="@string/keyguard_accessibility_pin_area"
                     />
             <ImageButton
@@ -65,19 +66,20 @@
                     android:clickable="true"
                     android:paddingTop="8dip"
                     android:paddingBottom="8dip"
-                    android:paddingRight="8dp"
+                    android:paddingRight="0dp"
                     android:paddingLeft="24dp"
                     android:background="@drawable/ripple_drawable"
                     android:contentDescription="@string/keyboardview_keycode_delete"
                     android:layout_alignEnd="@+id/pinEntry"
                     android:layout_alignParentRight="true"
+                    android:tint="@color/pin_delete_color"
                     />
             <View
                     android:id="@+id/divider"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_alignParentBottom="true"
-                    android:background="#28FFFFFF"
+                    android:background="@drawable/pin_divider"
                     />
         </com.android.keyguard.AlphaOptimizedRelativeLayout>
         <LinearLayout
@@ -203,6 +205,7 @@
                     android:layout_weight="1"
                     android:paddingBottom="11sp"
                     android:src="@drawable/ic_done_wht"
+                    style="@style/Keyguard.ImageButton.NumPadEnter"
                     android:background="@drawable/ripple_drawable"
                     android:contentDescription="@string/keyboardview_keycode_enter"
                     />

@@ -18,7 +18,6 @@
     android:id="@+id/quick_settings_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/colorPrimaryDark"
     android:clipToPadding="false"
     android:clipChildren="false">
 
@@ -27,6 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/qs_background_primary"
+        android:alpha="0.8"
         android:elevation="4dp" />
 
     <com.android.systemui.qs.QSPanel
