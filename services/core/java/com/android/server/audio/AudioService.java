@@ -352,7 +352,7 @@ public class AudioService extends IAudioService.Stub
         AudioSystem.STREAM_MUSIC,           // STREAM_TTS
         AudioSystem.STREAM_MUSIC            // STREAM_ACCESSIBILITY
     };
-    private int[] mStreamVolumeAlias;
+    protected static int[] mStreamVolumeAlias;
 
     /**
      * Map AudioSystem.STREAM_* constants to app ops.  This should be used
@@ -1817,7 +1817,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     // UI update and Broadcast Intent
-    private void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags) {
+    protected void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags) {
         streamType = mStreamVolumeAlias[streamType];
 
         if (streamType == AudioSystem.STREAM_MUSIC) {
