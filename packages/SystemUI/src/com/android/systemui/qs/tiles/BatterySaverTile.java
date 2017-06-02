@@ -20,9 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.service.quicksettings.Tile;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.RelativeSizeSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,9 +32,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.BatteryInfo;
 import com.android.settingslib.graph.BatteryMeterDrawableBase;
-import com.android.settingslib.graph.UsageView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -187,14 +182,6 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
             ((ImageView) mCurrentView.findViewById(android.R.id.icon)).setImageDrawable(mDrawable);
             Checkable checkbox = (Checkable) mCurrentView.findViewById(android.R.id.toggle);
             checkbox.setChecked(mPowerSave);
-            BatteryInfo.getBatteryInfo(mContext, new BatteryInfo.Callback() {
-                @Override
-                public void onBatteryInfoLoaded(BatteryInfo info) {
-                    if (mCurrentView != null) {
-                        bindBatteryInfo(info);
-                    }
-                }
-            });
             final TextView batterySaverTitle =
                     (TextView) mCurrentView.findViewById(android.R.id.title);
             final TextView batterySaverSummary =
@@ -214,23 +201,6 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
                 mCurrentView.findViewById(R.id.switch_container).setClickable(true);
                 mCurrentView.findViewById(R.id.switch_container).setOnClickListener(this);
             }
-        }
-
-        private void bindBatteryInfo(BatteryInfo info) {
-            SpannableStringBuilder builder = new SpannableStringBuilder();
-            builder.append(info.batteryPercentString, new RelativeSizeSpan(2.6f),
-                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-            if (info.remainingLabel != null) {
-                if (mContext.getResources().getBoolean(R.bool.quick_settings_wide)) {
-                    builder.append(' ');
-                } else {
-                    builder.append('\n');
-                }
-                builder.append(info.remainingLabel);
-            }
-            ((TextView) mCurrentView.findViewById(R.id.charge_and_estimation)).setText(builder);
-
-            info.bindHistory((UsageView) mCurrentView.findViewById(R.id.battery_usage));
         }
 
         @Override
