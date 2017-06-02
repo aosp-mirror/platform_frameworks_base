@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"ფონური პროცესების ლიმიტი"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"ყველა ANR-ის ჩვენება"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"შეტყობინების ჩვენება, როცა ფონური აპლიკაცია არ პასუხობს"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"შეტყობინებათა არხის გაფრთხილებების ჩვენება"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ეკრანზე აჩვენებს გაფრთხილებას, როცა აპი შეტყობინებას სწორი არხის გარეშე განათავსებს"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"აპების დაშვება გარე მეხსიერებაში"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"აპები ჩაიწერება გარე მეხსიერებაზე აღწერის ფაილების მნიშვნელობების მიუხედავად"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ზომაცვლადი აქტივობების იძულება"</string>

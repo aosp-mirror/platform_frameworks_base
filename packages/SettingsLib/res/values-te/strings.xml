@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"నేపథ్య ప్రాసెస్ పరిమితి"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"అన్ని ANRలను చూపు"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"నేపథ్య అనువర్తనాల కోసం అనువర్తనం ప్రతిస్పందించడం లేదు డైలాగ్‌ను చూపు"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ఛానెల్ హెచ్చరికల నోటిఫికేషన్‌‌ను చూపు"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"చెల్లుబాటు అయ్యే ఛానెల్ లేకుండా అనువర్తనం నోటిఫికేషన్‌ను పోస్ట్ చేస్తున్నప్పుడు స్క్రీన్‌పై హెచ్చరికను చూపిస్తుంది"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"అనువర్తనాలను బాహ్య నిల్వలో నిర్బంధంగా అనుమతించు"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ఏ అనువర్తనాన్ని అయినా మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా బాహ్య నిల్వలో వ్రాయడానికి అనుమతిస్తుంది"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"కార్యాచరణలను పరిమాణం మార్చగలిగేలా నిర్బంధించు"</string>

@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"バックグラウンドプロセスの上限"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"すべてのANRを表示"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"バックグラウンドアプリが応答しない場合に通知する"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"通知チャネルの警告を表示"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"アプリから有効なチャネルのない通知が投稿されたときに画面上に警告を表示します"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"外部ストレージへのアプリの書き込みを許可"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"マニフェストの値に関係なく、すべてのアプリを外部ストレージに書き込めるようになります"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"アクティビティをサイズ変更可能にする"</string>

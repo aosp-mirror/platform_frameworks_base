@@ -163,7 +163,7 @@
     <string name="oem_unlock_enable" msgid="6040763321967327691">"การปลดล็อก OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"อนุญาตให้ปลดล็อกตัวโหลดการเปิดเครื่อง"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"อนุญาตการปลดล็อก OEM ไหม"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"คำเตือน: คุณลักษณะการปกป้องอุปกรณ์จะไม่ทำงานบนอุปกรณ์นี้ขณะที่การตั้งค่านี้เปิดอยู่"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"คำเตือน: ฟีเจอร์การปกป้องอุปกรณ์จะไม่ทำงานบนอุปกรณ์นี้ขณะที่การตั้งค่านี้เปิดอยู่"</string>
     <string name="mock_location_app" msgid="7966220972812881854">"เลือกแอปจำลองตำแหน่ง"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"ไม่ได้ตั้งค่าแอปจำลองตำแหน่ง"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"แอปจำลองตำแหน่ง: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -211,7 +211,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"การตั้งค่านี้มีไว้เพื่อการพัฒนาเท่านั้น จึงอาจทำให้อุปกรณ์และแอปพลิเคชันที่มีอยู่เสียหายหรือทำงานผิดพลาดได้"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปพลิเคชันผ่าน USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปพลิเคชันที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ปิดใช้คุณลักษณะการควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ปิดใช้ฟีเจอร์การควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ให้เสียงเรียกเข้าในโทรศัพท์เล่นในชุดหูฟังบลูทูธ"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"ขีดจำกัดกระบวนการพื้นหลัง"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"แสดง ANR ทั้งหมด"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"แสดงหน้าต่างแอปไม่ตอบสนอง สำหรับแอปพื้นหลัง"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ทำให้สามารถเขียนแอปใดๆ ก็ตามไปยังพื้นที่เก็บข้อมูลภายนอกได้ โดยไม่คำนึงถึงค่าในไฟล์ Manifest"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"บังคับให้กิจกรรมปรับขนาดได้"</string>
@@ -310,7 +308,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"แปลง…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"เข้ารหัสไฟล์แล้ว"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"การแปลงเป็นการเข้ารหัสตามไฟล์"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"แปลงพาร์ทิชันข้อมูลเป็นการเข้ารหัสแบบไฟล์\n !!คำเตือน!! การดำเนินการนี้จะลบข้อมูลทั้งหมดของคุณ\n คุณลักษณะนี้เป็นแบบอัลฟา และอาจทำงานไม่เป็นปกติ\n กด \"ลบและแปลง...\" เพื่อดำเนินการต่อ"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"แปลงพาร์ทิชันข้อมูลเป็นการเข้ารหัสแบบไฟล์\n !!คำเตือน!! การดำเนินการนี้จะลบข้อมูลทั้งหมดของคุณ\n ฟีเจอร์นี้เป็นแบบอัลฟา และอาจทำงานไม่เป็นปกติ\n กด \"ลบและแปลง...\" เพื่อดำเนินการต่อ"</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"ลบและแปลง…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"โหมดสีของรูปภาพ"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"ใช้ sRGB"</string>
@@ -320,7 +318,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"ตาบอดจางสีแดง (สีแดง/เขียว)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ตาบอดจางสีน้ำเงิน (สีน้ำเงิน/เหลือง)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"การแก้สี"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"คุณลักษณะนี้เป็นแบบทดลองและอาจส่งผลต่อประสิทธิภาพการทำงาน"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ฟีเจอร์นี้เป็นแบบทดลองและอาจส่งผลต่อประสิทธิภาพการทำงาน"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"แทนที่โดย <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"อีกประมาณ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"อีก <xliff:g id="TIME">%1$s</xliff:g> จึงจะชาร์จเต็ม"</string>

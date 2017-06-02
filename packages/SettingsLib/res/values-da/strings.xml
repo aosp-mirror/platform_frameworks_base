@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Grænse for baggrundsprocesser"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Vis alle \"Appen svarer ikke\""</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Vis \"Appen svarer ikke\" for baggrundsapps"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Vis advarsler om underretningskanal"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Viser en advarsel, når en app sender en underretning uden en gyldig kanal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Gennemtving tilladelse til eksternt lager"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Gør det muligt at overføre enhver app til et eksternt lager uafhængigt af manifestværdier"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Tving aktiviteter til at kunne tilpasses"</string>

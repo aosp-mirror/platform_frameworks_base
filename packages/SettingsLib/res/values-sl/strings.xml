@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Omejitev postopkov v ozadju"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Pokaži okna neodzivanj"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Prikaz pogovornega okna za neodzivanje aplikacije v ozadju"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Pokaži opoz. kan. za obv."</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Na zaslonu se pokaže opozorilo, ko aplikacija objavi obvestilo brez veljavnega kanala"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Vsili omogočanje aplikacij v zunanji shrambi"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Poskrbi, da je ne glede na vrednosti v manifestu mogoče vsako aplikacijo zapisati v zunanjo shrambo"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Vsili povečanje velikosti za aktivnosti"</string>

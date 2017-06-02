@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"后台进程限制"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"显示所有“应用无响应”(ANR)"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"为后台应用显示“应用无响应”对话框"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"显示通知渠道警告"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"当应用未经有效渠道发布通知时，在屏幕上显示警告"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"强制允许将应用写入外部存储设备"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"允许将任何应用写入外部存储设备（无论清单值是什么）"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"强制将活动设为可调整大小"</string>

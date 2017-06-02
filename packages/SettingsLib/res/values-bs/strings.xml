@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Ograničenje procesa u pozadini"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Prikaži sve ANR-ove"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Prik. dijalog Aplikacija ne reagira za apl. u poz."</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Prikaz upozorenja na obavještenju o kanalu"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Prikaz upozorenja ekranu kada aplikacija pošalje obavještenje bez važećeg kanala."</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Nametni aplikacije na vanjskoj pohrani"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Omogućava da svaka aplikacija bude pogodna za upisivanje na vanjsku pohranu, bez obzira na prikazane vrijednosti"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Nametni aktivnostima mijenjanje veličina"</string>

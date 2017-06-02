@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"ਪਿਛੋਕੜ ਪ੍ਰਕਿਰਿਆ ਸੀਮਾ"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"ਸਾਰੇ ANR ਦਿਖਾਓ"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"ਪਿਛੋਕੜ ਐਪਸ ਲਈ ਐਪਸ ਜਵਾਬ ਨਹੀਂ ਦੇ ਰਹੇ ਡਾਇਲੌਗ ਦਿਖਾਓ"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ਸੂਚਨਾ ਚੈਨਲ ਚੇਤਾਵਨੀਆਂ ਦਿਖਾਓ"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ਐਪ ਵੱਲੋਂ ਵੈਧ ਚੈਨਲ ਤੋਂ ਬਿਨਾਂ ਸੂਚਨਾ ਪੋਸਟ ਕਰਨ \'ਤੇ ਸਕ੍ਰੀਨ \'ਤੇ ਚੇਤਾਵਨੀ ਦਿਖਾਉਂਦੀ ਹੈ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ਐਪਸ ਨੂੰ ਬਾਹਰਲੇ ਤੇ ਜ਼ਬਰਦਸਤੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਕਿਸੇ ਵੀ ਐਪ ਨੂੰ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ਮੁੜ-ਆਕਾਰ ਬਦਲਣ ਲਈ ਸਰਗਰਮੀਆਂ \'ਤੇ ਜ਼ੋਰ ਦਿਓ"</string>

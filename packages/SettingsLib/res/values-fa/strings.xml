@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"محدودیت پردازش در پس‌زمینه"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"‏نمایش تمام ANRها"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"نمایش گفتگوی \"برنامه پاسخ نمی‌دهد\" برای برنامه‌های پس‌زمینه"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"نمایش هشدارهای کانال اعلان"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"هنگامی که برنامه‌ای بدون وجود کانالی معتبر، اعلانی پست می‌کند، هشدار روی صفحه‌ای نمایش می‌دهد"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"اجازه اجباری به برنامه‌های دستگاه ذخیره خارجی"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"بدون توجه به مقادیر مانیفست، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"اجبار فعالیت‌ها به قابل تغییر اندازه بودن"</string>

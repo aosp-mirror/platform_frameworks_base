@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"പശ്ചാത്തല പ്രോസ‌സ്സ് പരിധി"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"എല്ലാ ANR-കളും ദൃശ്യമാക്കുക"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"പ‌ശ്ചാത്തല അപ്ലിക്കേഷനുകൾക്ക് അപ്ലിക്കേഷൻ പ്രതികരിക്കുന്നില്ല എന്ന ഡയലോഗ് കാണിക്കുക"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ചാനൽ മുന്നറിയിപ്പ് കാണിക്കൂ"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"സാധുതയുള്ള ചാനലില്ലാതെ ഒരു ആപ്പ്, അറിയിപ്പ് പോസ്റ്റുചെയ്യുമ്പോൾ ഓൺ-സ്‌ക്രീൻ മുന്നറിയിപ്പ് ‌പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ബാഹ്യമായതിൽ നിർബന്ധിച്ച് അനുവദിക്കുക"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, ബാഹ്യ സ്റ്റോറേജിലേക്ക് എഴുതപ്പെടുന്നതിന് ഏതൊരു ആപ്പിനെയും യോഗ്യമാക്കുന്നു"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"വലിപ്പം മാറ്റാൻ പ്രവർത്തനങ്ങളെ നിർബന്ധിക്കുക"</string>
