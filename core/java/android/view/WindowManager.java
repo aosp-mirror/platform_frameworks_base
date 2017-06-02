@@ -1903,6 +1903,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
+        @TestApi
         public CharSequence accessibilityTitle;
 
         /**
@@ -2185,6 +2186,7 @@ public interface WindowManager extends ViewManager {
         /** {@hide} */
         public static final int ACCESSIBILITY_ANCHOR_CHANGED = 1 << 24;
         /** {@hide} */
+        @TestApi
         public static final int ACCESSIBILITY_TITLE_CHANGED = 1 << 25;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
