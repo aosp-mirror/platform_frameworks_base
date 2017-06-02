@@ -235,6 +235,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
         @Override
         public void hide() {
+            // Remove any pending messages to show the session
+            mHandlerCaller.removeMessages(MSG_SHOW);
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_HIDE));
         }
 
