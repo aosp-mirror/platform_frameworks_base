@@ -252,6 +252,12 @@ public class DisconnectCause {
      */
     public static final int WIFI_LOST = 59;
 
+    /**
+     * The call has failed because of access class barring.
+     * {@hide}
+     */
+    public static final int IMS_ACCESS_BLOCKED = 60;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -384,6 +390,8 @@ public class DisconnectCause {
             return "IMEI_NOT_ACCEPTED";
         case WIFI_LOST:
             return "WIFI_LOST";
+        case IMS_ACCESS_BLOCKED:
+            return "IMS_ACCESS_BLOCKED";
         default:
             return "INVALID: " + cause;
         }
