@@ -157,6 +157,10 @@ public class DozeParameters {
         return 2 * getPulseVisibleDuration();
     }
 
+    public boolean doubleTapReportsTouchCoordinates() {
+        return mContext.getResources().getBoolean(R.bool.doze_double_tap_reports_touch_coordinates);
+    }
+
 
     /**
      * Parses a spec of the form `1,2,3,!5,*`. The resulting object will match numbers that are

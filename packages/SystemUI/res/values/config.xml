@@ -262,6 +262,9 @@
     <!-- Doze: alpha to apply to small icons when dozing -->
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
 
+    <!-- Doze: whether the double tap sensor reports 2D touch coordinates -->
+    <bool name="doze_double_tap_reports_touch_coordinates">false</bool>
+
     <!-- Hotspot tile: number of days to show after feature is used. -->
     <integer name="days_to_show_hotspot_tile">30</integer>
 
