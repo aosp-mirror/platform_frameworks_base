@@ -676,7 +676,7 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
 }
 
 CREATE_BRIDGE2(allocateHardwareBitmap, RenderThread* thread, SkBitmap* bitmap) {
-    sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(*args->thread, *args->bitmap);
+    sk_sp<Bitmap> hardwareBitmap = args->thread->allocateHardwareBitmap(*args->bitmap);
     return hardwareBitmap.release();
 }
 

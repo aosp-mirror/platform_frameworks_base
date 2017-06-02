@@ -61,6 +61,8 @@ public:
     static void destroyLayer(RenderNode* node);
     static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
     static void invokeFunctor(const RenderThread& thread, Functor* functor);
+    static sk_sp<Bitmap> allocateHardwareBitmap(RenderThread& thread,
+            SkBitmap& skBitmap);
 
 private:
     EglManager& mEglManager;

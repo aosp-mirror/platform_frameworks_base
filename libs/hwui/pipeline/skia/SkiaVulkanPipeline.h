@@ -48,6 +48,8 @@ public:
     bool isContextReady() override;
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
+    static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,
+            SkBitmap& skBitmap);
 
 private:
     renderthread::VulkanManager& mVkManager;

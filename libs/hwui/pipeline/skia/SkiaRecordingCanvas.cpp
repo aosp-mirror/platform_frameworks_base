@@ -156,30 +156,25 @@ inline static const SkPaint* nonAAPaint(const SkPaint* origPaint, SkPaint* tmpPa
 }
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
-    SkBitmap skBitmap;
-    bitmap.getSkBitmap(&skBitmap);
-
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(skBitmap, kNever_SkCopyPixelsMode);
+    sk_sp<SkImage> image = bitmap.makeImage();
     SkPaint tmpPaint;
     mRecorder.drawImage(image, left, top, nonAAPaint(paint, &tmpPaint));
     // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
     // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
     // when this function ends.
-    if (!skBitmap.isImmutable() && image.get() && !image->unique()) {
+    if (!bitmap.isImmutable() && image.get() && !image->unique()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
 }
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix,
         const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     SkAutoCanvasRestore acr(&mRecorder, true);
     concat(matrix);
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
+    sk_sp<SkImage> image = hwuiBitmap.makeImage();
     SkPaint tmpPaint;
     mRecorder.drawImage(image, 0, 0, nonAAPaint(paint, &tmpPaint));
-    if (!bitmap.isImmutable() && image.get() && !image->unique()) {
+    if (!hwuiBitmap.isImmutable() && image.get() && !image->unique()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
 }
@@ -187,14 +182,12 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix,
 void SkiaRecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop,
         float srcRight, float srcBottom, float dstLeft, float dstTop, float dstRight,
         float dstBottom, const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
+    sk_sp<SkImage> image = hwuiBitmap.makeImage();
     SkPaint tmpPaint;
     mRecorder.drawImageRect(image, srcRect, dstRect, nonAAPaint(paint, &tmpPaint));
-    if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty()
+    if (!hwuiBitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty()
             && !dstRect.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
@@ -202,11 +195,8 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float sr
 
 void SkiaRecordingCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
         float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
-
     SkCanvas::Lattice lattice;
-    NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
+    NinePatchUtils::SetLatticeDivs(&lattice, chunk, hwuiBitmap.width(), hwuiBitmap.height());
 
     lattice.fFlags = nullptr;
     int numFlags = 0;
@@ -223,11 +213,11 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch
 
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
+    sk_sp<SkImage> image = hwuiBitmap.makeImage();
 
     SkPaint tmpPaint;
     mRecorder.drawImageLattice(image.get(), lattice, dst, nonAAPaint(paint, &tmpPaint));
-    if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
+    if (!hwuiBitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
 }

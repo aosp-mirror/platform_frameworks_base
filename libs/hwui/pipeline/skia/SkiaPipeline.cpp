@@ -159,11 +159,11 @@ void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
     GrContext* context = thread.getGrContext();
     if (context) {
         ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
-        SkBitmap skiaBitmap;
-        bitmap->getSkBitmap(&skiaBitmap);
-        sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
-        SkImage_pinAsTexture(image.get(), context);
-        SkImage_unpinAsTexture(image.get(), context);
+        auto image = bitmap->makeImage();
+        if (image.get() && !bitmap->isHardware()) {
+            SkImage_pinAsTexture(image.get(), context);
+            SkImage_unpinAsTexture(image.get(), context);
+        }
     }
 }
 
