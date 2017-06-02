@@ -154,9 +154,32 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             }
         }
 
+        boolean nonBlockable = false;
+        try {
+            final PackageInfo pkgInfo = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
+            if (Utils.isSystemPackage(getResources(), pm, pkgInfo)) {
+                final int numChannels = mNotificationChannels.size();
+                for (int i = 0; i < numChannels; i++) {
+                    final NotificationChannel notificationChannel = mNotificationChannels.get(i);
+                    // If any of the system channels is not blockable, the bundle is nonblockable
+                    if (!notificationChannel.isBlockableSystem()) {
+                        nonBlockable = true;
+                        break;
+                    }
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            // unlikely.
+        }
+        if (nonBlockablePkgs != null) {
+            nonBlockable |= nonBlockablePkgs.contains(pkg);
+        }
+
         String channelsDescText;
         mNumChannelsView = findViewById(R.id.num_channels_desc);
-        if (mIsSingleDefaultChannel) {
+        if (nonBlockable) {
+            channelsDescText = mContext.getString(R.string.notification_unblockable_desc);
+        } else if (mIsSingleDefaultChannel) {
             channelsDescText = mContext.getString(R.string.notification_default_channel_desc);
         } else {
             switch (mNotificationChannels.size()) {
@@ -188,8 +211,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             // Multiple channels don't use a channel name for the title.
             channelNameText = mContext.getString(R.string.notification_num_channels,
                     mNotificationChannels.size());
-        } else if (mIsSingleDefaultChannel) {
-            // If this is the default channel, don't use our channel-specific text.
+        } else if (mIsSingleDefaultChannel || nonBlockable) {
+            // If this is the default channel or the app is unblockable,
+            // don't use our channel-specific text.
             channelNameText = mContext.getString(R.string.notification_header_default_channel);
         } else {
             channelNameText = mSingleNotificationChannel.getName();
@@ -218,19 +242,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             groupDividerView.setVisibility(View.GONE);
         }
 
-        boolean nonBlockable = false;
-        try {
-            final PackageInfo pkgInfo = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
-            nonBlockable = Utils.isSystemPackage(getResources(), pm, pkgInfo)
-                    && (mSingleNotificationChannel == null
-                    || !mSingleNotificationChannel.isBlockableSystem());
-        } catch (PackageManager.NameNotFoundException e) {
-            // unlikely.
-        }
-        if (nonBlockablePkgs != null) {
-            nonBlockable |= nonBlockablePkgs.contains(pkg);
-        }
-
         bindButtons(nonBlockable);
 
         // Top-level importance group
@@ -246,12 +257,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                     (View view) -> {
                         onSettingsClick.onClick(view, mSingleNotificationChannel, appUidF);
                     });
-            if (numTotalChannels > 1) {
-                settingsButton.setText(R.string.notification_all_categories);
-            } else {
+            if (numTotalChannels <= 1 || nonBlockable) {
                 settingsButton.setText(R.string.notification_more_settings);
+            } else {
+                settingsButton.setText(R.string.notification_all_categories);
             }
-
         } else {
             settingsButton.setVisibility(View.GONE);
         }
