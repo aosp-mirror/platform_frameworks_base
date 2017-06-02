@@ -19,9 +19,11 @@ package android.net;
 import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -34,12 +36,6 @@ import java.util.List;
 /**
  * Class that manages communication between network subsystems and a network scorer.
  *
- * <p>You can get an instance of this class by calling
- * {@link android.content.Context#getSystemService(String)}:
- *
- * <pre>NetworkScoreManager manager =
- *     (NetworkScoreManager) getSystemService(Context.NETWORK_SCORE_SERVICE)</pre>
- *
  * <p>A network scorer is any application which:
  * <ul>
  * <li>Declares the {@link permission#SCORE_NETWORKS} permission.
@@ -51,6 +47,7 @@ import java.util.List;
  * @hide
  */
 @SystemApi
+@SystemService(Context.NETWORK_SCORE_SERVICE)
 public class NetworkScoreManager {
     /**
      * Activity action: ask the user to change the active network scorer. This will show a dialog
@@ -243,6 +240,7 @@ public class NetworkScoreManager {
      * @hide
      */
     @Nullable
+    @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES)
     public NetworkScorerAppData getActiveScorer() {
         try {
             return mService.getActiveScorer();
@@ -276,6 +274,7 @@ public class NetworkScoreManager {
      * @return whether the update was successful.
      * @throws SecurityException if the caller is not the active scorer.
      */
+    @RequiresPermission(android.Manifest.permission.SCORE_NETWORKS)
     public boolean updateScores(ScoredNetwork[] networks) throws SecurityException {
         try {
             return mService.updateScores(networks);
@@ -296,6 +295,7 @@ public class NetworkScoreManager {
      * @return whether the clear was successful.
      * @throws SecurityException if the caller is not the active scorer or privileged.
      */
+    @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES)
     public boolean clearScores() throws SecurityException {
         try {
             return mService.clearScores();
@@ -316,6 +316,7 @@ public class NetworkScoreManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.SCORE_NETWORKS)
     public boolean setActiveScorer(String packageName) throws SecurityException {
         try {
             return mService.setActiveScorer(packageName);
@@ -331,6 +332,7 @@ public class NetworkScoreManager {
      *
      * @throws SecurityException if the caller is neither the active scorer nor the system.
      */
+    @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES)
     public void disableScoring() throws SecurityException {
         try {
             mService.disableScoring();

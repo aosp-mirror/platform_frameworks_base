@@ -18,6 +18,8 @@ package android.location;
 
 import java.util.HashMap;
 
+import android.annotation.SystemService;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -40,13 +42,10 @@ import android.util.Log;
  * To be notified of the future country change, use the
  * {@link #addCountryListener}
  * <p>
- * <p>
- * You do not instantiate this class directly; instead, retrieve it through
- * {@link android.content.Context#getSystemService
- * Context.getSystemService(Context.COUNTRY_DETECTOR)}.
  *
  * @hide
  */
+@SystemService(Context.COUNTRY_DETECTOR)
 public class CountryDetector {
 
     /**

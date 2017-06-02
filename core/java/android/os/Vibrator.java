@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -27,10 +28,8 @@ import android.util.Log;
  * <p>
  * If your process exits, any vibration you started will stop.
  * </p>
- *
- * To obtain an instance of the system vibrator, call
- * {@link Context#getSystemService} with {@link Context#VIBRATOR_SERVICE} as the argument.
  */
+@SystemService(Context.VIBRATOR_SERVICE)
 public abstract class Vibrator {
     private static final String TAG = "Vibrator";
 

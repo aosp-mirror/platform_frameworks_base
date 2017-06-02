@@ -17,7 +17,9 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.media.AudioAttributes.AttributeUsage;
@@ -42,10 +44,9 @@ import java.util.List;
  * API for interacting with "application operation" tracking.
  *
  * <p>This API is not generally intended for third party application developers; most
- * features are only available to system applications.  Obtain an instance of it through
- * {@link Context#getSystemService(String) Context.getSystemService} with
- * {@link Context#APP_OPS_SERVICE Context.APP_OPS_SERVICE}.</p>
+ * features are only available to system applications.
  */
+@SystemService(Context.APP_OPS_SERVICE)
 public class AppOpsManager {
     /**
      * <p>App ops allows callers to:</p>
@@ -1409,6 +1410,7 @@ public class AppOpsManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS)
     public void setUidMode(String appOp, int uid, int mode) {
         try {
             mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);

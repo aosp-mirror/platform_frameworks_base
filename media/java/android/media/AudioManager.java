@@ -19,9 +19,11 @@ package android.media;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
@@ -58,10 +60,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
- * <p>
- * Use <code>Context.getSystemService(Context.AUDIO_SERVICE)</code> to get
- * an instance of this class.
  */
+@SystemService(Context.AUDIO_SERVICE)
 public class AudioManager {
 
     private Context mOriginalContext;
@@ -2827,6 +2827,7 @@ public class AudioManager {
      *    {@link #SUCCESS} otherwise.
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int registerAudioPolicy(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");
@@ -2852,6 +2853,7 @@ public class AudioManager {
      * @param policy the non-null {@link AudioPolicy} to unregister.
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void unregisterAudioPolicyAsync(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");

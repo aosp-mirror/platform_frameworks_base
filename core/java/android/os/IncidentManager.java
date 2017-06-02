@@ -16,7 +16,9 @@
 
 package android.os;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.IIncidentManager;
@@ -31,6 +33,7 @@ import android.util.Slog;
  */
 @SystemApi
 @TestApi
+@SystemService(Context.INCIDENT_SERVICE)
 public class IncidentManager {
     private static final String TAG = "incident";
 
@@ -46,6 +49,10 @@ public class IncidentManager {
     /**
      * Take an incident report and put it in dropbox.
      */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.DUMP,
+            android.Manifest.permission.PACKAGE_USAGE_STATS
+    })
     public void reportIncident(IncidentReportArgs args) {
         final IIncidentManager service = IIncidentManager.Stub.asInterface(
                 ServiceManager.getService("incident"));
@@ -76,6 +83,10 @@ public class IncidentManager {
      * {@link android.util.proto.ProtoOutputStream#bytes bytes()} method to retrieve
      * the encoded data for the header.
      */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.DUMP,
+            android.Manifest.permission.PACKAGE_USAGE_STATS
+    })
     public void reportIncident(String settingName, byte[] headerProto) {
         // Sections
         String setting = Settings.System.getString(mContext.getContentResolver(), settingName);
