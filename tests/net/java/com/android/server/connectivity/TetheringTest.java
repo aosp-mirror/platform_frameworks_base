@@ -16,6 +16,12 @@
 
 package com.android.server.connectivity;
 
+import static android.net.wifi.WifiManager.IFACE_IP_MODE_LOCAL_ONLY;
+import static android.net.wifi.WifiManager.IFACE_IP_MODE_TETHERED;
+import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
+import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
+import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
+import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
@@ -222,12 +228,22 @@ public class TetheringTest {
 
     private void sendWifiApStateChanged(int state) {
         final Intent intent = new Intent(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
-        intent.putExtra(WifiManager.EXTRA_WIFI_AP_STATE, state);
+        intent.putExtra(EXTRA_WIFI_AP_STATE, state);
         mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
-    private void verifyInterfaceServingModeStarted() throws Exception {
-        verify(mNMService, times(1)).listInterfaces();
+    private void sendWifiApStateChanged(int state, String ifname, int ipmode) {
+        final Intent intent = new Intent(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
+        intent.putExtra(EXTRA_WIFI_AP_STATE, state);
+        intent.putExtra(EXTRA_WIFI_AP_INTERFACE_NAME, ifname);
+        intent.putExtra(EXTRA_WIFI_AP_MODE, ipmode);
+        mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+    }
+
+    private void verifyInterfaceServingModeStarted(boolean ifnameKnown) throws Exception {
+        if (!ifnameKnown) {
+            verify(mNMService, times(1)).listInterfaces();
+        }
         verify(mNMService, times(1)).getInterfaceConfig(mTestIfname);
         verify(mNMService, times(1))
                 .setInterfaceConfig(eq(mTestIfname), any(InterfaceConfiguration.class));
@@ -243,18 +259,21 @@ public class TetheringTest {
         mIntents.remove(bcast);
     }
 
-    @Test
-    public void workingLocalOnlyHotspot() throws Exception {
+    public void workingLocalOnlyHotspot(boolean enrichedApBroadcast) throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
 
         // Emulate externally-visible WifiManager effects, causing the
         // per-interface state machine to start up, and telling us that
         // hotspot mode is to be started.
         mTethering.interfaceStatusChanged(mTestIfname, true);
-        sendWifiApStateChanged(WifiManager.WIFI_AP_STATE_ENABLED);
+        if (enrichedApBroadcast) {
+            sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, mTestIfname, IFACE_IP_MODE_LOCAL_ONLY);
+        } else {
+            sendWifiApStateChanged(WIFI_AP_STATE_ENABLED);
+        }
         mLooper.dispatchAll();
 
-        verifyInterfaceServingModeStarted();
+        verifyInterfaceServingModeStarted(enrichedApBroadcast);
         verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
@@ -295,7 +314,16 @@ public class TetheringTest {
     }
 
     @Test
-    public void workingWifiTethering() throws Exception {
+    public void workingLocalOnlyHotspotLegacyApBroadcast() throws Exception {
+        workingLocalOnlyHotspot(false);
+    }
+
+    @Test
+    public void workingLocalOnlyHotspotEnrichedApBroadcast() throws Exception {
+        workingLocalOnlyHotspot(true);
+    }
+
+    public void workingWifiTethering(boolean enrichedApBroadcast) throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
         when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
 
@@ -311,10 +339,14 @@ public class TetheringTest {
         // per-interface state machine to start up, and telling us that
         // tethering mode is to be started.
         mTethering.interfaceStatusChanged(mTestIfname, true);
-        sendWifiApStateChanged(WifiManager.WIFI_AP_STATE_ENABLED);
+        if (enrichedApBroadcast) {
+            sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, mTestIfname, IFACE_IP_MODE_TETHERED);
+        } else {
+            sendWifiApStateChanged(WIFI_AP_STATE_ENABLED);
+        }
         mLooper.dispatchAll();
 
-        verifyInterfaceServingModeStarted();
+        verifyInterfaceServingModeStarted(enrichedApBroadcast);
         verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
@@ -373,6 +405,16 @@ public class TetheringTest {
         // has been reaped yields an unknown interface error.
         assertEquals(ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE,
                 mTethering.getLastTetherError(mTestIfname));
+    }
+
+    @Test
+    public void workingWifiTetheringLegacyApBroadcast() throws Exception {
+        workingWifiTethering(false);
+    }
+
+    @Test
+    public void workingWifiTetheringEnrichedApBroadcast() throws Exception {
+        workingWifiTethering(true);
     }
 
     @Test
