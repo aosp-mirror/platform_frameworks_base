@@ -267,7 +267,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
         ExpandableNotificationRow.OnExpandClickListener, InflationCallback,
-        ColorExtractor.OnColorsChangedListener {
+        ColorExtractor.OnColorsChangedListener, ConfigurationListener {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_REMOTE_INPUT =
@@ -431,7 +431,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     Object mQueueLock = new Object();
 
     protected StatusBarIconController mIconController;
-    private IconManager mIconManager;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -732,7 +731,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private LogMaker mStatusBarStateLog;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private NotificationIconAreaController mNotificationIconAreaController;
-    private ConfigurationListener mConfigurationListener;
     private boolean mReinflateNotificationsOnUserSwitched;
     private HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
@@ -971,23 +969,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
-        mConfigurationListener = new ConfigurationListener() {
-            @Override
-            public void onConfigChanged(Configuration newConfig) {
-                StatusBar.this.onConfigurationChanged(newConfig);
-            }
-
-            @Override
-            public void onDensityOrFontScaleChanged() {
-                StatusBar.this.onDensityOrFontScaleChanged();
-            }
-
-            @Override
-            public void onOverlayChanged() {
-                StatusBar.this.onOverlayChanged();
-            }
-        };
-        Dependency.get(ConfigurationController.class).addCallback(mConfigurationListener);
+        Dependency.get(ConfigurationController.class).addCallback(this);
 
         // Make sure that we're using the correct theme
         onOverlayChanged();
@@ -1039,8 +1021,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .replace(R.id.status_bar_container, new CollapsedStatusBarFragment(),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
-        mIconManager = new IconManager(mKeyguardStatusBar.findViewById(R.id.statusIcons));
-        Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         mIconController = Dependency.get(StatusBarIconController.class);
 
         mHeadsUpManager = new HeadsUpManager(context, mStatusBarWindow, mGroupManager);
@@ -1286,7 +1266,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationShelf.setStatusBarState(mState);
     }
 
-    protected void onDensityOrFontScaleChanged() {
+    public void onDensityOrFontScaleChanged() {
         // start old BaseStatusBar.onDensityOrFontScaleChanged().
         if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
             updateNotificationsOnDensityOrFontScaleChanged();
@@ -1313,7 +1293,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         reevaluateStyles();
     }
 
-    protected void onOverlayChanged() {
+    public void onOverlayChanged() {
         final boolean usingDarkTheme = isUsingDarkTheme();
         if (DEBUG) {
             Log.d(TAG, "Updating theme because overlay changed. Is theme dark? " + usingDarkTheme);
@@ -1334,10 +1314,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mKeyguardIndicationController.setVisible(mState == StatusBarState.KEYGUARD);
         mKeyguardIndicationController.setDozing(mDozing);
-
-        // Top status bar with system icons and clock
-        mKeyguardStatusBar.onOverlayChanged();
-        mIconManager.onOverlayChanged();
     }
 
     protected void reevaluateStyles() {
@@ -4054,7 +4030,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(null);
         mDeviceProvisionedController.removeCallback(mUserSetupObserver);
-        Dependency.get(ConfigurationController.class).removeCallback(mConfigurationListener);
+        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     private boolean mDemoModeAllowed;
