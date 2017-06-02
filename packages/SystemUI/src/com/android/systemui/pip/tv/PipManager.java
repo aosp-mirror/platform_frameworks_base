@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
+import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -124,6 +125,7 @@ public class PipManager implements BasePipManager {
     private MediaController mPipMediaController;
     private String[] mLastPackagesResourceGranted;
     private PipNotification mPipNotification;
+    private ParceledListSlice mCustomActions;
 
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
 
@@ -187,7 +189,14 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice actions) {}
+        public void onActionsChanged(ParceledListSlice actions) {
+            mCustomActions = actions;
+            mHandler.post(() -> {
+                for (int i = mListeners.size() - 1; i >= 0; --i) {
+                    mListeners.get(i).onPipMenuActionsChanged(mCustomActions);
+                }
+            });
+        }
     }
 
     private PipManager() { }
@@ -428,6 +437,7 @@ public class PipManager implements BasePipManager {
         }
         Intent intent = new Intent(mContext, PipMenuActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(PipMenuActivity.EXTRA_CUSTOM_ACTIONS, mCustomActions);
         mContext.startActivity(intent);
     }
 
@@ -686,6 +696,8 @@ public class PipManager implements BasePipManager {
         void onPipActivityClosed();
         /** Invoked when the PIP menu gets shown. */
         void onShowPipMenu();
+        /** Invoked when the PIP menu actions change. */
+        void onPipMenuActionsChanged(ParceledListSlice actions);
         /** Invoked when the PIPed activity is about to return back to the fullscreen. */
         void onMoveToFullscreen();
         /** Invoked when we are above to start resizing the Pip. */
