@@ -339,6 +339,12 @@ import java.util.Map;
         (unsigned 64-bit {@linkplain ByteOrder#nativeOrder native-order} integer.)</td>
    </tr>
    <tr>
+    <td>FLAC</td>
+    <td>Metadata blocks</td>
+    <td class=NA>Not Used</td>
+    <td class=NA>Not Used</td>
+   </tr>
+   <tr>
     <td>MPEG-4</td>
     <td>Decoder-specific information from ESDS<sup>*</sup></td>
     <td class=NA>Not Used</td>
