@@ -1204,6 +1204,8 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"탭하여 언어와 레이아웃을 선택하세요."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
+    <skip />
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g>이(가) 다른 앱 위에 표시됨"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>이(가) 다른 앱 위에 표시됨"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
