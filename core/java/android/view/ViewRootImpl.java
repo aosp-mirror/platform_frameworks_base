@@ -73,6 +73,7 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.Surface.OutOfResourcesException;
@@ -361,6 +362,8 @@ public final class ViewRootImpl implements ViewParent,
     InputStage mFirstInputStage;
     InputStage mFirstPostImeInputStage;
     InputStage mSyntheticInputStage;
+
+    private final KeyFallbackManager mKeyFallbackManager = new KeyFallbackManager();
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -4764,6 +4767,13 @@ public final class ViewRootImpl implements ViewParent,
         private int processKeyEvent(QueuedInputEvent q) {
             final KeyEvent event = (KeyEvent)q.mEvent;
 
+            mKeyFallbackManager.mDispatched = false;
+
+            if (mKeyFallbackManager.hasFocus()
+                    && mKeyFallbackManager.dispatchUnique(mView, event)) {
+                return FINISH_HANDLED;
+            }
+
             // Deliver the key to the view hierarchy.
             if (mView.dispatchKeyEvent(event)) {
                 return FINISH_HANDLED;
@@ -4771,6 +4781,10 @@ public final class ViewRootImpl implements ViewParent,
 
             if (shouldDropInputEvent(q)) {
                 return FINISH_NOT_HANDLED;
+            }
+
+            if (mKeyFallbackManager.dispatchUnique(mView, event)) {
+                return FINISH_HANDLED;
             }
 
             int groupNavigationDirection = 0;
@@ -7529,6 +7543,16 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Dispatches a KeyEvent to all registered key fallback handlers.
+     *
+     * @param event
+     * @return {@code true} if the event was handled, {@code false} otherwise.
+     */
+    public boolean dispatchKeyFallbackEvent(KeyEvent event) {
+        return mKeyFallbackManager.dispatch(mView, event);
+    }
+
     class TakenSurfaceHolder extends BaseSurfaceHolder {
         @Override
         public boolean onAllowLockCanvas() {
@@ -8091,6 +8115,94 @@ public final class ViewRootImpl implements ViewParent,
         public void removeCallbacksAndRun() {
             mHandler.removeCallbacks(this);
             run();
+        }
+    }
+
+    private static class KeyFallbackManager {
+
+        // This is used to ensure that key-fallback events are only dispatched once. We attempt
+        // to dispatch more than once in order to achieve a certain order. Specifically, if we
+        // are in an Activity or Dialog (and have a Window.Callback), the keyfallback events should
+        // be dispatched after the view hierarchy, but before the Activity. However, if we aren't
+        // in an activity, we still want key fallbacks to be dispatched.
+        boolean mDispatched = false;
+
+        SparseBooleanArray mCapturedKeys = new SparseBooleanArray();
+        WeakReference<View> mFallbackReceiver = null;
+        int mVisitCount = 0;
+
+        private void updateCaptureState(KeyEvent event) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                mCapturedKeys.append(event.getKeyCode(), true);
+            }
+            if (event.getAction() == KeyEvent.ACTION_UP) {
+                mCapturedKeys.delete(event.getKeyCode());
+            }
+        }
+
+        boolean dispatch(View root, KeyEvent event) {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "KeyFallback dispatch");
+            mDispatched = true;
+
+            updateCaptureState(event);
+
+            if (mFallbackReceiver != null) {
+                View target = mFallbackReceiver.get();
+                if (mCapturedKeys.size() == 0) {
+                    mFallbackReceiver = null;
+                }
+                if (target != null && target.isAttachedToWindow()) {
+                    return target.onKeyFallback(event);
+                }
+                // consume anyways so that we don't feed uncaptured key events to other views
+                return true;
+            }
+
+            boolean result = dispatchInZOrder(root, event);
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            return result;
+        }
+
+        private boolean dispatchInZOrder(View view, KeyEvent evt) {
+            if (view instanceof ViewGroup) {
+                ViewGroup vg = (ViewGroup) view;
+                ArrayList<View> orderedViews = vg.buildOrderedChildList();
+                if (orderedViews != null) {
+                    try {
+                        for (int i = orderedViews.size() - 1; i >= 0; --i) {
+                            View v = orderedViews.get(i);
+                            if (dispatchInZOrder(v, evt)) {
+                                return true;
+                            }
+                        }
+                    } finally {
+                        orderedViews.clear();
+                    }
+                } else {
+                    for (int i = vg.getChildCount() - 1; i >= 0; --i) {
+                        View v = vg.getChildAt(i);
+                        if (dispatchInZOrder(v, evt)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            if (view.onKeyFallback(evt)) {
+                mFallbackReceiver = new WeakReference<>(view);
+                return true;
+            }
+            return false;
+        }
+
+        boolean hasFocus() {
+            return mFallbackReceiver != null;
+        }
+
+        boolean dispatchUnique(View root, KeyEvent event) {
+            if (mDispatched) {
+                return false;
+            }
+            return dispatch(root, event);
         }
     }
 }
