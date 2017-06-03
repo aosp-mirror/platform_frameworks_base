@@ -583,8 +583,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 хвилин"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 хвилин"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 годину"</string>
-    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
-    <skip />
+    <string name="snooze_option_2_hour" msgid="8332218255658969475">"2 години"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ВІДМІНИТИ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Відкладено на <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Використання заряду"</string>
