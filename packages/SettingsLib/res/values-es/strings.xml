@@ -144,7 +144,7 @@
     <string name="choose_profile" msgid="6921016979430278661">"Seleccionar perfil"</string>
     <string name="category_personal" msgid="1299663247844969448">"Personal"</string>
     <string name="category_work" msgid="8699184680584175622">"Trabajo"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Opciones de desarrollo"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opciones para desarrolladores"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Habilitar opciones para desarrolladores"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Establecer opciones de desarrollo de aplicaciones"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Las opciones de desarrollador no están disponibles para este usuario"</string>
