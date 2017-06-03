@@ -190,8 +190,7 @@ class PbSerializerVisitor : public RawValueVisitor {
     }
 
     if (ref.name) {
-      StringPool::Ref symbol_ref =
-          symbol_pool_->MakeRef(ref.name.value().ToString());
+      StringPool::Ref symbol_ref = symbol_pool_->MakeRef(ref.name.value().ToString());
       pb_ref->set_symbol_idx(static_cast<uint32_t>(symbol_ref.index()));
     }
 

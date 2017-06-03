@@ -343,26 +343,19 @@ class PackagePbDeserializer {
     return value;
   }
 
-  bool DeserializeReferenceFromPb(const pb::Reference& pb_ref,
-                                  Reference* out_ref) {
+  bool DeserializeReferenceFromPb(const pb::Reference& pb_ref, Reference* out_ref) {
     out_ref->reference_type = DeserializeReferenceTypeFromPb(pb_ref.type());
     out_ref->private_reference = pb_ref.private_();
-
-    if (!pb_ref.has_id() && !pb_ref.has_symbol_idx()) {
-      return false;
-    }
 
     if (pb_ref.has_id()) {
       out_ref->id = ResourceId(pb_ref.id());
     }
 
     if (pb_ref.has_symbol_idx()) {
-      const std::string str_symbol =
-          util::GetString(*symbol_pool_, pb_ref.symbol_idx());
+      const std::string str_symbol = util::GetString(*symbol_pool_, pb_ref.symbol_idx());
       ResourceNameRef name_ref;
       if (!ResourceUtils::ParseResourceName(str_symbol, &name_ref, nullptr)) {
-        diag_->Error(DiagMessage(source_) << "invalid reference name '"
-                                          << str_symbol << "'");
+        diag_->Error(DiagMessage(source_) << "invalid reference name '" << str_symbol << "'");
         return false;
       }
 
