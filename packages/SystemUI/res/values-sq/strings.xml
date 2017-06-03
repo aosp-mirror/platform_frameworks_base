@@ -573,8 +573,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minuta"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 minuta"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 orë"</string>
-    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
-    <skip />
+    <string name="snooze_option_2_hour" msgid="8332218255658969475">"2 orë"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ZHBËJ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"U shty për <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Përdorimi i baterisë"</string>
