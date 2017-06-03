@@ -552,6 +552,8 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"អ្នក​នឹង​មិន​ទទួល​បានការ​ជូនដំណឹង​ទាំងនេះ​ទៀត​ទេ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"ប្រភេទនៃការជូនដំណឹងចំនួន <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"កម្មវិធីនេះ​មិនមាន​ប្រភេទនៃ​ការជូនដំណឹង​ទេ"</string>
+    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
+    <skip />
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">ប្រភេទនៃការ​ជូនដំណឹង 1 ក្នុង​ចំណោម <xliff:g id="NUMBER_1">%d</xliff:g> ដែលបានពី​កម្មវិធី​នេះ</item>
       <item quantity="one">ប្រភេទនៃការ​ជូនដំណឹង 1 ក្នុង​ចំណោម <xliff:g id="NUMBER_0">%d</xliff:g> ដែលបានពី​កម្មវិធី​នេះ</item>
@@ -571,13 +573,10 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"ការគ្រប់គ្រង​ការជូន​ដំណឹង"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ជម្រើស​ផ្អាកការ​ជូនដំណឹង"</string>
-    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 នាទី"</string>
-    <string name="snooze_option_30_min" msgid="867081342535195788">"30 នាទី"</string>
-    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ម៉ោង"</string>
-    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
-    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"មិន​ធ្វើវិញ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"បាន​ផ្អាក​រយៈពេល <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
+    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
+    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
     <string name="battery_panel_title" msgid="7944156115535366613">"ការប្រើប្រាស់ថ្ម"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"កម្មវិធីសន្សំថ្មមិនអាចប្រើបានអំឡុងពេលសាកថ្មទេ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"កម្មវិធីសន្សំថ្ម"</string>
