@@ -1166,7 +1166,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Selesai"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Kartu SIM ditambahkan"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Mulai ulang perangkat Anda untuk mengakses jaringan selular."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Mulai Ulang"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Nyalakan Ulang"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Agar SIM baru bekerja dengan baik, Anda harus memasang dan membuka aplikasi dari operator."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"DAPATKAN APLIKASI"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"LAIN KALI"</string>
@@ -1204,6 +1204,8 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Ketuk untuk memilih bahasa dan tata letak"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
+    <skip />
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ditampilkan di atas aplikasi lain"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ditampilkan di atas aplikasi lain"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jika Anda tidak ingin <xliff:g id="NAME">%s</xliff:g> menggunakan fitur ini, tap untuk membuka setelan dan menonaktifkannya."</string>
