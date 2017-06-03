@@ -362,6 +362,7 @@ public final class ThreadedRenderer {
 
     private boolean mEnabled;
     private boolean mRequested = true;
+    private boolean mIsOpaque = false;
 
     ThreadedRenderer(Context context, boolean translucent, String name) {
         final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
@@ -376,6 +377,7 @@ public final class ThreadedRenderer {
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
         mRootNode.setClipToBounds(false);
+        mIsOpaque = !translucent;
         mNativeProxy = nCreateProxy(translucent, rootNodePtr);
         nSetName(mNativeProxy, name);
 
@@ -590,7 +592,12 @@ public final class ThreadedRenderer {
      * Change the ThreadedRenderer's opacity
      */
     void setOpaque(boolean opaque) {
-        nSetOpaque(mNativeProxy, opaque && !mHasInsets);
+        mIsOpaque = opaque && !mHasInsets;
+        nSetOpaque(mNativeProxy, mIsOpaque);
+    }
+
+    boolean isOpaque() {
+        return mIsOpaque;
     }
 
     /**
