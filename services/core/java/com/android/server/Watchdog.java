@@ -76,6 +76,7 @@ public class Watchdog extends Thread {
         "/system/bin/sdcard",
         "/system/bin/surfaceflinger",
         "media.extractor", // system/bin/mediaextractor
+        "media.codec", // vendor/bin/hw/android.hardware.media.omx@1.0-service
         "com.android.bluetooth",  // Bluetooth service
     };
 
