@@ -4471,6 +4471,17 @@ public final class Settings {
         public static final Validator BUTTON_BACKLIGHT_TIMEOUT_VALIDATOR = NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
+         * Whether the button backlight is only lit when pressed (and not when screen is touched)
+         * The value is boolean (1 or 0).
+         */
+        public static final String BUTTON_BACKLIGHT_ONLY_WHEN_PRESSED =
+                "button_backlight_only_when_pressed";
+
+        /** @hide */
+        public static final Validator BUTTON_BACKLIGHT_ONLY_WHEN_PRESSED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * The button brightness to be used while the screen is on or after a button press,
          * depending on the value of {@link BUTTON_BACKLIGHT_TIMEOUT}.
          * Valid value range is between 0 and {@link PowerManager#getMaximumButtonBrightness()}
@@ -4683,6 +4694,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
             PRIVATE_SETTINGS.add(BUTTON_BACKLIGHT_TIMEOUT);
+            PRIVATE_SETTINGS.add(BUTTON_BACKLIGHT_ONLY_WHEN_PRESSED);
             PRIVATE_SETTINGS.add(BUTTON_BRIGHTNESS);
             PRIVATE_SETTINGS.add(PROXIMITY_ON_WAKE);
         }
@@ -4781,6 +4793,7 @@ public final class Settings {
             VALIDATORS.put(BUTTON_BACKLIGHT_TIMEOUT, BUTTON_BACKLIGHT_TIMEOUT_VALIDATOR);
             VALIDATORS.put(BUTTON_BRIGHTNESS, BUTTON_BRIGHTNESS_VALIDATOR);
             VALIDATORS.put(PROXIMITY_ON_WAKE, PROXIMITY_ON_WAKE_VALIDATOR);
+            VALIDATORS.put(BUTTON_BACKLIGHT_ONLY_WHEN_PRESSED, BUTTON_BACKLIGHT_ONLY_WHEN_PRESSED_VALIDATOR);
         }
 
         /**
