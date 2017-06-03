@@ -840,6 +840,16 @@
     <!-- Summary for switch preference to denote it is switched off [CHAR LIMIT=50] -->
     <string name="disabled_by_admin">Disabled by admin</string>
 
+    <!-- [CHAR LIMIT=25] Manage applications, text telling using an application is disabled. -->
+    <string name="disabled">Disabled</string>
+    <!-- Summary of app trusted to install apps [CHAR LIMIT=45] -->
+    <string name="external_source_trusted">Allowed</string>
+    <!-- Summary of app not trusted to install apps [CHAR LIMIT=45] -->
+    <string name="external_source_untrusted">Not allowed</string>
+
+    <!-- Title for settings screen for controlling apps that can install other apps on device [CHAR LIMIT=50] -->
+    <string name="install_other_apps">Install unknown apps</string>
+
     <!-- Option in navigation drawer that leads to Settings main screen [CHAR LIMIT=30] -->
     <string name="home">Settings Home</string>
 
