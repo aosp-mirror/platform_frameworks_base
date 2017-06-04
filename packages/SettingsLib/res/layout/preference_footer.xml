@@ -26,14 +26,14 @@
     android:clipToPadding="false">
 
     <LinearLayout
-        android:id="@+id/icon_container"
+        android:id="@+id/icon_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="60dp"
+        android:minWidth="56dp"
         android:gravity="start|top"
         android:orientation="horizontal"
         android:paddingEnd="12dp"
-        android:paddingTop="20dp"
+        android:paddingTop="16dp"
         android:paddingBottom="4dp">
         <ImageView
             android:id="@android:id/icon"
