@@ -63,6 +63,7 @@ public class AccessPointPreference extends Preference {
     private int mWifiBadge = NetworkBadging.BADGING_NONE;
 
     static final int[] WIFI_CONNECTION_STRENGTH = {
+            R.string.accessibility_no_wifi,
             R.string.accessibility_wifi_one_bar,
             R.string.accessibility_wifi_two_bars,
             R.string.accessibility_wifi_three_bars,

@@ -128,6 +128,7 @@ public:
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);
+    void setWideGamut(bool wideGamut);
     bool makeCurrent();
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             int64_t syncQueued, RenderNode* target);
@@ -240,6 +241,7 @@ private:
     nsecs_t mLastDropVsync = 0;
 
     bool mOpaque;
+    bool mWideColorGamut = false;
     BakedOpRenderer::LightInfo mLightInfo;
     FrameBuilder::LightGeometry mLightGeometry = { {0, 0, 0}, 0 };
 

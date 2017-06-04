@@ -44,6 +44,12 @@ enum class MakeCurrentResult {
     Succeeded
 };
 
+enum class ColorMode {
+    Srgb,
+    WideColorGamut,
+    // Hdr
+};
+
 class Frame;
 
 class IRenderPipeline {
@@ -61,7 +67,7 @@ public:
             FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
     virtual bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;
-    virtual bool setSurface(Surface* window, SwapBehavior swapBehavior) = 0;
+    virtual bool setSurface(Surface* window, SwapBehavior swapBehavior, ColorMode colorMode) = 0;
     virtual void onStop() = 0;
     virtual bool isSurfaceReady() = 0;
     virtual bool isContextReady() = 0;

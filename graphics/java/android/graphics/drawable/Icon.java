@@ -44,6 +44,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -493,7 +494,7 @@ public final class Icon implements Parcelable {
             case TYPE_DATA:
                 return getDataLength() == otherIcon.getDataLength()
                         && getDataOffset() == otherIcon.getDataOffset()
-                        && getDataBytes() == otherIcon.getDataBytes();
+                        && Arrays.equals(getDataBytes(), otherIcon.getDataBytes());
             case TYPE_RESOURCE:
                 return getResId() == otherIcon.getResId()
                         && Objects.equals(getResPackage(), otherIcon.getResPackage());

@@ -79,8 +79,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
         state.value = isActivated;
         state.label = state.contentDescription =
                 mContext.getString(R.string.quick_settings_night_display_label);
-        state.icon = ResourceIcon.get(isActivated ? R.drawable.ic_qs_night_display_on
-                : R.drawable.ic_qs_night_display_off);
+        state.icon = ResourceIcon.get(R.drawable.ic_qs_night_display_on);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }

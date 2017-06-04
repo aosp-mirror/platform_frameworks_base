@@ -10026,12 +10026,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // Going from one cluster to another, so save last-focused.
                 // This covers cluster jumps because they are always FOCUS_DOWN
                 oldFocus.setFocusedInCluster(oldCluster);
+                if (!(oldFocus.mParent instanceof ViewGroup)) {
+                    return;
+                }
                 if (direction == FOCUS_FORWARD || direction == FOCUS_BACKWARD) {
                     // This is a result of ordered navigation so consider navigation through
                     // the previous cluster "complete" and clear its last-focused memory.
-                    if (oldFocus.mParent instanceof ViewGroup) {
-                        ((ViewGroup) oldFocus.mParent).clearFocusedInCluster(oldFocus);
-                    }
+                    ((ViewGroup) oldFocus.mParent).clearFocusedInCluster(oldFocus);
+                } else if (oldFocus instanceof ViewGroup
+                        && ((ViewGroup) oldFocus).getDescendantFocusability()
+                                == ViewGroup.FOCUS_AFTER_DESCENDANTS
+                        && ViewRootImpl.isViewDescendantOf(this, oldFocus)) {
+                    // This means oldFocus is not focusable since it obviously has a focusable
+                    // child (this). Don't restore focus to it in the future.
+                    ((ViewGroup) oldFocus.mParent).clearFocusedInCluster(oldFocus);
                 }
             }
         }
@@ -13088,7 +13096,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // about in case nothing has focus.  even if this specific view
                 // isn't focusable, it may contain something that is, so let
                 // the root view try to give this focus if nothing else does.
-                if ((mParent != null) && (mBottom > mTop) && (mRight > mLeft)) {
+                if ((mParent != null)) {
                     mParent.focusableViewAvailable(this);
                 }
             }

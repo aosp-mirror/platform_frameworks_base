@@ -18,10 +18,12 @@
 #include <SkBitmap.h>
 #include <SkColorSpace.h>
 #include <SkColorTable.h>
+#include <SkImage.h>
 #include <SkImageInfo.h>
 #include <SkPixelRef.h>
 #include <cutils/compiler.h>
 #include <ui/GraphicBuffer.h>
+#include <SkImage.h>
 
 namespace android {
 
@@ -57,15 +59,13 @@ public:
 
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
 
-    static sk_sp<Bitmap> allocateHardwareBitmap(uirenderer::renderthread::RenderThread&,
-            SkBitmap& bitmap);
-
     Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
             sk_sp<SkColorTable> ctable);
     Bitmap(void* address, void* context, FreeFunc freeFunc,
             const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
             size_t rowBytes, sk_sp<SkColorTable> ctable);
+    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
 
     int rowBytesAsPixels() const {
         return rowBytes() >> SkColorTypeShiftPerPixel(mInfo.colorType());
@@ -77,10 +77,6 @@ public:
     void setAlphaType(SkAlphaType alphaType);
 
     void getSkBitmap(SkBitmap* outBitmap);
-
-    // Ugly hack: in case of hardware bitmaps, it sets nullptr as pixels pointer
-    // so it would crash if anyone tries to render this bitmap.
-    void getSkBitmapForShaders(SkBitmap* outBitmap);
 
     int getAshmemFd() const;
     size_t getAllocationByteCount() const;
@@ -105,8 +101,11 @@ public:
     }
 
     GraphicBuffer* graphicBuffer();
+
+    // makeImage creates or returns a cached SkImage. Can be invoked from UI or render thread.
+    // Caching is supported only for HW Bitmaps with skia pipeline.
+    sk_sp<SkImage> makeImage();
 private:
-    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
     virtual ~Bitmap();
     void* getStorage() const;
 
@@ -135,6 +134,8 @@ private:
             GraphicBuffer* buffer;
         } hardware;
     } mPixelStorage;
+
+    sk_sp<SkImage> mImage; // Cache is used only for HW Bitmaps with Skia pipeline.
 };
 
 } //namespace android

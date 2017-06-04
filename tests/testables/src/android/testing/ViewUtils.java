@@ -39,8 +39,7 @@ public class ViewUtils {
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 LayoutParams.TYPE_APPLICATION_OVERLAY,
                 0, PixelFormat.TRANSLUCENT);
-        InstrumentationRegistry.getContext()
-                .getSystemService(WindowManager.class).addView(view, lp);
+        view.getContext().getSystemService(WindowManager.class).addView(view, lp);
     }
 
     /**
@@ -49,7 +48,6 @@ public class ViewUtils {
      * This is currently done by removing the view from a window.
      */
     public static void detachView(View view) {
-        InstrumentationRegistry.getContext()
-                .getSystemService(WindowManager.class).removeViewImmediate(view);
+        view.getContext().getSystemService(WindowManager.class).removeViewImmediate(view);
     }
 }

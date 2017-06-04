@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -28,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -311,5 +315,11 @@ public class KeyguardStatusBarView extends RelativeLayout
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    public void onOverlayChanged() {
+        @ColorInt int textColor = Utils.getColorAttr(mContext, R.attr.bgProtectTextColor);
+        mCarrierLabel.setTextColor(textColor);
+        mBatteryView.setFillColor(textColor);
     }
 }

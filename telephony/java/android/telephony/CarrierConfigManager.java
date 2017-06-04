@@ -1220,6 +1220,15 @@ public class CarrierConfigManager {
     public static final String KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO = "video_calls_can_be_hd_audio";
 
     /**
+     * Whether system apps are allowed to use fallback if carrier video call is not available.
+     * Defaults to {@code true}.
+     *
+     * @hide
+     */
+    public static final String KEY_ALLOW_VIDEO_CALLING_FALLBACK_BOOL =
+            "allow_video_calling_fallback_bool";
+
+    /**
      * Defines operator-specific {@link com.android.ims.ImsReasonInfo} mappings.
      *
      * Format: "ORIGINAL_CODE|MESSAGE|NEW_CODE"
@@ -1665,6 +1674,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_WIFI_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
+        sDefaults.putBoolean(KEY_ALLOW_VIDEO_CALLING_FALLBACK_BOOL, true);
 
         sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL, false);

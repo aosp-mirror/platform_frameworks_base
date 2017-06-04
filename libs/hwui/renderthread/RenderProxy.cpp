@@ -227,6 +227,18 @@ void RenderProxy::setOpaque(bool opaque) {
     post(task);
 }
 
+CREATE_BRIDGE2(setWideGamut, CanvasContext* context, bool wideGamut) {
+    args->context->setWideGamut(args->wideGamut);
+    return nullptr;
+}
+
+void RenderProxy::setWideGamut(bool wideGamut) {
+    SETUP_TASK(setWideGamut);
+    args->context = mContext;
+    args->wideGamut = wideGamut;
+    post(task);
+}
+
 int64_t* RenderProxy::frameInfo() {
     return mDrawFrameTask.frameInfo();
 }
@@ -664,7 +676,7 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
 }
 
 CREATE_BRIDGE2(allocateHardwareBitmap, RenderThread* thread, SkBitmap* bitmap) {
-    sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(*args->thread, *args->bitmap);
+    sk_sp<Bitmap> hardwareBitmap = args->thread->allocateHardwareBitmap(*args->bitmap);
     return hardwareBitmap.release();
 }
 

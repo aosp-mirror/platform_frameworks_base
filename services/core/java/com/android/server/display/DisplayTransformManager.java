@@ -21,6 +21,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -48,6 +49,10 @@ public class DisplayTransformManager {
      */
     public static final int LEVEL_COLOR_MATRIX_INVERT_COLOR = 300;
 
+    private static final int SURFACE_FLINGER_TRANSACTION_COLOR_MATRIX = 1015;
+    private static final int SURFACE_FLINGER_TRANSACTION_DALTONIZER = 1014;
+    private static final int SURFACE_FLINGER_TRANSACTION_SATURATION = 1022;
+
     /**
      * Map of level -> color transformation matrix.
      */
@@ -65,6 +70,10 @@ public class DisplayTransformManager {
     private final Object mDaltonizerModeLock = new Object();
     @GuardedBy("mDaltonizerModeLock")
     private int mDaltonizerMode = -1;
+
+    private final Object mSaturationLock = new Object();
+    @GuardedBy("mSaturationLock")
+    private float mSaturation = 1.0f;
 
     /* package */ DisplayTransformManager() {
     }
@@ -156,6 +165,30 @@ public class DisplayTransformManager {
     }
 
     /**
+     * Returns the current saturation.
+     */
+    public float getSaturation() {
+        synchronized (mSaturationLock) {
+            return mSaturation;
+        }
+    }
+
+    /**
+     * Sets the saturation level of the display. The default value is 1.0.
+     *
+     * @param saturation A value between 0 (0% saturation, grayscale) and 2 (100% extra saturation)
+     */
+    public void setSaturation(float saturation) {
+        synchronized (mSaturationLock) {
+            saturation = MathUtils.constrain(saturation, 0.0f, 2.0f);
+            if (mSaturation != saturation) {
+                mSaturation = saturation;
+                applySaturation(saturation);
+            }
+        }
+    }
+
+    /**
      * Propagates the provided color transformation matrix to the SurfaceFlinger.
      */
     private static void applyColorMatrix(float[] m) {
@@ -172,7 +205,7 @@ public class DisplayTransformManager {
                 data.writeInt(0);
             }
             try {
-                flinger.transact(1015, data, null, 0);
+                flinger.transact(SURFACE_FLINGER_TRANSACTION_COLOR_MATRIX, data, null, 0);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to set color transform", ex);
             } finally {
@@ -191,9 +224,28 @@ public class DisplayTransformManager {
             data.writeInterfaceToken("android.ui.ISurfaceComposer");
             data.writeInt(mode);
             try {
-                flinger.transact(1014, data, null, 0);
+                flinger.transact(SURFACE_FLINGER_TRANSACTION_DALTONIZER, data, null, 0);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to set Daltonizer mode", ex);
+            } finally {
+                data.recycle();
+            }
+        }
+    }
+
+    /**
+     * Propagates the provided saturation to the SurfaceFlinger.
+     */
+    private static void applySaturation(float saturation) {
+        final IBinder flinger = ServiceManager.getService("SurfaceFlinger");
+        if (flinger != null) {
+            final Parcel data = Parcel.obtain();
+            data.writeInterfaceToken("android.ui.ISurfaceComposer");
+            data.writeFloat(saturation);
+            try {
+                flinger.transact(SURFACE_FLINGER_TRANSACTION_SATURATION, data, null, 0);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Failed to set saturation", ex);
             } finally {
                 data.recycle();
             }

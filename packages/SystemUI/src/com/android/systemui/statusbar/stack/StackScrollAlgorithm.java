@@ -416,6 +416,7 @@ public class StackScrollAlgorithm {
                 if (i == 0 && row.isAboveShelf()) {
                     // the first hun can't get off screen.
                     clampHunToMaxTranslation(ambientState, row, childState);
+                    childState.hidden = false;
                 }
             }
             if (row.isPinned()) {

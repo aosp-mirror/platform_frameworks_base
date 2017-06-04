@@ -21,7 +21,9 @@ import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.UserHandle;
+import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -37,6 +39,7 @@ import android.widget.TextView;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ChargingView;
+import com.android.systemui.statusbar.policy.DateView;
 
 import java.util.Locale;
 
@@ -48,7 +51,7 @@ public class KeyguardStatusView extends GridLayout {
     private final AlarmManager mAlarmManager;
 
     private TextView mAlarmStatusView;
-    private TextClock mDateView;
+    private DateView mDateView;
     private TextClock mClockView;
     private TextView mOwnerInfo;
     private ViewGroup mClockContainer;
@@ -56,7 +59,8 @@ public class KeyguardStatusView extends GridLayout {
 
     private View[] mVisibleInDoze;
     private boolean mPulsing;
-    private boolean mDark;
+    private float mDarkAmount;
+    private int mTextColor;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -118,12 +122,12 @@ public class KeyguardStatusView extends GridLayout {
         mAlarmStatusView = findViewById(R.id.alarm_status);
         mDateView = findViewById(R.id.date_view);
         mClockView = findViewById(R.id.clock_view);
-        mDateView.setShowCurrentUserTime(true);
         mClockView.setShowCurrentUserTime(true);
         mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         mOwnerInfo = findViewById(R.id.owner_info);
         mBatteryDoze = findViewById(R.id.battery_doze);
         mVisibleInDoze = new View[]{mBatteryDoze, mClockView};
+        mTextColor = mClockView.getCurrentTextColor();
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -154,8 +158,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     public void refreshTime() {
-        mDateView.setFormat24Hour(Patterns.dateView);
-        mDateView.setFormat12Hour(Patterns.dateView);
+        mDateView.setDatePattern(Patterns.dateViewSkel);
 
         mClockView.setFormat12Hour(Patterns.clockView12);
         mClockView.setFormat24Hour(Patterns.clockView24);
@@ -185,6 +188,10 @@ public class KeyguardStatusView extends GridLayout {
     public int getClockBottom() {
         return mClockView.getBottom() +
                 ((MarginLayoutParams) mClockView.getLayoutParams()).bottomMargin;
+    }
+
+    public float getClockTextSize() {
+        return mClockView.getTextSize();
     }
 
     public static String formatNextAlarm(Context context, AlarmManager.AlarmClockInfo info) {
@@ -246,7 +253,7 @@ public class KeyguardStatusView extends GridLayout {
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
     // This is an optimization to ensure we only recompute the patterns when the inputs change.
     private static final class Patterns {
-        static String dateView;
+        static String dateViewSkel;
         static String clockView12;
         static String clockView24;
         static String cacheKey;
@@ -254,15 +261,13 @@ public class KeyguardStatusView extends GridLayout {
         static void update(Context context, boolean hasAlarm) {
             final Locale locale = Locale.getDefault();
             final Resources res = context.getResources();
-            final String dateViewSkel = res.getString(hasAlarm
+            dateViewSkel = res.getString(hasAlarm
                     ? R.string.abbrev_wday_month_day_no_year_alarm
                     : R.string.abbrev_wday_month_day_no_year);
             final String clockView12Skel = res.getString(R.string.clock_12hr_format);
             final String clockView24Skel = res.getString(R.string.clock_24hr_format);
             final String key = locale.toString() + dateViewSkel + clockView12Skel + clockView24Skel;
             if (key.equals(cacheKey)) return;
-
-            dateView = DateFormat.getBestDateTimePattern(locale, dateViewSkel);
 
             clockView12 = DateFormat.getBestDateTimePattern(locale, clockView12Skel);
             // CLDR insists on adding an AM/PM indicator even though it wasn't in the skeleton
@@ -281,12 +286,13 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
-    public void setDark(boolean dark) {
-        if (mDark == dark) {
+    public void setDark(float darkAmount) {
+        if (mDarkAmount == darkAmount) {
             return;
         }
-        mDark = dark;
+        mDarkAmount = darkAmount;
 
+        boolean dark = darkAmount == 1;
         final int N = mClockContainer.getChildCount();
         for (int i = 0; i < N; i++) {
             View child = mClockContainer.getChildAt(i);
@@ -297,6 +303,7 @@ public class KeyguardStatusView extends GridLayout {
         }
         updateDozeVisibleViews();
         mBatteryDoze.setDark(dark);
+        mClockView.setTextColor(ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount));
     }
 
     public void setPulsing(boolean pulsing) {
@@ -306,7 +313,7 @@ public class KeyguardStatusView extends GridLayout {
 
     private void updateDozeVisibleViews() {
         for (View child : mVisibleInDoze) {
-            child.setAlpha(mDark && mPulsing ? 0.8f : 1);
+            child.setAlpha(mDarkAmount == 1 && mPulsing ? 0.8f : 1);
         }
     }
 }

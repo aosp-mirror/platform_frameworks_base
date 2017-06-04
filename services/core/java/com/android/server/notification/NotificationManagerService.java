@@ -1051,7 +1051,8 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void init(Looper looper, IPackageManager packageManager, PackageManager packageManagerClient,
             LightsManager lightsManager, NotificationListeners notificationListeners,
-            ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper) {
+            ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
+            NotificationUsageStats usageStats) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1074,7 +1075,7 @@ public class NotificationManagerService extends SystemService {
         } catch (Resources.NotFoundException e) {
             extractorNames = new String[0];
         }
-        mUsageStats = new NotificationUsageStats(getContext());
+        mUsageStats = usageStats;
         mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
         mRankingHelper = new RankingHelper(getContext(),
                 getContext().getPackageManager(),
@@ -1243,7 +1244,7 @@ public class NotificationManagerService extends SystemService {
 
         init(Looper.myLooper(), AppGlobals.getPackageManager(), getContext().getPackageManager(),
                 getLocalService(LightsManager.class), new NotificationListeners(),
-                null, snoozeHelper);
+                null, snoozeHelper, new NotificationUsageStats(getContext()));
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
@@ -2775,7 +2776,7 @@ public class NotificationManagerService extends SystemService {
         if (n == null) {
             return;
         }
-        n.sbn.setOverrideGroupKey(GroupHelper.AUTOGROUP_KEY);
+        n.setOverrideGroupKey(GroupHelper.AUTOGROUP_KEY);
         EventLogTags.writeNotificationAutogrouped(key);
     }
 
@@ -2784,7 +2785,7 @@ public class NotificationManagerService extends SystemService {
         if (n == null) {
             return;
         }
-        n.sbn.setOverrideGroupKey(null);
+        n.setOverrideGroupKey(null);
         EventLogTags.writeNotificationUnautogrouped(key);
     }
 
@@ -3714,7 +3715,7 @@ public class NotificationManagerService extends SystemService {
                     if (!mInCall && hasValidVibrate && !ringerModeSilent) {
                         mVibrateNotificationKey = key;
 
-                        buzz = playVibration(record, vibration);
+                        buzz = playVibration(record, vibration, hasValidSound);
                     }
                 }
             }
@@ -3788,22 +3789,41 @@ public class NotificationManagerService extends SystemService {
         return false;
     }
 
-    private boolean playVibration(final NotificationRecord record, long[] vibration) {
+    private boolean playVibration(final NotificationRecord record, long[] vibration,
+            boolean delayVibForSound) {
         // Escalate privileges so we can use the vibrator even if the
         // notifying app does not have the VIBRATE permission.
         long identity = Binder.clearCallingIdentity();
         try {
-            final boolean insistent =
-                (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
-            final VibrationEffect effect = VibrationEffect.createWaveform(
-                    vibration, insistent ? 0 : -1 /*repeatIndex*/);
-            mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
-                    effect, record.getAudioAttributes());
+            final VibrationEffect effect;
+            try {
+                final boolean insistent =
+                        (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
+                effect = VibrationEffect.createWaveform(
+                        vibration, insistent ? 0 : -1 /*repeatIndex*/);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Error creating vibration waveform with pattern: " +
+                        Arrays.toString(vibration));
+                return false;
+            }
+            if (delayVibForSound) {
+                new Thread(() -> {
+                    // delay the vibration by the same amount as the notification sound
+                    final int waitMs = mAudioManager.getFocusRampTimeMs(
+                            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+                            record.getAudioAttributes());
+                    if (DBG) Slog.v(TAG, "Delaying vibration by " + waitMs + "ms");
+                    try {
+                        Thread.sleep(waitMs);
+                    } catch (InterruptedException e) { }
+                    mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                            effect, record.getAudioAttributes());
+                }).start();
+            } else {
+                mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                        effect, record.getAudioAttributes());
+            }
             return true;
-        } catch (IllegalArgumentException e) {
-            Slog.e(TAG, "Error creating vibration waveform with pattern: " +
-                    Arrays.toString(vibration));
-            return false;
         } finally{
             Binder.restoreCallingIdentity(identity);
         }

@@ -18,7 +18,9 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
 import static android.app.ActivityManager.StackId;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.isLowRamDeviceStatic;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -761,16 +763,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final WindowState imeWin = mService.mInputMethodWindow;
             // IME is up and obscuring this window. Adjust the window position so it is visible.
             if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this) {
-                    if (windowsAreFloating && mContainingFrame.bottom > contentFrame.bottom) {
-                        // In freeform we want to move the top up directly.
-                        // TODO: Investigate why this is contentFrame not parentFrame.
-                        mContainingFrame.top -= mContainingFrame.bottom - contentFrame.bottom;
-                    } else if (mContainingFrame.bottom > parentFrame.bottom) {
-                        // But in docked we want to behave like fullscreen
-                        // and behave as if the task were given smaller bounds
-                        // for the purposes of layout.
-                        mContainingFrame.bottom = parentFrame.bottom;
-                    }
+                final int stackId = getStackId();
+                if (stackId == FREEFORM_WORKSPACE_STACK_ID
+                        && mContainingFrame.bottom > contentFrame.bottom) {
+                    // In freeform we want to move the top up directly.
+                    // TODO: Investigate why this is contentFrame not parentFrame.
+                    mContainingFrame.top -= mContainingFrame.bottom - contentFrame.bottom;
+                } else if (stackId != PINNED_STACK_ID
+                        && mContainingFrame.bottom > parentFrame.bottom) {
+                    // But in docked we want to behave like fullscreen and behave as if the task
+                    // were given smaller bounds for the purposes of layout. Skip adjustments for
+                    // the pinned stack, they are handled separately in the PinnedStackController.
+                    mContainingFrame.bottom = parentFrame.bottom;
+                }
             }
 
             if (windowsAreFloating) {

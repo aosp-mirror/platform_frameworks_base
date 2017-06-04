@@ -27,7 +27,6 @@
 
     <include
         layout="@layout/keyguard_status_view"
-        android:layout_height="wrap_content"
         android:visibility="gone" />
 
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer

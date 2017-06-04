@@ -453,6 +453,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                 mShowFlags = 0;
                 mHaveAssistData = false;
                 mAssistData.clear();
+                mPendingShowCallbacks.clear();
                 if (mSession != null) {
                     try {
                         mSession.hide();

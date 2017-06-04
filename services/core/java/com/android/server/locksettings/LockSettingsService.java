@@ -139,6 +139,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
+    private static final int SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT = 1;
 
     // Order of holding lock: mSeparateChallengeLock -> mSpManager -> this
     private final Object mSeparateChallengeLock = new Object();
@@ -1977,14 +1978,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         long handle = getSyntheticPasswordHandleLocked(userId);
         // This is a global setting
-        long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM);
+        long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY,
+                SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT, UserHandle.USER_SYSTEM);
       return enabled != 0 && handle != SyntheticPasswordManager.DEFAULT_HANDLE;
     }
 
     private boolean shouldMigrateToSyntheticPasswordLocked(int userId) throws RemoteException {
         long handle = getSyntheticPasswordHandleLocked(userId);
         // This is a global setting
-        long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM);
+        long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY,
+                SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT, UserHandle.USER_SYSTEM);
         return enabled != 0 && handle == SyntheticPasswordManager.DEFAULT_HANDLE;
     }
 

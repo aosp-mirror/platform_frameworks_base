@@ -617,6 +617,11 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowState mCurrentFocus = null;
     WindowState mLastFocus = null;
 
+    /** Windows added since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
+    private final ArrayList<WindowState> mWinAddedSinceNullFocus = new ArrayList<>();
+    /** Windows removed since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
+    private final ArrayList<WindowState> mWinRemovedSinceNullFocus = new ArrayList<>();
+
     /** This just indicates the window the input method is on top of, not
      * necessarily the window its input is going to. */
     WindowState mInputMethodTarget = null;
@@ -1381,6 +1386,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // From now on, no exceptions or errors allowed!
 
             res = WindowManagerGlobal.ADD_OKAY;
+            if (mCurrentFocus == null) {
+                mWinAddedSinceNullFocus.add(win);
+            }
 
             if (excludeWindowTypeFromTapOutTask(type)) {
                 displayContent.mTapExcludedWindows.add(win);
@@ -1667,6 +1675,9 @@ public class WindowManagerService extends IWindowManager.Stub
             mAppOps.finishOp(win.mAppOp, win.getOwningUid(), win.getOwningPackage());
         }
 
+        if (mCurrentFocus == null) {
+            mWinRemovedSinceNullFocus.add(win);
+        }
         mPendingRemove.remove(win);
         mResizingWindows.remove(win);
         mWindowsChanged = true;
@@ -5804,6 +5815,11 @@ public class WindowManagerService extends IWindowManager.Stub
             mCurrentFocus = newFocus;
             mLosingFocus.remove(newFocus);
 
+            if (mCurrentFocus != null) {
+                mWinAddedSinceNullFocus.clear();
+                mWinRemovedSinceNullFocus.clear();
+            }
+
             int focusChanged = mPolicy.focusChangedLw(oldFocus, newFocus);
 
             if (imWindowChanged && oldFocus != mInputMethodWindow) {
@@ -6537,6 +6553,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (reason != null) {
             pw.println("  Reason: " + reason);
+        }
+        if (!mWinAddedSinceNullFocus.isEmpty()) {
+            pw.println("  Windows added since null focus: " + mWinAddedSinceNullFocus);
+        }
+        if (!mWinRemovedSinceNullFocus.isEmpty()) {
+            pw.println("  Windows removed since null focus: " + mWinRemovedSinceNullFocus);
         }
         pw.println();
         dumpWindowsNoHeaderLocked(pw, true, null);

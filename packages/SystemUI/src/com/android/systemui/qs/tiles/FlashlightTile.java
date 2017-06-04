@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 public class FlashlightTile extends QSTileImpl<BooleanState> implements
         FlashlightController.FlashlightListener {
 
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_signal_flashlight_disable);
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_signal_flashlight);
     private final FlashlightController mFlashlightController;
 
     public FlashlightTile(QSHost host) {
@@ -103,9 +103,8 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
         }
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
         if (!mFlashlightController.isAvailable()) {
-            Drawable icon = mHost.getContext().getDrawable(R.drawable.ic_signal_flashlight_enable)
-                    .mutate();
-            state.icon = new DrawableIcon(icon);
+            state.icon = mIcon;
+            state.slash.isSlashed = true;
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_flashlight_unavailable);
             state.state = Tile.STATE_UNAVAILABLE;

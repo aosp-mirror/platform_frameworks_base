@@ -14,7 +14,10 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.ColorInt;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -26,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -56,7 +60,6 @@ public interface StatusBarIconController {
         }
         return ret;
     }
-
 
     /**
      * Version of ViewGroup that observers state from the DarkIconDispatcher.
@@ -162,6 +165,17 @@ public interface StatusBarIconController {
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
                 child.setLayoutParams(lp);
+            }
+        }
+
+        protected void onOverlayChanged() {
+            @ColorInt int iconColor = Utils.getColorAttr(mContext, R.attr.bgProtectTextColor);
+            for (int i = 0; i < mGroup.getChildCount(); i++) {
+                View child = mGroup.getChildAt(i);
+                if (child instanceof StatusBarIconView) {
+                    StatusBarIconView icon = (StatusBarIconView) child;
+                    icon.setStaticDrawableColor(iconColor);
+                }
             }
         }
 

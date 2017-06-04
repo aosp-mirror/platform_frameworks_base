@@ -71,8 +71,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private static final QSTile.Icon TOTAL_SILENCE =
             ResourceIcon.get(R.drawable.ic_qs_dnd_on_total_silence);
 
-    private final Icon mDisable = ResourceIcon.get(R.drawable.ic_qs_dnd_off);
-
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
 
@@ -187,7 +185,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                         R.string.accessibility_quick_settings_dnd_alarms_on);
                 break;
             default:
-                state.icon = mDisable;
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
                 state.label = mContext.getString(R.string.quick_settings_dnd_label);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd);
@@ -317,7 +315,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 mZenPanel.init(mController);
                 mZenPanel.addOnAttachStateChangeListener(this);
                 mZenPanel.setCallback(mZenModePanelCallback);
-                mZenPanel.setEmptyState(R.drawable.ic_qs_dnd_off, R.string.dnd_is_off);
+                mZenPanel.setEmptyState(R.drawable.ic_qs_dnd_detail_empty, R.string.dnd_is_off);
             }
             updatePanel();
             return mZenPanel;

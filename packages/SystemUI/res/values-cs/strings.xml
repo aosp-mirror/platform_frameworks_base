@@ -558,6 +558,8 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Tato oznámení již nebudete dostávat"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Kategorie oznámení: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Tato aplikace nemá kategorie oznámení"</string>
+    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
+    <skip />
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="few">1 ze <xliff:g id="NUMBER_1">%d</xliff:g> kategorií oznámení z této aplikace</item>
       <item quantity="many">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorie oznámení z této aplikace</item>
@@ -581,13 +583,10 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"Nastavení oznámení"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"Možnosti odložení oznámení"</string>
-    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minut"</string>
-    <string name="snooze_option_30_min" msgid="867081342535195788">"30 minut"</string>
-    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 hodina"</string>
-    <!-- no translation found for snooze_option_2_hour (8332218255658969475) -->
-    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"VRÁTIT ZPĚT"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Odloženo o <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
+    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
+    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
     <string name="battery_panel_title" msgid="7944156115535366613">"Využití baterie"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Spořič baterie při nabíjení není k dispozici."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Spořič baterie"</string>

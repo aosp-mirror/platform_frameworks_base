@@ -65,21 +65,22 @@ public class KeyguardIndicationController {
     private static final long TRANSIENT_FP_ERROR_TIMEOUT = 1300;
 
     private final Context mContext;
-    private final ViewGroup mIndicationArea;
-    private final KeyguardIndicationTextView mTextView;
-    private final KeyguardIndicationTextView mDisclosure;
+    private ViewGroup mIndicationArea;
+    private KeyguardIndicationTextView mTextView;
+    private KeyguardIndicationTextView mDisclosure;
     private final UserManager mUserManager;
     private final IBatteryStats mBatteryInfo;
     private final SettableWakeLock mWakeLock;
 
     private final int mSlowThreshold;
     private final int mFastThreshold;
-    private final LockIcon mLockIcon;
+    private LockIcon mLockIcon;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private String mRestingIndication;
     private String mTransientIndication;
     private int mTransientTextColor;
+    private int mInitialTextColor;
     private boolean mVisible;
 
     private boolean mPowerPluggedIn;
@@ -114,6 +115,7 @@ public class KeyguardIndicationController {
         mIndicationArea = indicationArea;
         mTextView = (KeyguardIndicationTextView) indicationArea.findViewById(
                 R.id.keyguard_indication_text);
+        mInitialTextColor = mTextView != null ? mTextView.getCurrentTextColor() : Color.WHITE;
         mDisclosure = (KeyguardIndicationTextView) indicationArea.findViewById(
                 R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
@@ -238,7 +240,7 @@ public class KeyguardIndicationController {
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
     public void showTransientIndication(String transientIndication) {
-        showTransientIndication(transientIndication, Color.WHITE);
+        showTransientIndication(transientIndication, mInitialTextColor);
     }
 
     /**
@@ -273,13 +275,17 @@ public class KeyguardIndicationController {
         }
 
         if (mVisible) {
-            // Walk down a precedence-ordered list of what should indication
+            // Walk down a precedence-ordered list of what indication
             // should be shown based on user or device state
             if (mDozing) {
                 // If we're dozing, never show a persistent indication.
                 if (!TextUtils.isEmpty(mTransientIndication)) {
+                    // When dozing we ignore the initial text color and use white instead.
+                    // We don't wait to draw black text on a black background.
+                    int color = mTransientTextColor == mInitialTextColor ?
+                            Color.WHITE : mTransientTextColor;
                     mTextView.switchIndication(mTransientIndication);
-                    mTextView.setTextColor(mTransientTextColor);
+                    mTextView.setTextColor(color);
 
                 } else {
                     mTextView.switchIndication(null);
@@ -293,29 +299,29 @@ public class KeyguardIndicationController {
             String trustManagedIndication = getTrustManagedIndication();
             if (!mUserManager.isUserUnlocked(userId)) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
-                mTextView.setTextColor(Color.WHITE);
+                mTextView.setTextColor(mInitialTextColor);
             } else if (!TextUtils.isEmpty(mTransientIndication)) {
                 mTextView.switchIndication(mTransientIndication);
                 mTextView.setTextColor(mTransientTextColor);
             } else if (!TextUtils.isEmpty(trustGrantedIndication)
                     && updateMonitor.getUserHasTrust(userId)) {
                 mTextView.switchIndication(trustGrantedIndication);
-                mTextView.setTextColor(Color.WHITE);
+                mTextView.setTextColor(mInitialTextColor);
             } else if (mPowerPluggedIn) {
                 String indication = computePowerIndication();
                 if (DEBUG_CHARGING_SPEED) {
                     indication += ",  " + (mChargingWattage / 1000) + " mW";
                 }
                 mTextView.switchIndication(indication);
-                mTextView.setTextColor(Color.WHITE);
+                mTextView.setTextColor(mInitialTextColor);
             } else if (!TextUtils.isEmpty(trustManagedIndication)
                     && updateMonitor.getUserTrustIsManaged(userId)
                     && !updateMonitor.getUserHasTrust(userId)) {
                 mTextView.switchIndication(trustManagedIndication);
-                mTextView.setTextColor(Color.WHITE);
+                mTextView.setTextColor(mInitialTextColor);
             } else {
                 mTextView.switchIndication(mRestingIndication);
-                mTextView.setTextColor(Color.WHITE);
+                mTextView.setTextColor(mInitialTextColor);
             }
         }
     }

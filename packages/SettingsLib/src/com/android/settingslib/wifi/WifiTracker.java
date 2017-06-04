@@ -95,8 +95,6 @@ public class WifiTracker {
 
     private WifiTrackerNetworkCallback mNetworkCallback;
 
-    private int mNumSavedNetworks;
-
     @GuardedBy("mLock")
     private boolean mRegistered;
 
@@ -399,9 +397,11 @@ public class WifiTracker {
     /**
      * Returns the number of saved networks on the device, regardless of whether the WifiTracker
      * is tracking saved networks.
+     * TODO(b/62292448): remove this function and update callsites to use WifiSavedConfigUtils
+     * directly.
      */
     public int getNumSavedNetworks() {
-        return mNumSavedNetworks;
+        return WifiSavedConfigUtils.getAllConfigs(mContext, mWifiManager).size();
     }
 
     public boolean isConnected() {
@@ -499,12 +499,10 @@ public class WifiTracker {
 
         final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
         if (configs != null) {
-            mNumSavedNetworks = 0;
             for (WifiConfiguration config : configs) {
                 if (config.selfAdded && config.numAssociation == 0) {
                     continue;
                 }
-                mNumSavedNetworks++;
                 AccessPoint accessPoint = getCachedOrCreate(config, cachedAccessPoints);
                 if (mLastInfo != null && mLastNetworkInfo != null) {
                     accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);

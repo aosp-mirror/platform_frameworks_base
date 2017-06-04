@@ -186,7 +186,8 @@ void CanvasContext::setSurface(Surface* surface) {
 
     mNativeSurface = surface;
 
-    bool hasSurface = mRenderPipeline->setSurface(surface, mSwapBehavior);
+    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::Srgb;
+    bool hasSurface = mRenderPipeline->setSurface(surface, mSwapBehavior, colorMode);
 
     mFrameNumber = -1;
 
@@ -239,6 +240,10 @@ void CanvasContext::setLightCenter(const Vector3& lightCenter) {
 
 void CanvasContext::setOpaque(bool opaque) {
     mOpaque = opaque;
+}
+
+void CanvasContext::setWideGamut(bool wideGamut) {
+    mWideColorGamut = wideGamut;
 }
 
 bool CanvasContext::makeCurrent() {
@@ -437,8 +442,8 @@ void CanvasContext::draw() {
         if (mNativeSurface.get()) {
             int durationUs;
             nsecs_t dequeueStart = mNativeSurface->getLastDequeueStartTime();
-            if (dequeueStart < mCurrentFrameInfo->get(FrameInfoIndex::Vsync)) {
-                // Ignoring dequeue duration as it happened prior to vsync
+            if (dequeueStart < mCurrentFrameInfo->get(FrameInfoIndex::SyncStart)) {
+                // Ignoring dequeue duration as it happened prior to frame render start
                 // and thus is not part of the frame.
                 swap.dequeueDuration = 0;
             } else {

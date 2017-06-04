@@ -37,6 +37,18 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Connecté par %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Accessible par %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Connecté, aucun accès à Internet"</string>
+    <!-- no translation found for speed_label_very_slow (1867055264243608530) -->
+    <skip />
+    <!-- no translation found for speed_label_slow (813109590815810235) -->
+    <skip />
+    <!-- no translation found for speed_label_okay (5941436233638654215) -->
+    <skip />
+    <!-- no translation found for speed_label_medium (3175763313268941953) -->
+    <skip />
+    <!-- no translation found for speed_label_fast (7715732164050975057) -->
+    <skip />
+    <!-- no translation found for speed_label_very_fast (2265363430784523409) -->
+    <skip />
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Déconnecté"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Déconnexion…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Connexion en cours…"</string>
@@ -47,17 +59,21 @@
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Connecté (sans accès aux messages)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Connecté (sans audio tel./multimédia)"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Paramètres audio du support"</string>
-    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Paramètres audio du téléphone"</string>
+    <!-- no translation found for bluetooth_profile_headset (7815495680863246034) -->
+    <skip />
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfert de fichier"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accès Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Partage de contact"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Utiliser pour le partage de contacts"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Partage de connexion Internet"</string>
-    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Accès aux messages"</string>
+    <!-- no translation found for bluetooth_profile_map (1019763341565580450) -->
+    <skip />
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Accès à la carte SIM"</string>
-    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Utiliser l\'audio de haute qualité : <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Utiliser l\'audio de haute qualité"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (5444517801472820055) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (8510588052415438887) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Connecté aux paramètres audio du média"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Connecté à l\'audio du téléphone"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Connexion au serveur de transfert de fichiers"</string>

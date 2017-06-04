@@ -37,6 +37,18 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Verbonden via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Beschikbaar via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Verbonden, geen internet"</string>
+    <!-- no translation found for speed_label_very_slow (1867055264243608530) -->
+    <skip />
+    <!-- no translation found for speed_label_slow (813109590815810235) -->
+    <skip />
+    <!-- no translation found for speed_label_okay (5941436233638654215) -->
+    <skip />
+    <!-- no translation found for speed_label_medium (3175763313268941953) -->
+    <skip />
+    <!-- no translation found for speed_label_fast (7715732164050975057) -->
+    <skip />
+    <!-- no translation found for speed_label_very_fast (2265363430784523409) -->
+    <skip />
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Verbinding verbroken"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Verbinding verbreken..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Verbinding maken..."</string>
@@ -47,17 +59,21 @@
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Verbonden (geen toegang tot berichten)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Gekoppeld (geen telefoon of media)"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Media-audio"</string>
-    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Telefoonaudio"</string>
+    <!-- no translation found for bluetooth_profile_headset (7815495680863246034) -->
+    <skip />
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Bestandsoverdracht"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Invoerapparaat"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Internettoegang"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Contacten delen"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Gebruiken voor contacten delen"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Internetverbinding delen"</string>
-    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Toegang tot berichten"</string>
+    <!-- no translation found for bluetooth_profile_map (1019763341565580450) -->
+    <skip />
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Sim-toegang"</string>
-    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"Audio van hoge kwaliteit gebruiken: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"Audio van hoge kwaliteit gebruiken"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (5444517801472820055) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (8510588052415438887) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Verbonden met audio van medium"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Verbonden met audio van telefoon"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Verbonden met server voor bestandsoverdracht"</string>

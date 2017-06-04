@@ -155,16 +155,16 @@
 
     <style name="TextAppearance.StatusBar.Expanded.Clock">
         <item name="android:textSize">@dimen/qs_time_expanded_size</item>
-        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textStyle">normal</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Date">
-        <item name="android:textSize">@dimen/qs_date_collapsed_size</item>
+        <item name="android:textSize">@dimen/qs_time_expanded_size</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.AboveDateTime">
@@ -293,7 +293,18 @@
     <style name="systemui_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="lightIconTheme">@style/DualToneLightTheme</item>
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
+        <item name="bgProtectTextColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="bgProtectSecondaryTextColor">?android:attr/textColorSecondaryInverse</item>
+        <item name="pinDividerColor">@color/pin_divider_color</item>
+        <item name="pinDeleteColor">@color/pin_delete_color</item>
+        <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
     </style>
+
+    <style name="LockPatternStyle">
+        <item name="*android:regularColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="*android:successColor">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
     <style name="qs_theme" parent="systemui_theme">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>

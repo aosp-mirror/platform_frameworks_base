@@ -578,7 +578,8 @@ class GlobalScreenshot {
         if (requiresRotation) {
             // Rotate the screenshot to the current orientation
             Bitmap ss = Bitmap.createBitmap(mDisplayMetrics.widthPixels,
-                    mDisplayMetrics.heightPixels, Bitmap.Config.ARGB_8888);
+                    mDisplayMetrics.heightPixels, Bitmap.Config.ARGB_8888,
+                    mScreenBitmap.hasAlpha(), mScreenBitmap.getColorSpace());
             Canvas c = new Canvas(ss);
             c.translate(ss.getWidth() / 2, ss.getHeight() / 2);
             c.rotate(degrees);

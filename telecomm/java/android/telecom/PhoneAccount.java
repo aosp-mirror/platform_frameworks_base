@@ -92,6 +92,18 @@ public final class PhoneAccount implements Parcelable {
 
     /**
      * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
+     * indicates whether this {@link PhoneAccount} supports using a fallback if video calling is
+     * not available. This extra is for device level support, {@link
+     * android.telephony.CarrierConfigManager#KEY_ALLOW_VIDEO_CALLING_FALLBACK_BOOL} should also
+     * be checked to ensure it is not disabled by individual carrier.
+     *
+     * @hide
+     */
+    public static final String EXTRA_SUPPORTS_VIDEO_CALLING_FALLBACK =
+            "android.telecom.extra.SUPPORTS_VIDEO_CALLING_FALLBACK";
+
+    /**
+     * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
      * indicates whether this {@link PhoneAccount} is capable of supporting a request to handover a
      * connection from this {@link PhoneAccount} to another {@link PhoneAccount}.
      * (see {@link android.telecom.Call#EVENT_REQUEST_HANDOVER}) which specifies
