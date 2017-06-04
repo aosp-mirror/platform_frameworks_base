@@ -1426,7 +1426,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
                             pendingOptions.getOnAnimationStartListener(),
                             scaleUp);
-                    if (intent.getSourceBounds() == null) {
+                    if (intent.getSourceBounds() == null && buffer != null) {
                         intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
                                 pendingOptions.getStartY(),
                                 pendingOptions.getStartX() + buffer.getWidth(),

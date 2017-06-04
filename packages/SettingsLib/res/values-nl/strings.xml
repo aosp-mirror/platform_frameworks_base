@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Achtergrondproceslimiet"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Alle ANR\'s weergeven"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"\'App reageert niet\' weerg. voor apps op achtergr."</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Kanaalwaarschuwingen voor meldingen weergeven"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Geeft een waarschuwing op het scherm weer wanneer een app een melding post zonder geldig kanaal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Toestaan van apps op externe opslag afdwingen"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Hiermee komt elke app in aanmerking voor schrijven naar externe opslag, ongeacht de manifestwaarden"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Formaat activiteiten geforceerd aanpasbaar maken"</string>

@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Հետնաշերտի գործընթացի սահմանաչափ"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Ցույց տալ բոլոր ANR-երը"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Ցուցադրել այն ծրագիրը, որը չի արձագանքում երկխոսությունը հետնաշերտի ծրագրերի համար"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Ցուցադրել ծանուցումների ալիքի զգուշացումները"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Էկրանին ցուցադրվում է զգուշացում, երբ որևէ հավելված փակցնում է ծանուցում առանց վավեր ալիքի"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Միշտ թույլատրել ծրագրեր արտաքին պահեստում"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Թույլ է տալիս ցանկացած հավելված պահել արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Ստիպել, որ ակտիվությունների չափերը լինեն փոփոխելի"</string>

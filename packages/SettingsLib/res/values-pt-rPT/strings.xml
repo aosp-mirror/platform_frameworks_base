@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Limite proc. em 2º plano"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Mostrar todos os ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Mostrar erro \"Aplic. não Resp.\" p/ aplic. 2º plano"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Mostrar avisos do canal de notif."</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Mostra um aviso no ecrã quando uma aplic. publica uma notific. sem um canal válido"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forçar perm. de aplicações no armazenamento ext."</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Torna qualquer aplicação elegível para ser gravada no armazenamento externo, independentemente dos valores do manifesto"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forçar as atividades a serem redimensionáveis"</string>

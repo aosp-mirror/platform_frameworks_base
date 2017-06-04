@@ -30,6 +30,8 @@
         <flag name="weak" value="4" />
     </attr>
 
+    <item name="value_that_allows_any_format" type="integer">-100%p</item>
+
     <!-- Override the Widget styleable declared in StaticLibOne.
          This should merge the two when built in overlay mode. -->
     <declare-styleable name="Widget">

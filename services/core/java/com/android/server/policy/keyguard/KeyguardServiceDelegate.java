@@ -372,6 +372,12 @@ public class KeyguardServiceDelegate {
         mKeyguardState.bootCompleted = true;
     }
 
+    public void onShortPowerPressedGoHome() {
+        if (mKeyguardService != null) {
+            mKeyguardService.onShortPowerPressedGoHome();
+        }
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + TAG);
         prefix += "  ";

@@ -53,10 +53,21 @@ public class KernelUidCpuFreqTimeReader {
 
     private SparseArray<long[]> mLastUidCpuFreqTimeMs = new SparseArray<>();
 
+    // We check the existence of proc file a few times (just in case it is not ready yet when we
+    // start reading) and if it is not available, we simply ignore further read requests.
+    private static final int TOTAL_READ_ERROR_COUNT = 5;
+    private int mReadErrorCounter;
+    private boolean mProcFileAvailable;
+
     public void readDelta(@Nullable Callback callback) {
+        if (!mProcFileAvailable && mReadErrorCounter >= TOTAL_READ_ERROR_COUNT) {
+            return;
+        }
         try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
             readDelta(reader, callback);
+            mProcFileAvailable = true;
         } catch (IOException e) {
+            mReadErrorCounter++;
             Slog.e(TAG, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
         }
     }

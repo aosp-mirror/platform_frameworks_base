@@ -1204,6 +1204,8 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Touchez pour sélectionner la langue et la configuration du clavier"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
+    <skip />
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> affiche du contenu par-dessus d\'autres applications"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> aff. contenu par-dessus applis"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Si vous ne voulez pas que <xliff:g id="NAME">%s</xliff:g> utilise cette fonctionnalités, touchez l\'écran pour ouvrir les paramètres, puis désactivez-la."</string>
@@ -1286,14 +1288,14 @@
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"Écouteur de réalité virtuelle"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Fournisseur de conditions"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Service de classement des notifications"</string>
-    <string name="vpn_title" msgid="19615213552042827">"VPN activé"</string>
-    <string name="vpn_title_long" msgid="6400714798049252294">"VPN activé par <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="vpn_title" msgid="19615213552042827">"RPV activé"</string>
+    <string name="vpn_title_long" msgid="6400714798049252294">"RPV activé par <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="1610714069627824309">"Appuyez ici pour gérer le réseau."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"Connecté à <xliff:g id="SESSION">%s</xliff:g>. Appuyez ici pour gérer le réseau."</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"VPN permanent en cours de connexion…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN permanent connecté"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"RPV permanent en cours de connexion…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"RPV permanent connecté"</string>
     <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"RPV permanent déconnecté"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Erreur du VPN permanent"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Erreur du RPV permanent"</string>
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"Touchez pour configurer"</string>
     <string name="upload_file" msgid="2897957172366730416">"Choisir un fichier"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Aucun fichier sélectionné"</string>

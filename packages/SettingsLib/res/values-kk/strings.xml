@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Фондық үрдіс шектеуі"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Барлық ANR (қолданба жауап бермеді) хабарларын көрсетіңіз"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Фондық қолданбалардың жауап бермегенін көрсету"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Хабарландыру арнасының ескертулерін көрсету"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Қолданба жарамсыз арна арқылы хабарландыру жариялағанда, экрандық ескертуді көрсетеді"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Сыртқыда қолданбаларға мәжбүрлеп рұқсат ету"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Манифест мәндеріне қарамастан кез келген қолданбаны сыртқы жадқа жазуға жарамды етеді"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Әрекеттерді өлшемін өзгертуге болатын етуге мәжбүрлеу"</string>

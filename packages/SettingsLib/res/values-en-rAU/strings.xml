@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Background process limit"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Show all ANRs"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Show App Not Responding dialogue for background apps"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Show notification channel warnings"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Displays on-screen warning when an app posts a notification without a valid channel"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Force allow apps on external"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Makes any app eligible to be written to external storage, regardless of manifest values"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Force activities to be re-sizable"</string>

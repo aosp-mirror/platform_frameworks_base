@@ -410,6 +410,7 @@ public class WifiTrackerTest {
         validConfig.BSSID = BSSID_1;
 
         WifiConfiguration selfAddedNoAssociation = new WifiConfiguration();
+        selfAddedNoAssociation.ephemeral = true;
         selfAddedNoAssociation.selfAdded = true;
         selfAddedNoAssociation.numAssociation = 0;
         selfAddedNoAssociation.SSID = SSID_2;

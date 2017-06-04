@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Далд процессын хязгаар"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Бүх ANRs харуулах"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Далд апп-уудад Апп Хариу Өгөхгүй байна гэснийг харуулах"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Мэдэгдлийн сувгийн анхааруулгыг харуулах"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Апп хүчинтэй суваггүйгээр мэдэгдэл гаргах үед дэлгэцэд сануулга харуулна"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Аппыг гадаад санах ойд хадгалахыг зөвшөөрөх"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Манифест утгыг нь үл хамааран дурын апп-г гадаад санах ойд бичих боломжтой болгодог"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Үйл ажиллагааны хэмжээг өөрчилж болохуйц болгох"</string>

@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Límita processos en segon pla"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Tots els errors sense resposta"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Informa que una aplicació en segon pla no respon"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Avisos del canal de notificacions"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Mostra un avís a la pantalla quan una app publica una notificació sense canal vàlid"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Força permís d\'aplicacions a l\'emmagatzem. extern"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Força l\'ajust de la mida de les activitats"</string>

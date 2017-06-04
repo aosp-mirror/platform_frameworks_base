@@ -75,12 +75,12 @@ import java.util.Map;
  <h4>Compressed Buffers</h4>
  <p>
  Input buffers (for decoders) and output buffers (for encoders) contain compressed data according
- to the {@linkplain MediaFormat#KEY_MIME format's type}. For video types this is a single
+ to the {@linkplain MediaFormat#KEY_MIME format's type}. For video types this is normally a single
  compressed video frame. For audio data this is normally a single access unit (an encoded audio
  segment typically containing a few milliseconds of audio as dictated by the format type), but
  this requirement is slightly relaxed in that a buffer may contain multiple encoded access units
  of audio. In either case, buffers do not start or end on arbitrary byte boundaries, but rather on
- frame/access unit boundaries.
+ frame/access unit boundaries unless they are flagged with {@link #BUFFER_FLAG_PARTIAL_FRAME}.
 
  <h4>Raw Audio Buffers</h4>
  <p>

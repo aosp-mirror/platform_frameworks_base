@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"ដែន​កំណត់​ដំណើរការ​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"បង្ហាញ ANRs ទាំងអស់"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"បង្ហាញ​ប្រអប់​កម្មវិធី​មិន​ឆ្លើយតប​សម្រាប់​កម្មវិធី​ផ្ទៃ​ខាង​ក្រោយ"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"បង្ហាញការព្រមានអំពីបណ្តាញជូនដំណឹង"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"បង្ហាញការព្រមាននៅលើអេក្រង់ នៅពេលកម្មវិធីបង្ហោះការជូនដំណឹងដោយមិនមានបណ្តាញត្រឹមត្រូវ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"បង្ខំឲ្យអនុញ្ញាតកម្មវិធីលើឧបករណ៍ផ្ទុកខាងក្រៅ"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ធ្វើឲ្យកម្មវិធីទាំងឡាយមានសិទ្ធិសរសេរទៅកាន់ឧបករណ៍ផ្ទុកខាងក្រៅ ដោយមិនគិតពីតម្លៃជាក់លាក់"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"បង្ខំឲ្យសកម្មភាពអាចប្តូរទំហំបាន"</string>

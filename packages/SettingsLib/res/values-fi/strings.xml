@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Taustaprosessi"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Näytä kaikki ANR:t"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Näytä Sovellus ei vastaa -ikkuna taustasovell."</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Näytä ilmoituskanavan varoitukset"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Näyttää varoituksen, kun sovellus julkaisee ilmoituksen ilman kelvollista kanavaa."</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Salli aina ulkoinen tallennus"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Mahdollistaa sovelluksen tietojen tallentamisen ulkoiseen tallennustilaan luetteloarvoista riippumatta."</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Pakota kaikki toiminnot hyväksymään koon muutos"</string>

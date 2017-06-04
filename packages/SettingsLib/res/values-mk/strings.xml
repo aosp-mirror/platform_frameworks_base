@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Граница на процес во зад."</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Прикажи ги сите ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Прикажи „Апл. не реагира“ за. апл. во заднина"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Прикажи ги предупредувањата на каналот за известувањe"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Предупредува кога апликација дава известување без важечки канал"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Принуд. дозволете апликации на надворешна меморија"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Прави секоја апликација да биде подобна за запишување на надворешна меморија, независно од вредностите на манифестот"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Принуди ги активностите да ја менуваат големината"</string>

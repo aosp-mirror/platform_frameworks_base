@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"પૃષ્ઠભૂમિ પ્રક્રિયા સીમા"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"બધા ANR બતાવો"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"પૃષ્ઠભૂમિ ઍપ્લિકેશનો માટે ઍપ્લિકેશન પ્રતિસાદ આપતી નથી સંવાદ બતાવો"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"સૂચના ચૅનલની ચેતવણી બતાવો"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ઍપ્લિકેશન માન્ય ચૅનલ વિના સૂચના પોસ્ટ કરે તો સ્ક્રીન પર ચેતવણી દેખાય છે"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"બાહ્ય પર એપ્લિકેશનોને મંજૂરી આપવાની ફરજ પાડો"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"મેનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, કોઈપણ ઍપ્લિકેશનને બાહ્ય સ્ટોરેજ પર લખાવા માટે લાયક બનાવે છે"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"પ્રવૃત્તિઓને ફરીથી કદ યોગ્ય થવા માટે ફરજ પાડો"</string>

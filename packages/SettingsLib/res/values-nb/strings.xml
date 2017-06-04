@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Bakgrunnsprosessgrense"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Vis alle ANR-er"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Vis varselskanaladvarsler"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Viser advarsler på skjermen når apper publiserer varsler uten en gyldig kanal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tving frem tillatelse for ekstern lagring av apper"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Dette gjør at alle apper kan lagres på eksterne lagringsmedier – uavhengig av manifestverdier"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Tving aktiviteter til å kunne endre størrelse"</string>

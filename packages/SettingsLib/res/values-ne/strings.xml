@@ -272,10 +272,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"पृष्ठभूमि प्रक्रिया सीमा"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"सबै ANRs देखाउनुहोस्"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"पृष्ठभूमि अनुप्रयोगका लागि जवाफ नदिइरहेका अनुप्रयोगहरू देखाउनुहोस्"</string>
-    <!-- no translation found for show_notification_channel_warnings (1399948193466922683) -->
-    <skip />
-    <!-- no translation found for show_notification_channel_warnings_summary (5536803251863694895) -->
-    <skip />
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"सूचना च्यानलका चेतावनी देखाउनुहोस्"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"अनुप्रयोगले कुनै मान्य च्यानल बिना सूचना पोस्ट गर्दा स्क्रिनमा चेतावनी देखाउँछ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"बाह्यमा बल प्रयोगको अनुमति प्राप्त अनुप्रयोगहरू"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि अनुप्रयोगलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"गतिविधिहरू रिसाइज गर्नको लागि बाध्य गर्नुहोस्"</string>
