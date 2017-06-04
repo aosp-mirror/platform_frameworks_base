@@ -263,10 +263,12 @@ public abstract class BiometricServiceBase extends SystemService
         @Override
         public int handleFailedAttempt() {
             final int lockoutMode = getLockoutMode();
-            if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
-                mPerformanceStats.permanentLockout++;
-            } else if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
-                mPerformanceStats.lockout++;
+            if (mPerformanceStats != null) {
+                if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
+                    mPerformanceStats.permanentLockout++;
+                } else if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
+                    mPerformanceStats.lockout++;
+                }
             }
 
             // Failing multiple times will continue to push out the lockout time
@@ -697,10 +699,12 @@ public abstract class BiometricServiceBase extends SystemService
         if (client != null && client.onAuthenticated(identifier, authenticated, token)) {
             removeClient(client);
         }
-        if (authenticated) {
-            mPerformanceStats.accept++;
-        } else {
-            mPerformanceStats.reject++;
+        if (mPerformanceStats != null) {
+            if (authenticated) {
+                mPerformanceStats.accept++;
+            } else {
+                mPerformanceStats.reject++;
+            }
         }
     }
 
