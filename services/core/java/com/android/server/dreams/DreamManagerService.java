@@ -86,7 +86,6 @@ public final class DreamManagerService extends SystemService {
     private boolean mCurrentDreamCanDoze;
     private boolean mCurrentDreamIsDozing;
     private boolean mCurrentDreamIsWaking;
-    private Runnable mStopDreamRunnable;
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -350,11 +349,6 @@ public final class DreamManagerService extends SystemService {
 
     private void startDreamLocked(final ComponentName name,
             final boolean isTest, final boolean canDoze, final int userId) {
-        if (mStopDreamRunnable != null) {
-            mHandler.removeCallbacks(mStopDreamRunnable);
-            mStopDreamRunnable = null;
-        }
-
         if (Objects.equal(mCurrentDreamName, name)
                 && mCurrentDreamIsTest == isTest
                 && mCurrentDreamCanDoze == canDoze
@@ -392,15 +386,13 @@ public final class DreamManagerService extends SystemService {
                 mCurrentDreamIsWaking = true;
             }
 
-            mStopDreamRunnable = new Runnable() {
+            mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     Slog.i(TAG, "Performing gentle wake from dream.");
                     mController.stopDream(immediate);
-                    mStopDreamRunnable = null;
                 }
-            };
-            mHandler.post(mStopDreamRunnable);
+            });
         }
     }
 
