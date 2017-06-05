@@ -46,27 +46,7 @@
 namespace aapt {
 namespace test {
 
-struct DummyDiagnosticsImpl : public IDiagnostics {
-  void Log(Level level, DiagMessageActual& actual_msg) override {
-    switch (level) {
-      case Level::Note:
-        return;
-
-      case Level::Warn:
-        std::cerr << actual_msg.source << ": warn: " << actual_msg.message << "." << std::endl;
-        break;
-
-      case Level::Error:
-        std::cerr << actual_msg.source << ": error: " << actual_msg.message << "." << std::endl;
-        break;
-    }
-  }
-};
-
-inline IDiagnostics* GetDiagnostics() {
-  static DummyDiagnosticsImpl diag;
-  return &diag;
-}
+IDiagnostics* GetDiagnostics();
 
 inline ResourceName ParseNameOrDie(const android::StringPiece& str) {
   ResourceNameRef ref;
@@ -80,7 +60,7 @@ inline ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
   return config;
 }
 
-template <typename T>
+template <typename T = Value>
 T* GetValueForConfigAndProduct(ResourceTable* table, const android::StringPiece& res_name,
                                const ConfigDescription& config,
                                const android::StringPiece& product) {
@@ -94,13 +74,19 @@ T* GetValueForConfigAndProduct(ResourceTable* table, const android::StringPiece&
   return nullptr;
 }
 
-template <typename T>
+template <>
+Value* GetValueForConfigAndProduct<Value>(ResourceTable* table,
+                                          const android::StringPiece& res_name,
+                                          const ConfigDescription& config,
+                                          const android::StringPiece& product);
+
+template <typename T = Value>
 T* GetValueForConfig(ResourceTable* table, const android::StringPiece& res_name,
                      const ConfigDescription& config) {
   return GetValueForConfigAndProduct<T>(table, res_name, config, {});
 }
 
-template <typename T>
+template <typename T = Value>
 T* GetValue(ResourceTable* table, const android::StringPiece& res_name) {
   return GetValueForConfig<T>(table, res_name, {});
 }
