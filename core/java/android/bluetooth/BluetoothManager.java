@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
@@ -48,6 +49,7 @@ import java.util.List;
  * @see Context#getSystemService
  * @see BluetoothAdapter#getDefaultAdapter()
  */
+@SystemService(Context.BLUETOOTH_SERVICE)
 public final class BluetoothManager {
     private static final String TAG = "BluetoothManager";
     private static final boolean DBG = true;

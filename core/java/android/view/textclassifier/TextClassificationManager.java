@@ -18,6 +18,7 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -33,10 +34,8 @@ import java.util.Locale;
 
 /**
  * Interface to the text classification service.
- *
- * <p>You do not instantiate this class directly; instead, retrieve it through
- * {@link android.content.Context#getSystemService}.
  */
+@SystemService(Context.TEXT_CLASSIFICATION_SERVICE)
 public final class TextClassificationManager {
 
     private static final String LOG_TAG = "TextClassificationManager";

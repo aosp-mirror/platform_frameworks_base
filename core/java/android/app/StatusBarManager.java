@@ -18,6 +18,7 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -36,6 +37,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemService(Context.STATUS_BAR_SERVICE)
 public class StatusBarManager {
 
     public static final int DISABLE_EXPAND = View.STATUS_BAR_DISABLE_EXPAND;

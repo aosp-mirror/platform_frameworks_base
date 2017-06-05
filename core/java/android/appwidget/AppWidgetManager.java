@@ -20,6 +20,7 @@ import android.annotation.BroadcastBehavior;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -51,6 +52,7 @@ import java.util.List;
  * <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a> developer guide.</p>
  * </div>
  */
+@SystemService(Context.APPWIDGET_SERVICE)
 public class AppWidgetManager {
 
     /**

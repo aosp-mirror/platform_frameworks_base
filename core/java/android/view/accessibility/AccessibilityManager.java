@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -59,15 +60,6 @@ import java.util.List;
  * {@link android.view.View} changes etc. Parties interested in handling accessibility
  * events implement and register an accessibility service which extends
  * {@link android.accessibilityservice.AccessibilityService}.
- * <p>
- * To obtain a handle to the accessibility manager do the following:
- * </p>
- * <p>
- * <code>
- * <pre>AccessibilityManager accessibilityManager =
- *        (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);</pre>
- * </code>
- * </p>
  *
  * @see AccessibilityEvent
  * @see AccessibilityNodeInfo
@@ -75,6 +67,7 @@ import java.util.List;
  * @see Context#getSystemService
  * @see Context#ACCESSIBILITY_SERVICE
  */
+@SystemService(Context.ACCESSIBILITY_SERVICE)
 public final class AccessibilityManager {
     private static final boolean DEBUG = false;
 

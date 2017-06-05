@@ -19,6 +19,7 @@ package android.net;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 import static android.net.NetworkPolicy.CYCLE_NONE;
 
+import android.annotation.SystemService;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +41,7 @@ import java.util.TimeZone;
  *
  * {@hide}
  */
+@SystemService(Context.NETWORK_POLICY_SERVICE)
 public class NetworkPolicyManager {
 
     /* POLICY_* are masks and can be ORed, although currently they are not.*/
