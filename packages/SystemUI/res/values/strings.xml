@@ -838,7 +838,10 @@
     <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
 
     <!-- Zen mode: Priority only introduction message on first use -->
-    <string name="zen_priority_introduction">You won’t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify.</string>
+    <string name="zen_priority_introduction">You won’t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify. You'll still hear anything you choose to play including music, videos, and games.</string>
+
+    <!-- Zen mode: Alarms only introduction message on first use -->
+    <string name="zen_alarms_introduction">You won’t be disturbed by sounds and vibrations, except from alarms. You'll still hear anything you choose to play including music, videos, and games.</string>
 
     <!-- Zen mode: Priority only customization button label -->
     <string name="zen_priority_customize_button">Customize</string>
@@ -1217,7 +1220,7 @@
     <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
 
     <!-- Button label for ending zen mode in the volume dialog -->
-    <string name="volume_zen_end_now">End now</string>
+    <string name="volume_zen_end_now">Turn off now</string>
 
     <!-- Content description for accessibility (not shown on the screen): volume dialog expand button. [CHAR LIMIT=NONE] -->
     <string name="accessibility_volume_expand">Expand</string>
