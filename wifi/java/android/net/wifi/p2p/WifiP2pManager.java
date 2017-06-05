@@ -17,6 +17,7 @@
 package android.net.wifi.p2p;
 
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.net.wifi.WpsInfo;
@@ -119,9 +120,6 @@ import java.util.Map;
  * {@link android.Manifest.permission#CHANGE_WIFI_STATE} to perform any further peer-to-peer
  * operations.
  *
- * Get an instance of this class by calling {@link android.content.Context#getSystemService(String)
- * Context.getSystemService(Context.WIFI_P2P_SERVICE)}.
- *
  * {@see WifiP2pConfig}
  * {@see WifiP2pInfo}
  * {@see WifiP2pGroup}
@@ -129,6 +127,7 @@ import java.util.Map;
  * {@see WifiP2pDeviceList}
  * {@see android.net.wifi.WpsInfo}
  */
+@SystemService(Context.WIFI_P2P_SERVICE)
 public class WifiP2pManager {
     private static final String TAG = "WifiP2pManager";
     /**

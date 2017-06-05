@@ -19,6 +19,7 @@ package android.app.usage;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.app.usage.NetworkStats.Bucket;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -82,6 +83,7 @@ import android.util.Log;
  * the above permission, even to access an app's own data usage, and carrier-privileged apps were
  * not included.
  */
+@SystemService(Context.NETWORK_STATS_SERVICE)
 public class NetworkStatsManager {
     private static final String TAG = "NetworkStatsManager";
     private static final boolean DBG = false;

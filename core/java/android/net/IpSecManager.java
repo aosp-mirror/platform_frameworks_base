@@ -18,6 +18,8 @@ package android.net;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
+import android.annotation.SystemService;
+import android.content.Context;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -34,12 +36,9 @@ import java.net.Socket;
  * This class contains methods for managing IPsec sessions, which will perform kernel-space
  * encryption and decryption of socket or Network traffic.
  *
- * <p>An IpSecManager may be obtained by calling {@link
- * android.content.Context#getSystemService(String) Context#getSystemService(String)} with {@link
- * android.content.Context#IPSEC_SERVICE Context#IPSEC_SERVICE}
- *
  * @hide
  */
+@SystemService(Context.IPSEC_SERVICE)
 public final class IpSecManager {
     private static final String TAG = "IpSecManager";
 

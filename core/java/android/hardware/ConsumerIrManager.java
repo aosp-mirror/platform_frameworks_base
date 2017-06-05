@@ -16,6 +16,7 @@
 
 package android.hardware;
 
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -24,14 +25,8 @@ import android.util.Log;
 
 /**
  * Class that operates consumer infrared on the device.
- *
- * <p>
- * To obtain an instance of the system infrared transmitter, call
- * {@link android.content.Context#getSystemService(java.lang.String)
- * Context.getSystemService()} with
- * {@link android.content.Context#CONSUMER_IR_SERVICE} as the argument.
- * </p>
  */
+@SystemService(Context.CONSUMER_IR_SERVICE)
 public final class ConsumerIrManager {
     private static final String TAG = "ConsumerIr";
 

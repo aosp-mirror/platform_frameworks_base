@@ -17,8 +17,10 @@
 package android.os;
 
 import android.annotation.IntDef;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.util.Log;
 import java.lang.annotation.Retention;
@@ -31,9 +33,6 @@ import java.lang.annotation.RetentionPolicy;
  * <b>Device battery life will be significantly affected by the use of this API.</b>
  * Do not acquire {@link WakeLock}s unless you really need them, use the minimum levels
  * possible, and be sure to release them as soon as possible.
- * </p><p>
- * You can obtain an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String) Context.getSystemService()}.
  * </p><p>
  * The primary API you'll use is {@link #newWakeLock(int, String) newWakeLock()}.
  * This will create a {@link PowerManager.WakeLock} object.  You can then use methods
@@ -102,6 +101,7 @@ import java.lang.annotation.RetentionPolicy;
  * permission in an {@code <uses-permission>} element of the application's manifest.
  * </p>
  */
+@SystemService(Context.POWER_SERVICE)
 public final class PowerManager {
     private static final String TAG = "PowerManager";
 
@@ -689,6 +689,10 @@ public final class PowerManager {
      * @hide Requires signature or system permission.
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.DEVICE_POWER,
+            android.Manifest.permission.USER_ACTIVITY
+    })
     public void userActivity(long when, int event, int flags) {
         try {
             mService.userActivity(when, event, flags);

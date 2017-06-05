@@ -17,9 +17,12 @@
 package android.net.wifi;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
@@ -56,27 +59,30 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * This class provides the primary API for managing all aspects of Wi-Fi
- * connectivity. Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(String) Context.getSystemService(Context.WIFI_SERVICE)}.
- * On releases before NYC, it should only be obtained from an application context, and not from
- * any other derived context to avoid memory leaks within the calling process.
-
+ * connectivity.
+ * <p>
+ * On releases before {@link android.os.Build.VERSION_CODES#N}, this object
+ * should only be obtained from an {@linkplain Context#getApplicationContext()
+ * application context}, and not from any other derived context to avoid memory
+ * leaks within the calling process.
+ * <p>
  * It deals with several categories of items:
  * <ul>
- * <li>The list of configured networks. The list can be viewed and updated,
- * and attributes of individual entries can be modified.</li>
+ * <li>The list of configured networks. The list can be viewed and updated, and
+ * attributes of individual entries can be modified.</li>
  * <li>The currently active Wi-Fi network, if any. Connectivity can be
- * established or torn down, and dynamic information about the state of
- * the network can be queried.</li>
- * <li>Results of access point scans, containing enough information to
- * make decisions about what access point to connect to.</li>
- * <li>It defines the names of various Intent actions that are broadcast
- * upon any sort of change in Wi-Fi state.
+ * established or torn down, and dynamic information about the state of the
+ * network can be queried.</li>
+ * <li>Results of access point scans, containing enough information to make
+ * decisions about what access point to connect to.</li>
+ * <li>It defines the names of various Intent actions that are broadcast upon
+ * any sort of change in Wi-Fi state.
  * </ul>
- * This is the API to use when performing Wi-Fi specific operations. To
- * perform operations that pertain to network connectivity at an abstract
- * level, use {@link android.net.ConnectivityManager}.
+ * This is the API to use when performing Wi-Fi specific operations. To perform
+ * operations that pertain to network connectivity at an abstract level, use
+ * {@link android.net.ConnectivityManager}.
  */
+@SystemService(Context.WIFI_SERVICE)
 public class WifiManager {
 
     private static final String TAG = "WifiManager";
@@ -966,6 +972,7 @@ public class WifiManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_WIFI_CREDENTIAL)
     public List<WifiConfiguration> getPrivilegedConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
@@ -981,6 +988,7 @@ public class WifiManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_WIFI_CREDENTIAL)
     public WifiConnectionStatistics getConnectionStatistics() {
         try {
             return mService.getConnectionStatistics();
@@ -1522,6 +1530,7 @@ public class WifiManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public boolean startScan(WorkSource workSource) {
         try {
             String packageName = mContext.getOpPackageName();
@@ -1542,6 +1551,7 @@ public class WifiManager {
      */
     @Deprecated
     @SystemApi
+    @SuppressLint("Doclava125")
     public boolean startLocationRestrictedScan(WorkSource workSource) {
         return false;
     }
@@ -1556,6 +1566,7 @@ public class WifiManager {
      */
     @Deprecated
     @SystemApi
+    @SuppressLint("Doclava125")
     public boolean isBatchedScanSupported() {
         return false;
     }
@@ -1569,6 +1580,7 @@ public class WifiManager {
      */
     @Deprecated
     @SystemApi
+    @SuppressLint("Doclava125")
     public List<BatchedScanResult> getBatchedScanResults() {
         return null;
     }
@@ -1808,6 +1820,7 @@ public class WifiManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
         String packageName = mContext.getOpPackageName();
 

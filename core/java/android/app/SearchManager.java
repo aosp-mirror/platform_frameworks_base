@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.SystemService;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -46,10 +47,6 @@ import java.util.List;
  * services are provided through methods in {@link android.app.Activity Activity}
  * and the {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH}
  * {@link android.content.Intent Intent}.
- * If you do require direct access to the SearchManager, do not instantiate
- * this class directly. Instead, retrieve it through
- * {@link android.content.Context#getSystemService
- * context.getSystemService(Context.SEARCH_SERVICE)}.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
@@ -58,9 +55,9 @@ import java.util.List;
  * <a href="{@docRoot}guide/topics/search/index.html">Search</a> developer guide.</p>
  * </div>
  */
+@SystemService(Context.SEARCH_SERVICE)
 public class SearchManager
-        implements DialogInterface.OnDismissListener, DialogInterface.OnCancelListener
-{
+        implements DialogInterface.OnDismissListener, DialogInterface.OnCancelListener {
 
     private static final boolean DBG = false;
     private static final String TAG = "SearchManager";

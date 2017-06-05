@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemService;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -61,6 +62,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <p>The media router API is not thread-safe; all interactions with it must be
  * done from the main thread of the process.</p>
  */
+@SystemService(Context.MEDIA_ROUTER_SERVICE)
 public class MediaRouter {
     private static final String TAG = "MediaRouter";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);

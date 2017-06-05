@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
@@ -57,9 +59,7 @@ import java.util.Map;
 
 /**
  * Central system API to the overall TV input framework (TIF) architecture, which arbitrates
- * interaction between applications and the selected TV inputs. You can retrieve an instance of
- * this interface with {@link android.content.Context#getSystemService
- * Context.getSystemService(Context.TV_INPUT_SERVICE)}.
+ * interaction between applications and the selected TV inputs.
  *
  * <p>There are three primary parties involved in the TV input framework (TIF) architecture:
  *
@@ -78,6 +78,7 @@ import java.util.Map;
  * programs.
  * </ul>
  */
+@SystemService(Context.TV_INPUT_SERVICE)
 public final class TvInputManager {
     private static final String TAG = "TvInputManager";
 
@@ -1516,6 +1517,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT)
     public List<TvStreamConfig> getAvailableTvStreamConfigList(String inputId) {
         try {
             return mService.getAvailableTvStreamConfigList(inputId, mUserId);
@@ -1534,6 +1536,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT)
     public boolean captureFrame(String inputId, Surface surface, TvStreamConfig config) {
         try {
             return mService.captureFrame(inputId, surface, config, mUserId);

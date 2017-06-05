@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.DownloadManager;
 import android.app.backup.BackupManager;
@@ -243,6 +244,7 @@ public class TrafficStats {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public static void setThreadStatsUid(int uid) {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
     }
@@ -255,6 +257,7 @@ public class TrafficStats {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public static void clearThreadStatsUid() {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
     }

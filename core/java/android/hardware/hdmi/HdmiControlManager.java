@@ -19,7 +19,9 @@ package android.hardware.hdmi;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.Context;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -37,6 +39,7 @@ import android.util.Log;
  * @hide
  */
 @SystemApi
+@SystemService(Context.HDMI_CONTROL_SERVICE)
 public final class HdmiControlManager {
     private static final String TAG = "HdmiControlManager";
 

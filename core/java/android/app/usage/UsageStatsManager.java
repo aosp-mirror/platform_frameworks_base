@@ -16,7 +16,9 @@
 
 package android.app.usage;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
@@ -51,6 +53,7 @@ import java.util.Map;
  * the permission implies intention to use the API and the user of the device can grant permission
  * through the Settings application.
  */
+@SystemService(Context.USAGE_STATS_SERVICE)
 public final class UsageStatsManager {
 
     /**
@@ -252,7 +255,6 @@ public final class UsageStatsManager {
      * Temporarily whitelist the specified app for a short duration. This is to allow an app
      * receiving a high priority message to be able to access the network and acquire wakelocks
      * even if the device is in power-save mode or the app is currently considered inactive.
-     * The caller must hold the CHANGE_DEVICE_IDLE_TEMP_WHITELIST permission.
      * @param packageName The package name of the app to whitelist.
      * @param duration Duration to whitelist the app for, in milliseconds. It is recommended that
      * this be limited to 10s of seconds. Requested duration will be clamped to a few minutes.
@@ -261,6 +263,7 @@ public final class UsageStatsManager {
      * @see #isAppInactive(String)
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public void whitelistAppTemporarily(String packageName, long duration, UserHandle user) {
         try {
             mService.whitelistAppTemporarily(packageName, duration, user.getIdentifier());

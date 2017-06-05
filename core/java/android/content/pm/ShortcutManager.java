@@ -17,6 +17,7 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -569,6 +570,7 @@ import java.util.List;
  * All shortcut information is stored in credential encrypted storage, so no shortcuts can be
  * accessed when the user is locked.
  */
+@SystemService(Context.SHORTCUT_SERVICE)
 public class ShortcutManager {
     private static final String TAG = "ShortcutManager";
 

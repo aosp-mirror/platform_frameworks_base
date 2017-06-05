@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.Size;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.BroadcastBehavior;
 import android.app.Activity;
@@ -161,6 +162,7 @@ import java.util.concurrent.TimeoutException;
  * the application's main event thread.  These operations throw
  * {@link IllegalStateException} if they are used on the main thread.
  */
+@SystemService(Context.ACCOUNT_SERVICE)
 public class AccountManager {
 
     private static final String TAG = "AccountManager";
@@ -3237,6 +3239,7 @@ public class AccountManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public AccountManagerFuture<Bundle> finishSessionAsUser(
             final Bundle sessionBundle,
             final Activity activity,

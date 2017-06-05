@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -324,6 +325,7 @@ public class BackupManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public RestoreSession beginRestoreSession() {
         RestoreSession session = null;
         checkServiceBinder();
@@ -348,11 +350,10 @@ public class BackupManager {
      * mechanism was disabled will still be backed up properly if it is enabled
      * at some point in the future.
      *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public void setBackupEnabled(boolean isEnabled) {
         checkServiceBinder();
         if (sService != null) {
@@ -367,11 +368,10 @@ public class BackupManager {
     /**
      * Report whether the backup mechanism is currently enabled.
      *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public boolean isBackupEnabled() {
         checkServiceBinder();
         if (sService != null) {
@@ -390,11 +390,10 @@ public class BackupManager {
      * the archival restore dataset (if any).  When disabled, no such attempt will
      * be made.
      *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public void setAutoRestore(boolean isEnabled) {
         checkServiceBinder();
         if (sService != null) {
@@ -407,14 +406,14 @@ public class BackupManager {
     }
 
     /**
-     * Identify the currently selected transport.  Callers must hold the
-     * android.permission.BACKUP permission to use this method.
+     * Identify the currently selected transport.
      * @return The name of the currently active backup transport.  In case of
      *   failure or if no transport is currently active, this method returns {@code null}.
      *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public String getCurrentTransport() {
         checkServiceBinder();
         if (sService != null) {
@@ -428,12 +427,12 @@ public class BackupManager {
     }
 
     /**
-     * Request a list of all available backup transports' names.  Callers must
-     * hold the android.permission.BACKUP permission to use this method.
+     * Request a list of all available backup transports' names.
      *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public String[] listAllTransports() {
         checkServiceBinder();
         if (sService != null) {
@@ -449,8 +448,6 @@ public class BackupManager {
     /**
      * Specify the current backup transport.
      *
-     * <p> Callers must hold the android.permission.BACKUP permission to use this method.
-     *
      * @param transport The name of the transport to select.  This should be one
      *   of the names returned by {@link #listAllTransports()}. This is the String returned by
      *   {@link BackupTransport#name()} for the particular transport.
@@ -462,6 +459,7 @@ public class BackupManager {
      */
     @Deprecated
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public String selectBackupTransport(String transport) {
         checkServiceBinder();
         if (sService != null) {
@@ -479,8 +477,6 @@ public class BackupManager {
      * This method is async because BackupManager might need to bind to the specified transport
      * which is in a separate process.
      *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     *
      * @param transport ComponentName of the service hosting the transport. This is different from
      *                  the transport's name that is returned by {@link BackupTransport#name()}.
      * @param listener A listener object to get a callback on the transport being selected.
@@ -488,6 +484,7 @@ public class BackupManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public void selectBackupTransport(ComponentName transport,
             SelectBackupTransportCallback listener) {
         checkServiceBinder();
@@ -510,11 +507,10 @@ public class BackupManager {
      * transport will still be asked to confirm via the usual requestBackupTime()
      * method.
      *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public void backupNow() {
         checkServiceBinder();
         if (sService != null) {
@@ -530,8 +526,6 @@ public class BackupManager {
      * Ask the framework which dataset, if any, the given package's data would be
      * restored from if we were to install it right now.
      *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     *
      * @param packageName The name of the package whose most-suitable dataset we
      *     wish to look up
      * @return The dataset token from which a restore should be attempted, or zero if
@@ -540,6 +534,7 @@ public class BackupManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public long getAvailableRestoreToken(String packageName) {
         checkServiceBinder();
         if (sService != null) {
@@ -555,14 +550,13 @@ public class BackupManager {
     /**
      * Ask the framework whether this app is eligible for backup.
      *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     *
      * @param packageName The name of the package.
      * @return Whether this app is eligible for backup.
      *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public boolean isAppEligibleForBackup(String packageName) {
         checkServiceBinder();
         if (sService != null) {
@@ -592,6 +586,7 @@ public class BackupManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public int requestBackup(String[] packages, BackupObserver observer) {
         return requestBackup(packages, observer, null, 0);
     }
@@ -615,6 +610,7 @@ public class BackupManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public int requestBackup(String[] packages, BackupObserver observer,
             BackupManagerMonitor monitor, int flags) {
         checkServiceBinder();
@@ -638,11 +634,10 @@ public class BackupManager {
      * Cancel all running backups. After this call returns, no currently running backups will
      * interact with the selected transport.
      *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
     public void cancelBackups() {
         checkServiceBinder();
         if (sService != null) {

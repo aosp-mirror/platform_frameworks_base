@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -72,12 +73,8 @@ import java.lang.annotation.RetentionPolicy;
  * {@link #setExact(int, long, PendingIntent)}.  Applications whose {@code targetSdkVersion}
  * is earlier than API 19 will continue to see the previous behavior in which all
  * alarms are delivered exactly when requested.
- *
- * <p>You do not
- * instantiate this class directly; instead, retrieve it through
- * {@link android.content.Context#getSystemService
- * Context.getSystemService(Context.ALARM_SERVICE)}.
  */
+@SystemService(Context.ALARM_SERVICE)
 public class AlarmManager {
     private static final String TAG = "AlarmManager";
 

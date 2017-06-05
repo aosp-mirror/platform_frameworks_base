@@ -20,7 +20,9 @@ import com.android.internal.location.ProviderProperties;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -47,11 +49,6 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  * {@link Intent} when the device enters the proximity of a given
  * geographical location.
  *
- * <p>You do not
- * instantiate this class directly; instead, retrieve it through
- * {@link android.content.Context#getSystemService
- * Context.getSystemService(Context.LOCATION_SERVICE)}.
- *
  * <p class="note">Unless noted, all Location API methods require
  * the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} or
  * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permissions.
@@ -60,8 +57,8 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  * return location results, but the update rate will be throttled and the exact
  * location will be obfuscated to a coarse level of accuracy.
  */
-public class LocationManager
-{
+@SystemService(Context.LOCATION_SERVICE)
+public class LocationManager {
     private static final String TAG = "LocationManager";
 
     private final Context mContext;
@@ -1820,6 +1817,7 @@ public class LocationManager
      */
     @Deprecated
     @SystemApi
+    @SuppressLint("Doclava125")
     public boolean addGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
         return false;
     }
@@ -1857,6 +1855,7 @@ public class LocationManager
      */
     @Deprecated
     @SystemApi
+    @SuppressLint("Doclava125")
     public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
     }
 
@@ -1877,6 +1876,7 @@ public class LocationManager
      */
     @Deprecated
     @SystemApi
+    @SuppressLint("Doclava125")
     public boolean addGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
         return false;
     }
@@ -1891,6 +1891,7 @@ public class LocationManager
      */
     @Deprecated
     @SystemApi
+    @SuppressLint("Doclava125")
     public void removeGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
     }
 

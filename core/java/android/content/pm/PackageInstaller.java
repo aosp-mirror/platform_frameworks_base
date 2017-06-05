@@ -473,6 +473,7 @@ public class PackageInstaller {
 
     /** {@hide} */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)
     public void setPermissionsResult(int sessionId, boolean accepted) {
         try {
             mInstaller.setPermissionsResult(sessionId, accepted);
@@ -1156,6 +1157,7 @@ public class PackageInstaller {
 
         /** {@hide} */
         @SystemApi
+        @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE)
         public void setAllocateAggressive(boolean allocateAggressive) {
             if (allocateAggressive) {
                 installFlags |= PackageManager.INSTALL_ALLOCATE_AGGRESSIVE;
