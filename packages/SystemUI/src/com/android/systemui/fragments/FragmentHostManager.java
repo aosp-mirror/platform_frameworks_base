@@ -49,7 +49,8 @@ public class FragmentHostManager {
     private final HashMap<String, ArrayList<FragmentListener>> mListeners = new HashMap<>();
     private final View mRootView;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
-            ActivityInfo.CONFIG_FONT_SCALE);
+            ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
+                | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
     private final FragmentService mManager;
     private final PluginFragmentManager mPlugins = new PluginFragmentManager();
 
