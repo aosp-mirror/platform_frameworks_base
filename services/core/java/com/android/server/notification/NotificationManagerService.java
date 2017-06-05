@@ -231,7 +231,6 @@ public class NotificationManagerService extends SystemService {
 
     static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_NOTIFICATION;
 
-    static final boolean ENABLE_BLOCKED_NOTIFICATIONS = true;
     static final boolean ENABLE_BLOCKED_TOASTS = true;
 
     // When #matchesCallFilter is called from the ringer, wait at most
@@ -1580,7 +1579,7 @@ public class NotificationManagerService extends SystemService {
 
             mRankingHelper.setEnabled(pkg, uid, enabled);
             // Now, cancel any outstanding notifications that are part of a just-disabled app
-            if (ENABLE_BLOCKED_NOTIFICATIONS && !enabled) {
+            if (!enabled) {
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0, true,
                         UserHandle.getUserId(uid), REASON_PACKAGE_BANNED, null);
             }
@@ -3195,7 +3194,7 @@ public class NotificationManagerService extends SystemService {
                 user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
 
-        if (!checkDisqualifyingFeatures(userId, notificationUid, id,tag, r)) {
+        if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r)) {
             return;
         }
 
@@ -3338,7 +3337,8 @@ public class NotificationManagerService extends SystemService {
             return isPackageSuspended;
         }
 
-        final boolean isBlocked = r.getImportance() == NotificationManager.IMPORTANCE_NONE
+        final boolean isBlocked =
+                mRankingHelper.getImportance(pkg, callingUid) == NotificationManager.IMPORTANCE_NONE
                 || r.getChannel().getImportance() == NotificationManager.IMPORTANCE_NONE;
         if (isBlocked) {
             Slog.e(TAG, "Suppressing notification from package by user request.");
