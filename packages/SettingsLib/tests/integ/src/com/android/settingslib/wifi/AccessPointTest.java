@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.NetworkBadging;
 import android.net.NetworkInfo;
 import android.net.NetworkKey;
 import android.net.RssiCurve;
@@ -330,48 +329,63 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testSpeedLabel_returnsVeryFastWhen4kBadgeIsSet() {
+    public void testSpeedLabel_returnsVeryFast() {
         AccessPoint ap = createAccessPointWithScanResultCache();
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_4K);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_VERY_FAST);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
-        assertThat(ap.getBadge()).isEqualTo(NetworkBadging.BADGING_4K);
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.SPEED_VERY_FAST);
         assertThat(ap.getSpeedLabel())
                 .isEqualTo(mContext.getString(R.string.speed_label_very_fast));
     }
 
     @Test
-    public void testSpeedLabel_returnsFastWhenHdBadgeIsSet() {
+    public void testSpeedLabel_returnsFast() {
         AccessPoint ap = createAccessPointWithScanResultCache();
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_HD);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_FAST);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
-        assertThat(ap.getBadge()).isEqualTo(NetworkBadging.BADGING_HD);
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.SPEED_FAST);
         assertThat(ap.getSpeedLabel())
                 .isEqualTo(mContext.getString(R.string.speed_label_fast));
     }
 
     @Test
-    public void testSpeedLabel_returnsOkayWhenSdBadgeIsSet() {
+    public void testSpeedLabel_returnsOkay() {
         AccessPoint ap = createAccessPointWithScanResultCache();
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_SD);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_MEDIUM);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
-        assertThat(ap.getBadge()).isEqualTo(NetworkBadging.BADGING_SD);
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.SPEED_MEDIUM);
         assertThat(ap.getSpeedLabel())
                 .isEqualTo(mContext.getString(R.string.speed_label_okay));
+    }
+
+    @Test
+    public void testSpeedLabel_returnsSlow() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_SLOW);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.SPEED_SLOW);
+        assertThat(ap.getSpeedLabel())
+                .isEqualTo(mContext.getString(R.string.speed_label_slow));
     }
 
     @Test
@@ -380,7 +394,7 @@ public class AccessPointTest {
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_4K);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_VERY_FAST);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
@@ -394,7 +408,7 @@ public class AccessPointTest {
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_4K);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_VERY_FAST);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
