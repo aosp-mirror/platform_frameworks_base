@@ -18,6 +18,7 @@ package com.android.server.connectivity;
 
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
+import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
@@ -241,8 +242,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         return (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
     }
 
+    // NOTE: This is always invoked on the mLooper thread.
     private void updateConfiguration() {
         mConfig = new TetheringConfiguration(mContext, mLog);
+        mUpstreamNetworkMonitor.updateMobileRequiresDun(mConfig.isDunRequired);
     }
 
     @Override
@@ -1179,15 +1182,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 return false;
             }
 
-            protected void requestUpstreamMobileConnection() {
-                mUpstreamNetworkMonitor.updateMobileRequiresDun(mConfig.isDunRequired);
-                mUpstreamNetworkMonitor.registerMobileNetworkRequest();
-            }
-
-            protected void unrequestUpstreamMobileConnection() {
-                mUpstreamNetworkMonitor.releaseMobileNetworkRequest();
-            }
-
             protected boolean turnOnMasterTetherSettings() {
                 final TetheringConfiguration cfg = mConfig;
                 try {
@@ -1236,17 +1230,26 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
 
             protected void chooseUpstreamType(boolean tryCell) {
-                final int upstreamType = findPreferredUpstreamType(tryCell);
+                updateConfiguration(); // TODO - remove?
+
+                final int upstreamType = findPreferredUpstreamType(
+                        getConnectivityManager(), mConfig);
+                if (upstreamType == ConnectivityManager.TYPE_NONE) {
+                    if (tryCell) {
+                        mUpstreamNetworkMonitor.registerMobileNetworkRequest();
+                        // We think mobile should be coming up; don't set a retry.
+                    } else {
+                        sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
+                    }
+                }
                 setUpstreamByType(upstreamType);
             }
 
-            protected int findPreferredUpstreamType(boolean tryCell) {
-                final ConnectivityManager cm = getConnectivityManager();
+            // TODO: Move this function into UpstreamNetworkMonitor.
+            protected int findPreferredUpstreamType(ConnectivityManager cm,
+                                                    TetheringConfiguration cfg) {
                 int upType = ConnectivityManager.TYPE_NONE;
 
-                updateConfiguration(); // TODO - remove?
-
-                final TetheringConfiguration cfg = mConfig;
                 if (VDBG) {
                     Log.d(TAG, "chooseUpstreamType has upstream iface types:");
                     for (Integer netType : cfg.preferredUpstreamIfaceTypes) {
@@ -1267,27 +1270,18 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 final int preferredUpstreamMobileApn = cfg.isDunRequired
                         ? ConnectivityManager.TYPE_MOBILE_DUN
                         : ConnectivityManager.TYPE_MOBILE_HIPRI;
-                if (DBG) {
-                    Log.d(TAG, "chooseUpstreamType(" + tryCell + "),"
-                            + " preferredApn="
-                            + ConnectivityManager.getNetworkTypeName(preferredUpstreamMobileApn)
-                            + ", got type="
-                            + ConnectivityManager.getNetworkTypeName(upType));
-                }
+                mLog.log(String.format(
+                        "findPreferredUpstreamType(), preferredApn=%s, got type=%s",
+                        getNetworkTypeName(preferredUpstreamMobileApn),
+                        getNetworkTypeName(upType)));
 
                 switch (upType) {
                     case ConnectivityManager.TYPE_MOBILE_DUN:
                     case ConnectivityManager.TYPE_MOBILE_HIPRI:
                         // If we're on DUN, put our own grab on it.
-                        requestUpstreamMobileConnection();
+                        mUpstreamNetworkMonitor.registerMobileNetworkRequest();
                         break;
                     case ConnectivityManager.TYPE_NONE:
-                        if (tryCell) {
-                            requestUpstreamMobileConnection();
-                            // We think mobile should be coming up; don't set a retry.
-                        } else {
-                            sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
-                        }
                         break;
                     default:
                         /* If we've found an active upstream connection that's not DUN/HIPRI
@@ -1296,7 +1290,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                          * If we found NONE we don't want to do this as we want any previous
                          * requests to keep trying to bring up something we can use.
                          */
-                        unrequestUpstreamMobileConnection();
+                        mUpstreamNetworkMonitor.releaseMobileNetworkRequest();
                         break;
                 }
 
@@ -1455,7 +1449,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             @Override
             public void exit() {
                 mOffloadController.stop();
-                unrequestUpstreamMobileConnection();
                 mUpstreamNetworkMonitor.stop();
                 mSimChange.stopListening();
                 notifyTetheredOfNewUpstreamIface(null);
