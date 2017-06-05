@@ -722,6 +722,10 @@ public class StatusBarWindowView extends FrameLayout {
         }
 
         @Override
+        public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+        }
+
+        @Override
         public void reportActivityRelaunched() {
         }
     };
