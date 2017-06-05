@@ -63,7 +63,6 @@ public class QSFragment extends Fragment implements QS {
     private QSContainerImpl mContainer;
     private int mLayoutDirection;
     private QSFooter mFooter;
-    private int mGutterHeight;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -80,7 +79,6 @@ public class QSFragment extends Fragment implements QS {
         mHeader = view.findViewById(R.id.header);
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
-        mGutterHeight = getContext().getResources().getDimensionPixelSize(R.dimen.qs_gutter_height);
 
         mQSDetail.setQsPanel(mQSPanel, mHeader);
 
@@ -131,7 +129,6 @@ public class QSFragment extends Fragment implements QS {
 
     @Override
     public void setHasNotifications(boolean hasNotifications) {
-        mContainer.setGutterEnabled(hasNotifications);
     }
 
     public void setPanelView(HeightListener panelView) {
@@ -250,7 +247,7 @@ public class QSFragment extends Fragment implements QS {
         mContainer.setExpansion(expansion);
         final float translationScaleY = expansion - 1;
         if (!mHeaderAnimating) {
-            int height = mHeader.getHeight() + mGutterHeight;
+            int height = mHeader.getHeight();
             getView().setTranslationY(mKeyguardShowing ? (translationScaleY * height)
                     : headerTranslation);
         }
@@ -333,15 +330,15 @@ public class QSFragment extends Fragment implements QS {
             LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
             int panelHeight = layoutParams.topMargin + layoutParams.bottomMargin +
                     + mQSPanel.getMeasuredHeight();
-            return panelHeight + getView().getPaddingBottom() + mGutterHeight;
+            return panelHeight + getView().getPaddingBottom();
         } else {
-            return getView().getMeasuredHeight() + mGutterHeight;
+            return getView().getMeasuredHeight();
         }
     }
 
     @Override
     public void setHeightOverride(int desiredHeight) {
-        mContainer.setHeightOverride(desiredHeight - mGutterHeight);
+        mContainer.setHeightOverride(desiredHeight);
     }
 
     public int getQsMinExpansionHeight() {

@@ -18,24 +18,16 @@
     android:id="@+id/quick_settings_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/qs_background_primary"
+    android:elevation="4dp"
     android:clipToPadding="false"
     android:clipChildren="false">
-
-    <View
-        android:id="@+id/qs_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/qs_background_primary"
-        android:alpha="0.8"
-        android:elevation="4dp" />
 
     <com.android.systemui.qs.QSPanel
         android:id="@+id/quick_settings_panel"
         android:layout_marginTop="28dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp"
-        android:background="#00000000"
         android:layout_marginBottom="48dp" />
 
     <include layout="@layout/quick_status_bar_expanded_header" />
