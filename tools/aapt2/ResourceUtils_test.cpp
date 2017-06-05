@@ -19,6 +19,9 @@
 #include "Resource.h"
 #include "test/Test.h"
 
+using ::aapt::test::ValueEq;
+using ::testing::Pointee;
+
 namespace aapt {
 
 TEST(ResourceUtilsTest, ParseBool) {
@@ -198,6 +201,24 @@ TEST(ResourceUtilsTest, ParseEmptyFlag) {
       ResourceUtils::TryParseFlagSymbol(attr.get(), "");
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(0u, result->value.data);
+}
+
+TEST(ResourceUtilsTest, NullIsEmptyReference) {
+  auto null_value = ResourceUtils::MakeNull();
+  ASSERT_THAT(null_value, Pointee(ValueEq(Reference())));
+
+  auto value = ResourceUtils::TryParseNullOrEmpty("@null");
+  ASSERT_THAT(value, Pointee(ValueEq(Reference())));
+}
+
+TEST(ResourceUtilsTest, EmptyIsBinaryPrimitive) {
+  auto empty_value = ResourceUtils::MakeEmpty();
+  ASSERT_THAT(empty_value, Pointee(ValueEq(BinaryPrimitive(android::Res_value::TYPE_NULL,
+                                                           android::Res_value::DATA_NULL_EMPTY))));
+
+  auto value = ResourceUtils::TryParseNullOrEmpty("@empty");
+  ASSERT_THAT(value, Pointee(ValueEq(BinaryPrimitive(android::Res_value::TYPE_NULL,
+                                                     android::Res_value::DATA_NULL_EMPTY))));
 }
 
 }  // namespace aapt

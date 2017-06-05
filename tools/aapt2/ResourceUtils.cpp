@@ -305,21 +305,25 @@ std::unique_ptr<Reference> TryParseReference(const StringPiece& str,
   return {};
 }
 
-std::unique_ptr<BinaryPrimitive> TryParseNullOrEmpty(const StringPiece& str) {
-  StringPiece trimmed_str(util::TrimWhitespace(str));
-  android::Res_value value = {};
+std::unique_ptr<Item> TryParseNullOrEmpty(const StringPiece& str) {
+  const StringPiece trimmed_str(util::TrimWhitespace(str));
   if (trimmed_str == "@null") {
-    // TYPE_NULL with data set to 0 is interpreted by the runtime as an error.
-    // Instead we set the data type to TYPE_REFERENCE with a value of 0.
-    value.dataType = android::Res_value::TYPE_REFERENCE;
+    return MakeNull();
   } else if (trimmed_str == "@empty") {
-    // TYPE_NULL with value of DATA_NULL_EMPTY is handled fine by the runtime.
-    value.dataType = android::Res_value::TYPE_NULL;
-    value.data = android::Res_value::DATA_NULL_EMPTY;
-  } else {
-    return {};
+    return MakeEmpty();
   }
-  return util::make_unique<BinaryPrimitive>(value);
+  return {};
+}
+
+std::unique_ptr<Reference> MakeNull() {
+  // TYPE_NULL with data set to 0 is interpreted by the runtime as an error.
+  // Instead we set the data type to TYPE_REFERENCE with a value of 0.
+  return util::make_unique<Reference>();
+}
+
+std::unique_ptr<BinaryPrimitive> MakeEmpty() {
+  return util::make_unique<BinaryPrimitive>(android::Res_value::TYPE_NULL,
+                                            android::Res_value::DATA_NULL_EMPTY);
 }
 
 std::unique_ptr<BinaryPrimitive> TryParseEnumSymbol(const Attribute* enum_attr,
@@ -569,13 +573,15 @@ uint32_t AndroidTypeToAttributeTypeMask(uint16_t type) {
 std::unique_ptr<Item> TryParseItemForAttribute(
     const StringPiece& value, uint32_t type_mask,
     const std::function<void(const ResourceName&)>& on_create_reference) {
-  std::unique_ptr<BinaryPrimitive> null_or_empty = TryParseNullOrEmpty(value);
+  using android::ResTable_map;
+
+  auto null_or_empty = TryParseNullOrEmpty(value);
   if (null_or_empty) {
-    return std::move(null_or_empty);
+    return null_or_empty;
   }
 
   bool create = false;
-  std::unique_ptr<Reference> reference = TryParseReference(value, &create);
+  auto reference = TryParseReference(value, &create);
   if (reference) {
     if (create && on_create_reference) {
       on_create_reference(reference->name.value());
@@ -583,39 +589,37 @@ std::unique_ptr<Item> TryParseItemForAttribute(
     return std::move(reference);
   }
 
-  if (type_mask & android::ResTable_map::TYPE_COLOR) {
+  if (type_mask & ResTable_map::TYPE_COLOR) {
     // Try parsing this as a color.
-    std::unique_ptr<BinaryPrimitive> color = TryParseColor(value);
+    auto color = TryParseColor(value);
     if (color) {
       return std::move(color);
     }
   }
 
-  if (type_mask & android::ResTable_map::TYPE_BOOLEAN) {
+  if (type_mask & ResTable_map::TYPE_BOOLEAN) {
     // Try parsing this as a boolean.
-    std::unique_ptr<BinaryPrimitive> boolean = TryParseBool(value);
+    auto boolean = TryParseBool(value);
     if (boolean) {
       return std::move(boolean);
     }
   }
 
-  if (type_mask & android::ResTable_map::TYPE_INTEGER) {
+  if (type_mask & ResTable_map::TYPE_INTEGER) {
     // Try parsing this as an integer.
-    std::unique_ptr<BinaryPrimitive> integer = TryParseInt(value);
+    auto integer = TryParseInt(value);
     if (integer) {
       return std::move(integer);
     }
   }
 
-  const uint32_t float_mask = android::ResTable_map::TYPE_FLOAT |
-                              android::ResTable_map::TYPE_DIMENSION |
-                              android::ResTable_map::TYPE_FRACTION;
+  const uint32_t float_mask =
+      ResTable_map::TYPE_FLOAT | ResTable_map::TYPE_DIMENSION | ResTable_map::TYPE_FRACTION;
   if (type_mask & float_mask) {
     // Try parsing this as a float.
-    std::unique_ptr<BinaryPrimitive> floating_point = TryParseFloat(value);
+    auto floating_point = TryParseFloat(value);
     if (floating_point) {
-      if (type_mask &
-          AndroidTypeToAttributeTypeMask(floating_point->value.dataType)) {
+      if (type_mask & AndroidTypeToAttributeTypeMask(floating_point->value.dataType)) {
         return std::move(floating_point);
       }
     }
@@ -630,24 +634,25 @@ std::unique_ptr<Item> TryParseItemForAttribute(
 std::unique_ptr<Item> TryParseItemForAttribute(
     const StringPiece& str, const Attribute* attr,
     const std::function<void(const ResourceName&)>& on_create_reference) {
+  using android::ResTable_map;
+
   const uint32_t type_mask = attr->type_mask;
-  std::unique_ptr<Item> value =
-      TryParseItemForAttribute(str, type_mask, on_create_reference);
+  auto value = TryParseItemForAttribute(str, type_mask, on_create_reference);
   if (value) {
     return value;
   }
 
-  if (type_mask & android::ResTable_map::TYPE_ENUM) {
+  if (type_mask & ResTable_map::TYPE_ENUM) {
     // Try parsing this as an enum.
-    std::unique_ptr<BinaryPrimitive> enum_value = TryParseEnumSymbol(attr, str);
+    auto enum_value = TryParseEnumSymbol(attr, str);
     if (enum_value) {
       return std::move(enum_value);
     }
   }
 
-  if (type_mask & android::ResTable_map::TYPE_FLAGS) {
+  if (type_mask & ResTable_map::TYPE_FLAGS) {
     // Try parsing this as a flag.
-    std::unique_ptr<BinaryPrimitive> flag_value = TryParseFlagSymbol(attr, str);
+    auto flag_value = TryParseFlagSymbol(attr, str);
     if (flag_value) {
       return std::move(flag_value);
     }
@@ -655,8 +660,7 @@ std::unique_ptr<Item> TryParseItemForAttribute(
   return {};
 }
 
-std::string BuildResourceFileName(const ResourceFile& res_file,
-                                  const NameMangler* mangler) {
+std::string BuildResourceFileName(const ResourceFile& res_file, const NameMangler* mangler) {
   std::stringstream out;
   out << "res/" << res_file.name.type;
   if (res_file.config != ConfigDescription{}) {
@@ -719,9 +723,9 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
         ref_type = Reference::Type::kAttribute;
       }
 
-      if (data == 0) {
+      if (data == 0u) {
         // A reference of 0, must be the magic @null reference.
-        return util::make_unique<BinaryPrimitive>(android::Res_value::TYPE_REFERENCE, 0u);
+        return util::make_unique<Reference>();
       }
 
       // This is a normal reference.

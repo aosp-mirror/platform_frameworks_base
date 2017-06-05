@@ -25,19 +25,20 @@
 #include "test/Test.h"
 #include "xml/XmlPullParser.h"
 
+using ::aapt::test::ValueEq;
 using ::android::StringPiece;
 using ::testing::Eq;
 using ::testing::NotNull;
+using ::testing::Pointee;
 
 namespace aapt {
 
-constexpr const char* kXmlPreamble =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+constexpr const char* kXmlPreamble = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 
 TEST(ResourceParserSingleTest, FailToParseWithNoRootResourcesElement) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::stringstream input(kXmlPreamble);
-  input << "<attr name=\"foo\"/>" << std::endl;
+  input << R"(<attr name="foo"/>)" << std::endl;
   ResourceTable table;
   ResourceParser parser(context->GetDiagnostics(), &table, Source{"test"}, {});
   xml::XmlPullParser xml_parser(input);
@@ -46,19 +47,20 @@ TEST(ResourceParserSingleTest, FailToParseWithNoRootResourcesElement) {
 
 class ResourceParserTest : public ::testing::Test {
  public:
-  void SetUp() override { context_ = test::ContextBuilder().Build(); }
+  void SetUp() override {
+    context_ = test::ContextBuilder().Build();
+  }
 
   ::testing::AssertionResult TestParse(const StringPiece& str) {
     return TestParse(str, ConfigDescription{});
   }
 
-  ::testing::AssertionResult TestParse(const StringPiece& str,
-                                       const ConfigDescription& config) {
+  ::testing::AssertionResult TestParse(const StringPiece& str, const ConfigDescription& config) {
     std::stringstream input(kXmlPreamble);
     input << "<resources>\n" << str << "\n</resources>" << std::endl;
     ResourceParserOptions parserOptions;
-    ResourceParser parser(context_->GetDiagnostics(), &table_, Source{"test"},
-                          config, parserOptions);
+    ResourceParser parser(context_->GetDiagnostics(), &table_, Source{"test"}, config,
+                          parserOptions);
     xml::XmlPullParser xmlParser(input);
     if (parser.Parse(&xmlParser)) {
       return ::testing::AssertionSuccess();
@@ -205,18 +207,18 @@ TEST_F(ResourceParserTest, ParseNull) {
   // a non-existing value, and this causes problems in styles when trying to
   // resolve an attribute. Null values must be encoded as android::Res_value::TYPE_REFERENCE
   // with a data value of 0.
-  BinaryPrimitive* integer = test::GetValue<BinaryPrimitive>(&table_, "integer/foo");
-  ASSERT_NE(nullptr, integer);
-  EXPECT_EQ(uint16_t(android::Res_value::TYPE_REFERENCE), integer->value.dataType);
-  EXPECT_EQ(0u, integer->value.data);
+  Reference* null_ref = test::GetValue<Reference>(&table_, "integer/foo");
+  ASSERT_THAT(null_ref, NotNull());
+  EXPECT_FALSE(null_ref->name);
+  EXPECT_FALSE(null_ref->id);
+  EXPECT_EQ(Reference::Type::kResource, null_ref->reference_type);
 }
 
 TEST_F(ResourceParserTest, ParseEmpty) {
   std::string input = "<integer name=\"foo\">@empty</integer>";
   ASSERT_TRUE(TestParse(input));
 
-  BinaryPrimitive* integer =
-      test::GetValue<BinaryPrimitive>(&table_, "integer/foo");
+  BinaryPrimitive* integer = test::GetValue<BinaryPrimitive>(&table_, "integer/foo");
   ASSERT_NE(nullptr, integer);
   EXPECT_EQ(uint16_t(android::Res_value::TYPE_NULL), integer->value.dataType);
   EXPECT_EQ(uint32_t(android::Res_value::DATA_NULL_EMPTY), integer->value.data);
@@ -241,22 +243,18 @@ TEST_F(ResourceParserTest, ParseAttr) {
 // ultimately
 // stored them with the default configuration. Check that we have the same
 // behavior.
-TEST_F(ResourceParserTest,
-       ParseAttrAndDeclareStyleableUnderConfigButRecordAsNoConfig) {
+TEST_F(ResourceParserTest, ParseAttrAndDeclareStyleableUnderConfigButRecordAsNoConfig) {
   const ConfigDescription watch_config = test::ParseConfigOrDie("watch");
-  std::string input = R"EOF(
-        <attr name="foo" />
-        <declare-styleable name="bar">
-          <attr name="baz" />
-        </declare-styleable>)EOF";
+  std::string input = R"(
+      <attr name="foo" />
+      <declare-styleable name="bar">
+        <attr name="baz" />
+      </declare-styleable>)";
   ASSERT_TRUE(TestParse(input, watch_config));
 
-  EXPECT_EQ(nullptr, test::GetValueForConfig<Attribute>(&table_, "attr/foo",
-                                                        watch_config));
-  EXPECT_EQ(nullptr, test::GetValueForConfig<Attribute>(&table_, "attr/baz",
-                                                        watch_config));
-  EXPECT_EQ(nullptr, test::GetValueForConfig<Styleable>(
-                         &table_, "styleable/bar", watch_config));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<Attribute>(&table_, "attr/foo", watch_config));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<Attribute>(&table_, "attr/baz", watch_config));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<Styleable>(&table_, "styleable/bar", watch_config));
 
   EXPECT_NE(nullptr, test::GetValue<Attribute>(&table_, "attr/foo"));
   EXPECT_NE(nullptr, test::GetValue<Attribute>(&table_, "attr/baz"));
@@ -831,6 +829,18 @@ TEST_F(ResourceParserTest, ParseBagElement) {
   ASSERT_EQ(1u, val->entries.size());
   EXPECT_EQ(Reference(test::ParseNameOrDie("attr/test")), val->entries[0].key);
   EXPECT_NE(nullptr, ValueCast<RawString>(val->entries[0].value.get()));
+}
+
+TEST_F(ResourceParserTest, ParseElementWithNoValue) {
+  std::string input = R"(
+      <item type="drawable" format="reference" name="foo" />
+      <string name="foo" />)";
+  ASSERT_TRUE(TestParse(input));
+  ASSERT_THAT(test::GetValue(&table_, "drawable/foo"), Pointee(ValueEq(Reference())));
+
+  String* str = test::GetValue<String>(&table_, "string/foo");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str->value, Eq(""));
 }
 
 }  // namespace aapt
