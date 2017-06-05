@@ -19,6 +19,8 @@ package com.android.internal.os;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.os.BatteryStats;
@@ -32,12 +34,16 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseLongArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatterySipper.DrainType;
+import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +61,7 @@ import java.util.Locale;
  * The caller must initialize this class as soon as activity object is ready to use (for example, in
  * onAttach() for Fragment), call create() in onCreate() and call destroy() in onDestroy().
  */
-public final class BatteryStatsHelper {
+public class BatteryStatsHelper {
     static final boolean DEBUG = false;
 
     private static final String TAG = BatteryStatsHelper.class.getSimpleName();
@@ -72,6 +78,10 @@ public final class BatteryStatsHelper {
     private BatteryStats mStats;
     private Intent mBatteryBroadcast;
     private PowerProfile mPowerProfile;
+
+    private String[] mSystemPackageArray;
+    private String[] mServicepackageArray;
+    private PackageManager mPackageManager;
 
     /**
      * List of apps using power.
@@ -131,7 +141,7 @@ public final class BatteryStatsHelper {
     boolean mHasBluetoothPowerReporting = false;
 
     public static boolean checkWifiOnly(Context context) {
-        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
@@ -144,7 +154,7 @@ public final class BatteryStatsHelper {
     }
 
     public static boolean checkHasBluetoothPowerReporting(BatteryStats stats,
-                                                          PowerProfile profile) {
+            PowerProfile profile) {
         return stats.hasBluetoothActivityReporting() &&
                 profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_IDLE) != 0 &&
                 profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_RX) != 0 &&
@@ -163,6 +173,13 @@ public final class BatteryStatsHelper {
         mContext = context;
         mCollectBatteryBroadcast = collectBatteryBroadcast;
         mWifiOnly = wifiOnly;
+        mPackageManager = context.getPackageManager();
+
+        final Resources resources = context.getResources();
+        mSystemPackageArray = resources.getStringArray(
+                com.android.internal.R.array.config_batteryPackageTypeSystem);
+        mServicepackageArray = resources.getStringArray(
+                com.android.internal.R.array.config_batteryPackageTypeService);
     }
 
     public void storeStatsHistoryInFile(String fname) {
@@ -216,7 +233,7 @@ public final class BatteryStatsHelper {
             }
         }
         return getStats(IBatteryStats.Stub.asInterface(
-                        ServiceManager.getService(BatteryStats.SERVICE_NAME)));
+                ServiceManager.getService(BatteryStats.SERVICE_NAME)));
     }
 
     public static void dropFile(Context context, String fname) {
@@ -274,15 +291,25 @@ public final class BatteryStatsHelper {
         if (power == 0) return "0";
 
         final String format;
-        if (power < .00001) format = "%.8f";
-        else if (power < .0001) format = "%.7f";
-        else if (power < .001) format = "%.6f";
-        else if (power < .01) format = "%.5f";
-        else if (power < .1) format = "%.4f";
-        else if (power < 1) format = "%.3f";
-        else if (power < 10) format = "%.2f";
-        else if (power < 100) format = "%.1f";
-        else format = "%.0f";
+        if (power < .00001) {
+            format = "%.8f";
+        } else if (power < .0001) {
+            format = "%.7f";
+        } else if (power < .001) {
+            format = "%.6f";
+        } else if (power < .01) {
+            format = "%.5f";
+        } else if (power < .1) {
+            format = "%.4f";
+        } else if (power < 1) {
+            format = "%.3f";
+        } else if (power < 10) {
+            format = "%.2f";
+        } else if (power < 100) {
+            format = "%.1f";
+        } else {
+            format = "%.0f";
+        }
 
         // Use English locale because this is never used in UI (only in checkin and dump).
         return String.format(Locale.ENGLISH, format, power);
@@ -370,7 +397,7 @@ public final class BatteryStatsHelper {
         mWifiPowerCalculator.reset();
 
         final boolean hasBluetoothPowerReporting = checkHasBluetoothPowerReporting(mStats,
-                                                                                   mPowerProfile);
+                mPowerProfile);
         if (mBluetoothPowerCalculator == null ||
                 hasBluetoothPowerReporting != mHasBluetoothPowerReporting) {
             mBluetoothPowerCalculator = new BluetoothPowerCalculator(mPowerProfile);
@@ -405,12 +432,12 @@ public final class BatteryStatsHelper {
         mChargeTimeRemainingUs = mStats.computeChargeTimeRemaining(rawRealtimeUs);
 
         if (DEBUG) {
-            Log.d(TAG, "Raw time: realtime=" + (rawRealtimeUs/1000) + " uptime="
-                    + (rawUptimeUs/1000));
-            Log.d(TAG, "Battery time: realtime=" + (mBatteryRealtimeUs /1000) + " uptime="
-                    + (mBatteryUptimeUs /1000));
-            Log.d(TAG, "Battery type time: realtime=" + (mTypeBatteryRealtimeUs /1000) + " uptime="
-                    + (mTypeBatteryUptimeUs /1000));
+            Log.d(TAG, "Raw time: realtime=" + (rawRealtimeUs / 1000) + " uptime="
+                    + (rawUptimeUs / 1000));
+            Log.d(TAG, "Battery time: realtime=" + (mBatteryRealtimeUs / 1000) + " uptime="
+                    + (mBatteryUptimeUs / 1000));
+            Log.d(TAG, "Battery type time: realtime=" + (mTypeBatteryRealtimeUs / 1000) + " uptime="
+                    + (mTypeBatteryUptimeUs / 1000));
         }
         mMinDrainedPower = (mStats.getLowDischargeAmountSinceCharge()
                 * mPowerProfile.getBatteryCapacity()) / 100;
@@ -420,7 +447,7 @@ public final class BatteryStatsHelper {
         processAppUsage(asUsers);
 
         // Before aggregating apps in to users, collect all apps to sort by their ms per packet.
-        for (int i=0; i<mUsageList.size(); i++) {
+        for (int i = 0; i < mUsageList.size(); i++) {
             BatterySipper bs = mUsageList.get(i);
             bs.computeMobilemspp();
             if (bs.mobilemspp != 0) {
@@ -428,9 +455,9 @@ public final class BatteryStatsHelper {
             }
         }
 
-        for (int i=0; i<mUserSippers.size(); i++) {
+        for (int i = 0; i < mUserSippers.size(); i++) {
             List<BatterySipper> user = mUserSippers.valueAt(i);
-            for (int j=0; j<user.size(); j++) {
+            for (int j = 0; j < user.size(); j++) {
                 BatterySipper bs = user.get(j);
                 bs.computeMobilemspp();
                 if (bs.mobilemspp != 0) {
@@ -491,6 +518,21 @@ public final class BatteryStatsHelper {
                 mMaxPower = Math.max(mMaxPower, amount);
             }
         }
+
+        // Smear it!
+        final double hiddenPowerMah = removeHiddenBatterySippers(mUsageList);
+        final double totalRemainingPower = getTotalPower() - hiddenPowerMah;
+        if (Math.abs(totalRemainingPower) > 1e-3) {
+            for (int i = 0, size = mUsageList.size(); i < size; i++) {
+                final BatterySipper sipper = mUsageList.get(i);
+                if (!sipper.shouldHide) {
+                    sipper.proportionalSmearMah = hiddenPowerMah
+                            * ((sipper.totalPowerMah + sipper.screenPowerMah)
+                            / totalRemainingPower);
+                    sipper.sumPower();
+                }
+            }
+        }
     }
 
     private void processAppUsage(SparseArray<UserHandle> asUsers) {
@@ -506,12 +548,15 @@ public final class BatteryStatsHelper {
 
             mCpuPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
             mWakelockPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
-            mMobileRadioPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
+            mMobileRadioPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
+                    mStatsType);
             mWifiPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
-            mBluetoothPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
+            mBluetoothPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
+                    mStatsType);
             mSensorPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
             mCameraPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
-            mFlashlightPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
+            mFlashlightPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
+                    mStatsType);
 
             final double totalPower = app.sumPower();
             if (DEBUG && totalPower != 0) {
@@ -562,7 +607,7 @@ public final class BatteryStatsHelper {
     private void addPhoneUsage() {
         long phoneOnTimeMs = mStats.getPhoneOnTime(mRawRealtimeUs, mStatsType) / 1000;
         double phoneOnPower = mPowerProfile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE)
-                * phoneOnTimeMs / (60*60*1000);
+                * phoneOnTimeMs / (60 * 60 * 1000);
         if (phoneOnPower != 0) {
             addEntry(BatterySipper.DrainType.PHONE, phoneOnTimeMs, phoneOnPower);
         }
@@ -582,14 +627,14 @@ public final class BatteryStatsHelper {
                     / BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS;
             long brightnessTime = mStats.getScreenBrightnessTime(i, mRawRealtimeUs, mStatsType)
                     / 1000;
-            double p = screenBinPower*brightnessTime;
+            double p = screenBinPower * brightnessTime;
             if (DEBUG && p != 0) {
                 Log.d(TAG, "Screen bin #" + i + ": time=" + brightnessTime
                         + " power=" + makemAh(p / (60 * 60 * 1000)));
             }
             power += p;
         }
-        power /= (60*60*1000); // To hours
+        power /= (60 * 60 * 1000); // To hours
         if (power != 0) {
             addEntry(BatterySipper.DrainType.SCREEN, screenOnTimeMs, power);
         }
@@ -606,7 +651,7 @@ public final class BatteryStatsHelper {
     }
 
     private void aggregateSippers(BatterySipper bs, List<BatterySipper> from, String tag) {
-        for (int i=0; i<from.size(); i++) {
+        for (int i = 0; i < from.size(); i++) {
             BatterySipper wbs = from.get(i);
             if (DEBUG) Log.d(TAG, tag + " adding sipper " + wbs + ": cpu=" + wbs.cpuTimeMs);
             bs.add(wbs);
@@ -647,7 +692,8 @@ public final class BatteryStatsHelper {
      */
     private void addWiFiUsage() {
         BatterySipper bs = new BatterySipper(DrainType.WIFI, null, 0);
-        mWifiPowerCalculator.calculateRemaining(bs, mStats, mRawRealtimeUs, mRawUptimeUs, mStatsType);
+        mWifiPowerCalculator.calculateRemaining(bs, mStats, mRawRealtimeUs, mRawUptimeUs,
+                mStatsType);
         aggregateSippers(bs, mWifiSippers, "WIFI");
         if (bs.totalPowerMah > 0) {
             mUsageList.add(bs);
@@ -719,17 +765,29 @@ public final class BatteryStatsHelper {
         return mMobilemsppList;
     }
 
-    public long getStatsPeriod() { return mStatsPeriod; }
+    public long getStatsPeriod() {
+        return mStatsPeriod;
+    }
 
-    public int getStatsType() { return mStatsType; }
+    public int getStatsType() {
+        return mStatsType;
+    }
 
-    public double getMaxPower() { return mMaxPower; }
+    public double getMaxPower() {
+        return mMaxPower;
+    }
 
-    public double getMaxRealPower() { return mMaxRealPower; }
+    public double getMaxRealPower() {
+        return mMaxRealPower;
+    }
 
-    public double getTotalPower() { return mTotalPower; }
+    public double getTotalPower() {
+        return mTotalPower;
+    }
 
-    public double getComputedPower() { return mComputedPower; }
+    public double getComputedPower() {
+        return mComputedPower;
+    }
 
     public double getMinDrainedPower() {
         return mMinDrainedPower;
@@ -747,7 +805,7 @@ public final class BatteryStatsHelper {
         int pos = 0;
         byte[] data = new byte[avail];
         while (true) {
-            int amt = stream.read(data, pos, data.length-pos);
+            int amt = stream.read(data, pos, data.length - pos);
             //Log.i("foo", "Read " + amt + " bytes at " + pos
             //        + " of avail " + data.length);
             if (amt <= 0) {
@@ -757,12 +815,150 @@ public final class BatteryStatsHelper {
             }
             pos += amt;
             avail = stream.available();
-            if (avail > data.length-pos) {
-                byte[] newData = new byte[pos+avail];
+            if (avail > data.length - pos) {
+                byte[] newData = new byte[pos + avail];
                 System.arraycopy(data, 0, newData, 0, pos);
                 data = newData;
             }
         }
+    }
+
+    /**
+     * Mark the {@link BatterySipper} that we should hide and smear the screen usage based on
+     * foreground activity time.
+     *
+     * @param sippers sipper list that need to check and remove
+     * @return the total power of the hidden items of {@link BatterySipper}
+     * for proportional smearing
+     */
+    public double removeHiddenBatterySippers(List<BatterySipper> sippers) {
+        double proportionalSmearPowerMah = 0;
+        BatterySipper screenSipper = null;
+        for (int i = sippers.size() - 1; i >= 0; i--) {
+            final BatterySipper sipper = sippers.get(i);
+            sipper.shouldHide = shouldHideSipper(sipper);
+            if (sipper.shouldHide) {
+                if (sipper.drainType != BatterySipper.DrainType.OVERCOUNTED
+                        && sipper.drainType != BatterySipper.DrainType.SCREEN
+                        && sipper.drainType != BatterySipper.DrainType.UNACCOUNTED) {
+                    // Don't add it if it is overcounted, unaccounted or screen
+                    proportionalSmearPowerMah += sipper.totalPowerMah;
+                }
+            }
+
+            if (sipper.drainType == BatterySipper.DrainType.SCREEN) {
+                screenSipper = sipper;
+            }
+        }
+
+        smearScreenBatterySipper(sippers, screenSipper);
+
+        return proportionalSmearPowerMah;
+    }
+
+    /**
+     * Smear the screen on power usage among {@code sippers}, based on ratio of foreground activity
+     * time.
+     */
+    public void smearScreenBatterySipper(List<BatterySipper> sippers, BatterySipper screenSipper) {
+        final long rawRealtimeMs = SystemClock.elapsedRealtime();
+        long totalActivityTimeMs = 0;
+        final SparseLongArray activityTimeArray = new SparseLongArray();
+        for (int i = 0, size = sippers.size(); i < size; i++) {
+            final BatteryStats.Uid uid = sippers.get(i).uidObj;
+            if (uid != null) {
+                final long timeMs = getForegroundActivityTotalTimeMs(uid, rawRealtimeMs);
+                activityTimeArray.put(uid.getUid(), timeMs);
+                totalActivityTimeMs += timeMs;
+            }
+        }
+
+        if (totalActivityTimeMs >= 10 * DateUtils.MINUTE_IN_MILLIS) {
+            final double screenPowerMah = screenSipper.totalPowerMah;
+            for (int i = 0, size = sippers.size(); i < size; i++) {
+                final BatterySipper sipper = sippers.get(i);
+                sipper.screenPowerMah = screenPowerMah * activityTimeArray.get(sipper.getUid(), 0)
+                        / totalActivityTimeMs;
+            }
+        }
+    }
+
+    /**
+     * Check whether we should hide the battery sipper.
+     */
+    public boolean shouldHideSipper(BatterySipper sipper) {
+        final BatterySipper.DrainType drainType = sipper.drainType;
+
+        return drainType == BatterySipper.DrainType.IDLE
+                || drainType == BatterySipper.DrainType.CELL
+                || drainType == BatterySipper.DrainType.SCREEN
+                || drainType == BatterySipper.DrainType.UNACCOUNTED
+                || drainType == BatterySipper.DrainType.OVERCOUNTED
+                || isTypeService(sipper)
+                || isTypeSystem(sipper);
+    }
+
+    /**
+     * Check whether {@code sipper} is type service
+     */
+    public boolean isTypeService(BatterySipper sipper) {
+        final String[] packages = mPackageManager.getPackagesForUid(sipper.getUid());
+        if (packages == null) {
+            return false;
+        }
+
+        for (String packageName : packages) {
+            if (ArrayUtils.contains(mServicepackageArray, packageName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check whether {@code sipper} is type system
+     */
+    public boolean isTypeSystem(BatterySipper sipper) {
+        final int uid = sipper.uidObj == null ? -1 : sipper.getUid();
+        sipper.mPackages = mPackageManager.getPackagesForUid(uid);
+        // Classify all the sippers to type system if the range of uid is 0...FIRST_APPLICATION_UID
+        if (uid >= Process.ROOT_UID && uid < Process.FIRST_APPLICATION_UID) {
+            return true;
+        } else if (sipper.mPackages != null) {
+            for (final String packageName : sipper.mPackages) {
+                if (ArrayUtils.contains(mSystemPackageArray, packageName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    @VisibleForTesting
+    public long getForegroundActivityTotalTimeMs(BatteryStats.Uid uid, long rawRealtimeMs) {
+        final BatteryStats.Timer timer = uid.getForegroundActivityTimer();
+        if (timer != null) {
+            return timer.getTotalTimeLocked(rawRealtimeMs, BatteryStats.STATS_SINCE_CHARGED);
+        }
+
+        return 0;
+    }
+
+    @VisibleForTesting
+    public void setPackageManager(PackageManager packageManager) {
+        mPackageManager = packageManager;
+    }
+
+    @VisibleForTesting
+    public void setSystemPackageArray(String[] array) {
+        mSystemPackageArray = array;
+    }
+
+    @VisibleForTesting
+    public void setServicePackageArray(String[] array) {
+        mServicepackageArray = array;
     }
 
     private void load() {

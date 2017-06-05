@@ -3026,4 +3026,8 @@
 
   <java-symbol type="integer" name="config_inCallNotificationVolumeRelative" />
   <java-symbol type="drawable" name="stat_sys_vitals" />
+
+  <java-symbol type="array" name="config_batteryPackageTypeSystem" />
+  <java-symbol type="array" name="config_batteryPackageTypeService" />
+
 </resources>

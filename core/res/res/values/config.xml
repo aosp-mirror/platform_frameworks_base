@@ -2898,4 +2898,14 @@
     <!-- Volume level of in-call notification tone playback,
          relative to the overall voice call stream volume [0..100] -->
     <integer name="config_inCallNotificationVolumeRelative">67</integer>
+
+    <!-- An array of packages that need to be treated as type system in battery settings -->
+    <string-array translatable="false" name="config_batteryPackageTypeSystem">
+        <item>com.android.providers.calendar</item>
+        <item>com.android.providers.media</item>
+        <item>com.android.systemui</item>
+    </string-array>
+
+    <!-- An array of packages that need to be treated as type service in battery settings -->
+    <string-array translatable="false" name="config_batteryPackageTypeService"/>
 </resources>
