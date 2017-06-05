@@ -18,7 +18,12 @@ package com.android.server.connectivity.tethering;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
+import static android.net.ConnectivityManager.TYPE_NONE;
+import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -59,6 +64,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -240,6 +246,72 @@ public class UpstreamNetworkMonitorTest {
         assertFalse(mUNM.mobileNetworkRequested());
     }
 
+    @Test
+    public void testSelectPreferredUpstreamType() throws Exception {
+        final Collection<Integer> preferredTypes = new ArrayList<>();
+        preferredTypes.add(TYPE_WIFI);
+
+        mUNM.start();
+        // There are no networks, so there is nothing to select.
+        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+
+        final TestNetworkAgent wifiAgent = new TestNetworkAgent(mCM, TRANSPORT_WIFI);
+        wifiAgent.fakeConnect();
+        // WiFi is up, we should prefer it.
+        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        wifiAgent.fakeDisconnect();
+        // There are no networks, so there is nothing to select.
+        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+
+        final TestNetworkAgent cellAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
+        cellAgent.fakeConnect();
+        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+
+        preferredTypes.add(TYPE_MOBILE_DUN);
+        // This is coupled with preferred types in TetheringConfiguration.
+        mUNM.updateMobileRequiresDun(true);
+        // DUN is available, but only use regular cell: no upstream selected.
+        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+        preferredTypes.remove(TYPE_MOBILE_DUN);
+        // No WiFi, but our preferred flavour of cell is up.
+        preferredTypes.add(TYPE_MOBILE_HIPRI);
+        // This is coupled with preferred types in TetheringConfiguration.
+        mUNM.updateMobileRequiresDun(false);
+        assertEquals(TYPE_MOBILE_HIPRI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        // Check to see we filed an explicit request.
+        assertEquals(1, mCM.requested.size());
+        NetworkRequest netReq = (NetworkRequest) mCM.requested.values().toArray()[0];
+        assertTrue(netReq.networkCapabilities.hasTransport(TRANSPORT_CELLULAR));
+        assertFalse(netReq.networkCapabilities.hasCapability(NET_CAPABILITY_DUN));
+
+        wifiAgent.fakeConnect();
+        // WiFi is up, and we should prefer it over cell.
+        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertEquals(0, mCM.requested.size());
+
+        preferredTypes.remove(TYPE_MOBILE_HIPRI);
+        preferredTypes.add(TYPE_MOBILE_DUN);
+        // This is coupled with preferred types in TetheringConfiguration.
+        mUNM.updateMobileRequiresDun(true);
+        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+
+        final TestNetworkAgent dunAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
+        dunAgent.networkCapabilities.addCapability(NET_CAPABILITY_DUN);
+        dunAgent.fakeConnect();
+
+        // WiFi is still preferred.
+        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+
+        // WiFi goes down, cell and DUN are still up but only DUN is preferred.
+        wifiAgent.fakeDisconnect();
+        assertEquals(TYPE_MOBILE_DUN, mUNM.selectPreferredUpstreamType(preferredTypes));
+        // Check to see we filed an explicit request.
+        assertEquals(1, mCM.requested.size());
+        netReq = (NetworkRequest) mCM.requested.values().toArray()[0];
+        assertTrue(netReq.networkCapabilities.hasTransport(TRANSPORT_CELLULAR));
+        assertTrue(netReq.networkCapabilities.hasCapability(NET_CAPABILITY_DUN));
+    }
+
     private void assertUpstreamTypeRequested(int upstreamType) throws Exception {
         assertEquals(1, mCM.requested.size());
         assertEquals(1, mCM.legacyTypeMap.size());
@@ -253,6 +325,8 @@ public class UpstreamNetworkMonitorTest {
         public Map<NetworkCallback, NetworkRequest> listening = new HashMap<>();
         public Map<NetworkCallback, NetworkRequest> requested = new HashMap<>();
         public Map<NetworkCallback, Integer> legacyTypeMap = new HashMap<>();
+
+        private int mNetworkId = 100;
 
         public TestConnectivityManager(Context ctx, IConnectivityManager svc) {
             super(ctx, svc);
@@ -286,6 +360,8 @@ public class UpstreamNetworkMonitorTest {
             }
             return false;
         }
+
+        int getNetworkId() { return ++mNetworkId; }
 
         @Override
         public void requestNetwork(NetworkRequest req, NetworkCallback cb, Handler h) {
@@ -360,6 +436,35 @@ public class UpstreamNetworkMonitorTest {
         }
     }
 
+    public static class TestNetworkAgent {
+        public final TestConnectivityManager cm;
+        public final Network networkId;
+        public final int transportType;
+        public final NetworkCapabilities networkCapabilities;
+
+        public TestNetworkAgent(TestConnectivityManager cm, int transportType) {
+            this.cm = cm;
+            this.networkId = new Network(cm.getNetworkId());
+            this.transportType = transportType;
+            networkCapabilities = new NetworkCapabilities();
+            networkCapabilities.addTransportType(transportType);
+            networkCapabilities.addCapability(NET_CAPABILITY_INTERNET);
+        }
+
+        public void fakeConnect() {
+            for (NetworkCallback cb : cm.listening.keySet()) {
+                cb.onAvailable(networkId);
+                cb.onCapabilitiesChanged(networkId, copy(networkCapabilities));
+            }
+        }
+
+        public void fakeDisconnect() {
+            for (NetworkCallback cb : cm.listening.keySet()) {
+                cb.onLost(networkId);
+            }
+        }
+    }
+
     public static class TestStateMachine extends StateMachine {
         public final ArrayList<Message> messages = new ArrayList<>();
         private final State mLoggingState = new LoggingState();
@@ -381,5 +486,9 @@ public class UpstreamNetworkMonitorTest {
             setInitialState(mLoggingState);
             super.start();
         }
+    }
+
+    static NetworkCapabilities copy(NetworkCapabilities nc) {
+        return new NetworkCapabilities(nc);
     }
 }
