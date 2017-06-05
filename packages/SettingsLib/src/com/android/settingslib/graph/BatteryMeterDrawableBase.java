@@ -40,7 +40,7 @@ public class BatteryMeterDrawableBase extends Drawable {
 
     private static final float ASPECT_RATIO = .58f;
     public static final String TAG = BatteryMeterDrawableBase.class.getSimpleName();
-    private static final float RADIUS_RATIO = 1.75f / 17f;
+    private static final float RADIUS_RATIO = 1.0f / 17f;
 
     protected final Context mContext;
     protected final Paint mFramePaint;
@@ -273,9 +273,9 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         // button-frame: area above the battery body
         mButtonFrame.set(
-                mFrame.left + Math.round(width * 0.3f),
+                mFrame.left + Math.round(width * 0.28f),
                 mFrame.top,
-                mFrame.right - Math.round(width * 0.3f),
+                mFrame.right - Math.round(width * 0.28f),
                 mFrame.top + buttonHeight);
 
         // frame: battery body area
@@ -302,9 +302,10 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         if (mCharging) {
             // define the bolt shape
-            final float bl = mFrame.left + mFrame.width() / 4f;
+            // Shift right by 1px for maximal bolt-goodness
+            final float bl = mFrame.left + mFrame.width() / 4f + 1;
             final float bt = mFrame.top + mFrame.height() / 6f;
-            final float br = mFrame.right - mFrame.width() / 4f;
+            final float br = mFrame.right - mFrame.width() / 4f + 1;
             final float bb = mFrame.bottom - mFrame.height() / 10f;
             if (mBoltFrame.left != bl || mBoltFrame.top != bt
                     || mBoltFrame.right != br || mBoltFrame.bottom != bb) {

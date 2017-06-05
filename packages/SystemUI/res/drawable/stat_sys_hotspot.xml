@@ -17,8 +17,8 @@ Copyright (C) 2017 The Android Open Source Project
     android:insetLeft="2.5dp"
     android:insetRight="2.5dp">
     <vector
-        android:width="17.0dp"
-        android:height="17.0dp"
+        android:width="18.0dp"
+        android:height="18.0dp"
         android:viewportWidth="18.0"
         android:viewportHeight="18.0">
       <group
