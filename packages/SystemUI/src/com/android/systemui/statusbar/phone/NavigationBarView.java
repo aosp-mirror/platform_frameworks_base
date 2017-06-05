@@ -634,9 +634,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         getHomeButton().setVertical(mVertical);
     }
 
-    public void onKeyguardOccludedChanged(boolean keyguardOccluded) {
-    }
-
     private void updateTaskSwitchHelper() {
         if (mGestureHelper == null) return;
         boolean isRtl = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);

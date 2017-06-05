@@ -604,10 +604,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         return mNavigationBarMode == MODE_SEMI_TRANSPARENT;
     }
 
-    public void onKeyguardOccludedChanged(boolean keyguardOccluded) {
-        mNavigationBarView.onKeyguardOccludedChanged(keyguardOccluded);
-    }
-
     public void disableAnimationsDuringHide(long delay) {
         mNavigationBarView.setLayoutTransitionsEnabled(false);
         mNavigationBarView.postDelayed(() -> mNavigationBarView.setLayoutTransitionsEnabled(true),
