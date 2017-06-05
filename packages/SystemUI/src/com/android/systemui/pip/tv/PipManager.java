@@ -239,7 +239,11 @@ public class PipManager implements BasePipManager {
             }
         }
 
-        loadConfigurationsAndApply(mContext.getResources().getConfiguration());
+        // Initialize the last orientation and apply the current configuration
+        Configuration initialConfig = mContext.getResources().getConfiguration();
+        mLastOrientation = initialConfig.orientation;
+        loadConfigurationsAndApply(initialConfig);
+
         mMediaSessionManager =
                 (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
 
