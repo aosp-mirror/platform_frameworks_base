@@ -3029,4 +3029,5 @@
   <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
 
   <java-symbol type="integer" name="config_inCallNotificationVolumeRelative" />
+  <java-symbol type="drawable" name="stat_sys_vitals" />
 </resources>
