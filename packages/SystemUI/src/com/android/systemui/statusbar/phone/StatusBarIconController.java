@@ -111,6 +111,31 @@ public interface StatusBarIconController {
         }
     }
 
+    public static class TintedIconManager extends IconManager {
+        private int mColor;
+
+        public TintedIconManager(ViewGroup group) {
+            super(group);
+        }
+
+        @Override
+        protected void onIconAdded(int index, String slot, boolean blocked, StatusBarIcon icon) {
+            StatusBarIconView v = addIcon(index, slot, blocked, icon);
+            v.setStaticDrawableColor(mColor);
+        }
+
+        public void setTint(int color) {
+            mColor = color;
+            for (int i = 0; i < mGroup.getChildCount(); i++) {
+                View child = mGroup.getChildAt(i);
+                if (child instanceof StatusBarIconView) {
+                    StatusBarIconView icon = (StatusBarIconView) child;
+                    icon.setStaticDrawableColor(mColor);
+                }
+            }
+        }
+    }
+
     /**
      * Turns info from StatusBarIconController into ImageViews in a ViewGroup.
      */
@@ -165,17 +190,6 @@ public interface StatusBarIconController {
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
                 child.setLayoutParams(lp);
-            }
-        }
-
-        protected void onOverlayChanged() {
-            @ColorInt int iconColor = Utils.getColorAttr(mContext, R.attr.bgProtectTextColor);
-            for (int i = 0; i < mGroup.getChildCount(); i++) {
-                View child = mGroup.getChildAt(i);
-                if (child instanceof StatusBarIconView) {
-                    StatusBarIconView icon = (StatusBarIconView) child;
-                    icon.setStaticDrawableColor(iconColor);
-                }
             }
         }
 
