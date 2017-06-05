@@ -332,19 +332,16 @@ public class UpstreamNetworkMonitor {
 
         @Override
         public void onAvailable(Network network) {
-            checkExpectedThread();
             handleAvailable(mCallbackType, network);
         }
 
         @Override
         public void onCapabilitiesChanged(Network network, NetworkCapabilities newNc) {
-            checkExpectedThread();
             handleNetCap(network, newNc);
         }
 
         @Override
         public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
-            checkExpectedThread();
             handleLinkProp(network, newLp);
         }
 
@@ -353,14 +350,7 @@ public class UpstreamNetworkMonitor {
 
         @Override
         public void onLost(Network network) {
-            checkExpectedThread();
             handleLost(mCallbackType, network);
-        }
-
-        private void checkExpectedThread() {
-            if (Looper.myLooper() != mHandler.getLooper()) {
-                Log.wtf(TAG, "Handling callback in unexpected thread.");
-            }
         }
     }
 
