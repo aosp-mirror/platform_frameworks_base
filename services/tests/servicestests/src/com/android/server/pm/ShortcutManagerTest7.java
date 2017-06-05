@@ -15,6 +15,7 @@
  */
 package com.android.server.pm;
 
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.array;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertContains;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertSuccess;
@@ -40,7 +41,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Unit test for "cmd shortcut"
+ * Unit test for "cmd shortcut" and "dumpsys shortcut".
  *
  * Launcher related commands are tested in
  */
@@ -336,4 +337,29 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
                     .areAllNotPinned();
         });
     }
+
+    public void testDumpsysArgs() {
+        checkDumpsysArgs(null, true, false, false);
+        checkDumpsysArgs(array("-u"), true, true, false);
+        checkDumpsysArgs(array("--uid"), true, true, false);
+
+        checkDumpsysArgs(array("-f"), true, false, true);
+        checkDumpsysArgs(array("--files"), true, false, true);
+
+        checkDumpsysArgs(array("-a"), true, true, true);
+        checkDumpsysArgs(array("--all"), true, true, true);
+
+        checkDumpsysArgs(array("-a", "-n"), false, true, true);
+        checkDumpsysArgs(array("-a", "--no-main"), false, true, true);
+    }
+
+    private void checkDumpsysArgs(String[] args, boolean expectMain, boolean expectUid,
+            boolean expectDumpFiles) {
+        String dump = dumpsys(args);
+
+        assertEquals(expectMain, dump.contains("Icon format: PNG"));
+        assertEquals(expectUid, dump.contains("SHORTCUT MANAGER UID STATES"));
+        assertEquals(expectDumpFiles, dump.contains("SHORTCUT MANAGER FILES"));
+    }
+
 }
