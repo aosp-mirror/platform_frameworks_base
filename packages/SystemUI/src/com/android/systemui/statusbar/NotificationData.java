@@ -24,6 +24,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
@@ -38,8 +40,11 @@ import android.widget.RemoteViews;
 import android.Manifest;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.systemui.Dependency;
+import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -339,6 +344,7 @@ public class NotificationData {
             mEntries.put(entry.notification.getKey(), entry);
         }
         mGroupManager.onEntryAdded(entry);
+
         updateRankingAndSort(mRankingMap);
     }
 
@@ -466,6 +472,10 @@ public class NotificationData {
         Collections.sort(mSortedAndFiltered, mRankingComparator);
     }
 
+    /**
+     * @param sbn
+     * @return true if this notification should NOT be shown right now
+     */
     public boolean shouldFilterOut(StatusBarNotification sbn) {
         if (!(mEnvironment.isDeviceProvisioned() ||
                 showNotificationEvenIfUnprovisioned(sbn))) {
@@ -487,6 +497,13 @@ public class NotificationData {
                 && mGroupManager.isChildInGroupWithSummary(sbn)) {
             return true;
         }
+
+        final ForegroundServiceController fsc = Dependency.get(ForegroundServiceController.class);
+        if (fsc.isDungeonNotification(sbn) && !fsc.isDungeonNeededForUser(sbn.getUserId())) {
+            // this is a foreground-service disclosure for a user that does not need to show one
+            return true;
+        }
+
         return false;
     }
 
