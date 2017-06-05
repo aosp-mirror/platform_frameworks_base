@@ -25,7 +25,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,13 +43,14 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.ViewState;
 
 import com.google.android.colorextraction.ColorExtractor;
+import com.google.android.colorextraction.ColorExtractor.OnColorsChangedListener;
 
 /**
  * Controls both the scrim behind the notifications and in front of the notifications (when a
  * security method gets shown).
  */
 public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
-        OnHeadsUpChangedListener, ColorExtractor.OnColorsChangedListener {
+        OnHeadsUpChangedListener, OnColorsChangedListener {
     public static final long ANIMATION_DURATION = 220;
     public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR
             = new PathInterpolator(0f, 0, 0.7f, 1f);
@@ -80,7 +80,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     private final ColorExtractor mColorExtractor;
     private ColorExtractor.GradientColors mLockColors;
+    private ColorExtractor.GradientColors mLockColorsDark;
     private ColorExtractor.GradientColors mSystemColors;
+    private ColorExtractor.GradientColors mSystemColorsDark;
     private boolean mNeedsDrawableColorUpdate;
 
     protected float mScrimBehindAlpha;
@@ -133,6 +135,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mColorExtractor.addOnColorsChangedListener(this);
         mLockColors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK);
         mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM);
+        // Darker gradient for the top scrim (mScrimInFront)
+        mLockColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
+                ColorExtractor.TYPE_DARK);
+        mSystemColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
+                ColorExtractor.TYPE_DARK);
         mNeedsDrawableColorUpdate = true;
 
         updateHeadsUpScrim(false);
@@ -142,8 +149,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public void setKeyguardShowing(boolean showing) {
         mKeyguardShowing = showing;
 
-        // Showing/hiding the keyguard means that scrim colors
-        // will probably have to be switched
+        // Showing/hiding the keyguard means that scrim colors have to be switched
         mNeedsDrawableColorUpdate = true;
         scheduleUpdate();
     }
@@ -301,11 +307,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         if (mNeedsDrawableColorUpdate) {
             mNeedsDrawableColorUpdate = false;
             if (mKeyguardShowing) {
-                mScrimInFront.setColors(mLockColors);
+                // Always animate color changes if we're seeing the keyguard
+                mScrimInFront.setColors(mLockColorsDark);
                 mScrimBehind.setColors(mLockColors);
             } else {
-                mScrimInFront.setColors(mSystemColors, true);
-                mScrimBehind.setColors(mSystemColors, true);
+                // Only animate scrim color if the scrim view is actually visible
+                boolean animateScrimInFront = mScrimInFront.getViewAlpha() != 0;
+                boolean animateScrimBehind = mScrimBehind.getViewAlpha() != 0;
+                mScrimInFront.setColors(mSystemColorsDark, animateScrimInFront);
+                mScrimBehind.setColors(mSystemColors, animateScrimBehind);
             }
         }
 
@@ -647,14 +657,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     @Override
-    public void onColorsChanged(ColorExtractor.GradientColors colors, int which) {
+    public void onColorsChanged(ColorExtractor colorExtractor, int which) {
         if ((which & WallpaperManager.FLAG_LOCK) != 0) {
-            mLockColors = colors;
+            mLockColors = colorExtractor.getColors(WallpaperManager.FLAG_LOCK,
+                    ColorExtractor.TYPE_NORMAL);
+            mLockColorsDark = colorExtractor.getColors(WallpaperManager.FLAG_LOCK,
+                    ColorExtractor.TYPE_DARK);
             mNeedsDrawableColorUpdate = true;
             scheduleUpdate();
         }
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
-            mSystemColors = colors;
+            mSystemColors = colorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
+                    ColorExtractor.TYPE_NORMAL);
+            mSystemColorsDark = colorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
+                    ColorExtractor.TYPE_DARK);
             mNeedsDrawableColorUpdate = true;
             scheduleUpdate();
         }
