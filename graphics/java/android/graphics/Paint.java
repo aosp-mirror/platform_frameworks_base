@@ -816,6 +816,27 @@ public class Paint {
     }
 
     /**
+     * Distance from top of the underline to the baseline. Positive values mean below the baseline.
+     * This method returns where the underline should be drawn independent of if the underlineText
+     * bit is set at the moment.
+     * @hide
+     */
+    public float getUnderlinePosition() {
+        // kStdUnderline_Offset = 1/9, defined in SkTextFormatParams.h
+        // TODO: replace with position from post and MVAR tables (b/62353930).
+        return (1.0f / 9.0f) * getTextSize();
+    }
+
+    /**
+     * @hide
+     */
+    public float getUnderlineThickness() {
+        // kStdUnderline_Thickness = 1/18, defined in SkTextFormatParams.h
+        // TODO: replace with thickness from post and MVAR tables (b/62353930).
+        return (1.0f / 18.0f) * getTextSize();
+    }
+
+    /**
      * Helper for setFlags(), setting or clearing the UNDERLINE_TEXT_FLAG bit
      *
      * @param underlineText true to set the underlineText bit in the paint's

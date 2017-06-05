@@ -705,9 +705,8 @@ class TextLine {
     }
 
     private static void drawUnderline(TextPaint wp, Canvas c, int color, float thickness,
-            float xleft, float xright, int baseline) {
-        // kStdUnderline_Offset = 1/9, defined in SkTextFormatParams.h
-        final float underlineTop = baseline + wp.baselineShift + (1.0f / 9.0f) * wp.getTextSize();
+            float xleft, float xright, float baseline) {
+        final float underlineTop = baseline + wp.baselineShift + wp.getUnderlinePosition();
 
         final int previousColor = wp.getColor();
         final Paint.Style previousStyle = wp.getStyle();
@@ -802,8 +801,6 @@ class TextLine {
             }
 
             if (numUnderlines != 0) {
-                // kStdUnderline_Thickness = 1/18, defined in SkTextFormatParams.h
-                final float defaultThickness = (1.0f / 18.0f) * wp.getTextSize();
                 for (int i = 0; i < numUnderlines; i++) {
                     final UnderlineInfo info = underlines.get(i);
 
@@ -826,11 +823,11 @@ class TextLine {
                     // setUnderLineText() are called. For backward compatibility, we need to draw
                     // both underlines, the one with custom color first.
                     if (info.underlineColor != 0) {
-                        drawUnderline(wp, c, wp.underlineColor, wp.underlineThickness,
+                        drawUnderline(wp, c, info.underlineColor, info.underlineThickness,
                                 underlineXLeft, underlineXRight, y);
                     }
                     if (info.isUnderlineText) {
-                        drawUnderline(wp, c, wp.getColor(), defaultThickness,
+                        drawUnderline(wp, c, wp.getColor(), ((Paint) wp).getUnderlineThickness(),
                                 underlineXLeft, underlineXRight, y);
                     }
                 }
