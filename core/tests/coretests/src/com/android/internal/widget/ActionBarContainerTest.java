@@ -60,11 +60,9 @@ public class ActionBarContainerTest extends AndroidTestCase {
         TestViewGroup viewGroup = new TestViewGroup(mContext);
         viewGroup.addView(mActionBarContainer);
 
-        ActionMode mode = mActionBarContainer.startActionModeForChild(
-                null, null, ActionMode.TYPE_FLOATING);
+        mActionBarContainer.startActionModeForChild(null, null, ActionMode.TYPE_FLOATING);
 
         // Should bubble up.
-        assertNotNull(mode);
         assertTrue(viewGroup.isStartActionModeForChildTypedCalled);
     }
 
