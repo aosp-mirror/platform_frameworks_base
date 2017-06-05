@@ -16,6 +16,8 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.ConnectivityManager.getNetworkTypeName;
+import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 
@@ -174,6 +176,41 @@ public class UpstreamNetworkMonitor {
 
     public NetworkState lookup(Network network) {
         return (network != null) ? mNetworkMap.get(network) : null;
+    }
+
+    // So many TODOs here, but chief among them is: make this functionality an
+    // integral part of this class such that whenever a higher priority network
+    // becomes available and useful we (a) file a request to keep it up as
+    // necessary and (b) change all upstream tracking state accordingly (by
+    // passing LinkProperties up to Tethering).
+    //
+    // Next TODO: return NetworkState instead of just the type.
+    public int selectPreferredUpstreamType(Iterable<Integer> preferredTypes) {
+        final TypeStatePair typeStatePair = findFirstAvailableUpstreamByType(
+                mNetworkMap.values(), preferredTypes);
+
+        mLog.log("preferred upstream type: " + getNetworkTypeName(typeStatePair.type));
+
+        switch (typeStatePair.type) {
+            case TYPE_MOBILE_DUN:
+            case TYPE_MOBILE_HIPRI:
+                // If we're on DUN, put our own grab on it.
+                registerMobileNetworkRequest();
+                break;
+            case TYPE_NONE:
+                break;
+            default:
+                /* If we've found an active upstream connection that's not DUN/HIPRI
+                 * we should stop any outstanding DUN/HIPRI start requests.
+                 *
+                 * If we found NONE we don't want to do this as we want any previous
+                 * requests to keep trying to bring up something we can use.
+                 */
+                releaseMobileNetworkRequest();
+                break;
+        }
+
+        return typeStatePair.type;
     }
 
     private void handleAvailable(int callbackType, Network network) {
@@ -364,5 +401,38 @@ public class UpstreamNetworkMonitor {
 
     private void notifyTarget(int which, NetworkState netstate) {
         mTarget.sendMessage(mWhat, which, 0, netstate);
+    }
+
+    static private class TypeStatePair {
+        public int type = TYPE_NONE;
+        public NetworkState ns = null;
+    }
+
+    static private TypeStatePair findFirstAvailableUpstreamByType(
+            Iterable<NetworkState> netStates, Iterable<Integer> preferredTypes) {
+        final TypeStatePair result = new TypeStatePair();
+
+        for (int type : preferredTypes) {
+            NetworkCapabilities nc;
+            try {
+                nc = ConnectivityManager.networkCapabilitiesForType(type);
+            } catch (IllegalArgumentException iae) {
+                Log.e(TAG, "No NetworkCapabilities mapping for legacy type: " +
+                       ConnectivityManager.getNetworkTypeName(type));
+                continue;
+            }
+
+            for (NetworkState value : netStates) {
+                if (!nc.satisfiedByNetworkCapabilities(value.networkCapabilities)) {
+                    continue;
+                }
+
+                result.type = type;
+                result.ns = value;
+                return result;
+            }
+        }
+
+        return result;
     }
 }
