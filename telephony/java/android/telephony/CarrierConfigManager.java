@@ -1129,6 +1129,8 @@ public class CarrierConfigManager {
     /** @hide */
     public static final int CDMA_ROAMING_MODE_AFFILIATED = 1;
     /** @hide */
+    public static final int IMSI_ENCRYPTION_DAYS_TIME_DISABLED = -1;
+    /** @hide */
     public static final int CDMA_ROAMING_MODE_ANY = 2;
     /**
      * Boolean indicating if support is provided for directly dialing FDN number from FDN list.
@@ -1446,6 +1448,23 @@ public class CarrierConfigManager {
     public static final String KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL =
             "disable_voice_barring_notification_bool";
 
+    /**
+     * URL from which the proto containing the public key of the Carrier used for
+     * IMSI encryption will be downloaded.
+     * @hide
+     */
+    public static final String IMSI_KEY_DOWNLOAD_URL_STRING = "imsi_key_download_url_string";
+
+    /**
+     * Time in days, after which the key will expire, and a new key will need to be downloaded.
+     * default value is {@link IMSI_ENCRYPTION_DAYS_TIME_DISABLED}, and indicates that IMSI
+     * encryption is not enabled by default for a carrier. Value of 0 indicates that the key
+     * does not expire.
+     * @hide
+     */
+    public static final String IMSI_KEY_EXPIRATION_DAYS_TIME_INT =
+            "imsi_key_expiration_days_time_int";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1693,6 +1712,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_LTE_EARFCNS_RSRP_BOOST_INT, 0);
         sDefaults.putStringArray(KEY_BOOSTED_LTE_EARFCNS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL, false);
+        sDefaults.putInt(IMSI_KEY_EXPIRATION_DAYS_TIME_INT, IMSI_ENCRYPTION_DAYS_TIME_DISABLED);
+        sDefaults.putString(IMSI_KEY_DOWNLOAD_URL_STRING, null);
     }
 
     /**
