@@ -6169,6 +6169,17 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public Region getCurrentImeTouchRegion() {
+        synchronized (mWindowMap) {
+            final Region r = new Region();
+            if (mInputMethodWindow != null) {
+                mInputMethodWindow.getTouchableRegion(r);
+            }
+            return r;
+        }
+    }
+
+    @Override
     public boolean hasNavigationBar() {
         return mPolicy.hasNavigationBar();
     }
