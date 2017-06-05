@@ -1487,6 +1487,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mHasUserChangedExpansion = true;
         mUserExpanded = userExpanded;
         onExpansionChanged(true /* userAction */, wasExpanded);
+        if (!wasExpanded && isExpanded()
+                && getActualHeight() != getIntrinsicHeight()) {
+            notifyHeightChanged(true /* needsAnimation */);
+        }
     }
 
     public void resetUserExpansion() {
@@ -2097,8 +2101,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         float x = event.getX();
         float y = event.getY();
         NotificationHeaderView header = getVisibleNotificationHeader();
-        if (header != null) {
-            return header.isInTouchRect(x - getTranslation(), y);
+        if (header != null && header.isInTouchRect(x - getTranslation(), y)) {
+            return true;
+        }
+        if ((!mIsSummaryWithChildren || mShowingPublic)
+                && getShowingLayout().disallowSingleClick(x, y)) {
+            return true;
         }
         return super.disallowSingleClick(event);
     }

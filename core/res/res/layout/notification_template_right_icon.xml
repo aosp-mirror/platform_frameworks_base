@@ -15,13 +15,27 @@
   ~ limitations under the License
   -->
 
-<ImageView android:id="@+id/right_icon" xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="40dp"
-    android:layout_height="40dp"
-    android:layout_marginEnd="@dimen/notification_content_margin_end"
-    android:layout_marginTop="36dp"
-    android:layout_gravity="top|end"
-    android:scaleType="centerCrop"
-    />
-
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/right_icon_container"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_gravity="top|end">
+    <ImageView android:id="@+id/right_icon"
+               android:layout_width="40dp"
+               android:layout_height="40dp"
+               android:layout_gravity="top|end"
+               android:layout_marginTop="36dp"
+               android:layout_marginEnd="@dimen/notification_content_margin_end"
+               android:scaleType="centerCrop"/>
+    <ImageView android:id="@+id/reply_icon_action"
+               android:layout_width="16dp"
+               android:layout_height="16dp"
+               android:layout_gravity="top|end"
+               android:layout_marginTop="64dp"
+               android:layout_marginEnd="12dp"
+               android:background="@drawable/notification_reply_background"
+               android:src="@drawable/ic_reply_notification"
+               android:scaleType="center"
+               visiblity="gone"/>
+</FrameLayout>
 

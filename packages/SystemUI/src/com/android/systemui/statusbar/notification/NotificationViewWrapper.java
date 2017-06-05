@@ -182,4 +182,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public boolean isDimmable() {
         return true;
     }
+
+    public boolean disallowSingleClick(float x, float y) {
+        return false;
+    }
 }
