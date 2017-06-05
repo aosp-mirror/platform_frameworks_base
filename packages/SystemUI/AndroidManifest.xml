@@ -195,6 +195,9 @@
     <!-- to access instant apps -->
     <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS" />
 
+    <!-- to change themes - light or dark -->
+    <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"

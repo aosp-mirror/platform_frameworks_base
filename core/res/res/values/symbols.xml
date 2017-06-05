@@ -2965,6 +2965,7 @@
   <java-symbol type="drawable" name="resolver_icon_placeholder" />
 
   <!-- Alert windows notification -->
+  <java-symbol type="string" name="alert_windows_notification_channel_group_name" />
   <java-symbol type="string" name="alert_windows_notification_channel_name" />
   <java-symbol type="string" name="alert_windows_notification_title" />
   <java-symbol type="string" name="alert_windows_notification_message" />

@@ -208,8 +208,15 @@ public:
 
     void detachAnimators() {
         // Remove animators from the list and post a delayed message in future to end the animator
+        // For infinite animators, remove the listener so we no longer hold a global ref to the AVD
+        // java object, and therefore the AVD objects in both native and Java can be properly
+        // released.
         for (auto& anim : mRunningVDAnimators) {
             detachVectorDrawableAnimator(anim.get());
+            anim->clearOneShotListener();
+        }
+        for (auto& anim : mPausedVDAnimators) {
+            anim->clearOneShotListener();
         }
         mRunningVDAnimators.clear();
         mPausedVDAnimators.clear();
@@ -674,6 +681,12 @@ static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
     proxy->setOpaque(opaque);
 }
 
+static void android_view_ThreadedRenderer_setWideGamut(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jboolean wideGamut) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->setWideGamut(wideGamut);
+}
+
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlongArray frameInfo, jint frameInfoSize) {
     LOG_ALWAYS_FATAL_IF(frameInfoSize != UI_THREAD_FRAME_INFO_SIZE,
@@ -975,6 +988,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetup", "(JFII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetLightCenter", "(JFFF)V", (void*) android_view_ThreadedRenderer_setLightCenter },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
+    { "nSetWideGamut", "(JZ)V", (void*) android_view_ThreadedRenderer_setWideGamut },
     { "nSyncAndDrawFrame", "(J[JI)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroy", "(JJ)V", (void*) android_view_ThreadedRenderer_destroy },
     { "nRegisterAnimatingRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_registerAnimatingRenderNode },

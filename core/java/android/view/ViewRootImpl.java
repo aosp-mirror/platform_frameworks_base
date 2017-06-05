@@ -35,11 +35,13 @@ import android.app.ResourcesManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -960,8 +962,12 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean hasSurfaceInsets = insets.left != 0 || insets.right != 0
                         || insets.top != 0 || insets.bottom != 0;
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE || hasSurfaceInsets;
+                final boolean wideGamut =
+                        attrs.getColorMode() == ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT;
+
                 mAttachInfo.mThreadedRenderer = ThreadedRenderer.create(mContext, translucent,
                         attrs.getTitle().toString());
+                mAttachInfo.mThreadedRenderer.setWideGamut(wideGamut);
                 if (mAttachInfo.mThreadedRenderer != null) {
                     mAttachInfo.mHardwareAccelerated =
                             mAttachInfo.mHardwareAccelerationRequested = true;
@@ -2651,6 +2657,15 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void onPreDraw(DisplayListCanvas canvas) {
+        // If mCurScrollY is not 0 then this influences the hardwareYOffset. The end result is we
+        // can apply offsets that are not handled by anything else, resulting in underdraw as
+        // the View is shifted (thus shifting the window background) exposing unpainted
+        // content. To handle this with minimal glitches we just clear to BLACK if the window
+        // is opaque. If it's not opaque then HWUI already internally does a glClear to
+        // transparent, so there's no risk of underdraw on non-opaque surfaces.
+        if (mCurScrollY != 0 && mHardwareYOffset != 0 && mAttachInfo.mThreadedRenderer.isOpaque()) {
+            canvas.drawColor(Color.BLACK);
+        }
         canvas.translate(-mHardwareXOffset, -mHardwareYOffset);
     }
 
@@ -2668,7 +2683,7 @@ public final class ViewRootImpl implements ViewParent,
     void outputDisplayList(View view) {
         view.mRenderNode.output();
         if (mAttachInfo.mThreadedRenderer != null) {
-            ((ThreadedRenderer)mAttachInfo.mThreadedRenderer).serializeDisplayListTree();
+            mAttachInfo.mThreadedRenderer.serializeDisplayListTree();
         }
     }
 

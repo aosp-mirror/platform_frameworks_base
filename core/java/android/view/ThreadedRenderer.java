@@ -358,11 +358,11 @@ public final class ThreadedRenderer {
     private long mNativeProxy;
     private boolean mInitialized = false;
     private RenderNode mRootNode;
-    private Choreographer mChoreographer;
     private boolean mRootNodeNeedsUpdate;
 
     private boolean mEnabled;
     private boolean mRequested = true;
+    private boolean mIsOpaque = false;
 
     ThreadedRenderer(Context context, boolean translucent, String name) {
         final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
@@ -377,6 +377,7 @@ public final class ThreadedRenderer {
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
         mRootNode.setClipToBounds(false);
+        mIsOpaque = !translucent;
         mNativeProxy = nCreateProxy(translucent, rootNodePtr);
         nSetName(mNativeProxy, name);
 
@@ -425,8 +426,6 @@ public final class ThreadedRenderer {
     /**
      * Indicates whether threaded rendering is currently requested but not
      * necessarily enabled yet.
-     *
-     * @return True to request threaded rendering, false otherwise.
      */
     void setRequested(boolean requested) {
         mRequested = requested;
@@ -593,7 +592,19 @@ public final class ThreadedRenderer {
      * Change the ThreadedRenderer's opacity
      */
     void setOpaque(boolean opaque) {
-        nSetOpaque(mNativeProxy, opaque && !mHasInsets);
+        mIsOpaque = opaque && !mHasInsets;
+        nSetOpaque(mNativeProxy, mIsOpaque);
+    }
+
+    boolean isOpaque() {
+        return mIsOpaque;
+    }
+
+    /**
+     * Enable/disable wide gamut rendering on this renderer.
+     */
+    void setWideGamut(boolean wideGamut) {
+        nSetWideGamut(mNativeProxy, wideGamut);
     }
 
     /**
@@ -933,11 +944,11 @@ public final class ThreadedRenderer {
             if (mInitialized) return;
             mInitialized = true;
             mAppContext = context.getApplicationContext();
-            initSched(context, renderProxy);
+            initSched(renderProxy);
             initGraphicsStats();
         }
 
-        private void initSched(Context context, long renderProxy) {
+        private void initSched(long renderProxy) {
             try {
                 int tid = nGetRenderThreadTid(renderProxy);
                 ActivityManager.getService().setRenderThread(tid);
@@ -1007,6 +1018,7 @@ public final class ThreadedRenderer {
     private static native void nSetLightCenter(long nativeProxy,
             float lightX, float lightY, float lightZ);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
+    private static native void nSetWideGamut(long nativeProxy, boolean wideGamut);
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
     private static native void nDestroy(long nativeProxy, long rootRenderNode);
     private static native void nRegisterAnimatingRenderNode(long rootRenderNode, long animatingNode);

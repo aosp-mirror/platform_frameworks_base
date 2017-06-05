@@ -44,7 +44,7 @@ public:
             FrameInfo* currentFrameInfo, bool* requireSwap) override;
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) override;
     DeferredLayerUpdater* createTextureLayer() override;
-    bool setSurface(Surface* window, SwapBehavior swapBehavior) override;
+    bool setSurface(Surface* window, SwapBehavior swapBehavior, ColorMode colorMode) override;
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
@@ -61,6 +61,8 @@ public:
     static void destroyLayer(RenderNode* node);
     static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
     static void invokeFunctor(const RenderThread& thread, Functor* functor);
+    static sk_sp<Bitmap> allocateHardwareBitmap(RenderThread& thread,
+            SkBitmap& skBitmap);
 
 private:
     EglManager& mEglManager;

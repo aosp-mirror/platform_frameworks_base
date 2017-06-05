@@ -69,7 +69,7 @@ namespace DumpFlags {
  */
 class ANDROID_API RenderProxy {
 public:
-    ANDROID_API RenderProxy(bool translucent, RenderNode* rootNode, IContextFactory* contextFactory);
+    ANDROID_API RenderProxy(bool opaque, RenderNode* rootNode, IContextFactory* contextFactory);
     ANDROID_API virtual ~RenderProxy();
 
     // Won't take effect until next EGLSurface creation
@@ -85,6 +85,7 @@ public:
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     ANDROID_API void setLightCenter(const Vector3& lightCenter);
     ANDROID_API void setOpaque(bool opaque);
+    ANDROID_API void setWideGamut(bool wideGamut);
     ANDROID_API int64_t* frameInfo();
     ANDROID_API int syncAndDrawFrame();
     ANDROID_API void destroy();

@@ -14,13 +14,18 @@
 
 package com.android.systemui;
 
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import android.app.Fragment;
+import android.app.Instrumentation;
 import android.support.test.InstrumentationRegistry;
 import android.testing.BaseFragmentTest;
 
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.leaks.LeakCheckedTest.SysuiLeakCheck;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 
@@ -33,6 +38,7 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
 
     protected final TestableDependency mDependency = new TestableDependency(mContext);
     protected SysuiTestableContext mSysuiContext;
+    private Instrumentation mRealInstrumentation;
 
     public SysuiBaseFragmentTest(Class<? extends Fragment> cls) {
         super(cls);
@@ -44,6 +50,20 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
         SystemUIFactory.createFromConfig(mContext);
         // TODO: Figure out another way to give reference to a SysuiTestableContext.
         mSysuiContext = (SysuiTestableContext) mContext;
+
+        mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
+        Instrumentation inst = spy(mRealInstrumentation);
+        when(inst.getContext()).thenThrow(new RuntimeException(
+                "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext"));
+        when(inst.getTargetContext()).thenThrow(new RuntimeException(
+                "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext"));
+        InstrumentationRegistry.registerInstance(inst, InstrumentationRegistry.getArguments());
+    }
+
+    @After
+    public void SysuiTeardown() {
+        InstrumentationRegistry.registerInstance(mRealInstrumentation,
+                InstrumentationRegistry.getArguments());
     }
 
     @Override

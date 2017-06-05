@@ -31,7 +31,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(TextureCache, clear) {
     SkBitmap skBitmap;
     SkImageInfo info = SkImageInfo::Make(100, 100, kN32_SkColorType, kPremul_SkAlphaType);
     skBitmap.setInfo(info);
-    sk_sp<Bitmap> hwBitmap(Bitmap::allocateHardwareBitmap(renderThread, skBitmap));
+    sk_sp<Bitmap> hwBitmap(renderThread.allocateHardwareBitmap(skBitmap));
     cache.get(hwBitmap.get());
     ASSERT_EQ(GpuMemoryTracker::getInstanceCount(GpuObjectType::Texture), initialCount + 1);
     cache.clear();

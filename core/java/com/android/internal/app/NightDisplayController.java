@@ -109,14 +109,36 @@ public final class NightDisplayController {
     }
 
     /**
-     * Sets whether Night display should be activated.
+     * Sets whether Night display should be activated. This also sets the last activated time.
      *
      * @param activated {@code true} if Night display should be activated
      * @return {@code true} if the activated value was set successfully
      */
     public boolean setActivated(boolean activated) {
+        if (isActivated() != activated) {
+            Secure.putLongForUser(mContext.getContentResolver(),
+                    Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, System.currentTimeMillis(),
+                    mUserId);
+        }
         return Secure.putIntForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_ACTIVATED, activated ? 1 : 0, mUserId);
+    }
+
+    /**
+     * Returns the time when Night display's activation state last changed, or {@code null} if it
+     * has never been changed.
+     */
+    public Calendar getLastActivatedTime() {
+        final ContentResolver cr = mContext.getContentResolver();
+        final long lastActivatedTimeMillis = Secure.getLongForUser(
+                cr, Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, -1, mUserId);
+        if (lastActivatedTimeMillis < 0) {
+            return null;
+        }
+
+        final Calendar lastActivatedTime = Calendar.getInstance();
+        lastActivatedTime.setTimeInMillis(lastActivatedTimeMillis);
+        return lastActivatedTime;
     }
 
     /**

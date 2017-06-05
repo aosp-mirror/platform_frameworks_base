@@ -45,6 +45,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -72,6 +73,7 @@ import java.util.Objects;
 public final class NotificationRecord {
     static final String TAG = "NotificationRecord";
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final int MAX_LOGTAG_LENGTH = 35;
     final StatusBarNotification sbn;
     final int mOriginalFlags;
     private final Context mContext;
@@ -126,6 +128,8 @@ public final class NotificationRecord {
     private boolean mShowBadge;
     private LogMaker mLogMaker;
     private Light mLight;
+    private String mGroupLogTag;
+    private String mChannelIdLogTag;
 
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
@@ -359,8 +363,13 @@ public final class NotificationRecord {
         }
     }
 
+    String formatRemoteViews(RemoteViews rv) {
+        if (rv == null) return "null";
+        return String.format("%s/0x%08x (%d bytes): %s",
+            rv.getPackage(), rv.getLayoutId(), rv.estimateMemoryUsage(), rv.toString());
+    }
+
     void dump(PrintWriter pw, String prefix, Context baseContext, boolean redact) {
-        prefix = prefix + "  ";
         final Notification notification = sbn.getNotification();
         final Icon icon = notification.getSmallIcon();
         String iconStr = String.valueOf(icon);
@@ -368,6 +377,7 @@ public final class NotificationRecord {
             iconStr += " / " + idDebugString(baseContext, icon.getResPackage(), icon.getResId());
         }
         pw.println(prefix + this);
+        prefix = prefix + "  ";
         pw.println(prefix + "uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
         pw.println(prefix + "icon=" + iconStr);
         pw.println(prefix + "pri=" + notification.priority);
@@ -391,8 +401,11 @@ public final class NotificationRecord {
         } else {
             pw.println("null");
         }
-        pw.println(prefix + "contentView=" + notification.contentView);
-        pw.println(prefix + String.format("color=0x%08x", notification.color));
+        pw.println(prefix + "contentView=" + formatRemoteViews(notification.contentView));
+        pw.println(prefix + "bigContentView=" + formatRemoteViews(notification.bigContentView));
+        pw.println(prefix + "headsUpContentView="
+                + formatRemoteViews(notification.headsUpContentView));
+        pw.print(prefix + String.format("color=0x%08x", notification.color));
         pw.println(prefix + "timeout="
                 + TimeUtils.formatForLogging(notification.getTimeoutAfter()));
         if (notification.actions != null && notification.actions.length > 0) {
@@ -739,6 +752,37 @@ public final class NotificationRecord {
         return sbn.getGroupKey();
     }
 
+    public void setOverrideGroupKey(String overrideGroupKey) {
+        sbn.setOverrideGroupKey(overrideGroupKey);
+        mGroupLogTag = null;
+    }
+
+    private String getGroupLogTag() {
+        if (mGroupLogTag == null) {
+            mGroupLogTag = shortenTag(sbn.getGroup());
+        }
+        return mGroupLogTag;
+    }
+
+    private String getChannelIdLogTag() {
+        if (mChannelIdLogTag == null) {
+            mChannelIdLogTag = shortenTag(mChannel.getId());
+        }
+        return mChannelIdLogTag;
+    }
+
+    private String shortenTag(String longTag) {
+        if (longTag == null) {
+            return null;
+        }
+        if (longTag.length() < MAX_LOGTAG_LENGTH) {
+            return longTag;
+        } else {
+            return longTag.substring(0, MAX_LOGTAG_LENGTH - 8) + "-" +
+                    Integer.toHexString(longTag.hashCode());
+        }
+    }
+
     public boolean isImportanceFromUser() {
         return mImportance == mUserImportance;
     }
@@ -796,16 +840,23 @@ public final class NotificationRecord {
 
     public LogMaker getLogMaker(long now) {
         if (mLogMaker == null) {
+            // initialize fields that only change on update (so a new record)
             mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
                     .setPackageName(sbn.getPackageName())
                     .addTaggedData(MetricsEvent.NOTIFICATION_ID, sbn.getId())
-                    .addTaggedData(MetricsEvent.NOTIFICATION_TAG, sbn.getTag());
+                    .addTaggedData(MetricsEvent.NOTIFICATION_TAG, sbn.getTag())
+                    .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID, getChannelIdLogTag());
         }
+        // reset fields that can change between updates, or are used by multiple logs
         return mLogMaker
                 .clearCategory()
                 .clearType()
                 .clearSubtype()
                 .clearTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX)
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE, mImportance)
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID, getGroupLogTag())
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_SUMMARY,
+                        sbn.getNotification().isGroupSummary() ? 1 : 0)
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, getLifespanMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_UPDATE_MILLIS, getFreshnessMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS, getExposureMs(now));

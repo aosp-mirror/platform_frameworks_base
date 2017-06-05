@@ -1956,12 +1956,12 @@ public class WebView extends AbsoluteLayout
      * messages to a certain target origin. See
      * <a href="https://html.spec.whatwg.org/multipage/comms.html#posting-messages">
      * HTML5 spec</a> for how target origin can be used.
+     * <p>
+     * A target origin can be set as a wildcard ("*"). However this is not recommended.
+     * See the page above for security issues.
      *
      * @param message the WebMessage
-     * @param targetOrigin the target origin. This is the origin of the page
-     *          that is intended to receive the message. For best security
-     *          practices, the user should not specify a wildcard (*) when
-     *          specifying the origin.
+     * @param targetOrigin the target origin.
      */
     public void postWebMessage(WebMessage message, Uri targetOrigin) {
         checkThread();

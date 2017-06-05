@@ -56,20 +56,8 @@ import java.util.concurrent.TimeUnit;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class UserLifecycleTest {
-    private final int TIMEOUT_REMOVE_USER_MS = 4 * 1000; // 4 sec
-    private final int CHECK_USER_REMOVED_INTERVAL_MS = 200; // 0.2 sec
-
-    private final int TIMEOUT_USER_START_SEC = 4; // 4 sec
-
-    private final int TIMEOUT_USER_SWITCH_SEC = 8; // 8 sec
-
-    private final int TIMEOUT_USER_STOP_SEC = 1; // 1 sec
-
-    private final int TIMEOUT_MANAGED_PROFILE_UNLOCK_SEC = 2; // 2 sec
-
-    private final int TIMEOUT_LOCKED_BOOT_COMPLETE_MS = 5 * 1000; // 5 sec
-
-    private final int TIMEOUT_EPHERMAL_USER_STOP_SEC = 6; // 6 sec
+    private final int TIMEOUT_IN_SECOND = 10;
+    private final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
 
     private UserManager mUm;
     private ActivityManager mAm;
@@ -109,7 +97,7 @@ public class UserLifecycleTest {
             final CountDownLatch latch = new CountDownLatch(1);
             registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userInfo.id);
             mIam.startUserInBackground(userInfo.id);
-            latch.await(TIMEOUT_USER_START_SEC, TimeUnit.SECONDS);
+            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
 
             mState.pauseTiming();
             removeUser(userInfo.id);
@@ -142,10 +130,10 @@ public class UserLifecycleTest {
             final CountDownLatch latch = new CountDownLatch(1);
             registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userInfo.id);
             mIam.startUserInBackground(userInfo.id);
-            latch.await(TIMEOUT_USER_START_SEC, TimeUnit.SECONDS);
+            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
             mState.resumeTiming();
 
-            stopUser(userInfo.id);
+            stopUser(userInfo.id, false);
 
             mState.pauseTiming();
             removeUser(userInfo.id);
@@ -164,7 +152,7 @@ public class UserLifecycleTest {
             mState.resumeTiming();
 
             mAm.switchUser(userInfo.id);
-            latch.await(TIMEOUT_LOCKED_BOOT_COMPLETE_MS, TimeUnit.SECONDS);
+            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
 
             mState.pauseTiming();
             switchUser(startUser);
@@ -184,7 +172,7 @@ public class UserLifecycleTest {
             mState.resumeTiming();
 
             mIam.startUserInBackground(userInfo.id);
-            latch.await(TIMEOUT_MANAGED_PROFILE_UNLOCK_SEC, TimeUnit.SECONDS);
+            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
 
             mState.pauseTiming();
             removeUser(userInfo.id);
@@ -215,10 +203,30 @@ public class UserLifecycleTest {
             mState.resumeTiming();
 
             mAm.switchUser(startUser);
-            latch.await(TIMEOUT_EPHERMAL_USER_STOP_SEC, TimeUnit.SECONDS);
+            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
 
             mState.pauseTiming();
-            switchLatch.await(TIMEOUT_USER_SWITCH_SEC, TimeUnit.SECONDS);
+            switchLatch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            removeUser(userInfo.id);
+            mState.resumeTiming();
+        }
+    }
+
+    @Test
+    public void managedProfileStoppedPerf() throws Exception {
+        while (mState.keepRunning()) {
+            mState.pauseTiming();
+            final UserInfo userInfo = mUm.createProfileForUser("TestUser",
+                    UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
+            final CountDownLatch latch = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch, userInfo.id);
+            mIam.startUserInBackground(userInfo.id);
+            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            mState.resumeTiming();
+
+            stopUser(userInfo.id, true);
+
+            mState.pauseTiming();
             removeUser(userInfo.id);
             mState.resumeTiming();
         }
@@ -228,12 +236,12 @@ public class UserLifecycleTest {
         final CountDownLatch latch = new CountDownLatch(1);
         registerUserSwitchObserver(latch, null, userId);
         mAm.switchUser(userId);
-        latch.await(TIMEOUT_USER_SWITCH_SEC, TimeUnit.SECONDS);
+        latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
     }
 
-    private void stopUser(int userId) throws Exception {
+    private void stopUser(int userId, boolean force) throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
-        mIam.stopUser(userId, false /* force */, new IStopUserCallback.Stub() {
+        mIam.stopUser(userId, force /* force */, new IStopUserCallback.Stub() {
             @Override
             public void userStopped(int userId) throws RemoteException {
                 latch.countDown();
@@ -243,7 +251,7 @@ public class UserLifecycleTest {
             public void userStopAborted(int userId) throws RemoteException {
             }
         });
-        latch.await(TIMEOUT_USER_STOP_SEC, TimeUnit.SECONDS);
+        latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
     }
 
     private void registerUserSwitchObserver(final CountDownLatch switchLatch,
@@ -283,9 +291,10 @@ public class UserLifecycleTest {
         try {
             mUm.removeUser(userId);
             final long startTime = System.currentTimeMillis();
+            final long timeoutInMs = TIMEOUT_IN_SECOND * 1000;
             while (mUm.getUserInfo(userId) != null &&
-                    System.currentTimeMillis() - startTime < TIMEOUT_REMOVE_USER_MS) {
-                Thread.sleep(CHECK_USER_REMOVED_INTERVAL_MS);
+                    System.currentTimeMillis() - startTime < timeoutInMs) {
+                TimeUnit.MILLISECONDS.sleep(CHECK_USER_REMOVED_INTERVAL_MS);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

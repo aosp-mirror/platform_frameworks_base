@@ -131,13 +131,15 @@ DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
 void SkiaVulkanPipeline::onStop() {
 }
 
-bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior) {
+bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
+        ColorMode colorMode) {
     if (mVkSurface) {
         mVkManager.destroySurface(mVkSurface);
         mVkSurface = nullptr;
     }
 
     if (surface) {
+        // TODO: handle color mode
         mVkSurface = mVkManager.createSurface(surface);
     }
 
@@ -156,6 +158,25 @@ void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* func
     // TODO: we currently don't support OpenGL WebView's
     DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
     (*functor)(mode, nullptr);
+}
+
+sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThread& renderThread,
+        SkBitmap& skBitmap) {
+    //TODO: implement this function for Vulkan pipeline
+    //code below is a hack to avoid crashing because of missing HW Bitmap support
+    sp<GraphicBuffer> buffer = new GraphicBuffer(skBitmap.info().width(), skBitmap.info().height(),
+            PIXEL_FORMAT_RGBA_8888,
+            GraphicBuffer::USAGE_HW_TEXTURE |
+            GraphicBuffer::USAGE_SW_WRITE_NEVER |
+            GraphicBuffer::USAGE_SW_READ_NEVER,
+            std::string("SkiaVulkanPipeline::allocateHardwareBitmap pid [")
+            + std::to_string(getpid()) + "]");
+    status_t error = buffer->initCheck();
+    if (error < 0) {
+        ALOGW("SkiaVulkanPipeline::allocateHardwareBitmap() failed in GraphicBuffer.create()");
+        return nullptr;
+    }
+    return sk_sp<Bitmap>(new Bitmap(buffer.get(), skBitmap.info()));
 }
 
 } /* namespace skiapipeline */

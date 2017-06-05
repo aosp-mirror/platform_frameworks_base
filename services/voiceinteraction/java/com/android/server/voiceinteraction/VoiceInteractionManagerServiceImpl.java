@@ -16,6 +16,8 @@
 
 package com.android.server.voiceinteraction;
 
+import static android.app.ActivityManager.START_ASSISTANT_HIDDEN_SESSION;
+import static android.app.ActivityManager.START_ASSISTANT_NOT_ACTIVE_SESSION;
 import static android.app.ActivityManager.START_VOICE_HIDDEN_SESSION;
 import static android.app.ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
 
@@ -212,11 +214,11 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         try {
             if (mActiveSession == null || token != mActiveSession.mToken) {
                 Slog.w(TAG, "startAssistantActivity does not match active session");
-                return START_VOICE_NOT_ACTIVE_SESSION;
+                return START_ASSISTANT_NOT_ACTIVE_SESSION;
             }
             if (!mActiveSession.mShown) {
                 Slog.w(TAG, "startAssistantActivity not allowed on hidden session");
-                return START_VOICE_HIDDEN_SESSION;
+                return START_ASSISTANT_HIDDEN_SESSION;
             }
             intent = new Intent(intent);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

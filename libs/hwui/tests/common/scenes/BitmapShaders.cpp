@@ -45,10 +45,8 @@ public:
             skCanvas.drawRect(SkRect::MakeXYWH(100, 100, 100, 100), skPaint);
         });
 
-        SkBitmap bitmap;
         SkPaint paint;
-        hwuiBitmap->getSkBitmapForShaders(&bitmap);
-        sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
+        sk_sp<SkImage> image = hwuiBitmap->makeImage();
         sk_sp<SkShader> repeatShader = image->makeShader(
                 SkShader::TileMode::kRepeat_TileMode,
                 SkShader::TileMode::kRepeat_TileMode,

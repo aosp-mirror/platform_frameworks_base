@@ -232,6 +232,17 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testBindNotification_UnblockablePackageDoesNotUseChannelName() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
+                mNotificationChannel.getImportance(), mSbn, null, null, null,
+                null, Collections.singleton(TEST_PACKAGE_NAME));
+        final TextView textView = (TextView) mNotificationInfo.findViewById(R.id.channel_name);
+        assertEquals(mContext.getString(R.string.notification_header_default_channel),
+                textView.getText());
+    }
+
+    @Test
     public void testBindNotification_DefaultChannelUsesNameWhenMoreThanOneChannelExists()
             throws Exception {
         when(mMockINotificationManager.getNumNotificationChannelsForPackage(
@@ -329,6 +340,21 @@ public class NotificationInfoTest extends SysuiTestCase {
         final TextView settingsButton =
                 (TextView) mNotificationInfo.findViewById(R.id.more_settings);
         assertEquals(getStringById(R.string.notification_all_categories), settingsButton.getText());
+    }
+
+    @Test
+    public void testBindNotification_SettingsTextWithMultipleChannelsForUnblockableApp()
+            throws Exception {
+        when(mMockINotificationManager.getNumNotificationChannelsForPackage(
+                eq(TEST_PACKAGE_NAME), eq(TEST_UID), anyBoolean())).thenReturn(2);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
+                mNotificationChannel.getImportance(), mSbn,
+                (View v, NotificationChannel c, int appUid) -> {
+                }, null, null, null, Collections.singleton(TEST_PACKAGE_NAME));
+        final TextView settingsButton =
+                (TextView) mNotificationInfo.findViewById(R.id.more_settings);
+        assertEquals(getStringById(R.string.notification_more_settings), settingsButton.getText());
     }
 
     @Test
@@ -499,6 +525,19 @@ public class NotificationInfoTest extends SysuiTestCase {
         final TextView numChannelsView =
                 (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
         assertEquals(numChannelsView.getVisibility(), View.GONE);
+    }
+
+    @Test
+    public void testbindNotification_UnblockableTextVisibleWhenAppUnblockable() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, Arrays.asList(mNotificationChannel),
+                mNotificationChannel.getImportance(), mSbn, null, null, null,
+                null, Collections.singleton(TEST_PACKAGE_NAME));
+        final TextView numChannelsView =
+                (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
+        assertEquals(View.VISIBLE, numChannelsView.getVisibility());
+        assertEquals(mContext.getString(R.string.notification_unblockable_desc),
+                numChannelsView.getText());
     }
 
     @Test

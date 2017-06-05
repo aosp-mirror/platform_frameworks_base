@@ -51,10 +51,13 @@
         <font weight="300" style="italic">RobotoCondensed-LightItalic.ttf</font>
         <font weight="400" style="normal">RobotoCondensed-Regular.ttf</font>
         <font weight="400" style="italic">RobotoCondensed-Italic.ttf</font>
+        <font weight="500" style="normal">RobotoCondensed-Medium.ttf</font>
+        <font weight="500" style="italic">RobotoCondensed-MediumItalic.ttf</font>
         <font weight="700" style="normal">RobotoCondensed-Bold.ttf</font>
         <font weight="700" style="italic">RobotoCondensed-BoldItalic.ttf</font>
     </family>
     <alias name="sans-serif-condensed-light" to="sans-serif-condensed" weight="300" />
+    <alias name="sans-serif-condensed-medium" to="sans-serif-condensed" weight="500" />
 
     <family name="serif">
         <font weight="400" style="normal">NotoSerif-Regular.ttf</font>

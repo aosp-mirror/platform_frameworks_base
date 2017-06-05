@@ -16,8 +16,12 @@
 
 #include "RenderThread.h"
 
-#include "../renderstate/RenderState.h"
-#include "../pipeline/skia/SkiaOpenGLReadback.h"
+#include "hwui/Bitmap.h"
+#include "renderstate/RenderState.h"
+#include "renderthread/OpenGLPipeline.h"
+#include "pipeline/skia/SkiaOpenGLReadback.h"
+#include "pipeline/skia/SkiaOpenGLPipeline.h"
+#include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "CanvasContext.h"
 #include "EglManager.h"
 #include "OpenGLReadback.h"
@@ -431,6 +435,22 @@ RenderTask* RenderThread::nextTask(nsecs_t* nextWakeup) {
         *nextWakeup = mNextWakeup;
     }
     return next;
+}
+
+sk_sp<Bitmap> RenderThread::allocateHardwareBitmap(SkBitmap& skBitmap) {
+    auto renderType = Properties::getRenderPipelineType();
+    switch (renderType) {
+        case RenderPipelineType::OpenGL:
+            return OpenGLPipeline::allocateHardwareBitmap(*this, skBitmap);
+        case RenderPipelineType::SkiaGL:
+            return skiapipeline::SkiaOpenGLPipeline::allocateHardwareBitmap(*this, skBitmap);
+        case RenderPipelineType::SkiaVulkan:
+            return skiapipeline::SkiaVulkanPipeline::allocateHardwareBitmap(*this, skBitmap);
+        default:
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            break;
+    }
+    return nullptr;
 }
 
 } /* namespace renderthread */

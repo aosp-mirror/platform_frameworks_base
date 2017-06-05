@@ -18,6 +18,9 @@ package android.net;
 
 import android.net.Network;
 import android.net.IpSecConfig;
+import android.net.IpSecUdpEncapResponse;
+import android.net.IpSecSpiResponse;
+import android.net.IpSecTransformResponse;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -27,16 +30,16 @@ import android.os.ParcelFileDescriptor;
  */
 interface IIpSecService
 {
-    Bundle reserveSecurityParameterIndex(
+    IpSecSpiResponse reserveSecurityParameterIndex(
             int direction, in String remoteAddress, int requestedSpi, in IBinder binder);
 
     void releaseSecurityParameterIndex(int resourceId);
 
-    Bundle openUdpEncapsulationSocket(int port, in IBinder binder);
+    IpSecUdpEncapResponse openUdpEncapsulationSocket(int port, in IBinder binder);
 
-    void closeUdpEncapsulationSocket(in ParcelFileDescriptor socket);
+    void closeUdpEncapsulationSocket(int resourceId);
 
-    Bundle createTransportModeTransform(in IpSecConfig c, in IBinder binder);
+    IpSecTransformResponse createTransportModeTransform(in IpSecConfig c, in IBinder binder);
 
     void deleteTransportModeTransform(int transformId);
 

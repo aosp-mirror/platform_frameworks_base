@@ -37,6 +37,18 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s દ્વારા કનેક્ટ થયેલ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s દ્વારા ઉપલબ્ધ"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"કનેક્ટ કર્યું, કોઈ ઇન્ટરનેટ નથી"</string>
+    <!-- no translation found for speed_label_very_slow (1867055264243608530) -->
+    <skip />
+    <!-- no translation found for speed_label_slow (813109590815810235) -->
+    <skip />
+    <!-- no translation found for speed_label_okay (5941436233638654215) -->
+    <skip />
+    <!-- no translation found for speed_label_medium (3175763313268941953) -->
+    <skip />
+    <!-- no translation found for speed_label_fast (7715732164050975057) -->
+    <skip />
+    <!-- no translation found for speed_label_very_fast (2265363430784523409) -->
+    <skip />
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ડિસ્કનેક્ટ કર્યું"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"ડિસ્કનેક્ટ થઈ રહ્યું છે..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"કનેક્ટ થઈ રહ્યું છે…"</string>
@@ -47,17 +59,21 @@
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"કનેક્ટ કર્યું (કોઇ સંદેશ ઍક્સેસ નથી)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"કનેક્ટ કરેલ (કોઈ ફોન અથવા મીડિયા નથી)"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"મીડિયા ઑડિઓ"</string>
-    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"ફોન ઑડિઓ"</string>
+    <!-- no translation found for bluetooth_profile_headset (7815495680863246034) -->
+    <skip />
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ફાઇલ સ્થાનાંતરણ"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ઇનપુટ ઉપકરણ"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ઇન્ટરનેટ ઍક્સેસ"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"સંપર્ક શેરિંગ"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"સંપર્ક શેરિંગ માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ઇન્ટરનેટ કનેક્શન શેરિંગ"</string>
-    <string name="bluetooth_profile_map" msgid="5465271250454324383">"સંદેશ ઍક્સેસ"</string>
+    <!-- no translation found for bluetooth_profile_map (1019763341565580450) -->
+    <skip />
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM ઍક્સેસ"</string>
-    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"ઉચ્ચ ગુણવત્તાવાળા ઑડિયોનો ઉપયોગ કરો: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"ઉચ્ચ ગુણવત્તાવાળા ઑડિયોનો ઉપયોગ કરો"</string>
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality (5444517801472820055) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (8510588052415438887) -->
+    <skip />
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"મીડિયા ઑડિઓ સાથે કનેક્ટ કર્યુ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ફોન ઑડિઓ સાથે કનેક્ટ થયાં"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ફાઇલ સ્થાનાંતરણ સેવાથી કનેક્ટ થયાં"</string>

@@ -86,23 +86,17 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
         textureMatrix.mapRect(&skiaSrcRect);
 
         if (skiaSrcRect.intersect(bufferRect)) {
-            SkPoint srcOrigin = SkPoint::Make(skiaSrcRect.fLeft, skiaSrcRect.fTop);
+            // we render in an offscreen buffer to scale and to avoid an issue b/62262733
+            // with reading incorrect data from EGLImage backed SkImage (likely a driver bug)
+            sk_sp<SkSurface> scaledSurface = SkSurface::MakeRenderTarget(
+                    grContext.get(), SkBudgeted::kYes, bitmap->info());
+            SkPaint paint;
+            paint.setBlendMode(SkBlendMode::kSrc);
+            scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect,
+                    SkRect::MakeWH(bitmap->width(), bitmap->height()), &paint);
+            image = scaledSurface->makeImageSnapshot();
 
-            // if we need to scale the result we must render to an offscreen buffer
-            if (bitmap->width() != skiaSrcRect.width()
-                    || bitmap->height() != skiaSrcRect.height()) {
-                sk_sp<SkSurface> scaledSurface = SkSurface::MakeRenderTarget(
-                        grContext.get(), SkBudgeted::kYes, bitmap->info());
-                SkPaint paint;
-                paint.setBlendMode(SkBlendMode::kSrc);
-                scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect,
-                        SkRect::MakeWH(bitmap->width(), bitmap->height()), &paint);
-                image = scaledSurface->makeImageSnapshot();
-                srcOrigin.set(0,0);
-            }
-
-            if (image->readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(),
-                                  srcOrigin.fX, srcOrigin.fY)) {
+            if (image->readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
                 copyResult = CopyResult::Success;
             }
         }

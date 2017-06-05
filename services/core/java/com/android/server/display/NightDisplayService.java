@@ -285,12 +285,6 @@ public final class NightDisplayService extends SystemService
         if (mIsActivated == null || mIsActivated != activated) {
             Slog.i(TAG, activated ? "Turning on night display" : "Turning off night display");
 
-            if (mIsActivated != null) {
-                Secure.putLongForUser(getContext().getContentResolver(),
-                        Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, System.currentTimeMillis(),
-                        mCurrentUser);
-            }
-
             mIsActivated = activated;
 
             if (mAutoMode != null) {
@@ -430,19 +424,6 @@ public final class NightDisplayService extends SystemService
         outTemp[10] = blue;
     }
 
-    private Calendar getLastActivatedTime() {
-        final ContentResolver cr = getContext().getContentResolver();
-        final long lastActivatedTimeMillis = Secure.getLongForUser(
-                cr, Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, -1, mCurrentUser);
-        if (lastActivatedTimeMillis < 0) {
-            return null;
-        }
-
-        final Calendar lastActivatedTime = Calendar.getInstance();
-        lastActivatedTime.setTimeInMillis(lastActivatedTimeMillis);
-        return lastActivatedTime;
-    }
-
     private abstract class AutoMode implements NightDisplayController.Callback {
         public abstract void onStart();
 
@@ -522,7 +503,7 @@ public final class NightDisplayService extends SystemService
             mStartTime = mController.getCustomStartTime();
             mEndTime = mController.getCustomEndTime();
 
-            mLastActivatedTime = getLastActivatedTime();
+            mLastActivatedTime = mController.getLastActivatedTime();
 
             // Force an update to initialize state.
             updateActivated();
@@ -538,7 +519,7 @@ public final class NightDisplayService extends SystemService
 
         @Override
         public void onActivated(boolean activated) {
-            mLastActivatedTime = getLastActivatedTime();
+            mLastActivatedTime = mController.getLastActivatedTime();
             updateNextAlarm(activated, Calendar.getInstance());
         }
 
@@ -579,7 +560,7 @@ public final class NightDisplayService extends SystemService
             }
 
             boolean activate = state.isNight();
-            final Calendar lastActivatedTime = getLastActivatedTime();
+            final Calendar lastActivatedTime = mController.getLastActivatedTime();
             if (lastActivatedTime != null) {
                 final Calendar now = Calendar.getInstance();
                 final Calendar sunrise = state.sunrise();

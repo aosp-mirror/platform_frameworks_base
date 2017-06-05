@@ -41,12 +41,15 @@ public:
             FrameInfo* currentFrameInfo, bool* requireSwap) override;
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) override;
     DeferredLayerUpdater* createTextureLayer() override;
-    bool setSurface(Surface* window, renderthread::SwapBehavior swapBehavior) override;
+    bool setSurface(Surface* window, renderthread::SwapBehavior swapBehavior,
+            renderthread::ColorMode colorMode) override;
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
+    static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,
+            SkBitmap& skBitmap);
 
 private:
     renderthread::VulkanManager& mVkManager;

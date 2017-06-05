@@ -932,7 +932,7 @@ public class ActivityOptions {
      * @hide
      */
     public GraphicBuffer getThumbnail() {
-        return mThumbnail.createGraphicBufferHandle();
+        return mThumbnail != null ? mThumbnail.createGraphicBufferHandle() : null;
     }
 
     /** @hide */
@@ -1243,11 +1243,13 @@ public class ActivityOptions {
             case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
                 // Once we parcel the thumbnail for transfering over to the system, create a copy of
                 // the bitmap to a hardware bitmap and pass through the GraphicBuffer
-                if (mThumbnail == null) {
-                    b.putParcelable(KEY_ANIM_THUMBNAIL, null);
-                } else {
+                if (mThumbnail != null) {
                     final Bitmap hwBitmap = mThumbnail.copy(Config.HARDWARE, true /* immutable */);
-                    b.putParcelable(KEY_ANIM_THUMBNAIL, hwBitmap.createGraphicBufferHandle());
+                    if (hwBitmap != null) {
+                        b.putParcelable(KEY_ANIM_THUMBNAIL, hwBitmap.createGraphicBufferHandle());
+                    } else {
+                        Slog.w(TAG, "Failed to copy thumbnail");
+                    }
                 }
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);

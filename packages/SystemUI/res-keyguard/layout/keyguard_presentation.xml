@@ -41,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal|top"
-                android:textColor="@color/clock_white"
+                android:textColor="?attr/bgProtectTextColor"
                 android:singleLine="true"
                 style="@style/widget_big_thin"
                 android:format12Hour="@string/keyguard_widget_12_hours_format"

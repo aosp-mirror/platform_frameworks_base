@@ -39,7 +39,7 @@ public:
 
     bool hasEglContext();
 
-    EGLSurface createSurface(EGLNativeWindowType window);
+    EGLSurface createSurface(EGLNativeWindowType window, bool wideColorGamut);
     void destroySurface(EGLSurface surface);
 
     void destroy();
@@ -68,7 +68,7 @@ private:
 
     void initExtensions();
     void createPBufferSurface();
-    void loadConfig();
+    void loadConfigs();
     void createContext();
     EGLint queryBufferAge(EGLSurface surface);
 
@@ -76,6 +76,7 @@ private:
 
     EGLDisplay mEglDisplay;
     EGLConfig mEglConfig;
+    EGLConfig mEglConfigWideGamut;
     EGLContext mEglContext;
     EGLSurface mPBufferSurface;
 

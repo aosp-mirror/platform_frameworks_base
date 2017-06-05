@@ -1903,6 +1903,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
+        @TestApi
         public CharSequence accessibilityTitle;
 
         /**
@@ -2089,6 +2090,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(needsMenuKey);
             out.writeInt(accessibilityIdOfAnchor);
             TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
+            out.writeInt(mColorMode);
             out.writeLong(hideTimeoutMilliseconds);
         }
 
@@ -2143,6 +2145,7 @@ public interface WindowManager extends ViewManager {
             needsMenuKey = in.readInt();
             accessibilityIdOfAnchor = in.readInt();
             accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            mColorMode = in.readInt();
             hideTimeoutMilliseconds = in.readLong();
         }
 
@@ -2185,7 +2188,10 @@ public interface WindowManager extends ViewManager {
         /** {@hide} */
         public static final int ACCESSIBILITY_ANCHOR_CHANGED = 1 << 24;
         /** {@hide} */
+        @TestApi
         public static final int ACCESSIBILITY_TITLE_CHANGED = 1 << 25;
+        /** {@hide} */
+        public static final int COLOR_MODE_CHANGED = 1 << 26;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
@@ -2362,6 +2368,11 @@ public interface WindowManager extends ViewManager {
                 // NOTE: accessibilityTitle only copied if the originator set one.
                 accessibilityTitle = o.accessibilityTitle;
                 changes |= ACCESSIBILITY_TITLE_CHANGED;
+            }
+
+            if (mColorMode != o.mColorMode) {
+                mColorMode = o.mColorMode;
+                changes |= COLOR_MODE_CHANGED;
             }
 
             // This can't change, it's only set at window creation time.

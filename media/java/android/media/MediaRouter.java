@@ -415,8 +415,6 @@ public class MediaRouter {
             }
             final ArrayList<MediaRouterClientState.RouteInfo> globalRoutes =
                     mClientState != null ? mClientState.routes : null;
-            final String globallySelectedRouteId = mClientState != null ?
-                    mClientState.globallySelectedRouteId : null;
 
             // Add or update routes.
             final int globalRouteCount = globalRoutes != null ? globalRoutes.size() : 0;
@@ -429,25 +427,6 @@ public class MediaRouter {
                 } else {
                     updateGlobalRoute(route, globalRoute);
                 }
-            }
-
-            // Synchronize state with the globally selected route.
-            if (globallySelectedRouteId != null) {
-                final RouteInfo route = findGlobalRoute(globallySelectedRouteId);
-                if (route == null) {
-                    Log.w(TAG, "Could not find new globally selected route: "
-                            + globallySelectedRouteId);
-                } else if (route != mSelectedRoute) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Selecting new globally selected route: " + route);
-                    }
-                    selectRouteStatic(route.mSupportedTypes, route, false);
-                }
-            } else if (mSelectedRoute != null && mSelectedRoute.mGlobalRouteId != null) {
-                if (DEBUG) {
-                    Log.d(TAG, "Unselecting previous globally selected route: " + mSelectedRoute);
-                }
-                selectDefaultRouteStatic();
             }
 
             // Remove defunct routes.

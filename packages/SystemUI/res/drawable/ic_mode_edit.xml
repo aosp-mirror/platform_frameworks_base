@@ -1,5 +1,5 @@
 <!--
-    Copyright (C) 2016 The Android Open Source Project
+    Copyright (C) 2017 The Android Open Source Project
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -21,5 +21,5 @@
         android:tint="?android:attr/colorControlNormal">
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M3.0,17.25L3.0,21.0l3.75,0.0L17.81,9.94l-3.75,-3.75L3.0,17.25zM20.71,7.04c0.39,-0.3 0.39,-1.02 0.0,-1.41l-2.34,-2.34c-0.39,-0.39 -1.02,-0.39 -1.41,0.0l-1.83,1.83 3.75,3.75 1.83,-1.83z"/>
+        android:pathData="M3,18.08v2.42c0,0.28 0.22,0.5 0.5,0.5h2.42c0.53,0 1.04,-0.21 1.41,-0.59L17.81,9.94l-3.75,-3.75L3.59,16.66c-0.38,0.38 -0.59,0.89 -0.59,1.42zM20.71,7.04a0.996,0.996 0,0 0,0 -1.41l-2.34,-2.34a0.996,0.996 0,0 0,-1.41 0l-1.83,1.83 3.75,3.75 1.83,-1.83z" />
 </vector>

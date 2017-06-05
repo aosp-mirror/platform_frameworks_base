@@ -27,5 +27,5 @@
     <View
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:background="?android:attr/dividerVertical" />
+        android:background="@drawable/list_divider_dark" />
 </LinearLayout>
