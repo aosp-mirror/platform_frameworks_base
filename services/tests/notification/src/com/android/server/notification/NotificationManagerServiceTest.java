@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_NONE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -67,7 +68,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.android.server.lights.Light;
@@ -285,15 +285,16 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
-    public void testBlockedNotifications_blockedApp() throws Exception {
+    public void testEnqueuedBlockedNotifications_blockedApp() throws Exception {
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
 
-        NotificationChannel channel = new NotificationChannel("id", "name",
-                NotificationManager.IMPORTANCE_HIGH);
-        NotificationRecord r = generateNotificationRecord(channel);
-        r.setUserImportance(NotificationManager.IMPORTANCE_NONE);
-        assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
-        verify(mUsageStats, times(1)).registerBlocked(eq(r));
+        mBinderService.setNotificationsEnabledForPackage(PKG, uid, false);
+
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+        assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
     }
 
     @Test
@@ -644,6 +645,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         associations.add("a");
         when(mCompanionMgr.getAssociations(PKG, uid)).thenReturn(associations);
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
+        mListener.component = new ComponentName(PKG, PKG);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
         when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
 
