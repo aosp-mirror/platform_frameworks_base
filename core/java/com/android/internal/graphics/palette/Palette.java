@@ -613,6 +613,8 @@ public final class Palette {
         private final List<Palette.Filter> mFilters = new ArrayList<>();
         private Rect mRegion;
 
+        private Quantizer mQuantizer;
+
         /**
          * Construct a new {@link Palette.Builder} using a source {@link Bitmap}
          */
@@ -726,6 +728,18 @@ public final class Palette {
         }
 
         /**
+         * Set a specific quantization algorithm. {@link ColorCutQuantizer} will
+         * be used if unspecified.
+         *
+         * @param quantizer Quantizer implementation.
+         */
+        @NonNull
+        public Palette.Builder setQuantizer(Quantizer quantizer) {
+            mQuantizer = quantizer;
+            return this;
+        }
+
+        /**
          * Set a region of the bitmap to be used exclusively when calculating the palette.
          * <p>This only works when the original input is a {@link Bitmap}.</p>
          *
@@ -818,17 +832,19 @@ public final class Palette {
                 }
 
                 // Now generate a quantizer from the Bitmap
-                final ColorCutQuantizer quantizer = new ColorCutQuantizer(
-                        getPixelsFromBitmap(bitmap),
-                        mMaxColors,
-                        mFilters.isEmpty() ? null : mFilters.toArray(new Palette.Filter[mFilters.size()]));
+                if (mQuantizer == null) {
+                    mQuantizer = new ColorCutQuantizer();
+                }
+                mQuantizer.quantize(getPixelsFromBitmap(bitmap),
+                            mMaxColors, mFilters.isEmpty() ? null :
+                            mFilters.toArray(new Palette.Filter[mFilters.size()]));
 
                 // If created a new bitmap, recycle it
                 if (bitmap != mBitmap) {
                     bitmap.recycle();
                 }
 
-                swatches = quantizer.getQuantizedColors();
+                swatches = mQuantizer.getQuantizedColors();
 
                 if (logger != null) {
                     logger.addSplit("Color quantization completed");
