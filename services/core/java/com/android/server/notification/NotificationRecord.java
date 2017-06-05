@@ -63,7 +63,7 @@ import java.util.Objects;
  * {@link android.service.notification.NotificationListenerService}s.
  *
  * <p>These objects should not be mutated unless the code is synchronized
- * on {@link NotificationManagerService#mNotificationList}, and any
+ * on {@link NotificationManagerService#mNotificationLock}, and any
  * modification should be followed by a sorting of that list.</p>
  *
  * <p>Is sortable by {@link NotificationComparator}.</p>
