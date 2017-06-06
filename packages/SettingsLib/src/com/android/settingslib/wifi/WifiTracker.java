@@ -136,8 +136,6 @@ public class WifiTracker {
 
     private final NetworkScoreManager mNetworkScoreManager;
     private final WifiNetworkScoreCache mScoreCache;
-    private boolean mNetworkScoringUiEnabled;
-    private final ContentObserver mObserver;
 
     @GuardedBy("mLock")
     private final Set<NetworkKey> mRequestedScores = new ArraySet<>();
@@ -225,16 +223,6 @@ public class WifiTracker {
                 updateNetworkScores();
             }
         });
-
-        mObserver = new ContentObserver(mWorkHandler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                mNetworkScoringUiEnabled =
-                        Settings.Global.getInt(
-                                mContext.getContentResolver(),
-                                Settings.Global.NETWORK_SCORING_UI_ENABLED, 0) == 1;
-            }
-        };
     }
 
     /**
@@ -308,12 +296,6 @@ public class WifiTracker {
         synchronized (mLock) {
             registerScoreCache();
 
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.NETWORK_SCORING_UI_ENABLED),
-                    false /* notifyForDescendants */,
-                    mObserver);
-            mObserver.onChange(false /* selfChange */); // Set mScoringUiEnabled
-
             resumeScanning();
             if (!mRegistered) {
                 mContext.registerReceiver(mReceiver, mFilter);
@@ -360,7 +342,6 @@ public class WifiTracker {
             }
             unregisterAndClearScoreCache();
             pauseScanning();
-            mContext.getContentResolver().unregisterContentObserver(mObserver);
 
             mWorkHandler.removePendingMessages();
             mMainHandler.removePendingMessages();
@@ -580,7 +561,7 @@ public class WifiTracker {
 
         requestScoresForNetworkKeys(scoresToRequest);
         for (AccessPoint ap : accessPoints) {
-            ap.update(mScoreCache, mNetworkScoringUiEnabled);
+            ap.update(mScoreCache, false /* mNetworkScoringUiEnabled */);
         }
 
         // Pre-sort accessPoints to speed preference insertion
@@ -678,7 +659,7 @@ public class WifiTracker {
                     updated = true;
                     if (previouslyConnected != ap.isActive()) reorder = true;
                 }
-                if (ap.update(mScoreCache, mNetworkScoringUiEnabled)) {
+                if (ap.update(mScoreCache, false /* mNetworkScoringUiEnabled */)) {
                     reorder = true;
                     updated = true;
                 }
@@ -701,7 +682,8 @@ public class WifiTracker {
         synchronized (mLock) {
             boolean updated = false;
             for (int i = 0; i < mInternalAccessPoints.size(); i++) {
-                if (mInternalAccessPoints.get(i).update(mScoreCache, mNetworkScoringUiEnabled)) {
+                if (mInternalAccessPoints.get(i).update(
+                        mScoreCache, false /* mNetworkScoringUiEnabled */)) {
                     updated = true;
                 }
             }
