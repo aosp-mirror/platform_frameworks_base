@@ -90,6 +90,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private final String mIfaceName;
     private final int mInterfaceType;
+    private final LinkProperties mLinkProperties;
     private final IPv6TetheringInterfaceServices mIPv6TetherSvc;
 
     private int mLastError;
@@ -106,6 +107,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mTetherController = tetherController;
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
+        mLinkProperties = new LinkProperties();
+        mLinkProperties.setInterfaceName(mIfaceName);
         mIPv6TetherSvc = ipv6Svc;
         mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
 
@@ -126,6 +129,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
     public int interfaceType() { return mInterfaceType; }
 
     public int lastError() { return mLastError; }
+
+    public void stop() { sendMessage(CMD_INTERFACE_DOWN); }
 
     // configured when we start tethering and unconfig'd on error or conclusion
     private boolean configureIfaceIp(boolean enabled) {
@@ -182,8 +187,12 @@ public class TetherInterfaceStateMachine extends StateMachine {
     }
 
     private void sendInterfaceState(int newInterfaceState) {
-        mTetherController.notifyInterfaceStateChange(
-                mIfaceName, TetherInterfaceStateMachine.this, newInterfaceState, mLastError);
+        mTetherController.updateInterfaceState(
+                TetherInterfaceStateMachine.this, newInterfaceState, mLastError);
+        // TODO: Populate mLinkProperties correctly, and send more sensible
+        // updates more frequently (not just here).
+        mTetherController.updateLinkProperties(
+                TetherInterfaceStateMachine.this, new LinkProperties(mLinkProperties));
     }
 
     class InitialState extends State {
@@ -195,7 +204,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
         @Override
         public boolean processMessage(Message message) {
             maybeLogMessage(this, message.what);
-            boolean retValue = true;
             switch (message.what) {
                 case CMD_TETHER_REQUESTED:
                     mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
@@ -218,10 +226,9 @@ public class TetherInterfaceStateMachine extends StateMachine {
                             (LinkProperties) message.obj);
                     break;
                 default:
-                    retValue = false;
-                    break;
+                    return NOT_HANDLED;
             }
-            return retValue;
+            return HANDLED;
         }
     }
 
