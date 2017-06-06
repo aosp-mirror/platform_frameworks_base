@@ -398,6 +398,12 @@ final class FillUi {
             } catch (WindowManager.BadTokenException e) {
                 if (sDebug) Slog.d(TAG, "Filed with with token " + params.token + " gone.");
                 mCallback.onDestroy();
+            } catch (IllegalStateException e) {
+                // WM throws an ISE if mContentView was added twice; this should never happen -
+                // since show() and hide() are always called in the UIThread - but when it does,
+                // it should not crash the system.
+                Slog.e(TAG, "Exception showing window " + params, e);
+                mCallback.onDestroy();
             }
         }
 
@@ -405,10 +411,18 @@ final class FillUi {
          * Hides the window.
          */
         void hide() {
-            if (mShowing) {
-                mContentView.setOnTouchListener(null);
-                mWm.removeView(mContentView);
-                mShowing = false;
+            try {
+                if (mShowing) {
+                    mContentView.setOnTouchListener(null);
+                    mWm.removeView(mContentView);
+                    mShowing = false;
+                }
+            } catch (IllegalStateException e) {
+                // WM might thrown an ISE when removing the mContentView; this should never
+                // happen - since show() and hide() are always called in the UIThread - but if it
+                // does, it should not crash the system.
+                Slog.e(TAG, "Exception hiding window ", e);
+                mCallback.onDestroy();
             }
         }
 
