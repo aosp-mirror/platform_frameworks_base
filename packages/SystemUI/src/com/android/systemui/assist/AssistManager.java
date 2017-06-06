@@ -92,7 +92,9 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
 
         registerVoiceInteractionSessionListener();
-        mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION);
+        mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
+                | ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_UI_MODE
+                | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
         onConfigurationChanged(context.getResources().getConfiguration());
     }
 
