@@ -601,7 +601,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final UnknownAppVisibilityController mUnknownAppVisibilityController =
             new UnknownAppVisibilityController(this);
-    final TaskSnapshotController mTaskSnapshotController = new TaskSnapshotController(this);
+    final TaskSnapshotController mTaskSnapshotController;
 
     boolean mIsTouchDevice;
 
@@ -992,6 +992,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mPolicy = policy;
+        mTaskSnapshotController = new TaskSnapshotController(this);
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
 
