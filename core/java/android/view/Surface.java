@@ -129,9 +129,15 @@ public class Surface implements Parcelable {
     public static final int SCALING_MODE_NO_SCALE_CROP = 3;
 
     /** @hide */
-    @IntDef({ROTATION_0, ROTATION_90, ROTATION_180, ROTATION_270})
+    @IntDef({ROTATION_UNDEFINED, ROTATION_0, ROTATION_90, ROTATION_180, ROTATION_270})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Rotation {}
+
+    /**
+     * Rotation constant: undefined
+     * @hide
+     */
+    public static final int ROTATION_UNDEFINED = -1;
 
     /**
      * Rotation constant: 0 degree rotation (natural orientation)
