@@ -181,6 +181,9 @@ public class ShortcutService extends IShortcutService.Stub {
     static final String DIRECTORY_PER_USER = "shortcut_service";
 
     @VisibleForTesting
+    static final String DIRECTORY_DUMP = "shortcut_dump";
+
+    @VisibleForTesting
     static final String FILENAME_USER_PACKAGES = "shortcuts.xml";
 
     static final String DIRECTORY_BITMAPS = "bitmaps";
@@ -308,6 +311,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final ShortcutRequestPinProcessor mShortcutRequestPinProcessor;
     private final ShortcutBitmapSaver mShortcutBitmapSaver;
+    private final ShortcutDumpFiles mShortcutDumpFiles;
 
     @GuardedBy("mLock")
     final SparseIntArray mUidState = new SparseIntArray();
@@ -429,6 +433,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
         mShortcutBitmapSaver = new ShortcutBitmapSaver(this);
+        mShortcutDumpFiles = new ShortcutDumpFiles(this);
 
         if (onlyForPackageManagerApis) {
             return; // Don't do anything further.  For unit tests only.
@@ -3395,6 +3400,16 @@ public class ShortcutService extends IShortcutService.Stub {
                 wtf("Can't restore: user " + userId + " is locked or not running");
                 return;
             }
+
+            // Note we print the file timestamps in dumpsys too, but also printing the timestamp
+            // in the files anyway.
+            mShortcutDumpFiles.save("restore-0-start.txt", pw -> {
+                pw.print("Start time: ");
+                dumpCurrentTime(pw);
+                pw.println();
+            });
+            mShortcutDumpFiles.save("restore-1-payload.xml", payload);
+
             // Actually do restore.
             final ShortcutUser restored;
             final ByteArrayInputStream is = new ByteArrayInputStream(payload);
@@ -3404,12 +3419,24 @@ public class ShortcutService extends IShortcutService.Stub {
                 Slog.w(TAG, "Restoration failed.", e);
                 return;
             }
+            mShortcutDumpFiles.save("restore-2.txt", this::dumpInner);
+
             getUserShortcutsLocked(userId).mergeRestoredFile(restored);
+
+            mShortcutDumpFiles.save("restore-3.txt", this::dumpInner);
 
             // Rescan all packages to re-publish manifest shortcuts and do other checks.
             rescanUpdatedPackagesLocked(userId,
                     0 // lastScanTime = 0; rescan all packages.
                     );
+
+            mShortcutDumpFiles.save("restore-4.txt", this::dumpInner);
+
+            mShortcutDumpFiles.save("restore-5-finish.txt", pw -> {
+                pw.print("Finish time: ");
+                dumpCurrentTime(pw);
+                pw.println();
+            });
 
             saveUserLocked(userId);
         }
@@ -3425,23 +3452,54 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     void dumpNoCheck(FileDescriptor fd, PrintWriter pw, String[] args) {
+
+        boolean dumpMain = true;
         boolean checkin = false;
         boolean clear = false;
+        boolean dumpUid = false;
+        boolean dumpFiles = false;
+
         if (args != null) {
             for (String arg : args) {
                 if ("-c".equals(arg)) {
                     checkin = true;
+
                 } else if ("--checkin".equals(arg)) {
                     checkin = true;
                     clear = true;
+
+                } else if ("-a".equals(arg) || "--all".equals(arg)) {
+                    dumpUid = true;
+                    dumpFiles = true;
+
+                } else if ("-u".equals(arg) || "--uid".equals(arg)) {
+                    dumpUid = true;
+
+                } else if ("-f".equals(arg) || "--files".equals(arg)) {
+                    dumpFiles = true;
+
+                } else if ("-n".equals(arg) || "--no-main".equals(arg)) {
+                    dumpMain = false;
                 }
             }
         }
 
         if (checkin) {
+            // Other flags are not supported for checkin.
             dumpCheckin(pw, clear);
         } else {
-            dumpInner(pw);
+            if (dumpMain) {
+                dumpInner(pw);
+                pw.println();
+            }
+            if (dumpUid) {
+                dumpUid(pw);
+                pw.println();
+            }
+            if (dumpFiles) {
+                dumpDumpFiles(pw);
+                pw.println();
+            }
         }
     }
 
@@ -3510,9 +3568,12 @@ public class ShortcutService extends IShortcutService.Stub {
                 pw.println();
                 mUsers.valueAt(i).dump(pw, "  ");
             }
+        }
+    }
 
-            pw.println();
-            pw.println("  UID state:");
+    private void dumpUid(PrintWriter pw) {
+        synchronized (mLock) {
+            pw.println("** SHORTCUT MANAGER UID STATES (dumpsys shortcut -n -u)");
 
             for (int i = 0; i < mUidState.size(); i++) {
                 final int uid = mUidState.keyAt(i);
@@ -3535,6 +3596,10 @@ public class ShortcutService extends IShortcutService.Stub {
         Time tobj = new Time();
         tobj.set(time);
         return tobj.format("%Y-%m-%d %H:%M:%S");
+    }
+
+    private void dumpCurrentTime(PrintWriter pw) {
+        pw.print(formatTime(injectCurrentTimeMillis()));
     }
 
     private void dumpStatLS(PrintWriter pw, String prefix, int statId) {
@@ -3571,6 +3636,13 @@ public class ShortcutService extends IShortcutService.Stub {
             } catch (JSONException e) {
                 Slog.e(TAG, "Unable to write in json", e);
             }
+        }
+    }
+
+    private void dumpDumpFiles(PrintWriter pw) {
+        synchronized (mLock) {
+            pw.println("** SHORTCUT MANAGER FILES (dumpsys shortcut -n -f)");
+            mShortcutDumpFiles.dumpAll(pw);
         }
     }
 
@@ -3874,6 +3946,10 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     File injectUserDataPath(@UserIdInt int userId) {
         return new File(Environment.getDataSystemCeDirectory(userId), DIRECTORY_PER_USER);
+    }
+
+    public File getDumpPath() {
+        return new File(injectUserDataPath(UserHandle.USER_SYSTEM), DIRECTORY_DUMP);
     }
 
     @VisibleForTesting

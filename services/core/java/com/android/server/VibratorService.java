@@ -221,19 +221,24 @@ public class VibratorService extends IVibratorService.Stub
 
         long[] clickEffectTimings = getLongIntArray(context.getResources(),
                 com.android.internal.R.array.config_virtualKeyVibePattern);
-        VibrationEffect clickEffect;
-        if (clickEffectTimings.length == 0) {
-            clickEffect = null;
-        } else if (clickEffectTimings.length == 1) {
-            clickEffect = VibrationEffect.createOneShot(
-                    clickEffectTimings[0], VibrationEffect.DEFAULT_AMPLITUDE);
-        } else {
-            clickEffect = VibrationEffect.createWaveform(clickEffectTimings, -1);
-        }
+        VibrationEffect clickEffect = createEffect(clickEffectTimings);
         VibrationEffect doubleClickEffect = VibrationEffect.createWaveform(
                 new long[] {0, 30, 100, 30} /*timings*/, -1);
+        long[] tickEffectTimings = getLongIntArray(context.getResources(),
+                com.android.internal.R.array.config_clockTickVibePattern);
+        VibrationEffect tickEffect = createEffect(tickEffectTimings);
 
-        mFallbackEffects = new VibrationEffect[] { clickEffect, doubleClickEffect };
+        mFallbackEffects = new VibrationEffect[] { clickEffect, doubleClickEffect, tickEffect };
+    }
+
+    private static VibrationEffect createEffect(long[] timings) {
+        if (timings == null || timings.length == 0) {
+            return null;
+        } else if (timings.length == 1) {
+            return VibrationEffect.createOneShot(timings[0], VibrationEffect.DEFAULT_AMPLITUDE);
+        } else {
+            return VibrationEffect.createWaveform(timings, -1);
+        }
     }
 
     public void systemReady() {

@@ -41,6 +41,9 @@ public class TextViewTransformState extends TransformState {
 
     @Override
     protected boolean sameAs(TransformState otherState) {
+        if (super.sameAs(otherState)) {
+            return true;
+        }
         if (otherState instanceof TextViewTransformState) {
             TextViewTransformState otherTvs = (TextViewTransformState) otherState;
             if(TextUtils.equals(otherTvs.mText.getText(), mText.getText())) {
@@ -50,7 +53,7 @@ public class TextViewTransformState extends TransformState {
                         && getInnerHeight(mText) == getInnerHeight(otherTvs.mText);
             }
         }
-        return super.sameAs(otherState);
+        return false;
     }
 
     private int getInnerHeight(TextView text) {

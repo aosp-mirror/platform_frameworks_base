@@ -339,6 +339,10 @@ public class ShortcutManagerTestUtils {
         return ret;
     }
 
+    public static <T> T[] array(T... array) {
+        return array;
+    }
+
     public static <T> List<T> list(T... array) {
         return Arrays.asList(array);
     }

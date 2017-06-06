@@ -22,23 +22,31 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.internal.statusbar.StatusBarIcon;
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
+import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
@@ -48,7 +56,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
  * The header group on Keyguard.
  */
 public class KeyguardStatusBarView extends RelativeLayout
-        implements BatteryStateChangeCallback, OnUserInfoChangedListener {
+        implements BatteryStateChangeCallback, OnUserInfoChangedListener, ConfigurationListener {
 
     private boolean mBatteryCharging;
     private boolean mKeyguardUserSwitcherShowing;
@@ -67,6 +75,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private int mSystemIconsSwitcherHiddenExpandedMargin;
     private int mSystemIconsBaseMargin;
     private View mSystemIconsContainer;
+    private TintedIconManager mIconManager;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -207,12 +216,18 @@ public class KeyguardStatusBarView extends RelativeLayout
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
         mMultiUserSwitch.setUserSwitcherController(mUserSwitcherController);
         userInfoController.reloadUserInfo();
+        Dependency.get(ConfigurationController.class).addCallback(this);
+        mIconManager = new TintedIconManager(findViewById(R.id.statusIcons));
+        Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
+        onOverlayChanged();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(UserInfoController.class).removeCallback(this);
+        Dependency.get(StatusBarIconController.class).removeIconGroup(mIconManager);
+        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     @Override
@@ -321,5 +336,20 @@ public class KeyguardStatusBarView extends RelativeLayout
         @ColorInt int textColor = Utils.getColorAttr(mContext, R.attr.bgProtectTextColor);
         mCarrierLabel.setTextColor(textColor);
         mBatteryView.setFillColor(textColor);
+        mIconManager.setTint(textColor);
+
+        float intensity = textColor == Color.WHITE ? 0 : 1;
+        Rect tintArea = new Rect(0, 0, 0, 0);
+
+        applyDarkness(R.id.signal_cluster, tintArea, intensity, textColor);
+        applyDarkness(R.id.battery, tintArea, intensity, textColor);
+        applyDarkness(R.id.clock, tintArea, intensity, textColor);
+    }
+
+    private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
+        View v = findViewById(id);
+        if (v instanceof DarkReceiver) {
+            ((DarkReceiver) v).onDarkChanged(tintArea, intensity, color);
+        }
     }
 }

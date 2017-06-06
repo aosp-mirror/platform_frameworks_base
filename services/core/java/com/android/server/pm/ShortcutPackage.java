@@ -150,6 +150,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                 getPackageName(), getPackageUserId());
     }
 
+    public int getShortcutCount() {
+        return mShortcuts.size();
+    }
+
     @Override
     protected void onRestoreBlocked() {
         // Can't restore due to version/signature mismatch.  Remove all shortcuts.

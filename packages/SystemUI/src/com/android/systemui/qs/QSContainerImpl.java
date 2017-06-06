@@ -39,8 +39,6 @@ public class QSContainerImpl extends FrameLayout {
     protected float mQsExpansion;
     private QSCustomizer mQSCustomizer;
     private QSFooter mQSFooter;
-    private int mGutterHeight;
-    private View mBackground;
     private float mFullElevation;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
@@ -55,8 +53,6 @@ public class QSContainerImpl extends FrameLayout {
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
         mQSFooter = findViewById(R.id.qs_footer);
-        mBackground = findViewById(R.id.qs_background);
-        mGutterHeight = getContext().getResources().getDimensionPixelSize(R.dimen.qs_gutter_height);
         mFullElevation = mQSPanel.getElevation();
 
         setClickable(true);
@@ -110,18 +106,10 @@ public class QSContainerImpl extends FrameLayout {
 
     public void updateExpansion() {
         int height = calculateContainerHeight();
-        int gutterHeight = Math.round(mQsExpansion * mGutterHeight);
-        setBottom(getTop() + height + gutterHeight);
+        setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + height);
-        mBackground.setBottom(getTop() + height);
         // Pin QS Footer to the bottom of the panel.
         mQSFooter.setTranslationY(height - mQSFooter.getHeight());
-
-        float elevation = mQsExpansion * mFullElevation;
-        mQSDetail.setElevation(elevation);
-        mBackground.setElevation(elevation);
-        mQSFooter.setElevation(elevation);
-        mQSPanel.setElevation(elevation);
     }
 
     protected int calculateContainerHeight() {
@@ -133,19 +121,6 @@ public class QSContainerImpl extends FrameLayout {
 
     public void setExpansion(float expansion) {
         mQsExpansion = expansion;
-        updateExpansion();
-    }
-
-    public void setGutterEnabled(boolean gutterEnabled) {
-        if (gutterEnabled == (mGutterHeight != 0)) {
-            return;
-        }
-        if (gutterEnabled) {
-            mGutterHeight = getContext().getResources().getDimensionPixelSize(
-                    R.dimen.qs_gutter_height);
-        } else {
-            mGutterHeight = 0;
-        }
         updateExpansion();
     }
 }

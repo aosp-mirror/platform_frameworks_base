@@ -100,6 +100,7 @@ LOCAL_SHARED_LIBRARIES += \
     android.hardware.tv.cec@1.0 \
     android.hardware.tv.input@1.0 \
     android.hardware.vibrator@1.0 \
+    android.hardware.vibrator@1.1 \
     android.hardware.vr@1.0 \
     android.frameworks.schedulerservice@1.0 \
     android.frameworks.sensorservice@1.0 \

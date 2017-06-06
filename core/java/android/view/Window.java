@@ -624,6 +624,9 @@ public abstract class Window {
 
         /** Returns the current stack Id for the window. */
         int getWindowStackId() throws RemoteException;
+
+        /** Returns whether the window belongs to the task root. */
+        boolean isTaskRoot();
     }
 
     /**
@@ -2269,6 +2272,12 @@ public abstract class Window {
      * @hide
      */
     public abstract void onMultiWindowModeChanged();
+
+    /**
+     * Called when the activity changes to/from picture-in-picture mode.
+     * @hide
+     */
+    public abstract void onPictureInPictureModeChanged(boolean isInPictureInPictureMode);
 
     /**
      * Called when the activity just relaunched.

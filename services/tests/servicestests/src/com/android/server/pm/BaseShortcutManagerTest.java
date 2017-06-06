@@ -1266,16 +1266,16 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         if (force || !ENABLE_DUMP) return;
 
         Log.v(TAG, "Dumping ShortcutService: " + message);
-        for (String line : dumpsys(null).split("\n")) {
+        for (String line : dumpsys("-u").split("\n")) {
             Log.v(TAG, line);
         }
     }
 
     protected String dumpCheckin() {
-        return dumpsys(new String[]{"--checkin"});
+        return dumpsys("--checkin");
     }
 
-    private String dumpsys(String[] args) {
+    protected String dumpsys(String... args) {
         final ArrayList<String> origPermissions = new ArrayList<>(mCallerPermissions);
         mCallerPermissions.add(android.Manifest.permission.DUMP);
         try {
@@ -2138,5 +2138,16 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         updatePackageVersion(getCallingPackage(), 1);
         mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(getCallingPackage(), getCallingUserId()));
+    }
+
+    protected void assertFileNotExists(String path) {
+        final File f = new File(mInjectedFilePathRoot, path);
+        assertFalse("File shouldn't exist: " + f.getAbsolutePath(), f.exists());
+    }
+
+    protected void assertFileExistsWithContent(String path) {
+        final File f = new File(mInjectedFilePathRoot, path);
+        assertTrue("File should exist: " + f.getAbsolutePath(), f.exists());
+        assertTrue("File should be larger than 0b: " + f.getAbsolutePath(), f.length() > 0);
     }
 }

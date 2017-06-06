@@ -385,6 +385,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \
 	core/java/com/android/internal/backup/IObbBackupService.aidl \
+	core/java/com/android/internal/car/ICarServiceHelper.aidl \
 	core/java/com/android/internal/inputmethod/IInputContentUriToken.aidl \
 	core/java/com/android/internal/policy/IKeyguardDrawnCallback.aidl \
 	core/java/com/android/internal/policy/IKeyguardDismissCallback.aidl \
@@ -598,6 +599,7 @@ LOCAL_STATIC_JAVA_LIBRARIES :=                          \
     android.hardware.usb-V1.0-java-constants             \
     android.hardware.usb-V1.1-java-constants             \
     android.hardware.vibrator-V1.0-java-constants        \
+    android.hardware.vibrator-V1.1-java-constants        \
 
 # Loaded with System.loadLibrary by android.view.textclassifier
 LOCAL_REQUIRED_MODULES += libtextclassifier

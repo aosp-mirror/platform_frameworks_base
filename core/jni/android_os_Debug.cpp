@@ -33,12 +33,14 @@
 #include <string>
 
 #include <android-base/stringprintf.h>
+#include <android-base/unique_fd.h>
 #include <debuggerd/client.h>
 #include <log/log.h>
 #include <utils/misc.h>
 #include <utils/String8.h>
 
 #include "JNIHelp.h"
+#include "ScopedUtfChars.h"
 #include "jni.h"
 #include <memtrack/memtrack.h>
 #include <memunreachable/memunreachable.h>
@@ -1008,30 +1010,34 @@ static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
     ALOGD("Native heap dump complete.\n");
 }
 
-static void android_os_Debug_dumpNativeBacktraceToFileTimeout(JNIEnv* env, jobject clazz,
-    jint pid, jstring fileName, jint timeoutSecs)
-{
-    if (fileName == NULL) {
-        jniThrowNullPointerException(env, "file == null");
-        return;
-    }
-    const jchar* str = env->GetStringCritical(fileName, 0);
-    String8 fileName8;
-    if (str) {
-        fileName8 = String8(reinterpret_cast<const char16_t*>(str),
-                            env->GetStringLength(fileName));
-        env->ReleaseStringCritical(fileName, str);
+static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs,
+                       DebuggerdDumpType dumpType) {
+    const ScopedUtfChars fileNameChars(env, fileName);
+    if (fileNameChars.c_str() == nullptr) {
+        return false;
     }
 
-    int fd = open(fileName8.string(), O_CREAT | O_WRONLY | O_NOFOLLOW | O_CLOEXEC | O_APPEND, 0666);
+    android::base::unique_fd fd(open(fileNameChars.c_str(),
+                                     O_CREAT | O_WRONLY | O_NOFOLLOW | O_CLOEXEC | O_APPEND,
+                                     0666));
     if (fd < 0) {
-        fprintf(stderr, "Can't open %s: %s\n", fileName8.string(), strerror(errno));
-        return;
+        fprintf(stderr, "Can't open %s: %s\n", fileNameChars.c_str(), strerror(errno));
+        return false;
     }
 
-    dump_backtrace_to_file_timeout(pid, kDebuggerdNativeBacktrace, timeoutSecs, fd);
+    return (dump_backtrace_to_file_timeout(pid, dumpType, timeoutSecs, fd) == 0);
+}
 
-    close(fd);
+static jboolean android_os_Debug_dumpJavaBacktraceToFileTimeout(JNIEnv* env, jobject clazz,
+        jint pid, jstring fileName, jint timeoutSecs) {
+    const bool ret =  dumpTraces(env, pid, fileName, timeoutSecs, kDebuggerdJavaBacktrace);
+    return ret ? JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean android_os_Debug_dumpNativeBacktraceToFileTimeout(JNIEnv* env, jobject clazz,
+        jint pid, jstring fileName, jint timeoutSecs) {
+    const bool ret = dumpTraces(env, pid, fileName, timeoutSecs, kDebuggerdNativeBacktrace);
+    return ret ? JNI_TRUE : JNI_FALSE;
 }
 
 static jstring android_os_Debug_getUnreachableMemory(JNIEnv* env, jobject clazz,
@@ -1074,7 +1080,9 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getProxyObjectCount },
     { "getBinderDeathObjectCount", "()I",
             (void*)android_os_Debug_getDeathObjectCount },
-    { "dumpNativeBacktraceToFileTimeout", "(ILjava/lang/String;I)V",
+    { "dumpJavaBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
+            (void*)android_os_Debug_dumpJavaBacktraceToFileTimeout },
+    { "dumpNativeBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
             (void*)android_os_Debug_dumpNativeBacktraceToFileTimeout },
     { "getUnreachableMemory", "(IZ)Ljava/lang/String;",
             (void*)android_os_Debug_getUnreachableMemory },

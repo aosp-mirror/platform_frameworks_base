@@ -283,6 +283,8 @@ public class ZenModePanel extends FrameLayout {
                 return Prefs.Key.DND_CONFIRMED_PRIORITY_INTRODUCTION;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 return Prefs.Key.DND_CONFIRMED_SILENCE_INTRODUCTION;
+            case Global.ZEN_MODE_ALARMS:
+                return Prefs.Key.DND_CONFIRMED_ALARM_INTRODUCTION;
             default:
                 return null;
         }
@@ -518,16 +520,22 @@ public class ZenModePanel extends FrameLayout {
         final int zen = getSelectedZen(Global.ZEN_MODE_OFF);
         final boolean zenImportant = zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        final boolean zenAlarm = zen == Global.ZEN_MODE_ALARMS;
         final boolean introduction = (zenImportant && !mPrefs.mConfirmedPriorityIntroduction
-                        || zenNone && !mPrefs.mConfirmedSilenceIntroduction);
+                || zenNone && !mPrefs.mConfirmedSilenceIntroduction
+                || zenAlarm && !mPrefs.mConfirmedAlarmIntroduction);
 
         mZenButtons.setVisibility(mHidden ? GONE : VISIBLE);
         mZenIntroduction.setVisibility(introduction ? VISIBLE : GONE);
         if (introduction) {
-            mConfigurableTexts.add(mZenIntroductionMessage, zenImportant
+            int message = zenImportant
                     ? R.string.zen_priority_introduction
-                    : mVoiceCapable ? R.string.zen_silence_introduction_voice
-                    : R.string.zen_silence_introduction);
+                    : zenAlarm
+                            ? R.string.zen_alarms_introduction
+                            : mVoiceCapable
+                                    ? R.string.zen_silence_introduction_voice
+                                    : R.string.zen_silence_introduction;
+            mConfigurableTexts.add(mZenIntroductionMessage, message);
             mConfigurableTexts.update();
             mZenIntroductionCustomize.setVisibility(zenImportant ? VISIBLE : GONE);
         }
@@ -958,6 +966,7 @@ public class ZenModePanel extends FrameLayout {
         private int mNoneSelected;
         private boolean mConfirmedPriorityIntroduction;
         private boolean mConfirmedSilenceIntroduction;
+        private boolean mConfirmedAlarmIntroduction;
 
         private ZenPrefs() {
             mNoneDangerousThreshold = mContext.getResources()
@@ -967,6 +976,7 @@ public class ZenModePanel extends FrameLayout {
             updateNoneSelected();
             updateConfirmedPriorityIntroduction();
             updateConfirmedSilenceIntroduction();
+            updateConfirmedAlarmIntroduction();
         }
 
         public void trackNoneSelected() {
@@ -994,6 +1004,7 @@ public class ZenModePanel extends FrameLayout {
             updateNoneSelected();
             updateConfirmedPriorityIntroduction();
             updateConfirmedSilenceIntroduction();
+            updateConfirmedAlarmIntroduction();
         }
 
         private void updateMinuteIndex() {
@@ -1032,6 +1043,15 @@ public class ZenModePanel extends FrameLayout {
             mConfirmedSilenceIntroduction = confirmed;
             if (DEBUG) Log.d(mTag, "Confirmed silence introduction: "
                     + mConfirmedSilenceIntroduction);
+        }
+
+        private void updateConfirmedAlarmIntroduction() {
+            final boolean confirmed =  Prefs.getBoolean(mContext,
+                    Prefs.Key.DND_CONFIRMED_ALARM_INTRODUCTION, false);
+            if (confirmed == mConfirmedAlarmIntroduction) return;
+            mConfirmedAlarmIntroduction = confirmed;
+            if (DEBUG) Log.d(mTag, "Confirmed alarm introduction: "
+                    + mConfirmedAlarmIntroduction);
         }
     }
 

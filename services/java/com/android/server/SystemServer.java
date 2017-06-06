@@ -63,6 +63,7 @@ import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.camera.CameraServiceProxy;
+import com.android.server.car.CarServiceHelperService;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.coverage.CoverageService;
@@ -1695,6 +1696,12 @@ public final class SystemServer {
                     mWebViewUpdateService.prepareWebViewInSystemServer();
                     traceLog.traceEnd();
                 }, WEBVIEW_PREPARATION);
+            }
+
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+                traceBeginAndSlog("StartCarServiceHelperService");
+                mSystemServiceManager.startService(CarServiceHelperService.class);
+                traceEnd();
             }
 
             traceBeginAndSlog("StartSystemUI");

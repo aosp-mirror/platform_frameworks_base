@@ -29,10 +29,19 @@ public interface ExtractionType {
      * Executes color extraction by reading WallpaperColors and setting
      * main and secondary colors on GradientColors.
      *
+     * Extraction is expected to happen with 3 different gradient types:
+     *     Normal, with the main extracted colors
+     *     Dark, with extra contrast
+     *     ExtraDark, for places where GAR is mandatory, like the emergency dialer
+     *
      * @param inWallpaperColors where to read from
-     * @param outGradientColors object that should receive the colors
-     * @return true if successful
+     * @param outGradientColorsNormal object that should receive normal colors
+     * @param outGradientColorsDark object that should receive dark colors
+     * @param outGradientColorsExtraDark object that should receive extra dark colors
+     * @return true if successful.
      */
     boolean extractInto(WallpaperColors inWallpaperColors,
-            ColorExtractor.GradientColors outGradientColors);
+            ColorExtractor.GradientColors outGradientColorsNormal,
+            ColorExtractor.GradientColors outGradientColorsDark,
+            ColorExtractor.GradientColors outGradientColorsExtraDark);
 }

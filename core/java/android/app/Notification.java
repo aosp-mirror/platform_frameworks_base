@@ -2742,6 +2742,11 @@ public class Notification implements Parcelable
         private int mBackgroundColor = COLOR_INVALID;
         private int mForegroundColor = COLOR_INVALID;
         private int mBackgroundColorHint = COLOR_INVALID;
+        /**
+         * A temporary location where actions are stored. If != null the view originally has action
+         * but doesn't have any for this inflation.
+         */
+        private ArrayList<Action> mOriginalActions;
         private boolean mRebuildStyledRemoteViews;
 
         /**
@@ -4054,7 +4059,53 @@ public class Notification implements Parcelable
                 contentView.setViewLayoutMarginEndDimen(R.id.line1, endMargin);
                 contentView.setViewLayoutMarginEndDimen(R.id.text, endMargin);
                 contentView.setViewLayoutMarginEndDimen(R.id.progress, endMargin);
+                // Bind the reply action
+                Action action = findReplyAction();
+                contentView.setViewVisibility(R.id.reply_icon_action, action != null
+                        ? View.VISIBLE
+                        : View.GONE);
+
+                if (action != null) {
+                    int contrastColor = resolveContrastColor();
+                    contentView.setDrawableParameters(R.id.reply_icon_action,
+                            true /* targetBackground */,
+                            -1,
+                            contrastColor,
+                            PorterDuff.Mode.SRC_ATOP, -1);
+                    int iconColor = NotificationColorUtil.isColorLight(contrastColor)
+                            ? Color.BLACK : Color.WHITE;
+                    contentView.setDrawableParameters(R.id.reply_icon_action,
+                            false /* targetBackground */,
+                            -1,
+                            iconColor,
+                            PorterDuff.Mode.SRC_ATOP, -1);
+                    contentView.setOnClickPendingIntent(R.id.right_icon,
+                            action.actionIntent);
+                    contentView.setOnClickPendingIntent(R.id.reply_icon_action,
+                            action.actionIntent);
+                    contentView.setRemoteInputs(R.id.right_icon, action.mRemoteInputs);
+                    contentView.setRemoteInputs(R.id.reply_icon_action, action.mRemoteInputs);
+
+                }
             }
+            contentView.setViewVisibility(R.id.right_icon_container, mN.mLargeIcon != null
+                    ? View.VISIBLE
+                    : View.GONE);
+        }
+
+        private Action findReplyAction() {
+            ArrayList<Action> actions = mActions;
+            if (mOriginalActions != null) {
+                actions = mOriginalActions;
+            }
+            int numActions = actions.size();
+            for (int i = 0; i < numActions; i++) {
+                Action action = actions.get(i);
+                if (hasValidRemoteInput(action)) {
+                    return action;
+                }
+            }
+            return null;
         }
 
         private void bindNotificationHeader(RemoteViews contentView, boolean ambient) {
@@ -5604,10 +5655,11 @@ public class Notification implements Parcelable
         @Override
         public RemoteViews makeContentView(boolean increasedHeight) {
             if (increasedHeight) {
-                ArrayList<Action> actions = mBuilder.mActions;
+                mBuilder.mOriginalActions = mBuilder.mActions;
                 mBuilder.mActions = new ArrayList<>();
                 RemoteViews remoteViews = makeBigContentView();
-                mBuilder.mActions = actions;
+                mBuilder.mActions = mBuilder.mOriginalActions;
+                mBuilder.mOriginalActions = null;
                 return remoteViews;
             }
             return super.makeContentView(increasedHeight);
@@ -5891,10 +5943,11 @@ public class Notification implements Parcelable
                 return mBuilder.applyStandardTemplate(mBuilder.getBaseLayoutResource(),
                         mBuilder.mParams.reset().hasProgress(false).title(title).text(text));
             } else {
-                ArrayList<Action> actions = mBuilder.mActions;
+                mBuilder.mOriginalActions = mBuilder.mActions;
                 mBuilder.mActions = new ArrayList<>();
                 RemoteViews remoteViews = makeBigContentView();
-                mBuilder.mActions = actions;
+                mBuilder.mActions = mBuilder.mOriginalActions;
+                mBuilder.mOriginalActions = null;
                 return remoteViews;
             }
         }

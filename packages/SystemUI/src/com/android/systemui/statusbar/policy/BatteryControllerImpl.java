@@ -207,14 +207,19 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             registerReceiver();
             updatePowerSave();
         } else if (mDemoMode && command.equals(COMMAND_BATTERY)) {
-           String level = args.getString("level");
-           String plugged = args.getString("plugged");
-           if (level != null) {
-               mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
-           }
-           if (plugged != null) {
-               mPluggedIn = Boolean.parseBoolean(plugged);
-           }
+            String level = args.getString("level");
+            String plugged = args.getString("plugged");
+            String powerSave = args.getString("powersave");
+            if (level != null) {
+                mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
+            }
+            if (plugged != null) {
+                mPluggedIn = Boolean.parseBoolean(plugged);
+            }
+            if (powerSave != null) {
+                mPowerSave = powerSave.equals("true");
+                firePowerSaveChanged();
+            }
             fireBatteryLevelChanged();
         }
     }

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.widget.ImageView;
@@ -41,6 +42,8 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private TextView mTitle;
     private TextView mText;
     private View mActionsContainer;
+    private View mReplyAction;
+    private Rect mTmpRect = new Rect();
 
     private int mContentHeight;
     private int mMinHeightHint;
@@ -130,6 +133,29 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             mProgressBar = null;
         }
         mActionsContainer = mView.findViewById(com.android.internal.R.id.actions_container);
+        mReplyAction = mView.findViewById(com.android.internal.R.id.reply_icon_action);
+    }
+
+    @Override
+    public boolean disallowSingleClick(float x, float y) {
+        if (mReplyAction != null && mReplyAction.getVisibility() == View.VISIBLE) {
+            if (isOnView(mReplyAction, x, y) || isOnView(mPicture, x, y)) {
+                return true;
+            }
+        }
+        return super.disallowSingleClick(x, y);
+    }
+
+    private boolean isOnView(View view, float x, float y) {
+        View searchView = (View) view.getParent();
+        while (searchView != null && !(searchView instanceof ExpandableNotificationRow)) {
+            searchView.getHitRect(mTmpRect);
+            x -= mTmpRect.left;
+            y -= mTmpRect.top;
+            searchView = (View) searchView.getParent();
+        }
+        view.getHitRect(mTmpRect);
+        return mTmpRect.contains((int) x,(int) y);
     }
 
     @Override

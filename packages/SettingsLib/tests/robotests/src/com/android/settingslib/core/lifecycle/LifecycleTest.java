@@ -210,6 +210,13 @@ public class LifecycleTest {
         assertThat(fragment.mFragObserver.mOnOptionsItemSelectedObserved).isTrue();
     }
 
+    @Test
+    public void addObserverDuringObserve_shoudNotCrash() {
+        Lifecycle lifecycle = new Lifecycle();
+        lifecycle.addObserver(new OnStartObserver(lifecycle));
+        lifecycle.onStart();
+    }
+
     private static class OptionItemAccepter implements LifecycleObserver, OnOptionsItemSelected {
         public boolean wasCalled = false;
 
@@ -235,5 +242,20 @@ public class LifecycleTest {
         fragmentController.pause().stop().destroy();
 
         assertThat(accepter.wasCalled).isFalse();
+    }
+
+    private class OnStartObserver implements LifecycleObserver, OnStart {
+
+        private final Lifecycle mLifecycle;
+
+        public OnStartObserver(Lifecycle lifecycle) {
+            mLifecycle = lifecycle;
+        }
+
+        @Override
+        public void onStart() {
+            mLifecycle.addObserver(new LifecycleObserver() {
+            });
+        }
     }
 }
