@@ -27,6 +27,7 @@ import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Binder;
 import android.os.Build;
@@ -992,16 +993,32 @@ public class WifiManager {
     /**
      * Returns a WifiConfiguration matching this ScanResult
      *
-     * An {@link UnsupportedOperationException} will be thrown if Passpoint is not enabled
-     * on the device.
-     *
      * @param scanResult scanResult that represents the BSSID
      * @return {@link WifiConfiguration} that matches this BSSID or null
+     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
      * @hide
      */
     public WifiConfiguration getMatchingWifiConfig(ScanResult scanResult) {
         try {
             return mService.getMatchingWifiConfig(scanResult);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns a list of Hotspot 2.0 OSU (Online Sign-Up) providers associated with the given AP.
+     *
+     * An empty list will be returned if no match is found.
+     *
+     * @param scanResult scanResult that represents the BSSID
+     * @return list of {@link OsuProvider}
+     * @throws UnsupportedOperationException if Passpoint is not enabled on the device.
+     * @hide
+     */
+    public List<OsuProvider> getMatchingOsuProviders(ScanResult scanResult) {
+        try {
+            return mService.getMatchingOsuProviders(scanResult);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
