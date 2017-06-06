@@ -60,7 +60,7 @@ public class AccessPointPreference extends Preference {
     private int mLevel;
     private CharSequence mContentDescription;
     private int mDefaultIconResId;
-    private int mWifiBadge = NetworkBadging.BADGING_NONE;
+    private int mWifiSpeed = NetworkBadging.BADGING_NONE;
 
     static final int[] WIFI_CONNECTION_STRENGTH = {
             R.string.accessibility_no_wifi,
@@ -161,7 +161,7 @@ public class AccessPointPreference extends Preference {
             safeSetDefaultIcon();
             return;
         }
-        TronUtils.logWifiSettingsBadge(context, mWifiBadge);
+        TronUtils.logWifiSettingsBadge(context, mWifiSpeed);
 
         // TODO(b/62355275): Revert this to N code after deleting NetworkBadging API
         Drawable drawable = NetworkBadging.getWifiIcon(
@@ -223,10 +223,10 @@ public class AccessPointPreference extends Preference {
 
         final Context context = getContext();
         int level = mAccessPoint.getLevel();
-        int wifiBadge = mAccessPoint.getBadge();
-        if (level != mLevel || wifiBadge != mWifiBadge) {
+        int wifiSpeed = mAccessPoint.getSpeed();
+        if (level != mLevel || wifiSpeed != mWifiSpeed) {
             mLevel = level;
-            mWifiBadge = wifiBadge;
+            mWifiSpeed = wifiSpeed;
             updateIcon(mLevel, context);
             notifyChanged();
         }
