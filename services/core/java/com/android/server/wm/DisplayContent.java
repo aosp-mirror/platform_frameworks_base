@@ -1162,6 +1162,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int dh = displayInfo.logicalHeight;
         config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
                 Configuration.ORIENTATION_LANDSCAPE;
+        config.setRotation(displayInfo.rotation);
+
         config.screenWidthDp =
                 (int)(mService.mPolicy.getConfigDisplayWidth(dw, dh, displayInfo.rotation,
                         config.uiMode, mDisplayId) / mDisplayMetrics.density);
