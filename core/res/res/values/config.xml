@@ -2961,4 +2961,7 @@
 
     <!-- Default number of days to retain for the automatic storage manager. -->
     <integer translatable="false" name="config_storageManagerDaystoRetainDefault">90</integer>
+
+    <!-- Name of a font family to use for headlines. If empty, falls back to platform default -->
+    <string name="config_headlineFontFamily" translatable="false"></string>
 </resources>
