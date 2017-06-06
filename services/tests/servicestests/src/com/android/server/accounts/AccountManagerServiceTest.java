@@ -2341,6 +2341,224 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithNullResponse() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.getAccountByTypeAndFeatures(
+                null, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+                AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+                "testpackage"); // opPackageName
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+            // IllegalArgumentException is expected.
+        }
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithNullAccountType() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.getAccountByTypeAndFeatures(
+                mMockAccountManagerResponse, // response
+                null, // accountType
+                AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+                "testpackage"); // opPackageName
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+            // IllegalArgumentException is expected.
+        }
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithNoFeaturesAndNoAccount() throws Exception {
+        unlockSystemUser();
+        mAms.getAccountByTypeAndFeatures(
+            mMockAccountManagerResponse,
+            AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+            null,
+            "testpackage");
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+        String accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
+        assertEquals(null, accountName);
+        assertEquals(null, accountType);
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithNoFeaturesAndOneVisibleAccount()
+        throws Exception {
+        unlockSystemUser();
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.getAccountByTypeAndFeatures(
+            mMockAccountManagerResponse,
+            AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+            null,
+            "testpackage");
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+        String accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS, accountName);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, accountType);
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithNoFeaturesAndOneNotVisibleAccount()
+        throws Exception {
+        unlockSystemUser();
+        HashMap<String, Integer> visibility = new HashMap<>();
+        visibility.put(AccountManagerServiceTestFixtures.CALLER_PACKAGE,
+            AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE);
+        mAms.addAccountExplicitlyWithVisibility(
+            AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null, visibility);
+        mAms.getAccountByTypeAndFeatures(
+            mMockAccountManagerResponse,
+            AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+            null,
+            AccountManagerServiceTestFixtures.CALLER_PACKAGE);
+        verify(mMockContext).startActivityAsUser(mIntentCaptor.capture(), eq(UserHandle.SYSTEM));
+        Intent intent = mIntentCaptor.getValue();
+        Account[] accounts = (Account[]) intent.getExtra(AccountManager.KEY_ACCOUNTS);
+        assertEquals(1, accounts.length);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, accounts[0]);
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithNoFeaturesAndTwoAccounts() throws Exception {
+        unlockSystemUser();
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p12", null);
+
+        mAms.getAccountByTypeAndFeatures(
+            mMockAccountManagerResponse,
+            AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+            null,
+            "testpackage");
+        verify(mMockContext).startActivityAsUser(mIntentCaptor.capture(), eq(UserHandle.SYSTEM));
+        Intent intent = mIntentCaptor.getValue();
+        Account[] accounts = (Account[]) intent.getExtra(AccountManager.KEY_ACCOUNTS);
+        assertEquals(2, accounts.length);
+        if (accounts[0].equals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS)) {
+            assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, accounts[0]);
+            assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, accounts[1]);
+        } else {
+            assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, accounts[0]);
+            assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, accounts[1]);
+        }
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithFeaturesAndNoAccount() throws Exception {
+        unlockSystemUser();
+        final CountDownLatch latch = new CountDownLatch(1);
+        mAms.getAccountByTypeAndFeatures(
+            mMockAccountManagerResponse,
+            AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+            AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+            "testpackage");
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+        String accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
+        assertEquals(null, accountName);
+        assertEquals(null, accountType);
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithFeaturesAndNoQualifiedAccount()
+        throws Exception {
+        unlockSystemUser();
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p12", null);
+        final CountDownLatch latch = new CountDownLatch(1);
+        mAms.getAccountByTypeAndFeatures(
+            mMockAccountManagerResponse,
+            AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+            AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+            "testpackage");
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+        String accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
+        assertEquals(null, accountName);
+        assertEquals(null, accountType);
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithFeaturesAndOneQualifiedAccount()
+        throws Exception {
+        unlockSystemUser();
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p12", null);
+        final CountDownLatch latch = new CountDownLatch(1);
+        mAms.getAccountByTypeAndFeatures(
+            mMockAccountManagerResponse,
+            AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+            AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+            "testpackage");
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+        String accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS, accountName);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, accountType);
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithFeaturesAndOneQualifiedNotVisibleAccount()
+        throws Exception {
+        unlockSystemUser();
+        HashMap<String, Integer> visibility = new HashMap<>();
+        visibility.put(AccountManagerServiceTestFixtures.CALLER_PACKAGE,
+            AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE);
+        mAms.addAccountExplicitlyWithVisibility(
+            AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null, visibility);
+        final CountDownLatch latch = new CountDownLatch(1);
+        mAms.getAccountByTypeAndFeatures(
+            mMockAccountManagerResponse,
+            AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+            AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+            AccountManagerServiceTestFixtures.CALLER_PACKAGE);
+        waitForLatch(latch);
+        verify(mMockContext).startActivityAsUser(mIntentCaptor.capture(), eq(UserHandle.SYSTEM));
+        Intent intent = mIntentCaptor.getValue();
+        Account[] accounts = (Account[]) intent.getExtra(AccountManager.KEY_ACCOUNTS);
+        assertEquals(1, accounts.length);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, accounts[0]);
+    }
+
+    @SmallTest
+    public void testGetAccountByTypeAndFeaturesWithFeaturesAndTwoQualifiedAccount()
+        throws Exception {
+        unlockSystemUser();
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS_2, "p12", null);
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p13", null);
+        final CountDownLatch latch = new CountDownLatch(1);
+        mAms.getAccountByTypeAndFeatures(
+            mMockAccountManagerResponse,
+            AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+            AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+            "testpackage");
+        waitForLatch(latch);
+        verify(mMockContext).startActivityAsUser(mIntentCaptor.capture(), eq(UserHandle.SYSTEM));
+        Intent intent = mIntentCaptor.getValue();
+        Account[] accounts = (Account[]) intent.getExtra(AccountManager.KEY_ACCOUNTS);
+        assertEquals(2, accounts.length);
+        if (accounts[0].equals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS)) {
+            assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, accounts[0]);
+            assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS_2, accounts[1]);
+        } else {
+            assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS_2, accounts[0]);
+            assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, accounts[1]);
+        }
+    }
+
+    @SmallTest
     public void testGetAccountsByFeaturesWithNullResponse() throws Exception {
         unlockSystemUser();
         try {
