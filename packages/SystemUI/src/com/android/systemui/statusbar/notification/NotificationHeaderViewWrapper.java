@@ -128,8 +128,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public void notifyContentUpdated(ExpandableNotificationRow row) {
-        super.notifyContentUpdated(row);
+    public void onContentUpdated(ExpandableNotificationRow row) {
+        super.onContentUpdated(row);
         mIsLowPriority = row.isLowPriority();
         mTransformLowPriorityTitle = !row.isChildInGroup() && !row.isSummaryWithChildren();
         ArraySet<View> previousViews = mTransformationHelper.getAllTransformingViews();
