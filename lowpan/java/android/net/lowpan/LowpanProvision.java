@@ -25,14 +25,13 @@ import java.util.Map;
  *
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public class LowpanProvision {
 
-    //////////////////////////////////////////////////////////////////////////
     // Builder
 
     /** @hide */
-    //@SystemApi
+    // @SystemApi
     public static class Builder {
         private final LowpanProvision provision = new LowpanProvision();
 
@@ -53,13 +52,11 @@ public class LowpanProvision {
 
     private LowpanProvision() {}
 
-    //////////////////////////////////////////////////////////////////////////
     // Instance Variables
 
     private LowpanIdentity mIdentity = new LowpanIdentity();
     private LowpanCredential mCredential = null;
 
-    //////////////////////////////////////////////////////////////////////////
     // Public Getters and Setters
 
     @NonNull
@@ -72,7 +69,6 @@ public class LowpanProvision {
         return mCredential;
     }
 
-    //////////////////////////////////////////////////////////////////////////
     // LoWPAN-Internal Methods
 
     static void addToMap(Map<String, Object> parameters, LowpanProvision provision)

@@ -33,7 +33,7 @@ import java.util.Set;
  *
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public class LowpanInterface {
     private static final String TAG = LowpanInterface.class.getSimpleName();
 
@@ -170,7 +170,7 @@ public class LowpanInterface {
      *
      * @hide
      */
-    //@SystemApi
+    // @SystemApi
     public abstract static class Callback {
         public void onConnectedChanged(boolean value) {}
 
@@ -244,7 +244,6 @@ public class LowpanInterface {
         LowpanException.throwAsPublicException(t);
     }
 
-    //////////////////////////////////////////////////////////////////////////
     // Private Property Helpers
 
     void setProperties(Map properties) throws LowpanException {
@@ -311,10 +310,9 @@ public class LowpanInterface {
 
     boolean getPropertyAsBoolean(LowpanProperty<Boolean> key) throws LowpanException {
         Boolean value = getProperty(key);
-        return (value != null) ? value : 0;
+        return (value != null) ? value : false;
     }
 
-    //////////////////////////////////////////////////////////////////////////
     // Public Actions
 
     /**
@@ -424,7 +422,6 @@ public class LowpanInterface {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////
     // Public Getters and Setters
 
     /**
@@ -448,13 +445,13 @@ public class LowpanInterface {
         return "";
     }
 
-  /**
-   * Indicates if the interface is enabled or disabled.
-   *
-   * @see #setEnabled
-   * @see android.net.lowpan.LowpanException#LOWPAN_DISABLED
-   */
-  public boolean isEnabled() {
+    /**
+     * Indicates if the interface is enabled or disabled.
+     *
+     * @see #setEnabled
+     * @see android.net.lowpan.LowpanException#LOWPAN_DISABLED
+     */
+    public boolean isEnabled() {
         try {
             return getPropertyAsBoolean(LowpanProperties.KEY_INTERFACE_ENABLED);
         } catch (LowpanException x) {
@@ -462,16 +459,16 @@ public class LowpanInterface {
         }
     }
 
-  /**
-   * Enables or disables the LoWPAN interface. When disabled, the interface is put into a low-power
-   * state and all commands that require the NCP to be queried will fail with {@link
-   * android.net.lowpan.LowpanException#LOWPAN_DISABLED}.
-   *
-   * @see #isEnabled
-   * @see android.net.lowpan.LowpanException#LOWPAN_DISABLED
-   * @hide
-   */
-  public void setEnabled(boolean enabled) throws LowpanException {
+    /**
+     * Enables or disables the LoWPAN interface. When disabled, the interface is put into a
+     * low-power state and all commands that require the NCP to be queried will fail with {@link
+     * android.net.lowpan.LowpanException#LOWPAN_DISABLED}.
+     *
+     * @see #isEnabled
+     * @see android.net.lowpan.LowpanException#LOWPAN_DISABLED
+     * @hide
+     */
+    public void setEnabled(boolean enabled) throws LowpanException {
         setProperty(LowpanProperties.KEY_INTERFACE_ENABLED, enabled);
     }
 
@@ -628,7 +625,6 @@ public class LowpanInterface {
         setProperties(map);
     }
 
-    //////////////////////////////////////////////////////////////////////////
     // Listener Support
 
     /**
@@ -644,7 +640,7 @@ public class LowpanInterface {
     public void registerCallback(@NonNull Callback cb, @Nullable Handler handler) {
         ILowpanInterfaceListener.Stub listenerBinder =
                 new ILowpanInterfaceListener.Stub() {
-                    public void onPropertiesChanged(Map<String, Object> properties) {
+                    public void onPropertiesChanged(Map properties) {
                         Runnable runnable =
                                 new Runnable() {
                                     @Override
@@ -724,36 +720,35 @@ public class LowpanInterface {
      */
     public void unregisterCallback(Callback cb) {
         int hashCode = System.identityHashCode(cb);
-        ILowpanInterfaceListener listenerBinder = mListenerMap.get(hashCode);
+        synchronized (mListenerMap) {
+            ILowpanInterfaceListener listenerBinder = mListenerMap.get(hashCode);
 
-        if (listenerBinder != null) {
-            synchronized (mListenerMap) {
+            if (listenerBinder != null) {
                 mListenerMap.remove(hashCode);
-            }
-            try {
-                mBinder.removeListener(listenerBinder);
-            } catch (RemoteException x) {
-                // Catch and ignore all binder exceptions
-                Log.e(TAG, x.toString());
+
+                try {
+                    mBinder.removeListener(listenerBinder);
+                } catch (RemoteException x) {
+                    // Catch and ignore all binder exceptions
+                    Log.e(TAG, x.toString());
+                }
             }
         }
     }
 
-  //////////////////////////////////////////////////////////////////////////
-  // Active and Passive Scanning
+    // Active and Passive Scanning
 
-  /**
-   * Creates a new {@link android.net.lowpan.LowpanScanner} object for this interface.
-   *
-   * <p>This method allocates a new unique object for each call.
-   *
-   * @see android.net.lowpan.LowpanScanner
-   */
-  public @NonNull LowpanScanner createScanner() {
+    /**
+     * Creates a new {@link android.net.lowpan.LowpanScanner} object for this interface.
+     *
+     * <p>This method allocates a new unique object for each call.
+     *
+     * @see android.net.lowpan.LowpanScanner
+     */
+    public @NonNull LowpanScanner createScanner() {
         return new LowpanScanner(mBinder);
     }
 
-    //////////////////////////////////////////////////////////////////////////
     // Route Management
 
     /**

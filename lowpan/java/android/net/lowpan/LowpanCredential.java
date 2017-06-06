@@ -16,7 +16,6 @@
 
 package android.net.lowpan;
 
-
 import java.util.Map;
 
 /**
@@ -24,7 +23,7 @@ import java.util.Map;
  *
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public class LowpanCredential {
 
     public static final int UNSPECIFIED_KEY_INDEX = 0;
@@ -84,8 +83,7 @@ public class LowpanCredential {
     void addToMap(Map<String, Object> parameters) throws LowpanException {
         if (isMasterKey()) {
             LowpanProperties.KEY_NETWORK_MASTER_KEY.putInMap(parameters, getMasterKey());
-            LowpanProperties.KEY_NETWORK_MASTER_KEY_INDEX.putInMap(
-                    parameters, getMasterKeyIndex());
+            LowpanProperties.KEY_NETWORK_MASTER_KEY_INDEX.putInMap(parameters, getMasterKeyIndex());
         } else {
             throw new LowpanException("Unsupported Network Credential");
         }

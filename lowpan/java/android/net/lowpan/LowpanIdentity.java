@@ -24,10 +24,9 @@ import java.util.Map;
  *
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public class LowpanIdentity {
 
-    //////////////////////////////////////////////////////////////////////////
     // Constants
 
     /** @hide */
@@ -41,11 +40,10 @@ public class LowpanIdentity {
 
     public static final int UNKNOWN = Integer.MAX_VALUE;
 
-    //////////////////////////////////////////////////////////////////////////
     // Builder
 
     /** @hide */
-    //@SystemApi
+    // @SystemApi
     public static class Builder {
         private final LowpanIdentity identity = new LowpanIdentity();
 
@@ -102,7 +100,6 @@ public class LowpanIdentity {
 
     LowpanIdentity() {}
 
-    //////////////////////////////////////////////////////////////////////////
     // Instance Variables
 
     private String mName = null;
@@ -111,7 +108,6 @@ public class LowpanIdentity {
     private int mPanid = UNKNOWN;
     private int mChannel = UNKNOWN;
 
-    //////////////////////////////////////////////////////////////////////////
     // Public Getters and Setters
 
     public String getName() {
@@ -140,12 +136,10 @@ public class LowpanIdentity {
             LowpanProperties.KEY_NETWORK_NAME.putInMap(parameters, networkInfo.getName());
         }
         if (networkInfo.getPanid() != LowpanIdentity.UNKNOWN) {
-            LowpanProperties.KEY_NETWORK_PANID.putInMap(
-                    parameters, networkInfo.getPanid());
+            LowpanProperties.KEY_NETWORK_PANID.putInMap(parameters, networkInfo.getPanid());
         }
         if (networkInfo.getChannel() != LowpanIdentity.UNKNOWN) {
-            LowpanProperties.KEY_CHANNEL.putInMap(
-                    parameters, networkInfo.getChannel());
+            LowpanProperties.KEY_CHANNEL.putInMap(parameters, networkInfo.getChannel());
         }
         if (networkInfo.getXpanid() != null) {
             LowpanProperties.KEY_NETWORK_XPANID.putInMap(parameters, networkInfo.getXpanid());
