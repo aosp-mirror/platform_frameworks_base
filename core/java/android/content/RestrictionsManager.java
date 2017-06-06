@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.pm.ApplicationInfo;
@@ -120,6 +121,7 @@ import java.util.List;
  * @see DevicePolicyManager#setRestrictionsProvider(ComponentName, ComponentName)
  * @see DevicePolicyManager#setApplicationRestrictions(ComponentName, String, Bundle)
  */
+@SystemService(Context.RESTRICTIONS_SERVICE)
 public class RestrictionsManager {
 
     private static final String TAG = "RestrictionsManager";

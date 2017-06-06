@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -49,11 +50,8 @@ import java.lang.annotation.RetentionPolicy;
  * displayed allowing the user to exit dock mode.  Thus the dock mode
  * represented here may be different than the current state of the underlying
  * dock event broadcast.
- *
- * <p>You do not instantiate this class directly; instead, retrieve it through
- * {@link android.content.Context#getSystemService
- * Context.getSystemService(Context.UI_MODE_SERVICE)}.
  */
+@SystemService(Context.UI_MODE_SERVICE)
 public class UiModeManager {
     private static final String TAG = "UiModeManager";
 

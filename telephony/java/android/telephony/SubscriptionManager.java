@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.content.Intent;
@@ -41,13 +42,11 @@ import java.util.List;
 /**
  * SubscriptionManager is the application interface to SubscriptionController
  * and provides information about the current Telephony Subscriptions.
- * * <p>
- * You do not instantiate this class directly; instead, you retrieve
- * a reference to an instance through {@link #from}.
  * <p>
  * All SDK public methods require android.Manifest.permission.READ_PHONE_STATE unless otherwise
  * specified.
  */
+@SystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
 public class SubscriptionManager {
     private static final String LOG_TAG = "SubscriptionManager";
     private static final boolean DBG = false;

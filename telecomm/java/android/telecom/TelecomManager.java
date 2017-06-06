@@ -18,6 +18,7 @@ import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -48,6 +49,7 @@ import java.util.List;
  * descriptions.
  */
 @SuppressAutoDoc
+@SystemService(Context.TELECOM_SERVICE)
 public class TelecomManager {
 
     /**
@@ -1245,6 +1247,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean endCall() {
         try {
             if (isServiceConnected()) {

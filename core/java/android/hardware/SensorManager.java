@@ -17,6 +17,8 @@
 package android.hardware;
 
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
+import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.MemoryFile;
@@ -30,10 +32,7 @@ import java.util.List;
 /**
  * <p>
  * SensorManager lets you access the device's {@link android.hardware.Sensor
- * sensors}. Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String)
- * Context.getSystemService()} with the argument
- * {@link android.content.Context#SENSOR_SERVICE}.
+ * sensors}.
  * </p>
  * <p>
  * Always make sure to disable sensors you don't need, especially when your
@@ -79,6 +78,7 @@ import java.util.List;
  * @see Sensor
  *
  */
+@SystemService(Context.SENSOR_SERVICE)
 public abstract class SensorManager {
     /** @hide */
     protected static final String TAG = "SensorManager";

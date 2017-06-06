@@ -19,6 +19,7 @@ package android.net;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -177,6 +178,7 @@ public class VpnService extends Service {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.CONTROL_VPN)
     public static void prepareAndAuthorize(Context context) {
         IConnectivityManager cm = getService();
         String packageName = context.getPackageName();

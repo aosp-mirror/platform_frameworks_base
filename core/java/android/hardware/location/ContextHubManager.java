@@ -15,7 +15,10 @@
  */
 package android.hardware.location;
 
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,6 +36,7 @@ import android.util.Log;
  * @hide
  */
 @SystemApi
+@SystemService(Context.CONTEXTHUB_SERVICE)
 public final class ContextHubManager {
 
     private static final String TAG = "ContextHubManager";
@@ -91,6 +95,7 @@ public final class ContextHubManager {
      * Get a handle to all the context hubs in the system
      * @return array of context hub handles
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int[] getContextHubHandles() {
         try {
             return mService.getContextHubHandles();
@@ -107,6 +112,7 @@ public final class ContextHubManager {
      *
      * @see ContextHubInfo
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public ContextHubInfo getContextHubInfo(int hubHandle) {
         try {
             return mService.getContextHubInfo(hubHandle);
@@ -134,6 +140,7 @@ public final class ContextHubManager {
      *
      * @see NanoApp
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int loadNanoApp(int hubHandle, NanoApp app) {
         try {
             return mService.loadNanoApp(hubHandle, app);
@@ -157,6 +164,7 @@ public final class ContextHubManager {
      * @return 0 if the command for unloading was sent to the context hub;
      *         -1 otherwise
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int unloadNanoApp(int nanoAppHandle) {
         try {
             return mService.unloadNanoApp(nanoAppHandle);
@@ -191,6 +199,7 @@ public final class ContextHubManager {
      *
      * @see NanoAppInstanceInfo
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) {
         try {
             return mService.getNanoAppInstanceInfo(nanoAppHandle);
@@ -209,6 +218,7 @@ public final class ContextHubManager {
      *
      * @return int[] Array of handles to any found nano apps
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int[] findNanoAppOnHub(int hubHandle, NanoAppFilter filter) {
         try {
             return mService.findNanoAppOnHub(hubHandle, filter);
@@ -236,6 +246,7 @@ public final class ContextHubManager {
      *
      * @return int 0 on success, -1 otherwise
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int sendMessage(int hubHandle, int nanoAppHandle, ContextHubMessage message) {
         try {
             return mService.sendMessage(hubHandle, nanoAppHandle, message);
@@ -253,6 +264,7 @@ public final class ContextHubManager {
      *
      * @return int 0 on success, -1 otherwise
      */
+    @SuppressLint("Doclava125")
     public int registerCallback(Callback callback) {
         return registerCallback(callback, null);
     }
@@ -281,6 +293,7 @@ public final class ContextHubManager {
      *
      * @return int 0 on success, -1 otherwise
      */
+    @SuppressLint("Doclava125")
     public int registerCallback(Callback callback, Handler handler) {
         synchronized(this) {
             if (mCallback != null) {
@@ -302,6 +315,7 @@ public final class ContextHubManager {
      *
      * @return int 0 on success, -1 otherwise
      */
+    @SuppressLint("Doclava125")
     public int unregisterCallback(Callback callback) {
       synchronized(this) {
           if (callback != mCallback) {

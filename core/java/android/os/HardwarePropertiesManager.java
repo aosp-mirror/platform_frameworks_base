@@ -17,6 +17,7 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.hardware.thermal.V1_0.Constants;
 import android.util.Log;
@@ -28,6 +29,7 @@ import java.lang.annotation.RetentionPolicy;
  * The HardwarePropertiesManager class provides a mechanism of accessing hardware state of a
  * device: CPU, GPU and battery temperatures, CPU usage per core, fan speed, etc.
  */
+@SystemService(Context.HARDWARE_PROPERTIES_SERVICE)
 public class HardwarePropertiesManager {
 
     private static final String TAG = HardwarePropertiesManager.class.getSimpleName();

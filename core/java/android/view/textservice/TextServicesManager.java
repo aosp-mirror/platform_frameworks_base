@@ -16,6 +16,7 @@
 
 package android.view.textservice;
 
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -30,8 +31,7 @@ import java.util.Locale;
 
 /**
  * System API to the overall text services, which arbitrates interaction between applications
- * and text services. You can retrieve an instance of this interface with
- * {@link Context#getSystemService(String) Context.getSystemService()}.
+ * and text services.
  *
  * The user can change the current text services in Settings. And also applications can specify
  * the target text services.
@@ -61,6 +61,7 @@ import java.util.Locale;
  * </ul>
  *
  */
+@SystemService(Context.TEXT_SERVICES_MANAGER_SERVICE)
 public final class TextServicesManager {
     private static final String TAG = TextServicesManager.class.getSimpleName();
     private static final boolean DBG = false;

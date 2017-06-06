@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
@@ -98,11 +99,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * guarantee the security of the OBB file itself: if any program modifies the
  * OBB, there is no guarantee that a read from that OBB will produce the
  * expected output.
- * <p>
- * Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String)} with an
- * argument of {@link android.content.Context#STORAGE_SERVICE}.
  */
+@SystemService(Context.STORAGE_SERVICE)
 public class StorageManager {
     private static final String TAG = "StorageManager";
 
@@ -1701,8 +1699,8 @@ public class StorageManager {
 
     /** @hide */
     @SystemApi
-    public long getAllocatableBytes(@NonNull UUID storageUuid, @AllocateFlags int flags)
-            throws IOException {
+    public long getAllocatableBytes(@NonNull UUID storageUuid,
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
         try {
             return mStorageManager.getAllocatableBytes(convert(storageUuid), flags);
         } catch (ParcelableException e) {
@@ -1715,8 +1713,8 @@ public class StorageManager {
 
     /** @removed */
     @Deprecated
-    public long getAllocatableBytes(@NonNull File path, @AllocateFlags int flags)
-            throws IOException {
+    public long getAllocatableBytes(@NonNull File path,
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
         return getAllocatableBytes(getUuidForPath(path), flags);
     }
 
@@ -1750,7 +1748,7 @@ public class StorageManager {
     /** @hide */
     @SystemApi
     public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes,
-            @AllocateFlags int flags) throws IOException {
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
         try {
             mStorageManager.allocateBytes(convert(storageUuid), bytes, flags);
         } catch (ParcelableException e) {
@@ -1762,8 +1760,8 @@ public class StorageManager {
 
     /** @removed */
     @Deprecated
-    public void allocateBytes(@NonNull File path, @BytesLong long bytes, @AllocateFlags int flags)
-            throws IOException {
+    public void allocateBytes(@NonNull File path, @BytesLong long bytes,
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
         allocateBytes(getUuidForPath(path), bytes, flags);
     }
 
@@ -1798,8 +1796,8 @@ public class StorageManager {
 
     /** @hide */
     @SystemApi
-    public void allocateBytes(FileDescriptor fd, @BytesLong long bytes, @AllocateFlags int flags)
-            throws IOException {
+    public void allocateBytes(FileDescriptor fd, @BytesLong long bytes,
+            @RequiresPermission @AllocateFlags int flags) throws IOException {
         final File file = ParcelFileDescriptor.getFile(fd);
         for (int i = 0; i < 3; i++) {
             try {

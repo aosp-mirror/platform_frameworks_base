@@ -20,9 +20,12 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
@@ -98,6 +101,7 @@ import java.util.Set;
  * "{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a> developer
  * guide. </div>
  */
+@SystemService(Context.DEVICE_POLICY_SERVICE)
 public class DevicePolicyManager {
     private static String TAG = "DevicePolicyManager";
 
@@ -4673,6 +4677,7 @@ public class DevicePolicyManager {
      */
     @Deprecated
     @SystemApi
+    @SuppressLint("Doclava125")
     public @Nullable String getDeviceInitializerApp() {
         return null;
     }
@@ -4684,6 +4689,7 @@ public class DevicePolicyManager {
      */
     @Deprecated
     @SystemApi
+    @SuppressLint("Doclava125")
     public @Nullable ComponentName getDeviceInitializerComponent() {
         return null;
     }
@@ -4706,6 +4712,7 @@ public class DevicePolicyManager {
      */
     @Deprecated
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS)
     public boolean setActiveProfileOwner(@NonNull ComponentName admin, @Deprecated String ownerName)
             throws IllegalArgumentException {
         throwIfParentInstance("setActiveProfileOwner");
@@ -6793,8 +6800,7 @@ public class DevicePolicyManager {
      * Called by the system update service to notify device and profile owners of pending system
      * updates.
      *
-     * The caller must hold {@link android.Manifest.permission#NOTIFY_PENDING_SYSTEM_UPDATE}
-     * permission. This method should only be used when it is unknown whether the pending system
+     * This method should only be used when it is unknown whether the pending system
      * update is a security patch. Otherwise, use
      * {@link #notifyPendingSystemUpdate(long, boolean)}.
      *
@@ -6805,6 +6811,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.NOTIFY_PENDING_SYSTEM_UPDATE)
     public void notifyPendingSystemUpdate(long updateReceivedTime) {
         throwIfParentInstance("notifyPendingSystemUpdate");
         if (mService != null) {
@@ -6820,8 +6827,7 @@ public class DevicePolicyManager {
      * Called by the system update service to notify device and profile owners of pending system
      * updates.
      *
-     * The caller must hold {@link android.Manifest.permission#NOTIFY_PENDING_SYSTEM_UPDATE}
-     * permission. This method should be used instead of {@link #notifyPendingSystemUpdate(long)}
+     * This method should be used instead of {@link #notifyPendingSystemUpdate(long)}
      * when it is known whether the pending system update is a security patch.
      *
      * @param updateReceivedTime The time as given by {@link System#currentTimeMillis()}
@@ -6833,6 +6839,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.NOTIFY_PENDING_SYSTEM_UPDATE)
     public void notifyPendingSystemUpdate(long updateReceivedTime, boolean isSecurityPatch) {
         throwIfParentInstance("notifyPendingSystemUpdate");
         if (mService != null) {
@@ -7731,6 +7738,7 @@ public class DevicePolicyManager {
       * @hide
       */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public void setDeviceProvisioningConfigApplied() {
         try {
             mService.setDeviceProvisioningConfigApplied();

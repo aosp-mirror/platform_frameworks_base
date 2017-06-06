@@ -19,6 +19,7 @@ package android.hardware.input;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -53,13 +54,8 @@ import java.util.List;
 
 /**
  * Provides information about input devices and available key layouts.
- * <p>
- * Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String)
- * Context.getSystemService()} with the argument
- * {@link android.content.Context#INPUT_SERVICE}.
- * </p>
  */
+@SystemService(Context.INPUT_SERVICE)
 public final class InputManager {
     private static final String TAG = "InputManager";
     private static final boolean DEBUG = false;

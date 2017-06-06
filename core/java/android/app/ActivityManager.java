@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -117,6 +118,7 @@ import java.util.List;
  * be used for testing and debugging purposes only.
  * </p>
  */
+@SystemService(Context.ACTIVITY_SERVICE)
 public class ActivityManager {
     private static String TAG = "ActivityManager";
 
@@ -3626,6 +3628,7 @@ public class ActivityManager {
      * @hide
      */
     @SystemApi @TestApi
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public void addOnUidImportanceListener(OnUidImportanceListener listener,
             @RunningAppProcessInfo.Importance int importanceCutpoint) {
         synchronized (this) {
@@ -3654,6 +3657,7 @@ public class ActivityManager {
      * @hide
      */
     @SystemApi @TestApi
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public void removeOnUidImportanceListener(OnUidImportanceListener listener) {
         synchronized (this) {
             UidObserver observer = mImportanceListeners.remove(listener);
@@ -4021,6 +4025,10 @@ public class ActivityManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.INTERACT_ACROSS_USERS_FULL"
+    })
     public static int getCurrentUser() {
         UserInfo ui;
         try {
