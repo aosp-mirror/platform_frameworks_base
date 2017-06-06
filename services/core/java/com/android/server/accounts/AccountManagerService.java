@@ -23,8 +23,10 @@ import android.accounts.AccountAndUser;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerInternal;
+import android.accounts.AccountManagerResponse;
 import android.accounts.AuthenticatorDescription;
 import android.accounts.CantAddAccountActivity;
+import android.accounts.ChooseAccountActivity;
 import android.accounts.GrantCredentialsPermissionActivity;
 import android.accounts.IAccountAuthenticator;
 import android.accounts.IAccountAuthenticatorResponse;
@@ -71,6 +73,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -4043,6 +4046,7 @@ public class AccountManagerService
         private volatile int mCurrentAccount = 0;
         private final int mCallingUid;
         private final String mPackageName;
+        private final boolean mIncludeManagedNotVisible;
 
         public GetAccountsByTypeAndFeatureSession(
                 UserAccounts accounts,
@@ -4050,19 +4054,21 @@ public class AccountManagerService
                 String type,
                 String[] features,
                 int callingUid,
-                String packageName) {
+                String packageName,
+                boolean includeManagedNotVisible) {
             super(accounts, response, type, false /* expectActivityLaunch */,
                     true /* stripAuthTokenFromResult */, null /* accountName */,
                     false /* authDetailsRequired */);
             mCallingUid = callingUid;
             mFeatures = features;
             mPackageName = packageName;
+            mIncludeManagedNotVisible = includeManagedNotVisible;
         }
 
         @Override
         public void run() throws RemoteException {
             mAccountsOfType = getAccountsFromCache(mAccounts, mAccountType,
-                    mCallingUid, mPackageName, false /* include managed not visible*/);
+                    mCallingUid, mPackageName, mIncludeManagedNotVisible);
             // check whether each account matches the requested features
             mAccountsWithFeatures = new ArrayList<>(mAccountsOfType.length);
             mCurrentAccount = 0;
@@ -4427,6 +4433,112 @@ public class AccountManagerService
                 packageName, packageUid, opPackageName, true /* includeUserManagedNotVisible */);
     }
 
+    private boolean needToStartChooseAccountActivity(Account[] accounts, String callingPackage) {
+        if (accounts.length < 1) return false;
+        if (accounts.length > 1) return true;
+        Account account = accounts[0];
+        UserAccounts userAccounts = getUserAccounts(UserHandle.getCallingUserId());
+        int visibility = resolveAccountVisibility(account, callingPackage, userAccounts);
+        if (visibility == AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE) return true;
+        return false;
+    }
+
+    private void startChooseAccountActivityWithAccounts(
+        IAccountManagerResponse response, Account[] accounts) {
+        Intent intent = new Intent(mContext, ChooseAccountActivity.class);
+        intent.putExtra(AccountManager.KEY_ACCOUNTS, accounts);
+        intent.putExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE,
+                new AccountManagerResponse(response));
+
+        mContext.startActivityAsUser(intent, UserHandle.of(UserHandle.getCallingUserId()));
+    }
+
+    private void handleGetAccountsResult(
+        IAccountManagerResponse response,
+        Account[] accounts,
+        String callingPackage) {
+
+        if (needToStartChooseAccountActivity(accounts, callingPackage)) {
+            startChooseAccountActivityWithAccounts(response, accounts);
+            return;
+        }
+        if (accounts.length == 1) {
+            Bundle bundle = new Bundle();
+            bundle.putString(AccountManager.KEY_ACCOUNT_NAME, accounts[0].name);
+            bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accounts[0].type);
+            onResult(response, bundle);
+            return;
+        }
+        // No qualified account exists, return an empty Bundle.
+        onResult(response, new Bundle());
+    }
+
+    @Override
+    public void getAccountByTypeAndFeatures(
+        IAccountManagerResponse response,
+        String accountType,
+        String[] features,
+        String opPackageName) {
+
+        int callingUid = Binder.getCallingUid();
+        mAppOpsManager.checkPackage(callingUid, opPackageName);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "getAccount: accountType " + accountType
+                    + ", response " + response
+                    + ", features " + Arrays.toString(features)
+                    + ", caller's uid " + callingUid
+                    + ", pid " + Binder.getCallingPid());
+        }
+        if (response == null) throw new IllegalArgumentException("response is null");
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
+
+        int userId = UserHandle.getCallingUserId();
+
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts userAccounts = getUserAccounts(userId);
+            if (ArrayUtils.isEmpty(features)) {
+                Account[] accountsWithManagedNotVisible = getAccountsFromCache(
+                    userAccounts, accountType, callingUid, opPackageName,
+                    true /* include managed not visible */);
+                handleGetAccountsResult(
+                    response, accountsWithManagedNotVisible, opPackageName);
+                return;
+            }
+
+            IAccountManagerResponse retrieveAccountsResponse =
+                new IAccountManagerResponse.Stub() {
+                @Override
+                public void onResult(Bundle value) throws RemoteException {
+                    Parcelable[] parcelables = value.getParcelableArray(
+                        AccountManager.KEY_ACCOUNTS);
+                    Account[] accounts = new Account[parcelables.length];
+                    for (int i = 0; i < parcelables.length; i++) {
+                        accounts[i] = (Account) parcelables[i];
+                    }
+                    handleGetAccountsResult(
+                        response, accounts, opPackageName);
+                }
+
+                @Override
+                public void onError(int errorCode, String errorMessage)
+                        throws RemoteException {
+                    // Will not be called in this case.
+                }
+            };
+            new GetAccountsByTypeAndFeatureSession(
+                    userAccounts,
+                    retrieveAccountsResponse,
+                    accountType,
+                    features,
+                    callingUid,
+                    opPackageName,
+                    true /* include managed not visible */).bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
     @Override
     public void getAccountsByFeatures(
             IAccountManagerResponse response,
@@ -4459,6 +4571,7 @@ public class AccountManagerService
             }
             return;
         }
+
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts userAccounts = getUserAccounts(userId);
@@ -4476,7 +4589,8 @@ public class AccountManagerService
                     type,
                     features,
                     callingUid,
-                    opPackageName).bind();
+                    opPackageName,
+                    false /* include managed not visible */).bind();
         } finally {
             restoreCallingIdentity(identityToken);
         }
