@@ -471,6 +471,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
     private final Rect mLastFullscreenStackBounds = new Rect();
     private final Rect mLastDockedStackBounds = new Rect();
+    private final Rect mTmpRect = new Rect();
 
     // last value sent to window manager
     private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
@@ -1371,20 +1372,33 @@ public class StatusBar extends SystemUI implements DemoMode,
         int numChildren = mStackScroller.getChildCount();
 
         final ArrayList<View> viewsToHide = new ArrayList<View>(numChildren);
+        final ArrayList<ExpandableNotificationRow> viewsToRemove = new ArrayList<>(numChildren);
         for (int i = 0; i < numChildren; i++) {
             final View child = mStackScroller.getChildAt(i);
             if (child instanceof ExpandableNotificationRow) {
-                if (mStackScroller.canChildBeDismissed(child)) {
-                    if (child.getVisibility() == View.VISIBLE) {
-                        viewsToHide.add(child);
-                    }
-                }
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                boolean parentVisible = false;
+                boolean hasClipBounds = child.getClipBounds(mTmpRect);
+                if (mStackScroller.canChildBeDismissed(child)) {
+                    viewsToRemove.add(row);
+                    if (child.getVisibility() == View.VISIBLE
+                            && (!hasClipBounds || mTmpRect.height() > 0)) {
+                        viewsToHide.add(child);
+                        parentVisible = true;
+                    }
+                } else if (child.getVisibility() == View.VISIBLE
+                        && (!hasClipBounds || mTmpRect.height() > 0)) {
+                    parentVisible = true;
+                }
                 List<ExpandableNotificationRow> children = row.getNotificationChildren();
-                if (row.areChildrenExpanded() && children != null) {
+                if (children != null) {
                     for (ExpandableNotificationRow childRow : children) {
-                        if (mStackScroller.canChildBeDismissed(childRow)) {
-                            if (childRow.getVisibility() == View.VISIBLE) {
+                        viewsToRemove.add(childRow);
+                        if (parentVisible && row.areChildrenExpanded()
+                                && mStackScroller.canChildBeDismissed(childRow)) {
+                            hasClipBounds = childRow.getClipBounds(mTmpRect);
+                            if (childRow.getVisibility() == View.VISIBLE
+                                    && (!hasClipBounds || mTmpRect.height() > 0)) {
                                 viewsToHide.add(childRow);
                             }
                         }
@@ -1392,7 +1406,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
         }
-        if (viewsToHide.isEmpty()) {
+        if (viewsToRemove.isEmpty()) {
             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             return;
         }
@@ -1401,6 +1415,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             @Override
             public void run() {
                 mStackScroller.setDismissAllInProgress(false);
+                for (ExpandableNotificationRow rowToRemove : viewsToRemove) {
+                    if (mStackScroller.canChildBeDismissed(rowToRemove)) {
+                        removeNotification(rowToRemove.getEntry().key, null);
+                    } else {
+                        rowToRemove.resetTranslation();
+                    }
+                }
                 try {
                     mBarService.onClearAllNotifications(mCurrentUserId);
                 } catch (Exception ex) { }
