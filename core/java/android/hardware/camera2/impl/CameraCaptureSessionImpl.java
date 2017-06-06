@@ -206,7 +206,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
         } else if (request.isReprocess() && !isReprocessable()) {
             throw new IllegalArgumentException("this capture session cannot handle reprocess " +
                     "requests");
-        } else if (request.isReprocess() && request.getReprocessableSessionId() != mId) {
+        } else if (!mDeviceImpl.isPrivilegedApp() &&
+                request.isReprocess() && request.getReprocessableSessionId() != mId) {
             throw new IllegalArgumentException("capture request was created for another session");
         }
     }
