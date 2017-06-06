@@ -21,11 +21,14 @@ import java.util.List;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.SpannableString;
@@ -35,6 +38,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,6 +51,10 @@ import com.android.systemui.R;
 public class NotificationSnooze extends LinearLayout
         implements NotificationGuts.GutsContent, View.OnClickListener {
 
+    /**
+     * If this changes more number increases, more assistant action resId's should be defined for
+     * accessibility purposes, see {@link #setSnoozeOptions(List)}
+     */
     private static final int MAX_ASSISTANT_SUGGESTIONS = 1;
     private NotificationGuts mGutsContainer;
     private NotificationSwipeActionHelper mSnoozeListener;
@@ -79,14 +89,58 @@ public class NotificationSnooze extends LinearLayout
         mDivider = findViewById(R.id.divider);
         mDivider.setAlpha(0f);
         mSnoozeOptionContainer = (ViewGroup) findViewById(R.id.snooze_options);
+        mSnoozeOptionContainer.setVisibility(View.INVISIBLE);
         mSnoozeOptionContainer.setAlpha(0f);
 
         // Create the different options based on list
         mSnoozeOptions = getDefaultSnoozeOptions();
         createOptionViews();
 
-        // Default to first option in list
         setSelected(mDefaultOption);
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        if (mGutsContainer != null && mGutsContainer.isExposed()) {
+            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                event.getText().add(mSelectedOptionText.getText());
+            }
+        }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.addAction(new AccessibilityAction(R.id.action_snooze_undo,
+                getResources().getString(R.string.snooze_undo)));
+        int count = mSnoozeOptions.size();
+        for (int i = 0; i < count; i++) {
+            AccessibilityAction action = mSnoozeOptions.get(i).getAccessibilityAction();
+            if (action != null) {
+                info.addAction(action);
+            }
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
+            return true;
+        }
+        if (action == R.id.action_snooze_undo) {
+            undoSnooze(mUndoButton);
+            return true;
+        }
+        for (int i = 0; i < mSnoozeOptions.size(); i++) {
+            SnoozeOption so = mSnoozeOptions.get(i);
+            if (so.getAccessibilityAction() != null
+                    && so.getAccessibilityAction().getId() == action) {
+                setSelected(so);
+                return true;
+            }
+        }
+        return false;
     }
 
     public void setSnoozeOptions(final List<SnoozeCriterion> snoozeList) {
@@ -98,7 +152,10 @@ public class NotificationSnooze extends LinearLayout
         final int count = Math.min(MAX_ASSISTANT_SUGGESTIONS, snoozeList.size());
         for (int i = 0; i < count; i++) {
             SnoozeCriterion sc = snoozeList.get(i);
-            mSnoozeOptions.add(new SnoozeOption(sc, 0, sc.getExplanation(), sc.getConfirmation()));
+            AccessibilityAction action = new AccessibilityAction(
+                    R.id.action_snooze_assistant_suggestion_1, sc.getExplanation());
+            mSnoozeOptions.add(new NotificationSnoozeOption(sc, 0, sc.getExplanation(),
+                    sc.getConfirmation(), action));
         }
         createOptionViews();
     }
@@ -117,15 +174,16 @@ public class NotificationSnooze extends LinearLayout
 
     private ArrayList<SnoozeOption> getDefaultSnoozeOptions() {
         ArrayList<SnoozeOption> options = new ArrayList<>();
-        options.add(createOption(15 /* minutes */));
-        options.add(createOption(30 /* minutes */));
-        mDefaultOption = createOption(60 /* minutes */);
+
+        options.add(createOption(15 /* minutes */, R.id.action_snooze_15_min));
+        options.add(createOption(30 /* minutes */, R.id.action_snooze_30_min));
+        mDefaultOption = createOption(60 /* minutes */, R.id.action_snooze_1_hour);
         options.add(mDefaultOption);
-        options.add(createOption(60 * 2 /* minutes */));
+        options.add(createOption(60 * 2 /* minutes */, R.id.action_snooze_2_hours));
         return options;
     }
 
-    private SnoozeOption createOption(int minutes) {
+    private SnoozeOption createOption(int minutes, int accessibilityActionId) {
         Resources res = getResources();
         boolean showInHours = minutes >= 60;
         int pluralResId = showInHours
@@ -137,7 +195,9 @@ public class NotificationSnooze extends LinearLayout
         SpannableString string = new SpannableString(resultText);
         string.setSpan(new StyleSpan(Typeface.BOLD),
                 resultText.length() - description.length(), resultText.length(), 0 /* flags */);
-        return new SnoozeOption(null, minutes, description, string);
+        AccessibilityAction action = new AccessibilityAction(accessibilityActionId, description);
+        return new NotificationSnoozeOption(null, minutes, description, string,
+                action);
     }
 
     private void createOptionViews() {
@@ -149,7 +209,7 @@ public class NotificationSnooze extends LinearLayout
             TextView tv = (TextView) inflater.inflate(R.layout.notification_snooze_option,
                     mSnoozeOptionContainer, false);
             mSnoozeOptionContainer.addView(tv);
-            tv.setText(option.description);
+            tv.setText(option.getDescription());
             tv.setTag(option);
             tv.setOnClickListener(this);
         }
@@ -184,18 +244,36 @@ public class NotificationSnooze extends LinearLayout
                 mDivider.getAlpha(), show ? 1f : 0f);
         ObjectAnimator optionAnim = ObjectAnimator.ofFloat(mSnoozeOptionContainer, View.ALPHA,
                 mSnoozeOptionContainer.getAlpha(), show ? 1f : 0f);
+        mSnoozeOptionContainer.setVisibility(View.VISIBLE);
         mExpandAnimation = new AnimatorSet();
         mExpandAnimation.playTogether(dividerAnim, optionAnim);
         mExpandAnimation.setDuration(150);
         mExpandAnimation.setInterpolator(show ? Interpolators.ALPHA_IN : Interpolators.ALPHA_OUT);
+        mExpandAnimation.addListener(new AnimatorListenerAdapter() {
+            boolean cancelled = false;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                cancelled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!show && !cancelled) {
+                    mSnoozeOptionContainer.setVisibility(View.INVISIBLE);
+                    mSnoozeOptionContainer.setAlpha(0f);
+                }
+            }
+        });
         mExpandAnimation.start();
     }
 
     private void setSelected(SnoozeOption option) {
         mSelectedOption = option;
-        mSelectedOptionText.setText(option.confirmation);
+        mSelectedOptionText.setText(option.getConfirmation());
         showSnoozeOptions(false);
         hideSelectedOption();
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
     }
 
     @Override
@@ -212,18 +290,22 @@ public class NotificationSnooze extends LinearLayout
             showSnoozeOptions(!mExpanded);
         } else {
             // Undo snooze was selected
-            mSelectedOption = null;
-            int[] parentLoc = new int[2];
-            int[] targetLoc = new int[2];
-            mGutsContainer.getLocationOnScreen(parentLoc);
-            v.getLocationOnScreen(targetLoc);
-            final int centerX = v.getWidth() / 2;
-            final int centerY = v.getHeight() / 2;
-            final int x = targetLoc[0] - parentLoc[0] + centerX;
-            final int y = targetLoc[1] - parentLoc[1] + centerY;
-            showSnoozeOptions(false);
-            mGutsContainer.closeControls(x, y, false /* save */, false /* force */);
+            undoSnooze(v);
         }
+    }
+
+    private void undoSnooze(View v) {
+        mSelectedOption = null;
+        int[] parentLoc = new int[2];
+        int[] targetLoc = new int[2];
+        mGutsContainer.getLocationOnScreen(parentLoc);
+        v.getLocationOnScreen(targetLoc);
+        final int centerX = v.getWidth() / 2;
+        final int centerY = v.getHeight() / 2;
+        final int x = targetLoc[0] - parentLoc[0] + centerX;
+        final int y = targetLoc[1] - parentLoc[1] + centerY;
+        showSnoozeOptions(false);
+        mGutsContainer.closeControls(x, y, false /* save */, false /* force */);
     }
 
     @Override
@@ -269,5 +351,49 @@ public class NotificationSnooze extends LinearLayout
     @Override
     public boolean isLeavebehind() {
         return true;
+    }
+
+    public class NotificationSnoozeOption implements SnoozeOption {
+        private SnoozeCriterion mCriterion;
+        private int mMinutesToSnoozeFor;
+        private CharSequence mDescription;
+        private CharSequence mConfirmation;
+        private AccessibilityAction mAction;
+
+        public NotificationSnoozeOption(SnoozeCriterion sc, int minToSnoozeFor,
+                CharSequence description,
+                CharSequence confirmation, AccessibilityAction action) {
+            mCriterion = sc;
+            mMinutesToSnoozeFor = minToSnoozeFor;
+            mDescription = description;
+            mConfirmation = confirmation;
+            mAction = action;
+        }
+
+        @Override
+        public SnoozeCriterion getSnoozeCriterion() {
+            return mCriterion;
+        }
+
+        @Override
+        public CharSequence getDescription() {
+            return mDescription;
+        }
+
+        @Override
+        public CharSequence getConfirmation() {
+            return mConfirmation;
+        }
+
+        @Override
+        public int getMinutesToSnoozeFor() {
+            return mMinutesToSnoozeFor;
+        }
+
+        @Override
+        public AccessibilityAction getAccessibilityAction() {
+            return mAction;
+        }
+
     }
 }
