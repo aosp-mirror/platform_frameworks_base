@@ -3606,6 +3606,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                     // Do it after DismissAction has been processed to conserve the needed ordering.
                     mHandler.post(this::runPostCollapseRunnables);
                 }
+            } else if (isInLaunchTransition() && mNotificationPanel.isLaunchTransitionFinished()) {
+
+                // We are not dismissing the shade, but the launch transition is already finished,
+                // so nobody will call readyForKeyguardDone anymore. Post it such that
+                // keyguardDonePending gets called first.
+                mHandler.post(mStatusBarKeyguardViewManager::readyForKeyguardDone);
             }
             return deferred;
         }, cancelAction, afterKeyguardGone);
