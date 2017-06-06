@@ -19,4 +19,11 @@
     <uses-sdk android:minSdkVersion="21" />
 
     <uses-permission-sdk-23 android:name="android.permission.TEST" android:maxSdkVersion="22" />
+
+    <application>
+        <activity android:name=".MyActivity">
+            <layout android:defaultHeight="500dp"
+                android:defaultWidth="600dp" />
+        </activity>
+    </application>
 </manifest>
