@@ -20,7 +20,6 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
@@ -33,6 +32,7 @@ import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.myPid;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -723,6 +723,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // For frozen screen animations.
     private int mExitAnimId, mEnterAnimId;
+
+    // The display that the rotation animation is applying to.
+    private int mFrozenDisplayId;
 
     /** Skip repeated AppWindowTokens initialization. Note that AppWindowsToken's version of this
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
@@ -2449,7 +2452,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 } else {
                     mPolicy.selectRotationAnimationLw(anim);
                 }
-                startFreezingDisplayLocked(false, anim[0], anim[1]);
+                startFreezingDisplayLocked(false, anim[0], anim[1], displayContent);
                 config = new Configuration(mTempConfiguration);
             }
         }
@@ -5555,7 +5558,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (configChanged) {
             mWaitingForConfig = true;
             startFreezingDisplayLocked(false /* inTransaction */, 0 /* exitAnim */,
-                    0 /* enterAnim */);
+                    0 /* enterAnim */, displayContent);
             mH.obtainMessage(H.SEND_NEW_CONFIGURATION, displayId).sendToTarget();
         }
 
@@ -5862,6 +5865,12 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void startFreezingDisplayLocked(boolean inTransaction, int exitAnim, int enterAnim) {
+        startFreezingDisplayLocked(inTransaction, exitAnim, enterAnim,
+                getDefaultDisplayContentLocked());
+    }
+
+    void startFreezingDisplayLocked(boolean inTransaction, int exitAnim, int enterAnim,
+            DisplayContent displayContent) {
         if (mDisplayFrozen) {
             return;
         }
@@ -5882,6 +5891,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayFreezeTime = SystemClock.elapsedRealtime();
         mLastFinishedFreezeSource = null;
 
+        // {@link mDisplayFrozen} prevents us from freezing on multiple displays at the same time.
+        // As a result, we only track the display that has initially froze the screen.
+        mFrozenDisplayId = displayContent.getDisplayId();
+
         mInputMonitor.freezeInputDispatchingLw();
 
         // Clear the last input window -- that is just used for
@@ -5901,10 +5914,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (CUSTOM_SCREEN_ROTATION) {
             mExitAnimId = exitAnim;
             mEnterAnimId = enterAnim;
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            final int displayId = displayContent.getDisplayId();
             ScreenRotationAnimation screenRotationAnimation =
-                    mAnimator.getScreenRotationAnimationLocked(displayId);
+                    mAnimator.getScreenRotationAnimationLocked(mFrozenDisplayId);
             if (screenRotationAnimation != null) {
                 screenRotationAnimation.kill();
             }
@@ -5915,8 +5926,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // TODO(multidisplay): rotation on main screen only.
             displayContent.updateDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
-                    mFxSession, inTransaction, mPolicy.isDefaultOrientationForced(), isSecure, this);
-            mAnimator.setScreenRotationAnimationLocked(displayId, screenRotationAnimation);
+                    mFxSession, inTransaction, mPolicy.isDefaultOrientationForced(), isSecure,
+                    this);
+            mAnimator.setScreenRotationAnimationLocked(mFrozenDisplayId,
+                    screenRotationAnimation);
         }
     }
 
@@ -5940,6 +5953,13 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_ORIENTATION) Slog.d(TAG_WM,
                 "stopFreezingDisplayLocked: Unfreezing now");
 
+        final DisplayContent displayContent = mRoot.getDisplayContent(mFrozenDisplayId);
+
+        // We must make a local copy of the displayId as it can be potentially overwritten later on
+        // in this method. For example, {@link startFreezingDisplayLocked} may be called as a result
+        // of update rotation, but we reference the frozen display after that call in this method.
+        final int displayId = mFrozenDisplayId;
+        mFrozenDisplayId = INVALID_DISPLAY;
         mDisplayFrozen = false;
         mLastDisplayFreezeDuration = (int)(SystemClock.elapsedRealtime() - mDisplayFreezeTime);
         StringBuilder sb = new StringBuilder(128);
@@ -5958,8 +5978,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean updateRotation = false;
 
-        final DisplayContent displayContent = getDefaultDisplayContentLocked();
-        final int displayId = displayContent.getDisplayId();
         ScreenRotationAnimation screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(displayId);
         if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != null
