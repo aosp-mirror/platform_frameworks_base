@@ -3973,6 +3973,15 @@ public final class Settings {
         };
 
         /**
+         * Keys we no longer back up under the current schema, but want to continue to
+         * process when restoring historical backup datasets.
+         *
+         * @hide
+         */
+        public static final String[] LEGACY_RESTORE_SETTINGS = {
+        };
+
+        /**
          * These are all public system settings
          *
          * @hide
@@ -7085,6 +7094,10 @@ public final class Settings {
             NOTIFICATION_BADGING
         };
 
+        /** @hide */
+        public static final String[] LEGACY_RESTORE_SETTINGS = {
+        };
+
         /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
@@ -10086,6 +10099,10 @@ public final class Settings {
             ENCODED_SURROUND_OUTPUT,
             LOW_POWER_MODE_TRIGGER_LEVEL,
             BLUETOOTH_ON
+        };
+
+        /** @hide */
+        public static final String[] LEGACY_RESTORE_SETTINGS = {
         };
 
         private static final ContentProviderHolder sProviderHolder =
