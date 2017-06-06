@@ -3042,4 +3042,6 @@
   <java-symbol type="integer" name="config_inCallNotificationVolumeRelative" />
 
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
+
+  <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
 </resources>
