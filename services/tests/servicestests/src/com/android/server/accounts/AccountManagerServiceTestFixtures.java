@@ -34,6 +34,7 @@ public final class AccountManagerServiceTestFixtures {
     public static final String KEY_OPTIONS_BUNDLE =
             "account_manager_service_test:option_bundle_key";
     public static final String ACCOUNT_NAME_SUCCESS = "success_on_return@fixture.com";
+    public static final String ACCOUNT_NAME_SUCCESS_2 = "success_on_return_2@fixture.com";
     public static final String ACCOUNT_NAME_INTERVENE = "intervene@fixture.com";
     public static final String ACCOUNT_NAME_ERROR = "error@fixture.com";
 
@@ -69,6 +70,8 @@ public final class AccountManagerServiceTestFixtures {
 
     public static final Account ACCOUNT_SUCCESS =
             new Account(ACCOUNT_NAME_SUCCESS, ACCOUNT_TYPE_1);
+    public static final Account ACCOUNT_SUCCESS_2 =
+            new Account(ACCOUNT_NAME_SUCCESS_2, ACCOUNT_TYPE_1);
     public static final Account ACCOUNT_INTERVENE =
             new Account(ACCOUNT_NAME_INTERVENE, ACCOUNT_TYPE_1);
     public static final Account ACCOUNT_ERROR =

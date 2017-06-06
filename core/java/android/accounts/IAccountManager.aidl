@@ -40,6 +40,8 @@ interface IAccountManager {
     Account[] getAccountsAsUser(String accountType, int userId, String opPackageName);
     void hasFeatures(in IAccountManagerResponse response, in Account account, in String[] features,
         String opPackageName);
+    void getAccountByTypeAndFeatures(in IAccountManagerResponse response, String accountType,
+        in String[] features, String opPackageName);
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType,
         in String[] features, String opPackageName);
     boolean addAccountExplicitly(in Account account, String password, in Bundle extras);
