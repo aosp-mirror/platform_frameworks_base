@@ -17,13 +17,15 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
+import static android.graphics.Bitmap.Config.ARGB_8888;
+import static android.graphics.Bitmap.Config.HARDWARE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskSnapshot;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Environment;
@@ -36,10 +38,10 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy.ScreenOffListener;
 import android.view.WindowManagerPolicy.StartingSurface;
 
+import com.google.android.collect.Sets;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.TaskSnapshotSurface.SystemBarBackgroundPainter;
-
-import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;
 
@@ -87,16 +89,9 @@ class TaskSnapshotController {
     private final ArraySet<Task> mTmpTasks = new ArraySet<>();
     private final Handler mHandler = new Handler();
 
-    /**
-     * Flag indicating whether we are running on an Android TV device.
-     */
-    private final boolean mIsRunningOnTv;
-
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
         mCache = new TaskSnapshotCache(mService, mLoader);
-        mIsRunningOnTv = mService.mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_LEANBACK);
     }
 
     void systemReady() {
@@ -117,7 +112,7 @@ class TaskSnapshotController {
     }
 
     private void handleClosingApps(ArraySet<AppWindowToken> closingApps) {
-        if (shouldDisableSnapshots()) {
+        if (!ENABLE_TASK_SNAPSHOTS || ActivityManager.isLowRamDeviceStatic()) {
             return;
         }
 
@@ -191,10 +186,6 @@ class TaskSnapshotController {
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
                 minRect(mainWindow.mContentInsets, mainWindow.mStableInsets), false /* reduced */,
                 1f /* scale */);
-    }
-
-    private boolean shouldDisableSnapshots() {
-        return !ENABLE_TASK_SNAPSHOTS || ActivityManager.isLowRamDeviceStatic() || mIsRunningOnTv;
     }
 
     private Rect minRect(Rect rect1, Rect rect2) {
@@ -310,7 +301,7 @@ class TaskSnapshotController {
      * Called when screen is being turned off.
      */
     void screenTurningOff(ScreenOffListener listener) {
-        if (shouldDisableSnapshots()) {
+        if (!ENABLE_TASK_SNAPSHOTS || ActivityManager.isLowRamDeviceStatic()) {
             listener.onScreenOff();
             return;
         }
