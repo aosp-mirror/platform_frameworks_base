@@ -2686,6 +2686,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressLint("Doclava125")
     public boolean isVisualVoicemailEnabled(PhoneAccountHandle phoneAccountHandle){
         return false;
     }
@@ -2704,6 +2705,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125")
     @Nullable
     public Bundle getVisualVoicemailSettings(){
         try {
@@ -4927,6 +4929,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @SuppressLint("Doclava125")
     public int checkCarrierPrivilegesForPackage(String pkgName) {
         try {
             ITelephony telephony = getITelephony();
@@ -4942,6 +4945,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @SuppressLint("Doclava125")
     public int checkCarrierPrivilegesForPackageAnyPhone(String pkgName) {
         try {
             ITelephony telephony = getITelephony();
@@ -4993,6 +4997,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @SuppressLint("Doclava125")
     public void dial(String number) {
         try {
             ITelephony telephony = getITelephony();
@@ -5045,6 +5050,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @SuppressLint("Doclava125")
     public void silenceRinger() {
         try {
             getTelecomService().silenceRinger(getOpPackageName());
@@ -5055,6 +5061,10 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isOffhook() {
         try {
             ITelephony telephony = getITelephony();
@@ -5068,6 +5078,10 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isRinging() {
         try {
             ITelephony telephony = getITelephony();
@@ -5081,6 +5095,10 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isIdle() {
         try {
             ITelephony telephony = getITelephony();
@@ -5094,6 +5112,10 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isRadioOn() {
         try {
             ITelephony telephony = getITelephony();
@@ -5338,6 +5360,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @SuppressLint("Doclava125")
     public void updateServiceLocation() {
         try {
             ITelephony telephony = getITelephony();
@@ -5526,6 +5549,10 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isVideoCallingEnabled() {
         try {
             ITelephony telephony = getITelephony();
