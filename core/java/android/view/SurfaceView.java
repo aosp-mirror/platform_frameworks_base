@@ -454,7 +454,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     }
 
     private void updateOpaqueFlag() {
-        if (PixelFormat.formatHasAlpha(mRequestedFormat)) {
+        if (!PixelFormat.formatHasAlpha(mRequestedFormat)) {
             mSurfaceFlags |= SurfaceControl.OPAQUE;
         } else {
             mSurfaceFlags &= ~SurfaceControl.OPAQUE;
