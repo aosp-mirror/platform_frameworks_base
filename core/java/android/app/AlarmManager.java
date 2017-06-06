@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -596,6 +597,7 @@ public class AlarmManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, PendingIntent operation, WorkSource workSource) {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, operation, null, null,
@@ -630,6 +632,7 @@ public class AlarmManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, OnAlarmListener listener, Handler targetHandler,
             WorkSource workSource) {
