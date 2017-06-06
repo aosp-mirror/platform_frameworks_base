@@ -317,7 +317,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected abstract void setListening(boolean listening);
 
     protected void handleDestroy() {
-        setListening(false);
+        if (mListeners.size() != 0) {
+            setListening(false);
+        }
         mCallbacks.clear();
     }
 
