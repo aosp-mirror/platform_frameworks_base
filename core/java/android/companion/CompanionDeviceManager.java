@@ -21,6 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.Application;
 import android.app.PendingIntent;
@@ -47,6 +48,7 @@ import java.util.List;
  *
  * @see AssociationRequest
  */
+@SystemService(Context.COMPANION_DEVICE_SERVICE)
 public final class CompanionDeviceManager {
 
     private static final boolean DEBUG = false;

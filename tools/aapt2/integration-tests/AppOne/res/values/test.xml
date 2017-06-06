@@ -38,4 +38,7 @@
         <attr name="android:text" />
         <attr name="layout_width" />
     </declare-styleable>
+
+    <!-- Declare an empty, resource -->
+    <item type="drawable" name="undefined" />
 </resources>

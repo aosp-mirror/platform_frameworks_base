@@ -20,6 +20,7 @@ import static android.os.storage.StorageManager.convert;
 
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.content.Context;
@@ -50,6 +51,7 @@ import java.util.UUID;
  * application.
  * </p>
  */
+@SystemService(Context.STORAGE_STATS_SERVICE)
 public class StorageStatsManager {
     private final Context mContext;
     private final IStorageStatsManager mService;

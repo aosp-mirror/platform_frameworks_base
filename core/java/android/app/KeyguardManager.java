@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
 import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.content.Intent;
@@ -44,12 +45,11 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import java.util.List;
 
 /**
- * Class that can be used to lock and unlock the keyboard. Get an instance of this
- * class by calling {@link android.content.Context#getSystemService(java.lang.String)}
- * with argument {@link android.content.Context#KEYGUARD_SERVICE}. The
+ * Class that can be used to lock and unlock the keyboard. The
  * actual class to control the keyboard locking is
  * {@link android.app.KeyguardManager.KeyguardLock}.
  */
+@SystemService(Context.KEYGUARD_SERVICE)
 public class KeyguardManager {
 
     private static final String TAG = "KeyguardManager";

@@ -1630,13 +1630,13 @@ public abstract class Context {
     /**
      * Version of {@link #startActivity(Intent)} that allows you to specify the
      * user the activity will be started for.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS_FULL permission.
+     * that are not pre-installed on the system image.
      * @param intent The description of the activity to start.
      * @param user The UserHandle of the user to start this activity for.
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public void startActivityAsUser(@RequiresPermission Intent intent, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -1672,8 +1672,7 @@ public abstract class Context {
     /**
      * Version of {@link #startActivity(Intent, Bundle)} that allows you to specify the
      * user the activity will be started for.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS_FULL permission.
+     * that are not pre-installed on the system image.
      * @param intent The description of the activity to start.
      * @param options Additional options for how the Activity should be started.
      * May be null if there are no options.  See {@link android.app.ActivityOptions}
@@ -1683,6 +1682,7 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
             UserHandle userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -1781,6 +1781,7 @@ public abstract class Context {
      * @see #startActivities(Intent[])
      * @see PackageManager#resolveActivity
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public void startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -2081,20 +2082,19 @@ public abstract class Context {
     /**
      * Version of {@link #sendBroadcast(Intent)} that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS permission.
+     * that are not pre-installed on the system image.
      * @param intent The intent to broadcast
      * @param user UserHandle to send the intent to.
      * @see #sendBroadcast(Intent)
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user);
 
     /**
      * Version of {@link #sendBroadcast(Intent, String)} that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS permission.
+     * that are not pre-installed on the system image.
      *
      * @param intent The Intent to broadcast; all receivers matching this
      *               Intent will receive the broadcast.
@@ -2105,14 +2105,14 @@ public abstract class Context {
      *
      * @see #sendBroadcast(Intent, String)
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, @Nullable String receiverPermission);
 
     /**
      * Version of {@link #sendBroadcast(Intent, String, Bundle)} that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS permission.
+     * that are not pre-installed on the system image.
      *
      * @param intent The Intent to broadcast; all receivers matching this
      *               Intent will receive the broadcast.
@@ -2127,14 +2127,14 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, @Nullable String receiverPermission, @Nullable Bundle options);
 
     /**
      * Version of {@link #sendBroadcast(Intent, String)} that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS permission.
+     * that are not pre-installed on the system image.
      *
      * @param intent The Intent to broadcast; all receivers matching this
      *               Intent will receive the broadcast.
@@ -2148,6 +2148,7 @@ public abstract class Context {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, @Nullable String receiverPermission, int appOp);
 
@@ -2156,8 +2157,7 @@ public abstract class Context {
      * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)}
      * that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS permission.
+     * that are not pre-installed on the system image.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
@@ -2181,6 +2181,7 @@ public abstract class Context {
      *
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract void sendOrderedBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, @Nullable String receiverPermission, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
@@ -2192,6 +2193,7 @@ public abstract class Context {
      *       BroadcastReceiver, Handler, int, String, Bundle)
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             @Nullable String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
@@ -2203,6 +2205,7 @@ public abstract class Context {
      *       BroadcastReceiver, Handler, int, String, Bundle)
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             @Nullable String receiverPermission, int appOp, @Nullable Bundle options,
             BroadcastReceiver resultReceiver, @Nullable Handler scheduler, int initialCode,
@@ -2307,8 +2310,7 @@ public abstract class Context {
     /**
      * <p>Version of {@link #sendStickyBroadcast(Intent)} that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS permission.
+     * that are not pre-installed on the system image.
      *
      * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
      * can access them), no protection (anyone can modify them), and many other problems.
@@ -2324,6 +2326,10 @@ public abstract class Context {
      * @see #sendBroadcast(Intent)
      */
     @Deprecated
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.BROADCAST_STICKY
+    })
     public abstract void sendStickyBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user);
 
@@ -2332,6 +2338,10 @@ public abstract class Context {
      * This is just here for sending CONNECTIVITY_ACTION.
      */
     @Deprecated
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.BROADCAST_STICKY
+    })
     public abstract void sendStickyBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, Bundle options);
 
@@ -2340,8 +2350,7 @@ public abstract class Context {
      * {@link #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)}
      * that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS permission.
+     * that are not pre-installed on the system image.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
@@ -2369,6 +2378,10 @@ public abstract class Context {
      * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
     @Deprecated
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.BROADCAST_STICKY
+    })
     public abstract void sendStickyOrderedBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
@@ -2377,8 +2390,7 @@ public abstract class Context {
     /**
      * <p>Version of {@link #removeStickyBroadcast(Intent)} that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
-     * that are not pre-installed on the system image.  Using it requires holding
-     * the INTERACT_ACROSS_USERS permission.
+     * that are not pre-installed on the system image.
      *
      * <p>You must hold the {@link android.Manifest.permission#BROADCAST_STICKY}
      * permission in order to use this API.  If you do not hold that
@@ -2396,6 +2408,10 @@ public abstract class Context {
      * @see #sendStickyBroadcastAsUser
      */
     @Deprecated
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.BROADCAST_STICKY
+    })
     public abstract void removeStickyBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user);
 
@@ -2562,9 +2578,7 @@ public abstract class Context {
      * @hide
      * Same as {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
      * but for a specific user.  This receiver will receiver broadcasts that
-     * are sent to the requested user.  It
-     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
-     * permission.
+     * are sent to the requested user.
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param user UserHandle to send the intent to.
@@ -2583,6 +2597,7 @@ public abstract class Context {
      * @see #unregisterReceiver
      */
     @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public abstract Intent registerReceiverAsUser(BroadcastReceiver receiver,
             UserHandle user, IntentFilter filter, @Nullable String broadcastPermission,
             @Nullable Handler scheduler);
@@ -2691,6 +2706,7 @@ public abstract class Context {
      * @hide like {@link #startForegroundService(Intent)} but for a specific user.
      */
     @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract ComponentName startForegroundServiceAsUser(Intent service, UserHandle user);
 
     /**
@@ -2728,11 +2744,13 @@ public abstract class Context {
      * @hide like {@link #startService(Intent)} but for a specific user.
      */
     @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract ComponentName startServiceAsUser(Intent service, UserHandle user);
 
     /**
      * @hide like {@link #stopService(Intent)} but for a specific user.
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract boolean stopServiceAsUser(Intent service, UserHandle user);
 
     /**
@@ -2792,6 +2810,7 @@ public abstract class Context {
      */
     @SystemApi
     @SuppressWarnings("unused")
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public boolean bindServiceAsUser(@RequiresPermission Intent service, ServiceConnection conn,
             int flags, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -2803,6 +2822,7 @@ public abstract class Context {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");

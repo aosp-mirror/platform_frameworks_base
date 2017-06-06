@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -44,15 +45,11 @@ import java.util.ArrayList;
  * <p>A system service manager for detecting, characterizing, and connecting to
  * {@link CameraDevice CameraDevices}.</p>
  *
- * <p>You can get an instance of this class by calling
- * {@link android.content.Context#getSystemService(String) Context.getSystemService()}.</p>
- *
- * <pre>CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);</pre>
- *
  * <p>For more details about communicating with camera devices, read the Camera
  * developer guide or the {@link android.hardware.camera2 camera2}
  * package documentation.</p>
  */
+@SystemService(Context.CAMERA_SERVICE)
 public final class CameraManager {
 
     private static final String TAG = "CameraManager";

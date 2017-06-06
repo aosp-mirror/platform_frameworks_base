@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
@@ -63,6 +64,7 @@ import java.util.List;
  * <p>
  * See {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} for more on managed profiles.
  */
+@SystemService(Context.USER_SERVICE)
 public class UserManager {
 
     private static final String TAG = "UserManager";
@@ -1038,12 +1040,12 @@ public class UserManager {
 
     /**
      * Checks if the calling app is running in a managed profile.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @return whether the caller is in a managed profile.
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isManagedProfile() {
         // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
         // Worst case we might end up calling the AIDL method multiple times but that's fine.
@@ -1067,6 +1069,7 @@ public class UserManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isManagedProfile(@UserIdInt int userId) {
         if (userId == UserHandle.myUserId()) {
             return isManagedProfile();
@@ -1252,7 +1255,6 @@ public class UserManager {
      * @hide
      *
      * Returns who set a user restriction on a user.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param restrictionKey the string key representing the restriction
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      * @return The source of user restriction. Any combination of {@link #RESTRICTION_NOT_SET},
@@ -1263,6 +1265,7 @@ public class UserManager {
     @Deprecated
     @SystemApi
     @UserRestrictionSource
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public int getUserRestrictionSource(String restrictionKey, UserHandle userHandle) {
         try {
             return mService.getUserRestrictionSource(restrictionKey, userHandle.getIdentifier());
@@ -1275,12 +1278,12 @@ public class UserManager {
      * @hide
      *
      * Returns a list of users who set a user restriction on a given user.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param restrictionKey the string key representing the restriction
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      * @return a list of user ids enforcing this restriction.
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public List<EnforcingUser> getUserRestrictionSources(
             String restrictionKey, UserHandle userHandle) {
         try {
@@ -1622,9 +1625,10 @@ public class UserManager {
     /**
      * @hide
      *
-     * Returns the preferred account name for user creation. Requires MANAGE_USERS permission.
+     * Returns the preferred account name for user creation.
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public String getSeedAccountName() {
         try {
             return mService.getSeedAccountName();
@@ -1636,9 +1640,10 @@ public class UserManager {
     /**
      * @hide
      *
-     * Returns the preferred account type for user creation. Requires MANAGE_USERS permission.
+     * Returns the preferred account type for user creation.
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public String getSeedAccountType() {
         try {
             return mService.getSeedAccountType();
@@ -1650,11 +1655,11 @@ public class UserManager {
     /**
      * @hide
      *
-     * Returns the preferred account's options bundle for user creation. Requires MANAGE_USERS
-     * permission.
+     * Returns the preferred account's options bundle for user creation.
      * @return Any options set by the requestor that created the user.
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public PersistableBundle getSeedAccountOptions() {
         try {
             return mService.getSeedAccountOptions();
@@ -1686,9 +1691,10 @@ public class UserManager {
 
     /**
      * @hide
-     * Clears the seed information used to create this user. Requires MANAGE_USERS permission.
+     * Clears the seed information used to create this user.
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public void clearSeedAccountData() {
         try {
             mService.clearSeedAccountData();
@@ -1771,13 +1777,13 @@ public class UserManager {
 
     /**
      * Returns serial numbers of all users on this device.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @param excludeDying specify if the list should exclude users being removed.
      * @return the list of serial numbers of users that exist on the device.
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public long[] getSerialNumbersOfUsers(boolean excludeDying) {
         try {
             List<UserInfo> users = mService.getUsers(excludeDying);

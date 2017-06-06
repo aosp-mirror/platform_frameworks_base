@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.SystemService;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -29,10 +30,6 @@ import java.util.ArrayList;
  * the global clipboard.
  *
  * <p>
- * You do not instantiate this class directly; instead, retrieve it through
- * {@link android.content.Context#getSystemService}.
- *
- * <p>
  * The ClipboardManager API itself is very simple: it consists of methods
  * to atomically get and set the current primary clipboard data.  That data
  * is expressed as a {@link ClipData} object, which defines the protocol
@@ -44,9 +41,8 @@ import java.util.ArrayList;
  * <a href="{@docRoot}guide/topics/clipboard/copy-paste.html">Copy and Paste</a>
  * developer guide.</p>
  * </div>
- *
- * @see android.content.Context#getSystemService
  */
+@SystemService(Context.CLIPBOARD_SERVICE)
 public class ClipboardManager extends android.text.ClipboardManager {
     private final Context mContext;
     private final IClipboard mService;

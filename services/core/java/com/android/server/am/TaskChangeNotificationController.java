@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ITaskStackListener;
 import android.app.ActivityManager.TaskDescription;
@@ -31,27 +30,27 @@ import android.os.RemoteException;
 import java.util.ArrayList;
 
 class TaskChangeNotificationController {
-    static final int LOG_STACK_STATE_MSG = 1;
-    static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 2;
-    static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 3;
-    static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 4;
-    static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 5;
-    static final int NOTIFY_FORCED_RESIZABLE_MSG = 6;
-    static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 7;
-    static final int NOTIFY_TASK_ADDED_LISTENERS_MSG = 8;
-    static final int NOTIFY_TASK_REMOVED_LISTENERS_MSG = 9;
-    static final int NOTIFY_TASK_MOVED_TO_FRONT_LISTENERS_MSG = 10;
-    static final int NOTIFY_TASK_DESCRIPTION_CHANGED_LISTENERS_MSG = 11;
-    static final int NOTIFY_ACTIVITY_REQUESTED_ORIENTATION_CHANGED_LISTENERS = 12;
-    static final int NOTIFY_TASK_REMOVAL_STARTED_LISTENERS = 13;
-    static final int NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG = 14;
-    static final int NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG = 15;
-    static final int NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG = 16;
-    static final int NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG = 17;
-    static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG = 18;
+    private static final int LOG_STACK_STATE_MSG = 1;
+    private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 2;
+    private static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 3;
+    private static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 4;
+    private static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 5;
+    private static final int NOTIFY_FORCED_RESIZABLE_MSG = 6;
+    private static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 7;
+    private static final int NOTIFY_TASK_ADDED_LISTENERS_MSG = 8;
+    private static final int NOTIFY_TASK_REMOVED_LISTENERS_MSG = 9;
+    private static final int NOTIFY_TASK_MOVED_TO_FRONT_LISTENERS_MSG = 10;
+    private static final int NOTIFY_TASK_DESCRIPTION_CHANGED_LISTENERS_MSG = 11;
+    private static final int NOTIFY_ACTIVITY_REQUESTED_ORIENTATION_CHANGED_LISTENERS = 12;
+    private static final int NOTIFY_TASK_REMOVAL_STARTED_LISTENERS = 13;
+    private static final int NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG = 14;
+    private static final int NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG = 15;
+    private static final int NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG = 16;
+    private static final int NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG = 17;
+    private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG = 18;
 
     // Delay in notifying task stack change listeners (in millis)
-    static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
+    private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
@@ -242,7 +241,7 @@ class TaskChangeNotificationController {
         }
     }
 
-    void forAllRemoteListeners(TaskStackConsumer callback, Message message) {
+    private void forAllRemoteListeners(TaskStackConsumer callback, Message message) {
         synchronized (mService) {
             for (int i = mRemoteTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
                 try {
@@ -256,7 +255,7 @@ class TaskChangeNotificationController {
         }
     }
 
-    void forAllLocalListeners(TaskStackConsumer callback, Message message) {
+    private void forAllLocalListeners(TaskStackConsumer callback, Message message) {
         synchronized (mService) {
             for (int i = mLocalTaskStackListeners.size() - 1; i >= 0; i--) {
                 try {
@@ -329,8 +328,9 @@ class TaskChangeNotificationController {
 
     void notifyActivityDismissingDockedStack() {
         mHandler.removeMessages(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
-        final Message message = mHandler.obtainMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
-        forAllLocalListeners(mNotifyActivityDismissingDockedStack, message);
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
+        forAllLocalListeners(mNotifyActivityDismissingDockedStack, msg);
+        msg.sendToTarget();
     }
 
     void notifyActivityForcedResizable(int taskId, int reason, String packageName) {

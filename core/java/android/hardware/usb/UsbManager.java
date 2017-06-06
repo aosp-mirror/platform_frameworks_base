@@ -19,6 +19,7 @@ package android.hardware.usb;
 
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -38,18 +39,13 @@ import java.util.HashMap;
  * This class allows you to access the state of USB and communicate with USB devices.
  * Currently only host mode is supported in the public API.
  *
- * <p>You can obtain an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String) Context.getSystemService()}.
- *
- * {@samplecode
- * UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);}
- *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about communicating with USB hardware, read the
  * <a href="{@docRoot}guide/topics/connectivity/usb/index.html">USB developer guide</a>.</p>
  * </div>
  */
+@SystemService(Context.USB_SERVICE)
 public class UsbManager {
     private static final String TAG = "UsbManager";
 

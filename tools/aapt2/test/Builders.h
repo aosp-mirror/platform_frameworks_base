@@ -59,8 +59,7 @@ class ResourceTableBuilder {
 
   ResourceTableBuilder& AddReference(const android::StringPiece& name, const ResourceId& id,
                                      const android::StringPiece& ref) {
-    return AddValue(name, id,
-                    util::make_unique<Reference>(ParseNameOrDie(ref)));
+    return AddValue(name, id, util::make_unique<Reference>(ParseNameOrDie(ref)));
   }
 
   ResourceTableBuilder& AddString(const android::StringPiece& name,
@@ -111,8 +110,8 @@ class ResourceTableBuilder {
   ResourceTableBuilder& AddValue(const android::StringPiece& name, const ConfigDescription& config,
                                  const ResourceId& id, std::unique_ptr<Value> value) {
     ResourceName res_name = ParseNameOrDie(name);
-    CHECK(table_->AddResourceAllowMangled(res_name, id, config, {},
-                                          std::move(value), &diagnostics_));
+    CHECK(table_->AddResourceAllowMangled(res_name, id, config, {}, std::move(value),
+                                          GetDiagnostics()));
     return *this;
   }
 
@@ -122,7 +121,7 @@ class ResourceTableBuilder {
     Symbol symbol;
     symbol.state = state;
     symbol.allow_new = allow_new;
-    CHECK(table_->SetSymbolStateAllowMangled(res_name, id, symbol, &diagnostics_));
+    CHECK(table_->SetSymbolStateAllowMangled(res_name, id, symbol, GetDiagnostics()));
     return *this;
   }
 
@@ -131,7 +130,6 @@ class ResourceTableBuilder {
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTableBuilder);
 
-  DummyDiagnosticsImpl diagnostics_;
   std::unique_ptr<ResourceTable> table_ = util::make_unique<ResourceTable>();
 };
 

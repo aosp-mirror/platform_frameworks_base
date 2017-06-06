@@ -3208,8 +3208,7 @@ public abstract class PackageManager {
 
     /**
      * Return a List of all packages that are installed on the device, for a
-     * specific user. Requesting a list of installed packages for another user
-     * will require the permission INTERACT_ACROSS_USERS_FULL.
+     * specific user.
      *
      * @param flags Additional option flags to modify the data returned.
      * @param userId The user for whom the installed packages are to be listed
@@ -3224,6 +3223,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public abstract List<PackageInfo> getInstalledPackagesAsUser(@PackageInfoFlags int flags,
             @UserIdInt int userId);
 
@@ -3365,6 +3365,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
     public abstract void grantRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName, @NonNull UserHandle user);
 
@@ -3390,6 +3391,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     public abstract void revokeRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName, @NonNull UserHandle user);
 
@@ -3404,6 +3406,10 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
+    })
     public abstract @PermissionFlags int getPermissionFlags(String permissionName,
             String packageName, @NonNull UserHandle user);
 
@@ -3420,6 +3426,10 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
+    })
     public abstract void updatePermissionFlags(String permissionName,
             String packageName, @PermissionFlags int flagMask, @PermissionFlags int flagValues,
             @NonNull UserHandle user);
@@ -4719,6 +4729,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT)
     public abstract void verifyIntentFilter(int verificationId, int verificationCode,
             List<String> failedDomains);
 
@@ -4766,6 +4777,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
     public abstract boolean updateIntentVerificationStatusAsUser(String packageName, int status,
             @UserIdInt int userId);
 
@@ -4826,6 +4838,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
     public abstract boolean setDefaultBrowserPackageNameAsUser(String packageName,
             @UserIdInt int userId);
 
@@ -5289,6 +5302,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
     public abstract void removeOnPermissionsChangeListener(OnPermissionsChangedListener listener);
 
     /**

@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -64,9 +65,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class that answers queries about the state of network connectivity. It also
- * notifies applications when network connectivity changes. Get an instance
- * of this class by calling
- * {@link android.content.Context#getSystemService(String) Context.getSystemService(Context.CONNECTIVITY_SERVICE)}.
+ * notifies applications when network connectivity changes.
  * <p>
  * The primary responsibilities of this class are to:
  * <ol>
@@ -80,6 +79,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * traffic</li>
  * </ol>
  */
+@SystemService(Context.CONNECTIVITY_SERVICE)
 public class ConnectivityManager {
     private static final String TAG = "ConnectivityManager";
 
@@ -2105,6 +2105,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public void startTethering(int type, boolean showProvisioningUi,
             final OnStartTetheringCallback callback, Handler handler) {
         checkNotNull(callback, "OnStartTetheringCallback cannot be null.");
@@ -2139,6 +2140,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public void stopTethering(int type) {
         try {
             mService.stopTethering(type);
