@@ -473,9 +473,13 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             if (mReversing) {
                 // Between start() and first frame, mLastEventId would be unset (i.e. -1)
                 mLastEventId = mLastEventId == -1 ? mEvents.size() : mLastEventId;
-                for (int j = mLastEventId - 1; j >= 0; j--) {
-                    AnimationEvent event = mEvents.get(j);
+                while (mLastEventId > 0) {
+                    mLastEventId = mLastEventId - 1;
+                    AnimationEvent event = mEvents.get(mLastEventId);
                     Animator anim = event.mNode.mAnimation;
+                    if (mNodeMap.get(anim).mEnded) {
+                        continue;
+                    }
                     if (event.mEvent == AnimationEvent.ANIMATION_END) {
                         anim.reverse();
                     } else if (event.mEvent == AnimationEvent.ANIMATION_DELAY_ENDED
@@ -487,9 +491,15 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                     }
                 }
             } else {
-                for (int j = mLastEventId + 1; j < mEvents.size(); j++) {
-                    AnimationEvent event = mEvents.get(j);
+                while (mLastEventId < mEvents.size() - 1) {
+                    // Avoid potential reentrant loop caused by child animators manipulating
+                    // AnimatorSet's lifecycle (i.e. not a recommended approach).
+                    mLastEventId = mLastEventId + 1;
+                    AnimationEvent event = mEvents.get(mLastEventId);
                     Animator anim = event.mNode.mAnimation;
+                    if (mNodeMap.get(anim).mEnded) {
+                        continue;
+                    }
                     if (event.mEvent == AnimationEvent.ANIMATION_START) {
                         anim.start();
                     } else if (event.mEvent == AnimationEvent.ANIMATION_END && anim.isStarted()) {
@@ -663,6 +673,10 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
      * <p>Starting this <code>AnimatorSet</code> will, in turn, start the animations for which
      * it is responsible. The details of when exactly those animations are started depends on
      * the dependency relationships that have been set up between the animations.
+     *
+     * <b>Note:</b> Manipulating AnimatorSet's lifecycle in the child animators' listener callbacks
+     * will lead to undefined behaviors. Also, AnimatorSet will ignore any seeking in the child
+     * animators once {@link #start()} is called.
      */
     @SuppressWarnings("unchecked")
     @Override
