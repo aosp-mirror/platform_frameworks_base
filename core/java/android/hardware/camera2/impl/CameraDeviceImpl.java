@@ -16,10 +16,13 @@
 
 package android.hardware.camera2.impl;
 
+import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
 import android.annotation.NonNull;
 import android.hardware.ICameraService;
+import android.app.ActivityThread;
+import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -43,6 +46,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
@@ -126,6 +131,7 @@ public class CameraDeviceImpl extends CameraDevice
     private int mNextSessionId = 0;
 
     private final int mAppTargetSdkVersion;
+    private boolean mIsPrivilegedApp = false;
 
     // Runnables for all state transitions, except error, which needs the
     // error code argument
@@ -268,6 +274,7 @@ public class CameraDeviceImpl extends CameraDevice
         } else {
             mTotalPartialCount = partialCount;
         }
+        mIsPrivilegedApp = checkPrivilegedAppList();
     }
 
     public CameraDeviceCallbacks getCallbacks() {
@@ -1218,10 +1225,40 @@ public class CameraDeviceImpl extends CameraDevice
         }
     }
 
+    private boolean checkPrivilegedAppList() {
+        String packageName = ActivityThread.currentOpPackageName();
+        String packageList = SystemProperties.get("vendor.camera.aux.packagelist");
+
+        if (packageList.length() > 0) {
+            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
+            splitter.setString(packageList);
+            for (String str : splitter) {
+                if (packageName.equals(str)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isPrivilegedApp() {
+        return mIsPrivilegedApp;
+    }
+
     private void checkInputConfiguration(InputConfiguration inputConfig) {
         if (inputConfig != null) {
             StreamConfigurationMap configMap = mCharacteristics.get(
                     CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+            /*
+             * don't check input format and size,
+             * if the package name is in the white list
+             */
+            if (isPrivilegedApp()) {
+                Log.w(TAG, "ignore input format/size check for white listed app");
+                return;
+            }
 
             int[] inputFormats = configMap.getInputFormats();
             boolean validFormat = false;
