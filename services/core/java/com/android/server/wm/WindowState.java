@@ -2386,6 +2386,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mResizedWhileNotDragResizingReported = true;
             mWinAnimator.mSurfaceResized = false;
         } catch (RemoteException e) {
+            mOverscanInsetsChanged = false;
+            mContentInsetsChanged = false;
+            mVisibleInsetsChanged = false;
+            mStableInsetsChanged = false;
+            mWinAnimator.mSurfaceResized = false;
             mOrientationChanging = false;
             mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                     - mService.mDisplayFreezeTime);

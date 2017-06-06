@@ -35,7 +35,8 @@ typedef union {
 jboolean Java_android_filterfw_core_NativeFrame_nativeAllocate(JNIEnv* env,
                                                                jobject thiz,
                                                                jint size) {
-  return ToJBool(WrapObjectInJava(new NativeFrame(size), env, thiz, true));
+  std::unique_ptr<NativeFrame> frame(new NativeFrame(size));
+  return ToJBool(WrapOwnedObjectInJava(std::move(frame), env, thiz, true));
 }
 
 jboolean Java_android_filterfw_core_NativeFrame_nativeDeallocate(JNIEnv* env, jobject thiz) {

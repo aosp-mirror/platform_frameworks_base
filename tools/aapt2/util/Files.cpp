@@ -72,8 +72,8 @@ std::vector<std::string> listFiles(const StringPiece& root, std::string* outErro
             std::stringstream errorStr;
             errorStr << "unable to open file: " << strerror(errno);
             *outError = errorStr.str();
-            return {};
         }
+        return {};
     }
 
     std::vector<std::string> files;

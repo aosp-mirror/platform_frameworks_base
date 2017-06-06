@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright (C) 2014-2016 The Dirty Unicorns Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <style name="GlobalActionsAnimation">
+        <item name="windowEnterAnimation">@anim/slide_in_up</item>
+        <item name="windowExitAnimation">@anim/slide_out_down</item>
+    </style>
+    <style name="GlobalActionsAnimationTop">
+        <item name="windowEnterAnimation">@anim/slide_in_down</item>
+        <item name="windowExitAnimation">@anim/slide_out_up</item>
+    </style>
+    <style name="GlobalActionsAnimationEnter">
+        <item name="windowEnterAnimation">@anim/dialog_enter</item>
+        <item name="windowExitAnimation">@anim/dialog_exit</item>
+    </style>
+
+    <!-- Exposed manifest styles -->
+    <style name="HeavyWeightSwitcherActivityTheme" parent="Theme.DeviceDefault.Light.Dialog" />
+    <style name="ChooseAccountActivityTheme" parent="Theme.DeviceDefault.Light.Dialog" />
+    <style name="ChooseTypeAndAccountActivityTheme" parent="Theme.DeviceDefault.Light.Dialog" />
+    <style name="ChooseAccountTypeActivityTheme" parent="Theme.DeviceDefault.Light.Dialog" />
+    <style name="CantAddAccountActivityTheme" parent="Theme.DeviceDefault.Light.Dialog.NoActionBar" />
+    <style name="GrantCredentialsPermissionActivityTheme" parent="Theme.DeviceDefault.Light.DialogWhenLarge" />
+    <style name="SyncActivityTooManyDeletesTheme" parent="Theme.DeviceDefault.Light.Dialog" />
+    <style name="NetInitiatedActivityTheme" parent="Theme.DeviceDefault.Light.Dialog.Alert" />
+    <style name="ConfirmUserCreationActivityTheme" parent="Theme.DeviceDefault.Light.Dialog.Alert" />
+    <style name="UnlaunchableAppActivityTheme" parent="Theme.DeviceDefault.Light.Dialog.Alert" />
+
+</resources>

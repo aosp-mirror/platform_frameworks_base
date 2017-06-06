@@ -202,7 +202,7 @@ public final class Shared {
      */
     public static boolean shouldShowDeviceRoot(Context context, Intent intent) {
         return isProductivityMode(context, intent)
-                || intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
+                || intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, true);
     }
 
     /**
@@ -211,6 +211,6 @@ public final class Shared {
     public static boolean shouldShowFancyFeatures(Activity activity) {
         Intent intent = activity.getIntent();
         return isProductivityMode(activity, intent)
-                || intent.getBooleanExtra(DocumentsContract.EXTRA_FANCY_FEATURES, false);
+                || intent.getBooleanExtra(DocumentsContract.EXTRA_FANCY_FEATURES, true);
     }
 }

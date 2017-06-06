@@ -29,7 +29,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
     private long mTotalAppMobileActiveMs = 0;
 
     /**
-     * Return estimated power (in mAs) of sending or receiving a packet with the mobile radio.
+     * Return estimated power per mobile radio packet in mAh/packet where 1 packet = 2 KB or real packet.
      */
     private double getMobilePowerPerPacket(long rawRealtimeUs, int statsType) {
         final long MOBILE_BPS = 200000; // TODO: Extract average bit rates from system
@@ -44,9 +44,9 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
         final long radioDataUptimeMs =
                 mStats.getMobileRadioActiveTime(rawRealtimeUs, statsType) / 1000;
         final double mobilePps = (mobileData != 0 && radioDataUptimeMs != 0)
-                ? (mobileData / (double)radioDataUptimeMs)
+                ? (mobileData / (((double)radioDataUptimeMs) / 1000))
                 : (((double)MOBILE_BPS) / 8 / 2048);
-        return (MOBILE_POWER / mobilePps) / (60*60);
+        return MOBILE_POWER / mobilePps;
     }
 
     public MobileRadioPowerCalculator(PowerProfile profile, BatteryStats stats) {

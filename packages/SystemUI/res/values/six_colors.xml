@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2017 Flash ROM
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+
+    <!-- carrier label color -->
+    <color name="status_bar_carrier_color">#FFFFFFFF</color>
+
+    <!-- Navbar icon Colors -->
+    <color name="icon_color_back">@android:color/white</color>
+    <color name="icon_color_ime_switcher">@android:color/white</color>
+    <color name="icon_color_split_screen">@android:color/white</color>
+    <color name="icon_color_home">@android:color/white</color>
+    <color name="icon_color_overview">@android:color/white</color>
+
+    <!-- Status bar battery colors -->
+    <color name="status_bar_battery_level_text_color">#ffffff</color>
+    <color name="batterymeter_frame_color_darkintensity">@color/dark_mode_icon_color_dual_tone_background</color>
+
+    <!-- Battery charging color -->
+    <color name="system_primary_color">@*android:color/material_blue_grey_900</color>
+
+    <!-- Navigation button ripple color -->
+    <color name="navbutton_ripple_color">#FFFFFFFF</color>
+
+    <!-- QS edit page background color -->
+    <color name="qs_edit_item_decoration_bg">@*android:color/secondary_device_default_settings</color>
+
+    <!-- QS alarm status text color -->
+    <color name="qs_alarm_status_text_color">#64ffffff</color>
+
+    <!-- QS edit page toolbar text color -->
+    <color name="qs_edit_toolbar_text_color">#FFFFFF</color>
+
+    <!-- QS battery % text color -->
+    <color name="qs_battery_text_color">@*android:color/accent_device_default_light</color>
+
+    <!-- QS battery graph text color -->
+    <color name="qs_battery_graph_text_color">#66FFFFFF</color>
+
+    <!-- QS battery accent color -->
+    <color name="qs_battery_accent">@*android:color/accent_device_default_light</color>
+
+    <!-- External QS tile tint color -->
+    <color name="external_qs_tile_tint_color">@android:color/white</color>
+
+    <!-- Clear-All recents FAB -->
+    <color name="fab_color">@*android:color/accent_device_default_light</color>
+    <color name="floating_action_button_icon_color">#FFFFFFFF</color>
+
+    <!-- Keyguard affordance circle background -->
+    <color name="keyguard_affordance_circle_background">@android:color/white</color>
+
+    <!-- Used by selector -->
+    <color name="card_pressed">#7e3c3c3c</color>
+    <color name="screenshot_flash_color">#4D3367d6</color>
+    <color name="screenshot_background_color">#ff000000</color>
+
+    <!-- Separate QS text label tint from icon tint -->
+    <color name="qs_tile_label_tint_unavailable">@color/qs_tile_tint_unavailable</color>
+</resources>

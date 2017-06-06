@@ -495,9 +495,6 @@ public class ImageWallpaper extends WallpaperService {
                     }
                     updateSurfaceSize(getSurfaceHolder(), getDefaultDisplayInfo(),
                             false /* forDraw */);
-                    if (mNeedsDrawAfterLoadingWallpaper) {
-                        drawFrame();
-                    }
 
                     mLoader = null;
                     mNeedsDrawAfterLoadingWallpaper = false;

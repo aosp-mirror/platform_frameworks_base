@@ -28,6 +28,8 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioAttributes;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -131,7 +133,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (mInvalidCharger) {
             showInvalidChargerNotification();
             mShowing = SHOWING_INVALID_CHARGER;
-        } else if (mWarning) {
+        } else if (mWarning && (Settings.System.getIntForUser(mContext.getContentResolver(),
+            	    Settings.System.BATTERY_LOW_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1)) {
             showWarningNotification();
             mShowing = SHOWING_WARNING;
         } else {
@@ -182,7 +185,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 mContext.getString(R.string.battery_saver_start_action),
                 pendingBroadcast(ACTION_START_SAVER));
         if (mPlaySound) {
-            attachLowBatterySound(nb);
+            attachLowBatterySound();
             mPlaySound = false;
         }
         SystemUI.overrideNotificationAppName(mContext, nb);
@@ -295,7 +298,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         updateNotification();
     }
 
-    private void attachLowBatterySound(Notification.Builder b) {
+    private void attachLowBatterySound() {
         final ContentResolver cr = mContext.getContentResolver();
 
         final int silenceAfter = Settings.Global.getInt(cr,
@@ -317,10 +320,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             final String soundPath = Settings.Global.getString(cr,
                     Settings.Global.LOW_BATTERY_SOUND);
             if (soundPath != null) {
-                final Uri soundUri = Uri.parse("file://" + soundPath);
-                if (soundUri != null) {
-                    b.setSound(soundUri, AUDIO_ATTRIBUTES);
-                    if (DEBUG) Slog.d(TAG, "playing sound " + soundUri);
+                Ringtone lowBatteryRingtone = RingtoneManager.getRingtone(mContext, Uri.parse(soundPath));
+                if (lowBatteryRingtone != null) {
+                    lowBatteryRingtone.play();
                 }
             }
         }

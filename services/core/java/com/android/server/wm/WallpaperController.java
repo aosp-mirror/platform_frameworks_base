@@ -429,7 +429,13 @@ class WallpaperController {
                 WindowState wallpaper = windows.get(wallpaperNdx);
                 if (updateWallpaperOffset(wallpaper, dw, dh, sync)) {
                     WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
-                    winAnimator.computeShownFrameLocked();
+                    if (mService.mSingleHandMode == 1) {
+                        winAnimator.computeShownFrameLeftLocked();
+                    } else if(mService.mSingleHandMode == 2) {
+                        winAnimator.computeShownFrameRightLocked();
+                    } else {
+                        winAnimator.computeShownFrameNormalLocked();
+                    }
                     // No need to lay out the windows - we can just set the wallpaper position
                     // directly.
                     winAnimator.setWallpaperOffset(wallpaper.mShownPosition);

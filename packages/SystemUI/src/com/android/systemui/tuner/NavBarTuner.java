@@ -199,8 +199,16 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             Settings.Secure.putString(getContext().getContentResolver(),
                     NAV_BAR_VIEWS, null);
             return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            getFragmentManager().popBackStack();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private static CharSequence getLabel(String button, Context context) {

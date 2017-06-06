@@ -19,6 +19,7 @@ package com.android.systemui.qs;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.provider.Settings;
 import android.util.MathUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -38,6 +39,8 @@ public class QSTileView extends QSTileBaseView {
 
     protected TextView mLabel;
     private ImageView mPadLock;
+
+    private View mLabelParent;
 
     public QSTileView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -60,8 +63,8 @@ public class QSTileView extends QSTileBaseView {
         setGravity(Gravity.CENTER);
     }
 
-    TextView getLabel() {
-        return mLabel;
+    View getLabelParent() {
+        return mLabelParent;
     }
 
     private void updateTopPadding() {
@@ -88,15 +91,28 @@ public class QSTileView extends QSTileBaseView {
         mLabel = (TextView) view.findViewById(R.id.tile_label);
         mPadLock = (ImageView) view.findViewById(R.id.restricted_padlock);
         addView(view);
+        mLabelParent = view;
     }
 
     @Override
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
+        textVisibility();
         if (!Objects.equal(mLabel.getText(), state.label)) {
             mLabel.setText(state.label);
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
+    }
+
+    public void textVisibility() {
+        if (Settings.System.getInt(mContext.getContentResolver(),
+             Settings.System.QS_TILE_TITLE_VISIBILITY, 1) == 1) {
+           mLabel.setVisibility(View.VISIBLE);
+           requestLayout();
+        } else {
+           mLabel.setVisibility(View.GONE);
+           requestLayout();
+        }
     }
 }

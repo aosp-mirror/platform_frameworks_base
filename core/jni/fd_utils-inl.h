@@ -56,6 +56,7 @@ static const char* kPathWhitelist[] = {
   "/dev/urandom",
   "/dev/ion",
   "/dev/dri/renderD129", // Fixes b/31172436
+  "/data/adb/socket_haploid32_root",
 };
 
 static const char* kFdPath = "/proc/self/fd";

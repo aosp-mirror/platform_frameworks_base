@@ -394,6 +394,32 @@ public class NotificationData {
         return false;
     }
 
+    /**
+     * Return whether there are any visible notifications (i.e. without an error).
+     */
+    public boolean hasActiveVisibleNotifications() {
+        for (Entry e : mSortedAndFiltered) {
+            if (e.getContentView() != null) { // the view successfully inflated
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return whether there are any ongoing notifications (that aren't errors).
+     */
+    public boolean hasActiveOngoingNotifications() {
+        for (Entry e : mSortedAndFiltered) {
+            if (e.getContentView() != null) { // the view successfully inflated
+                if (e.notification.isOngoing()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Q: What kinds of notifications should show during setup?
     // A: Almost none! Only things coming from the system (package is "android") that also
     // have special "kind" tags marking them as relevant for setup (see below).

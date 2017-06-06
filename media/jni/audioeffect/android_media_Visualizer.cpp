@@ -435,7 +435,8 @@ setup_failure:
 
 // ----------------------------------------------------------------------------
 static void android_media_visualizer_native_release(JNIEnv *env,  jobject thiz) {
-    { //limit scope so that lpVisualizer is deleted before JNI storage data.
+    // ensure that lpVisualizer is deleted before lpJniStorage
+    {
         sp<Visualizer> lpVisualizer = setVisualizer(env, thiz, 0);
         if (lpVisualizer == 0) {
             return;

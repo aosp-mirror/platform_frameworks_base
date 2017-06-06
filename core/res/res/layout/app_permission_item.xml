@@ -32,7 +32,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
         android:scaleType="fitCenter"
-        android:tint="@android:color/black"/>
+        android:tint="@color/app_permission_icon_tint"/>
 
     <ImageView
         android:layout_width="wrap_content"

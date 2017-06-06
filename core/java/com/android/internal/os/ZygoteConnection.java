@@ -22,8 +22,10 @@ import static android.system.OsConstants.STDERR_FILENO;
 import static android.system.OsConstants.STDIN_FILENO;
 import static android.system.OsConstants.STDOUT_FILENO;
 
+import android.graphics.Typeface;
 import android.net.Credentials;
 import android.net.LocalSocket;
+import android.os.FactoryTest;
 import android.os.Process;
 import android.os.SELinux;
 import android.os.SystemProperties;
@@ -192,6 +194,10 @@ class ZygoteConnection {
                 childPipeFd = pipeFds[1];
                 serverPipeFd = pipeFds[0];
                 Os.fcntlInt(childPipeFd, F_SETFD, 0);
+            }
+
+            if (parsedArgs.refreshTheme) {
+                Typeface.recreateDefaults();
             }
 
             /**
@@ -373,6 +379,9 @@ class ZygoteConnection {
          */
         String appDataDir;
 
+        /** from --refresh_theme */
+        boolean refreshTheme;
+
         /**
          * Constructs instance and parses args
          * @param args zygote command-line args
@@ -531,6 +540,8 @@ class ZygoteConnection {
                     instructionSet = arg.substring(arg.indexOf('=') + 1);
                 } else if (arg.startsWith("--app-data-dir=")) {
                     appDataDir = arg.substring(arg.indexOf('=') + 1);
+                } else if (arg.equals("--refresh_theme")) {
+                    refreshTheme = true;
                 } else {
                     break;
                 }
@@ -614,13 +625,10 @@ class ZygoteConnection {
             throws ZygoteSecurityException {
 
         if (peer.getUid() == Process.SYSTEM_UID) {
-            String factoryTest = SystemProperties.get("ro.factorytest");
-            boolean uidRestricted;
-
             /* In normal operation, SYSTEM_UID can only specify a restricted
              * set of UIDs. In factory test mode, SYSTEM_UID may specify any uid.
              */
-            uidRestricted = !(factoryTest.equals("1") || factoryTest.equals("2"));
+            boolean uidRestricted = FactoryTest.getMode() == FactoryTest.FACTORY_TEST_OFF;
 
             if (uidRestricted && args.uidSpecified && (args.uid < Process.SYSTEM_UID)) {
                 throw new ZygoteSecurityException(
@@ -650,7 +658,7 @@ class ZygoteConnection {
      * @param args non-null; zygote spawner args
      */
     public static void applyDebuggerSystemProperty(Arguments args) {
-        if ("1".equals(SystemProperties.get("ro.debuggable"))) {
+        if (RoSystemProperties.DEBUGGABLE) {
             args.debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
         }
     }

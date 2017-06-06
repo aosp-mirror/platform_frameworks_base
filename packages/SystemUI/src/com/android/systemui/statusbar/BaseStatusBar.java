@@ -44,6 +44,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.media.MediaMetadata;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -101,6 +102,7 @@ import com.android.systemui.RecentsComponent;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.navigation.Navigator;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationGuts.OnGutsClosedListener;
@@ -127,7 +129,7 @@ import static android.service.notification.NotificationListenerService.Ranking.I
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
-        ExpandableNotificationRow.OnExpandClickListener, OnGutsClosedListener {
+        ExpandableNotificationRow.OnExpandClickListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -190,9 +192,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected int mLayoutDirection = -1; // invalid
     protected AccessibilityManager mAccessibilityManager;
 
-    // on-screen navigation buttons
-    protected NavigationBarView mNavigationBarView = null;
-
     protected boolean mDeviceInteractive;
 
     protected boolean mVisible;
@@ -213,6 +212,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private float mFontScale;
 
     protected boolean mUseHeadsUp = false;
+    protected boolean mHeadsUpUserEnabled = false;
     protected boolean mHeadsUpTicker = false;
     protected boolean mDisableNotificationAlerts = false;
 
@@ -229,7 +229,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private UserManager mUserManager;
     private int mDensity;
 
-    private KeyguardManager mKeyguardManager;
+    protected KeyguardManager mKeyguardManager;
     private LockPatternUtils mLockPatternUtils;
 
     // UI-specific methods
@@ -605,6 +605,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         public void onListenerConnected() {
             if (DEBUG) Log.d(TAG, "onListenerConnected");
             final StatusBarNotification[] notifications = getActiveNotifications();
+            if (notifications == null) {
+                Log.w(TAG, "onListenerConnected unable to get active notifications.");
+                return;
+            }
             final RankingMap currentRanking = getCurrentRanking();
             mHandler.post(new Runnable() {
                 @Override
@@ -1074,7 +1078,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         PackageManager pmUser = getPackageManagerForUser(mContext, sbn.getUser().getIdentifier());
         row.setTag(sbn.getPackageName());
         final NotificationGuts guts = row.getGuts();
-        guts.setClosedListener(this);
+        guts.setClosedListener((NotificationGuts g) -> {
+            if (!row.isRemoved()) {
+                mStackScroller.onHeightChanged(row, !isPanelFullyCollapsed() /* needsAnimation */);
+            }
+            mNotificationGutsExposed = null;
+        });
         final String pkg = sbn.getPackageName();
         String appname = pkg;
         Drawable pkgicon = null;
@@ -1212,7 +1221,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         guts.setExposed(true /* exposed */,
                                 mState == StatusBarState.KEYGUARD /* needsFalsingProtection */);
                         row.closeRemoteInput();
-                        mStackScroller.onHeightChanged(null, true /* needsAnimation */);
+                        mStackScroller.onHeightChanged(row, true /* needsAnimation */);
                         mNotificationGutsExposed = guts;
                     }
                 });
@@ -1243,12 +1252,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (resetGear) {
             mStackScroller.resetExposedGearView(animate, true /* force */);
         }
-    }
-
-    @Override
-    public void onGutsClosed(NotificationGuts guts) {
-        mStackScroller.onHeightChanged(null, true /* needsAnimation */);
-        mNotificationGutsExposed = null;
     }
 
     @Override
@@ -1316,6 +1319,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         int msg = MSG_SHOW_PREV_AFFILIATED_TASK;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
+    public void screenPinningStateChanged(boolean enabled) {
+        Log.d(TAG, "StatusBar API screenPinningStateChanged = " + enabled);
     }
 
     protected H createHandler() {
@@ -2368,8 +2376,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    protected abstract void haltTicker();
     protected abstract void setAreThereNotifications();
     protected abstract void updateNotifications();
+    protected abstract void tick(StatusBarNotification n, boolean firstTime, boolean isMusic, MediaMetadata mediaMetaData);
     public abstract boolean shouldDisableNavbarGestures();
 
     public abstract void addNotification(StatusBarNotification notification,
@@ -2391,6 +2401,10 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         Notification n = notification.getNotification();
         mNotificationData.updateRanking(ranking);
+
+        boolean updateTicker = n.tickerText != null
+                && !TextUtils.equals(n.tickerText,
+                entry.notification.getNotification().tickerText);
 
         boolean applyInPlace;
         try {
@@ -2464,11 +2478,15 @@ public abstract class BaseStatusBar extends SystemUI implements
             mStackScroller.snapViewIfNeeded(entry.row);
         }
 
-        if (DEBUG) {
-            // Is this for you?
-            boolean isForCurrentUser = isNotificationForCurrentProfiles(notification);
-            Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
-        }
+        // Is this for you?
+        boolean isForCurrentUser = isNotificationForCurrentProfiles(notification);
+        Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
+
+        // Restart the ticker if it's still running
+        if (updateTicker && isForCurrentUser) {
+            haltTicker();
+            tick(notification, false, false, null);
+          }
 
         setAreThereNotifications();
     }
@@ -2540,7 +2558,19 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected boolean shouldPeek(Entry entry, StatusBarNotification sbn) {
-        if (!mUseHeadsUp || isDeviceInVrMode()) {
+        final ActivityManager am = (ActivityManager)
+            mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager.RunningTaskInfo foregroundApp = null;
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        if (tasks != null && !tasks.isEmpty()) {
+            foregroundApp = tasks.get(0);
+        }
+        boolean isDialerForegroundApp = foregroundApp != null &&
+                foregroundApp.baseActivity.getPackageName().toLowerCase().contains("dialer");
+        boolean isNotificationFromDialer = sbn.getPackageName().toLowerCase().contains("dialer");
+
+        boolean alwaysHeadsUpForThis = !isDialerForegroundApp && isNotificationFromDialer;
+        if (!mUseHeadsUp || (!mHeadsUpUserEnabled && !alwaysHeadsUpForThis) || isDeviceInVrMode()) {
             return false;
         }
 

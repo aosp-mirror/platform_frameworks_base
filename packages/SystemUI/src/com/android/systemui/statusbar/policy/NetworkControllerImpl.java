@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -785,6 +787,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("e") ? TelephonyIcons.E :
                             datatype.equals("g") ? TelephonyIcons.G :
                             datatype.equals("h") ? TelephonyIcons.H :
+                            datatype.equals("h+") ? TelephonyIcons.HP :
                             datatype.equals("lte") ? TelephonyIcons.LTE :
                             datatype.equals("lte+") ? TelephonyIcons.LTE_PLUS :
                             TelephonyIcons.UNKNOWN;
@@ -882,5 +885,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
             config.hideLtePlus = res.getBoolean(R.bool.config_hideLtePlus);
             return config;
         }
+    }
+
+    /**
+     * Check the advanced data tile setting
+     */
+    public boolean isEasyToggleEnabled() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.QS_EASY_TOGGLE, 0, ActivityManager.getCurrentUser()) == 1;
     }
 }

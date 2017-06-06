@@ -90,6 +90,7 @@ public interface WindowManagerPolicy {
 
     public final static int FLAG_INTERACTIVE = 0x20000000;
     public final static int FLAG_PASS_TO_USER = 0x40000000;
+    public final static int POLICY_FLAG_REMOVE_HANDYMODE = 0x80000000;
 
     // Flags for IActivityManager.keyguardGoingAway()
     public final static int KEYGUARD_GOING_AWAY_FLAG_TO_SHADE = 1 << 0;
@@ -484,7 +485,6 @@ public interface WindowManagerPolicy {
         public void switchInputMethod(boolean forwardDirection);
 
         public void shutdown(boolean confirm);
-        public void reboot(boolean confirm);
         public void rebootSafeMode(boolean confirm);
 
         /**
@@ -512,6 +512,8 @@ public interface WindowManagerPolicy {
          * Overrides all currently playing app animations with {@param a}.
          */
         void overridePlayingAppAnimationsLw(Animation a);
+
+        void addSystemUIVisibilityFlag(int flags);
     }
 
     public interface PointerEventListener {
@@ -1321,6 +1323,11 @@ public interface WindowManagerPolicy {
     public boolean hasNavigationBar();
 
     /**
+     * Device requires a software navigation bar.
+     */
+    public boolean needsNavigationBar();
+
+    /**
      * Lock the device now.
      */
     public void lockNow(Bundle options);
@@ -1436,4 +1443,11 @@ public interface WindowManagerPolicy {
     public void onConfigurationChanged();
 
     public boolean shouldRotateSeamlessly(int oldRotation, int newRotation);
+
+    /**
+     * Lock the device orientation to the specified rotation,
+     * Sensor input or hdmi will be ignored until
+     * freezeOrThawRotation(-1) is called or reboot the devcie.
+     */
+    public void freezeOrThawRotation(int rotation);
 }

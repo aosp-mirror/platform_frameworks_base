@@ -345,10 +345,10 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertCanBeHandled(new Intent(Settings.ACTION_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_SOUND_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_SYNC_SETTINGS));
-        assertCanBeHandled(new Intent(Settings.ACTION_SYSTEM_UPDATE_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_USER_DICTIONARY_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_WIFI_IP_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_WIFI_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_WIFI_SAVED_NETWORK_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
     }
 

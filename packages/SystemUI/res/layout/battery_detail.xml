@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:paddingStart="16dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:attr/colorAccent" />
+        android:textColor="@color/qs_battery_text_color" />
 
     <com.android.systemui.ResizingSpace
         android:layout_width="match_parent"
@@ -40,8 +40,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="24dp"
         systemui:sideLabels="@array/battery_labels"
-        android:colorAccent="?android:attr/colorAccent"
-        systemui:textColor="#66FFFFFF" />
+        android:colorAccent="@color/qs_battery_accent"
+        systemui:textColor="@color/qs_battery_graph_text_color" />
 
     <com.android.systemui.ResizingSpace
         android:layout_width="match_parent"

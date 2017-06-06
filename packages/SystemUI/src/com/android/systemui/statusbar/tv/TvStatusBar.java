@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.tv;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.media.MediaMetadata;
 import android.os.IBinder;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
@@ -99,11 +100,19 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    protected void haltTicker() {
+    }
+
+    @Override
     protected void setAreThereNotifications() {
     }
 
     @Override
     protected void updateNotifications() {
+    }
+
+    @Override
+    protected void tick(StatusBarNotification n, boolean firstTime, boolean isMusic, MediaMetadata mediaMetaData) {
     }
 
     @Override

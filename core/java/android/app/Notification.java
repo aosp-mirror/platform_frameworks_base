@@ -29,6 +29,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -992,6 +993,13 @@ public class Notification implements Parcelable
     private Icon mLargeIcon;
 
     /**
+     * Used by light picker in Settings to force
+     * notification lights on when screen is on
+     * @hide
+     */
+    public static final String EXTRA_FORCE_SHOW_LIGHTS = "android.forceShowLights";
+
+    /**
      * Structure to encapsulate a named action that can be shown as part of this notification.
      * It must include an icon, a label, and a {@link PendingIntent} to be fired when the action is
      * selected by the user.
@@ -1761,7 +1769,9 @@ public class Notification implements Parcelable
         if (this.actions != null) {
             that.actions = new Action[this.actions.length];
             for(int i=0; i<this.actions.length; i++) {
-                that.actions[i] = this.actions[i].clone();
+                if ( this.actions[i] != null) {
+                    that.actions[i] = this.actions[i].clone();
+                }
             }
         }
 
@@ -3108,7 +3118,9 @@ public class Notification implements Parcelable
          * @param action The action to add.
          */
         public Builder addAction(Action action) {
-            mActions.add(action);
+            if (action != null) {
+                mActions.add(action);
+            }
             return this;
         }
 
@@ -3122,7 +3134,9 @@ public class Notification implements Parcelable
         public Builder setActions(Action... actions) {
             mActions.clear();
             for (int i = 0; i < actions.length; i++) {
-                mActions.add(actions[i]);
+                if (actions[i] != null) {
+                    mActions.add(actions[i]);
+                }
             }
             return this;
         }
@@ -3877,7 +3891,7 @@ public class Notification implements Parcelable
         private void processSmallIconColor(Icon smallIcon, RemoteViews contentView) {
             boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
             if (colorable) {
-                contentView.setDrawableParameters(R.id.icon, false, -1, resolveContrastColor(),
+                contentView.setDrawableParameters(R.id.icon, false, -1, resolveIconContrastColor(),
                         PorterDuff.Mode.SRC_ATOP, -1);
 
             }
@@ -3894,7 +3908,7 @@ public class Notification implements Parcelable
             if (largeIcon != null && isLegacy()
                     && getColorUtil().isGrayscaleIcon(mContext, largeIcon)) {
                 // resolve color will fall back to the default when legacy
-                contentView.setDrawableParameters(R.id.icon, false, -1, resolveContrastColor(),
+                contentView.setDrawableParameters(R.id.icon, false, -1, resolveIconContrastColor(),
                         PorterDuff.Mode.SRC_ATOP, -1);
             }
         }
@@ -3905,7 +3919,23 @@ public class Notification implements Parcelable
             }
         }
 
+        int getSenderTextColor() {
+            return mContext.getColor(R.color.sender_text_color);
+        }
+
+        int resolveIconContrastColor() {
+            if (!mContext.getResources().getBoolean(R.bool.config_allowNotificationIconTextTinting)) {
+                return mContext.getColor(R.color.notification_icon_default_color);
+            } else {
+                return resolveContrastColor();
+            }
+        }
+
         int resolveContrastColor() {
+            if (!mContext.getResources().getBoolean(R.bool.config_allowNotificationIconTextTinting)) {
+                return mContext.getColor(R.color.notification_text_default_color);
+            }
+
             if (mCachedContrastColorIsFor == mN.color && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
             }
@@ -4908,7 +4938,7 @@ public class Notification implements Parcelable
                         0 /* flags */);
             } else {
                 sb.append(bidi.unicodeWrap(m.mSender),
-                        makeFontColorSpan(Color.BLACK),
+                        makeFontColorSpan(mBuilder.getSenderTextColor()),
                         0 /* flags */);
             }
             CharSequence text = m.mText == null ? "" : m.mText;

@@ -287,7 +287,7 @@ public class KeySetManagerService {
         for (int i = 0; i < defMapSize; i++) {
             String alias = definedMapping.keyAt(i);
             ArraySet<PublicKey> pubKeys = definedMapping.valueAt(i);
-            if (alias != null && pubKeys != null || pubKeys.size() > 0) {
+            if (alias != null && pubKeys != null && pubKeys.size() > 0) {
                 KeySetHandle ks = addKeySetLPw(pubKeys);
                 newKeySetAliases.put(alias, ks.getId());
             }

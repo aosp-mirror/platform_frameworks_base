@@ -170,6 +170,13 @@ public final class Installer extends SystemService {
         mInstaller.execute("idmap", targetApkPath, overlayApkPath, uid);
     }
 
+    public void removeIdmap(String overlayApkPath) throws InstallerException {
+        StringBuilder builder = new StringBuilder("rmidmap");
+        builder.append(' ');
+        builder.append(overlayApkPath);
+        mInstaller.execute(builder.toString());
+    }
+
     public void rmdex(String codePath, String instructionSet) throws InstallerException {
         assertValidInstructionSet(instructionSet);
         mInstaller.execute("rmdex", codePath, instructionSet);

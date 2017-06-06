@@ -639,7 +639,9 @@ public final class AudioAttributes implements Parcelable {
          * Use this audio attributes configuration method when building an {@link AudioRecord}
          * instance with {@link AudioRecord#AudioRecord(AudioAttributes, AudioFormat, int)}.
          * @param preset one of {@link MediaRecorder.AudioSource#DEFAULT},
-         *     {@link MediaRecorder.AudioSource#MIC}, {@link MediaRecorder.AudioSource#CAMCORDER},
+         *     {@link MediaRecorder.AudioSource#MIC}, {@link MediaRecorder.AudioSource#VOICE_UPLINK},
+         *     {@link MediaRecorder.AudioSource#VOICE_DOWNLINK}, {@link MediaRecorder.AudioSource#VOICE_CALL},
+         *     {@link MediaRecorder.AudioSource#CAMCORDER},
          *     {@link MediaRecorder.AudioSource#VOICE_RECOGNITION},
          *     {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION} or
          *     {@link MediaRecorder.AudioSource#UNPROCESSED}
@@ -650,6 +652,9 @@ public final class AudioAttributes implements Parcelable {
             switch (preset) {
                 case MediaRecorder.AudioSource.DEFAULT:
                 case MediaRecorder.AudioSource.MIC:
+                case MediaRecorder.AudioSource.VOICE_UPLINK:
+                case MediaRecorder.AudioSource.VOICE_DOWNLINK:
+                case MediaRecorder.AudioSource.VOICE_CALL:
                 case MediaRecorder.AudioSource.CAMCORDER:
                 case MediaRecorder.AudioSource.VOICE_RECOGNITION:
                 case MediaRecorder.AudioSource.VOICE_COMMUNICATION:

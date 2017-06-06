@@ -42,6 +42,7 @@ import android.util.Log;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -61,7 +62,7 @@ public class MediaSessions {
     private final Context mContext;
     private final H mHandler;
     private final MediaSessionManager mMgr;
-    private final Map<Token, MediaControllerRecord> mRecords = new HashMap<>();
+    private final Map<Token, MediaControllerRecord> mRecords = new ConcurrentHashMap<>();
     private final Callbacks mCallbacks;
 
     private boolean mInit;

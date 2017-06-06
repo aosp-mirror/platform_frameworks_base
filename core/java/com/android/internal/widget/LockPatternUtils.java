@@ -304,6 +304,14 @@ public class LockPatternUtils {
                 null /* componentName */, userId);
     }
 
+    public boolean shouldPassToSecurityView(int userId) {
+        return getBoolean(Settings.Secure.LOCK_PASS_TO_SECURITY_VIEW, false, userId);
+    }
+
+    public void setPassToSecurityView(boolean enabled, int userId) {
+        setBoolean(Settings.Secure.LOCK_PASS_TO_SECURITY_VIEW, enabled, userId);
+    }
+
     /**
      * Check to see if a pattern matches the saved pattern.
      * If pattern matches, return an opaque attestation that the challenge

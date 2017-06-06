@@ -181,4 +181,28 @@ public abstract class PackageManagerInternal {
      * user id is not currently assigned.
      */
     public abstract String getNameForUid(int uid);
+
+    /**
+     * Get all overlay packages for a user.
+     * @param userId The user for which to get the overlays.
+     * @return A list of overlay packages. An empty list is returned if the
+     *         user has no installed overlay packages.
+     */
+    public abstract List<PackageInfo> getOverlayPackages(int userId);
+
+    /**
+     * Get the names of all target packages for a user.
+     * @param userId The user for which to get the package names.
+     * @return A list of target package names. This list includes the "android" package.
+     */
+    public abstract List<String> getTargetPackageNames(int userId);
+
+    /**
+     * Set which overlay to use for a package.
+     * @param userId The user for which to update the overlays.
+     * @param packageName The package name of the package for which to update the overlays.
+     * @param resourceDirs The paths to the overlay packages to use, ordered in the order in
+     *                     which to load the paths, or null if no overlays should be used.
+     */
+    public abstract void setResourceDirs(int userId, String packageName, String[] resourceDirs);
 }

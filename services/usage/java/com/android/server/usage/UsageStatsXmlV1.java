@@ -195,7 +195,7 @@ final class UsageStatsXmlV1 {
      * @param parser The parser from which to read events.
      * @param statsOut The stats object to populate with the data from the XML file.
      */
-    public static void read(XmlPullParser parser, IntervalStats statsOut)
+    public static void read(XmlPullParser parser, IntervalStats statsOut, int flags)
             throws XmlPullParserException, IOException {
         statsOut.packageStats.clear();
         statsOut.configurations.clear();
@@ -217,17 +217,52 @@ final class UsageStatsXmlV1 {
 
             final String tag = parser.getName();
             switch (tag) {
+                case PACKAGES_TAG:
+                    if ((flags & UsageStatsDatabase.QUERY_FLAG_FETCH_PACKAGES) == 0) {
+                        skip(parser);
+                    }
+                    break;
+
                 case PACKAGE_TAG:
                     loadUsageStats(parser, statsOut);
+                    break;
+
+                case CONFIGURATIONS_TAG:
+                    if ((flags & UsageStatsDatabase.QUERY_FLAG_FETCH_CONFIGURATIONS) == 0) {
+                        skip(parser);
+                    }
                     break;
 
                 case CONFIG_TAG:
                     loadConfigStats(parser, statsOut);
                     break;
 
+                case EVENT_LOG_TAG:
+                    if ((flags & UsageStatsDatabase.QUERY_FLAG_FETCH_EVENTS) == 0) {
+                        skip(parser);
+                    }
+                    break;
+
                 case EVENT_TAG:
                     loadEvent(parser, statsOut);
                     break;
+            }
+        }
+    }
+
+    private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
+        if (parser.getEventType() != XmlPullParser.START_TAG) {
+            throw new IllegalStateException();
+        }
+        int depth = 1;
+        while (depth != 0) {
+            switch (parser.next()) {
+            case XmlPullParser.END_TAG:
+                depth--;
+                break;
+            case XmlPullParser.START_TAG:
+                depth++;
+                break;
             }
         }
     }

@@ -23,11 +23,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:navigationContentDescription="@*android:string/action_bar_up_description"
-        style="?android:attr/toolbarStyle" />
+        style="?android:attr/toolbarStyle"
+        android:titleTextColor="@color/qs_edit_toolbar_text_color"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@android:id/list"
-        android:layout_width="@dimen/notification_panel_width"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:scrollIndicators="top"

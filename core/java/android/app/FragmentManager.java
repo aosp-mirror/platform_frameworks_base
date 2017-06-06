@@ -1054,7 +1054,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         if (f.mView != null) {
                             // Need to save the current view state if not
                             // done already.
-                            if (mHost.onShouldSaveFragmentState(f) && f.mSavedViewState == null) {
+                            if (mHost != null && mHost.onShouldSaveFragmentState(f) && f.mSavedViewState == null) {
                                 saveFragmentViewState(f);
                             }
                         }

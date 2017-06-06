@@ -19,7 +19,7 @@
     <ImageView android:id="@+id/global_screenshot_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@android:color/black"
+        android:src="@color/screenshot_background_color"
         android:visibility="gone" />
     <ImageView android:id="@+id/global_screenshot"
         android:layout_width="wrap_content"
@@ -31,7 +31,7 @@
     <ImageView android:id="@+id/global_screenshot_flash"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@android:color/white"
+        android:src="@color/screenshot_flash_color"
         android:visibility="gone" />
     <com.android.systemui.screenshot.ScreenshotSelectorView
         android:id="@+id/global_screenshot_selector"

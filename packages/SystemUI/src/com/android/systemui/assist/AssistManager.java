@@ -133,6 +133,9 @@ public class AssistManager {
             return;
         }
 
+        if (mView == null) {
+            onConfigurationChanged();
+        }
         final boolean isService = assistComponent.equals(getVoiceInteractorComponentName());
         if (!isService || (!isVoiceSessionRunning() && shouldShowOrb())) {
             showOrb(assistComponent, isService);
@@ -246,6 +249,9 @@ public class AssistManager {
     }
 
     private void maybeSwapSearchIcon(@NonNull ComponentName assistComponent, boolean isService) {
+        if(mView == null) {
+            onConfigurationChanged();
+        }
         replaceDrawable(mView.getOrb().getLogo(), assistComponent, ASSIST_ICON_METADATA_NAME,
                 isService);
     }

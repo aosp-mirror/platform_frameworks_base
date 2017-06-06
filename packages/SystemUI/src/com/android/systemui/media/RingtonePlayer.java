@@ -161,6 +161,18 @@ public class RingtonePlayer extends SystemUI {
         }
 
         @Override
+        public void setVolume(IBinder token, float volume) {
+            if (LOGD) Log.d(TAG, "setVolume(token=" + token + ", volume=" + volume + ")");
+            Client client;
+            synchronized (mClients) {
+                client = mClients.get(token);
+            }
+            if (client != null) {
+                client.mRingtone.setVolume(volume);
+            }
+        }
+
+        @Override
         public void playAsync(Uri uri, UserHandle user, boolean looping, AudioAttributes aa) {
             if (LOGD) Log.d(TAG, "playAsync(uri=" + uri + ", user=" + user + ")");
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {

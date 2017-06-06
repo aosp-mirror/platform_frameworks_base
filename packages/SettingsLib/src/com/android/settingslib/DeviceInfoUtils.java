@@ -22,6 +22,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
@@ -32,6 +33,7 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -47,6 +49,10 @@ public class DeviceInfoUtils {
 
     private static final String FILENAME_PROC_VERSION = "/proc/version";
     private static final String FILENAME_MSV = "/sys/board_properties/soc/msv";
+    private static final String FILENAME_PROC_CPUINFO = "/proc/cpuinfo";
+    private static final String FILENAME_PROC_MEMINFO = "/proc/meminfo";
+
+    private static final String PROPERTY_VENDOR_NUMBER = "ro.vendor.build.fingerprint";
 
     /**
      * Reads a line from the specified file.
@@ -210,4 +216,74 @@ public class DeviceInfoUtils {
         return sb.toString();
     }
 
+     /**
+      * Returns the Hardware or Processor value in /proc/cpuinfo,
+      * else returns "Unknown" (regex can be changed with a device overlay)
+      * @return a string that describes the processor
+      */
+     public static String getDeviceProcessorInfo(Context context) {
+        // Hardware or Processor : XYZ
+        final String PROC_REGEX = context.getResources().getString(R.string.processor_regex); /* hardware or processor string */
+
+         try {
+             BufferedReader reader = new BufferedReader(new FileReader(FILENAME_PROC_CPUINFO));
+             String cpuinfo;
+
+             try {
+                 while (null != (cpuinfo = reader.readLine())) {
+                     Matcher m = Pattern.compile(PROC_REGEX).matcher(cpuinfo);
+                     if (m.matches()) {
+                         return m.group(1);
+                     }
+                 }
+                 return "Unknown";
+             } finally {
+                 reader.close();
+             }
+         } catch (IOException e) {
+             Log.e(TAG,
+                 "IO Exception when getting cpuinfo for Device Info screen",
+                 e);
+
+             return "Unknown";
+         }
+     }
+
+     public static String getDeviceMemoryInfo() {
+         String result = null;
+
+         try {
+             /* /proc/meminfo entries follow this format:
+              * MemTotal:         362096 kB
+              * MemFree:           29144 kB
+              * Buffers:            5236 kB
+              * Cached:            81652 kB
+              */
+             String firstLine = readLine(FILENAME_PROC_MEMINFO);
+             if (firstLine != null) {
+                 String parts[] = firstLine.split("\\s+");
+                 if (parts.length == 3) {
+                     result = Long.parseLong(parts[1])/1024 + " MB";
+                 }
+             }
+         } catch (IOException e) {}
+
+         return result;
+     }
+
+    public static String getVendorNumber() {
+        String result = null;
+
+        try {
+            String vendorFingerprint = SystemProperties.get(PROPERTY_VENDOR_NUMBER);
+            if (vendorFingerprint != null && !TextUtils.isEmpty(vendorFingerprint)) {
+                String[] splitFingerprint = vendorFingerprint.split("/");
+                if (splitFingerprint.length >= 3) {
+                    result = splitFingerprint[3];
+                }
+            }
+        } catch (IllegalArgumentException e) {}
+
+        return result;
+    }
 }

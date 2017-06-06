@@ -43,7 +43,7 @@ public class DeadZone extends View {
     public static final int HORIZONTAL = 0;  // Consume taps along the top edge.
     public static final int VERTICAL = 1;  // Consume taps along the left edge.
 
-    private static final boolean CHATTY = true; // print to logcat when we eat a click
+    private static final boolean CHATTY = false; // print to logcat when we eat a click
 
     private boolean mShouldFlash;
     private float mFlashFrac = 0f;
@@ -88,6 +88,7 @@ public class DeadZone extends View {
                     + (mVertical ? " vertical" : " horizontal"));
 
         setFlashOnTouchCapture(context.getResources().getBoolean(R.bool.config_dead_zone_flash));
+        a.recycle();
     }
 
     static float lerp(float a, float b, float f) {

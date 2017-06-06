@@ -2090,4 +2090,18 @@ class ActivityStarter {
             }
         }
     }
+
+    boolean clearPendingActivityLaunchesLocked(String packageName) {
+        boolean didSomething = false;
+
+        for (int palNdx = mPendingActivityLaunches.size() - 1; palNdx >= 0; --palNdx) {
+            PendingActivityLaunch pal = mPendingActivityLaunches.get(palNdx);
+            ActivityRecord r = pal.r;
+            if (r != null && r.packageName.equals(packageName)) {
+                mPendingActivityLaunches.remove(palNdx);
+                didSomething = true;
+            }
+        }
+        return didSomething;
+    }
 }

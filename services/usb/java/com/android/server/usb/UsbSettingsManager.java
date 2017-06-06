@@ -736,7 +736,7 @@ class UsbSettingsManager {
         final Intent intent = createDeviceAttachedIntent(device);
 
         // Send broadcast to running activity with registered intent
-        mUserContext.sendBroadcast(intent);
+        mUserContext.sendBroadcastAsUser(intent, UserHandle.ALL);
 
         if (MtpNotificationManager.shouldShowNotification(mPackageManager, device)) {
             // Show notification if the device is MTP storage.

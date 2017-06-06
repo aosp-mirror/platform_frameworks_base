@@ -23,6 +23,11 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.text.GetChars;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.TextWatcher;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * TextViewTest tests {@link TextView}.
@@ -134,5 +139,34 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActiv
         tv.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_OK, null);
 
         assertEquals(originalText, tv.getText().toString());
+    }
+
+    public void testRemoveTextWatcherInsideCallback() {
+        TextView tv = new TextView(mContext);
+
+        final List<String> one = new ArrayList<String>();
+        tv.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override public void afterTextChanged(Editable editable) {
+                tv.removeTextChangedListener(this);
+                one.add(editable.toString());
+            }
+        });
+
+        final List<String> two = new ArrayList<String>();
+        tv.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override public void afterTextChanged(Editable editable) {
+                two.add(editable.toString());
+            }
+        });
+
+        tv.setText("First");
+        tv.setText("Second");
+
+        assertEquals(Arrays.asList("First"), one);
+        assertEquals(Arrays.asList("First", "Second"), two));
     }
 }

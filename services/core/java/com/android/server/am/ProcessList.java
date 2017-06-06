@@ -182,22 +182,28 @@ final class ProcessList {
     // These are the various interesting memory levels that we will give to
     // the OOM killer.  Note that the OOM killer only supports 6 slots, so we
     // can't give it a different value for every possible kind of process.
-    private final int[] mOomAdj = new int[] {
-            FOREGROUND_APP_ADJ, VISIBLE_APP_ADJ, PERCEPTIBLE_APP_ADJ,
-            BACKUP_APP_ADJ, CACHED_APP_MIN_ADJ, CACHED_APP_MAX_ADJ
-    };
-    // These are the low-end OOM level limits.  This is appropriate for an
-    // HVGA or smaller phone with less than 512MB.  Values are in KB.
-    private final int[] mOomMinFreeLow = new int[] {
-            12288, 18432, 24576,
-            36864, 43008, 49152
-    };
-    // These are the high-end OOM level limits.  This is appropriate for a
-    // 1280x800 or larger screen with around 1GB RAM.  Values are in KB.
-    private final int[] mOomMinFreeHigh = new int[] {
-            73728, 92160, 110592,
-            129024, 147456, 184320
-    };
+    private final int[] mOomAdj = Resources.getSystem().getIntArray(
+                com.android.internal.R.array.config_defaultOomAdj);
+    // These are the low-end OOM level limits for 32 bit device.
+    // This is appropriate for an HVGA or smaller phone with less than 512MB.
+    // Values are in KB.
+    private final int[] mOomMinFreeLow32 = Resources.getSystem().getIntArray(
+                com.android.internal.R.array.config_defaultOomMinFreeLow32);
+    // These are the high-end OOM level limits for 32 bit device.
+    // This is appropriate for a 1280x800 or larger screen with around 1GB RAM.
+    // Values are in KB.
+    private final int[] mOomMinFreeHigh32 = Resources.getSystem().getIntArray(
+                com.android.internal.R.array.config_defaultOomMinFreeHigh32);
+    // These are the low-end OOM level limits for 64 bit device.
+    // This is appropriate for an HVGA or smaller phone with less than 512MB.
+    // Values are in KB.
+    private final int[] mOomMinFreeLow64 = Resources.getSystem().getIntArray(
+                com.android.internal.R.array.config_defaultOomMinFreeLow64);
+    // These are the high-end OOM level limits for 64 bit device.
+    // This is appropriate for a 1280x800 or larger screen with around 1GB RAM.
+    // Values are in KB.
+    private final int[] mOomMinFreeHigh64 = Resources.getSystem().getIntArray(
+                com.android.internal.R.array.config_defaultOomMinFreeHigh64);
     // The actual OOM killer memory levels we are using.
     private final int[] mOomMinFree = new int[mOomAdj.length];
 
@@ -257,12 +263,14 @@ final class ProcessList {
         final boolean is64bit = Build.SUPPORTED_64_BIT_ABIS.length > 0;
 
         for (int i=0; i<mOomAdj.length; i++) {
-            int low = mOomMinFreeLow[i];
-            int high = mOomMinFreeHigh[i];
+            int low = 0;
+            int high = 0;
             if (is64bit) {
-                // Increase the high min-free levels for cached processes for 64-bit
-                if (i == 4) high = (high*3)/2;
-                else if (i == 5) high = (high*7)/4;
+                low = mOomMinFreeLow64[i];
+                high = mOomMinFreeHigh64[i];
+            } else {
+                low = mOomMinFreeLow32[i];
+                high = mOomMinFreeHigh32[i];
             }
             mOomMinFree[i] = (int)(low + ((high-low)*scale));
         }

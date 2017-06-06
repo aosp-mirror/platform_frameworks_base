@@ -225,7 +225,7 @@ public final class LocalBluetoothProfileManager {
                 "Warning: PBAP Client profile was previously added but the UUID is now missing.");
         }
 
-        mEventManager.registerProfileIntentReceiver();
+        mEventManager.refreshProfileIntents();
 
         // There is no local SDP record for HID and Settings app doesn't control PBAP Server.
     }

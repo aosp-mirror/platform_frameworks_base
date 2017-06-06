@@ -981,6 +981,14 @@ public class StaticLayout extends Layout {
                     start - widthStart, end - start);
         }
 
+        // Do ellipsis columns exist?
+        if (mColumns >= COLUMNS_ELLIPSIZE) {
+            // Reset ellipsis state, as it may or may not be set by the code below
+            // that handles ellipsize.
+            lines[off + ELLIPSIS_START] = 0;
+            lines[off + ELLIPSIS_COUNT] = 0;
+        }
+
         if (ellipsize != null) {
             // If there is only one line, then do any type of ellipsis except when it is MARQUEE
             // if there are multiple lines, just allow END ellipsis on the last line

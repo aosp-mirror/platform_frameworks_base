@@ -18,6 +18,7 @@ package android.media.session;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
+import android.content.res.Configuration;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,9 +34,14 @@ import android.media.Rating;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Surface;
+import android.view.View;
+import android.view.WindowManager;
 
 /**
  * Helper for connecting existing APIs up to the new session APIs. This can be
@@ -197,6 +203,21 @@ public class MediaSessionLegacyHelper {
                 break;
         }
         if (down || up) {
+            final WindowManager windowService = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+            if (windowService != null) {
+                final int rotation = windowService.getDefaultDisplay().getRotation();
+                final Configuration config = mContext.getResources().getConfiguration();
+                final boolean swapKeys = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.SWAP_VOLUME_BUTTONS, 0, UserHandle.USER_CURRENT_OR_SELF) == 1;
+
+                if (swapKeys
+                        && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_180)
+                        && config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
+                    direction = keyEvent.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP
+                            ? AudioManager.ADJUST_LOWER
+                            : AudioManager.ADJUST_RAISE;
+                }
+            }
             int flags = AudioManager.FLAG_FROM_KEY;
             if (musicOnly) {
                 // This flag is used when the screen is off to only affect

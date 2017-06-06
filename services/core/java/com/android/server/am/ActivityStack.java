@@ -1806,7 +1806,7 @@ final class ActivityStack {
                     // them. However, when they don't have the wallpaper behind them, we want to
                     // show activities in the next application stack behind them vs. another
                     // task in the home stack like recents.
-                    behindFullscreenActivity = true;
+                    behindFullscreenActivity = task.getTopActivity() != null;
                 } else if (task.isRecentsTask()
                         && task.getTaskToReturnTo() == APPLICATION_ACTIVITY_TYPE) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
@@ -3197,7 +3197,8 @@ final class ActivityStack {
     }
 
     private void adjustFocusedActivityLocked(ActivityRecord r, String reason) {
-        if (!mStackSupervisor.isFocusedStack(this) || mService.mFocusedActivity != r) {
+        if (!mStackSupervisor.isFocusedStack(this) || (mService.mFocusedActivity != r
+                && mService.mFocusedActivity != null)) {
             return;
         }
 
@@ -3212,7 +3213,7 @@ final class ActivityStack {
                 return;
             } else {
                 final TaskRecord task = r.task;
-                if (r.frontOfTask && task == topTask() && task.isOverHomeStack()) {
+                if (r.frontOfTask && task.isOverHomeStack()) {
                     final int taskToReturnTo = task.getTaskToReturnTo();
 
                     // For non-fullscreen stack, we want to move the focus to the next visible
@@ -3354,9 +3355,10 @@ final class ActivityStack {
         }
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
-        int taskNdx = mTaskHistory.indexOf(r.task);
         int activityNdx = r.task.mActivities.indexOf(r);
         finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
+        // taskNdx may change after finishActivityLocked call
+        int taskNdx = mTaskHistory.indexOf(r.task);
         finishedTask = r.task;
         // Also terminate any activities below it that aren't yet
         // stopped, to avoid a situation where one will get
@@ -4941,7 +4943,8 @@ final class ActivityStack {
             if (focusedStack && topTask) {
                 // Give the latest time to ensure foreground task can be sorted
                 // at the first, because lastActiveTime of creating task is 0.
-                ci.lastActiveTime = System.currentTimeMillis();
+                // Only do this if the clock didn't run backwards, though.
+                ci.lastActiveTime = Math.max(ci.lastActiveTime, System.currentTimeMillis());
                 topTask = false;
             }
 

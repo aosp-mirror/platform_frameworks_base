@@ -81,7 +81,7 @@ public class AmbientDisplayConfiguration {
     }
 
     private boolean boolSetting(String name, int user) {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(), name, 1, user) != 0;
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(), name, 0, user) != 0;
     }
 
 }

@@ -40,6 +40,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SearchEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder.Callback2;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -1861,6 +1862,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         direction = AudioManager.ADJUST_TOGGLE_MUTE;
                         break;
                 }
+
+                final int rotation = getWindowManager().getDefaultDisplay().getRotation();
+                final Configuration config = getContext().getResources().getConfiguration();
+                final boolean swapKeys = Settings.System.getIntForUser(getContext().getContentResolver(),
+                        Settings.System.SWAP_VOLUME_BUTTONS, 0, UserHandle.USER_CURRENT_OR_SELF) == 1;
+
+                if (swapKeys
+                        && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_180)
+                        && config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
+                    direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                            ? AudioManager.ADJUST_LOWER
+                            : AudioManager.ADJUST_RAISE;
+                }
+
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {

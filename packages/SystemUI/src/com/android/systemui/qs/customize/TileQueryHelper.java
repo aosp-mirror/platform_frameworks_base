@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -64,7 +65,10 @@ public class TileQueryHelper {
         for (int i = 0; i < possibleTiles.length; i++) {
             final String spec = possibleTiles[i];
             final QSTile<?> tile = host.createTile(spec);
-            if (tile == null || !tile.isAvailable()) {
+            if (tile == null) {
+                continue;
+            } else if (!tile.isAvailable()) {
+                tile.destroy();
                 continue;
             }
             tile.setListening(this, true);
@@ -78,6 +82,7 @@ public class TileQueryHelper {
                     tile.getState().copyTo(state);
                     // Ignore the current state and get the generic label instead.
                     state.label = tile.getTileLabel();
+                    tile.destroy();
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -120,12 +125,12 @@ public class TileQueryHelper {
         mSpecs.add(spec);
     }
 
-    private void addTile(String spec, Drawable drawable, CharSequence label, CharSequence appLabel,
-            Context context) {
+    private void addTile(String spec, Drawable drawable, CharSequence label, CharSequence appLabel, Context context) {
         QSTile.State state = new QSTile.State();
         state.label = label;
         state.contentDescription = label;
         state.icon = new DrawableIcon(drawable);
+        state.autoMirrorDrawable = false;
         addTile(spec, appLabel, state, false);
     }
 
@@ -165,14 +170,12 @@ public class TileQueryHelper {
                     continue;
                 }
                 Drawable icon = info.serviceInfo.loadIcon(pm);
-                if (!permission.BIND_QUICK_SETTINGS_TILE.equals(info.serviceInfo.permission)) {
-                    continue;
-                }
-                if (icon == null) {
+                if (!permission.BIND_QUICK_SETTINGS_TILE.equals(info.serviceInfo.permission) && icon == null) {
                     continue;
                 }
                 icon.mutate();
-                icon.setTint(mContext.getColor(android.R.color.white));
+                icon.setTint(mContext.getColor(R.color.external_qs_tile_tint_color));
+                icon.setTintMode(Mode.SRC_ATOP);
                 CharSequence label = info.serviceInfo.loadLabel(pm);
                 addTile(spec, icon, label != null ? label.toString() : "null", appLabel, mContext);
             }

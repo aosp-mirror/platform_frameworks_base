@@ -130,7 +130,7 @@ public final class RotationPolicy {
     }
 
     private static boolean areAllRotationsAllowed(Context context) {
-        return context.getResources().getBoolean(R.bool.config_allowAllRotations);
+        return true;
     }
 
     private static void setRotationLock(final boolean enabled, final int rotation) {

@@ -1409,7 +1409,7 @@ void OpenGLRenderer::renderGlop(const Glop& glop, GlopRenderType type) {
 
         setStencilFromClip();
     }
-    mRenderState.render(glop, currentSnapshot()->getOrthoMatrix());
+    mRenderState.render(glop, currentSnapshot()->getOrthoMatrix(), false);
     if (type == GlopRenderType::Standard && !mRenderState.stencil().isWriteEnabled()) {
         // TODO: specify more clearly when a draw should dirty the layer.
         // is writing to the stencil the only time we should ignore this?

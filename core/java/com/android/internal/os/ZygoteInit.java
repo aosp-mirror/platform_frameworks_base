@@ -109,7 +109,7 @@ public class ZygoteInit {
     private static final String PRELOADED_CLASSES = "/system/etc/preloaded-classes";
 
     /** Controls whether we should preload resources during zygote init. */
-    public static final boolean PRELOAD_RESOURCES = true;
+    public static final boolean PRELOAD_RESOURCES = false;
 
     /**
      * Registers a server socket for zygote command connections
@@ -343,7 +343,7 @@ public class ZygoteInit {
                     continue;
                 }
 
-                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadClass " + line);
+                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, line);
                 try {
                     if (false) {
                         Log.v(TAG, "Preloading " + line + "...");
@@ -440,6 +440,8 @@ public class ZygoteInit {
                     Log.i(TAG, "...preloaded " + N + " resource in "
                             + (SystemClock.uptimeMillis() - startTime) + "ms.");
                 }
+            } else {
+                Log.i(TAG, "Preload resources disabled, skipped.");
             }
             mResources.finishPreloading();
         } catch (RuntimeException e) {
@@ -563,11 +565,11 @@ public class ZygoteInit {
      */
     private static PathClassLoader createSystemServerClassLoader(String systemServerClasspath,
                                                                  int targetSdkVersion) {
-      String librarySearchPath = System.getProperty("java.library.path");
+      String libraryPath = System.getProperty("java.library.path");
 
       return PathClassLoaderFactory.createClassLoader(systemServerClasspath,
-                                                      librarySearchPath,
-                                                      null /* libraryPermittedPath */,
+                                                      libraryPath,
+                                                      libraryPath,
                                                       ClassLoader.getSystemClassLoader(),
                                                       targetSdkVersion,
                                                       true /* isNamespaceShared */);

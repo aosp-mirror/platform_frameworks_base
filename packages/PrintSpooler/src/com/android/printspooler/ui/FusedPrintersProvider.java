@@ -23,6 +23,7 @@ import android.app.LoaderManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.location.Criteria;
 import android.location.Location;
@@ -251,19 +252,22 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
             Log.i(LOG_TAG, "onStartLoading() " + FusedPrintersProvider.this.hashCode());
         }
 
-        mLocationManager.requestLocationUpdates(LocationRequest.create()
-                .setQuality(LocationRequest.POWER_LOW).setInterval(LOCATION_UPDATE_MS), this,
-                Looper.getMainLooper());
+        if (getContext().checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mLocationManager.requestLocationUpdates(LocationRequest.create()
+                    .setQuality(LocationRequest.POWER_LOW).setInterval(LOCATION_UPDATE_MS), this,
+                    Looper.getMainLooper());
 
-        Location lastLocation = mLocationManager.getLastLocation();
-        if (lastLocation != null) {
-            onLocationChanged(lastLocation);
+            Location lastLocation = mLocationManager.getLastLocation();
+            if (lastLocation != null) {
+                onLocationChanged(lastLocation);
+            }
+
+            // Jumpstart location with a single forced update
+            Criteria oneTimeCriteria = new Criteria();
+            oneTimeCriteria.setAccuracy(Criteria.ACCURACY_FINE);
+            mLocationManager.requestSingleUpdate(oneTimeCriteria, this, Looper.getMainLooper());
         }
-
-        // Jumpstart location with a single forced update
-        Criteria oneTimeCriteria = new Criteria();
-        oneTimeCriteria.setAccuracy(Criteria.ACCURACY_FINE);
-        mLocationManager.requestSingleUpdate(oneTimeCriteria, this, Looper.getMainLooper());
 
         // The contract is that if we already have a valid,
         // result the we have to deliver it immediately.

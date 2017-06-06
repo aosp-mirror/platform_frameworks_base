@@ -17,18 +17,23 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pools;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
@@ -55,16 +60,15 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         VisualStabilityManager.Callback {
     private static final String TAG = "HeadsUpManager";
     private static final boolean DEBUG = false;
-    private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
     private static final int TAG_CLICKED_NOTIFICATION = R.id.is_clicked_heads_up_tag;
 
-    private final int mHeadsUpNotificationDecay;
+    private int mHeadsUpNotificationDecay;
+    private int mSnoozeLengthMs;
     private final int mMinimumDisplayTime;
 
     private final int mTouchAcceptanceDelay;
     private final ArrayMap<String, Long> mSnoozedPackages;
     private final HashSet<OnHeadsUpChangedListener> mListeners = new HashSet<>();
-    private final int mDefaultSnoozeLengthMs;
     private final Handler mHandler = new Handler();
     private final Pools.Pool<HeadsUpEntry> mEntryPool = new Pools.Pool<HeadsUpEntry>() {
 
@@ -91,7 +95,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private final Context mContext;
     private final NotificationGroupManager mGroupManager;
     private PhoneStatusBar mBar;
-    private int mSnoozeLengthMs;
     private ContentObserver mSettingsObserver;
     private HashMap<String, HeadsUpEntry> mHeadsUpEntries = new HashMap<>();
     private HashSet<String> mSwipedOutKeys = new HashSet<>();
@@ -118,28 +121,17 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         Resources resources = mContext.getResources();
         mTouchAcceptanceDelay = resources.getInteger(R.integer.touch_acceptance_delay);
         mSnoozedPackages = new ArrayMap<>();
-        mDefaultSnoozeLengthMs = resources.getInteger(R.integer.heads_up_default_snooze_length_ms);
-        mSnoozeLengthMs = mDefaultSnoozeLengthMs;
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
-        mHeadsUpNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
+        mHeadsUpNotificationDecay = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.HEADS_UP_TIMEOUT,
+                context.getResources().getInteger(R.integer.heads_up_notification_decay),
+                UserHandle.USER_CURRENT);
+        mSnoozeLengthMs = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.HEADS_UP_NOTIFICATION_SNOOZE,
+                context.getResources().getInteger(R.integer.heads_up_default_snooze_length_ms),
+                UserHandle.USER_CURRENT);
         mClock = new Clock();
 
-        mSnoozeLengthMs = Settings.Global.getInt(context.getContentResolver(),
-                SETTING_HEADS_UP_SNOOZE_LENGTH_MS, mDefaultSnoozeLengthMs);
-        mSettingsObserver = new ContentObserver(mHandler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                final int packageSnoozeLengthMs = Settings.Global.getInt(
-                        context.getContentResolver(), SETTING_HEADS_UP_SNOOZE_LENGTH_MS, -1);
-                if (packageSnoozeLengthMs > -1 && packageSnoozeLengthMs != mSnoozeLengthMs) {
-                    mSnoozeLengthMs = packageSnoozeLengthMs;
-                    if (DEBUG) Log.v(TAG, "mSnoozeLengthMs = " + mSnoozeLengthMs);
-                }
-            }
-        };
-        context.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS), false,
-                mSettingsObserver);
         mStatusBarWindowView = statusBarWindowView;
         mGroupManager = groupManager;
         mStatusBarHeight = resources.getDimensionPixelSize(
@@ -341,6 +333,31 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             String packageName = entry.entry.notification.getPackageName();
             mSnoozedPackages.put(snoozeKey(packageName, mUser),
                     SystemClock.elapsedRealtime() + mSnoozeLengthMs);
+            if (mSnoozeLengthMs != 0) {
+                String appName = null;
+                try {
+                    appName = (String) mContext.getPackageManager().getApplicationLabel(
+                        mContext.getPackageManager().getApplicationInfo(packageName,
+                            PackageManager.GET_META_DATA));
+                } catch (PackageManager.NameNotFoundException e) {
+                    appName = packageName;
+                }
+                if (mSnoozeLengthMs == 60000) {
+                    Toast toast = Toast.makeText(mContext,
+                    mContext.getString(R.string.heads_up_snooze_message_one_minute, appName),
+                            Toast.LENGTH_LONG);
+                    TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+                    if( v != null) v.setGravity(Gravity.CENTER);
+                    toast.show();
+                } else {
+                    Toast toast = Toast.makeText(mContext,
+                    mContext.getString(R.string.heads_up_snooze_message, appName,
+                    mSnoozeLengthMs / 60 / 1000), Toast.LENGTH_LONG);
+                    TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+                    if( v != null) v.setGravity(Gravity.CENTER);
+                    toast.show();
+                }
+            }
         }
         mReleaseOnExpandFinish = true;
     }
@@ -668,6 +685,14 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         }
 
         public void updateEntry(boolean updatePostTime) {
+            mHeadsUpNotificationDecay = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.HEADS_UP_TIMEOUT,
+                    mContext.getResources().getInteger(R.integer.heads_up_notification_decay),
+                    UserHandle.USER_CURRENT);
+            mSnoozeLengthMs = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.HEADS_UP_NOTIFICATION_SNOOZE,
+                mContext.getResources().getInteger(R.integer.heads_up_default_snooze_length_ms),
+                UserHandle.USER_CURRENT);
             long currentTime = mClock.currentTimeMillis();
             earliestRemovaltime = currentTime + mMinimumDisplayTime;
             if (updatePostTime) {

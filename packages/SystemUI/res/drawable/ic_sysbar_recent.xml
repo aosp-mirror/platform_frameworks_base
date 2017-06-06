@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2016 AICP
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="88"
+    android:viewportHeight="88">
+
+    <path
+        android:fillColor="@color/icon_color_overview"
+        android:pathData="M14.01,19.99C13.73,16.72 16.63,13.75 19.92,14.03C35.29,13.94 50.66,14.06 66.03,13.97C68.2,14.01 70.73,13.86 72.33,15.61C74.13,17.21 74.01,19.77 74.06,21.97C74.03,36.98 74.05,52 74.06,67.02C73.99,68.58 73.87,70.18 73.32,71.65C71.62,73.28 69.39,74.21 67.01,74.02C51.66,73.99 36.3,73.99 20.95,74.02C18.54,74.22 16.33,73.23 14.61,71.59C13.88,69.13 13.9,66.54 13.93,64.01C14.03,49.34 13.86,34.66 14.01,19.99Z"/>
+</vector>

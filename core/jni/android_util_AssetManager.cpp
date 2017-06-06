@@ -130,92 +130,6 @@ jint copyValue(JNIEnv* env, jobject outValue, const ResTable* table,
     return block;
 }
 
-// This is called by zygote (running as user root) as part of preloadResources.
-static void verifySystemIdmaps()
-{
-    pid_t pid;
-    char system_id[10];
-
-    snprintf(system_id, sizeof(system_id), "%d", AID_SYSTEM);
-
-    switch (pid = fork()) {
-        case -1:
-            ALOGE("failed to fork for idmap: %s", strerror(errno));
-            break;
-        case 0: // child
-            {
-                struct __user_cap_header_struct capheader;
-                struct __user_cap_data_struct capdata;
-
-                memset(&capheader, 0, sizeof(capheader));
-                memset(&capdata, 0, sizeof(capdata));
-
-                capheader.version = _LINUX_CAPABILITY_VERSION;
-                capheader.pid = 0;
-
-                if (capget(&capheader, &capdata) != 0) {
-                    ALOGE("capget: %s\n", strerror(errno));
-                    exit(1);
-                }
-
-                capdata.effective = capdata.permitted;
-                if (capset(&capheader, &capdata) != 0) {
-                    ALOGE("capset: %s\n", strerror(errno));
-                    exit(1);
-                }
-
-                if (setgid(AID_SYSTEM) != 0) {
-                    ALOGE("setgid: %s\n", strerror(errno));
-                    exit(1);
-                }
-
-                if (setuid(AID_SYSTEM) != 0) {
-                    ALOGE("setuid: %s\n", strerror(errno));
-                    exit(1);
-                }
-
-                // Generic idmap parameters
-                const char* argv[8];
-                int argc = 0;
-                struct stat st;
-
-                memset(argv, NULL, sizeof(argv));
-                argv[argc++] = AssetManager::IDMAP_BIN;
-                argv[argc++] = "--scan";
-                argv[argc++] = AssetManager::TARGET_PACKAGE_NAME;
-                argv[argc++] = AssetManager::TARGET_APK_PATH;
-                argv[argc++] = AssetManager::IDMAP_DIR;
-
-                // Directories to scan for overlays: if OVERLAY_THEME_DIR_PROPERTY is defined,
-                // use OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in addition to OVERLAY_DIR.
-                char subdir[PROP_VALUE_MAX];
-                int len = __system_property_get(AssetManager::OVERLAY_THEME_DIR_PROPERTY, subdir);
-                if (len > 0) {
-                    String8 overlayPath = String8(AssetManager::OVERLAY_DIR) + "/" + subdir;
-                    if (stat(overlayPath.string(), &st) == 0) {
-                        argv[argc++] = overlayPath.string();
-                    }
-                }
-                if (stat(AssetManager::OVERLAY_DIR, &st) == 0) {
-                    argv[argc++] = AssetManager::OVERLAY_DIR;
-                }
-
-                // Finally, invoke idmap (if any overlay directory exists)
-                if (argc > 5) {
-                    execv(AssetManager::IDMAP_BIN, (char* const*)argv);
-                    ALOGE("failed to execv for idmap: %s", strerror(errno));
-                    exit(1); // should never get here
-                } else {
-                    exit(0);
-                }
-            }
-            break;
-        default: // parent
-            waitpid(pid, NULL, 0);
-            break;
-    }
-}
-
 // ----------------------------------------------------------------------------
 
 // this guy is exported to other jni routines
@@ -2086,9 +2000,6 @@ static jintArray android_content_AssetManager_getStyleAttributes(JNIEnv* env, jo
 
 static void android_content_AssetManager_init(JNIEnv* env, jobject clazz, jboolean isSystem)
 {
-    if (isSystem) {
-        verifySystemIdmaps();
-    }
     AssetManager* am = new AssetManager();
     if (am == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", "");
@@ -2160,9 +2071,9 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_readAsset },
     { "seekAsset",      "(JJI)J",
         (void*) android_content_AssetManager_seekAsset },
-    { "getAssetLength", "!(J)J",
+    { "getAssetLength", "(J)J",
         (void*) android_content_AssetManager_getAssetLength },
-    { "getAssetRemainingLength", "!(J)J",
+    { "getAssetRemainingLength", "(J)J",
         (void*) android_content_AssetManager_getAssetRemainingLength },
     { "addAssetPathNative", "(Ljava/lang/String;Z)I",
         (void*) android_content_AssetManager_addAssetPath },
@@ -2178,25 +2089,25 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getNonSystemLocales },
     { "getSizeConfigurations", "()[Landroid/content/res/Configuration;",
         (void*) android_content_AssetManager_getSizeConfigurations },
-    { "setConfiguration", "!(IILjava/lang/String;IIIIIIIIIIIIII)V",
+    { "setConfiguration", "(IILjava/lang/String;IIIIIIIIIIIIII)V",
         (void*) android_content_AssetManager_setConfiguration },
-    { "getResourceIdentifier","!(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
+    { "getResourceIdentifier","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
         (void*) android_content_AssetManager_getResourceIdentifier },
-    { "getResourceName","!(I)Ljava/lang/String;",
+    { "getResourceName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceName },
-    { "getResourcePackageName","!(I)Ljava/lang/String;",
+    { "getResourcePackageName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourcePackageName },
-    { "getResourceTypeName","!(I)Ljava/lang/String;",
+    { "getResourceTypeName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceTypeName },
-    { "getResourceEntryName","!(I)Ljava/lang/String;",
+    { "getResourceEntryName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceEntryName },
-    { "loadResourceValue","!(ISLandroid/util/TypedValue;Z)I",
+    { "loadResourceValue","(ISLandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadResourceValue },
-    { "loadResourceBagValue","!(IILandroid/util/TypedValue;Z)I",
+    { "loadResourceBagValue","(IILandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadResourceBagValue },
-    { "getStringBlockCount","!()I",
+    { "getStringBlockCount","()I",
         (void*) android_content_AssetManager_getStringBlockCount },
-    { "getNativeStringBlock","!(I)J",
+    { "getNativeStringBlock","(I)J",
         (void*) android_content_AssetManager_getNativeStringBlock },
     { "getCookieName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getCookieName },
@@ -2214,21 +2125,21 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_copyTheme },
     { "clearTheme", "(J)V",
         (void*) android_content_AssetManager_clearTheme },
-    { "loadThemeAttributeValue", "!(JILandroid/util/TypedValue;Z)I",
+    { "loadThemeAttributeValue", "(JILandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadThemeAttributeValue },
-    { "getThemeChangingConfigurations", "!(J)I",
+    { "getThemeChangingConfigurations", "(J)I",
         (void*) android_content_AssetManager_getThemeChangingConfigurations },
     { "dumpTheme", "(JILjava/lang/String;Ljava/lang/String;)V",
         (void*) android_content_AssetManager_dumpTheme },
-    { "applyStyle","!(JIIJ[I[I[I)Z",
+    { "applyStyle","(JIIJ[I[I[I)Z",
         (void*) android_content_AssetManager_applyStyle },
-    { "resolveAttrs","!(JII[I[I[I[I)Z",
+    { "resolveAttrs","(JII[I[I[I[I)Z",
         (void*) android_content_AssetManager_resolveAttrs },
-    { "retrieveAttributes","!(J[I[I[I)Z",
+    { "retrieveAttributes","(J[I[I[I)Z",
         (void*) android_content_AssetManager_retrieveAttributes },
-    { "getArraySize","!(I)I",
+    { "getArraySize","(I)I",
         (void*) android_content_AssetManager_getArraySize },
-    { "retrieveArray","!(I[I)I",
+    { "retrieveArray","(I[I)I",
         (void*) android_content_AssetManager_retrieveArray },
 
     // XML files.
@@ -2238,11 +2149,11 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     // Arrays.
     { "getArrayStringResource","(I)[Ljava/lang/String;",
         (void*) android_content_AssetManager_getArrayStringResource },
-    { "getArrayStringInfo","!(I)[I",
+    { "getArrayStringInfo","(I)[I",
         (void*) android_content_AssetManager_getArrayStringInfo },
-    { "getArrayIntResource","!(I)[I",
+    { "getArrayIntResource","(I)[I",
         (void*) android_content_AssetManager_getArrayIntResource },
-    { "getStyleAttributes","!(I)[I",
+    { "getStyleAttributes","(I)[I",
         (void*) android_content_AssetManager_getStyleAttributes },
 
     // Bookkeeping.

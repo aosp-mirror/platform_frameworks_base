@@ -20,6 +20,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Don't use roaming icon for considered operators -->
     <string-array translatable="false" name="config_operatorConsideredNonRoaming">
+        <item>21910</item> <!-- Tele2: Don't use roaming icon for VIPnet -->
         <item>21901</item>
     </string-array>
 </resources>

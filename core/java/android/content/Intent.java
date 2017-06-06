@@ -1936,6 +1936,15 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
     /**
+     * Broadcast Action: Update preferences for the power menu dialog.  This is to provide a
+     * way for the preferences that need to be enabled/disabled to update because they were
+     * toggled elsewhere in the settings (ie profiles, immersive desktop, etc) so we don't have
+     * to do constant lookups while we wait for the menu to be created. Getting the values once
+     * when necessary is enough.
+     * @hide
+     */
+    public static final String UPDATE_POWER_MENU = "android.intent.action.UPDATE_POWER_MENU";
+    /**
      * Broadcast Action: Trigger the download and eventual installation
      * of a package.
      * <p>Input: {@link #getData} is the URI of the package file to download.
@@ -2597,6 +2606,21 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_AIRPLANE_MODE_CHANGED = "android.intent.action.AIRPLANE_MODE";
 
     /**
+     * <p>Broadcast Action: The user has changed carrier label:</p>
+     * <ul>
+     *   <li><em>state</em> - String value.</li>
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @hide
+     */
+    //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CUSTOM_CARRIER_LABEL_CHANGED
+            = "android.intent.action.CUSTOM_CARRIER_LABEL";
+
+    /**
      * Broadcast Action: Some content providers have parts of their namespace
      * where they publish new events or items that the user may be especially
      * interested in. For these things, they may broadcast this action when the
@@ -3074,6 +3098,40 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String ACTION_MEDIA_RESOURCE_GRANTED =
             "android.intent.action.MEDIA_RESOURCE_GRANTED";
+
+    /**
+     * Broadcast Action: An overlay package has been installed. The data
+     * contains the name of the added overlay package.
+     * @hide
+     */
+    public static final String ACTION_OVERLAY_ADDED = "android.intent.action.OVERLAY_ADDED";
+
+    /**
+     * Broadcast Action: An overlay package has changed. The data contains the
+     * name of the overlay package which has changed. This is broadcast on all
+     * changes to the OverlayInfo returned by {@link
+     * android.content.om.IOverlayManager#getOverlayInfo(String, int)}. The
+     * most common change is a state change that will change whether the
+     * overlay is enabled or not.
+     * @hide
+     */
+    public static final String ACTION_OVERLAY_CHANGED = "android.intent.action.OVERLAY_CHANGED";
+
+    /**
+     * Broadcast Action: An overlay package has been removed. The data contains
+     * the name of the overlay package which has been removed.
+     * @hide
+     */
+    public static final String ACTION_OVERLAY_REMOVED = "android.intent.action.OVERLAY_REMOVED";
+
+    /**
+     * Broadcast Action: The order of a package's list of overlay packages has
+     * changed. The data contains the package name of the overlay package that
+     * had its position in the list adjusted.
+     * @hide
+     */
+    public static final String
+            ACTION_OVERLAY_PRIORITY_CHANGED = "android.intent.action.OVERLAY_PRIORITY_CHANGED";
 
     /**
      * Activity Action: Allow the user to select and return one or more existing
@@ -7782,6 +7840,9 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      */
     public Intent putExtras(Bundle extras) {
+        if (extras == null) {
+            return this;
+        }
         if (mExtras == null) {
             mExtras = new Bundle();
         }

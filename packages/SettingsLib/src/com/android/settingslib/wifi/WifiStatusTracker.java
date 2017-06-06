@@ -15,6 +15,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiSsid;
+import android.text.TextUtils;
 
 import java.util.List;
 
@@ -62,9 +64,10 @@ public class WifiStatusTracker {
     }
 
     private String getSsid(WifiInfo info) {
-        String ssid = info.getSSID();
+        WifiSsid ssid = info.getWifiSsid();
         if (ssid != null) {
-            return ssid;
+            String ssidString = ssid.toString();
+            return TextUtils.isEmpty(ssidString) ? ssid.getHexString() : ssidString;
         }
         // OK, it's not in the connectionInfo; we have to go hunting for it
         List<WifiConfiguration> networks = mWifiManager.getConfiguredNetworks();

@@ -85,6 +85,9 @@ void PatchCache::clear() {
         mMeshBuffer = 0;
         mSize = 0;
     }
+
+    // MeshBuffer is deleted, so change generation id to create a new one.
+    mGenerationId++;
 }
 
 void PatchCache::clearCache() {

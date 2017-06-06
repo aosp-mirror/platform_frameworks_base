@@ -17,8 +17,14 @@
 package com.android.systemui.statusbar.policy;
 
 import android.view.LayoutInflater;
+
+import android.content.ContentResolver;
+import android.content.Context;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.widget.ImageView;
 import android.widget.FrameLayout;
 
 import com.android.systemui.Interpolators;
@@ -41,17 +47,22 @@ public class BrightnessMirrorController {
     private final View mNotificationPanel;
     private final int[] mInt2Cache = new int[2];
     private View mBrightnessMirror;
+    private final ImageView mIcon;
+    private Context mContext;
 
-    public BrightnessMirrorController(StatusBarWindowView statusBarWindow) {
+    public BrightnessMirrorController(Context context, StatusBarWindowView statusBarWindow) {
+        mContext = context;
         mStatusBarWindow = statusBarWindow;
         mScrimBehind = (ScrimView) statusBarWindow.findViewById(R.id.scrim_behind);
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
         mNotificationPanel = statusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = (NotificationStackScrollLayout) statusBarWindow.findViewById(
                 R.id.notification_stack_scroller);
+        mIcon = (ImageView) statusBarWindow.findViewById(R.id.brightness_icon);
     }
 
     public void showMirror() {
+        updateIcon();
         mBrightnessMirror.setVisibility(View.VISIBLE);
         mStackScroller.setFadingOut(true);
         mScrimBehind.animateViewAlpha(0.0f, TRANSITION_DURATION_OUT, Interpolators.ALPHA_OUT);
@@ -121,5 +132,23 @@ public class BrightnessMirrorController {
         mBrightnessMirror = LayoutInflater.from(mBrightnessMirror.getContext()).inflate(
                 R.layout.brightness_mirror, mStatusBarWindow, false);
         mStatusBarWindow.addView(mBrightnessMirror, index);
+    }
+
+    private void updateIcon() {
+        // enable the brightness icon
+        boolean brightnessIconEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_SHOW_BRIGHTNESS_ICON,
+                1, UserHandle.USER_CURRENT) == 1;
+        mIcon.setVisibility(brightnessIconEnabled ? View.VISIBLE : View.GONE);
+
+        if (mIcon != null) {
+            boolean automatic = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_MODE,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
+                    UserHandle.USER_CURRENT) != Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL;
+            mIcon.setImageResource(automatic ?
+                    com.android.systemui.R.drawable.ic_qs_brightness_auto_on :
+                    com.android.systemui.R.drawable.ic_qs_brightness_auto_off);
+        }
     }
 }

@@ -65,6 +65,7 @@ namespace android {
 static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
 static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
 static const char SYSTEM_ENCRYPTED_BOOTANIMATION_FILE[] = "/system/media/bootanimation-encrypted.zip";
+static const char THEME_BOOTANIMATION_FILE[] = "/data/system/theme/bootanimation.zip";
 static const char SYSTEM_DATA_DIR_PATH[] = "/data/system";
 static const char SYSTEM_TIME_DIR_NAME[] = "time";
 static const char SYSTEM_TIME_DIR_PATH[] = "/data/system/time";
@@ -322,6 +323,9 @@ status_t BootAnimation::readyToRun() {
     if (encryptedAnimation && (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0)) {
         mZipFileName = SYSTEM_ENCRYPTED_BOOTANIMATION_FILE;
     }
+    else if (access(THEME_BOOTANIMATION_FILE, R_OK) == 0) {
+        mZipFileName = THEME_BOOTANIMATION_FILE;
+    }
     else if (access(OEM_BOOTANIMATION_FILE, R_OK) == 0) {
         mZipFileName = OEM_BOOTANIMATION_FILE;
     }
@@ -348,6 +352,7 @@ bool BootAnimation::threadLoop()
     mFlingerSurface.clear();
     mFlingerSurfaceControl.clear();
     eglTerminate(mDisplay);
+    eglReleaseThread();
     IPCThreadState::self()->stopProcess();
     return r;
 }
@@ -963,7 +968,16 @@ bool BootAnimation::playAnimation(const Animation& animation)
                 checkExit();
             }
 
-            usleep(part.pause * ns2us(frameDuration));
+            // part.pause is the number of frames to pause for so total sleep will be
+            // part.pause * frameDuration.  Instead of a single sleep call, sleep for
+            // frameDuration and then check if surface flinger is done.
+            const nsecs_t frameDurationUs = ns2us(frameDuration);
+            for (int k = 0; k < part.pause; k++) {
+                usleep(frameDurationUs);
+                checkExit();
+                if(exitPending())
+                    break;
+            }
 
             // For infinite parts, we've now played them at least once, so perhaps exit
             if(exitPending() && !part.count)

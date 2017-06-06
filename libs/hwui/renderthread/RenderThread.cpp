@@ -20,6 +20,7 @@
 #include "CanvasContext.h"
 #include "EglManager.h"
 #include "RenderProxy.h"
+#include "utils/FatVector.h"
 
 #include <gui/DisplayEventReceiver.h>
 #include <gui/ISurfaceComposer.h>
@@ -282,10 +283,18 @@ bool RenderThread::threadLoop() {
                 "RenderThread Looper POLL_ERROR!");
 
         nsecs_t nextWakeup;
-        // Process our queue, if we have anything
-        while (RenderTask* task = nextTask(&nextWakeup)) {
-            task->run();
-            // task may have deleted itself, do not reference it again
+        {
+            FatVector<RenderTask*, 10> workQueue;
+            // Process our queue, if we have anything. By first acquiring
+            // all the pending events then processing them we avoid vsync
+            // starvation if more tasks are queued while we are processing tasks.
+            while (RenderTask* task = nextTask(&nextWakeup)) {
+                workQueue.push_back(task);
+            }
+            for (auto task : workQueue) {
+                task->run();
+                // task may have deleted itself, do not reference it again
+            }
         }
         if (nextWakeup == LLONG_MAX) {
             timeoutMillis = -1;

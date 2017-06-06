@@ -68,12 +68,23 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     private boolean mListening;
     private boolean mShowingDetail;
+    private boolean mReceiverRegistered;
 
     public DndTile(Host host) {
         super(host);
         mController = host.getZenModeController();
         mDetailAdapter = new DndDetailAdapter();
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
+        mReceiverRegistered = true;
+    }
+
+    @Override
+    protected void handleDestroy() {
+        super.handleDestroy();
+        if (mReceiverRegistered) {
+            mContext.unregisterReceiver(mReceiver);
+            mReceiverRegistered = false;
+        }
     }
 
     public static void setVisible(Context context, boolean visible) {
@@ -105,7 +116,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return ZEN_SETTINGS;
+        return null;
     }
 
     @Override
@@ -129,6 +140,14 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public void handleLongClick() {
+        if (mState.value)
+            showDetail(true);
+        else
+            mHost.startActivityDismissingKeyguard(ZEN_SETTINGS);
+    }
+
+    @Override
     public CharSequence getTileLabel() {
         return mContext.getString(R.string.quick_settings_dnd_label);
     }
@@ -142,7 +161,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on_priority);
                 state.label = mContext.getString(R.string.quick_settings_dnd_priority_label);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_priority_on);

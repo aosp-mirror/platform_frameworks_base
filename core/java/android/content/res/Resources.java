@@ -1178,7 +1178,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      * 
      */
-    public InputStream openRawResource(@RawRes int id) throws NotFoundException {
+    public InputStream openRawResource(@RawRes @DrawableRes int id) throws NotFoundException {
         final TypedValue value = obtainTempTypedValue();
         try {
             return openRawResource(id, value);
@@ -1234,7 +1234,7 @@ public class Resources {
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      */
-    public InputStream openRawResource(@RawRes int id, TypedValue value)
+    public InputStream openRawResource(@RawRes @DrawableRes int id, TypedValue value)
             throws NotFoundException {
         return mResourcesImpl.openRawResource(id, value);
     }
@@ -1260,7 +1260,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      * 
      */
-    public AssetFileDescriptor openRawResourceFd(@RawRes int id)
+    public AssetFileDescriptor openRawResourceFd(@RawRes @DrawableRes int id)
             throws NotFoundException {
         final TypedValue value = obtainTempTypedValue();
         try {

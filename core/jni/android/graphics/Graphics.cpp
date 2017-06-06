@@ -562,6 +562,7 @@ bool GraphicsJNI::allocatePixels(JNIEnv* env, SkBitmap* bitmap, SkColorTable* ct
                                                          &allocatePixelsReleaseProc, context);
     if (!pr) {
         delete context;
+        sk_free(addr);
         return false;
     }
 

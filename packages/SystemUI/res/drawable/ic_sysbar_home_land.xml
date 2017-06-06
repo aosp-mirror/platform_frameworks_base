@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2015 SlimRoms
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="17.995dp"
+    android:height="18dp"
+    android:viewportWidth="17.995"
+    android:viewportHeight="18">
+
+    <path
+        android:fillColor="#fff"
+        android:pathData="M8.5764
+17.99c-0.368-0.017-0.8101-0.067-1.1731-0.133-2.3603-0.428-4.4486-1.781-5.8247-3.775-1.1772-1.706-1.7253-3.787-1.5452-5.8608
+0.15796-1.8132 0.86104-3.5284 2.0222-4.9366 1.2272-1.4862 2.8874-2.5403
+4.7396-3.0094 1.2071-0.30602 2.4453-0.35703 3.6888-0.152 1.324 0.21802 2.624
+0.75709 3.722 1.5422 1.972 1.4092 3.288 3.5164 3.676 5.8837 0.085 0.5131 0.114
+0.8921 0.113 1.4612 0 0.434-0.011 0.6421-0.053 1.0147-0.178 1.57-0.782
+3.086-1.733 4.353-1.809 2.408-4.646 3.751-7.6326
+3.612zm0.8491-2.178c1.5465-0.102 2.9585-0.686 4.1045-1.698 0.134-0.118
+0.427-0.41 0.552-0.549 0.867-0.968 1.432-2.139 1.646-3.413 0.067-0.3916
+0.095-0.7376 0.095-1.1517
+0-0.3-0.009-0.4781-0.04-0.7641-0.215-1.9882-1.313-3.7965-2.982-4.9126-0.447-0.298-0.99-0.5721-1.48-0.7471-0.62-0.22-1.223-0.344-1.8925-0.389-0.189-0.012-0.6661-0.012-0.8571
+0-1.5592 0.103-2.9844 0.6991-4.1365 1.7302-0.139 0.125-0.431 0.419-0.5491
+0.552-0.9331 1.0582-1.5191 2.3793-1.6682 3.7665-0.031 0.285-0.04 0.4571-0.04
+0.7641s0.009 0.4781 0.04 0.7641c0.1491 1.3866 0.7351 2.7086 1.6682 3.7656 0.1171
+0.132 0.4091 0.426 0.5491 0.552 1.0321 0.926 2.3093 1.51 3.6815 1.686 0.104
+0.013 0.253 0.028 0.331 0.034 0.079 0.006 0.161 0.012 0.183 0.014 0.099 0.008
+0.6591 0.005 0.7951-0.004z" />
+</vector>

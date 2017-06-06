@@ -41,4 +41,7 @@
         android:layout_gravity="center_horizontal|bottom"
         android:scaleType="fitXY"
         android:src="@drawable/recents_lower_gradient" />
+
+    <!-- Clear-All recents FAB -->
+    <include layout="@layout/floating_action_button"/>
 </FrameLayout>

@@ -45,6 +45,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     private final NetworkController mController;
     private final DataUsageController mDataController;
     private final CellularDetailAdapter mDetailAdapter;
+    private final QSTile.SignalState mStateBeforeClick = newTileState();
 
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
 
@@ -81,14 +82,39 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return CELLULAR_SETTINGS;
+        return null;
+    }
+
+    @Override
+    protected void handleSecondaryClick() {
+        mState.copyTo(mStateBeforeClick);
+        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
+        mDataController.setMobileDataEnabled(!mState.value);
     }
 
     @Override
     protected void handleClick() {
         MetricsLogger.action(mContext, getMetricsCategory());
         if (mDataController.isMobileDataSupported()) {
+            if(mController.isEasyToggleEnabled()) {
+                mDataController.setMobileDataEnabled(!mDataController.isMobileDataEnabled());
+            } else {
+                showDetail(true);
+            }
+        } else {
+            mHost.startActivityDismissingKeyguard(CELLULAR_SETTINGS);
+        }
+    }
+
+    @Override
+    protected void handleLongClick() {
+        MetricsLogger.action(mContext, getMetricsCategory());
+        if(mController.isEasyToggleEnabled()) {
+            if (mDataController.isMobileDataSupported()) {
             showDetail(true);
+            } else {
+                mHost.startActivityDismissingKeyguard(CELLULAR_SETTINGS);
+            }
         } else {
             mHost.startActivityDismissingKeyguard(CELLULAR_SETTINGS);
         }

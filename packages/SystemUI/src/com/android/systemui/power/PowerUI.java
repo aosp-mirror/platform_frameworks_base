@@ -16,6 +16,8 @@
 
 package com.android.systemui.power;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -23,12 +25,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.HardwarePropertiesManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -69,6 +75,11 @@ public class PowerUI extends SystemUI {
     private float[] mRecentTemps = new float[MAX_RECENT_TEMPS];
     private int mNumTemps;
     private long mNextLogTime;
+
+    // For filtering ACTION_POWER_DISCONNECTED on boot
+    boolean mIgnoreFirstPowerEvent = true;
+
+    private static final String POWER_NOTIFICATIONS_SILENT_URI = "silent";
 
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -153,6 +164,8 @@ public class PowerUI extends SystemUI {
             filter.addAction(Intent.ACTION_USER_SWITCHED);
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+            filter.addAction(Intent.ACTION_POWER_CONNECTED);
+            filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
             mContext.registerReceiver(this, filter, null, mHandler);
         }
 
@@ -172,6 +185,10 @@ public class PowerUI extends SystemUI {
 
                 final boolean plugged = mPlugType != 0;
                 final boolean oldPlugged = oldPlugType != 0;
+
+                if (mIgnoreFirstPowerEvent && plugged) {
+                    mIgnoreFirstPowerEvent = false;
+                }
 
                 int oldBucket = findBatteryLevelBucket(oldBatteryLevel);
                 int bucket = findBatteryLevelBucket(mBatteryLevel);
@@ -220,6 +237,18 @@ public class PowerUI extends SystemUI {
                 mScreenOffTime = -1;
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 mWarnings.userSwitched();
+            } else if (Intent.ACTION_POWER_CONNECTED.equals(action)
+                    || Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
+                final ContentResolver cr = mContext.getContentResolver();
+
+                if (mIgnoreFirstPowerEvent) {
+                    mIgnoreFirstPowerEvent = false;
+                } else {
+                    if (Settings.Global.getInt(cr,
+                            Settings.Global.POWER_NOTIFICATIONS_ENABLED, 0) == 1) {
+                        playPowerNotificationSound();
+                    }
+                }
             } else {
                 Slog.w(TAG, "unknown intent: " + intent);
             }
@@ -325,6 +354,26 @@ public class PowerUI extends SystemUI {
 
     private void setNextLogTime() {
         mNextLogTime = System.currentTimeMillis() + TEMPERATURE_LOGGING_INTERVAL;
+    }
+
+    void playPowerNotificationSound() {
+        final ContentResolver cr = mContext.getContentResolver();
+        final String soundPath =
+                Settings.Global.getString(cr, Settings.Global.POWER_NOTIFICATIONS_RINGTONE);
+
+        if (soundPath != null && !soundPath.equals(POWER_NOTIFICATIONS_SILENT_URI) ) {
+            Ringtone powerRingtone = RingtoneManager.getRingtone(mContext, Uri.parse(soundPath));
+            if (powerRingtone != null) {
+                powerRingtone.play();
+            }
+        }
+        if (Settings.Global.getInt(cr,
+                Settings.Global.POWER_NOTIFICATIONS_VIBRATE, 0) == 1) {
+            Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+            if (vibrator != null) {
+                vibrator.vibrate(250);
+            }
+        }
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

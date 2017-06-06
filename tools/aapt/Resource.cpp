@@ -741,9 +741,11 @@ bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
             return false;
         }
 
+#ifdef SHOW_MANIFEST_WARNING
         fprintf(stderr, "Warning: AndroidManifest.xml already defines %s (in %s);"
                         " using existing value in manifest.\n",
                 String8(attr).string(), String8(ns).string());
+#endif
 
         // don't stop the build.
         return true;
@@ -1147,7 +1149,11 @@ status_t generateAndroidManifestForSplit(Bundle* bundle, const sp<AaptAssets>& a
     if (err < NO_ERROR) {
         return err;
     }
+#ifdef AAPT_COMPRESS
     outFile->setCompressionMethod(ZipEntry::kCompressDeflated);
+#else
+    outFile->setCompressionMethod(ZipEntry::kCompressStored);
+#endif
     return NO_ERROR;
 }
 

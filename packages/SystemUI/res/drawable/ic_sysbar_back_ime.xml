@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2016 AICP
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="88"
+    android:viewportHeight="88">
+
+    <path
+        android:fillColor="@color/icon_color_ime_switcher"
+        android:pathData="M16.11,16.11C34.41,15.87 52.74,16.05 71.05,16.02C74.76,15.94 77.25,20.45 75.4,23.61C66.61,39.03 57.76,54.44 48.87,69.8C46.91,72.92 42.05,72.85 39.97,69.88C30.84,54.46 21.66,39.05 12.58,23.61C10.99,20.69 12.76,16.63 16.11,16.11Z"/>
+</vector>

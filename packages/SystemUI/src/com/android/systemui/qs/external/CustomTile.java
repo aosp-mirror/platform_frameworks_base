@@ -229,7 +229,9 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
 
     @Override
     public State newTileState() {
-        return new State();
+        State state = new State();
+        state.autoMirrorDrawable = false;
+        return state;
     }
 
     @Override
@@ -298,12 +300,13 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         }
         int color = mContext.getColor(getColor(tileState));
         drawable.setTint(color);
-        state.icon = mHasRes ? new DrawableIconWithRes(drawable, icon.getResId())
+        state.icon = mHasRes ? new DrawableIconWithRes(drawable, icon.getResId(), color)
                 : new DrawableIcon(drawable);
         state.label = mTile.getLabel();
         if (tileState == Tile.STATE_UNAVAILABLE) {
             state.label = new SpannableStringBuilder().append(state.label,
-                    new ForegroundColorSpan(color),
+                    new ForegroundColorSpan(
+                            mContext.getColor(R.color.qs_tile_label_tint_unavailable)),
                     SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
         }
         if (mTile.getContentDescription() != null) {

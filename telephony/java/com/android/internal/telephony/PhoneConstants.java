@@ -68,6 +68,24 @@ public class PhoneConstants {
     public static final int LTE_ON_CDMA_FALSE = RILConstants.LTE_ON_CDMA_FALSE;
     public static final int LTE_ON_CDMA_TRUE = RILConstants.LTE_ON_CDMA_TRUE;
 
+    // Used for preferred network type
+    // Note NT_* substitute RILConstants.NETWORK_MODE_* above the Phone
+    public static final int NT_MODE_WCDMA_PREF   = RILConstants.NETWORK_MODE_WCDMA_PREF;
+    public static final int NT_MODE_GSM_ONLY     = RILConstants.NETWORK_MODE_GSM_ONLY;
+    public static final int NT_MODE_WCDMA_ONLY   = RILConstants.NETWORK_MODE_WCDMA_ONLY;
+    public static final int NT_MODE_GSM_UMTS     = RILConstants.NETWORK_MODE_GSM_UMTS;
+    public static final int NT_MODE_LTE_GSM_WCDMA= RILConstants.NETWORK_MODE_LTE_GSM_WCDMA;
+
+    public static final int NT_MODE_CDMA         = RILConstants.NETWORK_MODE_CDMA;
+
+    public static final int NT_MODE_CDMA_NO_EVDO = RILConstants.NETWORK_MODE_CDMA_NO_EVDO;
+    public static final int NT_MODE_EVDO_NO_CDMA = RILConstants.NETWORK_MODE_EVDO_NO_CDMA;
+    public static final int NT_MODE_GLOBAL       = RILConstants.NETWORK_MODE_GLOBAL;
+    public static final int NT_MODE_LTE_CDMA_EVDO = RILConstants.NETWORK_MODE_LTE_CDMA_EVDO;
+
+    public static final int NT_MODE_LTE_ONLY     = RILConstants.NETWORK_MODE_LTE_ONLY;
+    public static final int PREFERRED_NT_MODE    = RILConstants.PREFERRED_NETWORK_MODE;
+
     // Number presentation type for caller id display (From internal/Connection.java)
     public static final int PRESENTATION_ALLOWED = 1;    // normal
     public static final int PRESENTATION_RESTRICTED = 2; // block by user

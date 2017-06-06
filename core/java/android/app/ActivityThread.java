@@ -48,6 +48,7 @@ import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
@@ -898,6 +899,14 @@ public final class ActivityThread {
             sendMessage(H.CONFIGURATION_CHANGED, config);
         }
 
+        public void scheduleAssetsChanged(@NonNull final String packageName,
+                @NonNull final ApplicationInfo ai) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = packageName;
+            args.arg2 = ai;
+            sendMessage(H.ASSETS_CHANGED, args);
+        }
+
         public void updateTimeZone() {
             TimeZone.setDefault(null);
         }
@@ -1406,6 +1415,7 @@ public final class ActivityThread {
         public static final int MULTI_WINDOW_MODE_CHANGED = 152;
         public static final int PICTURE_IN_PICTURE_MODE_CHANGED = 153;
         public static final int LOCAL_VOICE_INTERACTION_STARTED = 154;
+        public static final int ASSETS_CHANGED = 155;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1462,6 +1472,7 @@ public final class ActivityThread {
                     case MULTI_WINDOW_MODE_CHANGED: return "MULTI_WINDOW_MODE_CHANGED";
                     case PICTURE_IN_PICTURE_MODE_CHANGED: return "PICTURE_IN_PICTURE_MODE_CHANGED";
                     case LOCAL_VOICE_INTERACTION_STARTED: return "LOCAL_VOICE_INTERACTION_STARTED";
+                    case ASSETS_CHANGED: return "ASSETS_CHANGED";
                 }
             }
             return Integer.toString(code);
@@ -1716,6 +1727,10 @@ public final class ActivityThread {
                 case LOCAL_VOICE_INTERACTION_STARTED:
                     handleLocalVoiceInteractionStarted((IBinder) ((SomeArgs) msg.obj).arg1,
                             (IVoiceInteractor) ((SomeArgs) msg.obj).arg2);
+                    break;
+                case ASSETS_CHANGED:
+                    handleAssetsChanged((String)((SomeArgs)msg.obj).arg1,
+                            (ApplicationInfo)((SomeArgs)msg.obj).arg2);
                     break;
             }
             Object obj = msg.obj;
@@ -3907,6 +3922,10 @@ public final class ActivityThread {
 
     private void handleStopActivity(IBinder token, boolean show, int configChanges, int seq) {
         ActivityClientRecord r = mActivities.get(token);
+        if (r == null) {
+            Log.w(TAG, "handleStopActivity: no activity for token:" + token);
+            return;
+        }
         if (!checkAndUpdateLifecycleSeq(seq, r, "stopActivity")) {
             return;
         }
@@ -4804,12 +4823,47 @@ public final class ActivityThread {
         }
     }
 
+    final void handleAssetsChanged(@NonNull final String packageToUpdate,
+            @NonNull final ApplicationInfo ai) {
+        synchronized (mResourcesManager) {
+            // Update all affected loaded packages with new overlay package information
+            final ArrayList<WeakReference<LoadedApk>> loadedPackages = new ArrayList<>();
+            loadedPackages.addAll(mPackages.values());
+            loadedPackages.addAll(mResourcePackages.values());
+            for (final WeakReference<LoadedApk> ref : loadedPackages) {
+                final LoadedApk apk = ref.get();
+                if (apk != null) {
+                    final String packageName = apk.getPackageName();
+                    if (packageToUpdate.equals(packageName)) {
+                        apk.updateApplicationInfo(ai, null);
+                    }
+                }
+            }
+
+            // Update all affected Resources objects to use new ResourcesImpl
+            mResourcesManager.applyNewResourceDirsLocked(ai.sourceDir, ai.resourceDirs);
+        }
+
+        // Schedule all activities to reload
+        for (final Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
+            final Activity activity = entry.getValue().activity;
+            if (!activity.mFinished) {
+                requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, null, false,
+                        false);
+            }
+        }
+    }
+
     static void freeTextLayoutCachesIfNeeded(int configDiff) {
         if (configDiff != 0) {
             // Ask text layout engine to free its caches if there is a locale change
             boolean hasLocaleConfigChange = ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0);
-            if (hasLocaleConfigChange) {
+            boolean hasFontConfigChange = ((configDiff & ActivityInfo.CONFIG_THEME_FONT) != 0);
+            if (hasLocaleConfigChange || hasFontConfigChange) {
                 Canvas.freeTextLayoutCaches();
+                if (hasFontConfigChange) {
+                    Typeface.recreateDefaults();
+                }
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Cleared TextLayout Caches");
             }
         }

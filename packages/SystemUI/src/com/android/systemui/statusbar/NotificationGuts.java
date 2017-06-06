@@ -235,7 +235,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     }
 
     private int getSelectedImportance() {
-        if (mSeekBar!= null && mSeekBar.isShown()) {
+        if (mSeekBar != null && mSeekBar.isShown()) {
             if (mSeekBar.isEnabled()) {
                 return mSeekBar.getProgress();
             } else {

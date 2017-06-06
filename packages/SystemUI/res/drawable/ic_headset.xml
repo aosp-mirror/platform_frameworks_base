@@ -1,28 +1,23 @@
 <!--
-    Copyright (C) 2016 The Android Open Source Project
+     Copyright (C) 2015 The MoKee OpenSource Project
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
 
-         http://www.apache.org/licenses/LICENSE-2.0
+          http://www.apache.org/licenses/LICENSE-2.0
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
 -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="2.5dp"
-    android:insetRight="2.5dp">
-    <vector
-        android:width="17.0dp"
-        android:height="17.0dp"
-        android:viewportWidth="48.0"
-        android:viewportHeight="48.0">
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M24.0,2.0C14.06,2.0 6.0,10.06 6.0,20.0l0.0,14.0c0.0,3.31 2.69,6.0 6.0,6.0l6.0,0.0L18.0,24.0l-8.0,0.0l0.0,-4.0c0.0,-7.73 6.27,-14.0 14.0,-14.0s14.0,6.27 14.0,14.0l0.0,4.0l-8.0,0.0l0.0,16.0l6.0,0.0c3.31,0.0 6.0,-2.69 6.0,-6.0L42.0,20.0c0.0,-9.94 -8.06,-18.0 -18.0,-18.0z"/>
-    </vector>
-</inset>
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportHeight="24"
+    android:viewportWidth="24">
+    <path android:fillColor="#ffffffff" android:pathData="m7.75133,4.21257c-0.04008,-0.04054 -0.08295,-0.07622 -0.12387,-0.11424c-0.16014,-0.14463 -0.26113,-0.22505 -0.26113,-0.22505l0.00097,0.01093c-0.4803,-0.35009 -1.08957,-0.56279 -1.72994,-0.56279c-1.75212,-0.00006 -2.89296,1.28682 -2.89296,2.89283l0,4.05003c0,1.60588 1.15888,2.8929 2.89289,2.8929c0.7153,0 0.75784,-0.37304 1.15713,-0.57857c0,0 0.57857,-0.34407 0.57857,0.57857l0,7.52155l1.73576,0l0,-3.47146c0.63908,0 1.15713,-0.51812 1.15713,-1.15713l0,-6.36442c0,-2.62698 -1.67609,-4.68814 -2.51455,-5.47313zm6.35595,9.67231c0.21296,0.57624 0.20863,1.00805 0.20863,1.00805l0,1.15713c0,0.63908 0.51812,1.15714 1.15719,1.15714l0,3.47153l1.73577,0l0,-3.47146c0.63908,0 1.15713,-0.51812 1.15713,-1.15713l0,-1.15713c0,0 0.00071,-0.43459 0.21115,-1.00895c-0.69274,0.2747 -1.44574,0.43039 -2.23623,0.43039c-0.78952,-0.00007 -1.54161,-0.15549 -2.23365,-0.42955zm2.23339,-10.56359c-2.71472,0 -4.91493,2.20183 -4.91493,4.91745s2.20022,4.91745 4.91493,4.91745c2.71465,0 4.91493,-2.20183 4.91493,-4.91745s-2.20022,-4.91745 -4.91493,-4.91745z" />
+</vector>

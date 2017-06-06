@@ -43,7 +43,7 @@ public class Somnambulator extends Activity {
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             Intent resultIntent = new Intent();
             resultIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
-                    Intent.ShortcutIconResource.fromContext(this, R.mipmap.ic_launcher_dreams));
+                    Intent.ShortcutIconResource.fromContext(this, R.drawable.icon));
             resultIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
             resultIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.start_dreams));
             setResult(RESULT_OK, resultIntent);

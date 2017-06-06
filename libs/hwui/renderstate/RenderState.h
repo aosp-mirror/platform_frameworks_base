@@ -86,11 +86,15 @@ public:
         mRegisteredContexts.erase(context);
     }
 
+    void setES3(bool hasES3) {
+        mHasES3 = hasES3;
+    }
+
     // TODO: This system is a little clunky feeling, this could use some
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
 
-    void render(const Glop& glop, const Matrix4& orthoMatrix);
+    void render(const Glop& glop, const Matrix4& orthoMatrix, bool firstDraw);
 
     AssetAtlas& assetAtlas() { return mAssetAtlas; }
     Blend& blend() { return *mBlend; }
@@ -129,6 +133,8 @@ private:
     GLuint mFramebuffer;
 
     pthread_t mThreadId;
+
+    bool mHasES3;
 };
 
 } /* namespace uirenderer */

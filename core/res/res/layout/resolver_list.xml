@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
         android:elevation="8dp"
-        android:background="@color/white">
+        android:background="@color/resolver_list_bg">
 
         <TextView
             android:id="@+id/profile_button"
@@ -69,7 +69,7 @@
         android:id="@+id/resolver_list"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
-        android:background="@color/white"
+        android:background="@color/resolver_list_bg"
         android:elevation="8dp"
         android:nestedScrollingEnabled="true"
         android:scrollIndicators="top|bottom"
@@ -78,7 +78,7 @@
     <TextView android:id="@+id/empty"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:background="@color/white"
+              android:background="@color/resolver_list_bg"
               android:elevation="8dp"
               android:layout_alwaysShow="true"
               android:text="@string/noApplications"
@@ -99,7 +99,7 @@
         android:orientation="horizontal"
         android:layoutDirection="locale"
         android:measureWithLargestChild="true"
-        android:background="@color/white"
+        android:background="@color/resolver_list_bg"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:paddingStart="12dp"

@@ -16,7 +16,13 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
@@ -24,11 +30,15 @@ import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+
+import com.android.systemui.R;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -44,6 +54,8 @@ public class FlashlightController {
     private static final int DISPATCH_CHANGED = 1;
     private static final int DISPATCH_AVAILABILITY_CHANGED = 2;
 
+    private static final String ACTION_TURN_FLASHLIGHT_OFF = "com.android.systemui.action.TURN_FLASHLIGHT_OFF";
+
     private final CameraManager mCameraManager;
     private final Context mContext;
     /** Call {@link #ensureHandler()} before using */
@@ -57,6 +69,29 @@ public class FlashlightController {
 
     private String mCameraId;
     private boolean mTorchAvailable;
+
+    private Notification mNotification = null;
+    private boolean mReceiverRegistered;
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_TURN_FLASHLIGHT_OFF.equals(intent.getAction())) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setFlashlight(false);
+                    }
+                });
+            } else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                      Settings.System.FLASHLIGHT_NOTIFICATION, 0) == 1) {
+                setNotificationShown(true);
+                } else {
+                setNotificationShown(false);
+                }
+            }
+        }
+    };
 
     public FlashlightController(Context context) {
         mContext = context;
@@ -98,6 +133,62 @@ public class FlashlightController {
         if (pendingError) {
             dispatchError();
         }
+    }
+
+    private void setNotificationShown(boolean showNotification) {
+        NotificationManager nm = (NotificationManager)
+                mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (showNotification) {
+            nm.notify(R.string.quick_settings_tile_flashlight_not_title, buildNotification());
+        } else {
+            nm.cancel(R.string.quick_settings_tile_flashlight_not_title);
+            mNotification = null;
+        }
+    }
+
+    private void setListenForScreenOff(boolean listen) {
+        if (listen && !mReceiverRegistered) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(ACTION_TURN_FLASHLIGHT_OFF);
+            filter.addAction(Intent.ACTION_SCREEN_ON);
+            mContext.registerReceiver(mReceiver, filter);
+            mReceiverRegistered = true;
+            if (Settings.System.getInt(mContext.getContentResolver(),
+                  Settings.System.FLASHLIGHT_NOTIFICATION, 0) == 1) {
+            setNotificationShown(true);
+            } else {
+            setNotificationShown(false);
+            }
+        } else if (!listen) {
+            if (mReceiverRegistered) {
+                mContext.unregisterReceiver(mReceiver);
+                mReceiverRegistered = false;
+            }
+            setNotificationShown(false);
+        }
+    }
+
+    private Notification buildNotification() {
+        if (mNotification == null) {
+            Intent fireMe = new Intent(ACTION_TURN_FLASHLIGHT_OFF);
+            fireMe.addFlags(Intent.FLAG_FROM_BACKGROUND);
+            fireMe.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            fireMe.setPackage(mContext.getPackageName());
+
+            final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, fireMe, 0);
+            mNotification = new Notification.Builder(mContext)
+                    .setContentTitle(
+                            mContext.getString(R.string.quick_settings_tile_flashlight_not_title))
+                    .setContentText(
+                            mContext.getString(R.string.quick_settings_tile_flashlight_not_summary))
+                    .setAutoCancel(false)
+                    .setOngoing(true)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setSmallIcon(R.drawable.ic_signal_flashlight_disable)
+                    .setContentIntent(pendingIntent)
+                    .build();
+        }
+        return mNotification;
     }
 
     public boolean hasFlashlight() {
@@ -202,6 +293,7 @@ public class FlashlightController {
         public void onTorchModeUnavailable(String cameraId) {
             if (TextUtils.equals(cameraId, mCameraId)) {
                 setCameraAvailable(false);
+                setListenForScreenOff(false);
             }
         }
 
@@ -210,6 +302,7 @@ public class FlashlightController {
             if (TextUtils.equals(cameraId, mCameraId)) {
                 setCameraAvailable(true);
                 setTorchMode(enabled);
+                setListenForScreenOff(enabled);
             }
         }
 

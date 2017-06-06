@@ -30,6 +30,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
 import android.util.LruCache;
+import android.util.MutableBoolean;
 import android.util.Printer;
 
 import java.text.SimpleDateFormat;
@@ -103,6 +104,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private final PreparedStatementCache mPreparedStatementCache;
     private PreparedStatement mPreparedStatementPool;
 
+    // Queue for resetting prepared statements that we've left open for performance reasons but may
+    // no longer need. Protected by mPool.mLock.
+    private final ArrayList<String> mCanceledContinuations = new ArrayList<>();
+
     // The recent operations log.
     private final OperationLog mRecentOperations = new OperationLog();
 
@@ -152,7 +157,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             long connectionPtr, long statementPtr);
     private static native long nativeExecuteForCursorWindow(
             long connectionPtr, long statementPtr, long windowPtr,
-            int startPos, int requiredPos, boolean countAllRows);
+            int startPos, int requiredPos, boolean countAllRows, MutableBoolean exhausted);
     private static native int nativeGetDbLookaside(long connectionPtr);
     private static native void nativeCancel(long connectionPtr);
     private static native void nativeResetCancel(long connectionPtr, boolean cancelable);
@@ -552,7 +557,15 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    nativeExecute(mConnectionPtr, statement.mStatementPtr);
+                    try {
+                        nativeExecute(mConnectionPtr, statement.mStatementPtr);
+                    } catch (SQLiteTableLockedException e) {
+                        if (!resetBusyStatements()) {
+                            throw e;
+                        }
+                        // we cleared something; let's retry
+                        nativeExecute(mConnectionPtr, statement.mStatementPtr);
+                    }
                 } finally {
                     detachCancellationSignal(cancellationSignal);
                 }
@@ -595,7 +608,15 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    return nativeExecuteForLong(mConnectionPtr, statement.mStatementPtr);
+                    try {
+                        return nativeExecuteForLong(mConnectionPtr, statement.mStatementPtr);
+                    } catch (SQLiteTableLockedException e) {
+                        if (!resetBusyStatements()) {
+                            throw e;
+                        }
+                        // we cleared something; let's retry
+                        return nativeExecuteForLong(mConnectionPtr, statement.mStatementPtr);
+                    }
                 } finally {
                     detachCancellationSignal(cancellationSignal);
                 }
@@ -638,7 +659,15 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    return nativeExecuteForString(mConnectionPtr, statement.mStatementPtr);
+                    try {
+                        return nativeExecuteForString(mConnectionPtr, statement.mStatementPtr);
+                    } catch (SQLiteTableLockedException e) {
+                        if (!resetBusyStatements()) {
+                            throw e;
+                        }
+                        // we cleared something; let's retry
+                        return nativeExecuteForString(mConnectionPtr, statement.mStatementPtr);
+                    }
                 } finally {
                     detachCancellationSignal(cancellationSignal);
                 }
@@ -684,8 +713,18 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    int fd = nativeExecuteForBlobFileDescriptor(
-                            mConnectionPtr, statement.mStatementPtr);
+                    int fd;
+                    try {
+                        fd = nativeExecuteForBlobFileDescriptor(
+                                mConnectionPtr, statement.mStatementPtr);
+                    } catch (SQLiteTableLockedException e) {
+                        if (!resetBusyStatements()) {
+                            throw e;
+                        }
+                        // we cleared something; let's retry
+                        fd = nativeExecuteForBlobFileDescriptor(
+                                mConnectionPtr, statement.mStatementPtr);
+                    }
                     return fd >= 0 ? ParcelFileDescriptor.adoptFd(fd) : null;
                 } finally {
                     detachCancellationSignal(cancellationSignal);
@@ -731,8 +770,17 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    changedRows = nativeExecuteForChangedRowCount(
-                            mConnectionPtr, statement.mStatementPtr);
+                    try {
+                        changedRows = nativeExecuteForChangedRowCount(
+                                mConnectionPtr, statement.mStatementPtr);
+                    } catch (SQLiteTableLockedException e) {
+                        if (!resetBusyStatements()) {
+                            throw e;
+                        }
+                        // we cleared something; let's retry
+                        changedRows = nativeExecuteForChangedRowCount(
+                                mConnectionPtr, statement.mStatementPtr);
+                    }
                     return changedRows;
                 } finally {
                     detachCancellationSignal(cancellationSignal);
@@ -779,8 +827,17 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    return nativeExecuteForLastInsertedRowId(
-                            mConnectionPtr, statement.mStatementPtr);
+                    try {
+                        return nativeExecuteForLastInsertedRowId(
+                                mConnectionPtr, statement.mStatementPtr);
+                    } catch (SQLiteTableLockedException e) {
+                        if (!resetBusyStatements()) {
+                            throw e;
+                        }
+                        // we cleared something; let's retry
+                        return nativeExecuteForLastInsertedRowId(
+                                mConnectionPtr, statement.mStatementPtr);
+                    }
                 } finally {
                     detachCancellationSignal(cancellationSignal);
                 }
@@ -809,9 +866,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      * so that it does.  Must be greater than or equal to <code>startPos</code>.
      * @param countAllRows True to count all rows that the query would return
      * regagless of whether they fit in the window.
+     * @param exhausted will be set to true if the full result set was consumed - never set to false
      * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
-     * @return The number of rows that were counted during query execution.  Might
-     * not be all rows in the result set unless <code>countAllRows</code> is true.
+     * @param cont Continuation cookie: lets us keep statements alive; may speed up future fills.
+     * @return the number of rows that have been seen in this query so far. Might not be all rows
+     *         in the result set unless <code>countAllRows</code> is true.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
      * or invalid number of bind arguments.
@@ -819,42 +878,72 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      */
     public int executeForCursorWindow(String sql, Object[] bindArgs,
             CursorWindow window, int startPos, int requiredPos, boolean countAllRows,
-            CancellationSignal cancellationSignal) {
+            MutableBoolean exhausted, CancellationSignal cancellationSignal,
+            SQLiteContinuation cont) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
-        if (window == null) {
-            throw new IllegalArgumentException("window must not be null.");
+        if (exhausted == null) {
+            throw new IllegalArgumentException("exhausted must not be null.");
         }
 
-        window.acquireReference();
+        if (window != null) window.acquireReference();
         try {
             int actualPos = -1;
             int countedRows = -1;
             int filledRows = -1;
+            int seenRows = -1;
             final int cookie = mRecentOperations.beginOperation("executeForCursorWindow",
                     sql, bindArgs);
             try {
-                final PreparedStatement statement = acquirePreparedStatement(sql);
+                final PreparedStatement statement;
+                if (window == null) {
+                    // don't care if the statement has already been stepped, just want the count
+                    statement = acquirePreparedStatement(sql, Integer.MAX_VALUE, cont);
+                } else {
+                    statement = acquirePreparedStatement(sql, requiredPos, cont);
+                }
+                boolean shouldReset = countAllRows; // might as well, if we're consuming everything
                 try {
                     throwIfStatementForbidden(statement);
-                    bindArguments(statement, bindArgs);
+                    final int statementPos;
+                    if (cont == null || cont.isReset()) {
+                        bindArguments(statement, bindArgs);
+                        statementPos = 0;
+                    } else {
+                        statementPos = cont.mNumSteps - 1; // it takes N steps to get to row N-1
+                        cont.reset(); // done with it; releasePreparedStatement may set it up again
+                    }
                     applyBlockGuardPolicy(statement);
                     attachCancellationSignal(cancellationSignal);
                     try {
+                        // For a continuation, we may be past startPos. Don't worry, it'll be fine.
+                        final int skip = Math.max(0, startPos - statementPos);
+                        final int req = requiredPos - statementPos;
+                        final long winPtr = window == null ? 0 : window.mWindowPtr;
                         final long result = nativeExecuteForCursorWindow(
-                                mConnectionPtr, statement.mStatementPtr, window.mWindowPtr,
-                                startPos, requiredPos, countAllRows);
-                        actualPos = (int)(result >> 32);
+                                mConnectionPtr, statement.mStatementPtr, winPtr,
+                                skip, req, countAllRows, exhausted);
+                        actualPos = statementPos + (int)(result >> 32);
                         countedRows = (int)result;
-                        filledRows = window.getNumRows();
-                        window.setStartPosition(actualPos);
-                        return countedRows;
+                        if (window != null) {
+                            filledRows = window.getNumRows();
+                            window.setStartPosition(actualPos);
+                        }
+                        if (exhausted.value) {
+                            // we've exhausted the result set, no use keeping the query state around
+                            shouldReset = true;
+                        }
+                        seenRows = statementPos + countedRows;
+                        return seenRows;
                     } finally {
                         detachCancellationSignal(cancellationSignal);
                     }
+                } catch (RuntimeException|Error ex) {
+                    shouldReset = true;
+                    throw ex;
                 } finally {
-                    releasePreparedStatement(statement);
+                    releasePreparedStatement(statement, shouldReset, cont, seenRows);
                 }
             } catch (RuntimeException ex) {
                 mRecentOperations.failOperation(cookie, ex);
@@ -865,19 +954,73 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                             + "', startPos=" + startPos
                             + ", actualPos=" + actualPos
                             + ", filledRows=" + filledRows
-                            + ", countedRows=" + countedRows);
+                            + ", countedRows=" + countedRows
+                            + ", seenRows=" + seenRows);
                 }
             }
         } finally {
-            window.releaseReference();
+            if (window != null) window.releaseReference();
+        }
+    }
+
+    /**
+     * Called from the pool. Must hold the pool's mLock, and this connection must not currently be
+     * acquired by another thread.
+     */
+    void handleCanceledContinuationsLocked() {
+        final int N = mCanceledContinuations.size();
+        for (int i=0; i<N; ++i) {
+            String sql = mCanceledContinuations.get(i);
+            PreparedStatement stmt = mPreparedStatementCache.get(sql);
+            if (stmt != null && stmt.mContinuation != null) {
+                resetAndClear(stmt);
+            }
+        }
+        mCanceledContinuations.clear();
+    }
+
+    /**
+     * Called from the connection pool when a continuation is no longer requested. Will be handled
+     * on the next call to handleCanceledContinuationsLocked(). The SQLiteContinuation instance may
+     * be reused by another connection after this call. Must lock the pool's mLock.
+     */
+    void queueCancelContinuationLocked(SQLiteContinuation cont) {
+        if (!cont.isReset()) {
+            mCanceledContinuations.add(cont.mSql);
+            cont.reset();
         }
     }
 
     private PreparedStatement acquirePreparedStatement(String sql) {
+        return acquirePreparedStatement(sql, SQLiteContinuation.RESET, null);
+    }
+
+    private PreparedStatement acquirePreparedStatement(String sql, int requiredPos,
+            SQLiteContinuation cont) {
         PreparedStatement statement = mPreparedStatementCache.get(sql);
         boolean skipCache = false;
         if (statement != null) {
             if (!statement.mInUse) {
+                boolean started  = (statement.mContinuation != null);
+                // was the statement last continued with another cookie?
+                boolean mismatch = (statement.mContinuation != cont);
+                // after taking N steps, we are at row N-1; more means we have to start over
+                boolean behind   = (cont != null && cont.mNumSteps-1 > requiredPos);
+                if (started && (mismatch || behind)) {
+                    if (DEBUG) {
+                        Log.i(TAG, "resetting statement because of " +
+                            (mismatch ? "mismatch" : "behind") + ". " +
+                            "requiredPos=" + requiredPos + ", " +
+                            "numSteps=" + (cont == null ? -1 : cont.mNumSteps) + ", " +
+                            "old continuation=" + statement.mContinuation + ", " +
+                            "new continuation=" + cont);
+                    }
+                    if (cont != null) {
+                        cont.reset();
+                    }
+                    resetAndClear(statement);
+                }
+                statement.mInUse = true;
                 return statement;
             }
             // The statement is already in the cache but is in use (this statement appears
@@ -886,6 +1029,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             skipCache = true;
         }
 
+        if (cont != null) {
+            cont.reset(); // no cached statement; continuation is not possible
+        }
         final long statementPtr = nativePrepareStatement(mConnectionPtr, sql);
         try {
             final int numParameters = nativeGetParameterCount(mConnectionPtr, statementPtr);
@@ -909,28 +1055,59 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private void releasePreparedStatement(PreparedStatement statement) {
-        statement.mInUse = false;
-        if (statement.mInCache) {
-            try {
-                nativeResetStatementAndClearBindings(mConnectionPtr, statement.mStatementPtr);
-            } catch (SQLiteException ex) {
-                // The statement could not be reset due to an error.  Remove it from the cache.
-                // When remove() is called, the cache will invoke its entryRemoved() callback,
-                // which will in turn call finalizePreparedStatement() to finalize and
-                // recycle the statement.
-                if (DEBUG) {
-                    Log.d(TAG, "Could not reset prepared statement due to an exception.  "
-                            + "Removing it from the cache.  SQL: "
-                            + trimSqlForDisplay(statement.mSql), ex);
-                }
+        releasePreparedStatement(statement, true, null, 0);
+    }
 
-                mPreparedStatementCache.remove(statement.mSql);
-            }
-        } else {
+    private void releasePreparedStatement(PreparedStatement statement,
+            boolean alwaysReset, SQLiteContinuation cont, int numSteps) {
+        statement.mInUse = false;
+
+        if (!statement.mInCache) {
             finalizePreparedStatement(statement);
+        } else if (alwaysReset || cont == null) {
+            resetAndClear(statement);
+        } else {
+            // we're keeping the statement alive! Set up the continuation.
+            statement.mContinuation = cont;
+            cont.mNumSteps = numSteps;
+            cont.mConnId = mConnectionId;
+            cont.mSql = statement.mSql;
         }
     }
 
+    private void resetAndClear(PreparedStatement statement) {
+        try {
+            // Depending on where we're calling from, statement.mContinuation may already
+            // be reused; we can't read or write its members. But we can disconnect it.
+            statement.mContinuation = null;
+            nativeResetStatementAndClearBindings(mConnectionPtr, statement.mStatementPtr);
+        } catch (SQLiteException ex) {
+            // The statement could not be reset due to an error.  Remove it from the cache.
+            // When remove() is called, the cache will invoke its entryRemoved() callback,
+            // which will in turn call finalizePreparedStatement() to finalize and
+            // recycle the statement.
+            if (DEBUG) {
+                Log.d(TAG, "Could not reset prepared statement due to an exception.  "
+                        + "Removing it from the cache.  SQL: "
+                        + trimSqlForDisplay(statement.mSql), ex);
+            }
+
+            mPreparedStatementCache.remove(statement.mSql);
+            throw ex;
+        }
+    }
+
+    private boolean resetBusyStatements() {
+        Map<String,PreparedStatement> snapshot = mPreparedStatementCache.snapshot();
+        int nreset = 0;
+        for (PreparedStatement stmt : snapshot.values()) {
+            if (!stmt.mInUse && stmt.mContinuation != null) {
+                resetAndClear(stmt);
+                nreset++;
+            }
+        }
+        return (nreset > 0);
+    }
     private void finalizePreparedStatement(PreparedStatement statement) {
         nativeFinalizeStatement(mConnectionPtr, statement.mStatementPtr);
         recyclePreparedStatement(statement);
@@ -1124,8 +1301,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         // We ignore the first row in the database list because it corresponds to
         // the main database which we have already described.
         CursorWindow window = new CursorWindow("collectDbStats");
+        MutableBoolean exh = new MutableBoolean(false);
         try {
-            executeForCursorWindow("PRAGMA database_list;", null, window, 0, 0, false, null);
+            executeForCursorWindow("PRAGMA database_list;", null, window, 0, 0, false, exh, null, null);
             for (int i = 1; i < window.getNumRows(); i++) {
                 String name = window.getString(i, 1);
                 String path = window.getString(i, 2);
@@ -1199,6 +1377,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private void recyclePreparedStatement(PreparedStatement statement) {
         statement.mSql = null;
         statement.mPoolNext = mPreparedStatementPool;
+        statement.mContinuation = null;
         mPreparedStatementPool = statement;
     }
 
@@ -1243,6 +1422,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         // True if the statement is in the cache.
         public boolean mInCache;
 
+        // Continuation cookie. When not null, this statement is alive ("busy" in sqlite terms).
+        // Note: this attribute is here for reference comparisons only! The cookie may be stale,
+        // having been used with another conn. Cookies are only safe when received from strangers.
+        private SQLiteContinuation mContinuation;
+
         // True if the statement is in use (currently executing).
         // We need this flag because due to the use of custom functions in triggers, it's
         // possible for SQLite calls to be re-entrant.  Consequently we need to prevent
@@ -1286,6 +1470,42 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             } else {
                 printer.println("    <none>");
             }
+        }
+    }
+
+    /**
+     * Continuation cookie that can be used to keep a native sqlite statement alive.
+     * May help speed up reading of large result sets.
+     */
+    static final class SQLiteContinuation {
+        private static final int NO_CONN = -1;
+        private static final int RESET = -1;
+
+        // The number of steps taken in the statement since it was last reset.
+        private int mNumSteps;
+
+        // The id of the last connection used
+        private int mConnId;
+
+        // Used to find the corresponding statement when this continuation is canceled.
+        private String mSql;
+
+        public SQLiteContinuation() {
+            reset();
+        }
+
+        private void reset() {
+            mNumSteps = RESET;
+            mConnId = NO_CONN;
+            mSql = null;
+        }
+
+        public boolean isReset() {
+            return mNumSteps == RESET;
+        }
+
+        public boolean belongsTo(SQLiteConnection conn) {
+            return conn.mConnectionId == mConnId;
         }
     }
 

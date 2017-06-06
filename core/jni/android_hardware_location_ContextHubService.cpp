@@ -33,6 +33,7 @@
 #include <unordered_map>
 #include <queue>
 
+#include <android-base/macros.h>
 #include <cutils/log.h>
 
 #include "JNIHelp.h"
@@ -704,10 +705,10 @@ static void passOnOsResponse(uint32_t hubHandle, uint32_t msgType,
     }
 
     jbyteArray jmsg = env->NewByteArray(msgLen);
-    jintArray jheader = env->NewIntArray(sizeof(header));
+    jintArray jheader = env->NewIntArray(arraysize(header));
 
     env->SetByteArrayRegion(jmsg, 0, msgLen, (jbyte *)msg);
-    env->SetIntArrayRegion(jheader, 0, sizeof(header), (jint *)header);
+    env->SetIntArrayRegion(jheader, 0, arraysize(header), (jint *)header);
 
     ALOGI("Passing msg type %" PRIu32 " from app %" PRIu32 " from hub %" PRIu32,
           header[HEADER_FIELD_MSG_TYPE], header[HEADER_FIELD_APP_INSTANCE],

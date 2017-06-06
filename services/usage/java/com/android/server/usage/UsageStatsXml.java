@@ -55,12 +55,13 @@ public class UsageStatsXml {
         }
     }
 
-    public static void read(AtomicFile file, IntervalStats statsOut) throws IOException {
+    public static void read(AtomicFile file, IntervalStats statsOut, int flags)
+            throws IOException {
         try {
             FileInputStream in = file.openRead();
             try {
                 statsOut.beginTime = parseBeginTime(file);
-                read(in, statsOut);
+                read(in, statsOut, flags);
                 statsOut.lastTimeSaved = file.getLastModifiedTime();
             } finally {
                 try {
@@ -87,7 +88,7 @@ public class UsageStatsXml {
         }
     }
 
-    static void read(InputStream in, IntervalStats statsOut) throws IOException {
+    static void read(InputStream in, IntervalStats statsOut, int flags) throws IOException {
         XmlPullParser parser = Xml.newPullParser();
         try {
             parser.setInput(in, "utf-8");
@@ -96,7 +97,7 @@ public class UsageStatsXml {
             try {
                 switch (Integer.parseInt(versionStr)) {
                     case 1:
-                        UsageStatsXmlV1.read(parser, statsOut);
+                        UsageStatsXmlV1.read(parser, statsOut, flags);
                         break;
 
                     default:

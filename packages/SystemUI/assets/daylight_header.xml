@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  Copyright (C) 2015 The OmniROM Project
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+
+<!-- hour_header must be sorted based on hour
+entry can only be only one of hour or day/month type
+day_header entries have a higher priority then hour entries -->
+
+<daylight_headers>
+
+    <!-- Time of the day headers -->
+    <hour_header hour="6" image="notifhead_sunrise" />
+    <hour_header hour="9" image="notifhead_morning" />
+    <hour_header hour="11" image="notifhead_noon" />
+    <hour_header hour="13" image="notifhead_afternoon" />
+    <hour_header hour="19" image="notifhead_sunset" />
+    <hour_header hour="21" image="notifhead_night" />
+
+    <!-- Special day headers -->
+    <day_header day="25" month="12" image="notifhead_christmas" />
+    <day_header day="31" month="12" image="notifhead_newyearseve" />
+
+</daylight_headers>

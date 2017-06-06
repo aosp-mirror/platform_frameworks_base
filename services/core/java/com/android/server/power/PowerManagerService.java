@@ -19,6 +19,7 @@ package com.android.server.power;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -401,6 +402,9 @@ public final class PowerManagerService extends SystemService
     // A bitfield of battery conditions under which to make the screen stay on.
     private int mStayOnWhilePluggedInSetting;
 
+    // True if the device should wake up when plugged or unplugged
+    private int mWakeUpWhenPluggedOrUnpluggedSetting;
+
     // True if the device should stay on.
     private boolean mStayOn;
 
@@ -516,6 +520,45 @@ public final class PowerManagerService extends SystemService
     private static native void nativeSendPowerHint(int hintId, int data);
     private static native void nativeSetFeature(int featureId, int data);
 
+    // @ WAKEBLOCK
+    private Handler wakeBlockHandler;
+    private android.os.Messenger wakeBlockClient = null;
+    private android.os.Messenger wakeBlockServer = null;
+    private boolean wakeBlockBound = false;
+    private static volatile boolean wakeBlockOk = true;
+    private static final Object wakeBlockLock = new Object();
+    private static boolean wakeBlockBindTime = false;
+    private final Intent wakeBlockServiceIntent = new Intent("com.giovannibozzano.wakeblock.Service");
+    private final android.content.ServiceConnection wakeBlockConnection = new android.content.ServiceConnection()
+    {
+        @Override
+        public void onServiceConnected(android.content.ComponentName className, IBinder service)
+        {
+            wakeBlockServer = new android.os.Messenger(service);
+            wakeBlockBound = true;
+            try {
+                Message message = Message.obtain(null, 3);
+                android.os.Bundle bundle = new android.os.Bundle();
+                bundle.putString("version", "1.0");
+                message.setData(bundle);
+                wakeBlockServer.send(message);
+            } catch (RemoteException exception) {
+                wakeBlockServer = null;
+                wakeBlockBound = false;
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(android.content.ComponentName className)
+        {
+            wakeBlockServer = null;
+            wakeBlockBound = false;
+            synchronized (wakeBlockLock) {
+                wakeBlockLock.notifyAll();
+            }
+        }
+    };
+    // # WAKEBLOCK
     public PowerManagerService(Context context) {
         super(context);
         mContext = context;
@@ -524,6 +567,34 @@ public final class PowerManagerService extends SystemService
         mHandlerThread.start();
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
 
+        // @ WAKEBLOCK
+        android.os.HandlerThread wakeBlockHandlerThread = new android.os.HandlerThread("wakeblock_client");
+        wakeBlockHandlerThread.start();
+        wakeBlockHandler = new Handler(wakeBlockHandlerThread.getLooper())
+        {
+            @Override
+            public void handleMessage(Message message)
+            {
+                switch (message.what) {
+                    case 0:
+                        synchronized (wakeBlockLock) {
+                            wakeBlockLock.notify();
+                        }
+                        break;
+                    case 1:
+                        synchronized (wakeBlockLock) {
+                            wakeBlockOk = false;
+                            wakeBlockLock.notify();
+                        }
+                        break;
+                    default:
+                        super.handleMessage(message);
+                }
+            }
+        };
+        wakeBlockClient = new android.os.Messenger(wakeBlockHandler);
+        wakeBlockServiceIntent.setPackage("com.giovannibozzano.wakeblock");
+        // # WAKEBLOCK
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService.WakeLocks");
             mDisplaySuspendBlocker = createSuspendBlockerLocked("PowerManagerService.Display");
@@ -611,25 +682,6 @@ public final class PowerManagerService extends SystemService
             mDisplayManagerInternal.initPowerManagement(
                     mDisplayPowerCallbacks, mHandler, sensorManager);
 
-            // Register for broadcasts from other components of the system.
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-            mContext.registerReceiver(new BatteryReceiver(), filter, null, mHandler);
-
-            filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_DREAMING_STARTED);
-            filter.addAction(Intent.ACTION_DREAMING_STOPPED);
-            mContext.registerReceiver(new DreamReceiver(), filter, null, mHandler);
-
-            filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
-            mContext.registerReceiver(new UserSwitchedReceiver(), filter, null, mHandler);
-
-            filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_DOCK_EVENT);
-            mContext.registerReceiver(new DockReceiver(), filter, null, mHandler);
-
             // Register for settings changes.
             final ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
@@ -671,6 +723,9 @@ public final class PowerManagerService extends SystemService
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.THEATER_MODE_ON),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.WAKE_WHEN_PLUGGED_OR_UNPLUGGED),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DOUBLE_TAP_TO_WAKE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
@@ -689,6 +744,25 @@ public final class PowerManagerService extends SystemService
             mDirty |= DIRTY_BATTERY_STATE;
             updatePowerStateLocked();
         }
+
+        // Register for broadcasts from other components of the system.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiver(new BatteryReceiver(), filter, null, mHandler);
+
+        filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DREAMING_STARTED);
+        filter.addAction(Intent.ACTION_DREAMING_STOPPED);
+        mContext.registerReceiver(new DreamReceiver(), filter, null, mHandler);
+
+        filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiver(new UserSwitchedReceiver(), filter, null, mHandler);
+
+        filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DOCK_EVENT);
+        mContext.registerReceiver(new DockReceiver(), filter, null, mHandler);
     }
 
     private void readConfigurationLocked() {
@@ -757,6 +831,9 @@ public final class PowerManagerService extends SystemService
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
         mTheaterModeEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.THEATER_MODE_ON, 0) == 1;
+        mWakeUpWhenPluggedOrUnpluggedSetting = Settings.Global.getInt(resolver,
+                Settings.Global.WAKE_WHEN_PLUGGED_OR_UNPLUGGED,
+                (mWakeUpWhenPluggedOrUnpluggedConfig ? 1 : 0));
 
         if (mSupportsDoubleTapWakeConfig) {
             boolean doubleTapWakeEnabled = Settings.Secure.getIntForUser(resolver,
@@ -875,6 +952,20 @@ public final class PowerManagerService extends SystemService
 
     private void acquireWakeLockInternal(IBinder lock, int flags, String tag, String packageName,
             WorkSource ws, String historyTag, int uid, int pid) {
+        // @ WAKEBLOCK
+        if (wakeBlockBindTime) {
+            wakeBlockBindTime = false;
+            Thread thread = new Thread()
+            {
+                @Override
+                public void run()
+                {
+                    mContext.bindService(wakeBlockServiceIntent, wakeBlockConnection, Context.BIND_AUTO_CREATE);
+                }
+            };
+            thread.start();
+        }
+        // # WAKEBLOCK
         synchronized (mLock) {
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "acquireWakeLockInternal: lock=" + Objects.hashCode(lock)
@@ -892,9 +983,66 @@ public final class PowerManagerService extends SystemService
                     notifyWakeLockChangingLocked(wakeLock, flags, tag, packageName,
                             uid, pid, ws, historyTag);
                     wakeLock.updateProperties(flags, tag, packageName, ws, historyTag, uid, pid);
+                    // @ WAKEBLOCK
+                    if (wakeLock.mTag != tag) {
+                        synchronized (wakeBlockLock) {
+                            if (wakeBlockBound) {
+                                try {
+                                    Message message = Message.obtain(null, 2);
+                                    android.os.Bundle bundle = new android.os.Bundle();
+                                    bundle.putBinder("lock", lock);
+                                    bundle.putString("old_tag", tag);
+                                    bundle.putString("new_tag", tag);
+                                    message.setData(bundle);
+                                    message.replyTo = wakeBlockClient;
+                                    wakeBlockServer.send(message);
+                                } catch (RemoteException exception) {
+                                    wakeBlockServer = null;
+                                    wakeBlockBound = false;
+                                }
+                            }
+                            if (wakeBlockBound) {
+                                try {
+                                    wakeBlockLock.wait();
+                                } catch (InterruptedException exception) {
+                                }
+                            }
+                        }
+                    }
+                    // # WAKEBLOCK
                 }
                 notifyAcquire = false;
             } else {
+                // @ WAKEBLOCK
+                synchronized (wakeBlockLock) {
+                    if (wakeBlockBound) {
+                        wakeBlockOk = true;
+                        try {
+                            Message message = Message.obtain(null, 0);
+                            android.os.Bundle bundle = new android.os.Bundle();
+                            bundle.putBinder("lock", lock);
+                            bundle.putString("tag", tag);
+                            bundle.putString("package_name", packageName);
+                            message.setData(bundle);
+                            message.replyTo = wakeBlockClient;
+                            wakeBlockServer.send(message);
+                        } catch (RemoteException exception) {
+                            wakeBlockServer = null;
+                            wakeBlockBound = false;
+                            wakeBlockOk = true;
+                        }
+                    }
+                    if (wakeBlockBound) {
+                        try {
+                            wakeBlockLock.wait();
+                        } catch (InterruptedException exception) {
+                        }
+                        if (!wakeBlockOk) {
+                            return;
+                        }
+                    }
+                }
+                // # WAKEBLOCK
                 wakeLock = new WakeLock(lock, flags, tag, packageName, ws, historyTag, uid, pid);
                 try {
                     lock.linkToDeath(wakeLock, 0);
@@ -961,6 +1109,30 @@ public final class PowerManagerService extends SystemService
             }
 
             WakeLock wakeLock = mWakeLocks.get(index);
+            // @ WAKEBLOCK
+            synchronized (wakeBlockLock) {
+                if (wakeBlockBound) {
+                    try {
+                        Message message = Message.obtain(null, 1);
+                        android.os.Bundle bundle = new android.os.Bundle();
+                        bundle.putString("tag", wakeLock.mTag);
+                        bundle.putBinder("lock", lock);
+                        message.setData(bundle);
+                        message.replyTo = wakeBlockClient;
+                        wakeBlockServer.send(message);
+                    } catch (RemoteException exception) {
+                        wakeBlockServer = null;
+                        wakeBlockBound = false;
+                    }
+                    if (wakeBlockBound) {
+                        try {
+                            wakeBlockLock.wait();
+                        } catch (InterruptedException exception) {
+                        }
+                    }
+                }
+            }
+            // # WAKEBLOCK
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "releaseWakeLockInternal: lock=" + Objects.hashCode(lock)
                         + " [" + wakeLock.mTag + "], flags=0x" + Integer.toHexString(flags));
@@ -987,6 +1159,30 @@ public final class PowerManagerService extends SystemService
                 return;
             }
 
+            // @ WAKEBLOCK
+            synchronized (wakeBlockLock) {
+                if (wakeBlockBound) {
+                    try {
+                        Message message = Message.obtain(null, 1);
+                        android.os.Bundle bundle = new android.os.Bundle();
+                        bundle.putString("tag", wakeLock.mTag);
+                        bundle.putBinder("lock", wakeLock.mLock);
+                        message.setData(bundle);
+                        message.replyTo = wakeBlockClient;
+                        wakeBlockServer.send(message);
+                    } catch (RemoteException exception) {
+                        wakeBlockServer = null;
+                        wakeBlockBound = false;
+                    }
+                    if (wakeBlockBound) {
+                        try {
+                            wakeBlockLock.wait();
+                        } catch (InterruptedException exception) {
+                        }
+                    }
+                }
+            }
+            // # WAKEBLOCK
             removeWakeLockLocked(wakeLock, index);
         }
     }
@@ -1540,8 +1736,8 @@ public final class PowerManagerService extends SystemService
 
     private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(
             boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {
-        // Don't wake when powered unless configured to do so.
-        if (!mWakeUpWhenPluggedOrUnpluggedConfig) {
+        // Don't wake when powered if disabled in settings.
+        if (mWakeUpWhenPluggedOrUnpluggedSetting == 0) {
             return false;
         }
 
@@ -3398,6 +3594,20 @@ public final class PowerManagerService extends SystemService
 
             final int uid = Binder.getCallingUid();
             final int pid = Binder.getCallingPid();
+
+            try {
+                if (mAppOps != null &&
+                        mAppOps.checkOperation(AppOpsManager.OP_WAKE_LOCK, uid, packageName)
+                        != AppOpsManager.MODE_ALLOWED) {
+                    Slog.d(TAG, "acquireWakeLock: ignoring request from " + packageName);
+                    // For (ignore) accounting purposes
+                    mAppOps.noteOperation(AppOpsManager.OP_WAKE_LOCK, uid, packageName);
+                    // silent return
+                    return;
+                }
+            } catch (RemoteException e) {
+            }
+
             final long ident = Binder.clearCallingIdentity();
             try {
                 acquireWakeLockInternal(lock, flags, tag, packageName, ws, historyTag, uid, pid);

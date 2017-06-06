@@ -147,6 +147,7 @@ import android.view.textservice.TextServicesManager;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastMath;
 import com.android.internal.widget.EditableInputConnection;
 
@@ -569,7 +570,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mAllowTransformationLengthChange;
     private ChangeWatcher mChangeWatcher;
 
-    private ArrayList<TextWatcher> mListeners;
+    private TextWatcher[] mListeners;
 
     // display attributes
     private final TextPaint mTextPaint;
@@ -4385,7 +4386,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         boolean needEditableForNotification = false;
 
-        if (mListeners != null && mListeners.size() != 0) {
+        if (mListeners != null && mListeners.length != 0) {
             needEditableForNotification = true;
         }
 
@@ -8107,11 +8108,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Editable if it would not otherwise be and does call this method.
      */
     public void addTextChangedListener(TextWatcher watcher) {
-        if (mListeners == null) {
-            mListeners = new ArrayList<TextWatcher>();
-        }
-
-        mListeners.add(watcher);
+        mListeners = ArrayUtils.appendElement(TextWatcher.class, mListeners, watcher);
     }
 
     /**
@@ -8120,21 +8117,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * whenever this TextView's text changes.
      */
     public void removeTextChangedListener(TextWatcher watcher) {
-        if (mListeners != null) {
-            int i = mListeners.indexOf(watcher);
-
-            if (i >= 0) {
-                mListeners.remove(i);
-            }
-        }
+        mListeners = ArrayUtils.removeElement(TextWatcher.class, mListeners, watcher);
     }
 
     private void sendBeforeTextChanged(CharSequence text, int start, int before, int after) {
         if (mListeners != null) {
-            final ArrayList<TextWatcher> list = mListeners;
-            final int count = list.size();
+            TextWatcher[] list = mListeners;
+            int count = mListeners.length;
             for (int i = 0; i < count; i++) {
-                list.get(i).beforeTextChanged(text, start, before, after);
+                list[i].beforeTextChanged(text, start, before, after);
             }
         }
 
@@ -8181,10 +8172,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     void sendOnTextChanged(CharSequence text, int start, int before, int after) {
         if (mListeners != null) {
-            final ArrayList<TextWatcher> list = mListeners;
-            final int count = list.size();
+            TextWatcher[] list = mListeners;
+            int count = mListeners.length;
             for (int i = 0; i < count; i++) {
-                list.get(i).onTextChanged(text, start, before, after);
+                list[i].onTextChanged(text, start, before, after);
             }
         }
 
@@ -8197,10 +8188,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     void sendAfterTextChanged(Editable text) {
         if (mListeners != null) {
-            final ArrayList<TextWatcher> list = mListeners;
-            final int count = list.size();
+            TextWatcher[] list = mListeners;
+            int count = mListeners.length;
             for (int i = 0; i < count; i++) {
-                list.get(i).afterTextChanged(text);
+                list[i].afterTextChanged(text);
             }
         }
         hideErrorIfUnchanged();

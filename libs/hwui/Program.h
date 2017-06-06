@@ -85,6 +85,12 @@ namespace uirenderer {
 #define PROGRAM_HAS_DEBUG_HIGHLIGHT 42
 #define PROGRAM_HAS_ROUND_RECT_CLIP 43
 
+#define PROGRAM_IS_SIMPLE_MATRIX 44
+#define PROGRAM_IS_VERY_SIMPLE_GRADIENT 45
+
+#define PROGRAM_IS_FAST_COLOR 46
+#define PROGRAM_IS_FAST_COLOR_OPAQUE 47
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,6 +109,7 @@ typedef uint64_t programid;
 struct ProgramDescription {
     enum class ColorFilterMode {
         None = 0,
+        SimpleMatrix,
         Matrix,
         Blend
     };
@@ -139,6 +146,7 @@ struct ProgramDescription {
     bool hasGradient;
     Gradient gradientType;
     bool isSimpleGradient;
+    bool isVerySimpleGradient;
 
     SkXfermode::Mode shadersMode;
 
@@ -149,6 +157,7 @@ struct ProgramDescription {
     // Color operations
     ColorFilterMode colorOp;
     SkXfermode::Mode colorMode;
+    bool isColorOpaque;
 
     // Framebuffer blending (requires Extensions.hasFramebufferFetch())
     // Ignored for all values < SkXfermode::kPlus_Mode
@@ -181,6 +190,7 @@ struct ProgramDescription {
         hasGradient = false;
         gradientType = kGradientLinear;
         isSimpleGradient = false;
+        isVerySimpleGradient = false;
 
         shadersMode = SkXfermode::kClear_Mode;
 
@@ -190,6 +200,7 @@ struct ProgramDescription {
 
         colorOp = ColorFilterMode::None;
         colorMode = SkXfermode::kClear_Mode;
+        isColorOpaque = false;
 
         framebufferMode = SkXfermode::kClear_Mode;
         swapSrcDst = false;
@@ -224,6 +235,25 @@ struct ProgramDescription {
      */
     programid key() const {
         programid key = 0;
+
+        // duplicates ProgramCache's definition of fast path for color uniform
+        // special key for fast paths, and modulate should be ignored for single color
+        // this lets us avoid duplicate programs with the same GLSL (lower CPU overhead)
+        // any change in ProgramCache.cpp should be reflected here
+        bool singleColor = !hasTexture && !hasExternalTexture && !hasGradient && !hasBitmap;
+        bool fastPath = !hasVertexAlpha && framebufferMode < SkXfermode::kPlus_Mode &&
+            !hasColors && colorOp == ProgramDescription::ColorFilterMode::None &&
+            !hasDebugHighlight && !hasRoundRectClip;
+
+        if (singleColor && fastPath) {
+            if (isColorOpaque) {
+                return programid(0x1) << PROGRAM_IS_FAST_COLOR_OPAQUE;
+            }
+            else {
+                return programid(0x1) << PROGRAM_IS_FAST_COLOR;
+            }
+        }
+
         if (hasTexture) key |= PROGRAM_KEY_TEXTURE;
         if (hasAlpha8Texture) key |= PROGRAM_KEY_A8_TEXTURE;
         if (hasBitmap) {
@@ -241,6 +271,9 @@ struct ProgramDescription {
             key |= (shadersMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_SHADER_SHIFT;
         }
         switch (colorOp) {
+            case ColorFilterMode::SimpleMatrix:
+                key |= programid(0x1) << PROGRAM_IS_SIMPLE_MATRIX;
+                break;
             case ColorFilterMode::Matrix:
                 key |= PROGRAM_KEY_COLOR_MATRIX;
                 break;
@@ -253,12 +286,13 @@ struct ProgramDescription {
         }
         key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
         if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
-        if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
+        if (modulate && !singleColor) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT; // modulate is ignored for single color
         if (hasVertexAlpha) key |= programid(0x1) << PROGRAM_HAS_VERTEX_ALPHA_SHIFT;
         if (useShadowAlphaInterp) key |= programid(0x1) << PROGRAM_USE_SHADOW_ALPHA_INTERP_SHIFT;
         if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
         if (hasTextureTransform) key |= programid(0x1) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
         if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
+        if (isVerySimpleGradient) key |= programid(0x1) << PROGRAM_IS_VERY_SIMPLE_GRADIENT;
         if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
         if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
         if (hasRoundRectClip) key |= programid(0x1) << PROGRAM_HAS_ROUND_RECT_CLIP;

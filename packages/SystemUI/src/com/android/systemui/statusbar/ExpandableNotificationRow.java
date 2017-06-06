@@ -367,20 +367,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param childIndex the index to add it at, if -1 it will be added at the end
      */
     public void addChildNotification(ExpandableNotificationRow row, int childIndex) {
+        row.setIsChildInGroup(true, this);
         if (mChildrenContainer == null) {
             mChildrenContainerStub.inflate();
         }
         mChildrenContainer.addNotification(row, childIndex);
         onChildrenCountChanged();
-        row.setIsChildInGroup(true, this);
     }
 
     public void removeChildNotification(ExpandableNotificationRow row) {
         if (mChildrenContainer != null) {
             mChildrenContainer.removeNotification(row);
         }
-        onChildrenCountChanged();
         row.setIsChildInGroup(false, null);
+        onChildrenCountChanged();
     }
 
     public boolean isChildInGroup() {

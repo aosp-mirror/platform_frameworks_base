@@ -213,6 +213,15 @@
   <java-symbol type="id" name="selection_start_handle" />
   <java-symbol type="id" name="selection_end_handle" />
   <java-symbol type="id" name="insertion_handle" />
+  <java-symbol type="id" name="relative_top" />
+  <java-symbol type="id" name="hint_info" />
+  <java-symbol type="id" name="single_hand_window_title" />
+  <java-symbol type="id" name="click_hint" />
+  <java-symbol type="id" name="hint_section" />
+  <java-symbol type="id" name="relative_bottom" />
+  <java-symbol type="id" name="singlehandmode_slide_hint_text" />
+  <java-symbol type="id" name="slide_hint" />
+  <java-symbol type="id" name="slide_hint_area" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -309,6 +318,7 @@
   <java-symbol type="bool" name="config_localDisplaysMirrorContent" />
   <java-symbol type="integer" name="config_defaultDisplayDefaultColorMode" />
   <java-symbol type="bool" name="config_enableAppWidgetService" />
+  <java-symbol type="bool" name="single_hand_mode" />
   <java-symbol type="string" name="config_defaultPictureInPictureBounds" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_factor" />
@@ -369,6 +379,11 @@
   <java-symbol type="integer" name="config_bluetooth_operating_voltage_mv" />
   <java-symbol type="bool" name="config_bluetooth_reload_supported_profiles_when_enabled" />
   <java-symbol type="integer" name="config_cursorWindowSize" />
+  <java-symbol type="array"   name="config_defaultOomAdj" />
+  <java-symbol type="array"   name="config_defaultOomMinFreeLow32" />
+  <java-symbol type="array"   name="config_defaultOomMinFreeHigh32" />
+  <java-symbol type="array"   name="config_defaultOomMinFreeLow64" />
+  <java-symbol type="array"   name="config_defaultOomMinFreeHigh64" />
   <java-symbol type="integer" name="config_drawLockTimeoutMillis" />
   <java-symbol type="integer" name="config_doublePressOnPowerBehavior" />
   <java-symbol type="integer" name="config_extraFreeKbytesAdjust" />
@@ -1125,6 +1140,8 @@
   <java-symbol type="string" name="demo_restarting_message" />
   <java-symbol type="string" name="conference_call" />
 
+  <java-symbol type="string" name="singlehandmode_click_hint_message" />
+  <java-symbol type="string" name="singlehandmode_slide_hint_message" />
 
   <java-symbol type="plurals" name="bugreport_countdown" />
   <java-symbol type="plurals" name="duration_hours" />
@@ -1394,6 +1411,7 @@
   <java-symbol type="layout" name="immersive_mode_cling" />
   <java-symbol type="layout" name="user_switching_dialog" />
   <java-symbol type="layout" name="common_tab_settings" />
+  <java-symbol type="layout" name="single_hand_window" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
@@ -1528,10 +1546,6 @@
   <java-symbol type="dimen" name="navigation_bar_height_landscape_car_mode" />
   <java-symbol type="dimen" name="navigation_bar_width_car_mode" />
   <java-symbol type="dimen" name="status_bar_height" />
-  <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
-  <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
-  <java-symbol type="drawable" name="ic_jog_dial_unlock" />
-  <java-symbol type="drawable" name="ic_jog_dial_vibrate_on" />
   <java-symbol type="drawable" name="ic_lock_airplane_mode" />
   <java-symbol type="drawable" name="ic_lock_airplane_mode_off" />
   <java-symbol type="drawable" name="ic_menu_cc" />
@@ -1606,7 +1620,6 @@
   <java-symbol type="string" name="bugreport_title" />
   <java-symbol type="string" name="faceunlock_multiple_failures" />
   <java-symbol type="string" name="global_action_power_off" />
-  <java-symbol type="string" name="global_action_restart" />
   <java-symbol type="string" name="global_actions_airplane_mode_off_status" />
   <java-symbol type="string" name="global_actions_airplane_mode_on_status" />
   <java-symbol type="string" name="global_actions_toggle_airplane_mode" />
@@ -2732,8 +2745,6 @@
 
   <!-- Default first user restrictions -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />
-
-  <java-symbol type="drawable" name="ic_restart" />
 
   <java-symbol type="drawable" name="emergency_icon" />
 

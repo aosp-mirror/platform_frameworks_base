@@ -387,7 +387,7 @@ class MountService extends IMountService.Stub
 
     private boolean shouldBenchmark() {
         final long benchInterval = Settings.Global.getLong(mContext.getContentResolver(),
-                Settings.Global.STORAGE_BENCHMARK_INTERVAL, DateUtils.WEEK_IN_MILLIS);
+                Settings.Global.STORAGE_BENCHMARK_INTERVAL, -1);
         if (benchInterval == -1) {
             return false;
         } else if (benchInterval == 0) {
@@ -2568,6 +2568,12 @@ class MountService extends IMountService.Stub
                 // to let the UI to clear itself
                 mHandler.postDelayed(new Runnable() {
                     public void run() {
+                        // unmount the internal emulated volume first
+                        try {
+                            mConnector.execute("volume", "unmount", "emulated");
+                        } catch (NativeDaemonConnectorException e) {
+                            Slog.e(TAG, "unable to shut down internal volume", e);
+                        }
                         try {
                             mCryptConnector.execute("cryptfs", "restart");
                         } catch (NativeDaemonConnectorException e) {
