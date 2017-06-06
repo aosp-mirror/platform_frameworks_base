@@ -91,6 +91,9 @@ public class Divider extends SystemUI {
     }
 
     private void removeDivider() {
+        if (mView != null) {
+            mView.onDividerRemoved();
+        }
         mWindowManager.remove();
     }
 
