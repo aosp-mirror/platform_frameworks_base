@@ -20,9 +20,14 @@ import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
 import android.content.ContentResolver;
 import android.net.LinkProperties;
+import android.net.RouteInfo;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.provider.Settings;
+
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.util.ArrayList;
 
 /**
  * A class to encapsulate the business logic of programming the tethering
@@ -92,8 +97,12 @@ public class OffloadController {
     public void setUpstreamLinkProperties(LinkProperties lp) {
         if (!started()) return;
 
-        // TODO: setUpstreamParameters().
-        mUpstreamLinkProperties = lp;
+        mUpstreamLinkProperties = (lp != null) ? new LinkProperties(lp) : null;
+        // TODO: examine return code and decide what to do if programming
+        // upstream parameters fails (probably just wait for a subsequent
+        // onOffloadEvent() callback to tell us offload is available again and
+        // then reapply all state).
+        pushUpstreamParameters();
     }
 
     // TODO: public void addDownStream(...)
@@ -105,5 +114,41 @@ public class OffloadController {
 
     private boolean started() {
         return mConfigInitialized && mControlInitialized;
+    }
+
+    private boolean pushUpstreamParameters() {
+        if (mUpstreamLinkProperties == null) {
+            return mHwInterface.setUpstreamParameters(null, null, null, null);
+        }
+
+        // A stacked interface cannot be an upstream for hardware offload.
+        // Consequently, we examine only the primary interface name, look at
+        // getAddresses() rather than getAllAddresses(), and check getRoutes()
+        // rather than getAllRoutes().
+        final String iface = mUpstreamLinkProperties.getInterfaceName();
+        final ArrayList<String> v6gateways = new ArrayList<>();
+        String v4addr = null;
+        String v4gateway = null;
+
+        for (InetAddress ip : mUpstreamLinkProperties.getAddresses()) {
+            if (ip instanceof Inet4Address) {
+                v4addr = ip.getHostAddress();
+                break;
+            }
+        }
+
+        // Find the gateway addresses of all default routes of either address family.
+        for (RouteInfo ri : mUpstreamLinkProperties.getRoutes()) {
+            if (!ri.hasGateway()) continue;
+
+            final String gateway = ri.getGateway().getHostAddress();
+            if (ri.isIPv4Default()) {
+                v4gateway = gateway;
+            } else if (ri.isIPv6Default()) {
+                v6gateways.add(gateway);
+            }
+        }
+
+        return mHwInterface.setUpstreamParameters(iface, v4addr, v4gateway, v6gateways);
     }
 }
