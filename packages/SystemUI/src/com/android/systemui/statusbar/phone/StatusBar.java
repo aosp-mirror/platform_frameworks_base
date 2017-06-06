@@ -3859,10 +3859,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    public void onKeyguardOccludedChanged(boolean keyguardOccluded) {
-        mNavigationBar.onKeyguardOccludedChanged(keyguardOccluded);
-    }
-
     // State logging
 
     private void logStateToEventlog() {
