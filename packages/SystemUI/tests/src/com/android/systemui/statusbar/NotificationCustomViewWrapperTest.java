@@ -53,11 +53,14 @@ public class NotificationCustomViewWrapperTest extends SysuiTestCase {
         RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.custom_view_dark);
         View v = views.apply(mContext, null);
         NotificationViewWrapper wrap = NotificationCustomViewWrapper.wrap(mContext, v, mRow);
-        wrap.notifyContentUpdated(mRow);
-        Assert.assertTrue(wrap.getCustomBackgroundColor() != 0);
+        wrap.onContentUpdated(mRow);
+        Assert.assertTrue("No background set, when applying custom background view",
+                wrap.getCustomBackgroundColor() != 0);
         views.reapply(mContext, v);
-        wrap.notifyContentUpdated(mRow);
-        Assert.assertTrue(wrap.getCustomBackgroundColor() != 0);
+        wrap.onReinflated();
+        wrap.onContentUpdated(mRow);
+        Assert.assertTrue("Reapplying a custom remote view lost it's background!",
+                wrap.getCustomBackgroundColor() != 0);
     }
 
 }

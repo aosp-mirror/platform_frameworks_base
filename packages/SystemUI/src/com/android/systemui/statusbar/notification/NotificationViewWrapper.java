@@ -66,6 +66,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
         mView = view;
         mRow = row;
         mDozer = createDozer(ctx);
+        onReinflated();
     }
 
     protected NotificationDozeHelper createDozer(Context ctx) {
@@ -92,12 +93,15 @@ public abstract class NotificationViewWrapper implements TransformableView {
      * Notifies this wrapper that the content of the view might have changed.
      * @param row the row this wrapper is attached to
      */
-    public void notifyContentUpdated(ExpandableNotificationRow row) {
+    public void onContentUpdated(ExpandableNotificationRow row) {
         mDarkInitialized = false;
-        Drawable background = mView.getBackground();
+    }
+
+    public void onReinflated() {
         if (shouldClearBackgroundOnReapply()) {
             mBackgroundColor = 0;
         }
+        Drawable background = mView.getBackground();
         if (background instanceof ColorDrawable) {
             mBackgroundColor = ((ColorDrawable) background).getColor();
             mView.setBackground(null);
