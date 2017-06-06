@@ -102,4 +102,16 @@ public class TextPaint extends Paint {
         underlineColor = color;
         underlineThickness = thickness;
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public float getUnderlineThickness() {
+        if (underlineColor != 0) { // Return custom thickness only if underline color is set.
+            return underlineThickness;
+        } else {
+            return super.getUnderlineThickness();
+        }
+    }
 }
