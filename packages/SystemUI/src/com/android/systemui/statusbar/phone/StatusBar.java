@@ -6822,7 +6822,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 // If mAlwaysExpandNonGroupedNotification is false, then only expand the
                 // very first notification and if it's not a child of grouped notifications.
                 row.setSystemExpanded(mAlwaysExpandNonGroupedNotification
-                        || (visibleNotifications == 0 && !isChildNotification));
+                        || (visibleNotifications == 0 && !isChildNotification
+                        && !row.isLowPriority()));
             }
 
             entry.row.setShowAmbient(isDozing());
