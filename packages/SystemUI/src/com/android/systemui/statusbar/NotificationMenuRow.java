@@ -138,7 +138,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     }
 
     @Override
-    public void createMenu(ViewGroup parent) {
+    public void createMenu(ViewGroup parent, StatusBarNotification sbn) {
         mParent = (ExpandableNotificationRow) parent;
         createMenuViews(true /* resetState */);
     }
@@ -159,7 +159,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     }
 
     @Override
-    public void onNotificationUpdated() {
+    public void onNotificationUpdated(StatusBarNotification sbn) {
         if (mMenuContainer == null) {
             // Menu hasn't been created yet, no need to do anything.
             return;
