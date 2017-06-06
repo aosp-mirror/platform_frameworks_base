@@ -3651,22 +3651,27 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags, int userId) {
         return getPackageInfoInternal(packageName, PackageManager.VERSION_CODE_HIGHEST,
-                flags, userId);
+                flags, Binder.getCallingUid(), userId);
     }
 
     @Override
     public PackageInfo getPackageInfoVersioned(VersionedPackage versionedPackage,
             int flags, int userId) {
         return getPackageInfoInternal(versionedPackage.getPackageName(),
-                versionedPackage.getVersionCode(), flags, userId);
+                versionedPackage.getVersionCode(), flags, Binder.getCallingUid(), userId);
     }
 
+    /**
+     * Important: The provided filterCallingUid is used exclusively to filter out packages
+     * that can be seen based on user state. It's typically the original caller uid prior
+     * to clearing. Because it can only be provided by trusted code, it's value can be
+     * trusted and will be used as-is; unlike userId which will be validated by this method.
+     */
     private PackageInfo getPackageInfoInternal(String packageName, int versionCode,
-            int flags, int userId) {
+            int flags, int filterCallingUid, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForPackage(flags, userId, packageName);
-        enforceCrossUserPermission(callingUid, userId,
+        enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */, "get package info");
 
         // reader
@@ -3678,10 +3683,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (matchFactoryOnly) {
                 final PackageSetting ps = mSettings.getDisabledSystemPkgLPr(packageName);
                 if (ps != null) {
-                    if (filterSharedLibPackageLPr(ps, callingUid, userId, flags)) {
+                    if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                         return null;
                     }
-                    if (filterAppAccessLPr(ps, callingUid, userId)) {
+                    if (filterAppAccessLPr(ps, filterCallingUid, userId)) {
                         return null;
                     }
                     return generatePackageInfo(ps, flags, userId);
@@ -3696,10 +3701,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 Log.v(TAG, "getPackageInfo " + packageName + ": " + p);
             if (p != null) {
                 final PackageSetting ps = (PackageSetting) p.mExtras;
-                if (filterSharedLibPackageLPr(ps, callingUid, userId, flags)) {
+                if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                     return null;
                 }
-                if (ps != null && filterAppAccessLPr(ps, callingUid, userId)) {
+                if (ps != null && filterAppAccessLPr(ps, filterCallingUid, userId)) {
                     return null;
                 }
                 return generatePackageInfo((PackageSetting)p.mExtras, flags, userId);
@@ -3707,10 +3712,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!matchFactoryOnly && (flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps == null) return null;
-                if (filterSharedLibPackageLPr(ps, callingUid, userId, flags)) {
+                if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                     return null;
                 }
-                if (filterAppAccessLPr(ps, callingUid, userId)) {
+                if (filterAppAccessLPr(ps, filterCallingUid, userId)) {
                     return null;
                 }
                 return generatePackageInfo(ps, flags, userId);
@@ -4071,14 +4076,14 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private ApplicationInfo generateApplicationInfoFromSettingsLPw(String packageName, int flags,
-            int uid, int userId) {
+            int filterCallingUid, int userId) {
         if (!sUserManager.exists(userId)) return null;
         PackageSetting ps = mSettings.mPackages.get(packageName);
         if (ps != null) {
-            if (filterSharedLibPackageLPr(ps, uid, userId, flags)) {
+            if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                 return null;
             }
-            if (filterAppAccessLPr(ps, uid, userId)) {
+            if (filterAppAccessLPr(ps, filterCallingUid, userId)) {
                 return null;
             }
             if (ps.pkg == null) {
@@ -4101,6 +4106,17 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ApplicationInfo getApplicationInfo(String packageName, int flags, int userId) {
+        return getApplicationInfoInternal(packageName, flags, Binder.getCallingUid(), userId);
+    }
+
+    /**
+     * Important: The provided filterCallingUid is used exclusively to filter out applications
+     * that can be seen based on user state. It's typically the original caller uid prior
+     * to clearing. Because it can only be provided by trusted code, it's value can be
+     * trusted and will be used as-is; unlike userId which will be validated by this method.
+     */
+    private ApplicationInfo getApplicationInfoInternal(String packageName, int flags,
+            int filterCallingUid, int userId) {
         if (!sUserManager.exists(userId)) return null;
         flags = updateFlagsForApplication(flags, userId, packageName);
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
@@ -4119,10 +4135,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (p != null) {
                 PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps == null) return null;
-                if (filterSharedLibPackageLPr(ps, Binder.getCallingUid(), userId, flags)) {
+                if (filterSharedLibPackageLPr(ps, filterCallingUid, userId, flags)) {
                     return null;
                 }
-                if (filterAppAccessLPr(ps, Binder.getCallingUid(), userId)) {
+                if (filterAppAccessLPr(ps, filterCallingUid, userId)) {
                     return null;
                 }
                 // Note: isEnabledLP() does not apply here - always return info
@@ -4140,7 +4156,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 // Already generates the external package name
                 return generateApplicationInfoFromSettingsLPw(packageName,
-                        Binder.getCallingUid(), flags, userId);
+                        flags, filterCallingUid, userId);
             }
         }
         return null;
@@ -4570,10 +4586,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
+        return getActivityInfoInternal(component, flags, Binder.getCallingUid(), userId);
+    }
+
+    /**
+     * Important: The provided filterCallingUid is used exclusively to filter out activities
+     * that can be seen based on user state. It's typically the original caller uid prior
+     * to clearing. Because it can only be provided by trusted code, it's value can be
+     * trusted and will be used as-is; unlike userId which will be validated by this method.
+     */
+    private ActivityInfo getActivityInfoInternal(ComponentName component, int flags,
+            int filterCallingUid, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForComponent(flags, userId, component);
-        enforceCrossUserPermission(callingUid, userId,
+        enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */, "get activity info");
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);
@@ -4582,7 +4608,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (a != null && mSettings.isEnabledAndMatchLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
-                if (filterAppAccessLPr(ps, callingUid, component, TYPE_ACTIVITY, userId)) {
+                if (filterAppAccessLPr(ps, filterCallingUid, component, TYPE_ACTIVITY, userId)) {
                     return null;
                 }
                 return generateActivityInfo(a, flags, ps.readUserState(userId), userId);
@@ -6303,7 +6329,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
             final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType,
-                    flags, userId, resolveForStart);
+                    flags, callingUid, userId, resolveForStart);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             final ResolveInfo bestChoice =
@@ -6847,15 +6873,16 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
-        return queryIntentActivitiesInternal(intent, resolvedType, flags, userId, false);
+        return queryIntentActivitiesInternal(
+                intent, resolvedType, flags, Binder.getCallingUid(), userId, false);
     }
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, int flags, int userId, boolean resolveForStart) {
+            String resolvedType, int flags, int filterCallingUid, int userId,
+            boolean resolveForStart) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        final int callingUid = Binder.getCallingUid();
-        final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        enforceCrossUserPermission(callingUid, userId,
+        final String instantAppPkgName = getInstantAppPackageName(filterCallingUid);
+        enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */,
                 "query intent activities");
         final String pkgName = intent.getPackage();
@@ -6867,7 +6894,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        flags = updateFlagsForResolve(flags, userId, intent, callingUid, resolveForStart,
+        flags = updateFlagsForResolve(flags, userId, intent, filterCallingUid, resolveForStart,
                 comp != null || pkgName != null /*onlyExposedExplicitly*/);
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
@@ -24409,8 +24436,34 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
-        public ApplicationInfo getApplicationInfo(String packageName, int userId) {
-            return PackageManagerService.this.getApplicationInfo(packageName, 0 /*flags*/, userId);
+        public PackageInfo getPackageInfo(
+                String packageName, int flags, int filterCallingUid, int userId) {
+            return PackageManagerService.this
+                    .getPackageInfoInternal(packageName, PackageManager.VERSION_CODE_HIGHEST,
+                            flags, filterCallingUid, userId);
+        }
+
+        @Override
+        public ApplicationInfo getApplicationInfo(
+                String packageName, int flags, int filterCallingUid, int userId) {
+            return PackageManagerService.this
+                    .getApplicationInfoInternal(packageName, flags, filterCallingUid, userId);
+        }
+
+        @Override
+        public ActivityInfo getActivityInfo(
+                ComponentName component, int flags, int filterCallingUid, int userId) {
+            return PackageManagerService.this
+                    .getActivityInfoInternal(component, flags, filterCallingUid, userId);
+        }
+
+        @Override
+        public List<ResolveInfo> queryIntentActivities(
+                Intent intent, int flags, int filterCallingUid, int userId) {
+            final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
+            return PackageManagerService.this
+                    .queryIntentActivitiesInternal(intent, resolvedType, flags, filterCallingUid,
+                            userId, false /*resolveForStart*/);
         }
 
         @Override
