@@ -24,6 +24,7 @@ import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.NotificationTestHelper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,9 @@ public class NotificationViewWrapperTest extends SysuiTestCase {
 
     @Test
     public void constructor_doesntUseViewContext() throws Exception {
-        new TestableNotificationViewWrapper(mContext, null /* view */, null /* row */);
+        new TestableNotificationViewWrapper(mContext,
+                new View(mContext),
+                new NotificationTestHelper(getContext()).createRow());
     }
 
     static class TestableNotificationViewWrapper extends NotificationViewWrapper {
