@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
 public class TestableSettingsProvider extends MockContentProvider {
 
     private static final String TAG = "TestableSettingsProvider";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String MY_UNIQUE_KEY = "Key_" + TestableSettingsProvider.class.getName();
     private static TestableSettingsProvider sInstance;
 

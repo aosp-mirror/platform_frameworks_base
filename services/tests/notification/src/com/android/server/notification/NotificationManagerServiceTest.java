@@ -60,11 +60,16 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.AtomicFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -94,11 +99,16 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     @Mock
     private RankingHelper mRankingHelper;
     @Mock
+    AtomicFile mPolicyFile;
+    File mFile;
+    @Mock
     private NotificationUsageStats mUsageStats;
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
     @Mock
     private NotificationManagerService.NotificationListeners mNotificationListeners;
+    @Mock private NotificationManagerService.NotificationAssistants mNotificationAssistants;
+    @Mock private ConditionProviders mConditionProviders;
     private ManagedServices.ManagedServiceInfo mListener;
     @Mock private ICompanionDeviceManager mCompanionMgr;
     @Mock SnoozeHelper mSnoozeHelper;
@@ -146,12 +156,24 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
 
+        mFile = new File(mContext.getCacheDir(), "test.xml");
+        mFile.createNewFile();
+        when(mPolicyFile.openRead()).thenReturn(new FileInputStream(mFile));
+        when(mPolicyFile.startWrite()).thenReturn(new FileOutputStream(mFile));
+
         mListener = mNotificationListeners.new ManagedServiceInfo(
                 null, new ComponentName(PKG, "test_class"), uid, true, null, 0);
         when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
-        mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
-                mPackageManagerClient, mockLightsManager, mNotificationListeners, mCompanionMgr,
-                mSnoozeHelper, mUsageStats);
+        try {
+            mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
+                    mPackageManagerClient, mockLightsManager, mNotificationListeners,
+                    mNotificationAssistants, mConditionProviders, mCompanionMgr,
+                    mSnoozeHelper, mUsageStats, mPolicyFile);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
 
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
@@ -159,6 +181,11 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
         mBinderService.createNotificationChannels(
                 PKG, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mFile.delete();
     }
 
     public void waitForIdle() throws Exception {
@@ -950,5 +977,62 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         waitForIdle();
 
         verify(mSnoozeHelper, never()).repostGroupSummary(anyString(), anyInt(), anyString());
+    }
+
+    @Test
+    public void testSetListenerAccess() throws Exception {
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        try {
+            mBinderService.setNotificationListenerAccessGranted(c, true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mNotificationListeners, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mNotificationAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetAssistantAccess() throws Exception {
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        try {
+            mBinderService.setNotificationAssistantAccessGranted(c, true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mNotificationAssistants, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mNotificationListeners, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetDndAccess() throws Exception {
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        try {
+            mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.getPackageName(), 0, true, true);
+        verify(mNotificationAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mNotificationListeners, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
     }
 }

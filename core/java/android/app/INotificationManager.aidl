@@ -116,6 +116,16 @@ interface INotificationManager
     boolean matchesCallFilter(in Bundle extras);
     boolean isSystemConditionProviderEnabled(String path);
 
+    boolean isNotificationListenerAccessGranted(in ComponentName listener);
+    boolean isNotificationListenerAccessGrantedForUser(in ComponentName listener, int userId);
+    boolean isNotificationAssistantAccessGranted(in ComponentName assistant);
+    void setNotificationListenerAccessGranted(in ComponentName listener, boolean enabled);
+    void setNotificationAssistantAccessGranted(in ComponentName assistant, boolean enabled);
+    void setNotificationListenerAccessGrantedForUser(in ComponentName listener, int userId, boolean enabled);
+    void setNotificationAssistantAccessGrantedForUser(in ComponentName assistant, int userId, boolean enabled);
+    List<String> getEnabledNotificationListenerPackages();
+    List<ComponentName> getEnabledNotificationListeners(int userId);
+
     int getZenMode();
     ZenModeConfig getZenModeConfig();
     oneway void setZenMode(int mode, in Uri conditionId, String reason);
@@ -123,7 +133,6 @@ interface INotificationManager
     boolean isNotificationPolicyAccessGranted(String pkg);
     NotificationManager.Policy getNotificationPolicy(String pkg);
     void setNotificationPolicy(String pkg, in NotificationManager.Policy policy);
-    String[] getPackagesRequestingNotificationPolicyAccess();
     boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
     AutomaticZenRule getAutomaticZenRule(String id);
