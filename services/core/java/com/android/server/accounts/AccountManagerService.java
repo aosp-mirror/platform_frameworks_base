@@ -4428,6 +4428,10 @@ public class AccountManagerService
                 && (type != null && !isAccountManagedByCaller(type, callingUid, userId))) {
                 return EMPTY_ACCOUNT_ARRAY;
         }
+        if (!UserHandle.isSameApp(callingUid, Process.SYSTEM_UID) && type == null) {
+            return getAccountsAsUserForPackage(type, userId,
+                packageName, packageUid, opPackageName, false /* includeUserManagedNotVisible */);
+        }
         return getAccountsAsUserForPackage(type, userId,
                 packageName, packageUid, opPackageName, true /* includeUserManagedNotVisible */);
     }
