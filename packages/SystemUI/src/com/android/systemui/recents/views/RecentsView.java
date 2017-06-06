@@ -21,6 +21,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.ActivityOptions.OnAnimationStartedListener;
+import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -111,7 +112,7 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
     private int mDividerSize;
 
     private final float mScrimAlpha;
-    private final GradientDrawable mBackgroundScrim;
+    private GradientDrawable mBackgroundScrim;
     private final ColorExtractor mColorExtractor;
     private Animator mBackgroundScrimAnimator;
 
@@ -828,9 +829,9 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
     }
 
     @Override
-    public void onColorsChanged(ColorExtractor.GradientColors colors, int which) {
+    public void onColorsChanged(ColorExtractor extractor, int which) {
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
-            mBackgroundScrim.setColors(colors);
+            mBackgroundScrim.setColors(extractor.getColors(WallpaperManager.FLAG_SYSTEM));
         }
     }
 

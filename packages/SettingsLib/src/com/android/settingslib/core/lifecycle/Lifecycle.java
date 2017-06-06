@@ -59,7 +59,8 @@ public class Lifecycle {
     }
 
     public void onAttach(Context context) {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnAttach) {
                 ((OnAttach) observer).onAttach(context);
             }
@@ -67,7 +68,8 @@ public class Lifecycle {
     }
 
     public void onCreate(Bundle savedInstanceState) {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnCreate) {
                 ((OnCreate) observer).onCreate(savedInstanceState);
             }
@@ -75,7 +77,8 @@ public class Lifecycle {
     }
 
     public void onStart() {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnStart) {
                 ((OnStart) observer).onStart();
             }
@@ -83,7 +86,8 @@ public class Lifecycle {
     }
 
     public void setPreferenceScreen(PreferenceScreen preferenceScreen) {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof SetPreferenceScreen) {
                 ((SetPreferenceScreen) observer).setPreferenceScreen(preferenceScreen);
             }
@@ -91,7 +95,8 @@ public class Lifecycle {
     }
 
     public void onResume() {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnResume) {
                 ((OnResume) observer).onResume();
             }
@@ -99,7 +104,8 @@ public class Lifecycle {
     }
 
     public void onPause() {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnPause) {
                 ((OnPause) observer).onPause();
             }
@@ -107,7 +113,8 @@ public class Lifecycle {
     }
 
     public void onSaveInstanceState(Bundle outState) {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnSaveInstanceState) {
                 ((OnSaveInstanceState) observer).onSaveInstanceState(outState);
             }
@@ -115,7 +122,8 @@ public class Lifecycle {
     }
 
     public void onStop() {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnStop) {
                 ((OnStop) observer).onStop();
             }
@@ -123,7 +131,8 @@ public class Lifecycle {
     }
 
     public void onDestroy() {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnDestroy) {
                 ((OnDestroy) observer).onDestroy();
             }
@@ -131,7 +140,8 @@ public class Lifecycle {
     }
 
     public void onCreateOptionsMenu(final Menu menu, final @Nullable MenuInflater inflater) {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnCreateOptionsMenu) {
                 ((OnCreateOptionsMenu) observer).onCreateOptionsMenu(menu, inflater);
             }
@@ -139,7 +149,8 @@ public class Lifecycle {
     }
 
     public void onPrepareOptionsMenu(final Menu menu) {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnPrepareOptionsMenu) {
                 ((OnPrepareOptionsMenu) observer).onPrepareOptionsMenu(menu);
             }
@@ -147,7 +158,8 @@ public class Lifecycle {
     }
 
     public boolean onOptionsItemSelected(final MenuItem menuItem) {
-        for (LifecycleObserver observer : mObservers) {
+        for (int i = 0, size = mObservers.size(); i < size; i++) {
+            final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnOptionsItemSelected) {
                 if (((OnOptionsItemSelected) observer).onOptionsItemSelected(menuItem)) {
                     return true;

@@ -34,7 +34,6 @@ import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -50,7 +49,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class SuggestionParser {
 
@@ -352,7 +350,9 @@ public class SuggestionParser {
             return false;
         }
         final long setupTime = mSharedPrefs.getLong(keySetupTime, 0);
-        return currentTime - setupTime > category.exclusiveExpireDaysInMillis;
+        final long elapsedTime = currentTime - setupTime;
+        Log.d(TAG, "Day " + elapsedTime / DateUtils.DAY_IN_MILLIS + " for " + category.category);
+        return elapsedTime > category.exclusiveExpireDaysInMillis;
     }
 
     private boolean isDismissed(Tile suggestion, boolean isSmartSuggestionEnabled) {

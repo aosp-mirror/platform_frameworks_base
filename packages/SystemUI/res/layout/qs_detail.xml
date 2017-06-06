@@ -20,7 +20,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/qs_detail_background"
-    android:elevation="4dp"
     android:clickable="true"
     android:orientation="vertical"
     android:paddingBottom="8dp"

@@ -1339,14 +1339,14 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         }
 
         @Override
-        public void onColorsChanged(GradientColors colors, int which) {
+        public void onColorsChanged(ColorExtractor extractor, int which) {
             if (mKeyguardShowing) {
                 if ((WallpaperManager.FLAG_LOCK & which) != 0) {
-                    mGradientDrawable.setColors(colors);
+                    mGradientDrawable.setColors(extractor.getColors(WallpaperManager.FLAG_LOCK));
                 }
             } else {
                 if ((WallpaperManager.FLAG_SYSTEM & which) != 0) {
-                    mGradientDrawable.setColors(colors);
+                    mGradientDrawable.setColors(extractor.getColors(WallpaperManager.FLAG_SYSTEM));
                 }
             }
         }

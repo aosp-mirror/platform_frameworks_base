@@ -2191,7 +2191,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
-            final TextView target = (TextView) root.findViewById(viewId);
+            final View target = root.findViewById(viewId);
             if (target == null) return;
 
             target.setTagInternal(R.id.remote_input_tag, remoteInputs);

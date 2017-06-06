@@ -19,12 +19,17 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.NetworkBadging;
 import android.net.NetworkInfo;
+import android.net.NetworkKey;
+import android.net.RssiCurve;
 import android.net.ScoredNetwork;
+import android.net.WifiKey;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -39,6 +44,8 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.SpannableString;
 import android.text.style.TtsSpan;
+
+import com.android.settingslib.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +62,8 @@ public class AccessPointTest {
 
     private static final String TEST_SSID = "test_ssid";
     private Context mContext;
-    @Mock private WifiNetworkScoreCache mWifiNetworkScoreCache;
+    @Mock private RssiCurve mockBadgeCurve;
+    @Mock private WifiNetworkScoreCache mockWifiNetworkScoreCache;
 
     @Before
     public void setUp() {
@@ -294,13 +302,13 @@ public class AccessPointTest {
     public void testIsMetered_returnTrueWhenScoredNetworkIsMetered() {
         AccessPoint ap = createAccessPointWithScanResultCache();
 
-        when(mWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(
                         new ScoredNetwork(
                                 null /* NetworkKey */,
                                 null /* rssiCurve */,
                                 true /* metered */));
-        ap.update(mWifiNetworkScoreCache, false /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, false /* scoringUiEnabled */);
 
         assertThat(ap.isMetered()).isTrue();
     }
@@ -321,6 +329,91 @@ public class AccessPointTest {
         assertThat(accessPoint.isMetered()).isFalse();
     }
 
+    @Test
+    public void testSpeedLabel_returnsVeryFastWhen4kBadgeIsSet() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_4K);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getBadge()).isEqualTo(NetworkBadging.BADGING_4K);
+        assertThat(ap.getSpeedLabel())
+                .isEqualTo(mContext.getString(R.string.speed_label_very_fast));
+    }
+
+    @Test
+    public void testSpeedLabel_returnsFastWhenHdBadgeIsSet() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_HD);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getBadge()).isEqualTo(NetworkBadging.BADGING_HD);
+        assertThat(ap.getSpeedLabel())
+                .isEqualTo(mContext.getString(R.string.speed_label_fast));
+    }
+
+    @Test
+    public void testSpeedLabel_returnsOkayWhenSdBadgeIsSet() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_SD);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getBadge()).isEqualTo(NetworkBadging.BADGING_SD);
+        assertThat(ap.getSpeedLabel())
+                .isEqualTo(mContext.getString(R.string.speed_label_okay));
+    }
+
+    @Test
+    public void testSummaryString_showsSpeedLabel() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_4K);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        assertThat(ap.getSummary()).isEqualTo(mContext.getString(R.string.speed_label_very_fast));
+    }
+
+    @Test
+    public void testSummaryString_concatenatesSpeedLabel() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+        ap.update(new WifiConfiguration());
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_4K);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        String expectedString = mContext.getString(R.string.speed_label_very_fast) + " / "
+                + mContext.getString(R.string.wifi_remembered);
+        assertThat(ap.getSummary()).isEqualTo(expectedString);
+    }
+
+    private ScoredNetwork buildScoredNetworkWithMockBadgeCurve() {
+        Bundle attr1 = new Bundle();
+        attr1.putParcelable(ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE, mockBadgeCurve);
+        return new ScoredNetwork(
+                new NetworkKey(new WifiKey("\"ssid\"", "00:00:00:00:00:00")),
+                mockBadgeCurve,
+                false /* meteredHint */,
+                attr1);
+
+    }
+
     private AccessPoint createAccessPointWithScanResultCache() {
         Bundle bundle = new Bundle();
         ArrayList<ScanResult> scanResults = new ArrayList<>();
@@ -333,7 +426,7 @@ public class AccessPointTest {
             scanResults.add(scanResult);
         }
 
-        bundle.putParcelableArrayList("key_scanresultcache", scanResults);
+        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, scanResults);
         return new AccessPoint(mContext, bundle);
     }
 

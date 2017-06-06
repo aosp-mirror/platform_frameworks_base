@@ -16,12 +16,19 @@
 
 package android.os;
 
-import com.android.internal.util.FastPrintWriter;
-import com.android.internal.util.TypedProperties;
-
 import android.app.AppGlobals;
 import android.content.Context;
 import android.util.Log;
+
+import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.TypedProperties;
+
+import dalvik.bytecode.OpcodeInfo;
+import dalvik.system.VMDebug;
+
+import org.apache.harmony.dalvik.ddmc.Chunk;
+import org.apache.harmony.dalvik.ddmc.ChunkHandler;
+import org.apache.harmony.dalvik.ddmc.DdmServer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -31,21 +38,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.harmony.dalvik.ddmc.Chunk;
-import org.apache.harmony.dalvik.ddmc.ChunkHandler;
-import org.apache.harmony.dalvik.ddmc.DdmServer;
 
-import dalvik.bytecode.OpcodeInfo;
-import dalvik.system.VMDebug;
 
 
 /**
@@ -2219,13 +2221,26 @@ public final class Debug
     }
 
     /**
-     * Append the stack traces of a given native process to a specified file.
+     * Append the Java stack traces of a given native process to a specified file.
+     *
      * @param pid pid to dump.
      * @param file path of file to append dump to.
      * @param timeoutSecs time to wait in seconds, or 0 to wait forever.
      * @hide
      */
-    public static native void dumpNativeBacktraceToFileTimeout(int pid, String file, int timeoutSecs);
+    public static native boolean dumpJavaBacktraceToFileTimeout(int pid, String file,
+                                                                int timeoutSecs);
+
+    /**
+     * Append the native stack traces of a given process to a specified file.
+     *
+     * @param pid pid to dump.
+     * @param file path of file to append dump to.
+     * @param timeoutSecs time to wait in seconds, or 0 to wait forever.
+     * @hide
+     */
+    public static native boolean dumpNativeBacktraceToFileTimeout(int pid, String file,
+                                                                  int timeoutSecs);
 
     /**
      * Get description of unreachable native memory.

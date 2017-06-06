@@ -463,13 +463,15 @@ public class UsbDeviceManager {
                         UsbManager.USB_FUNCTION_ADB);
 
                 /**
-                 * Remove MTP from persistent config, to bring usb to a good state
-                 * after fixes to b/31814300. This block can be removed after the update
+                 * Previous versions can set persist config to mtp/ptp but it does not
+                 * get reset on OTA. Reset the property here instead.
                  */
                 String persisted = SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY);
-                if (UsbManager.containsFunction(persisted, UsbManager.USB_FUNCTION_MTP)) {
+                if (UsbManager.containsFunction(persisted, UsbManager.USB_FUNCTION_MTP)
+                        || UsbManager.containsFunction(persisted, UsbManager.USB_FUNCTION_PTP)) {
                     SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY,
-                            UsbManager.removeFunction(persisted, UsbManager.USB_FUNCTION_MTP));
+                            UsbManager.removeFunction(UsbManager.removeFunction(persisted,
+                                    UsbManager.USB_FUNCTION_MTP), UsbManager.USB_FUNCTION_PTP));
                 }
 
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
@@ -1230,10 +1232,13 @@ public class UsbDeviceManager {
         private String getDefaultFunctions() {
             String func = SystemProperties.get(getPersistProp(true),
                     UsbManager.USB_FUNCTION_NONE);
-            if (UsbManager.USB_FUNCTION_NONE.equals(func)) {
-                func = UsbManager.USB_FUNCTION_MTP;
+            // if ADB is enabled, reset functions to ADB
+            // else enable MTP as usual.
+            if (UsbManager.containsFunction(func, UsbManager.USB_FUNCTION_ADB)) {
+                return UsbManager.USB_FUNCTION_ADB;
+            } else {
+                return UsbManager.USB_FUNCTION_MTP;
             }
-            return func;
         }
 
         public void dump(IndentingPrintWriter pw) {

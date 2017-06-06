@@ -20,8 +20,8 @@
     android:insetLeft="2.5dp"
     android:insetRight="2.5dp" >
     <vector
-        android:width="17dp"
-        android:height="17dp"
+        android:width="18dp"
+        android:height="18dp"
         android:viewportWidth="19.0"
         android:viewportHeight="19.0">
         <group

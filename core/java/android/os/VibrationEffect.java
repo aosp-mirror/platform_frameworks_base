@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.hardware.vibrator.V1_0.Constants.Effect;
+import android.hardware.vibrator.V1_1.Constants.Effect_1_1;
 
 import java.util.Arrays;
 
@@ -41,7 +41,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
-    public static final int EFFECT_CLICK = Effect.CLICK;
+    public static final int EFFECT_CLICK = Effect_1_1.CLICK;
 
     /**
      * A double click effect.
@@ -49,7 +49,14 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
-    public static final int EFFECT_DOUBLE_CLICK = Effect.DOUBLE_CLICK;
+    public static final int EFFECT_DOUBLE_CLICK = Effect_1_1.DOUBLE_CLICK;
+
+    /**
+     * A tick effect.
+     * @see #get(int)
+     * @hide
+     */
+    public static final int EFFECT_TICK = Effect_1_1.TICK;
 
     /** @hide to prevent subclassing from outside of the framework */
     public VibrationEffect() { }
@@ -382,9 +389,14 @@ public abstract class VibrationEffect implements Parcelable {
 
         @Override
         public void validate() {
-            if (mEffectId != EFFECT_CLICK) {
-                throw new IllegalArgumentException(
-                        "Unknown prebaked effect type (value=" + mEffectId + ")");
+            switch (mEffectId) {
+                case EFFECT_CLICK:
+                case EFFECT_DOUBLE_CLICK:
+                case EFFECT_TICK:
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown prebaked effect type (value=" + mEffectId + ")");
             }
         }
 

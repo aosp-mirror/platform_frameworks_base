@@ -25,9 +25,7 @@ import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.ShortcutService.InvalidFileFormatException;
@@ -492,6 +490,10 @@ class ShortcutUser {
         // without users interaction it's really not a big deal, so we just clear existing
         // ShortcutLauncher instances in mLaunchers and add all the restored ones here.
 
+        int[] restoredLaunchers = new int[1];
+        int[] restoredPackages = new int[1];
+        int[] restoredShortcuts = new int[1];
+
         mLaunchers.clear();
         restored.forAllLaunchers(sl -> {
             // If the app is already installed and allowbackup = false, then ignore the restored
@@ -501,6 +503,7 @@ class ShortcutUser {
                 return;
             }
             addLauncher(sl);
+            restoredLaunchers[0]++;
         });
         restored.forAllPackages(sp -> {
             // If the app is already installed and allowbackup = false, then ignore the restored
@@ -516,10 +519,16 @@ class ShortcutUser {
                         + " Existing non-manifeset shortcuts will be overwritten.");
             }
             addPackage(sp);
+            restoredPackages[0]++;
+            restoredShortcuts[0] += sp.getShortcutCount();
         });
         // Empty the launchers and packages in restored to avoid accidentally using them.
         restored.mLaunchers.clear();
         restored.mPackages.clear();
+
+        Slog.i(TAG, "Restored: L=" + restoredLaunchers[0]
+                + " P=" + restoredPackages[0]
+                + " S=" + restoredShortcuts[0]);
     }
 
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {

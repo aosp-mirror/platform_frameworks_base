@@ -55,6 +55,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
@@ -908,10 +909,11 @@ class AppErrors {
 
         // For background ANRs, don't pass the ProcessCpuTracker to
         // avoid spending 1/2 second collecting stats to rank lastPids.
-        File tracesFile = mService.dumpStackTraces(true, firstPids,
-                                                   (isSilentANR) ? null : processCpuTracker,
-                                                   (isSilentANR) ? null : lastPids,
-                                                   nativePids);
+        File tracesFile = ActivityManagerService.dumpStackTraces(
+                true, firstPids,
+                (isSilentANR) ? null : processCpuTracker,
+                (isSilentANR) ? null : lastPids,
+                nativePids);
 
         String cpuInfo = null;
         if (ActivityManagerService.MONITOR_CPU_USAGE) {

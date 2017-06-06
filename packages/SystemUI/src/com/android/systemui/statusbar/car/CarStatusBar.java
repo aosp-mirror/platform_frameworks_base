@@ -346,7 +346,7 @@ public class CarStatusBar extends StatusBar implements
      * changes.
      */
     @Override
-    protected void onDensityOrFontScaleChanged() {
+    public void onDensityOrFontScaleChanged() {
         super.onDensityOrFontScaleChanged();
         mController.onDensityOrFontScaleChanged();
 

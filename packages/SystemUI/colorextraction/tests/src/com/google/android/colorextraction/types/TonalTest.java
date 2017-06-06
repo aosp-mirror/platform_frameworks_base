@@ -27,6 +27,7 @@ import android.util.Pair;
 import android.util.Range;
 
 import com.google.android.colorextraction.ColorExtractor;
+import com.google.android.colorextraction.ColorExtractor.GradientColors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,7 +77,8 @@ public class TonalTest {
 
         // Make sure that palette generation will fail
         Tonal tonal = new Tonal();
-        boolean success = tonal.extractInto(colors, new ColorExtractor.GradientColors());
+        boolean success = tonal.extractInto(colors, new GradientColors(), new GradientColors(),
+                new GradientColors());
         assertFalse("Cannot generate a tonal palette from blacklisted colors ", success);
     }
 }

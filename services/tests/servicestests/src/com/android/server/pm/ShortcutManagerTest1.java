@@ -4732,7 +4732,22 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
      * - Bitmaps
      */
     public void testBackupAndRestore() {
+
+        assertFileNotExists("user-0/shortcut_dump/restore-0-start.txt");
+        assertFileNotExists("user-0/shortcut_dump/restore-1-payload.xml");
+        assertFileNotExists("user-0/shortcut_dump/restore-2.txt");
+        assertFileNotExists("user-0/shortcut_dump/restore-3.txt");
+        assertFileNotExists("user-0/shortcut_dump/restore-4.txt");
+        assertFileNotExists("user-0/shortcut_dump/restore-5-finish.txt");
+
         prepareForBackupTest();
+
+        assertFileExistsWithContent("user-0/shortcut_dump/restore-0-start.txt");
+        assertFileExistsWithContent("user-0/shortcut_dump/restore-1-payload.xml");
+        assertFileExistsWithContent("user-0/shortcut_dump/restore-2.txt");
+        assertFileExistsWithContent("user-0/shortcut_dump/restore-3.txt");
+        assertFileExistsWithContent("user-0/shortcut_dump/restore-4.txt");
+        assertFileExistsWithContent("user-0/shortcut_dump/restore-5-finish.txt");
 
         checkBackupAndRestore_success();
     }

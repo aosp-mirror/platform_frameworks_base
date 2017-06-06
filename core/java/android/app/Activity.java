@@ -5790,6 +5790,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @return True if this is the root activity, else false.
      */
+    @Override
     public boolean isTaskRoot() {
         try {
             return ActivityManager.getService().getTaskForActivity(mToken, true) >= 0;
@@ -7207,6 +7208,9 @@ public class Activity extends ContextThemeWrapper
                 "dispatchPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode
                         + " " + newConfig);
         mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+        if (mWindow != null) {
+            mWindow.onPictureInPictureModeChanged(isInPictureInPictureMode);
+        }
         onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 
