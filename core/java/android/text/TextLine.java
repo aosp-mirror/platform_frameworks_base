@@ -989,16 +989,23 @@ class TextLine {
             return 0f;
         }
 
+        final boolean needsSpanMeasurement;
         if (mSpanned == null) {
+            needsSpanMeasurement = false;
+        } else {
+            mMetricAffectingSpanSpanSet.init(mSpanned, mStart + start, mStart + limit);
+            mCharacterStyleSpanSet.init(mSpanned, mStart + start, mStart + limit);
+            needsSpanMeasurement = mMetricAffectingSpanSpanSet.numberOfSpans != 0
+                    || mCharacterStyleSpanSet.numberOfSpans != 0;
+        }
+
+        if (!needsSpanMeasurement) {
             final TextPaint wp = mWorkPaint;
             wp.set(mPaint);
             wp.setHyphenEdit(adjustHyphenEdit(start, limit, wp.getHyphenEdit()));
             return handleText(wp, start, limit, start, limit, runIsRtl, c, x, top,
                     y, bottom, fmi, needWidth, measureLimit, null);
         }
-
-        mMetricAffectingSpanSpanSet.init(mSpanned, mStart + start, mStart + limit);
-        mCharacterStyleSpanSet.init(mSpanned, mStart + start, mStart + limit);
 
         // Shaping needs to take into account context up to metric boundaries,
         // but rendering needs to take into account character style boundaries.
