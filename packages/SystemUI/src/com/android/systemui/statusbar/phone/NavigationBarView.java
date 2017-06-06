@@ -74,7 +74,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     View[] mRotatedViews = new View[4];
 
     boolean mVertical;
-    boolean mScreenOn;
     private int mCurrentRotation = -1;
 
     boolean mShowMenu;
@@ -367,8 +366,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         super.setLayoutDirection(layoutDirection);
     }
 
-    public void notifyScreenOn(boolean screenOn) {
-        mScreenOn = screenOn;
+    public void notifyScreenOn() {
         setDisabledFlags(mDisabledFlags, true);
     }
 
