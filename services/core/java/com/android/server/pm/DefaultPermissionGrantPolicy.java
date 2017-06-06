@@ -936,7 +936,7 @@ final class DefaultPermissionGrantPolicy {
         // permissions if the version on the system image does not declare them.
         if (!isDefaultPhoneOrSms && pkg.isUpdatedSystemApp()) {
             PackageSetting sysPs = mService.mSettings.getDisabledSystemPkgLPr(pkg.packageName);
-            if (sysPs != null) {
+            if (sysPs != null && sysPs.pkg != null) {
                 if (sysPs.pkg.requestedPermissions.isEmpty()) {
                     return;
                 }
