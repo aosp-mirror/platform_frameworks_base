@@ -4074,6 +4074,11 @@ message MetricsEvent {
     // OS: O DR
     ACTION_WIFI_SIGNIN = 1008;
 
+    // OPEN: Settings->Connected Devices->Bluetooth->(click on details link for a paired device)
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    BLUETOOTH_DEVICE_DETAILS = 1009;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
