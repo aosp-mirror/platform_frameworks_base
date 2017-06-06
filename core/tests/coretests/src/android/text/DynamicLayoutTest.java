@@ -17,15 +17,14 @@
 package android.text;
 
 import static android.text.Layout.Alignment.ALIGN_NORMAL;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.style.ReplacementSpan;
@@ -54,6 +53,16 @@ public class DynamicLayoutTest {
         assertNull(layout.getBlocksAlwaysNeedToBeRedrawn());
     }
 
+    private class MockReplacementSpan extends ReplacementSpan {
+        public int getSize(Paint paint, CharSequence text, int start, int end,
+                Paint.FontMetricsInt fm) {
+            return 10;
+        }
+
+        public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top,
+                int y, int bottom, Paint paint) { }
+    }
+
     @Test
     public void testGetBlocksAlwaysNeedToBeRedrawn_replacementSpan() {
         final SpannableStringBuilder builder = new SpannableStringBuilder();
@@ -66,17 +75,11 @@ public class DynamicLayoutTest {
         builder.append("hijk lmn\n");
         assertNull(layout.getBlocksAlwaysNeedToBeRedrawn());
 
-        ReplacementSpan mockReplacementSpan = mock(ReplacementSpan.class);
-        when(mockReplacementSpan.getSize(any(), any(), any(), any(), any()))
-            .thenReturn(10);
-        doNothing().when(mockReplacementSpan)
-            .draw(any(), any(), any(), any(), any(), any(), any(), any(), any());
-
-        builder.setSpan(mockReplacementSpan, 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        builder.setSpan(new MockReplacementSpan(), 0, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         assertNotNull(layout.getBlocksAlwaysNeedToBeRedrawn());
         assertTrue(layout.getBlocksAlwaysNeedToBeRedrawn().contains(0));
 
-        builder.setSpan(mockReplacementSpan, 9, 13, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        builder.setSpan(new MockReplacementSpan(), 9, 13, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         assertTrue(layout.getBlocksAlwaysNeedToBeRedrawn().contains(0));
         assertTrue(layout.getBlocksAlwaysNeedToBeRedrawn().contains(1));
 
