@@ -1625,6 +1625,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public boolean packageHasActiveAdmins(String packageName) {
         return packageHasActiveAdmins(packageName, myUserId());
     }
@@ -4536,11 +4537,10 @@ public class DevicePolicyManager {
     /**
      * @return device owner component name, even if it's running on a different user.
      *
-     * <p>Requires the MANAGE_USERS permission.
-     *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public ComponentName getDeviceOwnerComponentOnAnyUser() {
         return getDeviceOwnerComponentInner(/* callingUserOnly =*/ false);
     }
@@ -4624,6 +4624,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public @Nullable String getDeviceOwner() {
         throwIfParentInstance("getDeviceOwner");
         final ComponentName name = getDeviceOwnerComponentOnCallingUser();
@@ -4641,6 +4642,7 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @TestApi
+    @SuppressLint("Doclava125")
     public boolean isDeviceManaged() {
         try {
             return mService.hasDeviceOwner();
@@ -4653,11 +4655,10 @@ public class DevicePolicyManager {
      * Returns the device owner name.  Note this method *will* return the device owner
      * name when it's running on a different user.
      *
-     * <p>Requires the MANAGE_USERS permission.
-     *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public String getDeviceOwnerNameOnAnyUser() {
         throwIfParentInstance("getDeviceOwnerNameOnAnyUser");
         if (mService != null) {
@@ -5030,6 +5031,7 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if the userId is invalid.
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public @Nullable String getProfileOwnerNameAsUser(int userId) throws IllegalArgumentException {
         throwIfParentInstance("getProfileOwnerNameAsUser");
         if (mService != null) {
@@ -7548,6 +7550,7 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @TestApi
+    @SuppressLint("Doclava125")
     public @Nullable CharSequence getDeviceOwnerOrganizationName() {
         try {
             return mService.getDeviceOwnerOrganizationName();
@@ -7759,6 +7762,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isDeviceProvisioningConfigApplied() {
         try {
             return mService.isDeviceProvisioningConfigApplied();
