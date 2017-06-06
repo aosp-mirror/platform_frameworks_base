@@ -17,15 +17,22 @@
 package com.android.server.connectivity.tethering;
 
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.RouteInfo;
 import android.net.util.SharedLog;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -35,9 +42,13 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
 import com.android.internal.util.test.FakeSettingsProvider;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
+
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -49,6 +60,7 @@ public class OffloadControllerTest {
 
     @Mock private OffloadHardwareInterface mHardware;
     @Mock private Context mContext;
+    final ArgumentCaptor<ArrayList> mStringArrayCaptor = ArgumentCaptor.forClass(ArrayList.class);
     private MockContentResolver mContentResolver;
 
     @Before public void setUp() throws Exception {
@@ -112,6 +124,89 @@ public class OffloadControllerTest {
         final InOrder inOrder = inOrder(mHardware);
         inOrder.verify(mHardware, never()).initOffloadConfig();
         inOrder.verify(mHardware, never()).initOffloadControl(anyObject());
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testSetUpstreamLinkPropertiesWorking() throws Exception {
+        setupFunctioningHardwareInterface();
+        final OffloadController offload =
+                new OffloadController(null, mHardware, mContentResolver, new SharedLog("test"));
+        offload.start();
+
+        final InOrder inOrder = inOrder(mHardware);
+        inOrder.verify(mHardware, times(1)).initOffloadConfig();
+        inOrder.verify(mHardware, times(1)).initOffloadControl(
+                any(OffloadHardwareInterface.ControlCallback.class));
+        inOrder.verifyNoMoreInteractions();
+
+        offload.setUpstreamLinkProperties(null);
+        inOrder.verify(mHardware, times(1)).setUpstreamParameters(
+                eq(null), eq(null), eq(null), eq(null));
+        inOrder.verifyNoMoreInteractions();
+        reset(mHardware);
+
+        final LinkProperties lp = new LinkProperties();
+
+        final String testIfName = "rmnet_data17";
+        lp.setInterfaceName(testIfName);
+        offload.setUpstreamLinkProperties(lp);
+        inOrder.verify(mHardware, times(1)).setUpstreamParameters(
+                eq(testIfName), eq(null), eq(null), mStringArrayCaptor.capture());
+        assertTrue(mStringArrayCaptor.getValue().isEmpty());
+        inOrder.verifyNoMoreInteractions();
+
+        final String ipv4Addr = "192.0.2.5";
+        final String linkAddr = ipv4Addr + "/24";
+        lp.addLinkAddress(new LinkAddress(linkAddr));
+        offload.setUpstreamLinkProperties(lp);
+        inOrder.verify(mHardware, times(1)).setUpstreamParameters(
+                eq(testIfName), eq(ipv4Addr), eq(null), mStringArrayCaptor.capture());
+        assertTrue(mStringArrayCaptor.getValue().isEmpty());
+        inOrder.verifyNoMoreInteractions();
+
+        final String ipv4Gateway = "192.0.2.1";
+        lp.addRoute(new RouteInfo(InetAddress.getByName(ipv4Gateway)));
+        offload.setUpstreamLinkProperties(lp);
+        inOrder.verify(mHardware, times(1)).setUpstreamParameters(
+                eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), mStringArrayCaptor.capture());
+        assertTrue(mStringArrayCaptor.getValue().isEmpty());
+        inOrder.verifyNoMoreInteractions();
+
+        final String ipv6Gw1 = "fe80::cafe";
+        lp.addRoute(new RouteInfo(InetAddress.getByName(ipv6Gw1)));
+        offload.setUpstreamLinkProperties(lp);
+        inOrder.verify(mHardware, times(1)).setUpstreamParameters(
+                eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), mStringArrayCaptor.capture());
+        ArrayList<String> v6gws = mStringArrayCaptor.getValue();
+        assertEquals(1, v6gws.size());
+        assertTrue(v6gws.contains(ipv6Gw1));
+        inOrder.verifyNoMoreInteractions();
+
+        final String ipv6Gw2 = "fe80::d00d";
+        lp.addRoute(new RouteInfo(InetAddress.getByName(ipv6Gw2)));
+        offload.setUpstreamLinkProperties(lp);
+        inOrder.verify(mHardware, times(1)).setUpstreamParameters(
+                eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), mStringArrayCaptor.capture());
+        v6gws = mStringArrayCaptor.getValue();
+        assertEquals(2, v6gws.size());
+        assertTrue(v6gws.contains(ipv6Gw1));
+        assertTrue(v6gws.contains(ipv6Gw2));
+        inOrder.verifyNoMoreInteractions();
+
+        final LinkProperties stacked = new LinkProperties();
+        stacked.setInterfaceName("stacked");
+        stacked.addLinkAddress(new LinkAddress("192.0.2.129/25"));
+        stacked.addRoute(new RouteInfo(InetAddress.getByName("192.0.2.254")));
+        stacked.addRoute(new RouteInfo(InetAddress.getByName("fe80::bad:f00")));
+        assertTrue(lp.addStackedLink(stacked));
+        offload.setUpstreamLinkProperties(lp);
+        inOrder.verify(mHardware, times(1)).setUpstreamParameters(
+                eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), mStringArrayCaptor.capture());
+        v6gws = mStringArrayCaptor.getValue();
+        assertEquals(2, v6gws.size());
+        assertTrue(v6gws.contains(ipv6Gw1));
+        assertTrue(v6gws.contains(ipv6Gw2));
         inOrder.verifyNoMoreInteractions();
     }
 }
