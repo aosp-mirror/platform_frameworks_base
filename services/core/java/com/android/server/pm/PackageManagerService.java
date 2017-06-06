@@ -14898,7 +14898,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * @return true if verification should be performed
      */
-    private boolean isVerificationEnabled(int userId, int installFlags) {
+    private boolean isVerificationEnabled(int userId, int installFlags, int installerUid) {
         if (!DEFAULT_VERIFY_ENABLE) {
             return false;
         }
@@ -14918,6 +14918,23 @@ public class PackageManagerService extends IPackageManager.Stub
             if (android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                     android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) == 0) {
                 return false;
+            }
+        } else {
+            // only when not installed from ADB, skip verification for instant apps when
+            // the installer and verifier are the same.
+            if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
+                if (mInstantAppInstallerActivity != null
+                        && mInstantAppInstallerActivity.packageName.equals(
+                                mRequiredVerifierPackage)) {
+                    try {
+                        mContext.getSystemService(AppOpsManager.class)
+                                .checkPackage(installerUid, mRequiredVerifierPackage);
+                        if (DEBUG_VERIFY) {
+                            Slog.i(TAG, "disable verification for instant app");
+                        }
+                        return false;
+                    } catch (SecurityException ignore) { }
+                }
             }
         }
 
@@ -15753,8 +15770,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int requiredUid = mRequiredVerifierPackage == null ? -1
                         : getPackageUid(mRequiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
                                 verifierUser.getIdentifier());
+                final int installerUid =
+                        verificationInfo == null ? -1 : verificationInfo.installerUid;
                 if (!origin.existing && requiredUid != -1
-                        && isVerificationEnabled(verifierUser.getIdentifier(), installFlags)) {
+                        && isVerificationEnabled(
+                                verifierUser.getIdentifier(), installFlags, installerUid)) {
                     final Intent verification = new Intent(
                             Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
                     verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
