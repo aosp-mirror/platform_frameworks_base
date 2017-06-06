@@ -312,7 +312,9 @@ public abstract class QSTile<TState extends State> {
     protected abstract void setListening(boolean listening);
 
     protected void handleDestroy() {
-        setListening(false);
+        if (mListeners.size() != 0) {
+            setListening(false);
+        }
         mCallbacks.clear();
     }
 
