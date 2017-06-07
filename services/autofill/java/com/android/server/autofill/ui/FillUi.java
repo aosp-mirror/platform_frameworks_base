@@ -503,7 +503,7 @@ final class FillUi {
                         final String value = item.getValue();
                         // No value, i.e. null, matches any filter
                         if (value == null
-                                || value.toLowerCase().contains(constraintLowerCase)) {
+                                || value.toLowerCase().startsWith(constraintLowerCase)) {
                             filteredItems.add(item);
                         }
                     }
