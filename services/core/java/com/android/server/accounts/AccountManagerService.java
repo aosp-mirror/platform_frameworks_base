@@ -4446,11 +4446,12 @@ public class AccountManagerService
     }
 
     private void startChooseAccountActivityWithAccounts(
-        IAccountManagerResponse response, Account[] accounts) {
+        IAccountManagerResponse response, Account[] accounts, String callingPackage) {
         Intent intent = new Intent(mContext, ChooseAccountActivity.class);
         intent.putExtra(AccountManager.KEY_ACCOUNTS, accounts);
         intent.putExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE,
                 new AccountManagerResponse(response));
+        intent.putExtra(AccountManager.KEY_ANDROID_PACKAGE_NAME, callingPackage);
 
         mContext.startActivityAsUser(intent, UserHandle.of(UserHandle.getCallingUserId()));
     }
@@ -4461,7 +4462,7 @@ public class AccountManagerService
         String callingPackage) {
 
         if (needToStartChooseAccountActivity(accounts, callingPackage)) {
-            startChooseAccountActivityWithAccounts(response, accounts);
+            startChooseAccountActivityWithAccounts(response, accounts, callingPackage);
             return;
         }
         if (accounts.length == 1) {
