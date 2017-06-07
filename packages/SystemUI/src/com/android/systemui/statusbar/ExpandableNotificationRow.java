@@ -1973,6 +1973,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mGuts != null) {
             mGuts.setActualHeight(height);
         }
+        if (mMenuRow.getMenuView() != null) {
+            mMenuRow.onHeightUpdate();
+        }
     }
 
     @Override
