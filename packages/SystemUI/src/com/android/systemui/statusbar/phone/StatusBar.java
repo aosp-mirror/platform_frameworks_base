@@ -6269,6 +6269,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean isLockscreenPublicMode(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            return mLockscreenPublicMode.get(mCurrentUserId, false);
+        }
         return mLockscreenPublicMode.get(userId, false);
     }
 
