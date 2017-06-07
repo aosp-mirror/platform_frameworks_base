@@ -1168,7 +1168,7 @@ public class Notification implements Parcelable
      */
     public static final int GROUP_ALERT_CHILDREN = 2;
 
-    private int mGroupAlertBehavior = GROUP_ALERT_CHILDREN;
+    private int mGroupAlertBehavior = GROUP_ALERT_ALL;
 
     /**
      * If this notification is being shown as a badge, always show as a number.
