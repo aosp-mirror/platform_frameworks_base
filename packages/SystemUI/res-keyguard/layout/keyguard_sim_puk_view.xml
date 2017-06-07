@@ -48,9 +48,10 @@
             android:layoutDirection="ltr"
             >
         <include layout="@layout/keyguard_esim_area"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_marginTop="@dimen/eca_overlap" />
+            android:id="@+id/keyguard_esim_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eca_overlap" />
 
         <RelativeLayout
                 android:id="@+id/row0"
