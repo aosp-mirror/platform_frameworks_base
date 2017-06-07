@@ -73,6 +73,7 @@ public class VibratorService extends IVibratorService.Stub
 
     private final LinkedList<VibrationInfo> mPreviousVibrations;
     private final int mPreviousVibrationsLimit;
+    private final boolean mAllowPriorityVibrationsInLowPowerMode;
     private final boolean mSupportsAmplitudeControl;
     private final int mDefaultVibrationAmplitude;
     private final VibrationEffect[] mFallbackEffects;
@@ -212,6 +213,9 @@ public class VibratorService extends IVibratorService.Stub
 
         mDefaultVibrationAmplitude = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultVibrationAmplitude);
+
+        mAllowPriorityVibrationsInLowPowerMode = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowPriorityVibrationsInLowPowerMode);
 
         mPreviousVibrations = new LinkedList<>();
 
@@ -456,7 +460,7 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private void startVibrationLocked(final Vibration vib) {
-        if (mLowPowerMode && vib.mUsageHint != AudioAttributes.USAGE_NOTIFICATION_RINGTONE) {
+        if (!isAllowedToVibrate(vib)) {
             if (DEBUG) {
                 Slog.e(TAG, "Vibrate ignored, low power mode");
             }
@@ -503,6 +507,26 @@ public class VibratorService extends IVibratorService.Stub
         } else {
             Slog.e(TAG, "Unknown vibration type, ignoring");
         }
+    }
+
+    private boolean isAllowedToVibrate(Vibration vib) {
+        if (!mLowPowerMode) {
+            return true;
+        }
+        if (vib.mUsageHint == AudioAttributes.USAGE_NOTIFICATION_RINGTONE) {
+            return true;
+        }
+        if (!mAllowPriorityVibrationsInLowPowerMode) {
+            return false;
+        }
+        if (vib.mUsageHint == AudioAttributes.USAGE_ALARM ||
+            vib.mUsageHint == AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY ||
+            vib.mUsageHint == AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST) {
+
+            return true;
+        }
+
+        return false;
     }
 
     private boolean shouldVibrateForRingtone() {

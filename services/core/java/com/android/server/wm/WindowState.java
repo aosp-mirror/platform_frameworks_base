@@ -2231,15 +2231,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWinAnimator.applyEnterAnimationLocked();
         }
 
-        if (isConfigChanged()) {
-            final Configuration globalConfig = mService.mRoot.getConfiguration();
-            final Configuration overrideConfig = getMergedOverrideConfiguration();
-            mergedConfiguration.setConfiguration(globalConfig, overrideConfig);
-            if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + this
-                    + " visible with new global config: " + globalConfig
-                    + " merged override config: " + overrideConfig);
-            mLastReportedConfiguration.setTo(getConfiguration());
-        }
+        // always report back the new configuration
+        final Configuration globalConfig = mService.mRoot.getConfiguration();
+        final Configuration overrideConfig = getMergedOverrideConfiguration();
+        mergedConfiguration.setConfiguration(globalConfig, overrideConfig);
+        if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + this
+                + " reporting new global config: " + globalConfig
+                + " merged override config: " + overrideConfig);
+        mLastReportedConfiguration.setTo(getConfiguration());
     }
 
     void adjustStartingWindowFlags() {

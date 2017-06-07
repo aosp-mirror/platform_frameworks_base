@@ -162,6 +162,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private DividerState mState;
     private final SurfaceFlingerVsyncChoreographer mSfChoreographer;
 
+    // The view is removed or in the process of been removed from the system.
+    private boolean mRemoved;
+
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -321,6 +324,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         EventBus.getDefault().unregister(this);
+    }
+
+    void onDividerRemoved() {
+        mRemoved = true;
+        mHandler.removeMessages(MSG_RESIZE_STACK);
     }
 
     @Override
@@ -917,6 +925,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     public void resizeStack(int position, int taskPosition, SnapTarget taskSnapTarget) {
+        if (mRemoved) {
+            // This divider view has been removed so shouldn't have any additional influence.
+            return;
+        }
         calculateBoundsForPosition(position, mDockSide, mDockedRect);
 
         if (mDockedRect.equals(mLastResizeRect) && !mEntranceAnimationRunning) {

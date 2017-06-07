@@ -67,6 +67,8 @@ public class WifiConfiguration implements Parcelable {
     public static final String updateIdentiferVarName = "update_identifier";
     /** {@hide} */
     public static final int INVALID_NETWORK_ID = -1;
+    /** {@hide} */
+    public static final int LOCAL_ONLY_NETWORK_ID = -2;
 
     /** {@hide} */
     private String mPasspointManagementObjectTree;
