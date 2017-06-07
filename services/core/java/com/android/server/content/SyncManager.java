@@ -1858,7 +1858,7 @@ public class SyncManager {
                     account.account.name, account.userId, account.account.type);
 
             pw.println("=======================================================================");
-            final PrintTable table = new PrintTable(12);
+            final PrintTable table = new PrintTable(13);
             table.set(0, 0,
                     "Authority", // 0
                     "Syncable",  // 1
@@ -1871,7 +1871,8 @@ public class SyncManager {
                     "User",      // 8
                     "Tot",       // 9
                     "Time",      // 10
-                    "Last Sync" // 11
+                    "Last Sync", // 11
+                    "Etc"        // 12
             );
 
             final List<RegisteredServicesCache.ServiceInfo<SyncAdapterType>> sorted =
@@ -1921,6 +1922,7 @@ public class SyncManager {
                     }
                 }
 
+                row1 = row;
                 if (status.lastSuccessTime != 0) {
                     table.set(row1++, 11, SyncStorageEngine.SOURCES[status.lastSuccessSource]
                             + " " + "SUCCESS");
