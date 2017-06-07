@@ -2511,6 +2511,18 @@ public class AccountManager {
         return new AuthenticatorException(message);
     }
 
+    private void getAccountByTypeAndFeatures(String accountType, String[] features,
+        AccountManagerCallback<Bundle> callback, Handler handler) {
+        (new AmsTask(null, handler, callback) {
+            @Override
+            public void doWork() throws RemoteException {
+                mService.getAccountByTypeAndFeatures(mResponse, accountType, features,
+                    mContext.getOpPackageName());
+            }
+
+        }).start();
+    }
+
     private class GetAuthTokenByTypeAndFeaturesTask
             extends AmsTask implements AccountManagerCallback<Bundle> {
         GetAuthTokenByTypeAndFeaturesTask(final String accountType, final String authTokenType,
@@ -2537,13 +2549,16 @@ public class AccountManager {
 
         @Override
         public void doWork() throws RemoteException {
-            getAccountsByTypeAndFeatures(mAccountType, mFeatures,
-                    new AccountManagerCallback<Account[]>() {
+            getAccountByTypeAndFeatures(mAccountType, mFeatures,
+                    new AccountManagerCallback<Bundle>() {
                         @Override
-                        public void run(AccountManagerFuture<Account[]> future) {
-                            Account[] accounts;
+                        public void run(AccountManagerFuture<Bundle> future) {
+                            String accountName = null;
+                            String accountType = null;
                             try {
-                                accounts = future.getResult();
+                                Bundle result = future.getResult();
+                                accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+                                accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
                             } catch (OperationCanceledException e) {
                                 setException(e);
                                 return;
@@ -2555,9 +2570,7 @@ public class AccountManager {
                                 return;
                             }
 
-                            mNumAccounts = accounts.length;
-
-                            if (accounts.length == 0) {
+                            if (accountName == null) {
                                 if (mActivity != null) {
                                     // no accounts, add one now. pretend that the user directly
                                     // made this request
@@ -2577,62 +2590,16 @@ public class AccountManager {
                                     }
                                     // we are done
                                 }
-                            } else if (accounts.length == 1) {
+                            } else {
+                                mNumAccounts = 1;
+                                Account account = new Account(accountName, accountType);
                                 // have a single account, return an authtoken for it
                                 if (mActivity == null) {
-                                    mFuture = getAuthToken(accounts[0], mAuthTokenType,
+                                    mFuture = getAuthToken(account, mAuthTokenType,
                                             false /* notifyAuthFailure */, mMyCallback, mHandler);
                                 } else {
-                                    mFuture = getAuthToken(accounts[0],
-                                            mAuthTokenType, mLoginOptions,
+                                    mFuture = getAuthToken(account, mAuthTokenType, mLoginOptions,
                                             mActivity, mMyCallback, mHandler);
-                                }
-                            } else {
-                                if (mActivity != null) {
-                                    IAccountManagerResponse chooseResponse =
-                                            new IAccountManagerResponse.Stub() {
-                                        @Override
-                                        public void onResult(Bundle value) throws RemoteException {
-                                            Account account = new Account(
-                                                    value.getString(KEY_ACCOUNT_NAME),
-                                                    value.getString(KEY_ACCOUNT_TYPE),
-                                                    value.getString(KEY_ACCOUNT_ACCESS_ID));
-                                            mFuture = getAuthToken(account, mAuthTokenType,
-                                                    mLoginOptions,  mActivity, mMyCallback,
-                                                    mHandler);
-                                        }
-
-                                        @Override
-                                        public void onError(int errorCode, String errorMessage)
-                                                throws RemoteException {
-                                            mResponse.onError(errorCode, errorMessage);
-                                        }
-                                    };
-                                    // have many accounts, launch the chooser
-                                    Intent intent = new Intent();
-                                    // TODO - this activity will not include
-                                    // USER_MANAGED_NOT_VISIBLE
-                                    // accounts. We need to move method to service
-                                    ComponentName componentName = ComponentName.unflattenFromString(
-                                            Resources.getSystem().getString(
-                                                    R.string.config_chooseAccountActivity));
-                                    intent.setClassName(componentName.getPackageName(),
-                                            componentName.getClassName());
-                                    intent.putExtra(KEY_ACCOUNTS, accounts);
-                                    intent.putExtra(KEY_ACCOUNT_MANAGER_RESPONSE,
-                                            new AccountManagerResponse(chooseResponse));
-                                    mActivity.startActivity(intent);
-                                    // the result will arrive via the IAccountManagerResponse
-                                } else {
-                                    // send result since we can't prompt to select an account
-                                    Bundle result = new Bundle();
-                                    result.putString(KEY_ACCOUNTS, null);
-                                    try {
-                                        mResponse.onResult(result);
-                                    } catch (RemoteException e) {
-                                        // this will never happen
-                                    }
-                                    // we are done
                                 }
                             }
                         }}, mHandler);
@@ -2723,8 +2690,8 @@ public class AccountManager {
     public AccountManagerFuture<Bundle> getAuthTokenByFeatures(
             final String accountType, final String authTokenType, final String[] features,
             final Activity activity, final Bundle addAccountOptions,
-            final Bundle getAuthTokenOptions,
-            final AccountManagerCallback<Bundle> callback, final Handler handler) {
+            final Bundle getAuthTokenOptions, final AccountManagerCallback<Bundle> callback,
+            final Handler handler) {
         if (accountType == null) throw new IllegalArgumentException("account type is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         final GetAuthTokenByTypeAndFeaturesTask task =

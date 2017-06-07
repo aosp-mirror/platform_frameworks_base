@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.WorkerThread;
@@ -1699,6 +1700,7 @@ public class StorageManager {
 
     /** @hide */
     @SystemApi
+    @SuppressLint("Doclava125")
     public long getAllocatableBytes(@NonNull UUID storageUuid,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         try {
@@ -1713,6 +1715,7 @@ public class StorageManager {
 
     /** @removed */
     @Deprecated
+    @SuppressLint("Doclava125")
     public long getAllocatableBytes(@NonNull File path,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         return getAllocatableBytes(getUuidForPath(path), flags);
@@ -1747,6 +1750,7 @@ public class StorageManager {
 
     /** @hide */
     @SystemApi
+    @SuppressLint("Doclava125")
     public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         try {
@@ -1760,6 +1764,7 @@ public class StorageManager {
 
     /** @removed */
     @Deprecated
+    @SuppressLint("Doclava125")
     public void allocateBytes(@NonNull File path, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         allocateBytes(getUuidForPath(path), bytes, flags);
@@ -1796,6 +1801,7 @@ public class StorageManager {
 
     /** @hide */
     @SystemApi
+    @SuppressLint("Doclava125")
     public void allocateBytes(FileDescriptor fd, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         final File file = ParcelFileDescriptor.getFile(fd);

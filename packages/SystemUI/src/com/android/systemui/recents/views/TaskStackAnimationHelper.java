@@ -82,8 +82,6 @@ public class TaskStackAnimationHelper {
 
     private static final int ENTER_FROM_HOME_ALPHA_DURATION = 100;
     public static final int ENTER_FROM_HOME_TRANSLATION_DURATION = 300;
-    private static final Interpolator ENTER_FROM_HOME_TRANSLATION_INTERPOLATOR =
-            Interpolators.LINEAR_OUT_SLOW_IN;
     private static final Interpolator ENTER_FROM_HOME_ALPHA_INTERPOLATOR = Interpolators.LINEAR;
 
     public static final int EXIT_TO_HOME_TRANSLATION_DURATION = 200;
@@ -260,17 +258,18 @@ public class TaskStackAnimationHelper {
             } else if (launchState.launchedFromHome) {
                 // Animate the tasks up, but offset the animations to be relative to the front-most
                 // task animation
+                final float startOffsetFraction = (float) (Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS,
+                        taskIndexFromFront) * mEnterAndExitFromHomeTranslationOffset) /
+                        ENTER_FROM_HOME_TRANSLATION_DURATION;
                 AnimationProps taskAnimation = new AnimationProps()
-                        .setInitialPlayTime(AnimationProps.BOUNDS,
-                                Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS, taskIndexFromFront) *
-                                        mEnterAndExitFromHomeTranslationOffset)
                         .setStartDelay(AnimationProps.ALPHA,
                                 Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS, taskIndexFromFront) *
                                         FRAME_OFFSET_MS)
                         .setDuration(AnimationProps.BOUNDS, ENTER_FROM_HOME_TRANSLATION_DURATION)
                         .setDuration(AnimationProps.ALPHA, ENTER_FROM_HOME_ALPHA_DURATION)
                         .setInterpolator(AnimationProps.BOUNDS,
-                                ENTER_FROM_HOME_TRANSLATION_INTERPOLATOR)
+                                new RecentsEntrancePathInterpolator(0f, 0f, 0.2f, 1f,
+                                        startOffsetFraction))
                         .setInterpolator(AnimationProps.ALPHA, ENTER_FROM_HOME_ALPHA_INTERPOLATOR)
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();

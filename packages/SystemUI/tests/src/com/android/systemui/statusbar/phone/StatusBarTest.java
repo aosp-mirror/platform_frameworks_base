@@ -72,7 +72,7 @@ public class StatusBarTest extends SysuiTestCase {
     NotificationData mNotificationData;
     PowerManager mPowerManager;
     SystemServicesProxy mSystemServicesProxy;
-
+    NotificationPanelView mNotificationPanelView;
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     @Before
@@ -85,6 +85,7 @@ public class StatusBarTest extends SysuiTestCase {
         mHeadsUpManager = mock(HeadsUpManager.class);
         mNotificationData = mock(NotificationData.class);
         mSystemServicesProxy = mock(SystemServicesProxy.class);
+        mNotificationPanelView = mock(NotificationPanelView.class);
         IPowerManager powerManagerService = mock(IPowerManager.class);
         HandlerThread handlerThread = new HandlerThread("TestThread");
         handlerThread.start();
@@ -95,7 +96,7 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
-                mNotificationData, mPowerManager, mSystemServicesProxy);
+                mNotificationData, mPowerManager, mSystemServicesProxy, mNotificationPanelView);
 
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
@@ -287,7 +288,7 @@ public class StatusBarTest extends SysuiTestCase {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
                 NotificationStackScrollLayout stack, HeadsUpManager hum, NotificationData nd,
-                PowerManager pm, SystemServicesProxy ssp) {
+                PowerManager pm, SystemServicesProxy ssp, NotificationPanelView panelView) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -297,6 +298,7 @@ public class StatusBarTest extends SysuiTestCase {
             mUseHeadsUp = true;
             mPowerManager = pm;
             mSystemServicesProxy = ssp;
+            mNotificationPanel = panelView;
         }
 
         @Override
