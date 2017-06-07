@@ -64,6 +64,14 @@
     <!-- Status for networks disabled from authentication failure (wrong password
          or certificate). -->
     <string name="wifi_disabled_password_failure">Authentication problem</string>
+
+    <!-- Status detail for a network that can't be connected to for some reason -->
+    <string name="wifi_cant_connect">Can\'t connect</string>
+    <!-- Status for a named network that can't be connected to for some reason-->
+    <string name="wifi_cant_connect_to_ap">Can\'t connect to \'<xliff:g id="ap_name">%1$s</xliff:g>\'</string>
+    <!-- Message shown when the user likely entered an incorrect password for a wifi network -->
+    <string name="wifi_check_password_try_again">Check password and try again</string>
+
     <!-- Summary for the remembered network but currently not in range. -->
     <string name="wifi_not_in_range">Not in range</string>
     <!-- Summary for the network but no internet connection was detected. -->
