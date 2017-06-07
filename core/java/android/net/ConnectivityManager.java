@@ -1098,6 +1098,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS)
     public String getCaptivePortalServerUrl() {
         try {
             return mService.getCaptivePortalServerUrl();
@@ -2061,10 +2062,11 @@ public class ConnectivityManager {
      * {@hide}
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public boolean isTetheringSupported() {
         try {
-            return mService.isTetheringSupported();
+            String pkgName = mContext.getOpPackageName();
+            return mService.isTetheringSupported(pkgName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2094,6 +2096,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public void startTethering(int type, boolean showProvisioningUi,
             final OnStartTetheringCallback callback) {
         startTethering(type, showProvisioningUi, callback, null);
