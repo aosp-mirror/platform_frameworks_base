@@ -33,32 +33,24 @@ import java.util.HashMap;
  *
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public class LowpanManager {
     private static final String TAG = LowpanManager.class.getSimpleName();
 
-    //////////////////////////////////////////////////////////////////////////
-    // Public Classes
-
     /** @hide */
-    //@SystemApi
+    // @SystemApi
     public abstract static class Callback {
-        public void onInterfaceAdded(LowpanInterface lowpan_interface) {}
+        public void onInterfaceAdded(LowpanInterface lowpanInterface) {}
 
-        public void onInterfaceRemoved(LowpanInterface lowpan_interface) {}
+        public void onInterfaceRemoved(LowpanInterface lowpanInterface) {}
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    // Instance Variables
-
+    private Context mContext;
     private ILowpanManager mManager;
     private HashMap<Integer, ILowpanManagerListener> mListenerMap = new HashMap<>();
 
-    //////////////////////////////////////////////////////////////////////////
-
     private static LowpanManager sSingletonInstance;
 
-    //////////////////////////////////////////////////////////////////////////
     // Static Methods
 
     /** Returns a reference to the LowpanManager object, allocating it if necessary. */
@@ -75,7 +67,6 @@ public class LowpanManager {
         return sSingletonInstance;
     }
 
-    //////////////////////////////////////////////////////////////////////////
     // Constructors
 
     /**
@@ -84,28 +75,34 @@ public class LowpanManager {
      */
     private LowpanManager() {}
 
-    //////////////////////////////////////////////////////////////////////////
     // Private Methods
 
     /**
      * Returns a reference to the ILowpanManager interface, provided by the LoWPAN Manager Service.
      */
     @Nullable
-    private ILowpanManager getILowpanManager() {
+    private synchronized ILowpanManager getILowpanManager() {
+        // Use a local reference of this object for thread safety.
         ILowpanManager manager = mManager;
+
         if (manager == null) {
             IBinder serviceBinder =
                     new ServiceManager().getService(ILowpanManager.LOWPAN_SERVICE_NAME);
-            mManager = manager = ILowpanManager.Stub.asInterface(serviceBinder);
+
+            manager = ILowpanManager.Stub.asInterface(serviceBinder);
+
+            mManager = manager;
 
             // Add any listeners
             synchronized (mListenerMap) {
-                for (Integer hashObj : mListenerMap.keySet()) {
+                for (ILowpanManagerListener listener : mListenerMap.values()) {
                     try {
-                        manager.addListener(mListenerMap.get(hashObj));
+                        manager.addListener(listener);
+
                     } catch (RemoteException x) {
                         // Consider any failure here as implying the manager is defunct
-                        mManager = manager = null;
+                        mManager = null;
+                        manager = null;
                     }
                 }
             }
@@ -113,7 +110,6 @@ public class LowpanManager {
         return manager;
     }
 
-    //////////////////////////////////////////////////////////////////////////
     // Public Methods
 
     /**
@@ -141,6 +137,7 @@ public class LowpanManager {
                 manager = getILowpanManager();
             }
         }
+
         return ret;
     }
 
@@ -151,7 +148,7 @@ public class LowpanManager {
     @Nullable
     public LowpanInterface getInterface() {
         String[] ifaceList = getInterfaceList();
-        if (ifaceList != null && ifaceList.length > 0) {
+        if (ifaceList.length > 0) {
             return getInterface(ifaceList[0]);
         }
         return null;
@@ -165,24 +162,16 @@ public class LowpanManager {
     public String[] getInterfaceList() {
         ILowpanManager manager = getILowpanManager();
 
-        if (manager != null) {
+        // Maximum number of tries is two. We should only try
+        // more than once if our manager has died or there
+        // was some sort of AIDL buffer full event.
+        for (int i = 0; i < 2 && manager != null; i++) {
             try {
                 return manager.getInterfaceList();
-
             } catch (RemoteException x) {
                 // In all of the cases when we get this exception, we reconnect and try again
                 mManager = null;
-                try {
-                    manager = getILowpanManager();
-                    if (manager != null) {
-                        return manager.getInterfaceList();
-                    }
-                } catch (RemoteException ex) {
-                    // Something weird is going on, so we log it
-                    // and fall back thru to returning an empty array.
-                    Log.e(TAG, ex.toString());
-                    mManager = null;
-                }
+                manager = getILowpanManager();
             }
         }
 
@@ -200,14 +189,14 @@ public class LowpanManager {
             throws LowpanException {
         ILowpanManagerListener.Stub listenerBinder =
                 new ILowpanManagerListener.Stub() {
-                    public void onInterfaceAdded(ILowpanInterface lowpan_interface) {
+                    public void onInterfaceAdded(ILowpanInterface lowpanInterface) {
                         Runnable runnable =
                                 new Runnable() {
                                     @Override
                                     public void run() {
                                         cb.onInterfaceAdded(
                                                 LowpanInterface.getInterfaceFromBinder(
-                                                        lowpan_interface.asBinder()));
+                                                        lowpanInterface.asBinder()));
                                     }
                                 };
 
@@ -218,14 +207,14 @@ public class LowpanManager {
                         }
                     }
 
-                    public void onInterfaceRemoved(ILowpanInterface lowpan_interface) {
+                    public void onInterfaceRemoved(ILowpanInterface lowpanInterface) {
                         Runnable runnable =
                                 new Runnable() {
                                     @Override
                                     public void run() {
                                         cb.onInterfaceRemoved(
                                                 LowpanInterface.getInterfaceFromBinder(
-                                                        lowpan_interface.asBinder()));
+                                                        lowpanInterface.asBinder()));
                                     }
                                 };
 

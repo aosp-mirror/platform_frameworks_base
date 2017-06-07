@@ -28,7 +28,7 @@ import android.util.AndroidException;
  * @see LowpanInterface
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public class LowpanException extends AndroidException {
     // Make the eclipse warning about serializable exceptions go away
     private static final long serialVersionUID = 0x31863cbe562b0e11l; // randomly generated

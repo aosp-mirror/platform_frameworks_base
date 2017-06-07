@@ -16,13 +16,12 @@
 
 package android.net.lowpan;
 
-
 /**
  * Describes the result from one channel of an energy scan.
  *
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public class LowpanEnergyScanResult {
     public static final int UNKNOWN = Integer.MAX_VALUE;
 

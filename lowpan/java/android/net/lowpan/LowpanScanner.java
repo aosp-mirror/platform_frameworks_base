@@ -25,7 +25,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,11 +35,10 @@ import java.util.Map;
  * @see LowpanInterface
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public class LowpanScanner {
     private static final String TAG = LowpanInterface.class.getSimpleName();
 
-    //////////////////////////////////////////////////////////////////////////
     // Public Classes
 
     /**
@@ -48,7 +46,7 @@ public class LowpanScanner {
      *
      * @hide
      */
-    //@SystemApi
+    // @SystemApi
     public abstract static class Callback {
         public void onNetScanBeacon(LowpanBeaconInfo beacon) {}
 
@@ -57,16 +55,14 @@ public class LowpanScanner {
         public void onScanFinished() {}
     }
 
-    //////////////////////////////////////////////////////////////////////////
     // Instance Variables
 
     private ILowpanInterface mBinder;
     private Callback mCallback = null;
     private Handler mHandler = null;
-    private List<Integer> mChannelMask = null;
+    private ArrayList<Integer> mChannelMask = null;
     private int mTxPower = Integer.MAX_VALUE;
 
-    //////////////////////////////////////////////////////////////////////////
     // Constructors/Accessors and Exception Glue
 
     LowpanScanner(@NonNull ILowpanInterface binder) {
@@ -74,7 +70,7 @@ public class LowpanScanner {
     }
 
     /** Sets an instance of {@link LowpanScanner.Callback} to receive events. */
-    public void setCallback(@Nullable Callback cb, @Nullable Handler handler) {
+    public synchronized void setCallback(@Nullable Callback cb, @Nullable Handler handler) {
         mCallback = cb;
         mHandler = handler;
     }
@@ -110,7 +106,7 @@ public class LowpanScanner {
      * @return the current channel mask, or <code>null</code> if no channel mask is currently set.
      */
     public @Nullable Collection<Integer> getChannelMask() {
-        return mChannelMask.clone();
+        return (Collection<Integer>) mChannelMask.clone();
     }
 
     /**
@@ -179,17 +175,24 @@ public class LowpanScanner {
         ILowpanNetScanCallback binderListener =
                 new ILowpanNetScanCallback.Stub() {
                     public void onNetScanBeacon(Map parameters) {
-                        Callback callback = mCallback;
-                        Handler handler = mHandler;
+                        Callback callback;
+                        Handler handler;
+
+                        synchronized (LowpanScanner.this) {
+                            callback = mCallback;
+                            handler = mHandler;
+                        }
 
                         if (callback == null) {
                             return;
                         }
 
-                        Runnable runnable = () -> callback.onNetScanBeacon(
-                                new LowpanBeaconInfo.Builder()
-                                        .updateFromMap(parameters)
-                                        .build());
+                        Runnable runnable =
+                                () ->
+                                        callback.onNetScanBeacon(
+                                                new LowpanBeaconInfo.Builder()
+                                                        .updateFromMap(parameters)
+                                                        .build());
 
                         if (handler != null) {
                             handler.post(runnable);
@@ -199,8 +202,13 @@ public class LowpanScanner {
                     }
 
                     public void onNetScanFinished() {
-                        Callback callback = mCallback;
-                        Handler handler = mHandler;
+                        Callback callback;
+                        Handler handler;
+
+                        synchronized (LowpanScanner.this) {
+                            callback = mCallback;
+                            handler = mHandler;
+                        }
 
                         if (callback == null) {
                             return;
@@ -218,7 +226,7 @@ public class LowpanScanner {
 
         try {
             mBinder.startNetScan(map, binderListener);
-        } catch (ServiceSpecificException|RemoteException x) {
+        } catch (ServiceSpecificException | RemoteException x) {
             LowpanException.throwAsPublicException(x);
         }
     }
@@ -257,7 +265,8 @@ public class LowpanScanner {
                             return;
                         }
 
-                        Runnable runnable = () -> {
+                        Runnable runnable =
+                                () -> {
                                     if (callback != null) {
                                         LowpanEnergyScanResult result =
                                                 new LowpanEnergyScanResult();

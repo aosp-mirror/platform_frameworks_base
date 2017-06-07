@@ -26,7 +26,7 @@ import java.util.TreeSet;
  *
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public class LowpanBeaconInfo extends LowpanIdentity {
 
     private int mRssi = UNKNOWN;
@@ -104,7 +104,7 @@ public class LowpanBeaconInfo extends LowpanIdentity {
     }
 
     public Collection<Integer> getFlags() {
-        return mFlags.clone();
+        return (Collection<Integer>) mFlags.clone();
     }
 
     public boolean isFlagSet(int flag) {

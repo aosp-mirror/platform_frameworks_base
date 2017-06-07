@@ -16,14 +16,12 @@
 
 package android.net.lowpan;
 
-
 /** Provides detailed information about a given channel. */
-//@SystemApi
+// @SystemApi
 public class LowpanChannelInfo {
 
     public static final int UNKNOWN_POWER = Integer.MAX_VALUE;
 
-    //////////////////////////////////////////////////////////////////////////
     // Instance Variables
 
     private String mName = null;
@@ -33,7 +31,6 @@ public class LowpanChannelInfo {
     private float mSpectrumBandwidth = 0.0f;
     private int mMaxTransmitPower = UNKNOWN_POWER;
 
-    //////////////////////////////////////////////////////////////////////////
     // Public Getters and Setters
 
     public String getName() {

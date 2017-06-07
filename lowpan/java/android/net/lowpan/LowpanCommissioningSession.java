@@ -30,7 +30,7 @@ import java.net.InetSocketAddress;
  *
  * @hide
  */
-//@SystemApi
+// @SystemApi
 public abstract class LowpanCommissioningSession {
     public LowpanCommissioningSession() {}
 
@@ -39,7 +39,7 @@ public abstract class LowpanCommissioningSession {
      *
      * @hide
      */
-    //@SystemApi
+    // @SystemApi
     public class Callback {
         public void onReceiveFromCommissioner(@NonNull byte[] packet) {};
 
