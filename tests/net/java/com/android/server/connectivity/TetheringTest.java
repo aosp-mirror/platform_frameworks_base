@@ -42,6 +42,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
@@ -85,6 +86,7 @@ import java.util.Vector;
 public class TetheringTest {
     private static final String[] PROVISIONING_APP_NAME = {"some", "app"};
 
+    @Mock private ApplicationInfo mApplicationInfo;
     @Mock private Context mContext;
     @Mock private ConnectivityManager mConnectivityManager;
     @Mock private INetworkManagementService mNMService;
@@ -114,6 +116,9 @@ public class TetheringTest {
         MockContext(Context base) {
             super(base);
         }
+
+        @Override
+        public ApplicationInfo getApplicationInfo() { return mApplicationInfo; }
 
         @Override
         public ContentResolver getContentResolver() { return mContentResolver; }
