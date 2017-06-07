@@ -4,11 +4,15 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Icon;
 import android.support.annotation.NonNull;
+import android.support.v4.util.ArrayMap;
+import android.support.v4.util.ArraySet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -180,14 +184,54 @@ public class NotificationIconAreaController implements DarkReceiver {
             }
         }
 
+        // In case we are changing the suppression of a group, the replacement shouldn't flicker
+        // and it should just be replaced instead. We therefore look for notifications that were
+        // just replaced by the child or vice-versa to suppress this.
 
+        ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons = new ArrayMap<>();
         ArrayList<View> toRemove = new ArrayList<>();
         for (int i = 0; i < hostLayout.getChildCount(); i++) {
             View child = hostLayout.getChildAt(i);
+            if (!(child instanceof StatusBarIconView)) {
+                continue;
+            }
             if (!toShow.contains(child)) {
-                toRemove.add(child);
+                boolean iconWasReplaced = false;
+                StatusBarIconView removedIcon = (StatusBarIconView) child;
+                String removedGroupKey = removedIcon.getNotification().getGroupKey();
+                for (int j = 0; j < toShow.size(); j++) {
+                    StatusBarIconView candidate = toShow.get(j);
+                    if (candidate.getSourceIcon().sameAs((removedIcon.getSourceIcon()))
+                            && candidate.getNotification().getGroupKey().equals(removedGroupKey)) {
+                        if (!iconWasReplaced) {
+                            iconWasReplaced = true;
+                        } else {
+                            iconWasReplaced = false;
+                            break;
+                        }
+                    }
+                }
+                if (iconWasReplaced) {
+                    ArrayList<StatusBarIcon> statusBarIcons = replacingIcons.get(removedGroupKey);
+                    if (statusBarIcons == null) {
+                        statusBarIcons = new ArrayList<>();
+                        replacingIcons.put(removedGroupKey, statusBarIcons);
+                    }
+                    statusBarIcons.add(removedIcon.getStatusBarIcon());
+                }
+                toRemove.add(removedIcon);
             }
         }
+        // removing all duplicates
+        ArrayList<String> duplicates = new ArrayList<>();
+        for (String key : replacingIcons.keySet()) {
+            ArrayList<StatusBarIcon> statusBarIcons = replacingIcons.get(key);
+            if (statusBarIcons.size() != 1) {
+                duplicates.add(key);
+            }
+        }
+        replacingIcons.removeAll(duplicates);
+        hostLayout.setReplacingIcons(replacingIcons);
 
         final int toRemoveCount = toRemove.size();
         for (int i = 0; i < toRemoveCount; i++) {
@@ -217,6 +261,7 @@ public class NotificationIconAreaController implements DarkReceiver {
             hostLayout.addView(expected, i);
         }
         hostLayout.setChangingViewPositions(false);
+        hostLayout.setReplacingIcons(null);
     }
 
     /**
