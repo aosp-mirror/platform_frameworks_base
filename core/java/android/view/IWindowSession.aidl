@@ -96,7 +96,7 @@ interface IWindowSession {
             int flags, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
             out Rect outOutsets, out Rect outBackdropFrame,
-            inout MergedConfiguration mergedConfiguration, out Surface outSurface);
+            out MergedConfiguration outMergedConfiguration, out Surface outSurface);
 
     /*
      * Notify the window manager that an application is relaunching and
