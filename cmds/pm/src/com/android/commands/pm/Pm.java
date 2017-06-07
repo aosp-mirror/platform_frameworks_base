@@ -1033,7 +1033,7 @@ public final class Pm {
 
             if (info != null) {
                 System.out.println("Success: created user id " + info.id);
-                return 1;
+                return 0;
             } else {
                 System.err.println("Error: couldn't create User.");
                 return 1;
