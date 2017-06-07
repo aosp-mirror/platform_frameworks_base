@@ -2612,6 +2612,12 @@
     <permission android:name="android.permission.TV_VIRTUAL_REMOTE_CONTROLLER"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to change HDMI CEC active source.
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.CHANGE_HDMI_CEC_ACTIVE_SOURCE"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an application to modify parental controls
          <p>Not for use by third-party applications.
          @hide -->
