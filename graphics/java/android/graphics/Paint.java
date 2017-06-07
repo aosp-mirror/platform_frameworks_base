@@ -1115,6 +1115,8 @@ public class Paint {
         // old shader's pointer may be reused by another shader allocation later
         if (mShader != shader) {
             mNativeShader = -1;
+            // Release any native references to the old shader content
+            nSetShader(mNativePaint, 0);
         }
         // Defer setting the shader natively until getNativeInstance() is called
         mShader = shader;
