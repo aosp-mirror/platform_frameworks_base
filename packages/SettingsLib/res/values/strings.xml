@@ -94,7 +94,7 @@
     <!-- Speed label for slow network speed -->
     <string name="speed_label_slow">Slow</string>
     <!-- Speed label for okay network speed -->
-    <string name="speed_label_okay">Okay</string>
+    <string name="speed_label_okay">OK</string>
     <!-- Speed label for medium network speed -->
     <string name="speed_label_medium">Medium</string>
     <!-- Speed label for fast network speed -->
