@@ -519,6 +519,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             RecentsActivityLaunchState launchState = config.getLaunchState();
             launchState.reset();
         }
+
+        // Force a gc to attempt to clean up bitmap references more quickly (b/38258699)
+        Recents.getSystemServices().gc();
     }
 
     @Override
