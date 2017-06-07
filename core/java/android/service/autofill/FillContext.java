@@ -114,7 +114,7 @@ public final class FillContext implements Parcelable {
      *
      * @hide
      */
-    @NonNull public ViewNode[] findViewNodesByAutofillIds(@NonNull AutofillId[] ids) {
+    @NonNull public ViewNode[] findViewNodesByAutofillIds(@NonNull AutofillId... ids) {
         final LinkedList<ViewNode> nodesToProcess = new LinkedList<>();
         final ViewNode[] foundNodes = new AssistStructure.ViewNode[ids.length];
 

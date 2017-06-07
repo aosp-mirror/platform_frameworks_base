@@ -74,16 +74,14 @@ final class ViewState {
     private final Session mSession;
 
     private FillResponse mResponse;
-    private AutofillValue mInitialValue;
     private AutofillValue mCurrentValue;
     private AutofillValue mAutofilledValue;
     private Rect mVirtualBounds;
     private int mState;
 
-    ViewState(Session session, AutofillId id, AutofillValue value, Listener listener, int state) {
+    ViewState(Session session, AutofillId id, Listener listener, int state) {
         mSession = session;
         this.id = id;
-        mInitialValue = value;
         mListener = listener;
         mState = state;
     }
@@ -115,11 +113,6 @@ final class ViewState {
 
     void setAutofilledValue(@Nullable AutofillValue value) {
         mAutofilledValue = value;
-    }
-
-    @Nullable
-    AutofillValue getInitialValue() {
-        return mInitialValue;
     }
 
     @Nullable
@@ -189,8 +182,8 @@ final class ViewState {
 
     @Override
     public String toString() {
-        return "ViewState: [id=" + id + ", initialValue=" + mInitialValue
-                + ", currentValue=" + mCurrentValue + ", autofilledValue=" + mAutofilledValue
+        return "ViewState: [id=" + id + ", currentValue=" + mCurrentValue
+                + ", autofilledValue=" + mAutofilledValue
                 + ", bounds=" + mVirtualBounds + ", state=" + getStateAsString() + "]";
     }
 
@@ -207,7 +200,6 @@ final class ViewState {
                 pw.println(mResponse.getRequestId());
             }
         }
-        pw.print(prefix); pw.print("initialValue:" ); pw.println(mInitialValue);
         pw.print(prefix); pw.print("currentValue:" ); pw.println(mCurrentValue);
         pw.print(prefix); pw.print("autofilledValue:" ); pw.println(mAutofilledValue);
         pw.print(prefix); pw.print("virtualBounds:" ); pw.println(mVirtualBounds);

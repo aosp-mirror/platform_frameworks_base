@@ -774,20 +774,29 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 break;
             }
 
-            final AutofillValue currentValue = viewState.getCurrentValue();
-            if (currentValue == null || currentValue.isEmpty()) {
-                if (sDebug) {
-                    Slog.d(TAG, "showSaveLocked(): empty value for required " + id );
+            AutofillValue value = viewState.getCurrentValue();
+            if (value == null || value.isEmpty()) {
+                final AutofillValue initialValue = getValueFromContexts(id);
+                if (initialValue != null) {
+                    if (sDebug) {
+                        Slog.d(TAG, "Value of required field " + id + " didn't change; "
+                                + "using initial value (" + initialValue + ") instead");
+                    }
+                    value = initialValue;
+                } else {
+                    if (sDebug) {
+                        Slog.d(TAG, "showSaveLocked(): empty value for required " + id );
+                    }
+                    allRequiredAreNotEmpty = false;
+                    break;
                 }
-                allRequiredAreNotEmpty = false;
-                break;
             }
             final AutofillValue filledValue = viewState.getAutofilledValue();
 
-            if (!currentValue.equals(filledValue)) {
+            if (!value.equals(filledValue)) {
                 if (sDebug) {
                     Slog.d(TAG, "showSaveLocked(): found a change on required " + id + ": "
-                            + filledValue + " => " + currentValue);
+                            + filledValue + " => " + value);
                 }
                 atLeastOneChanged = true;
             }
@@ -842,6 +851,31 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     boolean isSavingLocked() {
         return mIsSaving;
+    }
+
+    /**
+     * Gets the latest non-empty value for the given id in the autofill contexts.
+     */
+    @Nullable
+    private AutofillValue getValueFromContexts(AutofillId id) {
+        AutofillValue value = null;
+        final int numContexts = mContexts.size();
+        for (int i = 0; i < numContexts; i++) {
+            final FillContext context = mContexts.get(i);
+            // TODO: create a function that gets just one node so it doesn't create an array
+            // unnecessarily
+            final ViewNode[] nodes = context.findViewNodesByAutofillIds(id);
+            if (nodes != null) {
+                AutofillValue candidate = nodes[0].getAutofillValue();
+                if (sDebug) {
+                    Slog.d(TAG, "getValueFromContexts(" + id + ") at " + i + ": " + candidate);
+                }
+                if (candidate != null && !candidate.isEmpty()) {
+                    value = candidate;
+                }
+            }
+        }
+        return value;
     }
 
     /**
@@ -1009,7 +1043,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     || action == ACTION_VIEW_ENTERED) {
                 if (sVerbose) Slog.v(TAG, "Creating viewState for " + id + " on " + action);
                 boolean isIgnored = isIgnoredLocked(id);
-                viewState = new ViewState(this, id, value, this,
+                viewState = new ViewState(this, id, this,
                         isIgnored ? ViewState.STATE_IGNORED : ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
                 if (isIgnored) {
@@ -1307,7 +1341,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (viewState != null)  {
             viewState.setState(state);
         } else {
-            viewState = new ViewState(this, id, null, this, state);
+            viewState = new ViewState(this, id, this, state);
             if (sVerbose) {
                 Slog.v(TAG, "Adding autofillable view with id " + id + " and state " + state);
             }
