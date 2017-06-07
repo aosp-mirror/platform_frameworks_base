@@ -3516,7 +3516,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *     and {@code 0}</li>
      * <li>The calling application has the permission
      *     {@link android.Manifest.permission#ACCESS_INSTANT_APPS}</li>
-     * <li>[TODO] The calling application is the default launcher on the
+     * <li>The calling application is the default launcher on the
      *     system partition.</li>
      * </ol>
      */
@@ -18430,8 +18430,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
-        final int hasAccessInstantApps = mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_INSTANT_APPS);
+        final boolean canViewInstantApps = canViewInstantApps(callingUid, userId);
         Preconditions.checkNotNull(versionedPackage);
         Preconditions.checkNotNull(observer);
         Preconditions.checkArgumentInRange(versionedPackage.getVersionCode(),
@@ -18502,7 +18501,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final boolean targetIsInstantApp =
                             ps.getInstantApp(UserHandle.getUserId(callingUid));
                     doDeletePackage = !targetIsInstantApp
-                            || hasAccessInstantApps == PackageManager.PERMISSION_GRANTED;
+                            || canViewInstantApps;
                 }
                 if (doDeletePackage) {
                     if (!deleteAllUsers) {
