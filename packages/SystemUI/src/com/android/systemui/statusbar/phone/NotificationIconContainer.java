@@ -21,9 +21,13 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Icon;
+import android.support.v4.util.ArrayMap;
+import android.support.v4.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
@@ -33,6 +37,7 @@ import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.statusbar.stack.ViewState;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -117,6 +122,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private float mVisualOverflowAdaption;
     private boolean mDisallowNextAnimation;
     private boolean mAnimationsEnabled = true;
+    private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
     private int mDarkOffsetX;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
@@ -184,11 +190,17 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     @Override
     public void onViewAdded(View child) {
         super.onViewAdded(child);
+        boolean isReplacingIcon = isReplacingIcon(child);
         if (!mChangingViewPositions) {
-            mIconStates.put(child, new IconState());
+            IconState v = new IconState();
+            if (isReplacingIcon) {
+                v.justAdded = false;
+                v.justReplaced = true;
+            }
+            mIconStates.put(child, v);
         }
         int childIndex = indexOfChild(child);
-        if (childIndex < getChildCount() - 1
+        if (childIndex < getChildCount() - 1 && !isReplacingIcon
             && mIconStates.get(getChildAt(childIndex + 1)).iconAppearAmount > 0.0f) {
             if (mAddAnimationStartIndex < 0) {
                 mAddAnimationStartIndex = childIndex;
@@ -201,13 +213,34 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }
 
+    private boolean isReplacingIcon(View child) {
+        if (mReplacingIcons == null) {
+            return false;
+        }
+        if (!(child instanceof StatusBarIconView)) {
+            return false;
+        }
+        StatusBarIconView iconView = (StatusBarIconView) child;
+        Icon sourceIcon = iconView.getSourceIcon();
+        String groupKey = iconView.getNotification().getGroupKey();
+        ArrayList<StatusBarIcon> statusBarIcons = mReplacingIcons.get(groupKey);
+        if (statusBarIcons != null) {
+            StatusBarIcon replacedIcon = statusBarIcons.get(0);
+            if (sourceIcon.sameAs(replacedIcon.icon)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void onViewRemoved(View child) {
         super.onViewRemoved(child);
         if (child instanceof StatusBarIconView) {
+            boolean isReplacingIcon = isReplacingIcon(child);
             final StatusBarIconView icon = (StatusBarIconView) child;
             if (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
-                    && child.getVisibility() == VISIBLE) {
+                    && child.getVisibility() == VISIBLE && isReplacingIcon) {
                 int animationStartIndex = findFirstViewIndexAfter(icon.getTranslationX());
                 if (mAddAnimationStartIndex < 0) {
                     mAddAnimationStartIndex = animationStartIndex;
@@ -217,9 +250,11 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             }
             if (!mChangingViewPositions) {
                 mIconStates.remove(child);
-                addTransientView(icon, 0);
-                icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, true /* animate */,
-                        () -> removeTransientView(icon));
+                if (!isReplacingIcon) {
+                    addTransientView(icon, 0);
+                    icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, true /* animate */,
+                            () -> removeTransientView(icon));
+                }
             }
         }
     }
@@ -486,11 +521,16 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mDarkOffsetX = offsetX;
     }
 
+    public void setReplacingIcons(ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons) {
+        mReplacingIcons = replacingIcons;
+    }
+
     public class IconState extends ViewState {
         public float iconAppearAmount = 1.0f;
         public float clampedAppearAmount = 1.0f;
         public int visibleState;
         public boolean justAdded = true;
+        private boolean justReplaced;
         public boolean needsCannedAnimation;
         public boolean useFullTransitionAmount;
         public boolean useLinearTransitionAmount;
@@ -509,9 +549,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                         && !mDisallowNextAnimation
                         && !noAnimations;
                 if (animationsAllowed) {
-                    if (justAdded) {
+                    if (justAdded || justReplaced) {
                         super.applyToView(icon);
-                        if (iconAppearAmount != 0.0f) {
+                        if (justAdded && iconAppearAmount != 0.0f) {
                             icon.setAlpha(0.0f);
                             icon.setVisibleState(StatusBarIconView.STATE_HIDDEN,
                                     false /* animate */);
@@ -570,6 +610,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 }
             }
             justAdded = false;
+            justReplaced = false;
             needsCannedAnimation = false;
             justUndarkened = false;
         }
