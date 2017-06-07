@@ -813,7 +813,8 @@ public final class ActiveServices {
             String title;
             String msg;
             String[] pkgs;
-            long oldestStartTime = System.currentTimeMillis(); // now
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            long oldestStartTime = nowElapsed;
             if (active.size() == 1) {
                 intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                 intent.setData(Uri.fromParts("package", active.get(0).mPackageName, null));
@@ -846,8 +847,8 @@ public final class ActiveServices {
                             .addExtras(notificationBundle)
                             .setSmallIcon(R.drawable.stat_sys_vitals)
                             .setOngoing(true)
-                            .setShowWhen(oldestStartTime > 0)
-                            .setWhen(oldestStartTime)
+                            .setShowWhen(oldestStartTime < nowElapsed)
+                            .setWhen(System.currentTimeMillis() - (nowElapsed - oldestStartTime))
                             .setColor(context.getColor(
                                     com.android.internal.R.color.system_notification_accent_color))
                             .setContentTitle(title)
