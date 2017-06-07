@@ -26,7 +26,6 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.Proxy;
 import android.net.Uri;
@@ -470,15 +469,7 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private String getHeaderTitle() {
-        NetworkInfo info = mCm.getNetworkInfo(mNetwork);
-        if (info == null) {
-            return getString(R.string.action_bar_label);
-        }
-        NetworkCapabilities nc = mCm.getNetworkCapabilities(mNetwork);
-        if (!nc.hasTransportType(NetworkCapabilities.TRANSPORT_WIFI)) {
-            return getString(R.string.action_bar_label);
-        }
-        return getString(R.string.action_bar_title, info.getExtraInfo().replaceAll("^\"|\"$", ""));
+        return getString(R.string.action_bar_label);
     }
 
     private String getHeaderSubtitle(String urlString) {
