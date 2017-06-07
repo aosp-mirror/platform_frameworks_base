@@ -751,6 +751,11 @@ public class AccountManagerService
         }
     }
 
+    private boolean isVisible(int visibility) {
+        return visibility == AccountManager.VISIBILITY_VISIBLE ||
+            visibility == AccountManager.VISIBILITY_USER_MANAGED_VISIBLE;
+    }
+
     /**
      * Updates visibility for given account name and package.
      *
@@ -803,8 +808,10 @@ public class AccountManagerService
                 if (notify) {
                     for (Entry<String, Integer> packageToVisibility : packagesToVisibility
                             .entrySet()) {
-                        if (shouldNotifyOnVisibilityChange(packageToVisibility.getValue(),
-                                resolveAccountVisibility(account, packageName, accounts))) {
+                        int oldVisibility = packageToVisibility.getValue();
+                        int currentVisibility =
+                            resolveAccountVisibility(account, packageName, accounts);
+                        if (isVisible(oldVisibility) != isVisible(currentVisibility)) {
                             notifyPackage(packageToVisibility.getKey(), accounts);
                         }
                     }
@@ -1181,8 +1188,7 @@ public class AccountManagerService
 
                             for (Entry<String, Integer> packageToVisibility :
                                     packagesToVisibility.entrySet()) {
-                                if (shouldNotifyOnVisibilityChange(packageToVisibility.getValue(),
-                                        AccountManager.VISIBILITY_NOT_VISIBLE)) {
+                                if (isVisible(packageToVisibility.getValue())) {
                                     notifyPackage(packageToVisibility.getKey(), accounts);
                                 }
                             }
@@ -1216,14 +1222,6 @@ public class AccountManagerService
                 }
             }
         }
-    }
-
-    private boolean shouldNotifyOnVisibilityChange(int oldVisibility, int newVisibility) {
-        boolean oldVisible = (oldVisibility == AccountManager.VISIBILITY_VISIBLE) ||
-            (oldVisibility == AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
-        boolean newVisible = (newVisibility == AccountManager.VISIBILITY_VISIBLE) ||
-            (newVisibility == AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
-        return oldVisible == newVisible;
     }
 
     private SparseBooleanArray getUidsOfInstalledOrUpdatedPackagesAsUser(int userId) {
