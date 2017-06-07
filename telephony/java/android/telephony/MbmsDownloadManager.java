@@ -16,22 +16,32 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.telephony.mbms.IDownloadCallback;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.DownloadStatus;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
+import android.telephony.mbms.MbmsDownloadManagerCallback;
+import android.telephony.mbms.MbmsDownloadReceiver;
 import android.telephony.mbms.MbmsException;
+import android.telephony.mbms.MbmsTempFileProvider;
 import android.telephony.mbms.MbmsUtils;
 import android.telephony.mbms.vendor.IMbmsDownloadService;
 import android.util.Log;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -47,7 +57,7 @@ public class MbmsDownloadManager {
      * The MBMS middleware should send this when a download of single file has completed or
      * failed. Mandatory extras are
      * {@link #EXTRA_RESULT}
-     * {@link #EXTRA_INFO}
+     * {@link #EXTRA_FILE_INFO}
      * {@link #EXTRA_REQUEST}
      * {@link #EXTRA_TEMP_LIST}
      * {@link #EXTRA_FINAL_URI}
@@ -93,7 +103,7 @@ public class MbmsDownloadManager {
      * is for. Must not be null.
      * TODO: future systemapi (here and and all extras) except the two for the app intent
      */
-    public static final String EXTRA_INFO = "android.telephony.mbms.extra.INFO";
+    public static final String EXTRA_FILE_INFO = "android.telephony.mbms.extra.FILE_INFO";
 
     /**
      * Extra containing the {@link DownloadRequest} for which the download result or file
@@ -144,6 +154,14 @@ public class MbmsDownloadManager {
             "android.telephony.mbms.extra.PAUSED_URI_LIST";
 
     /**
+     * Extra containing a string that points to the middleware's knowledge of where the temp file
+     * root for the app is. The path should be a canonical path as returned by
+     * {@link File#getCanonicalPath()}
+     */
+    public static final String EXTRA_TEMP_FILE_ROOT =
+            "android.telephony.mbms.extra.TEMP_FILE_ROOT";
+
+    /**
      * Extra containing a list of {@link Uri}s indicating temp files which the middleware is
      * still using.
      */
@@ -168,7 +186,7 @@ public class MbmsDownloadManager {
     private static final long BIND_TIMEOUT_MS = 3000;
 
     private final Context mContext;
-    private int mSubId = INVALID_SUBSCRIPTION_ID;
+    private int mSubscriptionId = INVALID_SUBSCRIPTION_ID;
 
     private IMbmsDownloadService mService;
     private final IMbmsDownloadManagerCallback mCallback;
@@ -179,14 +197,12 @@ public class MbmsDownloadManager {
         mContext = context;
         mCallback = callback;
         mDownloadAppName = downloadAppName;
-        mSubId = subId;
+        mSubscriptionId = subId;
     }
 
     /**
      * Create a new MbmsDownloadManager using the system default data subscription ID.
-     *
-     * Note that this call will bind a remote service and that may take a bit.  This
-     * may throw an Illegal ArgumentException or RemoteException.
+     * See {@link #createManager(Context, IMbmsDownloadManagerCallback, String, int)}
      *
      * @hide
      */
@@ -202,17 +218,29 @@ public class MbmsDownloadManager {
     /**
      * Create a new MbmsDownloadManager using the given subscription ID.
      *
-     * Note that this call will bind a remote service and that may take a bit.  This
-     * may throw an Illegal ArgumentException or RemoteException.
+     * Note that this call will bind a remote service and that may take a bit. Since the
+     * framework notifies us that binding is complete on the main thread, this method should
+     * never be called from the main thread of one's app, or else an
+     * {@link IllegalStateException} will be thrown.
      *
+     * This also may throw an {@link IllegalArgumentException} or a {@link MbmsException}.
+     *
+     * @param context The instance of {@link Context} to use
+     * @param listener A callback to get asynchronous error messages and file service updates.
+     * @param downloadAppName The app name, as negotiated with the eMBMS provider
+     * @param subscriptionId The data subscription ID to use
      * @hide
      */
-
     public static MbmsDownloadManager createManager(Context context,
-            IMbmsDownloadManagerCallback listener, String downloadAppName, int subId)
+            IMbmsDownloadManagerCallback listener, String downloadAppName, int subscriptionId)
             throws MbmsException {
+        if (Looper.getMainLooper().isCurrentThread()) {
+            throw new IllegalStateException(
+                    "createManager must not be called from the main thread.");
+        }
+
         MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, downloadAppName,
-                subId);
+                subscriptionId);
         mdm.bindAndInitialize();
         return mdm;
     }
@@ -234,61 +262,182 @@ public class MbmsDownloadManager {
         };
 
         Intent bindIntent = new Intent();
-        bindIntent.setComponent(MbmsUtils.toComponentName(
-                MbmsUtils.getMiddlewareServiceInfo(mContext, MBMS_DOWNLOAD_SERVICE_ACTION)));
+        ServiceInfo mbmsServiceInfo =
+                MbmsUtils.getMiddlewareServiceInfo(mContext, MBMS_DOWNLOAD_SERVICE_ACTION);
 
-        // Kick off the binding, and synchronously wait until binding is complete
+        if (mbmsServiceInfo == null) {
+            throw new MbmsException(MbmsException.ERROR_NO_SERVICE_INSTALLED);
+        }
+
+        bindIntent.setComponent(MbmsUtils.toComponentName(mbmsServiceInfo));
+
         mContext.bindService(bindIntent, bindListener, Context.BIND_AUTO_CREATE);
 
+        // Wait until binding is complete
         MbmsUtils.waitOnLatchWithTimeout(latch, BIND_TIMEOUT_MS);
 
-        // TODO: initialize
+        // Call initialize after binding finishes
+        synchronized (this) {
+            if (mService == null) {
+                throw new MbmsException(MbmsException.ERROR_BIND_TIMEOUT_OR_FAILURE);
+            }
+
+            try {
+                mService.initialize(mDownloadAppName, mSubscriptionId, mCallback);
+            } catch (RemoteException e) {
+                mService = null;
+                Log.e(LOG_TAG, "Service died before initialization");
+                throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+            }
+        }
     }
 
     /**
-     * Gets the list of files published for download.
-     * They may occur at times far in the future.
-     * servicesClasses lets the app filter on types of files and is opaque data between
-     *     the app and the carrier
+     * An inspection API to retrieve the list of available
+     * {@link android.telephony.mbms.FileServiceInfo}s currently being advertised.
+     * The results are returned asynchronously via a call to
+     * {@link IMbmsDownloadManagerCallback#fileServicesUpdated(List)}
      *
-     * Multiple calls replace trhe list of serviceClasses of interest.
+     * The serviceClasses argument lets the app filter on types of programming and is opaque data
+     * negotiated beforehand between the app and the carrier.
      *
-     * May throw an IllegalArgumentException or RemoteException.
+     * Multiple calls replace the list of serviceClasses of interest.
      *
-     * Synchronous responses include
-     * <li>SUCCESS</li>
-     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
+     * This may throw an {@link MbmsException} containing one of the following errors:
+     * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
+     * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
+     * {@link MbmsException#ERROR_SERVICE_LOST}
      *
-     * Asynchronous errors through the listener include any of the errors except
-     * <li>ERROR_MSDC_UNABLE_TO_)START_SERVICE</li>
-     * <li>ERROR_MSDC_INVALID_SERVICE_ID</li>
-     * <li>ERROR_MSDC_END_OF_SESSION</li>
+     * Asynchronous error codes via the {@link MbmsDownloadManagerCallback#error(int, String)}
+     * callback can include any of the errors except:
+     * {@link MbmsException#ERROR_UNABLE_TO_START_SERVICE}
+     * {@link MbmsException#ERROR_END_OF_SESSION}
      */
-    public int getFileServices(List<String> serviceClasses) {
-        return 0;
+    public void getFileServices(List<String> classList) throws MbmsException {
+        if (mService == null) {
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+        }
+        try {
+            int returnCode = mService.getFileServices(mDownloadAppName, mSubscriptionId, classList);
+            if (returnCode != MbmsException.SUCCESS) {
+                throw new MbmsException(returnCode);
+            }
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "Remote process died");
+            mService = null;
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+        }
     }
 
+    /**
+     * Sets the temp file root for downloads.
+     * All temp files created for the middleware to write to will be contained in the specified
+     * directory. Applications that wish to specify a location only need to call this method once
+     * as long their data is persisted in storage -- the argument will be stored both in a
+     * local instance of {@link android.content.SharedPreferences} and by the middleware.
+     *
+     * If this method is not called at least once before calling
+     * {@link #download(DownloadRequest, IDownloadCallback)}, the framework
+     * will default to a directory formed by the concatenation of the app's files directory and
+     * {@link android.telephony.mbms.MbmsTempFileProvider#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY}.
+     *
+     * This method may not be called while any download requests are still active. If this is
+     * the case, an {@link MbmsException} will be thrown with code
+     * {@link MbmsException#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT}
+     *
+     * The {@link File} supplied as a root temp file directory must already exist. If not, an
+     * {@link IllegalArgumentException} will be thrown.
+     * @param tempFileRootDirectory A directory to place temp files in.
+     */
+    public void setTempFileRootDirectory(@NonNull File tempFileRootDirectory)
+            throws MbmsException {
+        if (mService == null) {
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+        }
+        if (!tempFileRootDirectory.exists()) {
+            throw new IllegalArgumentException("Provided directory does not exist");
+        }
+        if (!tempFileRootDirectory.isDirectory()) {
+            throw new IllegalArgumentException("Provided File is not a directory");
+        }
+        String filePath;
+        try {
+            filePath = tempFileRootDirectory.getCanonicalPath();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Unable to canonicalize the provided path: " + e);
+        }
+
+        try {
+            int result = mService.setTempFileRootDirectory(
+                    mDownloadAppName, mSubscriptionId, filePath);
+            if (result != MbmsException.SUCCESS) {
+                throw new MbmsException(result);
+            }
+        } catch (RemoteException e) {
+            mService = null;
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+        }
+
+        SharedPreferences prefs = mContext.getSharedPreferences(
+                MbmsTempFileProvider.TEMP_FILE_ROOT_PREF_FILE_NAME, 0);
+        prefs.edit().putString(MbmsTempFileProvider.TEMP_FILE_ROOT_PREF_NAME, filePath).apply();
+    }
 
     /**
-     * Requests a future download.
-     * returns a token which may be used to cancel a download.
+     * Requests a download of a file that is available via multicast.
+     *
      * downloadListener is an optional callback object which can be used to get progress reports
      *     of a currently occuring download.  Note this can only run while the calling app
      *     is running, so future downloads will simply result in resultIntents being sent
      *     for completed or errored-out downloads.  A NULL indicates no callbacks are needed.
      *
-     * May throw an IllegalArgumentException or RemoteExcpetion.
+     * May throw an {@link IllegalArgumentException}
+     *
+     * If {@link #setTempFileRootDirectory(File)} has not called after the app has been installed,
+     * this method will create a directory at the default location defined at
+     * {@link MbmsTempFileProvider#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY} and store that as the temp
+     * file root directory.
      *
      * Asynchronous errors through the listener include any of the errors
+     *
+     * @param request The request that specifies what should be downloaded
+     * @param callback Optional callback that will provide progress updates if the app is running.
      */
-    public DownloadRequest download(DownloadRequest request, IDownloadCallback listener) {
+    public void download(DownloadRequest request, IDownloadCallback callback)
+            throws MbmsException {
+        if (mService == null) {
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+        }
+
+        // Check to see whether the app's set a temp root dir yet, and set it if not.
+        SharedPreferences prefs = mContext.getSharedPreferences(
+                MbmsTempFileProvider.TEMP_FILE_ROOT_PREF_FILE_NAME, 0);
+        if (prefs.getString(MbmsTempFileProvider.TEMP_FILE_ROOT_PREF_NAME, null) == null) {
+            File tempRootDirectory = new File(mContext.getFilesDir(),
+                    MbmsTempFileProvider.DEFAULT_TOP_LEVEL_TEMP_DIRECTORY);
+            tempRootDirectory.mkdirs();
+            setTempFileRootDirectory(tempRootDirectory);
+        }
+
         request.setAppName(mDownloadAppName);
+        // Check if the request is a multipart download. If so, validate that the destination is
+        // a directory that exists.
+        // TODO: figure out what qualifies a request as a multipart download request.
+        if (request.getSourceUri().getLastPathSegment() != null &&
+                request.getSourceUri().getLastPathSegment().contains("*")) {
+            File toFile = new File(request.getDestinationUri().getSchemeSpecificPart());
+            if (!toFile.isDirectory()) {
+                throw new IllegalArgumentException("Multipart download must specify valid " +
+                        "destination directory.");
+            }
+        }
+        // TODO: check to make sure destination is clear
+        // TODO: write download request token
         try {
-            mService.download(request, listener);
+            mService.download(request, callback);
         } catch (RemoteException e) {
             mService = null;
         }
-        return request;
     }
 
     /**
@@ -355,10 +504,40 @@ public class MbmsDownloadManager {
         return 0;
     }
 
+    /**
+     * Retrieves the {@link ComponentName} for the {@link android.content.BroadcastReceiver} that
+     * the various intents from the middleware should be targeted towards.
+     * @param uid The uid of the frontend app.
+     * @return The component name of the receiver that the middleware should send its intents to,
+     * or null if the app didn't declare it in the manifest.
+     *
+     * @hide
+     * future systemapi
+     */
+    public static ComponentName getAppReceiverFromUid(Context context, int uid) {
+        String[] packageNames = context.getPackageManager().getPackagesForUid(uid);
+        if (packageNames == null) {
+            return null;
+        }
+
+        for (String packageName : packageNames) {
+            ComponentName candidate = new ComponentName(packageName,
+                    MbmsDownloadReceiver.class.getCanonicalName());
+            Intent queryIntent = new Intent();
+            queryIntent.setComponent(candidate);
+            List<ResolveInfo> receivers =
+                    context.getPackageManager().queryBroadcastReceivers(queryIntent, 0);
+            if (receivers != null && receivers.size() > 0) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
     public void dispose() {
         try {
             if (mService != null) {
-                mService.dispose(mDownloadAppName, mSubId);
+                mService.dispose(mDownloadAppName, mSubscriptionId);
             } else {
                 Log.i(LOG_TAG, "Service already dead");
             }

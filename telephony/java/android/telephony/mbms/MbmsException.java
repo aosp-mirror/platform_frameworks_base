@@ -36,6 +36,7 @@ public class MbmsException extends Exception {
     public static final int ERROR_NOT_CONNECTED_TO_HOME_CARRIER_LTE = 15;
     public static final int ERROR_UNABLE_TO_READ_SIM = 16;
     public static final int ERROR_CARRIER_CHANGE_NOT_ALLOWED = 17;
+    public static final int ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT = 18;
 
     private final int mErrorCode;
 
