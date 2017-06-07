@@ -2083,6 +2083,10 @@ class ActivityStarter {
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,
             ActivityOptions aOptions) {
+        // We are reusing a task, keep the stack!
+        if (mReuseTask != null) {
+            return mReuseTask.getStack();
+        }
 
         // If the activity is of a specific type, return the associated stack, creating it if
         // necessary
@@ -2094,11 +2098,6 @@ class ActivityStarter {
         }
         if (r.isAssistantActivity()) {
             return mSupervisor.getStack(ASSISTANT_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
-        }
-
-        // We are reusing a task, keep the stack!
-        if (mReuseTask != null) {
-            return mReuseTask.getStack();
         }
 
         final int launchDisplayId =
