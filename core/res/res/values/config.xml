@@ -1091,6 +1091,11 @@
          that can be set by the user. -->
     <integer name="config_screenBrightnessDoze">1</integer>
 
+    <!-- Whether or not to skip the initial brightness ramps when the display transitions to
+         STATE_ON. Setting this to true will skip the brightness ramp to the last stored active
+         brightness value and will repeat for the following ramp if autobrightness is enabled. -->
+    <bool name="config_skipScreenOnBrightnessRamp">false</bool>
+
     <!-- Allow automatic adjusting of the screen brightness while dozing in low power state. -->
     <bool name="config_allowAutoBrightnessWhileDozing">false</bool>
 
@@ -2575,6 +2580,10 @@
     <!-- The default vibration strength, must be between 1 and 255 inclusive. -->
     <integer name="config_defaultVibrationAmplitude">255</integer>
 
+    <!-- If the device should still vibrate even in low power mode, for certain priority vibrations
+     (e.g. accessibility, alarms). This is mainly for Wear devices that don't have speakers. -->
+    <bool name="config_allowPriorityVibrationsInLowPowerMode">false</bool>
+
     <!-- Number of retries Cell Data should attempt for a given error code before
          restarting the modem.
          Error codes not listed will not lead to modem restarts.
@@ -2953,4 +2962,10 @@
     <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
         must match the value of config_cameraLiftTriggerSensorType in OEM's HAL -->
     <string translatable="false" name="config_cameraLiftTriggerSensorStringType"></string>
+
+    <!-- Default number of days to retain for the automatic storage manager. -->
+    <integer translatable="false" name="config_storageManagerDaystoRetainDefault">90</integer>
+
+    <!-- Name of a font family to use for headlines. If empty, falls back to platform default -->
+    <string name="config_headlineFontFamily" translatable="false"></string>
 </resources>

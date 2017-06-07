@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
@@ -29,13 +30,8 @@ import java.util.ArrayList;
 
 /**
  * Manages the properties of attached displays.
- * <p>
- * Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String)
- * Context.getSystemService()} with the argument
- * {@link android.content.Context#DISPLAY_SERVICE}.
- * </p>
  */
+@SystemService(Context.DISPLAY_SERVICE)
 public final class DisplayManager {
     private static final String TAG = "DisplayManager";
     private static final boolean DEBUG = false;

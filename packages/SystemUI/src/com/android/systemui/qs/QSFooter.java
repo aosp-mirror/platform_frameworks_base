@@ -18,12 +18,14 @@ package com.android.systemui.qs;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_DATE;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.UserManager;
@@ -42,6 +44,7 @@ import android.widget.Toast;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -423,6 +426,13 @@ public class QSFooter extends FrameLayout implements
 
     @Override
     public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
+        if (picture != null &&
+                UserManager.get(mContext).isGuestUser(ActivityManager.getCurrentUser())) {
+            picture = picture.getConstantState().newDrawable().mutate();
+            picture.setColorFilter(
+                    Utils.getColorAttr(mContext, android.R.attr.colorForeground),
+                    Mode.SRC_IN);
+        }
         mMultiUserAvatar.setImageDrawable(picture);
     }
 }

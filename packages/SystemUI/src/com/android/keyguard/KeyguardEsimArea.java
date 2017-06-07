@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
+import android.telephony.SubscriptionManager;
 import android.telephony.euicc.EuiccManager;
 
 import java.lang.ref.WeakReference;
@@ -46,16 +47,19 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
     public KeyguardEsimArea(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mEuiccManager = (EuiccManager) mContext.getSystemService(Context.EUICC_SERVICE);
-        if (mEuiccManager.isEnabled()) {
-            setVisibility(View.VISIBLE);
-        }
         setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         // STOPSHIP(b/37353596): use EuiccManager API to disable current carrier.
+    }
+
+    public static boolean isEsimLocked(Context context, int subId) {
+        EuiccManager euiccManager =
+                (EuiccManager) context.getSystemService(Context.EUICC_SERVICE);
+        return euiccManager.isEnabled()
+                && SubscriptionManager.from(context).getActiveSubscriptionInfo(subId).isEmbedded();
     }
 
 }

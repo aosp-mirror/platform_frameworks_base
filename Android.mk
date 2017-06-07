@@ -566,6 +566,15 @@ LOCAL_SRC_FILES += \
 
 LOCAL_AIDL_INCLUDES += system/update_engine/binder_bindings
 
+LOCAL_AIDL_INCLUDES += frameworks/base/lowpan/java
+LOCAL_SRC_FILES += \
+	lowpan/java/android/net/lowpan/ILowpanEnergyScanCallback.aidl \
+	lowpan/java/android/net/lowpan/ILowpanNetScanCallback.aidl \
+	lowpan/java/android/net/lowpan/ILowpanInterfaceListener.aidl \
+	lowpan/java/android/net/lowpan/ILowpanInterface.aidl \
+	lowpan/java/android/net/lowpan/ILowpanManagerListener.aidl \
+	lowpan/java/android/net/lowpan/ILowpanManager.aidl
+
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += \
       $(FRAMEWORKS_BASE_JAVA_SRC_DIRS) \
@@ -967,6 +976,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -android \
     -knowntags ./frameworks/base/docs/knowntags.txt \
     -knowntags ./libcore/known_oj_tags.txt \
+    -manifest ./frameworks/base/core/res/AndroidManifest.xml \
     -hidePackage com.android.org.conscrypt \
     -since $(SRC_API_DIR)/1.xml 1 \
     -since $(SRC_API_DIR)/2.xml 2 \

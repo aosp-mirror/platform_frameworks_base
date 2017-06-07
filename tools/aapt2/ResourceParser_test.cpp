@@ -843,4 +843,9 @@ TEST_F(ResourceParserTest, ParseElementWithNoValue) {
   EXPECT_THAT(*str->value, Eq(""));
 }
 
+TEST_F(ResourceParserTest, ParsePlatformIndependentNewline) {
+  std::string input = R"(<string name="foo">%1$s %n %2$s</string>)";
+  ASSERT_TRUE(TestParse(input));
+}
+
 }  // namespace aapt

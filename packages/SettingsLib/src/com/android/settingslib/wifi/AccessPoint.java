@@ -23,7 +23,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
-import android.net.NetworkBadging;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
@@ -83,6 +82,35 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     public static final int HIGHER_FREQ_5GHZ = 5900;
 
+    /**
+     * Constant value representing an unlabeled / unscored network.
+     */
+    @VisibleForTesting
+    static final int SPEED_NONE = 0;
+
+    /**
+     * Constant value representing a slow speed network connection.
+     */
+    @VisibleForTesting
+    static final int SPEED_SLOW = 5;
+
+    /**
+     * Constant value representing a medium speed network connection.
+     */
+    @VisibleForTesting
+    static final int SPEED_MEDIUM = 10;
+
+    /**
+     * Constant value representing a fast speed network connection.
+     */
+    @VisibleForTesting
+    static final int SPEED_FAST = 20;
+
+    /**
+     * Constant value representing a very fast speed network connection.
+     */
+    @VisibleForTesting
+    static final int SPEED_VERY_FAST = 30;
 
     /**
      * Experimental: we should be able to show the user the list of BSSIDs and bands
@@ -149,7 +177,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private Object mTag;
 
     private int mRankingScore = Integer.MIN_VALUE;
-    private int mBadge = NetworkBadging.BADGING_NONE;
+    private int mSpeed = AccessPoint.SPEED_NONE;
     private boolean mIsScoredNetworkMetered = false;
 
     // used to co-relate internal vs returned accesspoint.
@@ -249,7 +277,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         this.mScanResultCache.clear();
         this.mScanResultCache.putAll(that.mScanResultCache);
         this.mId = that.mId;
-        this.mBadge = that.mBadge;
+        this.mSpeed = that.mSpeed;
         this.mIsScoredNetworkMetered = that.mIsScoredNetworkMetered;
         this.mRankingScore = that.mRankingScore;
     }
@@ -340,8 +368,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (mRankingScore != Integer.MIN_VALUE) {
             builder.append(",rankingScore=").append(mRankingScore);
         }
-        if (mBadge != NetworkBadging.BADGING_NONE) {
-            builder.append(",badge=").append(mBadge);
+        if (mSpeed != SPEED_NONE) {
+            builder.append(",speed=").append(mSpeed);
         }
         builder.append(",metered=").append(isMetered());
 
@@ -349,7 +377,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /**
-     * Updates the AccessPoint rankingScore, metering, and badge, returning true if the data has
+     * Updates the AccessPoint rankingScore, metering, and speed, returning true if the data has
      * changed.
      *
      * @param scoreCache The score cache to use to retrieve scores.
@@ -364,14 +392,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /**
-     * Updates the AccessPoint rankingScore and badge, returning true if the data has changed.
+     * Updates the AccessPoint rankingScore and speed, returning true if the data has changed.
      *
      * @param scoreCache The score cache to use to retrieve scores.
      */
     private boolean updateScores(WifiNetworkScoreCache scoreCache) {
-        int oldBadge = mBadge;
+        int oldSpeed = mSpeed;
         int oldRankingScore = mRankingScore;
-        mBadge = NetworkBadging.BADGING_NONE;
+        mSpeed = SPEED_NONE;
         mRankingScore = Integer.MIN_VALUE;
 
         for (ScanResult result : mScanResultCache.values()) {
@@ -383,10 +411,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
             if (score.hasRankingScore()) {
                 mRankingScore = Math.max(mRankingScore, score.calculateRankingScore(result.level));
             }
-            mBadge = Math.max(mBadge, score.calculateBadge(result.level));
+            // TODO(sghuman): Rename calculateBadge API
+            mSpeed = Math.max(mSpeed, score.calculateBadge(result.level));
         }
 
-        return (oldBadge != mBadge || oldRankingScore != mRankingScore);
+        return (oldSpeed != mSpeed || oldRankingScore != mRankingScore);
     }
 
     /**
@@ -643,7 +672,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // TODO(b/62354743): Standardize and international delimiter usage
         final String concatenator = " / ";
 
-        if (mBadge != NetworkBadging.BADGING_NONE) {
+        if (mSpeed != SPEED_NONE) {
             summary.append(getSpeedLabel() + concatenator);
         }
 
@@ -764,7 +793,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             if (mRankingScore != Integer.MIN_VALUE) {
                 visibility.append(" rankingScore=").append(getRankingScore());
             }
-            if (mBadge != NetworkBadging.BADGING_NONE) {
+            if (mSpeed != SPEED_NONE) {
                 visibility.append(" speed=").append(getSpeedLabel());
             }
             visibility.append(String.format(" tx=%.1f,", mInfo.txSuccessRate));
@@ -1062,18 +1091,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return mRankingScore;
     }
 
-    int getBadge() { return mBadge;}
+    int getSpeed() { return mSpeed;}
 
     @Nullable
     String getSpeedLabel() {
-        switch (mBadge) {
-            case NetworkBadging.BADGING_4K:
+        switch (mSpeed) {
+            case SPEED_VERY_FAST:
                 return mContext.getString(R.string.speed_label_very_fast);
-            case NetworkBadging.BADGING_HD:
+            case SPEED_FAST:
                 return mContext.getString(R.string.speed_label_fast);
-            case NetworkBadging.BADGING_SD:
+            case SPEED_MEDIUM:
                 return mContext.getString(R.string.speed_label_okay);
-            case NetworkBadging.BADGING_NONE:
+            case SPEED_SLOW:
+                return mContext.getString(R.string.speed_label_slow);
+            case SPEED_NONE:
             default:
                 return null;
         }

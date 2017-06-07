@@ -18,6 +18,8 @@ package android.app.trust;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
+import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -29,6 +31,7 @@ import android.util.ArrayMap;
  * See {@link com.android.server.trust.TrustManagerService}
  * @hide
  */
+@SystemService(Context.TRUST_SERVICE)
 public class TrustManager {
 
     private static final int MSG_TRUST_CHANGED = 1;

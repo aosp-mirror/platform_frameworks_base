@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.SystemService;
+import android.content.Context;
 import android.hardware.health.V1_0.Constants;
 import com.android.internal.app.IBatteryStats;
 
@@ -24,6 +26,7 @@ import com.android.internal.app.IBatteryStats;
  * in the {@link android.content.Intent#ACTION_BATTERY_CHANGED} Intent, and
  * provides a method for querying battery and charging properties.
  */
+@SystemService(Context.BATTERY_SERVICE)
 public class BatteryManager {
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:

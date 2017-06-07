@@ -23,6 +23,8 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.net.util.SharedLog;
 
+import java.util.ArrayList;
+
 
 /**
  * Capture tethering dependencies, for injection.
@@ -101,6 +103,25 @@ public class OffloadHardwareInterface {
         mOffloadControl = null;
         mTetheringOffloadCallback = null;
         mControlCallback = null;
+    }
+
+    public boolean setUpstreamParameters(
+            String iface, String v4addr, String v4gateway, ArrayList<String> v6gws) {
+        final CbResults results = new CbResults();
+        try {
+            mOffloadControl.setUpstreamParameters(
+                    iface, v4addr, v4gateway, v6gws,
+                    (boolean success, String errMsg) -> {
+                        results.success = success;
+                        results.errMsg = errMsg;
+                    });
+        } catch (RemoteException e) {
+            mLog.e("failed to setUpstreamParameters: " + e);
+            return false;
+        }
+
+        if (!results.success) mLog.e("setUpstreamParameters failed: " + results.errMsg);
+        return results.success;
     }
 
     private static class TetheringOffloadCallback extends ITetheringOffloadCallback.Stub {

@@ -16,10 +16,14 @@
 
 package android.service.persistentdata;
 
-import android.annotation.SystemApi;
 import android.annotation.IntDef;
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
+import android.annotation.SystemService;
+import android.content.Context;
 import android.os.RemoteException;
-import android.util.Slog;
+import android.service.oemlock.OemLockManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +47,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
+@SystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE)
 public class PersistentDataBlockManager {
     private static final String TAG = PersistentDataBlockManager.class.getSimpleName();
     private IPersistentDataBlockService sService;
@@ -85,6 +90,7 @@ public class PersistentDataBlockManager {
      *
      * @param data the data to write
      */
+    @SuppressLint("Doclava125")
     public int write(byte[] data) {
         try {
             return sService.write(data);
@@ -96,6 +102,7 @@ public class PersistentDataBlockManager {
     /**
      * Returns the data block stored on the persistent partition.
      */
+    @SuppressLint("Doclava125")
     public byte[] read() {
         try {
             return sService.read();
@@ -109,6 +116,7 @@ public class PersistentDataBlockManager {
      *
      * Return -1 on error.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_PDB_STATE)
     public int getDataBlockSize() {
         try {
             return sService.getDataBlockSize();
@@ -136,6 +144,7 @@ public class PersistentDataBlockManager {
      * It will also prevent any further {@link #write} operation until reboot,
      * in order to prevent a potential race condition. See b/30352311.
      */
+    @RequiresPermission(android.Manifest.permission.OEM_UNLOCK_STATE)
     public void wipe() {
         try {
             sService.wipe();
@@ -149,6 +158,7 @@ public class PersistentDataBlockManager {
      *
      * @deprecated use {@link OemLockManager#setOemUnlockAllowedByUser(boolean)} instead.
      */
+    @RequiresPermission(android.Manifest.permission.OEM_UNLOCK_STATE)
     public void setOemUnlockEnabled(boolean enabled) {
         try {
             sService.setOemUnlockEnabled(enabled);
@@ -162,6 +172,10 @@ public class PersistentDataBlockManager {
      *
      * @deprecated use {@link OemLockManager#isOemUnlockAllowedByUser()} instead.
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_OEM_UNLOCK_STATE,
+            android.Manifest.permission.OEM_UNLOCK_STATE
+    })
     public boolean getOemUnlockEnabled() {
         try {
             return sService.getOemUnlockEnabled();
@@ -177,6 +191,10 @@ public class PersistentDataBlockManager {
      * {@link #FLASH_LOCK_UNLOCKED} if device bootloader is unlocked, or {@link #FLASH_LOCK_UNKNOWN}
      * if this information cannot be ascertained on this device.
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_OEM_UNLOCK_STATE,
+            android.Manifest.permission.OEM_UNLOCK_STATE
+    })
     @FlashLockState
     public int getFlashLockState() {
         try {

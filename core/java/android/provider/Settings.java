@@ -6781,6 +6781,13 @@ public final class Settings {
         public static final String CAMERA_LIFT_TRIGGER_ENABLED = "camera_lift_trigger_enabled";
 
         /**
+         * The default enable state of the camera lift trigger.
+         *
+         * @hide
+         */
+        public static final int CAMERA_LIFT_TRIGGER_ENABLED_DEFAULT = 1;
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide

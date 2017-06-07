@@ -21,6 +21,7 @@ import android.net.NetworkBadging;
 import android.os.BatteryManager;
 import android.os.UserManager;
 import android.print.PrintManager;
+import android.provider.Settings;
 import android.view.View;
 
 import com.android.internal.util.UserIcons;
@@ -312,5 +313,21 @@ public class Utils {
                 throw new IllegalArgumentException(
                     "No badge resource found for badge value: " + badge);
         }
+    }
+
+    public static int getDefaultStorageManagerDaysToRetain(Resources resources) {
+        int defaultDays = Settings.Secure.AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_DEFAULT;
+        try {
+            defaultDays =
+                    resources.getInteger(
+                            com.android
+                                    .internal
+                                    .R
+                                    .integer
+                                    .config_storageManagerDaystoRetainDefault);
+        } catch (Resources.NotFoundException e) {
+            // We are likely in a test environment.
+        }
+        return defaultDays;
     }
 }

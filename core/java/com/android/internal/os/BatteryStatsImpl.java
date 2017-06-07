@@ -171,6 +171,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public interface PlatformIdleStateCallback {
         public String getPlatformLowPowerStats();
+        public String getSubsystemLowPowerStats();
     }
 
     private final PlatformIdleStateCallback mPlatformIdleStateCallback;
@@ -2878,6 +2879,12 @@ public class BatteryStatsImpl extends BatteryStats {
                         mPlatformIdleStateCallback.getPlatformLowPowerStats();
                 if (DEBUG) Slog.i(TAG, "WRITE PlatformIdleState:" +
                         mCurHistoryStepDetails.statPlatformIdleState);
+
+                mCurHistoryStepDetails.statSubsystemPowerState =
+                        mPlatformIdleStateCallback.getSubsystemLowPowerStats();
+                if (DEBUG) Slog.i(TAG, "WRITE SubsystemPowerState:" +
+                        mCurHistoryStepDetails.statSubsystemPowerState);
+
             }
             computeHistoryStepDetails(mCurHistoryStepDetails, mLastHistoryStepDetails);
             if (includeStepDetails != 0) {
@@ -10175,7 +10182,16 @@ public class BatteryStatsImpl extends BatteryStats {
                 new KernelUidCpuTimeReader.Callback() {
                     @Override
                     public void onUidCpuTime(int uid, long userTimeUs, long systemTimeUs) {
-                        final Uid u = getUidStatsLocked(mapUid(uid));
+                        uid = mapUid(uid);
+                        if (Process.isIsolated(uid)) {
+                            // This could happen if the isolated uid mapping was removed before
+                            // that process was actually killed.
+                            mKernelUidCpuTimeReader.removeUid(uid);
+                            Slog.d(TAG, "Got readings for an isolated uid with"
+                                    + " no mapping to owning uid: " + uid);
+                            return;
+                        }
+                        final Uid u = getUidStatsLocked(uid);
 
                         // Accumulate the total system and user time.
                         mTempTotalCpuUserTimeUs += userTimeUs;
@@ -10340,7 +10356,11 @@ public class BatteryStatsImpl extends BatteryStats {
 
                     @Override
                     public void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs) {
-                        final Uid u = getUidStatsLocked(mapUid(uid));
+                        uid = mapUid(uid);
+                        if (Process.isIsolated(uid)) {
+                            return;
+                        }
+                        final Uid u = getUidStatsLocked(uid);
                         if (u.mCpuFreqTimeMs == null) {
                             u.mCpuFreqTimeMs = new LongSamplingCounterArray(mOnBatteryTimeBase);
                         }

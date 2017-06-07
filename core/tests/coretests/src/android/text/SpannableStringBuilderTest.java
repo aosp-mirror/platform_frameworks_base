@@ -16,9 +16,46 @@
 
 package android.text;
 
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import android.text.style.BulletSpan;
+import android.text.style.QuoteSpan;
+import android.text.style.SubscriptSpan;
+import android.text.style.UnderlineSpan;
+
+import org.junit.Test;
+
 public class SpannableStringBuilderTest extends SpannableTest {
 
     protected Spannable newSpannableWithText(String text) {
         return new SpannableStringBuilder(text);
+    }
+
+    @Test
+    public void testGetSpans_sortsByPriorityEvenWhenSortParamIsFalse() {
+        String text = "p_in_s";
+        SpannableStringBuilder builder = new SpannableStringBuilder(text);
+        Object first = new SubscriptSpan();
+        Object second = new UnderlineSpan();
+        Object third = new BulletSpan();
+        Object fourth = new QuoteSpan();
+
+        builder.setSpan(first, 2, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        builder.setSpan(second, 1, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        builder.setSpan(third, 2, text.length(), 1 << Spanned.SPAN_PRIORITY_SHIFT);
+        builder.setSpan(fourth, 0, text.length(), 2 << Spanned.SPAN_PRIORITY_SHIFT);
+
+        Object[] spans = builder.getSpans(0, text.length(), Object.class, false);
+
+        assertNotNull(spans);
+        assertEquals(4, spans.length);
+        // priority spans are first
+        assertEquals(fourth, spans[0]);
+        assertEquals(third, spans[1]);
+        // other spans should be there
+        assertEquals(second, spans[2]);
+        assertEquals(first, spans[3]);
     }
 }

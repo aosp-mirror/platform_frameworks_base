@@ -369,15 +369,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateShelfIconColor();
     }
 
-    private void updateShelfIconColor() {
+    @VisibleForTesting
+    void updateShelfIconColor() {
         StatusBarIconView expandedIcon = mEntry.expandedIcon;
         boolean isPreL = Boolean.TRUE.equals(expandedIcon.getTag(R.id.icon_is_pre_L));
         boolean colorize = !isPreL || NotificationUtils.isGrayscale(expandedIcon,
                 NotificationColorUtil.getInstance(mContext));
         int color = StatusBarIconView.NO_COLOR;
         if (colorize) {
-            color = mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded(),
-                    getBackgroundColorWithoutTint());
+            NotificationHeaderView header = getVisibleNotificationHeader();
+            if (header != null) {
+                color = header.getOriginalIconColor();
+            } else {
+                color = mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded(),
+                        getBackgroundColorWithoutTint());
+            }
         }
         expandedIcon.setStaticDrawableColor(color);
     }
@@ -1770,6 +1776,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         NotificationContentView showingLayout = getShowingLayout();
         showingLayout.updateBackgroundColor(animated);
         mPrivateLayout.updateExpandButtons(isExpandable());
+        updateShelfIconColor();
         showingLayout.setDark(isDark(), false /* animate */, 0 /* delay */);
         mShowingPublicInitialized = true;
     }

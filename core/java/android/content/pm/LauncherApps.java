@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
 import android.app.PendingIntent;
@@ -79,6 +80,7 @@ import java.util.List;
  * Note as of Android O, apps on a managed profile are no longer allowed to access apps on the
  * main profile.  Apps can only access profiles returned by {@link #getProfiles()}.
  */
+@SystemService(Context.LAUNCHER_APPS_SERVICE)
 public class LauncherApps {
 
     static final String TAG = "LauncherApps";

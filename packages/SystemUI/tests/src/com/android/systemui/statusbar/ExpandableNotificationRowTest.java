@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -88,5 +89,11 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         verify(mockContainer).reInflateViews(any(), any());
     }
 
-
+    @Test
+    public void testIconColorShouldBeUpdatedWhenSensitive() throws Exception {
+        ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
+        row.setSensitive(true, true);
+        row.setHideSensitive(true, false, 0, 0);
+        verify(row).updateShelfIconColor();
+    }
 }

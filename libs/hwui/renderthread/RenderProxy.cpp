@@ -469,18 +469,7 @@ uint32_t RenderProxy::frameTimePercentile(int p) {
 }
 
 CREATE_BRIDGE2(dumpGraphicsMemory, int fd, RenderThread* thread) {
-    args->thread->jankTracker().dump(args->fd);
-
-    FILE *file = fdopen(args->fd, "a");
-    if (Caches::hasInstance()) {
-        String8 cachesLog;
-        Caches::getInstance().dumpMemoryUsage(cachesLog);
-        fprintf(file, "\nCaches:\n%s\n", cachesLog.string());
-    } else {
-        fprintf(file, "\nNo caches instance.\n");
-    }
-    fprintf(file, "\nPipeline=FrameBuilder\n");
-    fflush(file);
+    args->thread->dumpGraphicsMemory(args->fd);
     return nullptr;
 }
 

@@ -17,6 +17,7 @@
 package com.android.server.autofill.ui;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.app.Dialog;
@@ -63,7 +64,7 @@ final class SaveUi {
 
         @Override
         public void onSave() {
-            if (sDebug) Slog.d(TAG, "onSave(): " + mDone);
+            if (sDebug) Slog.d(TAG, "OneTimeListener.onSave(): " + mDone);
             if (mDone) {
                 return;
             }
@@ -73,7 +74,7 @@ final class SaveUi {
 
         @Override
         public void onCancel(IntentSender listener) {
-            if (sDebug) Slog.d(TAG, "onCancel(): " + mDone);
+            if (sDebug) Slog.d(TAG, "OneTimeListener.onCancel(): " + mDone);
             if (mDone) {
                 return;
             }
@@ -83,7 +84,7 @@ final class SaveUi {
 
         @Override
         public void onDestroy() {
-            if (sDebug) Slog.d(TAG, "onDestroy(): " + mDone);
+            if (sDebug) Slog.d(TAG, "OneTimeListener.onDestroy(): " + mDone);
             if (mDone) {
                 return;
             }
@@ -158,9 +159,8 @@ final class SaveUi {
             subTitleView.setVisibility(View.VISIBLE);
         }
 
-        Slog.i(TAG, "Showing save dialog: " + mTitle);
         if (sDebug) {
-            Slog.d(TAG, "SubTitle: " + mSubTitle);
+            Slog.d(TAG, "on constructor: title=" + mTitle + ", subTitle=" + mSubTitle);
         }
 
         final TextView noButton = view.findViewById(R.id.autofill_save_no);
@@ -169,15 +169,15 @@ final class SaveUi {
         } else {
             noButton.setText(R.string.autofill_save_no);
         }
-        noButton.setOnClickListener((v) -> mListener.onCancel(
-                info.getNegativeActionListener()));
+        View.OnClickListener cancelListener =
+                (v) -> mListener.onCancel(info.getNegativeActionListener());
+        noButton.setOnClickListener(cancelListener);
 
         final View yesButton = view.findViewById(R.id.autofill_save_yes);
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
         final View closeButton = view.findViewById(R.id.autofill_save_close);
-        closeButton.setOnClickListener((v) -> mListener.onCancel(
-                info.getNegativeActionListener()));
+        closeButton.setOnClickListener(cancelListener);
 
         mDialog = new Dialog(context, R.style.Theme_DeviceDefault_Light_Panel);
         mDialog.setContentView(view);
@@ -195,13 +195,16 @@ final class SaveUi {
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.accessibilityTitle = context.getString(R.string.autofill_save_accessibility_title);
 
+        Slog.i(TAG, "Showing save dialog: " + mTitle);
         mDialog.show();
     }
 
     void destroy() {
+        if (sDebug) Slog.d(TAG, "destroy()");
         throwIfDestroyed();
         mListener.onDestroy();
         mHandler.removeCallbacksAndMessages(mListener);
+        if (sVerbose) Slog.v(TAG, "destroy(): dismissing dialog");
         mDialog.dismiss();
         mDestroyed = true;
     }
@@ -210,6 +213,11 @@ final class SaveUi {
         if (mDestroyed) {
             throw new IllegalStateException("cannot interact with a destroyed instance");
         }
+    }
+
+    @Override
+    public String toString() {
+        return mTitle == null ? "NO TITLE" : mTitle.toString();
     }
 
     void dump(PrintWriter pw, String prefix) {

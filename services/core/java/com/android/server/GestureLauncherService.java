@@ -320,7 +320,8 @@ public class GestureLauncherService extends SystemService {
     public static boolean isCameraLiftTriggerSettingEnabled(Context context, int userId) {
         return isCameraLiftTriggerEnabled(context.getResources())
                 && (Settings.Secure.getIntForUser(context.getContentResolver(),
-                        Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED, 0, userId) != 0);
+                        Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED,
+                        Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED_DEFAULT, userId) != 0);
     }
 
     /**
