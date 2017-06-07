@@ -827,7 +827,9 @@ class TextLine {
                                 underlineXLeft, underlineXRight, y);
                     }
                     if (info.isUnderlineText) {
-                        drawUnderline(wp, c, wp.getColor(), ((Paint) wp).getUnderlineThickness(),
+                        final float thickness =
+                                Math.max(((Paint) wp).getUnderlineThickness(), 1.0f);
+                        drawUnderline(wp, c, wp.getColor(), thickness,
                                 underlineXLeft, underlineXRight, y);
                     }
                 }

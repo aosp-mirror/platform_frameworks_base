@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import static org.junit.Assert.assertNotEquals;
+
 import android.graphics.Paint;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -364,5 +366,32 @@ public class PaintTest extends InstrumentationTestCase {
         assertEquals(1.0f, p.getWordSpacing());
         p.setWordSpacing(-2.0f);
         assertEquals(-2.0f, p.getWordSpacing());
+    }
+
+    public void testGetUnderlinePositionAndThickness() {
+        final Typeface fontTypeface = Typeface.createFromAsset(
+                getInstrumentation().getContext().getAssets(), "fonts/underlineTestFont.ttf");
+        final Paint p = new Paint();
+        final int textSize = 100;
+        p.setTextSize(textSize);
+
+        final float origPosition = p.getUnderlinePosition();
+        final float origThickness = p.getUnderlineThickness();
+
+        p.setTypeface(fontTypeface);
+        assertNotEquals(origPosition, p.getUnderlinePosition());
+        assertNotEquals(origThickness, p.getUnderlineThickness());
+
+        //    -200 (underlinePosition in 'post' table, negative means below the baseline)
+        //    ÷ 1000 (unitsPerEm in 'head' table)
+        //    × 100 (text size)
+        //    × -1 (negated, since we consider below the baseline positive)
+        //    = 20
+        assertEquals(20.0f, p.getUnderlinePosition(), 0.5f);
+        //    300 (underlineThickness in 'post' table)
+        //    ÷ 1000 (unitsPerEm in 'head' table)
+        //    × 100 (text size)
+        //    = 30
+        assertEquals(30.0f, p.getUnderlineThickness(), 0.5f);
     }
 }

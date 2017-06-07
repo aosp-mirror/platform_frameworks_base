@@ -822,18 +822,14 @@ public class Paint {
      * @hide
      */
     public float getUnderlinePosition() {
-        // kStdUnderline_Offset = 1/9, defined in SkTextFormatParams.h
-        // TODO: replace with position from post and MVAR tables (b/62353930).
-        return (1.0f / 9.0f) * getTextSize();
+        return nGetUnderlinePosition(mNativePaint, mNativeTypeface);
     }
 
     /**
      * @hide
      */
     public float getUnderlineThickness() {
-        // kStdUnderline_Thickness = 1/18, defined in SkTextFormatParams.h
-        // TODO: replace with thickness from post and MVAR tables (b/62353930).
-        return (1.0f / 18.0f) * getTextSize();
+        return nGetUnderlineThickness(mNativePaint, mNativeTypeface);
     }
 
     /**
@@ -2996,6 +2992,10 @@ public class Paint {
     private static native float nAscent(long paintPtr, long typefacePtr);
     @CriticalNative
     private static native float nDescent(long paintPtr, long typefacePtr);
+    @CriticalNative
+    private static native float nGetUnderlinePosition(long paintPtr, long typefacePtr);
+    @CriticalNative
+    private static native float nGetUnderlineThickness(long paintPtr, long typefacePtr);
     @CriticalNative
     private static native void nSetTextSize(long paintPtr, float textSize);
 }
