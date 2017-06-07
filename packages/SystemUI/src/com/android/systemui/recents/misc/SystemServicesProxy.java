@@ -362,6 +362,19 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Requests a gc() from the background thread.
+     */
+    public void gc() {
+        BackgroundThread.getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                System.gc();
+                System.runFinalization();
+            }
+        });
+    }
+
+    /**
      * @return whether the provided {@param className} is blacklisted
      */
     public boolean isBlackListedActivity(String className) {
