@@ -158,6 +158,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -3596,8 +3597,16 @@ public class WindowManagerService extends IWindowManager.Stub
     // only allow disables from pids which have count on, etc.
     @Override
     public void showStrictModeViolation(boolean on) {
-        int pid = Binder.getCallingPid();
-        mH.sendMessage(mH.obtainMessage(H.SHOW_STRICT_MODE_VIOLATION, on ? 1 : 0, pid));
+        final int pid = Binder.getCallingPid();
+        if (on) {
+            // Show the visualization, and enqueue a second message to tear it
+            // down if we don't hear back from the app.
+            mH.sendMessage(mH.obtainMessage(H.SHOW_STRICT_MODE_VIOLATION, 1, pid));
+            mH.sendMessageDelayed(mH.obtainMessage(H.SHOW_STRICT_MODE_VIOLATION, 0, pid),
+                    DateUtils.SECOND_IN_MILLIS);
+        } else {
+            mH.sendMessage(mH.obtainMessage(H.SHOW_STRICT_MODE_VIOLATION, 0, pid));
+        }
     }
 
     private void showStrictModeViolation(int arg, int pid) {
