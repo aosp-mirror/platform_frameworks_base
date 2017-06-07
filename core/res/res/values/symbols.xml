@@ -3042,7 +3042,7 @@
   <java-symbol type="integer" name="config_inCallNotificationVolumeRelative" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
   <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
+  <java-symbol type="string" name="config_headlineFontFamily" />
 
   <java-symbol type="drawable" name="stat_sys_vitals" />
-
 </resources>
