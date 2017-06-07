@@ -4242,6 +4242,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         mAmbientState.setUnlockHintRunning(running);
     }
 
+    public void setDarkShelfOffsetX(int shelfOffsetX) {
+        mShelf.setDarkOffsetX(shelfOffsetX);
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
