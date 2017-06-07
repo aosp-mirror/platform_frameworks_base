@@ -95,4 +95,11 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.setHideSensitive(true, false, 0, 0);
         verify(row).updateShelfIconColor();
     }
+
+    @Test
+    public void testIconColorShouldBeUpdatedWhenSettingDark() throws Exception {
+        ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
+        row.setDark(true, false, 0);
+        verify(row).updateShelfIconColor();
+    }
 }
