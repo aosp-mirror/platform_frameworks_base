@@ -109,6 +109,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     /** Application tokens that are exiting, but still on screen for animations. */
     final AppTokenList mExitingAppTokens = new AppTokenList();
+    final AppTokenList mTmpAppTokens = new AppTokenList();
 
     /** Detach this stack from its display when animation completes. */
     // TODO: maybe tie this to WindowContainer#removeChild some how...
@@ -1626,9 +1627,14 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
         // TODO: Why aren't we just using the loop above for this? mAppAnimator.animating isn't set
         // below but is set in the loop above. See if it really matters...
-        final int exitingCount = mExitingAppTokens.size();
-        for (int i = 0; i < exitingCount; i++) {
-            final AppWindowAnimator appAnimator = mExitingAppTokens.get(i).mAppAnimator;
+
+        // Clear before using.
+        mTmpAppTokens.clear();
+        // We copy the list as things can be removed from the exiting token list while we are
+        // processing.
+        mTmpAppTokens.addAll(mExitingAppTokens);
+        for (int i = 0; i < mTmpAppTokens.size(); i++) {
+            final AppWindowAnimator appAnimator = mTmpAppTokens.get(i).mAppAnimator;
             appAnimator.wasAnimating = appAnimator.animating;
             if (appAnimator.stepAnimationLocked(currentTime)) {
                 mService.mAnimator.setAnimating(true);
@@ -1641,6 +1647,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                         "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
             }
         }
+        // Clear to avoid holding reference to tokens.
+        mTmpAppTokens.clear();
     }
 
     @Override
