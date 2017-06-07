@@ -70,7 +70,12 @@ public interface MenuItem {
      * a larger segment of its container.
      */
     public static final int SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW = 8;
-    
+
+    /**
+     * @hide
+     */
+    int SHOW_AS_OVERFLOW_ALWAYS = 1 << 31;
+
     /**
      * Interface definition for a callback to be invoked when a menu item is
      * clicked.
@@ -798,5 +803,15 @@ public interface MenuItem {
      */
     default CharSequence getTooltipText() {
         return null;
+    }
+
+    /**
+     * Returns true if {@link #setShowAsAction(int)} was set to {@link #SHOW_AS_OVERFLOW_ALWAYS}.
+     * Default value if {@code false}.
+     *
+     * @hide
+     */
+    default boolean requiresOverflow() {
+        return false;
     }
 }
