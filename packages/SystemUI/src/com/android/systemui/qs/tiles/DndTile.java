@@ -140,7 +140,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
         if (mState.value) {
             mController.setZen(ZEN_MODE_OFF, null, TAG);
         } else {
-            mController.setZen(ZEN_MODE_ALARMS, null, TAG);
+            int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN, Global.ZEN_MODE_ALARMS);
+            mController.setZen(zen, null, TAG);
         }
     }
 
