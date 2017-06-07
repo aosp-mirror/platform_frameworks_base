@@ -51,7 +51,14 @@ import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.classifier.FalsingLog;
+import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.Prefs;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Map;
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
  */
@@ -71,6 +78,7 @@ public class CarStatusBar extends StatusBar implements
     private ConnectedDeviceSignalController mConnectedDeviceSignalController;
     private CarNavigationBarView mNavigationBarView;
 
+    private final Object mQueueLock = new Object();
     @Override
     public void start() {
         super.start();
@@ -167,6 +175,43 @@ public class CarStatusBar extends StatusBar implements
         lp.windowAnimations = 0;
 
         mWindowManager.addView(navigationBarWindow, lp);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        //When executing dump() funciton simultaneously, we need to serialize them
+        //to get mStackScroller's position correctly.
+        synchronized (mQueueLock) {
+            pw.println("  mStackScroller: " + viewInfo(mStackScroller));
+            pw.println("  mStackScroller: " + viewInfo(mStackScroller)
+                    + " scroll " + mStackScroller.getScrollX()
+                    + "," + mStackScroller.getScrollY());
+        }
+
+        pw.print("  mTaskStackListener="); pw.println(mTaskStackListener);
+        pw.print("  mController=");
+        pw.println(mController);
+        pw.print("  mFullscreenUserSwitcher="); pw.println(mFullscreenUserSwitcher);
+        pw.print("  mCarBatteryController=");
+        pw.println(mCarBatteryController);
+        pw.print("  mBatteryMeterView=");
+        pw.println(mBatteryMeterView);
+        pw.print("  mConnectedDeviceSignalController=");
+        pw.println(mConnectedDeviceSignalController);
+        pw.print("  mNavigationBarView=");
+        pw.println(mNavigationBarView);
+
+        if (KeyguardUpdateMonitor.getInstance(mContext) != null) {
+            KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
+        }
+
+        FalsingManager.getInstance(mContext).dump(pw);
+        FalsingLog.dump(pw);
+
+        pw.println("SharedPreferences:");
+        for (Map.Entry<String, ?> entry : Prefs.getAll(mContext).entrySet()) {
+            pw.print("  "); pw.print(entry.getKey()); pw.print("="); pw.println(entry.getValue());
+        }
     }
 
     @Override
