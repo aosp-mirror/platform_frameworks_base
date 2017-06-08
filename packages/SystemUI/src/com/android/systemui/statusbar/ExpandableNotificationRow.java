@@ -1451,6 +1451,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mIsSummaryWithChildren) {
             mChildrenContainer.setDark(dark, fade, delay);
         }
+        updateShelfIconColor();
     }
 
     public boolean isExpandable() {
