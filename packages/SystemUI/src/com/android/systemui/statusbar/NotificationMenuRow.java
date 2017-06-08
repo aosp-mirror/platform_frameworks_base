@@ -67,7 +67,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     private Context mContext;
     private FrameLayout mMenuContainer;
-    private MenuItem mSnoozeItem;
     private MenuItem mInfoItem;
     private ArrayList<MenuItem> mMenuItems;
     private OnMenuEventListener mMenuListener;
@@ -86,9 +85,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private int[] mIconLocation = new int[2];
     private int[] mParentLocation = new int[2];
 
-    private float mHorizSpaceForIcon;
-    private int mVertSpaceForIcons;
-    private int mIconPadding;
+    private float mHorizSpaceForIcon = -1;
+    private int mVertSpaceForIcons = -1;
+    private int mIconPadding = -1;
 
     private float mAlpha = 0f;
     private float mPrevX;
@@ -104,17 +103,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     public NotificationMenuRow(Context context) {
         mContext = context;
-        final Resources res = context.getResources();
-        mShouldShowMenu = res.getBoolean(R.bool.config_showNotificationGear);
-        mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
-        mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
-        mIconPadding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
+        mShouldShowMenu = context.getResources().getBoolean(R.bool.config_showNotificationGear);
         mHandler = new Handler(Looper.getMainLooper());
         mMenuItems = new ArrayList<>();
-        mSnoozeItem = createSnoozeItem(context);
-        mInfoItem = createInfoItem(context);
-        mMenuItems.add(mSnoozeItem);
-        mMenuItems.add(mInfoItem);
     }
 
     @Override
@@ -180,19 +171,24 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     }
 
     private void createMenuViews(boolean resetState) {
-        // Filter the menu items based on the notification
+        final Resources res = mContext.getResources();
+        mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
+        mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
+        mIconPadding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
+        mMenuItems.clear();
+        // Construct the menu items based on the notification
         if (mParent != null && mParent.getStatusBarNotification() != null) {
             int flags = mParent.getStatusBarNotification().getNotification().flags;
             boolean isForeground = (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
-            if (isForeground) {
-                // Don't show snooze for foreground services
-                mMenuItems.remove(mSnoozeItem);
-            } else if (!mMenuItems.contains(mSnoozeItem)) {
-                // Was a foreground service but is no longer, add snooze back
-                mMenuItems.add(mSnoozeItem);
+            if (!isForeground) {
+                // Only show snooze for non-foreground notifications
+                mMenuItems.add(createSnoozeItem(mContext));
             }
         }
-        // Recreate the menu
+        mInfoItem = createInfoItem(mContext);
+        mMenuItems.add(mInfoItem);
+
+        // Construct the menu views
         if (mMenuContainer != null) {
             mMenuContainer.removeAllViews();
         } else {
