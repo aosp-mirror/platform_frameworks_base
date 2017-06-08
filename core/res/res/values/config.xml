@@ -284,6 +284,13 @@
          Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
     <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
 
+    <!-- If the hardware supports specially marking packets that caused a wakeup of the
+         main CPU, set this value to the mark used. -->
+    <integer name="config_networkWakeupPacketMark">0</integer>
+
+    <!-- Mask to use when checking skb mark defined in config_networkWakeupPacketMark above. -->
+    <integer name="config_networkWakeupPacketMask">0</integer>
+
     <!-- Default value for ConnectivityManager.getMultipathPreference() on metered networks. Actual
          device behaviour is controlled by Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE.
          This is the default value of that setting. -->
