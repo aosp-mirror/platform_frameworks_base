@@ -3332,7 +3332,10 @@ public abstract class BatteryStats implements Parcelable {
                         label = "???";
                 }
                 dumpLine(pw, uid, category, POWER_USE_ITEM_DATA, label,
-                        BatteryStatsHelper.makemAh(bs.totalPowerMah));
+                        BatteryStatsHelper.makemAh(bs.totalPowerMah),
+                        bs.shouldHide ? 1 : 0,
+                        BatteryStatsHelper.makemAh(bs.screenPowerMah),
+                        BatteryStatsHelper.makemAh(bs.proportionalSmearMah));
             }
         }
 
@@ -4362,6 +4365,26 @@ public abstract class BatteryStats implements Parcelable {
                     }
                     pw.print(" )");
                 }
+
+                // If there is additional smearing information, include it.
+                if (bs.totalSmearedPowerMah != bs.totalPowerMah) {
+                    pw.print(" Including smearing: ");
+                    printmAh(pw, bs.totalSmearedPowerMah);
+                    pw.print(" (");
+                    if (bs.screenPowerMah != 0) {
+                        pw.print(" screen=");
+                        printmAh(pw, bs.screenPowerMah);
+                    }
+                    if (bs.proportionalSmearMah != 0) {
+                        pw.print(" proportional=");
+                        printmAh(pw, bs.proportionalSmearMah);
+                    }
+                    pw.print(" )");
+                }
+                if (bs.shouldHide) {
+                    pw.print(" Excluded from smearing");
+                }
+
                 pw.println();
             }
             pw.println();
