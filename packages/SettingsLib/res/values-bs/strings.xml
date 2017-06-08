@@ -150,7 +150,7 @@
     <string name="development_settings_not_available" msgid="4308569041701535607">"Opcije za programere nisu dostupne za ovog korisnika"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN postavke nisu dostupne za ovog korisnika"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Postavke za privezivanje nisu dostupne za ovog korisnika"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"Postavke za naziv pristupne tačke nisu dostupne za ovog korisnika"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Postavke za ime pristupne tačke nisu dostupne za ovog korisnika"</string>
     <string name="enable_adb" msgid="7982306934419797485">"Otklanjanje grešaka putem uređaja spojenog na USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Način rada za uklanjanje grešaka kada je povezan USB"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Ukini odobrenja otklanjanja grešaka putem uređaja spojenog na USB"</string>
@@ -337,6 +337,10 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Pod kontrolom administratora"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Omogućio administrator"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Onemogućio administrator"</string>
+    <string name="disabled" msgid="9206776641295849915">"Onemogućeno"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Dozvoljeno"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Nije dozvoljeno"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Instaliranje nepoznatih aplikacija"</string>
     <string name="home" msgid="3256884684164448244">"Postavke početne stranice"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
