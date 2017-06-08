@@ -106,10 +106,10 @@ public class SignalDrawable extends Drawable {
     private final Path mFullPath = new Path();
     private final Path mForegroundPath = new Path();
     private final Path mXPath = new Path();
-    private final int mIntrinsicSize;
     private final Handler mHandler;
     private float mOldDarkIntensity = -1;
     private float mNumLevels = 1;
+    private int mIntrinsicSize;
     private int mLevel;
     private int mState;
     private boolean mVisible;
@@ -133,6 +133,10 @@ public class SignalDrawable extends Drawable {
                 .getDimensionPixelSize(R.dimen.stat_sys_mobile_signal_corner_radius);
         mCircleOffsetStraight = mCornerRadius / (float) TAN_THETA;
         mCircleOffsetDiag = (float) Math.sqrt(Math.pow(mCircleOffsetStraight, 2.f) / 2.f);
+    }
+
+    public void setIntrinsicSize(int size) {
+        mIntrinsicSize = size;
     }
 
     @Override
