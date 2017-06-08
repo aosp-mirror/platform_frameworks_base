@@ -2212,11 +2212,7 @@ public class SettingsProvider extends ContentProvider {
                 throw new IllegalStateException("Key is corrupted", e);
             }
 
-            // Mac the package name and each of the signatures.
-            final String packageName = callingPkg.packageName;
-            byte[] packageNameBytes = packageName.getBytes(StandardCharsets.UTF_8);
-            m.update(getLengthPrefix(packageNameBytes), 0, 4);
-            m.update(packageNameBytes);
+            // Mac each of the developer signatures.
             for (int i = 0; i < callingPkg.signatures.length; i++) {
                 byte[] sig = callingPkg.signatures[i].toByteArray();
                 m.update(getLengthPrefix(sig), 0, 4);
@@ -2231,7 +2227,7 @@ public class SettingsProvider extends ContentProvider {
             final String uid = Integer.toString(callingPkg.applicationInfo.uid);
             final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
             final boolean success = ssaidSettings.insertSettingLocked(uid, ssaid, null, true,
-                    packageName);
+                callingPkg.packageName);
 
             if (!success) {
                 throw new IllegalStateException("Ssaid settings not accessible");
