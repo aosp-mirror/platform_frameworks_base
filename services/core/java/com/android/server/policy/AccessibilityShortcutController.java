@@ -234,7 +234,7 @@ public class AccessibilityShortcutController {
 
     private AccessibilityServiceInfo getInfoForTargetService() {
         final String currentShortcutServiceString = getTargetServiceComponentNameString(
-                mContext, UserHandle.myUserId());
+                mContext, UserHandle.USER_CURRENT);
         if (currentShortcutServiceString == null) {
             return null;
         }
