@@ -368,7 +368,6 @@ public class TetheringTest {
                 any(NetworkCallback.class), any(Handler.class));
         // In tethering mode, in the default configuration, an explicit request
         // for a mobile network is also made.
-        verify(mConnectivityManager, atLeastOnce()).getNetworkInfo(anyInt());
         verify(mConnectivityManager, times(1)).requestNetwork(
                 any(NetworkRequest.class), any(NetworkCallback.class), eq(0), anyInt(),
                 any(Handler.class));
