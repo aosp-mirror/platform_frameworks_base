@@ -270,7 +270,8 @@ public final class Bmgr {
             case BackupManager.ERROR_TRANSPORT_ABORTED:
                 return "Transport error";
             case BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED:
-                return "Transport rejected package";
+                return "Transport rejected package because it wasn't able to process it"
+                        + " at the time";
             case BackupManager.ERROR_AGENT_FAILURE:
                 return "Agent error";
             case BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED:
