@@ -79,6 +79,9 @@ public class TetheringConfiguration {
 
         tetherableUsbRegexs = ctx.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_usb_regexs);
+        // TODO: Evaluate deleting this altogether now that Wi-Fi always passes
+        // us an interface name. Careful consideration needs to be given to
+        // implications for Settings and for provisioning checks.
         tetherableWifiRegexs = ctx.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_wifi_regexs);
         tetherableBluetoothRegexs = ctx.getResources().getStringArray(
