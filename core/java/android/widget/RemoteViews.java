@@ -2342,7 +2342,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
 
-    public RemoteViews clone() {
+    public synchronized RemoteViews clone() {
         Preconditions.checkState(mIsRoot, "RemoteView has been attached to another RemoteView. "
                 + "May only clone the root of a RemoteView hierarchy.");
 
