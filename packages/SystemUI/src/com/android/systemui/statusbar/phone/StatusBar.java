@@ -209,6 +209,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.RowInflaterTask;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -1000,6 +1001,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 R.id.notification_stack_scroller);
         mNotificationPanel.setStatusBar(this);
         mNotificationPanel.setGroupManager(mGroupManager);
+        mAboveShelfObserver = new AboveShelfObserver(mStackScroller);
+        mAboveShelfObserver.setListener(mStatusBarWindow.findViewById(
+                R.id.notification_container_parent));
         mKeyguardStatusBar = (KeyguardStatusBarView) mStatusBarWindow.findViewById(R.id.keyguard_header);
 
         mNotificationIconAreaController = SystemUIFactory.getInstance()
@@ -4647,6 +4651,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onActivated(ActivatableNotificationView view) {
+        onActivated((View)view);
+        mStackScroller.setActivatedChild(view);
+    }
+
+    public void onActivated(View view) {
         mLockscreenGestureLogger.write(
                 MetricsEvent.ACTION_LS_NOTE,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
@@ -4655,7 +4664,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (previousView != null) {
             previousView.makeInactive(true /* animate */);
         }
-        mStackScroller.setActivatedChild(view);
     }
 
     /**
@@ -4689,9 +4697,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onActivationReset(ActivatableNotificationView view) {
         if (view == mStackScroller.getActivatedChild()) {
-            mKeyguardIndicationController.hideTransientIndication();
             mStackScroller.setActivatedChild(null);
+            onActivationReset((View)view);
         }
+    }
+
+    public void onActivationReset(View view) {
+        mKeyguardIndicationController.hideTransientIndication();
     }
 
     public void onTrackingStarted() {
@@ -5332,6 +5344,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // for heads up notifications
     protected HeadsUpManager mHeadsUpManager;
+
+    private AboveShelfObserver mAboveShelfObserver;
 
     // handling reordering
     protected VisualStabilityManager mVisualStabilityManager = new VisualStabilityManager();
@@ -6269,6 +6283,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean isLockscreenPublicMode(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            return mLockscreenPublicMode.get(mCurrentUserId, false);
+        }
         return mLockscreenPublicMode.get(userId, false);
     }
 
@@ -6405,6 +6422,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         row.setExpansionLogger(this, entry.notification.getKey());
         row.setGroupManager(mGroupManager);
         row.setHeadsUpManager(mHeadsUpManager);
+        row.setAboveShelfChangedListener(mAboveShelfObserver);
         row.setRemoteInputController(mRemoteInputController);
         row.setOnExpandClickListener(this);
         row.setRemoteViewClickHandler(mOnClickHandler);
@@ -6973,7 +6991,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         entry.notification = notification;
         mGroupManager.onEntryUpdated(entry, oldNotification);
 
-        entry.updateIcons(mContext, n);
+        entry.updateIcons(mContext, notification);
         inflateViews(entry, mStackScroller);
 
         mForegroundServiceController.updateNotification(notification,

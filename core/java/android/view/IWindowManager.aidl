@@ -29,6 +29,7 @@ import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
@@ -377,4 +378,9 @@ interface IWindowManager
      * associated with that InputConsumer.
      */
     boolean destroyInputConsumer(String name);
+
+    /**
+     * Return the touch region for the current IME window, or an empty region if there is none.
+     */
+    Region getCurrentImeTouchRegion();
 }

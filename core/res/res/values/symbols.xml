@@ -529,10 +529,7 @@
   <java-symbol type="string" name="RestrictedOnDataTitle" />
   <java-symbol type="string" name="RestrictedOnEmergencyTitle" />
   <java-symbol type="string" name="RestrictedOnNormalTitle" />
-  <java-symbol type="string" name="RestrictedOnAllVoiceContent" />
-  <java-symbol type="string" name="RestrictedOnDataContent" />
-  <java-symbol type="string" name="RestrictedOnEmergencyContent" />
-  <java-symbol type="string" name="RestrictedOnNormalContent" />
+  <java-symbol type="string" name="RestrictedStateContent" />
   <java-symbol type="string" name="notification_channel_network_alert" />
   <java-symbol type="string" name="notification_channel_call_forward" />
   <java-symbol type="string" name="notification_channel_emergency_callback" />

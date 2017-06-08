@@ -375,6 +375,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mHeadsUpAnimatingAway;
     private int mStatusBarState;
     private int mCachedBackgroundColor;
+    private boolean mHeadsUpGoingAwayAnimationsAllowed = true;
     private Runnable mAnimateScroll = this::animateScroll;
 
     public NotificationStackScrollLayout(Context context) {
@@ -4060,7 +4061,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
-        if (mAnimationsEnabled) {
+        if (mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed)) {
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));
             mNeedsAnimation = true;
             if (!mIsExpanded && !isHeadsUp) {
@@ -4240,6 +4241,15 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setUnlockHintRunning(boolean running) {
         mAmbientState.setUnlockHintRunning(running);
+    }
+
+    public void setQsCustomizerShowing(boolean isShowing) {
+        mAmbientState.setQsCustomizerShowing(isShowing);
+        requestChildrenUpdate();
+    }
+
+    public void setHeadsUpGoingAwayAnimationsAllowed(boolean headsUpGoingAwayAnimationsAllowed) {
+        mHeadsUpGoingAwayAnimationsAllowed = headsUpGoingAwayAnimationsAllowed;
     }
 
     /**
