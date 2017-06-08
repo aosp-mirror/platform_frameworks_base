@@ -34,6 +34,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
@@ -100,7 +101,6 @@ public class LauncherAppsService extends SystemService {
         private static final boolean DEBUG = false;
         private static final String TAG = "LauncherAppsService";
         private final Context mContext;
-        private final PackageManager mPm;
         private final UserManager mUm;
         private final ActivityManagerInternal mActivityManagerInternal;
         private final ShortcutServiceInternal mShortcutServiceInternal;
@@ -113,7 +113,6 @@ public class LauncherAppsService extends SystemService {
 
         public LauncherAppsImpl(Context context) {
             mContext = context;
-            mPm = mContext.getPackageManager();
             mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
             mActivityManagerInternal = Preconditions.checkNotNull(
                     LocalServices.getService(ActivityManagerInternal.class));
@@ -263,15 +262,17 @@ public class LauncherAppsService extends SystemService {
         void verifyCallingPackage(String callingPackage) {
             int packageUid = -1;
             try {
-                packageUid = mPm.getPackageUidAsUser(callingPackage,
+                packageUid = AppGlobals.getPackageManager().getPackageUid(callingPackage,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                                 | PackageManager.MATCH_UNINSTALLED_PACKAGES,
                         UserHandle.getUserId(getCallingUid()));
-            } catch (NameNotFoundException e) {
+            } catch (RemoteException ignore) {
+            }
+            if (packageUid < 0) {
                 Log.e(TAG, "Package not found: " + callingPackage);
             }
-            if (packageUid != Binder.getCallingUid()) {
+            if (packageUid != injectBinderCallingUid()) {
                 throw new SecurityException("Calling package name mismatch");
             }
         }
@@ -315,13 +316,15 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
 
+            final int callingUid = injectBinderCallingUid();
             long ident = Binder.clearCallingIdentity();
             try {
-                IPackageManager pm = AppGlobals.getPackageManager();
-                return pm.getActivityInfo(component,
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                return pmInt.getActivityInfo(component,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.getIdentifier());
+                        callingUid, user.getIdentifier());
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -344,12 +347,15 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
 
+            final int callingUid = injectBinderCallingUid();
             long ident = injectClearCallingIdentity();
             try {
-                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(intent,
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                List<ResolveInfo> apps = pmInt.queryIntentActivities(intent,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.getIdentifier());
+                        callingUid, user.getIdentifier());
                 return new ParceledListSlice<>(apps);
             } finally {
                 injectRestoreCallingIdentity(ident);
@@ -390,13 +396,15 @@ public class LauncherAppsService extends SystemService {
                 return false;
             }
 
+            final int callingUid = injectBinderCallingUid();
             long ident = Binder.clearCallingIdentity();
             try {
-                IPackageManager pm = AppGlobals.getPackageManager();
-                PackageInfo info = pm.getPackageInfo(packageName,
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                PackageInfo info = pmInt.getPackageInfo(packageName,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.getIdentifier());
+                        callingUid, user.getIdentifier());
                 return info != null && info.applicationInfo.enabled;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -414,11 +422,13 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
 
+            final int callingUid = injectBinderCallingUid();
             long ident = Binder.clearCallingIdentity();
             try {
-                IPackageManager pm = AppGlobals.getPackageManager();
-                ApplicationInfo info = pm.getApplicationInfo(packageName, flags,
-                        user.getIdentifier());
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                ApplicationInfo info = pmInt.getApplicationInfo(packageName, flags,
+                        callingUid, user.getIdentifier());
                 return info;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -573,13 +583,15 @@ public class LauncherAppsService extends SystemService {
                 return false;
             }
 
+            final int callingUid = injectBinderCallingUid();
             long ident = Binder.clearCallingIdentity();
             try {
-                IPackageManager pm = AppGlobals.getPackageManager();
-                ActivityInfo info = pm.getActivityInfo(component,
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                ActivityInfo info = pmInt.getActivityInfo(component,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.getIdentifier());
+                        callingUid, user.getIdentifier());
                 return info != null;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -604,13 +616,15 @@ public class LauncherAppsService extends SystemService {
                     | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             launchIntent.setPackage(component.getPackageName());
 
+            final int callingUid = injectBinderCallingUid();
             long ident = Binder.clearCallingIdentity();
             try {
-                IPackageManager pm = AppGlobals.getPackageManager();
-                ActivityInfo info = pm.getActivityInfo(component,
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                ActivityInfo info = pmInt.getActivityInfo(component,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.getIdentifier());
+                        callingUid, user.getIdentifier());
                 if (!info.exported) {
                     throw new SecurityException("Cannot launch non-exported components "
                             + component);
@@ -619,10 +633,10 @@ public class LauncherAppsService extends SystemService {
                 // Check that the component actually has Intent.CATEGORY_LAUCNCHER
                 // as calling startActivityAsUser ignores the category and just
                 // resolves based on the component if present.
-                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(launchIntent,
+                List<ResolveInfo> apps = pmInt.queryIntentActivities(launchIntent,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.getIdentifier());
+                        callingUid, user.getIdentifier());
                 final int size = apps.size();
                 for (int i = 0; i < size; ++i) {
                     ActivityInfo activityInfo = apps.get(i).activityInfo;
