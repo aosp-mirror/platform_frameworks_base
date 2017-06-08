@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.Assert;
 
 import java.util.HashMap;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -207,7 +206,8 @@ public class NotificationInflater {
             };
             applyRemoteView(result, reInflateFlags, flag, row, redactAmbient,
                     isNewView, remoteViewClickHandler, callback, entry, privateLayout,
-                    privateLayout.getContractedChild(),
+                    privateLayout.getContractedChild(), privateLayout.getVisibleWrapper(
+                            NotificationContentView.VISIBLE_TYPE_CONTRACTED),
                     runningInflations, applyCallback);
         }
 
@@ -229,7 +229,9 @@ public class NotificationInflater {
                 };
                 applyRemoteView(result, reInflateFlags, flag, row,
                         redactAmbient, isNewView, remoteViewClickHandler, callback, entry,
-                        privateLayout, privateLayout.getExpandedChild(), runningInflations,
+                        privateLayout, privateLayout.getExpandedChild(),
+                        privateLayout.getVisibleWrapper(
+                                NotificationContentView.VISIBLE_TYPE_EXPANDED), runningInflations,
                         applyCallback);
             }
         }
@@ -252,7 +254,9 @@ public class NotificationInflater {
                 };
                 applyRemoteView(result, reInflateFlags, flag, row,
                         redactAmbient, isNewView, remoteViewClickHandler, callback, entry,
-                        privateLayout, privateLayout.getHeadsUpChild(), runningInflations,
+                        privateLayout, privateLayout.getHeadsUpChild(),
+                        privateLayout.getVisibleWrapper(
+                                NotificationContentView.VISIBLE_TYPE_HEADSUP), runningInflations,
                         applyCallback);
             }
         }
@@ -274,8 +278,9 @@ public class NotificationInflater {
             };
             applyRemoteView(result, reInflateFlags, flag, row,
                     redactAmbient, isNewView, remoteViewClickHandler, callback, entry,
-                    publicLayout, publicLayout.getContractedChild(), runningInflations,
-                    applyCallback);
+                    publicLayout, publicLayout.getContractedChild(),
+                    publicLayout.getVisibleWrapper(NotificationContentView.VISIBLE_TYPE_CONTRACTED),
+                    runningInflations, applyCallback);
         }
 
         flag = FLAG_REINFLATE_AMBIENT_VIEW;
@@ -296,7 +301,8 @@ public class NotificationInflater {
             };
             applyRemoteView(result, reInflateFlags, flag, row,
                     redactAmbient, isNewView, remoteViewClickHandler, callback, entry,
-                    newParent, newParent.getAmbientChild(), runningInflations,
+                    newParent, newParent.getAmbientChild(), newParent.getVisibleWrapper(
+                            NotificationContentView.VISIBLE_TYPE_AMBIENT), runningInflations,
                     applyCallback);
         }
 
@@ -316,6 +322,7 @@ public class NotificationInflater {
             RemoteViews.OnClickHandler remoteViewClickHandler,
             @Nullable final InflationCallback callback, NotificationData.Entry entry,
             NotificationContentView parentLayout, View existingView,
+            NotificationViewWrapper existingWrapper,
             final HashMap<Integer, CancellationSignal> runningInflations,
             ApplyCallback applyCallback) {
         RemoteViews.OnViewAppliedListener listener
@@ -326,6 +333,8 @@ public class NotificationInflater {
                 if (isNewView) {
                     v.setIsRootNamespace(true);
                     applyCallback.setResultView(v);
+                } else if (existingWrapper != null) {
+                    existingWrapper.onReinflated();
                 }
                 runningInflations.remove(inflationId);
                 finishIfDone(result, reInflateFlags, runningInflations, callback, row,
