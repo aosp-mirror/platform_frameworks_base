@@ -868,23 +868,16 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 ipServingMode = IControlsTethering.STATE_LOCAL_ONLY;
                 break;
             default:
-                // Resort to legacy "guessing" behaviour.
-                //
-                // When the AP comes up and we've been requested to tether it,
-                // do so. Otherwise, assume it's a local-only hotspot request.
-                //
-                // TODO: Once all AP broadcasts are known to include ifname and
-                // mode information delete this code path and log an error.
-                ipServingMode = mWifiTetherRequested
-                        ? IControlsTethering.STATE_TETHERED
-                        : IControlsTethering.STATE_LOCAL_ONLY;
-                break;
+                mLog.e("Cannot enable IP serving in unknown WiFi mode: " + wifiIpMode);
+                return;
         }
 
         if (!TextUtils.isEmpty(ifname)) {
             changeInterfaceState(ifname, ipServingMode);
         } else {
-            tetherMatchingInterfaces(ipServingMode, ConnectivityManager.TETHERING_WIFI);
+            mLog.e(String.format(
+                   "Cannot enable IP serving in mode %s on missing interface name",
+                   ipServingMode));
         }
     }
 
