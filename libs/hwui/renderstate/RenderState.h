@@ -45,6 +45,7 @@ class Layer;
 class DeferredLayerUpdater;
 
 namespace renderthread {
+class CacheManager;
 class CanvasContext;
 class RenderThread;
 }
@@ -55,6 +56,7 @@ class RenderState {
     PREVENT_COPY_AND_ASSIGN(RenderState);
     friend class renderthread::RenderThread;
     friend class Caches;
+    friend class renderthread::CacheManager;
 public:
     void onGLContextCreated();
     void onGLContextDestroyed();

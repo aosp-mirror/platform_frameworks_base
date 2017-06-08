@@ -138,7 +138,7 @@ void EglManager::initialize() {
 
         GrContextOptions options;
         options.fGpuPathRenderers &= ~GrContextOptions::GpuPathRenderers::kDistanceField;
-        options.fAllowPathMaskCaching = true;
+        mRenderThread.cacheManager().configureContext(&options);
         mRenderThread.setGrContext(GrContext::Create(GrBackend::kOpenGL_GrBackend,
                 (GrBackendContext)glInterface.get(), options));
     }

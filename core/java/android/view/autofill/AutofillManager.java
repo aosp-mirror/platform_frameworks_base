@@ -23,6 +23,7 @@ import static android.view.autofill.Helper.sVerbose;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -55,6 +56,7 @@ import java.util.Objects;
  *
  * <p>It is safe to call into this from any thread.
  */
+@SystemService(Context.AUTOFILL_MANAGER_SERVICE)
 public final class AutofillManager {
 
     private static final String TAG = "AutofillManager";

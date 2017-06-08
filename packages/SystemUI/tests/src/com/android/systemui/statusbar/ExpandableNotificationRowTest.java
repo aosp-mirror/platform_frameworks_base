@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 
+import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
 import com.android.systemui.SysuiTestCase;
 
@@ -88,5 +90,54 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         verify(mockContainer).reInflateViews(any(), any());
     }
 
+    @Test
+    public void testIconColorShouldBeUpdatedWhenSensitive() throws Exception {
+        ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
+        row.setSensitive(true, true);
+        row.setHideSensitive(true, false, 0, 0);
+        verify(row).updateShelfIconColor();
+    }
 
+    @Test
+    public void testIconColorShouldBeUpdatedWhenSettingDark() throws Exception {
+        ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
+        row.setDark(true, false, 0);
+        verify(row).updateShelfIconColor();
+    }
+
+    @Test
+    public void testAboveShelfChangedListenerCalled() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
+        row.setAboveShelfChangedListener(listener);
+        row.setHeadsUp(true);
+        verify(listener).onAboveShelfStateChanged(true);
+    }
+
+    @Test
+    public void testAboveShelfChangedListenerCalledPinned() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
+        row.setAboveShelfChangedListener(listener);
+        row.setPinned(true);
+        verify(listener).onAboveShelfStateChanged(true);
+    }
+
+    @Test
+    public void testAboveShelfChangedListenerCalledHeadsUpGoingAway() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
+        row.setAboveShelfChangedListener(listener);
+        row.setHeadsUpAnimatingAway(true);
+        verify(listener).onAboveShelfStateChanged(true);
+    }
+    @Test
+    public void testAboveShelfChangedListenerCalledWhenGoingBelow() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setHeadsUp(true);
+        AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
+        row.setAboveShelfChangedListener(listener);
+        row.setAboveShelf(false);
+        verify(listener).onAboveShelfStateChanged(false);
+    }
 }

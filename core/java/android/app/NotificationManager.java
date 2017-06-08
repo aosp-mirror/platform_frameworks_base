@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.Notification.Builder;
 import android.content.ComponentName;
@@ -81,10 +82,6 @@ import java.util.Objects;
  * to the {@link #cancel(int)} or {@link #cancel(String, int)} method to clear
  * this notification.
  *
- * <p>
- * You do not instantiate this class directly; instead, retrieve it through
- * {@link android.content.Context#getSystemService}.
- *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For a guide to creating notifications, read the
@@ -93,10 +90,9 @@ import java.util.Objects;
  * </div>
  *
  * @see android.app.Notification
- * @see android.content.Context#getSystemService
  */
-public class NotificationManager
-{
+@SystemService(Context.NOTIFICATION_SERVICE)
+public class NotificationManager {
     private static String TAG = "NotificationManager";
     private static boolean localLOGV = false;
 

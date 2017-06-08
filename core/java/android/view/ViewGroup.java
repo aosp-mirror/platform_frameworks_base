@@ -4937,9 +4937,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 needGlobalAttributesUpdate(true);
             }
             ai.mKeepScreenOn = lastKeepOn;
-            if (!childHasFocus && child.hasFocusable()) {
-                focusableViewAvailable(child);
-            }
         }
 
         if (child.isLayoutDirectionInherited()) {

@@ -2212,11 +2212,7 @@ public class SettingsProvider extends ContentProvider {
                 throw new IllegalStateException("Key is corrupted", e);
             }
 
-            // Mac the package name and each of the signatures.
-            final String packageName = callingPkg.packageName;
-            byte[] packageNameBytes = packageName.getBytes(StandardCharsets.UTF_8);
-            m.update(getLengthPrefix(packageNameBytes), 0, 4);
-            m.update(packageNameBytes);
+            // Mac each of the developer signatures.
             for (int i = 0; i < callingPkg.signatures.length; i++) {
                 byte[] sig = callingPkg.signatures[i].toByteArray();
                 m.update(getLengthPrefix(sig), 0, 4);
@@ -2231,7 +2227,7 @@ public class SettingsProvider extends ContentProvider {
             final String uid = Integer.toString(callingPkg.applicationInfo.uid);
             final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
             final boolean success = ssaidSettings.insertSettingLocked(uid, ssaid, null, true,
-                    packageName);
+                callingPkg.packageName);
 
             if (!success) {
                 throw new IllegalStateException("Ssaid settings not accessible");
@@ -2899,7 +2895,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 145;
+            private static final int SETTINGS_VERSION = 146;
 
             private final int mUserId;
 
@@ -3482,22 +3478,25 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 144) {
-                    // Version 145: Set the default value for WIFI_WAKEUP_AVAILABLE.
+                    // Version 145: Removed
+                    currentVersion = 145;
+                }
+
+                if (currentVersion == 145) {
+                    // Version 146: Set the default value for WIFI_WAKEUP_AVAILABLE.
                     if (userId == UserHandle.USER_SYSTEM) {
                         final SettingsState globalSettings = getGlobalSettingsLocked();
                         final Setting currentSetting = globalSettings.getSettingLocked(
                                 Settings.Global.WIFI_WAKEUP_AVAILABLE);
-                        if (currentSetting.isNull()) {
-                            final int defaultValue = getContext().getResources().getInteger(
-                                    com.android.internal.R.integer.config_wifi_wakeup_available);
-                            globalSettings.insertSettingLocked(
-                                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
-                                    String.valueOf(defaultValue),
-                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                        }
+                        final int defaultValue = getContext().getResources().getInteger(
+                                com.android.internal.R.integer.config_wifi_wakeup_available);
+                        globalSettings.insertSettingLocked(
+                                Settings.Global.WIFI_WAKEUP_AVAILABLE,
+                                String.valueOf(defaultValue),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
 
-                    currentVersion = 145;
+                    currentVersion = 146;
                 }
 
                 // vXXX: Add new settings above this point.

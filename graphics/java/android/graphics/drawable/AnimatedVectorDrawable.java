@@ -834,6 +834,16 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             final Animator localAnimator = animator.clone();
             final String targetName = mTargetNameMap.get(animator);
             final Object target = mVectorDrawable.getTargetByName(targetName);
+            if (!mShouldIgnoreInvalidAnim) {
+                if (target == null) {
+                    throw new IllegalStateException("Target with the name \"" + targetName
+                            + "\" cannot be found in the VectorDrawable to be animated.");
+                } else if (!(target instanceof VectorDrawable.VectorDrawableState)
+                        && !(target instanceof VectorDrawable.VObject)) {
+                    throw new UnsupportedOperationException("Target should be either VGroup, VPath,"
+                            + " or ConstantState, " + target.getClass() + " is not supported");
+                }
+            }
             localAnimator.setTarget(target);
             return localAnimator;
         }
@@ -1321,16 +1331,10 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                         throw new IllegalArgumentException("ClipPath only supports PathData " +
                                 "property");
                     }
-
                 }
             } else if (target instanceof VectorDrawable.VectorDrawableState) {
                 createRTAnimatorForRootGroup(values, animator,
                         (VectorDrawable.VectorDrawableState) target, startTime);
-            } else if (!mDrawable.mAnimatedVectorState.mShouldIgnoreInvalidAnim) {
-                // Should never get here
-                throw new UnsupportedOperationException("Target should be either VGroup, VPath, " +
-                        "or ConstantState, " + target == null ? "Null target" : target.getClass() +
-                        " is not supported");
             }
         }
 

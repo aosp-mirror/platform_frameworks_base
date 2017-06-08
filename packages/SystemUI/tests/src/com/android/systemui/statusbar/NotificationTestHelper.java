@@ -24,12 +24,16 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.view.LayoutInflater;
+import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
+import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.NotificationInflaterTest;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 /**
  * A helper class to create {@link ExpandableNotificationRow}
@@ -42,10 +46,12 @@ public class NotificationTestHelper {
     private final NotificationGroupManager mGroupManager = new NotificationGroupManager();
     private ExpandableNotificationRow mRow;
     private InflationException mException;
+    private HeadsUpManager mHeadsUpManager;
 
     public NotificationTestHelper(Context context) {
         mContext = context;
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        mHeadsUpManager = new HeadsUpManager(mContext, null, mGroupManager);
     }
 
     public ExpandableNotificationRow createRow() throws Exception {
@@ -73,6 +79,8 @@ public class NotificationTestHelper {
         });
         ExpandableNotificationRow row = mRow;
         row.setGroupManager(mGroupManager);
+        row.setHeadsUpManager(mHeadsUpManager);
+        row.setAboveShelfChangedListener(aboveShelf -> {});
         UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
         StatusBarNotification sbn = new StatusBarNotification("com.android.systemui",
                 "com.android.systemui", mId++, null, 1000,

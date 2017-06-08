@@ -24,6 +24,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
@@ -38,8 +40,11 @@ import android.widget.RemoteViews;
 import android.Manifest;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.systemui.Dependency;
+import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -141,12 +146,12 @@ public class NotificationData {
 
             // Construct the icon.
             icon = new StatusBarIconView(context,
-                    sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), n);
+                    sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), sbn);
             icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
             // Construct the expanded icon.
             expandedIcon = new StatusBarIconView(context,
-                    sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), n);
+                    sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), sbn);
             expandedIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             final StatusBarIcon ic = new StatusBarIcon(
                     sbn.getUser(),
@@ -182,9 +187,11 @@ public class NotificationData {
          * @param n the notification to read the icon from.
          * @throws InflationException
          */
-        public void updateIcons(Context context, Notification n) throws InflationException {
+        public void updateIcons(Context context, StatusBarNotification sbn)
+                throws InflationException {
             if (icon != null) {
                 // Update the icon
+                Notification n = sbn.getNotification();
                 final StatusBarIcon ic = new StatusBarIcon(
                         notification.getUser(),
                         notification.getPackageName(),
@@ -192,8 +199,8 @@ public class NotificationData {
                         n.iconLevel,
                         n.number,
                         StatusBarIconView.contentDescForNotification(context, n));
-                icon.setNotification(n);
-                expandedIcon.setNotification(n);
+                icon.setNotification(sbn);
+                expandedIcon.setNotification(sbn);
                 if (!icon.set(ic) || !expandedIcon.set(ic)) {
                     throw new InflationException("Couldn't update icon: " + ic);
                 }
@@ -339,6 +346,7 @@ public class NotificationData {
             mEntries.put(entry.notification.getKey(), entry);
         }
         mGroupManager.onEntryAdded(entry);
+
         updateRankingAndSort(mRankingMap);
     }
 
@@ -466,6 +474,10 @@ public class NotificationData {
         Collections.sort(mSortedAndFiltered, mRankingComparator);
     }
 
+    /**
+     * @param sbn
+     * @return true if this notification should NOT be shown right now
+     */
     public boolean shouldFilterOut(StatusBarNotification sbn) {
         if (!(mEnvironment.isDeviceProvisioned() ||
                 showNotificationEvenIfUnprovisioned(sbn))) {
@@ -487,6 +499,13 @@ public class NotificationData {
                 && mGroupManager.isChildInGroupWithSummary(sbn)) {
             return true;
         }
+
+        final ForegroundServiceController fsc = Dependency.get(ForegroundServiceController.class);
+        if (fsc.isDungeonNotification(sbn) && !fsc.isDungeonNeededForUser(sbn.getUserId())) {
+            // this is a foreground-service disclosure for a user that does not need to show one
+            return true;
+        }
+
         return false;
     }
 

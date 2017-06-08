@@ -19,6 +19,7 @@ package android.hardware.radio;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Parcel;
@@ -41,6 +42,7 @@ import java.util.Arrays;
  * @hide
  */
 @SystemApi
+@SystemService(Context.RADIO_SERVICE)
 public class RadioManager {
     private static final String TAG = "RadioManager";
 

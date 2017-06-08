@@ -326,7 +326,10 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   uses_static_library_action.Action(RequiredAndroidAttribute("certDigest"));
 
   application_action["meta-data"] = meta_data_action;
+
   application_action["activity"] = component_action;
+  application_action["activity"]["layout"];
+
   application_action["activity-alias"] = component_action;
   application_action["service"] = component_action;
   application_action["receiver"] = component_action;

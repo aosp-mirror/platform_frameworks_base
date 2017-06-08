@@ -269,9 +269,10 @@ public class WifiAwareSession implements AutoCloseable {
             Log.e(TAG, "createNetworkSpecifierPassphrase: called after termination");
             return null;
         }
-        if (passphrase == null || passphrase.length() == 0) {
-            throw new IllegalArgumentException("Passphrase must not be null or empty");
+        if (!WifiAwareUtils.validatePassphrase(passphrase)) {
+            throw new IllegalArgumentException("Passphrase must meet length requirements");
         }
+
         return mgr.createNetworkSpecifier(mClientId, role, peer, null, passphrase);
     }
 
@@ -319,8 +320,8 @@ public class WifiAwareSession implements AutoCloseable {
             Log.e(TAG, "createNetworkSpecifierPmk: called after termination");
             return null;
         }
-        if (pmk == null || pmk.length == 0) {
-            throw new IllegalArgumentException("PMK must not be null or empty");
+        if (!WifiAwareUtils.validatePmk(pmk)) {
+            throw new IllegalArgumentException("PMK must 32 bytes");
         }
         return mgr.createNetworkSpecifier(mClientId, role, peer, pmk, null);
     }

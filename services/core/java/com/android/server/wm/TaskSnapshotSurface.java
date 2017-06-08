@@ -102,6 +102,8 @@ class TaskSnapshotSurface implements StartingSurface {
             | FLAG_SCALED
             | FLAG_SECURE;
 
+    private static final int PRIVATE_FLAG_INHERITS = PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
+
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SnapshotStartingWindow" : TAG_WM;
     private static final int MSG_REPORT_DRAW = 0;
     private static final String TITLE_FORMAT = "SnapshotStartingWindow for taskId=%s";
@@ -160,7 +162,8 @@ class TaskSnapshotSurface implements StartingSurface {
             layoutParams.flags = (windowFlags & ~FLAG_INHERIT_EXCLUDES)
                     | FLAG_NOT_FOCUSABLE
                     | FLAG_NOT_TOUCHABLE;
-            layoutParams.privateFlags = PRIVATE_FLAG_TASK_SNAPSHOT;
+            layoutParams.privateFlags = PRIVATE_FLAG_TASK_SNAPSHOT
+                    | (windowPrivateFlags & PRIVATE_FLAG_INHERITS);
             layoutParams.token = token.token;
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = LayoutParams.MATCH_PARENT;

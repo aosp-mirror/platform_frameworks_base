@@ -3973,6 +3973,15 @@ public final class Settings {
         };
 
         /**
+         * Keys we no longer back up under the current schema, but want to continue to
+         * process when restoring historical backup datasets.
+         *
+         * @hide
+         */
+        public static final String[] LEGACY_RESTORE_SETTINGS = {
+        };
+
+        /**
          * These are all public system settings
          *
          * @hide
@@ -6781,6 +6790,13 @@ public final class Settings {
         public static final String CAMERA_LIFT_TRIGGER_ENABLED = "camera_lift_trigger_enabled";
 
         /**
+         * The default enable state of the camera lift trigger.
+         *
+         * @hide
+         */
+        public static final int CAMERA_LIFT_TRIGGER_ENABLED_DEFAULT = 1;
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide
@@ -6793,6 +6809,13 @@ public final class Settings {
          * @hide
          */
         public static final String ASSIST_GESTURE_SENSITIVITY = "assist_gesture_sensitivity";
+
+        /**
+         * Whether Assist Gesture Deferred Setup has been completed
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
 
         /**
          * Control whether Night display is currently activated.
@@ -7083,6 +7106,10 @@ public final class Settings {
             ASSIST_GESTURE_SENSITIVITY,
             VR_DISPLAY_MODE,
             NOTIFICATION_BADGING
+        };
+
+        /** @hide */
+        public static final String[] LEGACY_RESTORE_SETTINGS = {
         };
 
         /**
@@ -10086,6 +10113,10 @@ public final class Settings {
             ENCODED_SURROUND_OUTPUT,
             LOW_POWER_MODE_TRIGGER_LEVEL,
             BLUETOOTH_ON
+        };
+
+        /** @hide */
+        public static final String[] LEGACY_RESTORE_SETTINGS = {
         };
 
         private static final ContentProviderHolder sProviderHolder =

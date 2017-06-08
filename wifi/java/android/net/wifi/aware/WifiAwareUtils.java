@@ -16,6 +16,8 @@
 
 package android.net.wifi.aware;
 
+import android.hardware.wifi.V1_0.Constants;
+
 /**
  * Provides utilities for the Wifi Aware manager/service.
  *
@@ -50,5 +52,36 @@ public class WifiAwareUtils {
             }
             ++index;
         }
+    }
+
+    /**
+     * Validates that the passphrase is a non-null string of the right size (per the HAL min/max
+     * length parameters).
+     *
+     * @param passphrase Passphrase to test
+     * @return true if passphrase is valid, false if not
+     */
+    public static boolean validatePassphrase(String passphrase) {
+        if (passphrase == null
+                || passphrase.length() < Constants.NanParamSizeLimits.MIN_PASSPHRASE_LENGTH
+                || passphrase.length() > Constants.NanParamSizeLimits.MAX_PASSPHRASE_LENGTH) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validates that the PMK is a non-null byte array of the right size (32 bytes per spec).
+     *
+     * @param pmk PMK to test
+     * @return true if PMK is valid, false if not
+     */
+    public static boolean validatePmk(byte[] pmk) {
+        if (pmk == null || pmk.length != 32) {
+            return false;
+        }
+
+        return true;
     }
 }

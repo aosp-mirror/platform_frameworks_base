@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupDataInput;
@@ -30,7 +31,6 @@ import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -590,14 +590,18 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             Log.i(TAG, "restoreSettings: " + contentUri);
         }
 
-        // Figure out the white list and redirects to the global table.
+        // Figure out the white list and redirects to the global table.  We restore anything
+        // in either the backup whitelist or the legacy-restore whitelist for this table.
         final String[] whitelist;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
-            whitelist = Settings.Secure.SETTINGS_TO_BACKUP;
+            whitelist = concat(Settings.Secure.SETTINGS_TO_BACKUP,
+                    Settings.Secure.LEGACY_RESTORE_SETTINGS);
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
-            whitelist = Settings.System.SETTINGS_TO_BACKUP;
+            whitelist = concat(Settings.System.SETTINGS_TO_BACKUP,
+                    Settings.System.LEGACY_RESTORE_SETTINGS);
         } else if (contentUri.equals(Settings.Global.CONTENT_URI)) {
-            whitelist = Settings.Global.SETTINGS_TO_BACKUP;
+            whitelist = concat(Settings.Global.SETTINGS_TO_BACKUP,
+                    Settings.Global.LEGACY_RESTORE_SETTINGS);
         } else {
             throw new IllegalArgumentException("Unknown URI: " + contentUri);
         }
@@ -646,6 +650,18 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
             }
         }
+    }
+
+    private final String[] concat(String[] first, @Nullable String[] second) {
+        if (second == null || second.length == 0) {
+            return first;
+        }
+        final int firstLen = first.length;
+        final int secondLen = second.length;
+        String[] both = new String[firstLen + secondLen];
+        System.arraycopy(first, 0, both, 0, firstLen);
+        System.arraycopy(second, 0, both, firstLen, secondLen);
+        return both;
     }
 
     /**

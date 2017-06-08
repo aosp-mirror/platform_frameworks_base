@@ -18,7 +18,10 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -29,14 +32,8 @@ import com.android.internal.telephony.ICarrierConfigLoader;
 
 /**
  * Provides access to telephony configuration values that are carrier-specific.
- * <p>
- * Users should obtain an instance of this class by calling
- * {@code mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);}
- * </p>
- *
- * @see Context#getSystemService
- * @see Context#CARRIER_CONFIG_SERVICE
  */
+@SystemService(Context.CARRIER_CONFIG_SERVICE)
 public class CarrierConfigManager {
     private final static String TAG = "CarrierConfigManager";
 
@@ -1797,6 +1794,7 @@ public class CarrierConfigManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void updateConfigForPhoneId(int phoneId, String simState) {
         try {
             ICarrierConfigLoader loader = getICarrierConfigLoader();
@@ -1818,6 +1816,7 @@ public class CarrierConfigManager {
      */
     @NonNull
     @SystemApi
+    @SuppressLint("Doclava125")
     public static PersistableBundle getDefaultConfig() {
         return new PersistableBundle(sDefaults);
     }

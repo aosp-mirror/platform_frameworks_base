@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.mbms.MbmsException;
 import android.telephony.mbms.MbmsStreamingManagerCallback;
+import android.telephony.mbms.MbmsUtils;
 import android.telephony.mbms.StreamingService;
 import android.telephony.mbms.StreamingServiceCallback;
 import android.telephony.mbms.StreamingServiceInfo;
@@ -62,7 +63,9 @@ public class MbmsStreamingManager {
                 Log.i(LOG_TAG, String.format("Connected to service %s", name));
                 synchronized (MbmsStreamingManager.this) {
                     mService = IMbmsStreamingService.Stub.asInterface(service);
-                    mServiceListeners.forEach(ServiceListener::onServiceConnected);
+                    for (ServiceListener l : mServiceListeners) {
+                        l.onServiceConnected();
+                    }
                 }
             }
         }
@@ -72,10 +75,13 @@ public class MbmsStreamingManager {
             Log.i(LOG_TAG, String.format("Disconnected from service %s", name));
             synchronized (MbmsStreamingManager.this) {
                 mService = null;
-                mServiceListeners.forEach(ServiceListener::onServiceDisconnected);
+                for (ServiceListener l : mServiceListeners) {
+                    l.onServiceDisconnected();
+                }
             }
         }
     };
+
     private List<ServiceListener> mServiceListeners = new LinkedList<>();
 
     private MbmsStreamingManagerCallback mCallbackToApp;
@@ -218,22 +224,6 @@ public class MbmsStreamingManager {
     }
 
     private void bindAndInitialize() throws MbmsException {
-        // Query for the proper service
-        PackageManager packageManager = mContext.getPackageManager();
-        Intent queryIntent = new Intent();
-        queryIntent.setAction(MBMS_STREAMING_SERVICE_ACTION);
-        List<ResolveInfo> streamingServices = packageManager.queryIntentServices(queryIntent,
-                PackageManager.MATCH_SYSTEM_ONLY);
-
-        if (streamingServices == null || streamingServices.size() == 0) {
-            throw new MbmsException(
-                    MbmsException.ERROR_NO_SERVICE_INSTALLED);
-        }
-        if (streamingServices.size() > 1) {
-            throw new MbmsException(
-                    MbmsException.ERROR_MULTIPLE_SERVICES_INSTALLED);
-        }
-
         // Kick off the binding, and synchronously wait until binding is complete
         final CountDownLatch latch = new CountDownLatch(1);
         ServiceListener bindListener = new ServiceListener() {
@@ -252,13 +242,14 @@ public class MbmsStreamingManager {
         }
 
         Intent bindIntent = new Intent();
-        bindIntent.setComponent(streamingServices.get(0).getComponentInfo().getComponentName());
+        bindIntent.setComponent(MbmsUtils.toComponentName(
+                MbmsUtils.getMiddlewareServiceInfo(mContext, MBMS_STREAMING_SERVICE_ACTION)));
 
         mContext.bindService(bindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
-        waitOnLatchWithTimeout(latch, BIND_TIMEOUT_MS);
+        MbmsUtils.waitOnLatchWithTimeout(latch, BIND_TIMEOUT_MS);
 
-        // Remove the listener and call the initialization method through the interface.
+       // Remove the listener and call the initialization method through the interface.
         synchronized (this) {
             mServiceListeners.remove(bindListener);
 
@@ -279,17 +270,4 @@ public class MbmsStreamingManager {
         }
     }
 
-    private static void waitOnLatchWithTimeout(CountDownLatch l, long timeoutMs) {
-        long endTime = System.currentTimeMillis() + timeoutMs;
-        while (System.currentTimeMillis() < endTime) {
-            try {
-                l.await(timeoutMs, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                // keep waiting
-            }
-            if (l.getCount() <= 0) {
-                return;
-            }
-        }
-    }
 }

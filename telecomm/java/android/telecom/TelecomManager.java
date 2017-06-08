@@ -17,7 +17,9 @@ package android.telecom;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -48,6 +50,7 @@ import java.util.List;
  * descriptions.
  */
 @SuppressAutoDoc
+@SystemService(Context.TELECOM_SERVICE)
 public class TelecomManager {
 
     /**
@@ -763,6 +766,10 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(String uriScheme) {
         try {
             if (isServiceConnected()) {
@@ -844,6 +851,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125")
     public List<PhoneAccountHandle> getPhoneAccountsForPackage() {
         try {
             if (isServiceConnected()) {
@@ -971,6 +979,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125")
     public void clearPhoneAccounts() {
         clearAccounts();
     }
@@ -980,6 +989,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125")
     public void clearAccounts() {
         try {
             if (isServiceConnected()) {
@@ -1011,6 +1021,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125")
     public ComponentName getDefaultPhoneApp() {
         try {
             if (isServiceConnected()) {
@@ -1227,6 +1238,10 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isRinging() {
         try {
             if (isServiceConnected()) {
@@ -1245,6 +1260,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean endCall() {
         try {
             if (isServiceConnected()) {
@@ -1324,6 +1340,10 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isTtySupported() {
         try {
             if (isServiceConnected()) {
@@ -1602,6 +1622,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void enablePhoneAccount(PhoneAccountHandle handle, boolean isEnabled) {
         ITelecomService service = getTelecomService();
         if (service != null) {

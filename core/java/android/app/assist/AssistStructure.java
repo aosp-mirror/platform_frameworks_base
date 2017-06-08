@@ -18,7 +18,6 @@ import android.os.PooledStringReader;
 import android.os.PooledStringWriter;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,7 +30,6 @@ import android.view.ViewStructure.HtmlInfo.Builder;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 
 import java.util.ArrayList;
@@ -39,18 +37,18 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Assist data automatically created by the platform's implementation of Assist and Autofill.
+ * Assist data automatically created by the platform's implementation of assist and autofill.
  *
- * <p>The structure is used for Assist purposes when created by
+ * <p>The structure is used for assist purposes when created by
  * {@link android.app.Activity#onProvideAssistData}, {@link View#onProvideStructure(ViewStructure)},
  * or {@link View#onProvideVirtualStructure(ViewStructure)}.
  *
- * <p>The structure is used for Autofill purposes when created by
+ * <p>The structure is used for autofill purposes when created by
  * {@link View#onProvideAutofillStructure(ViewStructure, int)},
  * or {@link View#onProvideAutofillVirtualStructure(ViewStructure, int)}.
  *
- * <p>For performance reasons, some properties of the Assist data might be available just for Assist
- * or Autofill purposes; in those case, the property availability will be document in its javadoc.
+ * <p>For performance reasons, some properties of the assist data might be available just for assist
+ * or autofill purposes; in those case, the property availability will be document in its javadoc.
  */
 public class AssistStructure implements Parcelable {
     static final String TAG = "AssistStructure";
@@ -958,10 +956,10 @@ public class AssistStructure implements Parcelable {
         /**
          * Gets the id that can be used to autofill the view contents.
          *
-         * <p>It's relevant set when the {@link AssistStructure} is used for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes.
          *
          * @return id that can be used to autofill the view contents, or {@code null} if the
-         * structure was created for Assist purposes.
+         * structure was created for assist purposes.
          */
         @Nullable public AutofillId getAutofillId() {
             return mAutofillId;
@@ -970,10 +968,10 @@ public class AssistStructure implements Parcelable {
         /**
          * Gets the the type of value that can be used to autofill the view contents.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes.
          *
          * @return autofill type as defined by {@link View#getAutofillType()},
-         * or {@link View#AUTOFILL_TYPE_NONE} if the structure was created for Assist purposes.
+         * or {@link View#AUTOFILL_TYPE_NONE} if the structure was created for assist purposes.
          */
         public @View.AutofillType int getAutofillType() {
             return mAutofillType;
@@ -983,11 +981,11 @@ public class AssistStructure implements Parcelable {
          * Describes the content of a view so that a autofill service can fill in the appropriate
          * data.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Autofill purposes,
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
          * not for Assist - see {@link View#getAutofillHints()} for more info.
          *
          * @return The autofill hints for this view, or {@code null} if the structure was created
-         * for Assist purposes.
+         * for assist purposes.
          */
         @Nullable public String[] getAutofillHints() {
             return mAutofillHints;
@@ -996,11 +994,11 @@ public class AssistStructure implements Parcelable {
         /**
          * Gets the the value of this view.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Autofill purposes,
-         * not for Assist purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
          *
          * @return the autofill value of this view, or {@code null} if the structure was created
-         * for Assist purposes.
+         * for assist purposes.
          */
         @Nullable public AutofillValue getAutofillValue() {
             return mAutofillValue;
@@ -1017,11 +1015,11 @@ public class AssistStructure implements Parcelable {
          * <p>Typically used by nodes whose {@link View#getAutofillType()} is a list to indicate
          * the meaning of each possible value in the list.
          *
-         * <p>It's relevant when the {@link AssistStructure} is used for Autofill purposes, not
-         * for Assist purposes.
+         * <p>It's relevant when the {@link AssistStructure} is used for autofill purposes, not
+         * for assist purposes.
          *
          * @return the options that can be used to autofill this view, or {@code null} if the
-         * structure was created for Assist purposes.
+         * structure was created for assist purposes.
          */
         @Nullable public CharSequence[] getAutofillOptions() {
             return mAutofillOptions;
@@ -1106,8 +1104,8 @@ public class AssistStructure implements Parcelable {
          * or scaling.  The returned Matrix object is owned by ViewNode; do not modify it.
          * Returns null if there is no transformation applied to the view.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public Matrix getTransformation() {
             return mMatrix;
@@ -1118,8 +1116,8 @@ public class AssistStructure implements Parcelable {
          * characterstics, as set by {@link ViewStructure#setElevation
          * ViewStructure.setElevation(float)}.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public float getElevation() {
             return mElevation;
@@ -1130,8 +1128,8 @@ public class AssistStructure implements Parcelable {
          * of the view's contents, as set by {@link ViewStructure#setAlpha
          * ViewStructure.setAlpha(float)}.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public float getAlpha() {
             return mAlpha;
@@ -1260,7 +1258,7 @@ public class AssistStructure implements Parcelable {
          * document.
          *
          * <strong>WARNING:</strong> a {@link android.service.autofill.AutofillService} should only
-         * use this domain for Autofill purposes when it trusts the app generating it (i.e., the app
+         * use this domain for autofill purposes when it trusts the app generating it (i.e., the app
          * defined by {@link AssistStructure#getActivityComponent()}).
          *
          * @return domain-only part of the document. For example, if the full URL is
@@ -1273,11 +1271,11 @@ public class AssistStructure implements Parcelable {
         /**
          * Returns the HTML properties associated with this view.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Autofill purposes,
-         * not for Assist purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
          *
          * @return the HTML properties associated with this view, or {@code null} if the
-         * structure was created for Assist purposes.
+         * structure was created for assist purposes.
          */
         @Nullable public HtmlInfo getHtmlInfo() {
             return mHtmlInfo;
@@ -1301,8 +1299,8 @@ public class AssistStructure implements Parcelable {
         /**
          * If {@link #getText()} is non-null, this is where the current selection starts.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public int getTextSelectionStart() {
             return mText != null ? mText.mTextSelectionStart : -1;
@@ -1313,8 +1311,8 @@ public class AssistStructure implements Parcelable {
          * If there is no selection, returns the same value as {@link #getTextSelectionStart()},
          * indicating the cursor position.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public int getTextSelectionEnd() {
             return mText != null ? mText.mTextSelectionEnd : -1;
@@ -1337,8 +1335,8 @@ public class AssistStructure implements Parcelable {
          * Note that the text may also contain style spans that modify the color of specific
          * parts of the text.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public int getTextBackgroundColor() {
             return mText != null ? mText.mTextBackgroundColor : TEXT_COLOR_UNDEFINED;
@@ -1350,8 +1348,8 @@ public class AssistStructure implements Parcelable {
          * Note that the text may also contain style spans that modify the size of specific
          * parts of the text.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public float getTextSize() {
             return mText != null ? mText.mTextSize : 0;
@@ -1365,8 +1363,8 @@ public class AssistStructure implements Parcelable {
          * Note that the text may also contain style spans that modify the style of specific
          * parts of the text.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public int getTextStyle() {
             return mText != null ? mText.mTextStyle : 0;
@@ -1378,8 +1376,8 @@ public class AssistStructure implements Parcelable {
          * into the text string where that line starts.  May return null if there is no line
          * information.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public int[] getTextLineCharOffsets() {
             return mText != null ? mText.mLineCharOffsets : null;
@@ -1391,8 +1389,8 @@ public class AssistStructure implements Parcelable {
          * where that text appears in the view.  May return null if there is no line
          * information.
          *
-         * <p>It's only relevant when the {@link AssistStructure} is used for Assist purposes,
-         * not for Autofill purposes.
+         * <p>It's only relevant when the {@link AssistStructure} is used for assist purposes,
+         * not for autofill purposes.
          */
         public int[] getTextLineBaselines() {
             return mText != null ? mText.mLineBaselines : null;

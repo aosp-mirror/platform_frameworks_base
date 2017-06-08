@@ -34,6 +34,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -99,7 +100,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private int mNumberX;
     private int mNumberY;
     private String mNumberText;
-    private Notification mNotification;
+    private StatusBarNotification mNotification;
     private final boolean mBlocked;
     private int mDensity;
     private float mIconScale = 1.0f;
@@ -127,11 +128,11 @@ public class StatusBarIconView extends AnimatedImageView {
     };
     private final NotificationIconDozeHelper mDozer;
 
-    public StatusBarIconView(Context context, String slot, Notification notification) {
-        this(context, slot, notification, false);
+    public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
+        this(context, slot, sbn, false);
     }
 
-    public StatusBarIconView(Context context, String slot, Notification notification,
+    public StatusBarIconView(Context context, String slot, StatusBarNotification sbn,
             boolean blocked) {
         super(context);
         mDozer = new NotificationIconDozeHelper(context);
@@ -141,7 +142,7 @@ public class StatusBarIconView extends AnimatedImageView {
         mNumberPain.setTextAlign(Paint.Align.CENTER);
         mNumberPain.setColor(context.getColor(R.drawable.notification_number_text_color));
         mNumberPain.setAntiAlias(true);
-        setNotification(notification);
+        setNotification(sbn);
         maybeUpdateIconScaleDimens();
         setScaleType(ScaleType.CENTER);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
@@ -207,9 +208,11 @@ public class StatusBarIconView extends AnimatedImageView {
         }
     }
 
-    public void setNotification(Notification notification) {
+    public void setNotification(StatusBarNotification notification) {
         mNotification = notification;
-        setContentDescription(notification);
+        if (notification != null) {
+            setContentDescription(notification.getNotification());
+        }
     }
 
     public StatusBarIconView(Context context, AttributeSet attrs) {
@@ -315,6 +318,10 @@ public class StatusBarIconView extends AnimatedImageView {
         return true;
     }
 
+    public Icon getSourceIcon() {
+        return mIcon.icon;
+    }
+
     private Drawable getIcon(StatusBarIcon icon) {
         return getIcon(getContext(), icon);
     }
@@ -354,7 +361,7 @@ public class StatusBarIconView extends AnimatedImageView {
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         if (mNotification != null) {
-            event.setParcelableData(mNotification);
+            event.setParcelableData(mNotification.getNotification());
         }
     }
 
@@ -454,6 +461,10 @@ public class StatusBarIconView extends AnimatedImageView {
     public String toString() {
         return "StatusBarIconView(slot=" + mSlot + " icon=" + mIcon
             + " notification=" + mNotification + ")";
+    }
+
+    public StatusBarNotification getNotification() {
+        return mNotification;
     }
 
     public String getSlot() {

@@ -19,8 +19,11 @@ package android.app.job;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -53,6 +56,7 @@ import java.util.List;
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.JOB_SCHEDULER_SERVICE)}.
  */
+@SystemService(Context.JOB_SCHEDULER_SERVICE)
 public abstract class JobScheduler {
     /** @hide */
     @IntDef(prefix = { "RESULT_" }, value = {
@@ -132,6 +136,7 @@ public abstract class JobScheduler {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public abstract @Result int scheduleAsPackage(@NonNull JobInfo job, @NonNull String packageName,
             int userId, String tag);
 

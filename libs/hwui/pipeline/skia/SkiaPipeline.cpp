@@ -50,8 +50,7 @@ TaskManager* SkiaPipeline::getTaskManager() {
 }
 
 void SkiaPipeline::onDestroyHardwareResources() {
-    // No need to flush the caches here. There is a timer
-    // which will flush temporary resources over time.
+    mRenderThread.cacheManager().trimStaleResources();
 }
 
 bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {

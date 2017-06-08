@@ -179,7 +179,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 mShelfState.notGoneIndex = Math.min(mShelfState.notGoneIndex, mNotGoneIndex);
             }
             mShelfState.hasItemsInStableShelf = lastViewState.inShelf;
-            mShelfState.hidden = !mAmbientState.isShadeExpanded();
+            mShelfState.hidden = !mAmbientState.isShadeExpanded()
+                    || mAmbientState.isQsCustomizerShowing();
             mShelfState.maxShelfEnd = maxShelfEnd;
         } else {
             mShelfState.hidden = true;
@@ -466,9 +467,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
             int shelfColor = icon.getStaticDrawableColor();
             if (!noIcon && shelfColor != StatusBarIconView.NO_COLOR) {
-                int notificationColor
-                        = row.getVisibleNotificationHeader().getOriginalNotificationColor();
-                shelfColor = NotificationUtils.interpolateColors(notificationColor, shelfColor,
+                int iconColor = row.getVisibleNotificationHeader().getOriginalIconColor();
+                shelfColor = NotificationUtils.interpolateColors(iconColor, shelfColor,
                         iconState.iconAppearAmount);
             }
             iconState.iconColor = shelfColor;
@@ -648,6 +648,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
             int oldTop, int oldRight, int oldBottom) {
         updateRelativeOffset();
+    }
+
+    public void setDarkOffsetX(int offsetX) {
+        mShelfIcons.setDarkOffsetX(offsetX);
     }
 
     private class ShelfState extends ExpandableViewState {

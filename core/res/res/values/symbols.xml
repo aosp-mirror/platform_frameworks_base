@@ -529,10 +529,7 @@
   <java-symbol type="string" name="RestrictedOnDataTitle" />
   <java-symbol type="string" name="RestrictedOnEmergencyTitle" />
   <java-symbol type="string" name="RestrictedOnNormalTitle" />
-  <java-symbol type="string" name="RestrictedOnAllVoiceContent" />
-  <java-symbol type="string" name="RestrictedOnDataContent" />
-  <java-symbol type="string" name="RestrictedOnEmergencyContent" />
-  <java-symbol type="string" name="RestrictedOnNormalContent" />
+  <java-symbol type="string" name="RestrictedStateContent" />
   <java-symbol type="string" name="notification_channel_network_alert" />
   <java-symbol type="string" name="notification_channel_call_forward" />
   <java-symbol type="string" name="notification_channel_emergency_callback" />
@@ -1762,6 +1759,7 @@
   <java-symbol type="bool" name="config_sf_limitedAlpha" />
   <java-symbol type="bool" name="config_unplugTurnsOnScreen" />
   <java-symbol type="bool" name="config_usbChargingMessage" />
+  <java-symbol type="bool" name="config_skipScreenOnBrightnessRamp" />
   <java-symbol type="bool" name="config_allowAutoBrightnessWhileDozing" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromUnplug" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromGesture" />
@@ -1814,6 +1812,7 @@
   <java-symbol type="dimen" name="default_minimal_size_pip_resizable_task" />
   <java-symbol type="dimen" name="task_height_of_minimized_mode" />
   <java-symbol type="fraction" name="config_screenAutoBrightnessDozeScaleFactor" />
+  <java-symbol type="bool" name="config_allowPriorityVibrationsInLowPowerMode" />
   <java-symbol type="fraction" name="config_autoBrightnessAdjustmentMaxGamma" />
   <java-symbol type="integer" name="config_autoBrightnessAmbientLightHorizon"/>
   <java-symbol type="integer" name="config_autoBrightnessBrighteningLightDebounce"/>
@@ -3038,8 +3037,10 @@
   <java-symbol type="array" name="config_allowedSecureInstantAppSettings" />
 
   <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
-
   <java-symbol type="integer" name="config_inCallNotificationVolumeRelative" />
-
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
+  <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
+  <java-symbol type="string" name="config_headlineFontFamily" />
+
+  <java-symbol type="drawable" name="stat_sys_vitals" />
 </resources>
