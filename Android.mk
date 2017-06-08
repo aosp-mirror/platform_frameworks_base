@@ -530,6 +530,7 @@ LOCAL_SRC_FILES += \
         telephony/java/com/android/ims/internal/uce/presence/IPresenceService.aidl \
         telephony/java/com/android/ims/internal/uce/presence/IPresenceListener.aidl \
 	telephony/java/com/android/ims/ImsConfigListener.aidl \
+	telephony/java/com/android/internal/telephony/IApnSourceService.aidl \
 	telephony/java/com/android/internal/telephony/ICarrierConfigLoader.aidl \
 	telephony/java/com/android/internal/telephony/IMms.aidl \
 	telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl \
