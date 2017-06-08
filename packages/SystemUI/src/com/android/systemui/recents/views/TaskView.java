@@ -133,6 +133,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     @ViewDebug.ExportedProperty(deepExport=true, prefix="task_")
     private Task mTask;
+    private boolean mTaskBound;
     @ViewDebug.ExportedProperty(category="recents")
     private boolean mClipViewInStack = true;
     @ViewDebug.ExportedProperty(category="recents")
@@ -607,6 +608,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         SystemServicesProxy ssp = Recents.getSystemServices();
         mTouchExplorationEnabled = touchExplorationEnabled;
         mTask = t;
+        mTaskBound = true;
         mTask.addCallback(this);
         mIsDisabledInSafeMode = !mTask.isSystemApp && ssp.isInSafeMode();
         mThumbnailView.bindToTask(mTask, mIsDisabledInSafeMode, displayOrientation, displayRect);
@@ -627,9 +629,11 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     @Override
     public void onTaskDataLoaded(Task task, ThumbnailData thumbnailData) {
-        // Update each of the views to the new task data
-        mThumbnailView.onTaskDataLoaded(thumbnailData);
-        mHeaderView.onTaskDataLoaded();
+        if (mTaskBound) {
+            // Update each of the views to the new task data
+            mThumbnailView.onTaskDataLoaded(thumbnailData);
+            mHeaderView.onTaskDataLoaded();
+        }
     }
 
     @Override
@@ -638,6 +642,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mTask.removeCallback(this);
         mThumbnailView.unbindFromTask();
         mHeaderView.unbindFromTask(mTouchExplorationEnabled);
+        mTaskBound = false;
     }
 
     @Override
