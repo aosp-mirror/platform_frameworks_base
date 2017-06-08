@@ -91,10 +91,10 @@ public class SignalDrawable extends Drawable {
     private final Path mFullPath = new Path();
     private final Path mForegroundPath = new Path();
     private final Path mXPath = new Path();
-    private final int mIntrinsicSize;
     private final Handler mHandler;
     private float mOldDarkIntensity = -1;
     private float mNumLevels = 1;
+    private int mIntrinsicSize;
     private int mLevel;
     private int mState;
     private boolean mVisible;
@@ -113,6 +113,10 @@ public class SignalDrawable extends Drawable {
         mIntrinsicSize = context.getResources().getDimensionPixelSize(R.dimen.signal_icon_size);
         mHandler = new Handler();
         setDarkIntensity(0);
+    }
+
+    public void setIntrinsicSize(int size) {
+        mIntrinsicSize = size;
     }
 
     @Override
