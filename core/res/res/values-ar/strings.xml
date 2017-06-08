@@ -94,13 +94,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"لا يمكنك تغيير إعداد معرّف المتصل."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ليست هناك خدمة بيانات"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"لا تتوفر خدمة طوارئ"</string>
+    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
+    <skip />
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"لا تتوفر خدمة صوتية"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"لا تتوفر خدمة الصوت/الطوارئ"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"علّق مشغّل شبكة الجوّال خدمة البيانات مؤقتًا في هذا الموقع الجغرافي"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"علّق مشغّل شبكة الجوّال مكالمات الطوارئ مؤقتًا في هذا الموقع الجغرافي"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"علّق مشغّل شبكة الجوّال المكالمات الصوتية مؤقتًا في هذا الموقع الجغرافي"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"علّق مشغّل شبكة الجوّال الصوت ومكالمات الطوارئ مؤقتًا في هذا الموقع الجغرافي"</string>
+    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"يتعذر الوصول إلى الشبكة"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"‏لتحسين الاستقبال، يمكنك تجربة تغيير النوع المحدّد في النظام &gt; الشبكة والإنترنت &gt; شبكات الجوّال &gt; نوع الشبكة المفضّل."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"التنبيهات"</string>

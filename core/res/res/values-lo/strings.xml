@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ບໍ່ໄດ້ເປີດໃຊ້ບໍລິການ."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"ທ່ານບໍ່ສາມາດປ່ຽນແປງການຕັ້ງຄ່າ Caller ID"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ບໍ່ມີບໍລິການອິນເຕີເນັດ"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"ບໍ່ມີບໍລິການໂທສຸກເສີນ"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"ບໍ່ສາມາດໂທສຸກເສີນໄດ້"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ບໍ່ມີບໍລິການໂທສຽງ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ບໍ່ມີບໍລິການສຽງ/ສຸກເສີນ"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"ຜູ້ໃຫ້ບໍລິການຂອງທ່ານໄດ້ລະງັບບໍລິການອິນເຕີເນັດຢູ່ບ່ອນນີ້ໄວ້ຊົ່ວຄາວ"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"ຜູ້ໃຫ້ບໍລິການຂອງທ່ານໄດ້ລະງັບການໂທສຸກເສີນຢູ່ບ່ອນນີ້ໄວ້ຊົ່ວຄາວ"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"ຜູ້ໃຫ້ບໍລິການຂອງທ່ານໄດ້ລະງັບການໂທສຽງຢູ່ບ່ອນນີ້ໄວ້ຊົ່ວຄາວ"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ຜູ້ໃຫ້ບໍລິການຂອງທ່ານໄດ້ລະງັບການນຳໃຊ້ການໂທສຽງ ແລະ ການໂທສຸກເສີນຢູ່ບ່ອນນີ້ໄວ້ຊົ່ວຄາວ"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"ເຄືອຂ່າຍຂອງທ່ານບໍ່ໄດ້ໃຫ້ບໍລິການຢູ່ສະຖານທີ່ນີ້ເປັນການຊົ່ວຄາວ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Can’t reach network"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"ເພື່ອປັບປຸງການຮັບສັນຍານ, ໃຫ້ລອງປ່ຽນປະເພດທີ່ເລືອກໄວ້ທີ່ ລະບົບ &gt; ເຄືອຂ່າຍ ແລະ ອິນເຕີເນັດ &gt; ເຄືອຂ່າຍມືຖື &gt; ປະເພດເຄືອຂ່າຍທີ່ຕ້ອງການ."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ການເຕືອນ"</string>

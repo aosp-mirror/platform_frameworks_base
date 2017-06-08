@@ -92,13 +92,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услуга не предоставляется."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Невозможно изменить параметр идентификатора вызывающего абонента."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Мобильный Интернет недоступен"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Экстренные вызовы недоступны"</string>
+    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
+    <skip />
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Голосовые вызовы недоступны"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Голосовые и экстренные вызовы недоступны"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Ваш оператор временно заблокировал передачу данных по мобильной сети в этом месте."</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Ваш оператор временно заблокировал экстренные вызовы в этом месте."</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Ваш оператор временно заблокировал голосовые вызовы в этом месте."</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Ваш оператор временно заблокировал голосовые и экстренные вызовы в этом месте."</string>
+    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Сеть недоступна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Чтобы улучшить сигнал, попробуйте выбрать другой тип сети в настройках (раздел \"Мобильные сети\")."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Оповещения"</string>

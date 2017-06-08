@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услугата не е обезпечена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не можете да променяте настройката за идентификация на обажданията."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Няма услуга за данни"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Няма услуга за спешни обаждания"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Няма достъп до спешните обаждания"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Няма услуга за гласови обаждания"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Няма услуга за гласови/спешни обаждания"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Операторът ви временно е спрял услугата за данни в това местоположение"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Операторът ви временно е спрял спешните обаждания в това местоположение"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Операторът ви временно е спрял гласовите обаждания в това местоположение"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Операторът ви временно е спрял гласовите и спешните обаждания в това местоположение"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Временно не се предлага от мобилната мрежа в местоположението ви"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не може да се установи връзка с мрежата"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"За да подобрите сигнала, променете избрания тип мрежа от „Система“ &gt; „Мрежа и интернет“ &gt; „Мобилни мрежи“ &gt; „Предпочитан тип мрежа“."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сигнали"</string>
@@ -1204,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Докоснете, за да изберете език и подредба"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Показване върху други приложения"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> се показва върху други приложения"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> се показва в/у други прилож."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ако не искате <xliff:g id="NAME">%s</xliff:g> да използва тази функция, докоснете, за да отворите настройките, и я изключете."</string>

@@ -90,13 +90,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Xizmat ishalamaydi."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Qo‘ng‘iroq qiluvchining ID raqami sozlamasini o‘zgartirib bo‘lmaydi."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Mobil internet ishlamaydi"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Favqulodda chaqiruvlar ishlamaydi"</string>
+    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
+    <skip />
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ovozli chaqiruvlar ishlamaydi"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ovozli va favqulodda chaqiruvlar ishlamaydi"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Aloqa operatoringiz bu joyda mobil internetni bloklagan"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Aloqa operatoringiz bu joyda favqulodda chaqiruvlarni bloklagan"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Aloqa operatoringiz bu joyda ovozli chaqiruvlarni bloklagan"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Aloqa operatoringiz bu joyda ovozli va favqulodda chaqiruvlarni bloklagan"</string>
+    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tarmoq bilan bog‘lanib bo‘lmadi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Qabul qilish sifatini yaxshilash uchun Tizim &gt; Tarmoq va Internet &gt; Mobil tarmoqlar > Asosiy tarmoq turi orqali o‘zgartirib ko‘ring."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ogohlantirishlar"</string>
@@ -1205,8 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Til va sxemani belgilash uchun bosing"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Boshqa oynalar ustidan ochish"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> boshqa ilovalar ustidan ochilgan"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> boshqa ilovalar ustidan ochilgan"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ilovasi uchun bu funksiyani sozlamalar orqali o‘chirib qo‘yish mumkin."</string>

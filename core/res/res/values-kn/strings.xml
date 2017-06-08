@@ -90,13 +90,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ಸೇವೆಯನ್ನು ಪೂರೈಸಲಾಗಿಲ್ಲ."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"ನೀವು ಕಾಲರ್‌ ID ಸೆಟ್ಟಿಂಗ್‌ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ಡೇಟಾ ಸೇವೆ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"ತುರ್ತು ಸೇವೆ ಇಲ್ಲ"</string>
+    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
+    <skip />
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ಧ್ವನಿ ಸೇವೆಯಿಲ್ಲ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ಧ್ವನಿ/ತುರ್ತು ಸೇವೆ ಇಲ್ಲ"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"ನಿಮ್ಮ ವಾಹಕವು ಈ ಸ್ಥಳದಲ್ಲಿ ತಾತ್ಕಾಲಿಕವಾಗಿ ಡೇಟಾ ಸೇವೆಯನ್ನು ಅಮಾನತ್ತುಗೊಳಿಸಿದೆ"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"ನಿಮ್ಮ ವಾಹಕವು ಈ ಸ್ಥಳದಲ್ಲಿ ತಾತ್ಕಾಲಿಕವಾಗಿ ತುರ್ತು ಕರೆಗಳನ್ನು ಅಮಾನತ್ತುಗೊಳಿಸಿದೆ"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"ನಿಮ್ಮ ವಾಹಕವು  ಈ ಸ್ಥಳದಲ್ಲಿ ತಾತ್ಕಾಲಿಕವಾಗಿ ಧ್ವನಿ ಕರೆಗಳನ್ನು ಅಮಾನತ್ತುಗೊಳಿಸಿದೆ"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ನಿಮ್ಮ ವಾಹಕವು ಈ ಸ್ಥಳದಲ್ಲಿ ತಾತ್ಕಾಲಿಕವಾಗಿ ಧ್ವನಿ ಮತ್ತು ತುರ್ತು ಕರೆಗಳನ್ನು ಅಮಾನತ್ತುಗೊಳಿಸಿದೆ"</string>
+    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕ ಪಡೆಯುವುದನ್ನು ಸುಧಾರಿಸಲು, ಆಯ್ಕೆ ಮಾಡಿರುವ ವಿಧವನ್ನು ಸಿಸ್ಟಂ &gt; ನೆಟ್‌ವರ್ಕ್ ಮತ್ತು ಇಂಟರ್ನೆಟ್ &gt; ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗಳು &gt; ಆದ್ಯತೆಯ ನೆಟ್‌ವರ್ಕ್ ವಿಧದಲ್ಲಿ ಬದಲಿಸಿ ನೋಡಿ."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ಎಚ್ಚರಿಕೆಗಳು"</string>
@@ -1205,8 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ಭಾಷೆ ಮತ್ತು ವಿನ್ಯಾಸವನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"ಇತರ ಅಪ್ಲಿಕೇಶನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಮೂಲಕ ಪ್ರದರ್ಶಿಸುತ್ತಿದೆ"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ಇತರವುಗಳ ಮೇಲೆ ಪ್ರದರ್ಶಿಸುತ್ತಿದೆ"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ಈ ವೈಶಿಷ್ಟ್ಯ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆದು, ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>

@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Dienst nicht eingerichtet."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Du kannst die Einstellung für die Anrufer-ID nicht ändern."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Kein Datendienst"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Keine Notrufe"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Keine Notrufe möglich"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Keine Anrufe"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Keine Anrufe/Notrufe"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Dein Anbieter hat den Datendienst an diesem Standort vorübergehend ausgesetzt"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Dein Anbieter hat Notrufe an diesem Standort vorübergehend ausgesetzt"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Dein Anbieter hat Anrufe an diesem Standort vorübergehend ausgesetzt"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Dein Anbieter hat Anrufe und Notrufe an diesem Standort vorübergehend ausgesetzt"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Derzeit nicht im Mobilfunknetz in deiner Region verfügbar"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Netzwerk nicht erreichbar"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Der Empfang lässt sich möglicherweise verbessern, indem du unter \"System\" &gt; \"Netzwerk\" &amp; \"Internet\" &gt; \"Mobilfunknetze\" &gt; \"Bevorzugter Netzwerktyp\" einen anderen Typ auswählst."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Warnmeldungen"</string>

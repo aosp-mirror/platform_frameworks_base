@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"서비스가 준비되지 않았습니다."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"발신자 번호 설정을 변경할 수 없습니다."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"데이터 서비스를 이용할 수 없음"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"긴급 서비스를 이용할 수 없음"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"긴급 전화 차단됨"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"음성 서비스를 이용할 수 없음"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"음성/긴급 서비스를 이용할 수 없음"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"이동통신사에서 이 위치에서의 데이터 서비스를 일시적으로 정지했습니다."</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"이동통신사에서 이 위치에서의 긴급 통화를 일시적으로 정지했습니다."</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"이동통신사에서 이 위치에서의 음성 통화를 일시적으로 정지했습니다."</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"이동통신사에서 이 위치에서의 음성 및 긴급 통화를 일시적으로 정지했습니다."</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"현재 위치에서 모바일 네트워크가 긴급 서비스 제공을 일시적으로 중단했습니다."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"네트워크에 연결할 수 없습니다."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"수신 상태를 개선하려면 시스템 &gt; 네트워크 및 인터넷 &gt; 모바일 네트워크 &gt; 기본 네트워크 유형에서 선택된 유형을 변경해 보세요."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"알림"</string>

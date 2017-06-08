@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"సేవ కేటాయించబడలేదు."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"డేటా సేవ లేదు"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"అత్యవసర సేవ లేదు"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"అత్యవసర కాలింగ్ లేదు"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"వాయిస్ సేవ లేదు"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"వాయిస్/అత్యవసర సేవ లేదు"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"మీ క్యారియర్ ఈ స్థానంలో డేటా సేవను తాత్కాలికంగా నిలిపివేసింది"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"మీ క్యారియర్ ఈ స్థానంలో అత్యవసర కాల్‌లను తాత్కాలికంగా నిలిపివేసింది"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"మీ క్యారియర్ ఈ స్థానంలో వాయిస్ కాల్‌లను తాత్కాలికంగా నిలిపివేసింది"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"మీ క్యారియర్ ఈ స్థానంలో వాయిస్ మరియు అత్యవసర కాల్‌లను తాత్కాలికంగా నిలిపివేసింది"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"మీ స్థానంలో మొబైల్ నెట్‌వర్క్ ద్వారా తాత్కాలికంగా అందించబడదు"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"నెట్‌వర్క్‌ను చేరుకోలేరు"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"స్వీకరణను మెరుగుపరచాలంటే, సిస్టమ్ &gt; నెట్‌వర్క్ &amp; ఇంటర్నెట్ &gt; మొబైల్ నెట్‌వర్క్‌లు &gt; ప్రాధాన్య నెట్‌వర్క్ రకంలో మీరు ఎంచుకున్న రకాన్ని మార్చి ప్రయత్నించండి."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"హెచ్చరికలు"</string>
@@ -1205,8 +1202,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"భాష మరియు లేఅవుట్‌ను ఎంచుకోవడానికి నొక్కండి"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"ఇతర యాప్‌ల ఎగువన ప్రదర్శన"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి నొక్కి, దీన్ని ఆఫ్ చేయండి."</string>

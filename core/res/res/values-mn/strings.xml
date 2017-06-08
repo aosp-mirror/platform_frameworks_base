@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Үйлчилгээ провишн хийгдээгүй ."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Та дуудлага хийгчийн ID тохиргоог солиж чадахгүй."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Дата үйлчилгээ алга"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Яаралтай үйлчилгээ алга"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Яаралтай дуудлага хийх боломжгүй"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Дуу хоолойны үйлчилгээ алга"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Дуу хоолой/яаралтай үйлчилгээ алга"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Таны оператор компани энэ байршилд дата үйлчилгээг түр хаасан байна"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Таны оператор компани энэ байршилд яаралтай дуудлагыг түр хаасан байна"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Таны оператор компани энэ байршилд дуу хоолойн дуудлагыг түр хаасан байна"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Таны оператор компани энэ байршилд дуу хоолой, яаралтай дуудлагыг түр хаасан байна"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Таны байршилд таны мобайл сүлжээнээс түр хугацаанд блоклосон"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Сүлжээнд холбогдох боломжгүй байна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Хүлээн авалтыг сайжруулахын тулд систем, сүлжээ, интернэт, мобайл сүлжээнд сонгосон сүлжээний төрлийг өөрчилнө үү."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сануулга"</string>
@@ -1204,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Хэл болон бүдүүвчийг сонгохын тулд дарна уу"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Бусад апп дээр харуулах"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Бусад апп дээгүүр <xliff:g id="NAME">%s</xliff:g>-г харуулж байна"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>-г бусад апп дээр харуулж байна"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Та <xliff:g id="NAME">%s</xliff:g>-д энэ онцлогийг ашиглахыг хүсэхгүй байгаа бол тохиргоог нээгээд, унтраана уу."</string>

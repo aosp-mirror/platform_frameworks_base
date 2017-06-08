@@ -91,13 +91,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услуга није добављена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не можете да промените подешавање ИД-а корисника."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Нема услуге преноса података"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Нема услуге за хитне позиве"</string>
+    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
+    <skip />
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Нема гласовне услуге"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Нема гласовне услуге/услуге за хитне позиве"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Мобилни оператер је привремено суспендовао услугу преноса података на овој локацији"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Мобилни оператер је привремено суспендовао хитне позиве на овој локацији"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Мобилни оператер је привремено суспендовао гласовне позиве на овој локацији"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Мобилни оператер је привремено суспендовао гласовне и хитне позиве на овој локацији"</string>
+    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Повезивање са мрежом није успело"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Да бисте побољшали пријем, пробајте да промените изабрани тип у одељку Систем &gt; Мрежа и интернет &gt; Мобилне мреже &gt; Жељени тип мреже."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Обавештења"</string>

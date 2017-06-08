@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Xidmət təmin edilməyib."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Çağrı kimliyi ayarını dəyişə bilməzsiniz."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Data xidməti yoxdur"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Təcili xidmət yoxdur"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Təcili zəng yoxdur"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Səsli xidmət yoxdur"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Səsli/təcili xidmət yoxdur"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Operator müvəqqəti olaraq bu məkanda data xidmətini dayandırıb"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Operator müvəqqəti olaraq bu məkanda təcili zəngləri dayandırıb"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Operator müvəqqəti olaraq bu məkanda səsli zəngləri dayandırıb"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operator müvəqqəti olaraq bu məkanda səsli və təcili zəngləri dayandırıb"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Müvəqqəti olaraq məkanda mobil şəbəkə tərəfindən təklif edilmir"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Şəbəkəyə daxil olmaq mümkün deyil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Qəbulu inkişaf etdirmək üçün seçilmiş növü Sistem &gt; Şəbəkə və İnternet &gt; Mobil şəbəkə &gt; Tərcih edilən şəbəkə növü bölməsində dəyişə bilərsiniz."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Siqnallar"</string>
@@ -1204,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dil və tərtibatı seçmək üçün tıklayın"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCÇDEƏFGĞHXIİJKQLMNOÖPRSŞTUÜVYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCÇDEƏFGĞHİIJKLMNOÖPQRSŞTUÜVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Digər tətbiqlər üzərindən görüntüləyin"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> digər tətbiqlər üzərindən göstərilir"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> tətbiq üzərindən göstərilir"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> adlı şəxsin bu funksiyadan istifadə etməyini istəmirsinizsə, ayarları açmaq və deaktiv etmək üçün klikləyin."</string>
