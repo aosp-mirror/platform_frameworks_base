@@ -6802,6 +6802,13 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SENSITIVITY = "assist_gesture_sensitivity";
 
         /**
+         * Whether Assist Gesture Deferred Setup has been completed
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
+
+        /**
          * Control whether Night display is currently activated.
          * @hide
          */

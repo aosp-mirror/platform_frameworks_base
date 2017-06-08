@@ -4085,6 +4085,11 @@ message MetricsEvent {
     // Open: Settings > Search > No Result View
     SETTINGS_SEARCH_NO_RESULT = 1011;
 
+    // OPEN: Assist Gesture before training
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    SETTINGS_ASSIST_GESTURE_FIRST_TIME = 1012;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
