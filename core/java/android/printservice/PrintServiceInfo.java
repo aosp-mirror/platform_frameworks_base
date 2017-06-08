@@ -18,6 +18,7 @@ package android.printservice;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -48,6 +49,7 @@ import java.io.IOException;
  *
  * @hide
  */
+@TestApi
 @SystemApi
 public final class PrintServiceInfo implements Parcelable {
 
