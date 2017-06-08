@@ -1249,8 +1249,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             protected void chooseUpstreamType(boolean tryCell) {
                 updateConfiguration(); // TODO - remove?
 
-                final int upstreamType = findPreferredUpstreamType(
-                        getConnectivityManager(), mConfig);
+                final int upstreamType = mUpstreamNetworkMonitor.selectPreferredUpstreamType(
+                        mConfig.preferredUpstreamIfaceTypes);
                 if (upstreamType == ConnectivityManager.TYPE_NONE) {
                     if (tryCell) {
                         mUpstreamNetworkMonitor.registerMobileNetworkRequest();
@@ -1260,58 +1260,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     }
                 }
                 setUpstreamByType(upstreamType);
-            }
-
-            // TODO: Move this function into UpstreamNetworkMonitor.
-            protected int findPreferredUpstreamType(ConnectivityManager cm,
-                                                    TetheringConfiguration cfg) {
-                int upType = ConnectivityManager.TYPE_NONE;
-
-                if (VDBG) {
-                    Log.d(TAG, "chooseUpstreamType has upstream iface types:");
-                    for (Integer netType : cfg.preferredUpstreamIfaceTypes) {
-                        Log.d(TAG, " " + netType);
-                    }
-                }
-
-                for (Integer netType : cfg.preferredUpstreamIfaceTypes) {
-                    NetworkInfo info = cm.getNetworkInfo(netType.intValue());
-                    // TODO: if the network is suspended we should consider
-                    // that to be the same as connected here.
-                    if ((info != null) && info.isConnected()) {
-                        upType = netType.intValue();
-                        break;
-                    }
-                }
-
-                final int preferredUpstreamMobileApn = cfg.isDunRequired
-                        ? ConnectivityManager.TYPE_MOBILE_DUN
-                        : ConnectivityManager.TYPE_MOBILE_HIPRI;
-                mLog.log(String.format(
-                        "findPreferredUpstreamType(), preferredApn=%s, got type=%s",
-                        getNetworkTypeName(preferredUpstreamMobileApn),
-                        getNetworkTypeName(upType)));
-
-                switch (upType) {
-                    case ConnectivityManager.TYPE_MOBILE_DUN:
-                    case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                        // If we're on DUN, put our own grab on it.
-                        mUpstreamNetworkMonitor.registerMobileNetworkRequest();
-                        break;
-                    case ConnectivityManager.TYPE_NONE:
-                        break;
-                    default:
-                        /* If we've found an active upstream connection that's not DUN/HIPRI
-                         * we should stop any outstanding DUN/HIPRI start requests.
-                         *
-                         * If we found NONE we don't want to do this as we want any previous
-                         * requests to keep trying to bring up something we can use.
-                         */
-                        mUpstreamNetworkMonitor.releaseMobileNetworkRequest();
-                        break;
-                }
-
-                return upType;
             }
 
             protected void setUpstreamByType(int upType) {
