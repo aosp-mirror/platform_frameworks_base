@@ -16,19 +16,24 @@
 
 package android.telephony;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.mbms.IDownloadCallback;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.DownloadStatus;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsException;
+import android.telephony.mbms.MbmsUtils;
 import android.telephony.mbms.vendor.IMbmsDownloadService;
 import android.util.Log;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
@@ -36,6 +41,8 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 public class MbmsDownloadManager {
     private static final String LOG_TAG = MbmsDownloadManager.class.getSimpleName();
 
+    public static final String MBMS_DOWNLOAD_SERVICE_ACTION =
+            "android.telephony.action.EmbmsDownload";
     /**
      * The MBMS middleware should send this when a download of single file has completed or
      * failed. Mandatory extras are
@@ -76,15 +83,15 @@ public class MbmsDownloadManager {
             "android.telephony.mbms.action.CLEANUP";
 
     /**
-     * Integer extra indicating the result code of the download.
-     * TODO: put in link to error list
-     * TODO: future systemapi (here and and all extras)
+     * Integer extra indicating the result code of the download. One of
+     * {@link #RESULT_SUCCESSFUL}, {@link #RESULT_EXPIRED}, or {@link #RESULT_CANCELLED}.
      */
     public static final String EXTRA_RESULT = "android.telephony.mbms.extra.RESULT";
 
     /**
      * Extra containing the {@link android.telephony.mbms.FileInfo} for which the download result
      * is for. Must not be null.
+     * TODO: future systemapi (here and and all extras) except the two for the app intent
      */
     public static final String EXTRA_INFO = "android.telephony.mbms.extra.INFO";
 
@@ -143,10 +150,22 @@ public class MbmsDownloadManager {
     public static final String EXTRA_TEMP_FILES_IN_USE =
             "android.telephony.mbms.extra.TEMP_FILES_IN_USE";
 
+    /**
+     * Extra containing a single {@link Uri} indicating the location of the successfully
+     * downloaded file. Set on the intent provided via
+     * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}.
+     * Will always be set to a non-null value if {@link #EXTRA_RESULT} is set to
+     * {@link #RESULT_SUCCESSFUL}.
+     */
+    public static final String EXTRA_COMPLETED_FILE_URI =
+            "android.telephony.mbms.extra.COMPLETED_FILE_URI";
+
     public static final int RESULT_SUCCESSFUL = 1;
     public static final int RESULT_CANCELLED  = 2;
     public static final int RESULT_EXPIRED    = 3;
     // TODO - more results!
+
+    private static final long BIND_TIMEOUT_MS = 3000;
 
     private final Context mContext;
     private int mSubId = INVALID_SUBSCRIPTION_ID;
@@ -199,12 +218,31 @@ public class MbmsDownloadManager {
     }
 
     private void bindAndInitialize() throws MbmsException {
-        // TODO: bind
-        try {
-            mService.initialize(mDownloadAppName, mSubId, mCallback);
-        } catch (RemoteException e) {
-            throw new MbmsException(0); // TODO: proper error code
-        }
+        // TODO: fold binding for download and streaming into a common utils class.
+        final CountDownLatch latch = new CountDownLatch(1);
+        ServiceConnection bindListener = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                mService = IMbmsDownloadService.Stub.asInterface(service);
+                latch.countDown();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                mService = null;
+            }
+        };
+
+        Intent bindIntent = new Intent();
+        bindIntent.setComponent(MbmsUtils.toComponentName(
+                MbmsUtils.getMiddlewareServiceInfo(mContext, MBMS_DOWNLOAD_SERVICE_ACTION)));
+
+        // Kick off the binding, and synchronously wait until binding is complete
+        mContext.bindService(bindIntent, bindListener, Context.BIND_AUTO_CREATE);
+
+        MbmsUtils.waitOnLatchWithTimeout(latch, BIND_TIMEOUT_MS);
+
+        // TODO: initialize
     }
 
     /**
@@ -245,6 +283,11 @@ public class MbmsDownloadManager {
      */
     public DownloadRequest download(DownloadRequest request, IDownloadCallback listener) {
         request.setAppName(mDownloadAppName);
+        try {
+            mService.download(request, listener);
+        } catch (RemoteException e) {
+            mService = null;
+        }
         return request;
     }
 
