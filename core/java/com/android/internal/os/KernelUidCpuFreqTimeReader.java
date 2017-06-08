@@ -72,6 +72,10 @@ public class KernelUidCpuFreqTimeReader {
         }
     }
 
+    public void removeUid(int uid) {
+        mLastUidCpuFreqTimeMs.delete(uid);
+    }
+
     @VisibleForTesting
     public void readDelta(BufferedReader reader, @Nullable Callback callback) throws IOException {
         String line = reader.readLine();
