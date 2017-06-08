@@ -91,13 +91,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Nu se asigură accesul la acest serviciu."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nu puteți să modificați setarea pentru ID-ul apelantului."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Fără serviciu de date"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Fără serviciu de urgență"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Fără apeluri de urgență"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Fără servicii vocale"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Fără servicii vocale/de urgență"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Operatorul dvs. a suspendat temporar serviciul de date în această locație"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Operatorul dvs. a suspendat temporar apelurile de urgență în această locație"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Operatorul dvs. a suspendat temporar apelurile vocale în această locație"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operatorul dvs. a suspendat temporar apelurile vocale și de urgență în această locație"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Momentan nu este oferit de rețeaua mobilă în locația dvs."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nu se poate stabili conexiunea la rețea"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Pentru o recepție mai bună, încercați să schimbați tipul selectat în Sistem &gt; Rețea și internet &gt; Rețele mobile &gt; Tip preferat de rețea."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alerte"</string>

@@ -92,13 +92,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Služba není zřízena."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nastavení identifikace volajícího nesmíte měnit."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Datová služba není k dispozici"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Tísňová volání nejsou k dispozici"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Žádná tísňová volání"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Hlasová volání nejsou k dispozici"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Hlasová ani tísňová volání nejsou k dispozici"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Váš operátor v této oblasti dočasně blokuje datovou službu"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Váš operátor v této oblasti dočasně blokuje tísňová volání"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Váš operátor v této oblasti dočasně blokuje hlasová volání"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Váš operátor v této oblasti dočasně blokuje hlasová i tísňová volání"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Mobilní síť ve vaší oblasti tuto službu dočasně nenabízí"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"K síti se nelze připojit"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Chcete-li zlepšit příjem, zkuste změnit vybraný typ sítě v nastavení Systém &gt; Síť a internet &gt; Mobilní sítě &gt; Preferovaný typ sítě."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozornění"</string>

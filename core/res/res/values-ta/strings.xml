@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"சேவை ஒதுக்கப்படவில்லை."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"அழைப்பாளர் ஐடி அமைப்பை மாற்ற முடியாது."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"தரவுச் சேவை இல்லை"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"அவசரச் சேவை இல்லை"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"அவசர அழைப்பு வசதி இல்லை"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"குரல் சேவை இல்லை"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"குரல்/அவசரச் சேவை இல்லை"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"உங்கள் தொலைத்தொடர்பு நிறுவனம் தரவுச் சேவையை இந்த இடத்தில் தற்காலிகமாக நிறுத்தியுள்ளது"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"உங்கள் தொலைத்தொடர்பு நிறுவனம் அவசர அழைப்புகளை இந்த இடத்தில் தற்காலிகமாக நிறுத்தியுள்ளது"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"உங்கள் தொலைத்தொடர்பு நிறுவனம் குரல் அழைப்புகளை இந்த இடத்தில் தற்காலிகமாக நிறுத்தியுள்ளது"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"உங்கள் தொலைத்தொடர்பு நிறுவனம் குரல் மற்றும் அவசர அழைப்புகளை இந்த இடத்தில் தற்காலிகமாக நிறுத்தியுள்ளது"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"தற்காலிகமாக உங்கள் இருப்பிடத்தில் மொபைல் நெட்வொர்க் வழங்கவில்லை"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"பெறுதலை மேம்படுத்த, சாதனம் &gt; நெட்வொர்க் &amp; இணையம் &gt; மொபைல் நெட்வொர்க்குகள் &gt; விரும்பும் நெட்வொர்க் வகை என்பதற்குச் சென்று, தேர்ந்தெடுத்த வகையை மாற்றவும்."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"விழிப்பூட்டல்கள்"</string>

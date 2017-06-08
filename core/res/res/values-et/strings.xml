@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Teenus pole ette valmistatud."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Helistaja ID seadet ei saa muuta."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Andmesideteenus puudub"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Hädaabiteenus pole saadaval"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Hädaabikõned on blokeeritud"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Häälkõned pole saadaval"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Häälkõned/hädaabiteenus pole saadaval"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Teie operaator on andmesideteenuse selles asukohas ajutiselt peatanud"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Teie operaator on hädaabikõned selles asukohas ajutiselt peatanud"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Teie operaator on häälkõned selles asukohas ajutiselt peatanud"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Teie operaator on hääl- ja hädaabikõned selles asukohas ajutiselt peatanud"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Teie asukoha mobiilsidevõrk seda teenust ajutiselt ei paku"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Võrguga ei saa ühendust"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Vastuvõtu parandamiseks muutke valitud tüüpi jaotises Süsteem &gt; Võrk ja Internet &gt; Mobiilsidevõrgud &gt; Eelistatud võrgutüüp."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Teatised"</string>

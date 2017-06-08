@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Layanan tidak diperlengkapi."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Anda tidak dapat mengubah setelan nomor penelepon."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Tidak ada layanan data"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Tidak ada layanan panggilan darurat"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Tidak ada panggilan darurat"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Tidak ada layanan panggilan suara"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Tidak ada layanan panggilan suara/darurat"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Operator menangguhkan layanan data di lokasi ini untuk sementara"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Operator menangguhkan panggilan darurat di lokasi ini untuk sementara"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Operator menangguhkan panggilan suara di lokasi ini untuk sementara"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Operator menangguhkan panggilan suara dan darurat di lokasi ini untuk sementara"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Untuk sementara tidak ditawarkan oleh jaringan seluler di lokasi Anda"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tidak dapat menjangkau jaringan"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Untuk meningkatkan penerimaan sinyal, coba ubah jenis yang dipilih di Sistem &gt; Jaringan &amp; Internet &gt; Jaringan seluler &gt; Jenis jaringan pilihan."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Notifikasi"</string>

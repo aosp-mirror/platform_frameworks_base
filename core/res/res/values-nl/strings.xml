@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Service niet voorzien."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"U kunt de instelling voor de beller-ID niet wijzigen."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Geen gegevensservice"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Geen service voor noodoproepen"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Geen noodoproepen"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Geen service voor spraakoproepen"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Geen service voor spraak-/noodoproepen"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Je provider heeft de gegevensservice tijdelijk opgeschort op deze locatie"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Je provider heeft noodoproepen tijdelijk opgeschort op deze locatie"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Je provider heeft spraakoproepen tijdelijk opgeschort op deze locatie"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Je provider heeft spraak- en noodoproepen tijdelijk opgeschort op deze locatie"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Tijdelijk niet aangeboden door het mobiele netwerk op je locatie"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Kan netwerk niet bereiken"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Als je de ontvangst wilt verbeteren, kun je het netwerktype wijzigen dat is geselecteerd bij Systeem &gt; Netwerk en internet &gt; Mobiele netwerken &gt; Voorkeursnetwerktype."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Meldingen"</string>
@@ -1204,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tik om een taal en indeling te selecteren"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Weergeven vóór andere apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> wordt weergegeven over andere apps"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> wordt weergegeven over apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en schakel je de functie uit."</string>

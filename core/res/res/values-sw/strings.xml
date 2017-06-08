@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Huduma haitathminiwi."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Hauwezi kubadilisha mpangilio wa kitambulisho cha anayepiga."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Hakuna huduma ya data"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Hakuna huduma za dharura"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Huwezi kupiga simu za dharura"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Hakuna huduma za simu za sauti"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Hakuna huduma ya simu za dharura au za sauti"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Mtoa huduma wako amesitisha kwa muda huduma ya data mahali hapa"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Mtoa huduma wako amesitisha kwa muda huduma ya kupiga simu za dharura mahali hapa"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Mtoa huduma wako amesitisha kwa muda mfupi huduma ya kupiga simu za sauti mahali hapa"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Mtoa huduma wako amesitisha kwa muda huduma ya kupiga simu za dharura na za sauti mahali hapa"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Kwa sasa, huduma hii haipatikani katika mtandao wa simu mahali ulipo"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Haiwezi kufikia mtandao"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Ili kupata mtandao thabiti, jaribu kubadilisha aina iliyochaguliwa katika Mfumo &gt; Mtandao na Intaneti &gt; Mitandao ya simu &gt; Aina ya mtandao unaopendelea."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Arifa"</string>

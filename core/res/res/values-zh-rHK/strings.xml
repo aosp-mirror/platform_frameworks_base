@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"未提供此服務。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您無法更改來電顯示設定。"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"沒有數據服務"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"沒有緊急服務"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"無法撥打緊急電話"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"沒有語音服務"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"沒有語音/緊急服務"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"您的流動網絡供應商已在此地點暫時停權數據服務"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"您的流動網絡供應商已在此地點暫時停權緊急通話"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"您的流動網絡供應商已在此地點暫時停權語音通話"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"您的流動網絡供應商已在此地點暫時停權語音和緊急通話"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"你所在位置的行動網路暫時不提供這項服務"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連接網絡"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"如要改善接收品質，請前往 [系統] &gt; [網絡與互聯網] &gt; [流動網絡] &gt; [偏好的網絡類型]，然後變更所選的網絡類型。"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"通知"</string>
@@ -1204,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"輕按即可選取語言和鍵盤配置"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"顯示在其他應用程式上層"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"「<xliff:g id="NAME">%s</xliff:g>」目前可顯示在其他應用程式上面"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"「<xliff:g id="NAME">%s</xliff:g>」正在其他應用程式上顯示內容"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"如果您不想「<xliff:g id="NAME">%s</xliff:g>」使用此功能，請輕按以開啟設定，然後停用此功能。"</string>

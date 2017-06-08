@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"未提供服务。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您无法更改来电显示设置。"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"无法使用数据服务"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"无法使用紧急呼救服务"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"无法进行紧急呼救"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"无法使用语音通话服务"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"无法使用语音通话/紧急呼救服务"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"您的运营商在此位置暂时不提供数据服务"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"您的运营商在此位置暂时不提供紧急呼救服务"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"您的运营商在此位置暂时不提供语音通话服务"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"您的运营商在此位置暂时不提供语音通话和紧急呼救服务"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"您所在位置的移动网络暂时不提供这项服务"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"无法连接网络"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"要改善信号情况，请尝试更改在“系统”&gt;“网络和互联网”&gt;“移动网络”&gt;“首选网络类型”中选择的类型。"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"提醒"</string>

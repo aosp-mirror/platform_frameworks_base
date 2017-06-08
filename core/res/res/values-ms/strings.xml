@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Perkhidmatan yang tidak diuntukkan."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Anda tidak boleh mengubah tetapan ID pemanggil."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Tiada perkhidmatan data"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Tiada perkhidmatan kecemasan"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Tiada panggilan kecemasan"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Tiada perkhidmatan suara"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Tiada perkhidmatan suara/kecemasan"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Pembawa anda telah menggantung perkhidmatan data di lokasi ini untuk sementara waktu"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Pembawa anda telah menggantung panggilan kecemasan di lokasi ini untuk sementara waktu"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Pembawa anda telah menggantung panggilan suara di lokasi ini untuk sementara waktu"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Pembawa anda telah menggantung panggilan suara dan kecemasan di lokasi ini untuk sementara waktu"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Tidak ditawarkan oleh rangkaian mudah alih di lokasi anda untuk sementara waktu"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tidak dapat mencapai rangkaian"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Untuk memperbaik penerimaan, cuba tukar jenis rangkaian yang dipilih di Sistem &gt; Rangkaian &amp; Internet &gt; Rangkaian mudah alih &gt; Jenis rangkaian pilihan."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Makluman"</string>

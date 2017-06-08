@@ -90,13 +90,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Ce service n\'est pas pris en charge."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Impossible de modifier le paramètre relatif au numéro de l\'appelant."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Aucun service de données"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Aucun service d\'urgence"</string>
+    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
+    <skip />
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Aucun service vocal"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Aucun service vocal/d\'urgence"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Votre opérateur a momentanément suspendu le service de données pour ce lieu"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Votre opérateur a momentanément suspendu les appels d\'urgence pour ce lieu"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Votre opérateur a momentanément suspendu les appels vocaux pour ce lieu"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Votre opérateur a momentanément suspendu les appels vocaux et d\'urgence pour ce lieu"</string>
+    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Impossible d\'accéder au réseau"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Pour améliorer la réception, essayez de modifier le type sélectionné sous Système &gt; Réseau et Internet &gt; Réseaux mobiles &gt; Type de réseau préféré."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>

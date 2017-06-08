@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"មិន​បាន​ផ្ដល់​សេវាកម្ម។"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"អ្នក​មិន​អាច​ប្ដូរ​ការ​កំណត់​លេខ​សម្គាល់​អ្នក​ហៅ​បានទេ។"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"គ្មាន​សេវាកម្ម​ទិន្នន័យ​ទេ"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"គ្មាន​សេវាកម្ម​សង្រ្គោះបន្ទាន់​ទេ"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"មិនមាន​ការហៅបន្ទាន់ទេ"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"គ្មាន​សេវាកម្ម​ជា​សំឡេង​ទេ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"គ្មាន​សេវាកម្ម​សំឡេង/សង្រ្គោះបន្ទាន់​ទេ"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"ក្រុមហ៊ុន​បម្រើ​សេវាទូរសព្ទ​របស់​អ្នក​បានផ្អាក​សេវាកម្ម​ទិន្នន័យ​ជាបណ្តោះអាសន្ន​នៅ​ទីតាំង​នេះ"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"ក្រុមហ៊ុន​បម្រើ​សេវាទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​បន្ទាន់​ជាបណ្តោះអាសន្ន​នៅទី​តាំង​នេះ"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"ក្រុមហ៊ុន​បម្រើសេវា​ទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​ដោយ​សំឡេង​ជាបណ្តោះអាសន្ន​នៅទី​តាំងនេះ"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ក្រុមហ៊ុន​បម្រើ​សេវា​ទូរសព្ទ​របស់អ្នក​បានផ្អាក​ការហៅ​ដោយ​សំឡេង និង​ការហៅ​បន្ទាន់​ជា​បណ្តោះអាសន្ន​នៅទី​តាំង​នេះ"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"​មិន​បាន​ផ្តល់​ជូន​ដោយ​បណ្តាញចល័តនៅ​ទីកន្លែងរបស់អ្នកជា​បណ្តោះ​អាសន្ន"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"ដើម្បីកែលម្អការទទួលយក សាកល្បងប្តូរប្រភេទដែលបានជ្រើសរើសនៅ ប្រព័ន្ធ &gt; បណ្តាញ និងអ៊ីនធឺណិត &gt; បណ្តាញទូរសព្ទចល័ត &gt; ប្រភេទបណ្តាញដែលចង់ប្រើ។"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ការជូនដំណឹង"</string>
@@ -1206,8 +1203,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ប៉ះដើម្បីជ្រើសភាសា និងប្លង់"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"បង្ហាញនៅលើកម្មវិធីផ្សេងទៀត"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> កំពុង​បង្ហាញពីលើ​កម្មវិធី​ផ្សេង​ទៀត"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> កំពុង​បង្ហាញ​ពីលើ​កម្មវិធី​ផ្សេង​ទៀត"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"ប្រសិនបើ​អ្នក​មិន​ចង់​ឲ្យ <xliff:g id="NAME">%s</xliff:g> ប្រើ​មុខងារ​នេះ​ទេ សូមចុច​ដើម្បី​បើក​ការកំណត់ រួច​បិទ​វា។"</string>

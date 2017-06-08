@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवा प्रावधान की हुई नहीं है."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"आप कॉलर आईडी सेटिंग नहीं बदल सकते."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"कोई डेटा सेवा नहीं है"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"कोई आपातकालीन सेवा नहीं है"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"कोई भी आपातकालीन कॉलिंग नहीं है"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"कोई वॉइस सेवा नहीं है"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"कोई वॉइस/आपातकालीन सेवा नहीं है"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"आपके वाहक ने इस स्थान पर कुछ समय के लिए डेटा सेवा बंद कर दी है"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"आपके वाहक ने इस स्थान पर कुछ समय के लिए आपातकालीन कॉल बंद कर दिए हैं"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"आपके वाहक ने इस स्थान पर कुछ समय के लिए वॉइस कॉल बंद कर दिए हैं"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"आपके वाहक ने इस स्थान पर वॉइस और आपातकालीन कॉल कुछ समय के लिए बंद कर दिए हैं"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"आपके स्थान के मोबाइल नेटवर्क की ओर से इस समय ऑफ़र नहीं किया जा रहा है"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्क तक नहीं पहुंच पा रहे हैं"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"रिसेप्शन बेहतर करने के लिए, सिस्टम &gt; नेटवर्क और इंटरनेट &gt; मोबाइल नेटवर्क &gt; पसंदीदा नेटवर्क प्रकार पर जाकर, चुना गया प्रकार बदलकर देखें."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"सूचनाएं"</string>
@@ -1204,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"भाषा और लेआउट चुनने के लिए टैप करें"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"दूसरे ऐप्लिकेशन पर प्रदर्शित करें"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> अन्य ऐप्लिकेशन के ऊपर दिखाई दे रहा है"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> अन्य ऐप पर दिखाई दे रहा है"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने और उसे बंद करने के लिए टैप करें."</string>

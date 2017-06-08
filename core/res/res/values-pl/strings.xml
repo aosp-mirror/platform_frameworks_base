@@ -92,13 +92,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Usługa nie jest świadczona."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nie możesz zmienić ustawienia ID rozmówcy."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Brak usługi transmisji danych"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Brak usługi połączeń alarmowych"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Brak możliwości wykonywania połączeń alarmowych"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Brak usługi połączeń głosowych"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Brak usługi połączeń głosowych/alarmowych"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Twój operator tymczasowo zawiesił usługę transmisji danych w tej lokalizacji"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Twój operator tymczasowo zawiesił połączenia alarmowe w tej lokalizacji"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Twój operator tymczasowo zawiesił połączenia głosowe w tej lokalizacji"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Twój operator tymczasowo zawiesił połączenia głosowe i alarmowe w tej lokalizacji"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Usługa tymczasowo nieoferowana przez sieć komórkową w Twojej lokalizacji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Brak zasięgu sieci"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Aby poprawić odbiór, zmień typ sieci – wybierz System &gt; Sieć i internet &gt; Sieci komórkowe &gt; Preferowany typ sieci."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alerty"</string>

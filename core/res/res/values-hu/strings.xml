@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"A szolgáltatás nincs biztosítva."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nem tudja módosítani a hívó fél azonosítója beállítást."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Adatszolgáltatás letiltva"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Segélyszolgáltatás letiltva"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Nincs vészhívás"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Hangszolgáltatás letiltva"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Hang- és segélyszolgáltatás letiltva"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Szolgáltatója ezen a helyen átmenetileg felfüggesztette az adatszolgáltatást"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Szolgáltatója ezen a helyen átmenetileg felfüggesztette a segélyhívásokat"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Szolgáltatója ezen a helyen átmenetileg felfüggesztette a hanghívásokat"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Szolgáltatója ezen a helyen átmenetileg felfüggesztette a hang- és segélyhívásokat"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Az Ön tartózkodási helyén ideiglenesen nem áll rendelkezésre a mobilhálózaton"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"A hálózat nem érhető el"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"A vétel javítása érdekében próbálja módosítani a kiválasztott hálózattípust a Rendszer &gt; Hálózat és internet &gt; Mobilhálózatok &gt; Preferált hálózattípus menüben."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Értesítések"</string>

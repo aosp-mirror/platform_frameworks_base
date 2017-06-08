@@ -92,13 +92,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Службу не ініціалізовано."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ви не можете змінювати налаштування ідентифікатора абонента."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Немає мобільного Інтернету"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Немає екстреної служби"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Екстрені виклики заблоковано"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Немає голосової служби"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Немає голосової/екстреної служби"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Оператор тимчасово заблокував передавання даних у цьому місці"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Оператор тимчасово заблокував екстрені виклики в цьому місці"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Оператор тимчасово заблокував голосові виклики в цьому місці"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Оператор тимчасово заблокував голосові й екстрені виклики в цьому місці"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Тимчасово не пропонується мобільною мережею у вашому місцезнаходженні"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не вдається під’єднатися до мережі"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Щоб покращити якість сигналу, змініть тип у меню \"Система\" &gt; \"Мережа й Інтернет\" &gt; \"Мобільні мережі\" &gt; \"Тип мережі\"."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сповіщення"</string>

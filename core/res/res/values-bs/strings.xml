@@ -91,13 +91,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Uslugu nije moguće koristiti."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ne možete promijeniti postavke ID-a pozivaoca."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Nema usluge prijenosa mobilnih podataka"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Nema usluge za hitne slučajeve"</string>
+    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
+    <skip />
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Nema usluge govornih poziva"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nema govornih/hitnih usluga"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Vaš operater je privremeno obustavio uslugu prijenosa mobilnih podataka na ovoj lokaciji"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Vaš operater je privremeno obustavio hite pozive na ovoj lokaciji"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Vaš operater je privremeno obustavio govorne pozive na ovoj lokaciji"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Vaš operater je na ovoj lokaciji privremeno obustavio govorne i hitne pozive."</string>
+    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nije moguće dosegnuti mrežu"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Za poboljšanje prijema, pokušajte promijeniti tip odabran u meniju Sistem &gt; Mreža i internet &gt; Mobilne mreže &gt; Preferirani tip mreže."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozorenja"</string>
@@ -453,7 +452,7 @@
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"izmjene podijeljenog povezivanja"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Dozvoljava aplikaciji izmjenu stanja povezanosti na podijeljenu mrežu."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"pregled Wi-Fi veza"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Omogućava aplikaciji pregled informacija o Wi-Fi mrežama, npr. da li je Wi-Fi omogućen i naziv povezanih Wi-Fi uređaja."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Omogućava aplikaciji pregled informacija o Wi-Fi mrežama, npr. je li Wi-Fi omogućen i imena povezanih Wi-Fi uređaja."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"uspostavljanje i prekidanje Wi-Fi veze"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Omogućava aplikaciji uspostavljanje i prekidanje veze sa Wi-Fi pristupnim tačkama, kao i promjenu konfiguracije uređaja za Wi-Fi mreže."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"dozvoljava prijem paketa kroz Wi-Fi Multicast"</string>
@@ -1743,7 +1742,7 @@
     <string name="user_creation_adding" msgid="4482658054622099197">"Da li dozvoljavate da <xliff:g id="APP">%1$s</xliff:g> kreira novog korisnika za <xliff:g id="ACCOUNT">%2$s</xliff:g> (Korisnik sa ovim nalogom već postoji)?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Dodaj jezik"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Izbor regije"</string>
-    <string name="search_language_hint" msgid="7042102592055108574">"Ukucajte naziv jezika"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Ukucajte ime jezika"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Predloženo"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Svi jezici"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Sve regije"</string>

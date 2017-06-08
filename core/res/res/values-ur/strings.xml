@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"سروس فراہم نہیں کی گئی۔"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"‏آپ کالر ID کی ترتیبات تبدیل نہیں کر سکتے ہیں۔"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"کوئی ڈیٹا سروس نہیں"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"کوئی ہنگامی سروس نہیں"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"کوئی ایمرجنسی کالنگ نہیں ہے"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"کوئی صوتی سروس نہیں"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"کوئی صوتی/ہنگامی سروس نہیں"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"آپ کے کیریئر نے عارضی طور پر اس مقام پر ڈیٹا سروس کو معطل کر دیا ہے"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"آپ کے کیریئر نے عارضی طور پر اس مقام پر ہنگامی کالز کو معطل کر دیا ہے"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"آپ کے کیریئر نے عارضی طور پر اس مقام پر صوتی کالز کو معطل کر دیا ہے"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"آپ کے کیریئر نے عارضی طور پر اس مقام پر صوتی اور ہنگامی کالز کو معطل کر دیا ہے"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"عارضی طور پر آپ کے مقام پر موبائل نیٹ ورک کی طرف سے پیش نہیں ہے"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"نیٹ ورک تک نہیں پہنچا جا سکتا"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"‏ریسپشن کو بہتر بنانے کیلئے، سسٹم ‎&gt; نیٹ ورک اور انٹرنیٹ ‎&gt; موبائل نیٹ ورکس ‎&gt; ترجیحی نیٹ ورک کی قسم تبدیل کرنے کی کوشش کریں۔"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"الرٹس"</string>
@@ -1205,8 +1202,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"زبان اور لے آؤٹ منتخب کرنے کیلئے تھپتھپائیں"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"دیگر ایپس پر ڈسپلے کریں"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> کو دیگر ایپس پر دکھایا کیا جا رہا ہے"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> دیگر ایپس پر ڈسپلے ہو رہی ہے"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"اگر آپ نہیں چاہتے ہیں کہ <xliff:g id="NAME">%s</xliff:g> اس خصوصیت کا استعمال کرے تو ترتیبات کھولنے کیلئے تھپتھپائیں اور اسے بند کریں۔"</string>

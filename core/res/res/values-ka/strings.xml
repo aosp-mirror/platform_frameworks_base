@@ -90,13 +90,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"სერვისი არ არის მიწოდებული."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"არ შეგიძლიათ აბონენტის ID პარამეტრების შეცვლა."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"მობილური ინტერნეტის სერვისი არ არის"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"გადაუდებელი ზარების სერვისი არ არის"</string>
+    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
+    <skip />
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ხმოვანი ზარების სერვისი არ არის"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ხმოვანი/გადაუდებელი ზარების სერვისი არ არის"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"მობილური ინტერნეტის სერვისი დროებით შეიზღუდა თქვენი ოპერატორის მიერ ამ მდებარეობაზე"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"გადაუდებელი ზარები დროებით შეიზღუდა თქვენი ოპერატორის მიერ ამ მდებარეობაზე"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"ხმოვანი ზარები დროებით შეიზღუდა თქვენი ოპერატორის მიერ ამ მდებარეობაზე"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ხმოვანი და გადაუდებელი ზარები დროებით შეიზღუდა თქვენი ოპერატორის მიერ ამ მდებარეობაზე"</string>
+    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ქსელთან დაკავშირება ვერ ხერხდება"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"მიღების გასაუმჯობესებლად ცადეთ არჩეული ტიპის შეცვლა აქ: სისტემა &gt; ქსელი და ინტერნეტი &gt; მობილური ქსელები &gt; ქსელის სასურველი ტიპი."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"გაფრთხილებები"</string>
@@ -1204,8 +1203,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"შეეხეთ ენისა და განლაგების ასარჩევად"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"სხვა აპების ზემოდან გამოჩენა"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ნაჩვენებია სხვა აპების ინტერფეისის გადაფარვით"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ნაჩვენებია სხვა აპების ინტერფეისის გადაფარვით"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"თუ არ გსურთ <xliff:g id="NAME">%s</xliff:g>-ის მიერ ამ ფუნქციის გამოყენება, შეეხეთ პარამეტრების გასახსნელად და გამორთეთ."</string>

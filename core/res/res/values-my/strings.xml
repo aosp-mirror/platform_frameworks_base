@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ဝန်ဆောင်မှုအား ကန့်သတ်မထားပါ"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"သင်သည် ခေါ်ဆိုသူ ID ဆက်တင်ကို မပြောင်းလဲနိုင်ပါ။"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ဒေတာချိတ်ဆက်ရန် ဝန်ဆောင်မှု မရှိပါ"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"အရေးပေါ်ဝန်ဆောင်မှု မရရှိနိုင်ပါ"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"အရေးပေါ်ဖုန်းခေါ်ခြင်းများ မရရှိနိုင်ပါ"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ဖုန်းဝန်ဆောင်မှု မရှိပါ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ဖုန်း/အရေးပေါ် ဝန်ဆောင်မှုများမရရှိနိုင်ပါ"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"သင်၏ ဝန်ဆောင်မှုပေးသူသည် ဤတည်နေရာအတွက် ဒေတာဝန်ဆောင်မှုများကို ခေတ္တရပ်ဆိုင်းထားပါသည်"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"သင်၏ ဝန်ဆောင်မှုပေးသူသည် ဤတည်နေရာအတွက် အရေးပေါ်ဖုန်းခေါ်ဆိုမှုများကို ခေတ္တရပ်ဆိုင်းထားပါသည်"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"သင်၏ ဝန်ဆောင်မှုပေးသူသည် ဤနေရာအတွက် ဖုန်းခေါ်ဆိုမှုများကို ခေတ္တရပ်ဆိုင်းထားပါသည်"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"သင်၏ ဝန်ဆောင်မှုပေးသူသည် ဤတည်နေရာအတွက် ဖုန်းခေါ်ဆိုမှု နှင့် အရေးပေါ်ခေါ်ဆိုမှုများကို ခေတ္တရပ်ဆိုင်းထားပါသည်"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"သင်၏ ဒေသတွင် မိုဘိုင်းကွန်ရက် ယာယီမရရှိနိုင်ပါ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ကွန်ရက်ကို ချိတ်ဆက်၍မရပါ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"လိုင်းဖမ်းယူမှု ကောင်းမွန်စေရန် စနစ် &gt; ကွန်ရက်နှင့် အင်တာနက် &gt; မိုဘိုင်းကွန်ရက်များ &gt; အသုံးပြုလိုသည့် ကွန်ရက်အမျိုးအစားတွင် ရွေးချယ်ထားသည့် အမျိုးအစားကို ပြောင်းကြည့်ပါ။"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"သတိပေးချက်များ"</string>
@@ -1205,8 +1202,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ဘာသာစကားနှင့် အသွင်အပြင်ရွေးချယ်ရန် တို့ပါ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"အခြားအက်ပ်များအပေါ်တွင် ပြသခွင့် ပြုခြင်း"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> သည် အခြားအက်ပ်များအပေါ်တွင် ပြပါသည်"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ကို အခြားအက်ပ်များပေါ်တွင် မြင်နေရပါသည်။"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ကို ဤဝန်ဆောင်မှုအား အသုံးမပြုစေလိုလျှင် ဆက်တင်ကို တို့၍ ဖွင့်ပြီး ၎င်းကို ပိတ်လိုက်ပါ။"</string>
