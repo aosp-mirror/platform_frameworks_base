@@ -18,7 +18,11 @@ package android.content.pm;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager.PackageInfoFlags;
+import android.content.pm.PackageManager.ResolveInfoFlags;
 import android.os.Bundle;
 import android.util.SparseArray;
 
@@ -133,16 +137,40 @@ public abstract class PackageManagerInternal {
     public abstract boolean isPermissionsReviewRequired(String packageName, int userId);
 
     /**
-     * Gets all of the information we know about a particular package.
-     *
-     * @param packageName The package name to find.
-     * @param userId The user under which to check.
-     *
-     * @return An {@link ApplicationInfo} containing information about the
-     *         package, or {@code null} if no application exists with that
-     *         package name.
+     * Retrieve all of the information we know about a particular package/application.
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     * of the calling UID.
+     * @see PackageManager#getPackageInfo(String, int)
      */
-    public abstract ApplicationInfo getApplicationInfo(String packageName, int userId);
+    public abstract PackageInfo getPackageInfo(String packageName,
+            @PackageInfoFlags int flags, int filterCallingUid, int userId);
+
+    /**
+     * Retrieve all of the information we know about a particular package/application.
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     * of the calling UID.
+     * @see PackageManager#getApplicationInfo(String, int)
+     */
+    public abstract ApplicationInfo getApplicationInfo(String packageName,
+            @ApplicationInfoFlags int flags, int filterCallingUid, int userId);
+
+    /**
+     * Retrieve all of the information we know about a particular activity class.
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     * of the calling UID.
+     * @see PackageManager#getActivityInfo(ComponentName, int)
+     */
+    public abstract ActivityInfo getActivityInfo(ComponentName component,
+            @ComponentInfoFlags int flags, int filterCallingUid, int userId);
+
+    /**
+     * Retrieve all activities that can be performed for the given intent.
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     * of the calling UID.
+     * @see PackageManager#queryIntentActivities(Intent, int)
+     */
+    public abstract List<ResolveInfo> queryIntentActivities(Intent intent,
+            @ResolveInfoFlags int flags, int filterCallingUid, int userId);
 
     /**
      * Interface to {@link com.android.server.pm.PackageManagerService#getHomeActivitiesAsUser}.

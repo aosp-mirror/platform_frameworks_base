@@ -19221,10 +19221,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final Uri data = intent.getData();
                     final String ssp;
                     if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
-                        final ApplicationInfo aInfo =
-                                getPackageManagerInternalLocked().getApplicationInfo(
-                                        ssp,
-                                        userId);
+                        ApplicationInfo aInfo = null;
+                        try {
+                            aInfo = AppGlobals.getPackageManager()
+                                    .getApplicationInfo(ssp, 0 /*flags*/, userId);
+                        } catch (RemoteException ignore) {}
                         if (aInfo == null) {
                             Slog.w(TAG, "Dropping ACTION_PACKAGE_REPLACED for non-existent pkg:"
                                     + " ssp=" + ssp + " data=" + data);
@@ -24344,7 +24345,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void updateApplicationInfoLocked(@NonNull List<String> packagesToUpdate, int userId) {
-        final PackageManagerInternal packageManager = getPackageManagerInternalLocked();
         final boolean updateFrameworkRes = packagesToUpdate.contains("android");
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             final ProcessRecord app = mLruProcesses.get(i);
@@ -24361,8 +24361,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final String packageName = app.pkgList.keyAt(j);
                 if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
                     try {
-                        final ApplicationInfo ai = packageManager.getApplicationInfo(
-                                packageName, app.userId);
+                        final ApplicationInfo ai = AppGlobals.getPackageManager()
+                                .getApplicationInfo(packageName, 0 /*flags*/, app.userId);
                         if (ai != null) {
                             app.thread.scheduleApplicationInfoChanged(ai);
                         }
