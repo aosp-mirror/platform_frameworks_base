@@ -3518,6 +3518,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void removeIsolatedUidLocked(int isolatedUid) {
         mIsolatedUids.delete(isolatedUid);
         mKernelUidCpuTimeReader.removeUid(isolatedUid);
+        mKernelUidCpuFreqTimeReader.removeUid(isolatedUid);
     }
 
     public int mapUid(int uid) {
@@ -10351,6 +10352,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     public void onUidCpuFreqTime(int uid, long[] cpuFreqTimeMs) {
                         uid = mapUid(uid);
                         if (Process.isIsolated(uid)) {
+                            mKernelUidCpuFreqTimeReader.removeUid(uid);
+                            Slog.d(TAG, "Got freq readings for an isolated uid with"
+                                    + " no mapping to owning uid: " + uid);
                             return;
                         }
                         final Uid u = getUidStatsLocked(uid);
@@ -11019,6 +11023,7 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     public void removeUidStatsLocked(int uid) {
         mKernelUidCpuTimeReader.removeUid(uid);
+        mKernelUidCpuFreqTimeReader.removeUid(uid);
         mUidStats.remove(uid);
     }
 

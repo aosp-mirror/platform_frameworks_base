@@ -6121,6 +6121,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean isLockscreenPublicMode(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            return mLockscreenPublicMode.get(mCurrentUserId, false);
+        }
         return mLockscreenPublicMode.get(userId, false);
     }
 
@@ -6799,7 +6802,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         entry.notification = notification;
         mGroupManager.onEntryUpdated(entry, oldNotification);
 
-        entry.updateIcons(mContext, n);
+        entry.updateIcons(mContext, notification);
         inflateViews(entry, mStackScroller);
 
         mForegroundServiceController.updateNotification(notification,

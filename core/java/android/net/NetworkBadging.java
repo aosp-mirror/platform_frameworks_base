@@ -66,15 +66,7 @@ public class NetworkBadging {
      */
     @NonNull public static Drawable getWifiIcon(
             @IntRange(from=0, to=4) int signalLevel, @Badging int badging, @Nullable Theme theme) {
-        Resources resources = Resources.getSystem();
-        if (badging == BADGING_NONE) {
-            return resources.getDrawable(getWifiSignalResource(signalLevel), theme);
-        }
-        Drawable[] layers = new Drawable[] {
-                resources.getDrawable(getBadgedWifiSignalResource(signalLevel), theme),
-                resources.getDrawable(getWifiBadgeResource(badging), theme)
-        };
-        return new LayerDrawable(layers);
+        return Resources.getSystem().getDrawable(getWifiSignalResource(signalLevel), theme);
     }
 
     /**
@@ -132,33 +124,6 @@ public class NetworkBadging {
                 return com.android.internal.R.drawable.ic_signal_wifi_badged_4_bars;
             default:
                 throw new IllegalArgumentException("Invalid signal level: " + signalLevel);
-        }
-    }
-
-    /**
-     * Returns the wifi quality badge resource id for the the given badging balue.
-     *
-     * <p>This badge should be displayed with the badge signal resource retrieved from
-     * {@link #getBadgedWifiSignalResource(int)}.
-     *
-     * @param badging {@see NetworkBadging#Badging} from {@link ScoredNetwork#calculateBadge(int)}.
-     * @return the @DrawableRes for the icon or {@link View#NO_ID} for
-     *         {@link NetworkBadging#BADGING_NONE}
-     * @throws IllegalArgumentException for an invalid badging value.
-     * @hide
-     */
-    @DrawableRes private static int getWifiBadgeResource(@Badging int badging) {
-        switch (badging) {
-            case BADGING_NONE:
-                return View.NO_ID;
-            case BADGING_SD:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_sd;
-            case BADGING_HD:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_hd;
-            case BADGING_4K:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_4k;
-            default:
-                throw new IllegalArgumentException("No resource found for badge: " + badging);
         }
     }
 }
