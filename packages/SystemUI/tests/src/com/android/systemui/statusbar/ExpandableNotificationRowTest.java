@@ -99,6 +99,13 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
+    public void testIconColorShouldBeUpdatedWhenSettingDark() throws Exception {
+        ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
+        row.setDark(true, false, 0);
+        verify(row).updateShelfIconColor();
+    }
+
+    @Test
     public void testAboveShelfChangedListenerCalled() throws Exception {
         ExpandableNotificationRow row = mNotificationTestHelper.createRow();
         AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
