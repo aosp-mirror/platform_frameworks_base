@@ -201,7 +201,7 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 22:
      *   - BLE scan result background count, BLE unoptimized scan time
      */
-    static final String CHECKIN_VERSION = "22";
+    static final String CHECKIN_VERSION = "23";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -3051,6 +3051,7 @@ public abstract class BatteryStats implements Parcelable {
             boolean wifiOnly) {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
+        final long rawRealtimeMs = (rawRealtime + 500) / 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
         final long whichBatteryUptime = computeBatteryUptime(rawUptime, which);
         final long whichBatteryRealtime = computeBatteryRealtime(rawRealtime, which);
@@ -3437,7 +3438,6 @@ public abstract class BatteryStats implements Parcelable {
                     final int count = bleTimer.getCountLocked(which);
                     final Timer bleTimerBg = u.getBluetoothScanBackgroundTimer();
                     final int countBg = bleTimerBg != null ? bleTimerBg.getCountLocked(which) : 0;
-                    final long rawRealtimeMs = (rawRealtime + 500) / 1000;
                     // 'actualTime' are unpooled and always since reset (regardless of 'which')
                     final long actualTime = bleTimer.getTotalDurationMsLocked(rawRealtimeMs);
                     final long actualTimeBg = bleTimerBg != null ?
@@ -3486,11 +3486,11 @@ public abstract class BatteryStats implements Parcelable {
 
             if (u.getAggregatedPartialWakelockTimer() != null) {
                 final Timer timer = u.getAggregatedPartialWakelockTimer();
-                // Convert from microseconds to milliseconds with rounding
-                final long totTimeMs = (timer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+                // Times are since reset (regardless of 'which')
+                final long totTimeMs = timer.getTotalDurationMsLocked(rawRealtimeMs);
                 final Timer bgTimer = timer.getSubTimer();
                 final long bgTimeMs = bgTimer != null ?
-                        (bgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : 0;
+                        bgTimer.getTotalDurationMsLocked(rawRealtimeMs) : 0;
                 dumpLine(pw, uid, category, AGGREGATED_WAKELOCK_DATA, totTimeMs, bgTimeMs);
             }
 
@@ -3527,7 +3527,7 @@ public abstract class BatteryStats implements Parcelable {
                 final int count = timer.getCountLocked(which);
                 final Timer bgTimer = timer.getSubTimer();
                 final long bgTime = bgTimer != null ?
-                        (bgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : -1;
+                        bgTimer.getTotalDurationMsLocked(rawRealtimeMs) : -1;
                 final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : -1;
                 if (totalTime != 0) {
                     dumpLine(pw, uid, category, SYNC_DATA, "\"" + syncs.keyAt(isy) + "\"",
@@ -3543,7 +3543,7 @@ public abstract class BatteryStats implements Parcelable {
                 final int count = timer.getCountLocked(which);
                 final Timer bgTimer = timer.getSubTimer();
                 final long bgTime = bgTimer != null ?
-                        (bgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : -1;
+                        bgTimer.getTotalDurationMsLocked(rawRealtimeMs) : -1;
                 final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : -1;
                 if (totalTime != 0) {
                     dumpLine(pw, uid, category, JOB_DATA, "\"" + jobs.keyAt(ij) + "\"",
@@ -3574,7 +3574,6 @@ public abstract class BatteryStats implements Parcelable {
                         final int count = timer.getCountLocked(which);
                         final Timer bgTimer = se.getSensorBackgroundTime();
                         final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : 0;
-                        final long rawRealtimeMs = (rawRealtime + 500) / 1000;
                         // 'actualTime' are unpooled and always since reset (regardless of 'which')
                         final long actualTime = timer.getTotalDurationMsLocked(rawRealtimeMs);
                         final long bgActualTime = bgTimer != null ?
@@ -3715,6 +3714,7 @@ public abstract class BatteryStats implements Parcelable {
             int reqUid, boolean wifiOnly) {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
+        final long rawRealtimeMs = (rawRealtime + 500) / 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
 
         final long whichBatteryUptime = computeBatteryUptime(rawUptime, which);
@@ -4655,7 +4655,6 @@ public abstract class BatteryStats implements Parcelable {
                     final int count = bleTimer.getCountLocked(which);
                     final Timer bleTimerBg = u.getBluetoothScanBackgroundTimer();
                     final int countBg = bleTimerBg != null ? bleTimerBg.getCountLocked(which) : 0;
-                    final long rawRealtimeMs = (rawRealtime + 500) / 1000;
                     // 'actualTime' are unpooled and always since reset (regardless of 'which')
                     final long actualTimeMs = bleTimer.getTotalDurationMsLocked(rawRealtimeMs);
                     final long actualTimeMsBg = bleTimerBg != null ?
@@ -4823,10 +4822,10 @@ public abstract class BatteryStats implements Parcelable {
                     final Timer aggTimer = u.getAggregatedPartialWakelockTimer();
                     // Convert from microseconds to milliseconds with rounding
                     actualTotalPartialWakelock =
-                            (aggTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000;
+                            aggTimer.getTotalDurationMsLocked(rawRealtimeMs);
                     final Timer bgAggTimer = aggTimer.getSubTimer();
                     actualBgPartialWakelock = bgAggTimer != null ?
-                            (bgAggTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : 0;
+                            bgAggTimer.getTotalDurationMsLocked(rawRealtimeMs) : 0;
                 }
 
                 if (actualTotalPartialWakelock != 0 || actualBgPartialWakelock != 0 ||
@@ -4894,7 +4893,7 @@ public abstract class BatteryStats implements Parcelable {
                 final int count = timer.getCountLocked(which);
                 final Timer bgTimer = timer.getSubTimer();
                 final long bgTime = bgTimer != null ?
-                        (bgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : -1;
+                        bgTimer.getTotalDurationMsLocked(rawRealtimeMs) : -1;
                 final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : -1;
                 sb.setLength(0);
                 sb.append(prefix);
@@ -4928,7 +4927,7 @@ public abstract class BatteryStats implements Parcelable {
                 final int count = timer.getCountLocked(which);
                 final Timer bgTimer = timer.getSubTimer();
                 final long bgTime = bgTimer != null ?
-                        (bgTimer.getTotalTimeLocked(rawRealtime, which) + 500) / 1000 : -1;
+                        bgTimer.getTotalDurationMsLocked(rawRealtimeMs) : -1;
                 final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : -1;
                 sb.setLength(0);
                 sb.append(prefix);
@@ -4987,7 +4986,6 @@ public abstract class BatteryStats implements Parcelable {
                     final int count = timer.getCountLocked(which);
                     final Timer bgTimer = se.getSensorBackgroundTime();
                     final int bgCount = bgTimer != null ? bgTimer.getCountLocked(which) : 0;
-                    final long rawRealtimeMs = (rawRealtime + 500) / 1000;
                     // 'actualTime' are unpooled and always since reset (regardless of 'which')
                     final long actualTime = timer.getTotalDurationMsLocked(rawRealtimeMs);
                     final long bgActualTime = bgTimer != null ?
