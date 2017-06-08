@@ -63,12 +63,6 @@ class AlertWindowNotification {
         mNotificationTag = CHANNEL_PREFIX + mPackageName;
         mRequestCode = sNextRequestCode++;
         mIconUtilities = new IconUtilities(mService.mContext);
-        if (sChannelGroup == null) {
-            sChannelGroup = new NotificationChannelGroup(CHANNEL_PREFIX,
-                    mService.mContext.getString(
-                            R.string.alert_windows_notification_channel_group_name));
-            mNotificationManager.createNotificationChannelGroup(sChannelGroup);
-        }
     }
 
     void post() {
@@ -143,6 +137,13 @@ class AlertWindowNotification {
     }
 
     private void createNotificationChannel(Context context, String appName) {
+        if (sChannelGroup == null) {
+            sChannelGroup = new NotificationChannelGroup(CHANNEL_PREFIX,
+                    mService.mContext.getString(
+                            R.string.alert_windows_notification_channel_group_name));
+            mNotificationManager.createNotificationChannelGroup(sChannelGroup);
+        }
+
         final String nameChannel =
                 context.getString(R.string.alert_windows_notification_channel_name, appName);
         final NotificationChannel channel =
