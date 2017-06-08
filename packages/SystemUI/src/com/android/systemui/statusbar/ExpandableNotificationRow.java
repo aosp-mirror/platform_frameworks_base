@@ -63,6 +63,8 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.statusbar.NotificationGuts.GutsContent;
+import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
+import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.NotificationInflater;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -162,6 +164,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mIsSystemChildExpanded;
     private boolean mIsPinned;
     private FalsingManager mFalsingManager;
+    private AboveShelfChangedListener mAboveShelfChangedListener;
     private HeadsUpManager mHeadsUpManager;
 
     private boolean mJustClicked;
@@ -388,6 +391,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         expandedIcon.setStaticDrawableColor(color);
     }
 
+    public void setAboveShelfChangedListener(AboveShelfChangedListener aboveShelfChangedListener) {
+        mAboveShelfChangedListener = aboveShelfChangedListener;
+    }
+
     @Override
     public boolean isDimmable() {
         if (!getShowingLayout().isDimmable()) {
@@ -442,6 +449,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setHeadsUp(boolean isHeadsUp) {
+        boolean wasAboveShelf = isAboveShelf();
         int intrinsicBefore = getIntrinsicHeight();
         mIsHeadsUp = isHeadsUp;
         mPrivateLayout.setHeadsUp(isHeadsUp);
@@ -454,6 +462,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         if (isHeadsUp) {
             setAboveShelf(true);
+        } else if (isAboveShelf() != wasAboveShelf) {
+            mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
         }
     }
 
@@ -634,6 +644,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public void setPinned(boolean pinned) {
         int intrinsicHeight = getIntrinsicHeight();
+        boolean wasAboveShelf = isAboveShelf();
         mIsPinned = pinned;
         if (intrinsicHeight != getIntrinsicHeight()) {
             notifyHeightChanged(false /* needsAnimation */);
@@ -645,6 +656,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             setUserExpanded(true);
         }
         setChronometerRunning(mLastChronometerRunning);
+        if (isAboveShelf() != wasAboveShelf) {
+            mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
+        }
     }
 
     public boolean isPinned() {
@@ -993,8 +1007,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
+        boolean wasAboveShelf = isAboveShelf();
         mHeadsupDisappearRunning = headsUpAnimatingAway;
         mPrivateLayout.setHeadsUpAnimatingAway(headsUpAnimatingAway);
+        if (isAboveShelf() != wasAboveShelf) {
+            mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
+        }
     }
 
     /**
@@ -1555,6 +1573,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public void setOnKeyguard(boolean onKeyguard) {
         if (onKeyguard != mOnKeyguard) {
+            boolean wasAboveShelf = isAboveShelf();
             final boolean wasExpanded = isExpanded();
             mOnKeyguard = onKeyguard;
             onExpansionChanged(false /* userAction */, wasExpanded);
@@ -1563,6 +1582,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     mChildrenContainer.updateGroupOverflow();
                 }
                 notifyHeightChanged(false /* needsAnimation */);
+            }
+            if (isAboveShelf() != wasAboveShelf) {
+                mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
             }
         }
     }
@@ -2214,7 +2236,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setAboveShelf(boolean aboveShelf) {
+        boolean wasAboveShelf = isAboveShelf();
         mAboveShelf = aboveShelf;
+        if (isAboveShelf() != wasAboveShelf) {
+            mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
+        }
     }
 
     public static class NotificationViewState extends ExpandableViewState {
