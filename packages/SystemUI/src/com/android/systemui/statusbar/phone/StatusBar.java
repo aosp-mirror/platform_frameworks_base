@@ -6985,7 +6985,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         entry.notification = notification;
         mGroupManager.onEntryUpdated(entry, oldNotification);
 
-        entry.updateIcons(mContext, n);
+        entry.updateIcons(mContext, notification);
         inflateViews(entry, mStackScroller);
 
         mForegroundServiceController.updateNotification(notification,
