@@ -2899,7 +2899,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 145;
+            private static final int SETTINGS_VERSION = 146;
 
             private final int mUserId;
 
@@ -3482,22 +3482,25 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 144) {
-                    // Version 145: Set the default value for WIFI_WAKEUP_AVAILABLE.
+                    // Version 145: Removed
+                    currentVersion = 145;
+                }
+
+                if (currentVersion == 145) {
+                    // Version 146: Set the default value for WIFI_WAKEUP_AVAILABLE.
                     if (userId == UserHandle.USER_SYSTEM) {
                         final SettingsState globalSettings = getGlobalSettingsLocked();
                         final Setting currentSetting = globalSettings.getSettingLocked(
                                 Settings.Global.WIFI_WAKEUP_AVAILABLE);
-                        if (currentSetting.isNull()) {
-                            final int defaultValue = getContext().getResources().getInteger(
-                                    com.android.internal.R.integer.config_wifi_wakeup_available);
-                            globalSettings.insertSettingLocked(
-                                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
-                                    String.valueOf(defaultValue),
-                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                        }
+                        final int defaultValue = getContext().getResources().getInteger(
+                                com.android.internal.R.integer.config_wifi_wakeup_available);
+                        globalSettings.insertSettingLocked(
+                                Settings.Global.WIFI_WAKEUP_AVAILABLE,
+                                String.valueOf(defaultValue),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
 
-                    currentVersion = 145;
+                    currentVersion = 146;
                 }
 
                 // vXXX: Add new settings above this point.
