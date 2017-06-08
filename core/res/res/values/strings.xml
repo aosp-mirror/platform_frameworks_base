@@ -191,21 +191,15 @@
 
     <!-- Notification title to tell the user that data service is blocked by access control. -->
     <string name="RestrictedOnDataTitle">No data service</string>
-    <!-- Notification title to tell the user that emergency service is blocked by access control. -->
-    <string name="RestrictedOnEmergencyTitle">No emergency service</string>
+    <!-- Notification title to tell the user that emergency calling is blocked by access control. -->
+    <string name="RestrictedOnEmergencyTitle">No emergency calling</string>
     <!-- Notification title to tell the user that normal service is blocked by access control. -->
     <string name="RestrictedOnNormalTitle">No voice service</string>
     <!-- Notification title to tell the user that all emergency and normal voice services are blocked by access control. -->
     <string name="RestrictedOnAllVoiceTitle">No voice/emergency service</string>
 
-    <!-- Notification content to tell the user that data service is blocked by access control. -->
-    <string name="RestrictedOnDataContent">Your carrier has temporarily suspended data service at this location</string>
-    <!-- Notification content to tell the user that emergency service is blocked by access control. -->
-    <string name="RestrictedOnEmergencyContent">Your carrier has temporarily suspended emergency calls at this location</string>
-    <!-- Notification content to tell the user that normal service is blocked by access control. -->
-    <string name="RestrictedOnNormalContent">Your carrier has temporarily suspended voice calls at this location</string>
-    <!-- Notification content to tell the user that all emergency and normal voice services are blocked by access control. -->
-    <string name="RestrictedOnAllVoiceContent">Your carrier has temporarily suspended voice and emergency calls at this location</string>
+    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control. -->
+    <string name="RestrictedStateContent">Temporarily not offered by the mobile network at your location</string>
 
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach network</string>
