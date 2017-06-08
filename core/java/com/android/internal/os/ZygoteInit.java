@@ -501,7 +501,7 @@ public class ZygoteInit {
             OsConstants.CAP_NET_RAW,
             OsConstants.CAP_SYS_MODULE,
             OsConstants.CAP_SYS_NICE,
-            OsConstants.CAP_SYS_RESOURCE,
+            OsConstants.CAP_SYS_PTRACE,
             OsConstants.CAP_SYS_TIME,
             OsConstants.CAP_SYS_TTY_CONFIG
         );
