@@ -36,6 +36,7 @@ public class SignalTileView extends QSIconViewImpl {
 
     protected FrameLayout mIconFrame;
     protected ImageView mSignal;
+    private ImageView mOverlay;
     private ImageView mIn;
     private ImageView mOut;
 
@@ -64,6 +65,8 @@ public class SignalTileView extends QSIconViewImpl {
         mIconFrame = new FrameLayout(mContext);
         mSignal = new SlashImageView(mContext);
         mIconFrame.addView(mSignal);
+        mOverlay = new ImageView(mContext);
+        mIconFrame.addView(mOverlay, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         return mIconFrame;
     }
 
@@ -109,7 +112,18 @@ public class SignalTileView extends QSIconViewImpl {
     public void setIcon(QSTile.State state) {
         final SignalState s = (SignalState) state;
         setIcon(mSignal, s);
-        Drawable drawable = mSignal.getDrawable();
+
+        if (s.overlayIconId > 0) {
+            mOverlay.setVisibility(VISIBLE);
+            mOverlay.setImageResource(s.overlayIconId);
+        } else {
+            mOverlay.setVisibility(GONE);
+        }
+        if (s.overlayIconId > 0 && s.isOverlayIconWide) {
+            mSignal.setPaddingRelative(mWideOverlayIconStartPadding, 0, 0, 0);
+        } else {
+            mSignal.setPaddingRelative(0, 0, 0, 0);
+        }
         final boolean shown = isShown();
         setVisibility(mIn, shown, s.activityIn);
         setVisibility(mOut, shown, s.activityOut);

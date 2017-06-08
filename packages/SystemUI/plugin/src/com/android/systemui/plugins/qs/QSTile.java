@@ -202,14 +202,20 @@ public interface QSTile {
         public static final int VERSION = 1;
         public boolean activityIn;
         public boolean activityOut;
+        public boolean isOverlayIconWide;
+        public int overlayIconId;
 
         @Override
         public boolean copyTo(State other) {
             final SignalState o = (SignalState) other;
             final boolean changed = o.activityIn != activityIn
-                    || o.activityOut != activityOut;
+                    || o.activityOut != activityOut
+                    || o.isOverlayIconWide != isOverlayIconWide
+                    || o.overlayIconId != overlayIconId;
             o.activityIn = activityIn;
             o.activityOut = activityOut;
+            o.isOverlayIconWide = isOverlayIconWide;
+            o.overlayIconId = overlayIconId;
             return super.copyTo(other) || changed;
         }
 
