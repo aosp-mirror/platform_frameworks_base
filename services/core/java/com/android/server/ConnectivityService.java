@@ -215,13 +215,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // See Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS
     private final int mReleasePendingIntentDelayMs;
 
-    // Driver specific constants used to select packets received via
-    // WiFi that caused the phone to exit sleep state. Currently there
-    // is only one kernel implementation so we can get away with
-    // constants.
-    private static final int mWakeupPacketMark = 0x80000000;
-    private static final int mWakeupPacketMask = 0x80000000;
-
     private MockableSystemProperties mSystemProperties;
 
     private Tethering mTethering;
@@ -2410,6 +2403,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOST);
             mKeepaliveTracker.handleStopAllKeepalives(nai,
                     ConnectivityManager.PacketKeepalive.ERROR_INVALID_NETWORK);
+            for (String iface : nai.linkProperties.getAllInterfaceNames()) {
+                // Disable wakeup packet monitoring for each interface.
+                wakeupModifyInterface(iface, nai.networkCapabilities, false);
+            }
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
             updateClat(null, nai.linkProperties, nai);
@@ -4529,22 +4526,35 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void wakeupAddInterface(String iface, NetworkCapabilities caps) throws RemoteException {
+    private void wakeupModifyInterface(String iface, NetworkCapabilities caps, boolean add) {
         // Marks are only available on WiFi interaces. Checking for
         // marks on unsupported interfaces is harmless.
         if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
             return;
         }
-        mNetd.getNetdService().wakeupAddInterface(
-            iface, "iface:" + iface, mWakeupPacketMark, mWakeupPacketMask);
-    }
 
-    private void wakeupDelInterface(String iface, NetworkCapabilities caps) throws RemoteException {
-        if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+        int mark = mContext.getResources().getInteger(
+            com.android.internal.R.integer.config_networkWakeupPacketMark);
+        int mask = mContext.getResources().getInteger(
+            com.android.internal.R.integer.config_networkWakeupPacketMask);
+
+        // Mask/mark of zero will not detect anything interesting.
+        // Don't install rules unless both values are nonzero.
+        if (mark == 0 || mask == 0) {
             return;
         }
-        mNetd.getNetdService().wakeupDelInterface(
-            iface, "iface:" + iface, mWakeupPacketMark, mWakeupPacketMask);
+
+        final String prefix = "iface:" + iface;
+        try {
+            if (add) {
+                mNetd.getNetdService().wakeupAddInterface(iface, prefix, mark, mask);
+            } else {
+                mNetd.getNetdService().wakeupDelInterface(iface, prefix, mark, mask);
+            }
+        } catch (Exception e) {
+            loge("Exception modifying wakeup packet monitoring: " + e);
+        }
+
     }
 
     private void updateInterfaces(LinkProperties newLp, LinkProperties oldLp, int netId,
@@ -4559,7 +4569,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 if (DBG) log("Adding iface " + iface + " to network " + netId);
                 mNetd.addInterfaceToNetwork(iface, netId);
-                wakeupAddInterface(iface, caps);
+                wakeupModifyInterface(iface, caps, true);
             } catch (Exception e) {
                 loge("Exception adding interface: " + e);
             }
@@ -4567,8 +4577,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (String iface : interfaceDiff.removed) {
             try {
                 if (DBG) log("Removing iface " + iface + " from network " + netId);
+                wakeupModifyInterface(iface, caps, false);
                 mNetd.removeInterfaceFromNetwork(iface, netId);
-                wakeupDelInterface(iface, caps);
             } catch (Exception e) {
                 loge("Exception removing interface: " + e);
             }
