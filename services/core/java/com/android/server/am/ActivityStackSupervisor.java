@@ -2380,7 +2380,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void notifyAppTransitionDone() {
-        continueUpdateBounds(HOME_STACK_ID);
+        continueUpdateBounds(RECENTS_STACK_ID);
         for (int i = mResizingTasksDuringAnimation.size() - 1; i >= 0; i--) {
             final int taskId = mResizingTasksDuringAnimation.valueAt(i);
             final TaskRecord task =
@@ -5094,73 +5094,79 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     + taskId + " can't be launch in the home/recents stack.");
         }
 
-        if (launchStackId == DOCKED_STACK_ID) {
-            mWindowManager.setDockedStackCreateState(
-                    activityOptions.getDockCreateMode(), null /* initialBounds */);
+        mWindowManager.deferSurfaceLayout();
+        try {
+            if (launchStackId == DOCKED_STACK_ID) {
+                mWindowManager.setDockedStackCreateState(
+                        activityOptions.getDockCreateMode(), null /* initialBounds */);
 
-            // Defer updating the stack in which recents is until the app transition is done, to
-            // not run into issues where we still need to draw the task in recents but the
-            // docked stack is already created.
-            deferUpdateBounds(HOME_STACK_ID);
-            mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
-        }
-
-        task = anyTaskForIdLocked(taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE,
-                launchStackId);
-        if (task == null) {
-            continueUpdateBounds(HOME_STACK_ID);
-            mWindowManager.executeAppTransition();
-            throw new IllegalArgumentException(
-                    "startActivityFromRecentsInner: Task " + taskId + " not found.");
-        }
-
-        // Since we don't have an actual source record here, we assume that the currently focused
-        // activity was the source.
-        final ActivityStack focusedStack = getFocusedStack();
-        final ActivityRecord sourceRecord =
-                focusedStack != null ? focusedStack.topActivity() : null;
-
-        if (launchStackId != INVALID_STACK_ID) {
-            if (task.getStackId() != launchStackId) {
-                task.reparent(launchStackId, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, ANIMATE,
-                        DEFER_RESUME, "startActivityFromRecents");
+                // Defer updating the stack in which recents is until the app transition is done, to
+                // not run into issues where we still need to draw the task in recents but the
+                // docked stack is already created.
+                deferUpdateBounds(RECENTS_STACK_ID);
+                mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
             }
-        }
 
-        // If the user must confirm credentials (e.g. when first launching a work app and the
-        // Work Challenge is present) let startActivityInPackage handle the intercepting.
-        if (!mService.mUserController.shouldConfirmCredentials(task.userId)
-                && task.getRootActivity() != null) {
-            mService.mActivityStarter.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */);
-            mActivityMetricsLogger.notifyActivityLaunching();
-            mService.moveTaskToFrontLocked(task.taskId, 0, bOptions);
-            mActivityMetricsLogger.notifyActivityLaunched(ActivityManager.START_TASK_TO_FRONT,
-                    task.getTopActivity());
+            task = anyTaskForIdLocked(taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE,
+                    launchStackId);
+            if (task == null) {
+                continueUpdateBounds(RECENTS_STACK_ID);
+                mWindowManager.executeAppTransition();
+                throw new IllegalArgumentException(
+                        "startActivityFromRecentsInner: Task " + taskId + " not found.");
+            }
 
-            // If we are launching the task in the docked stack, put it into resizing mode so
-            // the window renders full-screen with the background filling the void. Also only
-            // call this at the end to make sure that tasks exists on the window manager side.
+            // Since we don't have an actual source record here, we assume that the currently
+            // focused activity was the source.
+            final ActivityStack focusedStack = getFocusedStack();
+            final ActivityRecord sourceRecord =
+                    focusedStack != null ? focusedStack.topActivity() : null;
+
+            if (launchStackId != INVALID_STACK_ID) {
+                if (task.getStackId() != launchStackId) {
+                    task.reparent(launchStackId, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, ANIMATE,
+                            DEFER_RESUME, "startActivityFromRecents");
+                }
+            }
+
+            // If the user must confirm credentials (e.g. when first launching a work app and the
+            // Work Challenge is present) let startActivityInPackage handle the intercepting.
+            if (!mService.mUserController.shouldConfirmCredentials(task.userId)
+                    && task.getRootActivity() != null) {
+                mService.mActivityStarter.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */);
+                mActivityMetricsLogger.notifyActivityLaunching();
+                mService.moveTaskToFrontLocked(task.taskId, 0, bOptions);
+                mActivityMetricsLogger.notifyActivityLaunched(ActivityManager.START_TASK_TO_FRONT,
+                        task.getTopActivity());
+
+                // If we are launching the task in the docked stack, put it into resizing mode so
+                // the window renders full-screen with the background filling the void. Also only
+                // call this at the end to make sure that tasks exists on the window manager side.
+                if (launchStackId == DOCKED_STACK_ID) {
+                    setResizingDuringAnimation(task);
+                }
+
+                mService.mActivityStarter.postStartActivityProcessing(task.getTopActivity(),
+                        ActivityManager.START_TASK_TO_FRONT,
+                        sourceRecord != null
+                                ? sourceRecord.getTask().getStackId() : INVALID_STACK_ID,
+                        sourceRecord, task.getStack());
+                return ActivityManager.START_TASK_TO_FRONT;
+            }
+            callingUid = task.mCallingUid;
+            callingPackage = task.mCallingPackage;
+            intent = task.intent;
+            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+            userId = task.userId;
+            int result = mService.startActivityInPackage(callingUid, callingPackage, intent, null,
+                    null, null, 0, 0, bOptions, userId, null, task);
             if (launchStackId == DOCKED_STACK_ID) {
                 setResizingDuringAnimation(task);
             }
-
-            mService.mActivityStarter.postStartActivityProcessing(task.getTopActivity(),
-                    ActivityManager.START_TASK_TO_FRONT,
-                    sourceRecord != null ? sourceRecord.getTask().getStackId() : INVALID_STACK_ID,
-                    sourceRecord, task.getStack());
-            return ActivityManager.START_TASK_TO_FRONT;
+            return result;
+        } finally {
+            mWindowManager.continueSurfaceLayout();
         }
-        callingUid = task.mCallingUid;
-        callingPackage = task.mCallingPackage;
-        intent = task.intent;
-        intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-        userId = task.userId;
-        int result = mService.startActivityInPackage(callingUid, callingPackage, intent, null,
-                null, null, 0, 0, bOptions, userId, null, task);
-        if (launchStackId == DOCKED_STACK_ID) {
-            setResizingDuringAnimation(task);
-        }
-        return result;
     }
 
     /**
