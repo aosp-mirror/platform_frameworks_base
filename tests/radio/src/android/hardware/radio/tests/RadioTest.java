@@ -15,6 +15,7 @@
  */
 package android.hardware.radio.tests;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.radio.RadioManager;
@@ -82,6 +83,11 @@ public class RadioTest {
         PackageManager packageManager = mContext.getPackageManager();
         boolean isRadioSupported = packageManager.hasSystemFeature(PackageManager.FEATURE_RADIO);
         assumeTrue(isRadioSupported);
+
+        // Check radio access permission
+        int res = mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FM_RADIO);
+        assertEquals("ACCESS_FM_RADIO permission not granted",
+                PackageManager.PERMISSION_GRANTED, res);
 
         mRadioManager = (RadioManager)mContext.getSystemService(Context.RADIO_SERVICE);
         assertNotNull(mRadioManager);

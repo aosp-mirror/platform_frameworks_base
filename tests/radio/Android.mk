@@ -18,6 +18,8 @@ include $(CLEAR_VARS)
 
 LOCAL_PACKAGE_NAME := RadioTests
 
+LOCAL_PRIVILEGED_MODULE := true
+LOCAL_CERTIFICATE := platform
 LOCAL_MODULE_TAGS := tests
 # TODO(b/13282254): uncomment when b/13282254 is fixed
 # LOCAL_SDK_VERSION := current
