@@ -1249,9 +1249,9 @@ public class Tethering extends BaseNetworkObserver {
             protected void chooseUpstreamType(boolean tryCell) {
                 updateConfiguration(); // TODO - remove?
 
-                final int upstreamType = mUpstreamNetworkMonitor.selectPreferredUpstreamType(
+                final NetworkState ns = mUpstreamNetworkMonitor.selectPreferredUpstreamType(
                         mConfig.preferredUpstreamIfaceTypes);
-                if (upstreamType == ConnectivityManager.TYPE_NONE) {
+                if (ns == null) {
                     if (tryCell) {
                         mUpstreamNetworkMonitor.registerMobileNetworkRequest();
                         // We think mobile should be coming up; don't set a retry.
@@ -1259,40 +1259,30 @@ public class Tethering extends BaseNetworkObserver {
                         sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
                     }
                 }
-                setUpstreamByType(upstreamType);
+                setUpstreamByType(ns);
             }
 
-            protected void setUpstreamByType(int upType) {
-                final ConnectivityManager cm = getConnectivityManager();
-                Network network = null;
+            protected void setUpstreamByType(NetworkState ns) {
                 String iface = null;
-                if (upType != ConnectivityManager.TYPE_NONE) {
-                    LinkProperties linkProperties = cm.getLinkProperties(upType);
-                    if (linkProperties != null) {
-                        // Find the interface with the default IPv4 route. It may be the
-                        // interface described by linkProperties, or one of the interfaces
-                        // stacked on top of it.
-                        Log.i(TAG, "Finding IPv4 upstream interface on: " + linkProperties);
-                        RouteInfo ipv4Default = RouteInfo.selectBestRoute(
-                            linkProperties.getAllRoutes(), Inet4Address.ANY);
-                        if (ipv4Default != null) {
-                            iface = ipv4Default.getInterface();
-                            Log.i(TAG, "Found interface " + ipv4Default.getInterface());
-                        } else {
-                            Log.i(TAG, "No IPv4 upstream interface, giving up.");
-                        }
-                    }
-
-                    if (iface != null) {
-                        network = cm.getNetworkForType(upType);
-                        if (network == null) {
-                            Log.e(TAG, "No Network for upstream type " + upType + "!");
-                        }
-                        setDnsForwarders(network, linkProperties);
+                if (ns != null && ns.linkProperties != null) {
+                    // Find the interface with the default IPv4 route. It may be the
+                    // interface described by linkProperties, or one of the interfaces
+                    // stacked on top of it.
+                    Log.i(TAG, "Finding IPv4 upstream interface on: " + ns.linkProperties);
+                    RouteInfo ipv4Default = RouteInfo.selectBestRoute(
+                        ns.linkProperties.getAllRoutes(), Inet4Address.ANY);
+                    if (ipv4Default != null) {
+                        iface = ipv4Default.getInterface();
+                        Log.i(TAG, "Found interface " + ipv4Default.getInterface());
+                    } else {
+                        Log.i(TAG, "No IPv4 upstream interface, giving up.");
                     }
                 }
+
+                if (iface != null) {
+                    setDnsForwarders(ns.network, ns.linkProperties);
+                }
                 notifyTetheredOfNewUpstreamIface(iface);
-                NetworkState ns = mUpstreamNetworkMonitor.lookup(network);
                 if (ns != null && pertainsToCurrentUpstream(ns)) {
                     // If we already have NetworkState for this network examine
                     // it immediately, because there likely will be no second
