@@ -650,6 +650,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
         updateRelativeOffset();
     }
 
+    public void setDarkOffsetX(int offsetX) {
+        mShelfIcons.setDarkOffsetX(offsetX);
+    }
+
     private class ShelfState extends ExpandableViewState {
         private float openedAmount;
         private boolean hasItemsInStableShelf;
