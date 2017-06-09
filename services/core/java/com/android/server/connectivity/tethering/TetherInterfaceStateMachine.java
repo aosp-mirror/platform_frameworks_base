@@ -163,6 +163,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     public void stop() { sendMessage(CMD_INTERFACE_DOWN); }
 
+    public void unwanted() { sendMessage(CMD_TETHER_UNREQUESTED); }
+
     /**
      * Internals.
      */
