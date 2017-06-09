@@ -870,8 +870,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // since they won't be notified through the app window animator.
     final List<IBinder> mNoAnimationNotifyOnTransitionFinished = new ArrayList<>();
 
-    private static ThreadPriorityBooster sThreadPriorityBooster = new ThreadPriorityBooster(
-            THREAD_PRIORITY_DISPLAY, INDEX_WINDOW);
+    static WindowManagerThreadPriorityBooster sThreadPriorityBooster =
+            new WindowManagerThreadPriorityBooster();
 
     static void boostPriorityForLockedSection() {
         sThreadPriorityBooster.boost();
