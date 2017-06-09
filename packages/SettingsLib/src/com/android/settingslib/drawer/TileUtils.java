@@ -133,15 +133,25 @@ public class TileUtils {
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
-     * to specify the title that should be displayed for the preference.
+     * to specify whether the icon is tintable. This should be a boolean value {@code true} or
+     * {@code false}, set using {@code android:value}
      */
-    @Deprecated
-    public static final String META_DATA_PREFERENCE_TITLE = "com.android.settings.title";
+    public static final String META_DATA_PREFERENCE_ICON_TINTABLE =
+            "com.android.settings.icon_tintable";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the title that should be displayed for the preference.
+     *
+     * <p>Note: It is preferred to provide this value using {@code android:resource} with a string
+     * resource for localization.
      */
+    public static final String META_DATA_PREFERENCE_TITLE = "com.android.settings.title";
+
+    /**
+     * @deprecated Use {@link #META_DATA_PREFERENCE_TITLE} with {@code android:resource}
+     */
+    @Deprecated
     public static final String META_DATA_PREFERENCE_TITLE_RES_ID =
             "com.android.settings.title.resid";
 
@@ -309,12 +319,13 @@ public class TileUtils {
             intent.setPackage(settingPkg);
         }
         getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
-                usePriority, true);
+                usePriority, true, true);
     }
 
-    public static void getTilesForIntent(Context context, UserHandle user, Intent intent,
+    public static void getTilesForIntent(
+            Context context, UserHandle user, Intent intent,
             Map<Pair<String, String>, Tile> addedCache, String defaultCategory, List<Tile> outTiles,
-            boolean usePriority, boolean checkCategory) {
+            boolean usePriority, boolean checkCategory, boolean forceTintExternalIcon) {
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivitiesAsUser(intent,
                 PackageManager.GET_META_DATA, user.getIdentifier());
@@ -350,7 +361,7 @@ public class TileUtils {
                 tile.priority = usePriority ? resolved.priority : 0;
                 tile.metaData = activityInfo.metaData;
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo,
-                        pm, providerMap);
+                        pm, providerMap, forceTintExternalIcon);
                 if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
 
                 addedCache.put(key, tile);
@@ -366,24 +377,39 @@ public class TileUtils {
 
     private static boolean updateTileData(Context context, Tile tile,
             ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm,
-            Map<String, IContentProvider> providerMap) {
+            Map<String, IContentProvider> providerMap, boolean forceTintExternalIcon) {
         if (applicationInfo.isSystemApp()) {
+            boolean forceTintIcon = false;
             int icon = 0;
             Pair<String, Integer> iconFromUri = null;
             CharSequence title = null;
             String summary = null;
             String keyHint = null;
+            boolean isIconTintable = false;
             RemoteViews remoteViews = null;
 
             // Get the activity's meta-data
             try {
-                Resources res = pm.getResourcesForApplication(
-                        applicationInfo.packageName);
+                Resources res = pm.getResourcesForApplication(applicationInfo.packageName);
                 Bundle metaData = activityInfo.metaData;
+
+                if (forceTintExternalIcon
+                        && !context.getPackageName().equals(applicationInfo.packageName)) {
+                    isIconTintable = true;
+                    forceTintIcon = true;
+                }
 
                 if (res != null && metaData != null) {
                     if (metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
                         icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
+                    }
+                    if (metaData.containsKey(META_DATA_PREFERENCE_ICON_TINTABLE)) {
+                        if (forceTintIcon) {
+                            Log.w(LOG_TAG, "Ignoring icon tintable for " + activityInfo);
+                        } else {
+                            isIconTintable =
+                                    metaData.getBoolean(META_DATA_PREFERENCE_ICON_TINTABLE);
+                        }
                     }
                     int resId = 0;
                     if (metaData.containsKey(META_DATA_PREFERENCE_TITLE_RES_ID)) {
@@ -392,8 +418,6 @@ public class TileUtils {
                             title = res.getString(resId);
                         }
                     }
-                    // Fallback to legacy title extraction if we couldn't get the title through
-                    // res id.
                     if ((resId == 0) && metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
                         if (metaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
                             title = res.getString(metaData.getInt(META_DATA_PREFERENCE_TITLE));
@@ -457,6 +481,7 @@ public class TileUtils {
                     activityInfo.name);
             // Suggest a key for this tile
             tile.key = keyHint;
+            tile.isIconTintable = isIconTintable;
             tile.remoteViews = remoteViews;
 
             return true;
