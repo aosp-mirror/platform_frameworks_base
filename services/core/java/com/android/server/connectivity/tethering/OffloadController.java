@@ -105,7 +105,19 @@ public class OffloadController {
         pushUpstreamParameters();
     }
 
-    // TODO: public void addDownStream(...)
+    public void notifyDownstreamLinkProperties(LinkProperties lp) {
+        if (!started()) return;
+
+        // TODO: Cache LinkProperties on a per-ifname basis and compute the
+        // deltas, calling addDownstream()/removeDownstream() accordingly.
+    }
+
+    public void removeDownstreamInterface(String ifname) {
+        if (!started()) return;
+
+        // TODO: Check cache for LinkProperties of ifname and, if present,
+        // call removeDownstream() accordingly.
+    }
 
     private boolean isOffloadDisabled() {
         // Defaults to |false| if not present.
