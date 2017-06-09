@@ -313,6 +313,7 @@ public class AppTransition implements Dump {
         mNextAppTransition = transit;
         mNextAppTransitionFlags |= flags;
         setLastAppTransition(TRANSIT_UNSET, null, null);
+        updateBooster();
     }
 
     void setLastAppTransition(int transit, AppWindowToken openingApp, AppWindowToken closingApp) {
@@ -327,7 +328,7 @@ public class AppTransition implements Dump {
     }
 
     void setReady() {
-        mAppTransitionState = APP_STATE_READY;
+        setAppTransitionState(APP_STATE_READY);
         fetchAppTransitionSpecsFromFuture();
     }
 
@@ -336,7 +337,7 @@ public class AppTransition implements Dump {
     }
 
     void setIdle() {
-        mAppTransitionState = APP_STATE_IDLE;
+        setAppTransitionState(APP_STATE_IDLE);
     }
 
     boolean isTimeout() {
@@ -344,7 +345,7 @@ public class AppTransition implements Dump {
     }
 
     void setTimeout() {
-        mAppTransitionState = APP_STATE_TIMEOUT;
+        setAppTransitionState(APP_STATE_TIMEOUT);
     }
 
     GraphicBuffer getAppTransitionThumbnailHeader(int taskId) {
@@ -386,7 +387,7 @@ public class AppTransition implements Dump {
 
     private boolean prepare() {
         if (!isRunning()) {
-            mAppTransitionState = APP_STATE_IDLE;
+            setAppTransitionState(APP_STATE_IDLE);
             notifyAppTransitionPendingLocked();
             mLastHadClipReveal = false;
             mLastClipRevealMaxTranslation = 0;
@@ -405,7 +406,7 @@ public class AppTransition implements Dump {
             ArraySet<AppWindowToken> closingApps) {
         mNextAppTransition = TRANSIT_UNSET;
         mNextAppTransitionFlags = 0;
-        mAppTransitionState = APP_STATE_RUNNING;
+        setAppTransitionState(APP_STATE_RUNNING);
         int redoLayout = notifyAppTransitionStartingLocked(transit,
                 topOpeningAppAnimator != null ? topOpeningAppAnimator.mAppToken.token : null,
                 topClosingAppAnimator != null ? topClosingAppAnimator.mAppToken.token : null,
@@ -448,6 +449,22 @@ public class AppTransition implements Dump {
         clear();
         setReady();
         notifyAppTransitionCancelledLocked(transit);
+    }
+
+    private void setAppTransitionState(int state) {
+        mAppTransitionState = state;
+        updateBooster();
+    }
+
+    /**
+     * Updates whether we currently boost wm locked sections and the animation thread. We want to
+     * boost the priorities to a more important value whenever an app transition is going to happen
+     * soon or an app transition is running.
+     */
+    private void updateBooster() {
+        WindowManagerService.sThreadPriorityBooster.setAppTransitionRunning(
+                mNextAppTransition != TRANSIT_UNSET || mAppTransitionState == APP_STATE_READY
+                        || mAppTransitionState == APP_STATE_RUNNING);
     }
 
     void registerListenerLocked(AppTransitionListener listener) {
