@@ -196,6 +196,23 @@ public class ImsCallSessionListenerImplBase extends IImsCallSessionListener.Stub
     }
 
     /**
+     * Notifies of a case where a {@link com.android.ims.internal.ImsCallSession} may potentially
+     * handover from one radio technology to another.
+     * @param session
+     * @param srcAccessTech The source radio access technology; one of the access technology
+     *                      constants defined in {@link android.telephony.ServiceState}.  For
+     *                      example {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
+     * @param targetAccessTech The target radio access technology; one of the access technology
+     *                      constants defined in {@link android.telephony.ServiceState}.  For
+     *                      example {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
+     */
+    @Override
+    public void callSessionMayHandover(IImsCallSession session, int srcAccessTech,
+            int targetAccessTech) {
+        // no-op
+    }
+
+    /**
      * Notifies of handover information for this call
      */
     @Override
