@@ -62,6 +62,12 @@ public class HapticFeedbackConstants {
     public static final int VIRTUAL_KEY_RELEASE = 7;
 
     /**
+     * The user has performed a selection/insertion handle move on text field.
+     * @hide
+     */
+    public static final int TEXT_HANDLE_MOVE = 8;
+
+    /**
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */
