@@ -24,10 +24,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -79,6 +79,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         });
     }
 
+    @FlakyTest
     @Test
     public void testOnNotification_stillWorksAfterOneFailedProxCheck() throws Exception {
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
