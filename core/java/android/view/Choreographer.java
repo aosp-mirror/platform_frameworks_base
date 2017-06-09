@@ -16,6 +16,9 @@
 
 package android.view;
 
+import static android.view.DisplayEventReceiver.VSYNC_SOURCE_APP;
+import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
+
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Handler;
 import android.os.Looper;
@@ -102,9 +105,22 @@ public final class Choreographer {
             if (looper == null) {
                 throw new IllegalStateException("The current thread must have a looper!");
             }
-            return new Choreographer(looper);
+            return new Choreographer(looper, VSYNC_SOURCE_APP);
         }
     };
+
+    // Thread local storage for the SF choreographer.
+    private static final ThreadLocal<Choreographer> sSfThreadInstance =
+            new ThreadLocal<Choreographer>() {
+                @Override
+                protected Choreographer initialValue() {
+                    Looper looper = Looper.myLooper();
+                    if (looper == null) {
+                        throw new IllegalStateException("The current thread must have a looper!");
+                    }
+                    return new Choreographer(looper, VSYNC_SOURCE_SURFACE_FLINGER);
+                }
+            };
 
     // Enable/disable vsync for animations and drawing.
     private static final boolean USE_VSYNC = SystemProperties.getBoolean(
@@ -202,10 +218,12 @@ public final class Choreographer {
 
     private static final int CALLBACK_LAST = CALLBACK_COMMIT;
 
-    private Choreographer(Looper looper) {
+    private Choreographer(Looper looper, int vsyncSource) {
         mLooper = looper;
         mHandler = new FrameHandler(looper);
-        mDisplayEventReceiver = USE_VSYNC ? new FrameDisplayEventReceiver(looper) : null;
+        mDisplayEventReceiver = USE_VSYNC
+                ? new FrameDisplayEventReceiver(looper, vsyncSource)
+                : null;
         mLastFrameTimeNanos = Long.MIN_VALUE;
 
         mFrameIntervalNanos = (long)(1000000000 / getRefreshRate());
@@ -231,6 +249,13 @@ public final class Choreographer {
      */
     public static Choreographer getInstance() {
         return sThreadInstance.get();
+    }
+
+    /**
+     * @hide
+     */
+    public static Choreographer getSfInstance() {
+        return sSfThreadInstance.get();
     }
 
     /** Destroys the calling thread's choreographer
@@ -816,8 +841,8 @@ public final class Choreographer {
         private long mTimestampNanos;
         private int mFrame;
 
-        public FrameDisplayEventReceiver(Looper looper) {
-            super(looper);
+        public FrameDisplayEventReceiver(Looper looper, int vsyncSource) {
+            super(looper, vsyncSource);
         }
 
         @Override
