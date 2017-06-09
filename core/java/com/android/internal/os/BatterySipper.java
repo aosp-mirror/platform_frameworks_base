@@ -17,14 +17,50 @@ package com.android.internal.os;
 
 import android.os.BatteryStats.Uid;
 
+import java.util.List;
+
 /**
  * Contains power usage of an application, system service, or hardware type.
  */
 public class BatterySipper implements Comparable<BatterySipper> {
     public int userId;
     public Uid uidObj;
-    public double totalPowerMah;
     public DrainType drainType;
+
+    /**
+     * Smeared power from screen usage.
+     * We split the screen usage power and smear them among apps, based on activity time.
+     */
+    public double screenPowerMah;
+
+    /**
+     * Smeared power using proportional method.
+     *
+     * we smear power usage from hidden sippers to all apps proportionally.(except for screen usage)
+     *
+     * @see BatteryStatsHelper#shouldHideSipper(BatterySipper)
+     * @see BatteryStatsHelper#removeHiddenBatterySippers(List)
+     */
+    public double proportionalSmearMah;
+
+    /**
+     * Total power that adding the smeared power.
+     *
+     * @see #sumPower()
+     */
+    public double totalSmearedPowerMah;
+
+    /**
+     * Total power before smearing
+     */
+    public double totalPowerMah;
+
+    /**
+     * Whether we should hide this sipper
+     *
+     * @see BatteryStatsHelper#shouldHideSipper(BatterySipper)
+     */
+    public boolean shouldHide;
 
     /**
      * Generic usage time in milliseconds.
@@ -99,8 +135,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
     }
 
     public void computeMobilemspp() {
-        long packets = mobileRxPackets+mobileTxPackets;
-        mobilemspp = packets > 0 ? (mobileActive / (double)packets) : 0;
+        long packets = mobileRxPackets + mobileTxPackets;
+        mobilemspp = packets > 0 ? (mobileActive / (double) packets) : 0;
     }
 
     @Override
@@ -169,15 +205,23 @@ public class BatterySipper implements Comparable<BatterySipper> {
         cameraPowerMah += other.cameraPowerMah;
         flashlightPowerMah += other.flashlightPowerMah;
         bluetoothPowerMah += other.bluetoothPowerMah;
+        screenPowerMah += other.screenPowerMah;
+        proportionalSmearMah += other.proportionalSmearMah;
+        totalSmearedPowerMah += other.totalSmearedPowerMah;
     }
 
     /**
      * Sum all the powers and store the value into `value`.
+     * Also sum the {@code smearedTotalPowerMah} by adding smeared powerMah.
+     *
      * @return the sum of all the power in this BatterySipper.
      */
     public double sumPower() {
-        return totalPowerMah = usagePowerMah + wifiPowerMah + gpsPowerMah + cpuPowerMah +
+        totalPowerMah = usagePowerMah + wifiPowerMah + gpsPowerMah + cpuPowerMah +
                 sensorPowerMah + mobileRadioPowerMah + wakeLockPowerMah + cameraPowerMah +
                 flashlightPowerMah + bluetoothPowerMah;
+        totalSmearedPowerMah = totalPowerMah + screenPowerMah + proportionalSmearMah;
+
+        return totalPowerMah;
     }
 }
