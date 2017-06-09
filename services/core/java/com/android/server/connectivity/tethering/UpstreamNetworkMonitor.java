@@ -174,10 +174,6 @@ public class UpstreamNetworkMonitor {
         mMobileNetworkCallback = null;
     }
 
-    public NetworkState lookup(Network network) {
-        return (network != null) ? mNetworkMap.get(network) : null;
-    }
-
     // So many TODOs here, but chief among them is: make this functionality an
     // integral part of this class such that whenever a higher priority network
     // becomes available and useful we (a) file a request to keep it up as
@@ -185,7 +181,7 @@ public class UpstreamNetworkMonitor {
     // passing LinkProperties up to Tethering).
     //
     // Next TODO: return NetworkState instead of just the type.
-    public int selectPreferredUpstreamType(Iterable<Integer> preferredTypes) {
+    public NetworkState selectPreferredUpstreamType(Iterable<Integer> preferredTypes) {
         final TypeStatePair typeStatePair = findFirstAvailableUpstreamByType(
                 mNetworkMap.values(), preferredTypes);
 
@@ -210,7 +206,7 @@ public class UpstreamNetworkMonitor {
                 break;
         }
 
-        return typeStatePair.type;
+        return typeStatePair.ns;
     }
 
     private void handleAvailable(int callbackType, Network network) {
