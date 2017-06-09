@@ -320,6 +320,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
+     * Get the playback state.
+     *
+     * @return The current playback state.
+     */
+    public PlaybackState getPlaybackState() {
+        return mPlaybackState;
+    }
+
+    /**
      * Check if the session is currently performing playback.
      *
      * @return True if the session is performing playback, false otherwise.
