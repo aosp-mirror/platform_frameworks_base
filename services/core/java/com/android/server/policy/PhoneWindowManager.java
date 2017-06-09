@@ -221,6 +221,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.autofill.AutofillManagerInternal;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
@@ -407,6 +408,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowManagerInternal mWindowManagerInternal;
     PowerManager mPowerManager;
     ActivityManagerInternal mActivityManagerInternal;
+    AutofillManagerInternal mAutofillManagerInternal;
     InputManagerInternal mInputManagerInternal;
     InputMethodManagerInternal mInputMethodManagerInternal;
     DreamManagerInternal mDreamManagerInternal;
@@ -831,6 +833,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_ACCESSIBILITY_SHORTCUT = 21;
     private static final int MSG_BUGREPORT_TV = 22;
     private static final int MSG_ACCESSIBILITY_TV = 23;
+    private static final int MSG_DISPATCH_BACK_KEY_TO_AUTOFILL = 24;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -916,6 +919,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(false)) {
                         accessibilityShortcutActivated();
                     }
+                    break;
+                case MSG_DISPATCH_BACK_KEY_TO_AUTOFILL:
+                    mAutofillManagerInternal.onBackKeyPressed();
                     break;
             }
         }
@@ -1222,6 +1228,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return telecomManager.endCall();
                 }
             }
+        }
+
+        if (mAutofillManagerInternal != null && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_BACK_KEY_TO_AUTOFILL));
         }
 
         return handled;
@@ -7239,6 +7249,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mSystemGestures.systemReady();
         mImmersiveModeConfirmation.systemReady();
+
+        mAutofillManagerInternal = LocalServices.getService(AutofillManagerInternal.class);
     }
 
     /** {@inheritDoc} */
