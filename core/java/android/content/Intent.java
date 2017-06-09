@@ -16,6 +16,8 @@
 
 package android.content;
 
+import static android.content.ContentProvider.maybeAddUserId;
+
 import android.annotation.AnyRes;
 import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
@@ -43,7 +45,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCommand;
 import android.os.StrictMode;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
+import android.provider.ContactsContract.QuickContact;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
@@ -51,7 +53,9 @@ import android.provider.OpenableColumns;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
+
 import com.android.internal.util.XmlUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -68,8 +72,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-
-import static android.content.ContentProvider.maybeAddUserId;
 
 /**
  * An intent is an abstract description of an operation to be performed.  It
@@ -9782,6 +9784,7 @@ public class Intent implements Parcelable, Cloneable {
                 && leavingPackage) {
             switch (mAction) {
                 case ACTION_PROVIDER_CHANGED:
+                case QuickContact.ACTION_QUICK_CONTACT:
                     // Ignore actions that don't need to grant
                     break;
                 default:
