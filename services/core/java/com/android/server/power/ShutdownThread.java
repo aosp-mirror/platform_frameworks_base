@@ -256,7 +256,7 @@ public final class ShutdownThread extends Thread {
         ProgressDialog pd = new ProgressDialog(context);
 
         // Path 1: Reboot to recovery for update
-        //   Condition: mReason == REBOOT_RECOVERY_UPDATE
+        //   Condition: mReason startswith REBOOT_RECOVERY_UPDATE
         //
         //  Path 1a: uncrypt needed
         //   Condition: if /cache/recovery/uncrypt_file exists but
@@ -276,7 +276,9 @@ public final class ShutdownThread extends Thread {
         // Path 3: Regular reboot / shutdown
         //   Condition: Otherwise
         //   UI: spinning circle only (no progress bar)
-        if (PowerManager.REBOOT_RECOVERY_UPDATE.equals(mReason)) {
+
+        // mReason could be "recovery-update" or "recovery-update,quiescent".
+        if (mReason != null && mReason.startsWith(PowerManager.REBOOT_RECOVERY_UPDATE)) {
             // We need the progress bar if uncrypt will be invoked during the
             // reboot, which might be time-consuming.
             mRebootHasProgressBar = RecoverySystem.UNCRYPT_PACKAGE_FILE.exists()
@@ -295,7 +297,7 @@ public final class ShutdownThread extends Thread {
                 pd.setMessage(context.getText(
                             com.android.internal.R.string.reboot_to_update_reboot));
             }
-        } else if (PowerManager.REBOOT_RECOVERY.equals(mReason)) {
+        } else if (mReason != null && mReason.equals(PowerManager.REBOOT_RECOVERY)) {
             // Factory reset path. Set the dialog message accordingly.
             pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_reset_title));
             pd.setMessage(context.getText(
