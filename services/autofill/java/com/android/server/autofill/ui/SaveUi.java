@@ -99,14 +99,17 @@ final class SaveUi {
 
     private final @NonNull OneTimeListener mListener;
 
+    private final @NonNull OverlayControl mOverlayControl;
+
     private final CharSequence mTitle;
     private final CharSequence mSubTitle;
 
     private boolean mDestroyed;
 
     SaveUi(@NonNull Context context, @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
-            @NonNull OnSaveListener listener) {
+           @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener) {
         mListener = new OneTimeListener(listener);
+        mOverlayControl = overlayControl;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
@@ -197,16 +200,21 @@ final class SaveUi {
 
         Slog.i(TAG, "Showing save dialog: " + mTitle);
         mDialog.show();
+        mOverlayControl.hideOverlays();
     }
 
     void destroy() {
-        if (sDebug) Slog.d(TAG, "destroy()");
-        throwIfDestroyed();
-        mListener.onDestroy();
-        mHandler.removeCallbacksAndMessages(mListener);
-        if (sVerbose) Slog.v(TAG, "destroy(): dismissing dialog");
-        mDialog.dismiss();
-        mDestroyed = true;
+        try {
+            if (sDebug) Slog.d(TAG, "destroy()");
+            throwIfDestroyed();
+            mListener.onDestroy();
+            mHandler.removeCallbacksAndMessages(mListener);
+            if (sVerbose) Slog.v(TAG, "destroy(): dismissing dialog");
+            mDialog.dismiss();
+            mDestroyed = true;
+        } finally {
+            mOverlayControl.showOverlays();
+        }
     }
 
     private void throwIfDestroyed() {
