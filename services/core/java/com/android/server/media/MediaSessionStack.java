@@ -153,7 +153,7 @@ class MediaSessionStack {
             mCachedVolumeDefault = null;
         }
 
-        // In most cases, playback state isn't needed for finding media buttion session,
+        // In most cases, playback state isn't needed for finding media button session,
         // but we only use it as a hint if an app has multiple local media sessions.
         // In that case, we pick the media session whose PlaybackState matches
         // the audio playback configuration.
@@ -204,8 +204,9 @@ class MediaSessionStack {
 
     /**
      * Find the media button session with the given {@param uid}.
-     * If the app has multiple media sessions, the media session matches the audio playback state
-     * becomes the media button session.
+     * If the app has multiple media sessions, the media session whose playback state is not null
+     * and matches the audio playback state becomes the media button session. Otherwise the top
+     * priority session becomes the media button session.
      *
      * @return The media button session. Returns {@code null} if the app doesn't have a media
      *   session.
@@ -214,7 +215,7 @@ class MediaSessionStack {
         MediaSessionRecord mediaButtonSession = null;
         for (MediaSessionRecord session : mSessions) {
             if (uid == session.getUid()) {
-                if (session.isPlaybackActive() ==
+                if (session.getPlaybackState() != null && session.isPlaybackActive() ==
                         mAudioPlaybackMonitor.isPlaybackActive(session.getUid())) {
                     // If there's a media session whose PlaybackState matches
                     // the audio playback state, return it immediately.
