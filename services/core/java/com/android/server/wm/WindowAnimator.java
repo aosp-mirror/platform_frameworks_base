@@ -83,10 +83,6 @@ public class WindowAnimator {
     // check if some got replaced and can be removed.
     private boolean mRemoveReplacedWindows = false;
 
-    private long mCurrentFrameTime;
-    private final Runnable mAnimationTick;
-    private final SurfaceFlingerVsyncChoreographer mSfChoreographer;
-
     private Choreographer mChoreographer;
 
     /**
@@ -95,40 +91,19 @@ public class WindowAnimator {
      */
     private boolean mAnimationFrameCallbackScheduled;
 
-    /**
-     * Indicates whether we have an animation tick scheduled. The tick is the thing that actually
-     * executes the animation step, which will happen at vsync-sf.
-     */
-    private boolean mAnimationTickScheduled;
-
     WindowAnimator(final WindowManagerService service) {
         mService = service;
         mContext = service.mContext;
         mPolicy = service.mPolicy;
         mWindowPlacerLocked = service.mWindowPlacerLocked;
         AnimationThread.getHandler().runWithScissors(
-                () -> mChoreographer = Choreographer.getInstance(), 0 /* timeout */);
+                () -> mChoreographer = Choreographer.getSfInstance(), 0 /* timeout */);
 
-        // TODO: Multi-display: If displays have different vsync tick, have a separate tick per
-        // display.
-        mSfChoreographer = new SurfaceFlingerVsyncChoreographer(AnimationThread.getHandler(),
-                mService.getDefaultDisplayContentLocked().getDisplay(), mChoreographer);
-        mAnimationTick = () -> {
-            synchronized (mService.mWindowMap) {
-                mAnimationTickScheduled = false;
-            }
-            animate(mCurrentFrameTime);
-        };
         mAnimationFrameCallback = frameTimeNs -> {
             synchronized (mService.mWindowMap) {
-                mCurrentFrameTime = frameTimeNs;
                 mAnimationFrameCallbackScheduled = false;
-                if (mAnimationTickScheduled) {
-                    return;
-                }
-                mAnimationTickScheduled = true;
             }
-            mSfChoreographer.scheduleAtSfVsync(mAnimationTick);
+            animate(frameTimeNs);
         };
     }
 
@@ -422,7 +397,7 @@ public class WindowAnimator {
     }
 
     boolean isAnimationScheduled() {
-        return mAnimationFrameCallbackScheduled || mAnimationTickScheduled;
+        return mAnimationFrameCallbackScheduled;
     }
 
     Choreographer getChoreographer() {
