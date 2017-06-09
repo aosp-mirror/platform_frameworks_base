@@ -18,10 +18,10 @@ package android.util;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.Deque;
+import java.time.LocalDateTime;
 import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
 
 /**
  * @hide
@@ -40,9 +40,7 @@ public final class LocalLog {
         if (mMaxLines <= 0) {
             return;
         }
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(System.currentTimeMillis());
-        append(String.format("%tm-%td %tH:%tM:%tS.%tL - %s", c, c, c, c, c, c, msg));
+        append(String.format("%s - %s", LocalDateTime.now(), msg));
     }
 
     private synchronized void append(String logLine) {
