@@ -2968,4 +2968,14 @@
 
     <!-- Name of a font family to use for headlines. If empty, falls back to platform default -->
     <string name="config_headlineFontFamily" translatable="false"></string>
+
+    <!-- An array of packages that need to be treated as type system in battery settings -->
+    <string-array translatable="false" name="config_batteryPackageTypeSystem">
+        <item>com.android.providers.calendar</item>
+        <item>com.android.providers.media</item>
+        <item>com.android.systemui</item>
+    </string-array>
+
+    <!-- An array of packages that need to be treated as type service in battery settings -->
+    <string-array translatable="false" name="config_batteryPackageTypeService"/>
 </resources>
