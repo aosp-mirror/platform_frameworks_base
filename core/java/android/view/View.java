@@ -8065,6 +8065,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             boolean forAutofill, @AutofillFlags int flags) {
         if (forAutofill) {
             structure.setAutofillId(getAutofillId());
+            if (!isLaidOut()) {
+                Log.w(VIEW_LOG_TAG, "dispatchProvideAutofillStructure(): not laid out, ignoring");
+                return;
+            }
             onProvideAutofillStructure(structure, flags);
             onProvideAutofillVirtualStructure(structure, flags);
         } else if (!isAssistBlocked()) {
