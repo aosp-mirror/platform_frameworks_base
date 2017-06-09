@@ -7676,7 +7676,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * }
      * </pre>
      *
-     * <p>If the value is updated asynchronously the next call to
+     * <p>If the value is updated asynchronously, the next call to
      * {@link AutofillManager#notifyValueChanged(View)} must happen <b>after</b> the value was
      * changed to the autofilled value. If not, the view will not be considered autofilled.
      *
@@ -7697,6 +7697,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>{@link #onProvideAutofillVirtualStructure(ViewStructure, int)} is responsible for the
      * former, this method is responsible for the latter - see {@link #autofill(AutofillValue)} and
      * {@link #onProvideAutofillVirtualStructure(ViewStructure, int)} for more info about autofill.
+     *
+     * <p>If a child value is updated asynchronously, the next call to
+     * {@link AutofillManager#notifyValueChanged(View, int, AutofillValue)} must happen
+     * <b>after</b> the value was changed to the autofilled value. If not, the child will not be
+     * considered autofilled.
      *
      * <p><b>NOTE:</b> to indicate that a virtual view was autofilled,
      * <code>?android:attr/autofilledHighlight</code> should be drawn over it until the data
