@@ -16,14 +16,16 @@
 
 package com.android.server;
 
-import android.os.Process;
+import static android.os.Process.getThreadPriority;
+import static android.os.Process.myTid;
+import static android.os.Process.setThreadPriority;
 
 /**
  * Utility class to boost threads in sections where important locks are held.
  */
 public class ThreadPriorityBooster {
 
-    private final int mBoostToPriority;
+    private volatile int mBoostToPriority;
     private final int mLockGuardIndex;
 
     private final ThreadLocal<PriorityState> mThreadState = new ThreadLocal<PriorityState>() {
@@ -38,12 +40,12 @@ public class ThreadPriorityBooster {
     }
 
     public void boost() {
-        final int tid = Process.myTid();
-        final int prevPriority = Process.getThreadPriority(tid);
-        PriorityState state = mThreadState.get();
+        final int tid = myTid();
+        final int prevPriority = getThreadPriority(tid);
+        final PriorityState state = mThreadState.get();
         state.prevPriority = prevPriority;
         if (state.regionCounter == 0 && prevPriority > mBoostToPriority) {
-            Process.setThreadPriority(tid, mBoostToPriority);
+            setThreadPriority(tid, mBoostToPriority);
         }
         state.regionCounter++;
         if (LockGuard.ENABLED) {
@@ -52,10 +54,28 @@ public class ThreadPriorityBooster {
     }
 
     public void reset() {
-        PriorityState state = mThreadState.get();
+        final PriorityState state = mThreadState.get();
         state.regionCounter--;
-        if (state.regionCounter == 0 && state.prevPriority > mBoostToPriority) {
-            Process.setThreadPriority(Process.myTid(), state.prevPriority);
+        final int currentPriority = getThreadPriority(myTid());
+        if (state.regionCounter == 0 && state.prevPriority != currentPriority) {
+            setThreadPriority(myTid(), state.prevPriority);
+        }
+    }
+
+    /**
+     * Updates the priority we boost the threads to, and updates the current thread's priority if
+     * necessary.
+     */
+    protected void setBoostToPriority(int priority) {
+
+        // We don't care about the other threads here, as long as they see the update of this
+        // variable immediately.
+        mBoostToPriority = priority;
+        final PriorityState state = mThreadState.get();
+        final int tid = myTid();
+        final int prevPriority = getThreadPriority(tid);
+        if (state.regionCounter != 0 && prevPriority != priority) {
+            setThreadPriority(tid, priority);
         }
     }
 
