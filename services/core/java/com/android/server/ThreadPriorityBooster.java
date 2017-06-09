@@ -43,9 +43,11 @@ public class ThreadPriorityBooster {
         final int tid = myTid();
         final int prevPriority = getThreadPriority(tid);
         final PriorityState state = mThreadState.get();
-        state.prevPriority = prevPriority;
-        if (state.regionCounter == 0 && prevPriority > mBoostToPriority) {
-            setThreadPriority(tid, mBoostToPriority);
+        if (state.regionCounter == 0) {
+            state.prevPriority = prevPriority;
+            if (prevPriority > mBoostToPriority) {
+                setThreadPriority(tid, mBoostToPriority);
+            }
         }
         state.regionCounter++;
         if (LockGuard.ENABLED) {
