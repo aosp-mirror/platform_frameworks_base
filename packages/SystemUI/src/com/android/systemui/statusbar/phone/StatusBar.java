@@ -4633,7 +4633,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     /* Only ever called as a consequence of a lockscreen expansion gesture. */
     @Override
     public boolean onDraggedDown(View startingChild, int dragLengthY) {
-        if (hasActiveNotifications() && (!isDozing() || isPulsing())) {
+        if (mState == StatusBarState.KEYGUARD
+                && hasActiveNotifications() && (!isDozing() || isPulsing())) {
             mLockscreenGestureLogger.write(
                     MetricsEvent.ACTION_LS_SHADE,
                     (int) (dragLengthY / mDisplayMetrics.density),

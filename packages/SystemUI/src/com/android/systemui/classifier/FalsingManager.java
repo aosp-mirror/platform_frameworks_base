@@ -24,6 +24,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -59,7 +60,7 @@ public class FalsingManager implements SensorEventListener {
             Sensor.TYPE_ROTATION_VECTOR,
     };
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
 
     private final SensorManager mSensorManager;
