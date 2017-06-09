@@ -3846,7 +3846,7 @@ public class Editor {
                 if (selected == null || selected.isEmpty()) {
                     menu.add(Menu.NONE, TextView.ID_AUTOFILL, MENU_ITEM_ORDER_AUTOFILL,
                             com.android.internal.R.string.autofill)
-                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                            .setShowAsAction(MenuItem.SHOW_AS_OVERFLOW_ALWAYS);
                 }
             }
 
