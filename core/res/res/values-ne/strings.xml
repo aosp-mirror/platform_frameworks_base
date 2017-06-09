@@ -90,12 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवाको व्यवस्था छैन।"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"तपाईं कलर ID सेटिङ परिवर्तन गर्न सक्नुहुन्न।"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"कुनै पनि डेटा सेवा छैन"</string>
-    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
-    <skip />
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"कुनै पनि आपतकालीन कल सेवा उपलब्ध छैन"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"कुनै पनि भ्वाइस सेवा उपलब्ध छैन"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"कुनै पनि भ्वाइस/आपतकालीन सेवा उपलब्ध छैन"</string>
-    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
-    <skip />
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"तपाईंको स्थानमा सञ्चालन भइरहेको मोबाइल नेटवर्कले अस्थायी रूपमा यो सुविधा प्रदान गर्दैन"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कमाथि पहुँच राख्न सकिँदैन"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"रिसेप्सनमा सुधार गर्न, प्रणाली &gt; नेटवर्क र इन्टरनेट &gt; मोबाइल नेटवर्कहरू &gt; रुचाइएको नेटवर्कको प्रकार मा गएर चयन गरिएको प्रकार परिवर्तन गरी हेर्नुहोस्।"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"अलर्टहरू"</string>

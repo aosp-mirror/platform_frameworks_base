@@ -90,12 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услугата не е предвидена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не може да го промените поставувањето за ID на повикувач."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Нема услуга за интернет"</string>
-    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
-    <skip />
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Нема итни повици"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Нема услуга за говорни повици"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Нема услуга за говорни/итни повици"</string>
-    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
-    <skip />
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Привремено не се нуди од мобилната мрежа на вашата локација"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не може да се дојде до мрежата"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"За подобрување на приемот, обидете се да го промените избраниот тип во: Систем &gt; Мрежа и интернет &gt; Мобилни мрежи &gt; Претпочитан тип мрежа."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Предупредувања"</string>

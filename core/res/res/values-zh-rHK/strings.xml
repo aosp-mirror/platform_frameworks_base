@@ -93,7 +93,7 @@
     <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"無法撥打緊急電話"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"沒有語音服務"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"沒有語音/緊急服務"</string>
-    <string name="RestrictedStateContent" msgid="4278821484643362350">"你所在位置的行動網路暫時不提供這項服務"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"您所在位置的流動網絡暫不提供這項服務"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連接網絡"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"如要改善接收品質，請前往 [系統] &gt; [網絡與互聯網] &gt; [流動網絡] &gt; [偏好的網絡類型]，然後變更所選的網絡類型。"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"通知"</string>
