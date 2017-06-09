@@ -82,7 +82,8 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app has requested.
      * @param listener The listener object on which the app wishes to receive updates.
-     * @return TODO: document possible errors
+     * @return {@link MbmsException#SUCCESS}, {@link MbmsException#ERROR_STREAM_ALREADY_STARTED},
+     *         or {@link MbmsException#ERROR_UNABLE_TO_START_SERVICE}.
      */
     @Override
     public int startStreaming(String appName, int subscriptionId,
@@ -111,6 +112,9 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * Stop streaming the stream identified by {@code serviceId}. Notification of the resulting
      * stream state change should be reported to the app via
      * {@link IStreamingServiceCallback#streamStateChanged(int)}.
+     *
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
+     *
      * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app wishes to stop.
@@ -126,6 +130,9 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * No notification back to the app is required for this operation, and the callback provided via
      * {@link #startStreaming(String, int, String, IStreamingServiceCallback)} should no longer be
      * used after this method has called by the app.
+     *
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
+     *
      * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app wishes to dispose of.
@@ -141,6 +148,9 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * app is required for this operation, and the corresponding callback provided via
      * {@link #initialize(IMbmsStreamingManagerCallback, String, int)} should no longer be used
      * after this method has been called by the app.
+     *
+     * May throw an {@link IllegalStateException}
+     *
      * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription id to use.
      */
