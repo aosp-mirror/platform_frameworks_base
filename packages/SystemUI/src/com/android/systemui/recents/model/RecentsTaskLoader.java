@@ -100,7 +100,6 @@ class BackgroundTaskLoader implements Runnable {
 
     TaskResourceLoadQueue mLoadQueue;
     TaskKeyLruCache<Drawable> mIconCache;
-    Bitmap mDefaultThumbnail;
     BitmapDrawable mDefaultIcon;
 
     boolean mStarted;
@@ -111,11 +110,10 @@ class BackgroundTaskLoader implements Runnable {
 
     /** Constructor, creates a new loading thread that loads task resources in the background */
     public BackgroundTaskLoader(TaskResourceLoadQueue loadQueue,
-            TaskKeyLruCache<Drawable> iconCache, Bitmap defaultThumbnail,
-            BitmapDrawable defaultIcon, OnIdleChangedListener onIdleChangedListener) {
+            TaskKeyLruCache<Drawable> iconCache, BitmapDrawable defaultIcon,
+            OnIdleChangedListener onIdleChangedListener) {
         mLoadQueue = loadQueue;
         mIconCache = iconCache;
-        mDefaultThumbnail = defaultThumbnail;
         mDefaultIcon = defaultIcon;
         mMainThreadHandler = new Handler();
         mOnIdleChangedListener = onIdleChangedListener;
@@ -230,18 +228,14 @@ class BackgroundTaskLoader implements Runnable {
             }
 
             if (DEBUG) Log.d(TAG, "Loading thumbnail: " + t.key);
-            final ThumbnailData cachedThumbnailData = ssp.getTaskThumbnail(t.key.id,
+            final ThumbnailData thumbnailData = ssp.getTaskThumbnail(t.key.id,
                     true /* reducedResolution */);
-
-            if (cachedThumbnailData.thumbnail == null) {
-                cachedThumbnailData.thumbnail = mDefaultThumbnail;
-            }
 
             if (!mCancelled) {
                 // Notify that the task data has changed
                 final Drawable finalIcon = cachedIcon;
                 mMainThreadHandler.post(
-                        () -> t.notifyTaskDataLoaded(cachedThumbnailData, finalIcon));
+                        () -> t.notifyTaskDataLoaded(thumbnailData, finalIcon));
             }
         }
     }
@@ -282,7 +276,6 @@ public class RecentsTaskLoader {
     int mDefaultTaskBarBackgroundColor;
     int mDefaultTaskViewBackgroundColor;
     BitmapDrawable mDefaultIcon;
-    Bitmap mDefaultThumbnail;
 
     private TaskKeyLruCache.EvictionCallback mClearActivityInfoOnEviction =
             new TaskKeyLruCache.EvictionCallback() {
@@ -304,15 +297,10 @@ public class RecentsTaskLoader {
         mMaxIconCacheSize = res.getInteger(R.integer.config_recents_max_icon_count);
         int iconCacheSize = RecentsDebugFlags.Static.DisableBackgroundCache ? 1 :
                 mMaxIconCacheSize;
-        int thumbnailCacheSize = RecentsDebugFlags.Static.DisableBackgroundCache ? 1 :
-                mMaxThumbnailCacheSize;
 
         // Create the default assets
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
         icon.eraseColor(0);
-        mDefaultThumbnail = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        mDefaultThumbnail.setHasAlpha(false);
-        mDefaultThumbnail.eraseColor(0xFFffffff);
         mDefaultIcon = new BitmapDrawable(context.getResources(), icon);
 
         // Initialize the proxy, cache and loaders
@@ -325,7 +313,7 @@ public class RecentsTaskLoader {
         mContentDescriptionCache = new TaskKeyLruCache<>(numRecentTasks,
                 mClearActivityInfoOnEviction);
         mActivityInfoCache = new LruCache(numRecentTasks);
-        mLoader = new BackgroundTaskLoader(mLoadQueue, mIconCache, mDefaultThumbnail, mDefaultIcon,
+        mLoader = new BackgroundTaskLoader(mLoadQueue, mIconCache, mDefaultIcon,
                 mHighResThumbnailLoader::setTaskLoadQueueIdle);
     }
 
