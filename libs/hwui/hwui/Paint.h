@@ -28,6 +28,15 @@ namespace android {
 
 class ANDROID_API Paint : public SkPaint {
 public:
+    // Default values for underlined and strikethrough text,
+    // as defined by Skia in SkTextFormatParams.h.
+    constexpr static float kStdStrikeThru_Offset   = (-6.0f / 21.0f);
+    constexpr static float kStdUnderline_Offset    = (1.0f / 9.0f);
+    constexpr static float kStdUnderline_Thickness = (1.0f / 18.0f);
+
+    constexpr static float kStdUnderline_Top =
+            kStdUnderline_Offset - 0.5f * kStdUnderline_Thickness;
+
     Paint();
     Paint(const Paint& paint);
     Paint(const SkPaint& paint);  // NOLINT(implicit)
