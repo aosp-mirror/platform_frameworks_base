@@ -16,9 +16,8 @@
 
 package com.android.systemui.recents.events.ui;
 
-import android.app.ActivityManager.TaskSnapshot;
-
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.model.ThumbnailData;
 
 /**
  * Sent when a task snapshot has changed.
@@ -26,10 +25,10 @@ import com.android.systemui.recents.events.EventBus;
 public class TaskSnapshotChangedEvent extends EventBus.Event {
 
     public final int taskId;
-    public final TaskSnapshot taskSnapshot;
+    public final ThumbnailData thumbnailData;
 
-    public TaskSnapshotChangedEvent(int taskId, TaskSnapshot taskSnapshot) {
+    public TaskSnapshotChangedEvent(int taskId, ThumbnailData thumbnailData) {
         this.taskId = taskId;
-        this.taskSnapshot = taskSnapshot;
+        this.thumbnailData = thumbnailData;
     }
 }
