@@ -114,7 +114,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * This class holds much of the business logic to allow Android devices
  * to act as IP gateways via USB, BT, and WiFi interfaces.
  */
-public class Tethering extends BaseNetworkObserver implements IControlsTethering {
+public class Tethering extends BaseNetworkObserver {
 
     private final static String TAG = Tethering.class.getSimpleName();
     private final static boolean DBG = false;
@@ -170,6 +170,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private final StateMachine mTetherMasterSM;
     private final OffloadController mOffloadController;
     private final UpstreamNetworkMonitor mUpstreamNetworkMonitor;
+    // TODO: Figure out how to merge this and other downstream-tracking objects
+    // into a single coherent structure.
     private final HashSet<TetherInterfaceStateMachine> mForwardedDownstreams;
     private final SimChangeListener mSimChange;
 
@@ -181,7 +183,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private boolean mRndisEnabled;       // track the RNDIS function enabled state
     private boolean mUsbTetherRequested; // true if USB tethering should be started
                                          // when RNDIS is enabled
-    // True iff WiFi tethering should be started when soft AP is ready.
+    // True iff. WiFi tethering should be started when soft AP is ready.
     private boolean mWifiTetherRequested;
 
     public Tethering(Context context, INetworkManagementService nmService,
@@ -1102,6 +1104,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         static final int EVENT_UPSTREAM_CALLBACK                = BASE_MASTER + 5;
         // we treated the error and want now to clear it
         static final int CMD_CLEAR_ERROR                        = BASE_MASTER + 6;
+        static final int EVENT_IFACE_UPDATE_LINKPROPERTIES      = BASE_MASTER + 7;
 
         private State mInitialState;
         private State mTetherModeAliveState;
@@ -1168,6 +1171,9 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         who = (TetherInterfaceStateMachine)message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who);
                         handleInterfaceServingStateInactive(who);
+                        break;
+                    case EVENT_IFACE_UPDATE_LINKPROPERTIES:
+                        // Silently ignore these for now.
                         break;
                     default:
                         return NOT_HANDLED;
@@ -1335,6 +1341,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             if (mode == IControlsTethering.STATE_TETHERED) {
                 mForwardedDownstreams.add(who);
             } else {
+                mOffloadController.removeDownstreamInterface(who.interfaceName());
                 mForwardedDownstreams.remove(who);
             }
 
@@ -1359,6 +1366,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         private void handleInterfaceServingStateInactive(TetherInterfaceStateMachine who) {
             mNotifyList.remove(who);
             mIPv6TetheringCoordinator.removeActiveDownstream(who);
+            mOffloadController.removeDownstreamInterface(who.interfaceName());
             mForwardedDownstreams.remove(who);
 
             // If this is a Wi-Fi interface, tell WifiManager of any errors.
@@ -1459,6 +1467,15 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         final boolean previousUpstreamWanted = updateUpstreamWanted();
                         if (previousUpstreamWanted && !mUpstreamWanted) {
                             mUpstreamNetworkMonitor.releaseMobileNetworkRequest();
+                        }
+                        break;
+                    }
+                    case EVENT_IFACE_UPDATE_LINKPROPERTIES: {
+                        final LinkProperties newLp = (LinkProperties) message.obj;
+                        if (message.arg1 == IControlsTethering.STATE_TETHERED) {
+                            mOffloadController.notifyDownstreamLinkProperties(newLp);
+                        } else {
+                            mOffloadController.removeDownstreamInterface(newLp.getInterfaceName());
                         }
                         break;
                     }
@@ -1692,9 +1709,25 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         return false;
     }
 
-    @Override
-    public void notifyInterfaceStateChange(String iface, TetherInterfaceStateMachine who,
-                                           int state, int error) {
+    private IControlsTethering makeControlCallback(String ifname) {
+        return new IControlsTethering() {
+            @Override
+            public void updateInterfaceState(
+                    TetherInterfaceStateMachine who, int state, int lastError) {
+                notifyInterfaceStateChange(ifname, who, state, lastError);
+            }
+
+            @Override
+            public void updateLinkProperties(
+                    TetherInterfaceStateMachine who, LinkProperties newLp) {
+                notifyLinkPropertiesChanged(ifname, who, newLp);
+            }
+        };
+    }
+
+    // TODO: Move into TetherMasterSM.
+    private void notifyInterfaceStateChange(
+            String iface, TetherInterfaceStateMachine who, int state, int error) {
         synchronized (mPublicSync) {
             final TetherState tetherState = mTetherStates.get(iface);
             if (tetherState != null && tetherState.stateMachine.equals(who)) {
@@ -1740,6 +1773,24 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         sendTetherStateChangedBroadcast();
     }
 
+    private void notifyLinkPropertiesChanged(String iface, TetherInterfaceStateMachine who,
+                                             LinkProperties newLp) {
+        final int state;
+        synchronized (mPublicSync) {
+            final TetherState tetherState = mTetherStates.get(iface);
+            if (tetherState != null && tetherState.stateMachine.equals(who)) {
+                state = tetherState.lastState;
+            } else {
+                mLog.log("got notification from stale iface " + iface);
+                return;
+            }
+        }
+
+        mLog.log(String.format("OBSERVED LinkProperties update iface=%s state=%s", iface, state));
+        final int which = TetherMasterSM.EVENT_IFACE_UPDATE_LINKPROPERTIES;
+        mTetherMasterSM.sendMessage(which, state, 0, newLp);
+    }
+
     private void maybeTrackNewInterfaceLocked(final String iface) {
         // If we don't care about this type of interface, ignore.
         final int interfaceType = ifaceNameToType(iface);
@@ -1757,7 +1808,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         mLog.log("adding TetheringInterfaceStateMachine for: " + iface);
         final TetherState tetherState = new TetherState(
                 new TetherInterfaceStateMachine(
-                    iface, mLooper, interfaceType, mLog, mNMService, mStatsService, this,
+                    iface, mLooper, interfaceType, mLog, mNMService, mStatsService,
+                    makeControlCallback(iface),
                     new IPv6TetheringInterfaceServices(iface, mNMService, mLog)));
         mTetherStates.put(iface, tetherState);
         tetherState.stateMachine.start();
@@ -1769,7 +1821,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             mLog.log("attempting to remove unknown iface (" + iface + "), ignoring");
             return;
         }
-        tetherState.stateMachine.sendMessage(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
+        tetherState.stateMachine.stop();
         mLog.log("removing TetheringInterfaceStateMachine for: " + iface);
         mTetherStates.remove(iface);
     }
