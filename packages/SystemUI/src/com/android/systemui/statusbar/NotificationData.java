@@ -438,7 +438,7 @@ public class NotificationData {
                 final int N = mEntries.size();
                 for (int i = 0; i < N; i++) {
                     Entry entry = mEntries.valueAt(i);
-                    final StatusBarNotification oldSbn = entry.notification.clone();
+                    final StatusBarNotification oldSbn = entry.notification.cloneLight();
                     final String overrideGroupKey = getOverrideGroupKey(entry.key);
                     if (!Objects.equals(oldSbn.getOverrideGroupKey(), overrideGroupKey)) {
                         entry.notification.setOverrideGroupKey(overrideGroupKey);
