@@ -207,6 +207,9 @@ public class TelephonyIntents {
      *       <dt>{@code PUK}</dt><dd>locked on PUK1</dd>
      *       <dt>{@code NETWORK}</dt><dd>locked on network personalization</dd>
      *   </dl>
+     *   <dt>rebroadcastOnUnlock</dt>
+     *   <dd>A boolean indicates a rebroadcast on unlock. optional extra, defaults to {@code false}
+     *   if not specified </dd>
      * </dl>
      *
      * <p class="note">
@@ -217,6 +220,8 @@ public class TelephonyIntents {
      */
     public static final String ACTION_SIM_STATE_CHANGED
             = Intent.ACTION_SIM_STATE_CHANGED;
+
+    public static final String EXTRA_REBROADCAST_ON_UNLOCK= "rebroadcastOnUnlock";
 
     /**
      * Broadcast Action: The time was set by the carrier (typically by the NITZ string).
