@@ -61,6 +61,8 @@ public final class AutoFillUI {
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
+    private final @NonNull OverlayControl mOverlayControl;
+
     public interface AutoFillUiCallback {
         void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
                 @Nullable Bundle extras);
@@ -75,6 +77,7 @@ public final class AutoFillUI {
 
     public AutoFillUI(@NonNull Context context) {
         mContext = context;
+        mOverlayControl = new OverlayControl(context);
     }
 
     public void setCallback(@NonNull AutoFillUiCallback callback) {
@@ -174,7 +177,7 @@ public final class AutoFillUI {
             }
             hideAllUiThread(callback);
             mFillUi = new FillUi(mContext, response, focusedId,
-                    filterText, new FillUi.Callback() {
+                    filterText, mOverlayControl, new FillUi.Callback() {
                 @Override
                 public void onResponsePicked(FillResponse response) {
                     log.setType(MetricsProto.MetricsEvent.TYPE_DETAIL);
@@ -255,7 +258,7 @@ public final class AutoFillUI {
             }
             hideAllUiThread(callback);
             mSaveUi = new SaveUi(mContext, providerLabel, info,
-                    new SaveUi.OnSaveListener() {
+                    mOverlayControl, new SaveUi.OnSaveListener() {
                 @Override
                 public void onSave() {
                     log.setType(MetricsProto.MetricsEvent.TYPE_ACTION);
