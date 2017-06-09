@@ -90,12 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"No s\'ha proveït el servei."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"No pots canviar la configuració de l\'identificador de trucada."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"No hi ha servei de dades"</string>
-    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
-    <skip />
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"No es poden fer trucades d\'emergència"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Sense servei de veu"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Sense servei de veu/emergència"</string>
-    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
-    <skip />
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"La xarxa de telefonia mòbil de la teva ubicació temporalment no ofereix aquest servei"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No es pot accedir a la xarxa"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Per millorar la recepció, prova de canviar-ne el tipus a Sistema &gt; Xarxa i Internet &gt; Xarxes de telefonia mòbil &gt; Tipus de xarxa preferit."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>
@@ -1203,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca per seleccionar l\'idioma i el disseny"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Mostra sobre altres aplicacions"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"S\'està superposant <xliff:g id="NAME">%s</xliff:g> a altres aplicacions"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> s\'està superposant a altres apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>

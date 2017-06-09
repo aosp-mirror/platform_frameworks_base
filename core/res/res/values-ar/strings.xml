@@ -94,12 +94,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"لا يمكنك تغيير إعداد معرّف المتصل."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ليست هناك خدمة بيانات"</string>
-    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
-    <skip />
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"لا يوجد اتصال في حالات الطوارئ"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"لا تتوفر خدمة صوتية"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"لا تتوفر خدمة الصوت/الطوارئ"</string>
-    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
-    <skip />
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"مؤقتا لا تقدمها شبكة الجوال في موقعك"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"يتعذر الوصول إلى الشبكة"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"‏لتحسين الاستقبال، يمكنك تجربة تغيير النوع المحدّد في النظام &gt; الشبكة والإنترنت &gt; شبكات الجوّال &gt; نوع الشبكة المفضّل."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"التنبيهات"</string>
@@ -1291,8 +1289,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"انقر لاختيار لغة وتنسيق"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789 أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"عرض التطبيق أمام غيره"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"جارٍ عرض <xliff:g id="NAME">%s</xliff:g> فوق تطبيقات أخرى"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"يتم عرض <xliff:g id="NAME">%s</xliff:g> فوق التطبيقات الأخرى."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"إذا كنت لا تريد أن يستخدم <xliff:g id="NAME">%s</xliff:g> هذه الميزة، فانقر لفتح الإعدادات، ثم اختر تعطيلها."</string>

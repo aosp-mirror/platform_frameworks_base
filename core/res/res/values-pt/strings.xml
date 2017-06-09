@@ -90,12 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"O serviço não foi habilitado."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Não é possível alterar a configuração de identificação de chamadas."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Sem serviço de dados"</string>
-    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
-    <skip />
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Sem chamada de emergência"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Sem serviço de voz"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Sem serviço de voz/emergência"</string>
-    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
-    <skip />
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Serviço temporariamente bloqueado pela rede móvel no seu local"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Não foi possível acessar a rede"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para melhorar a recepção, tente alterar o tipo selecionado em Sistema &gt; Rede &amp; Internet &gt; Redes móveis &gt; Tipo de rede preferencial."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>

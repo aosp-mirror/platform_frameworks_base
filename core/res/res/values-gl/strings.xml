@@ -90,12 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Servizo non ofrecido."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Non podes cambiar a configuración do ID de chamada."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Non hai servizo de datos"</string>
-    <!-- no translation found for RestrictedOnEmergencyTitle (3646729271176394091) -->
-    <skip />
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Non se poden realizar chamadas de emerxencia"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Non hai servizo de chamadas de voz"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Non hai servizo de chamadas de emerxencia nin de voz"</string>
-    <!-- no translation found for RestrictedStateContent (4278821484643362350) -->
-    <skip />
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"A rede de telefonía móbil non ofrece o servizo na túa localización temporalmente"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Non se pode conectar coa rede"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para mellorar a recepción, proba a cambiar o tipo seleccionado en Sistema &gt; Rede e Internet &gt; Redes de telefonía móbil &gt; Tipo de rede preferido."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
@@ -1204,8 +1202,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca para seleccionar o idioma e o deseño"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Mostrar sobre outras aplicacións"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Mostrando <xliff:g id="NAME">%s</xliff:g> sobre outras aplicacións"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> móstrase sobre outras aplicacións"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Se non queres que <xliff:g id="NAME">%s</xliff:g> utilice esta función, toca para abrir a configuración e desactívaa."</string>
