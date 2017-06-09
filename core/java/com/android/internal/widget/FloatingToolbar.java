@@ -49,9 +49,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.Transformation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.view.animation.Transformation;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -60,12 +60,12 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import com.android.internal.R;
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import com.android.internal.R;
-import com.android.internal.util.Preconditions;
 import java.util.Objects;
 
 /**
@@ -1141,7 +1141,18 @@ public final class FloatingToolbar {
             Preconditions.checkNotNull(menuItems);
 
             int availableWidth = toolbarWidth;
-            final LinkedList<MenuItem> remainingMenuItems = new LinkedList<MenuItem>(menuItems);
+
+            final LinkedList<MenuItem> remainingMenuItems = new LinkedList<>();
+            // add the overflow menu items to the end of the remainingMenuItems list.
+            final LinkedList<MenuItem> overflowMenuItems = new LinkedList();
+            for (MenuItem menuItem : menuItems) {
+                if (menuItem.requiresOverflow()) {
+                    overflowMenuItems.add(menuItem);
+                } else {
+                    remainingMenuItems.add(menuItem);
+                }
+            }
+            remainingMenuItems.addAll(overflowMenuItems);
 
             mMainPanel.removeAllViews();
             mMainPanel.setPaddingRelative(0, 0, 0, 0);
@@ -1150,6 +1161,14 @@ public final class FloatingToolbar {
             boolean isFirstItem = true;
             while (!remainingMenuItems.isEmpty()) {
                 final MenuItem menuItem = remainingMenuItems.peek();
+
+                // if this is the first item, regardless of requiresOverflow(), it should be
+                // displayed on the main panel. Otherwise all items including this one will be
+                // overflow items, and should be displayed in overflow panel.
+                if(!isFirstItem && menuItem.requiresOverflow()) {
+                    break;
+                }
+
                 View menuItemButton = createMenuItemButton(mContext, menuItem, mIconTextSpacing);
 
                 // Adding additional start padding for the first button to even out button spacing.
@@ -1226,13 +1245,17 @@ public final class FloatingToolbar {
                     availableWidth -= menuItemButtonWidth + extraPadding;
                     remainingMenuItems.pop();
                 } else {
-                    // Reserve space for overflowButton.
-                    mMainPanel.setPaddingRelative(0, 0, mOverflowButtonSize.getWidth(), 0);
                     break;
                 }
                 lastGroupId = menuItem.getGroupId();
                 isFirstItem = false;
             }
+
+            if (!remainingMenuItems.isEmpty()) {
+                // Reserve space for overflowButton.
+                mMainPanel.setPaddingRelative(0, 0, mOverflowButtonSize.getWidth(), 0);
+            }
+
             mMainPanelSize = measure(mMainPanel);
             return remainingMenuItems;
         }
