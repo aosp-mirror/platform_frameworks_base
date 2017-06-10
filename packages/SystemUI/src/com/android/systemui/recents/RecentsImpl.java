@@ -78,6 +78,7 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.model.ThumbnailData;
 import com.android.systemui.recents.views.RecentsTransitionHelper;
 import com.android.systemui.recents.views.RecentsTransitionHelper.AppTransitionAnimationSpecsFuture;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
@@ -199,7 +200,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 return;
             }
 
-            EventBus.getDefault().send(new TaskSnapshotChangedEvent(taskId, snapshot));
+            EventBus.getDefault().send(new TaskSnapshotChangedEvent(taskId,
+                    ThumbnailData.createFromTaskSnapshot(snapshot)));
         }
     }
 
