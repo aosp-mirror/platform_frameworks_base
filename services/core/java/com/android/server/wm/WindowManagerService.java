@@ -5116,6 +5116,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         mLastANRState = null;
                     }
+                    mAmInternal.clearSavedANRState();
                 }
                 break;
                 case WALLPAPER_DRAW_PENDING_TIMEOUT: {
@@ -6583,7 +6584,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void saveANRStateLocked(AppWindowToken appWindowToken, WindowState windowState, String reason) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new FastPrintWriter(sw, false, 1024);
-        pw.println("  ANR time: " + DateFormat.getInstance().format(new Date()));
+        pw.println("  ANR time: " + DateFormat.getDateTimeInstance().format(new Date()));
         if (appWindowToken != null) {
             pw.println("  Application at fault: " + appWindowToken.stringName);
         }
