@@ -3072,13 +3072,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (PRINT_ANIM) Log.i(TAG, "selectAnimation in " + win
               + ": transit=" + transit);
         if (win == mStatusBar) {
-            boolean isKeyguard = (win.getAttrs().privateFlags & PRIVATE_FLAG_KEYGUARD) != 0;
+            final boolean isKeyguard = (win.getAttrs().privateFlags & PRIVATE_FLAG_KEYGUARD) != 0;
+            final boolean expanded = win.getAttrs().height == MATCH_PARENT
+                    && win.getAttrs().width == MATCH_PARENT;
+            if (isKeyguard || expanded) {
+                return -1;
+            }
             if (transit == TRANSIT_EXIT
                     || transit == TRANSIT_HIDE) {
-                return isKeyguard ? -1 : R.anim.dock_top_exit;
+                return R.anim.dock_top_exit;
             } else if (transit == TRANSIT_ENTER
                     || transit == TRANSIT_SHOW) {
-                return isKeyguard ? -1 : R.anim.dock_top_enter;
+                return R.anim.dock_top_enter;
             }
         } else if (win == mNavigationBar) {
             if (win.getAttrs().windowAnimations != 0) {
@@ -6803,7 +6808,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean isScreenOn() {
-        return mScreenOnFully;
+        synchronized (mLock) {
+            return mScreenOnEarly;
+        }
     }
 
     /** {@inheritDoc} */
