@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"ค้นหา"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"เลื่อนขึ้นเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"เลื่อนไปทางซ้ายเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นการปลุก การช่วยเตือน กิจกรรม และผู้โทรที่คุณระบุ"</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นเสียงนาฬิกาปลุก การช่วยเตือน กิจกรรม และผู้โทรที่ระบุไว้ คุณจะยังคงได้ยินสิ่งที่คุณเลือกเล่น เช่น เพลง วิดีโอ และเกม"</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นเสียงนาฬิกาปลุก คุณจะยังคงได้ยินสิ่งที่คุณเลือกเล่น เช่น เพลง วิดีโอ และเกม"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"กำหนดค่า"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม คุณจะยังโทรออกได้อยู่"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม"</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ไม่เป็นไร"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ตั้งค่า"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g> <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"ไม่ใช้แล้ว"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"ปิดเลย"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ขยาย"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ยุบ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ตรึงหน้าจอแล้ว"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"คุณจะไม่ได้รับการแจ้งเตือนเหล่านี้อีก"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"หมวดหมู่การแจ้งเตือน <xliff:g id="NUMBER">%d</xliff:g> หมวด"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"แอปนี้ไม่มีหมวดหมู่การแจ้งเตือน"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ไม่สามารถปิดการแจ้งเตือนจากแอปนี้"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">การแจ้งเตือน 1 ใน <xliff:g id="NUMBER_1">%d</xliff:g> หมวดหมู่จากแอปนี้</item>
       <item quantity="one">การแจ้งเตือน 1 ใน <xliff:g id="NUMBER_0">%d</xliff:g> หมวดหมู่จากแอปนี้</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ตัวเลือกการปิดเสียงแจ้งเตือนชั่วคราว"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"เลิกทำ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"ปิดเสียงเตือนชั่วคราวไว้เป็นเวลา <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d ชั่วโมง</item>
+      <item quantity="one">%d ชั่วโมง</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d นาที</item>
+      <item quantity="one">%d นาที</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"การใช้งานแบตเตอรี่"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ไม่สามารถใช้โหมดประหยัดแบตเตอรี่ระหว่างการชาร์จ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"โหมดประหยัดแบตเตอรี่"</string>

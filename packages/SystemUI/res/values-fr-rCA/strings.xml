@@ -354,7 +354,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Recherche"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faire glisser le doigt vers le haut : <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser votre doigt vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Vous ne serez pas dérangé par les sonneries ni par les vibrations, sauf pour les alarmes, les rappels, les événements et les appels des personnes que vous spécifiez."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes, les rappels, les événements et les appelants. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personnaliser"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez quand même faire des appels téléphoniques."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
@@ -476,7 +477,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Non, merci"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configurer"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Arrêter maintenant"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Désactiver maintenant"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Développer"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Réduire"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"L\'écran est épinglé"</string>
@@ -554,8 +555,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Vous ne recevrez plus ces notifications"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> catégories de notification"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Cette application n\'a pas de catégories de notification"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Les notifications de cette application ne peuvent pas être désactivées"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">1 catégorie de notification sur <xliff:g id="NUMBER_1">%d</xliff:g> provenant de cette application</item>
       <item quantity="other">1 catégorie de notification sur <xliff:g id="NUMBER_1">%d</xliff:g> provenant de cette application</item>
@@ -577,8 +577,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"options de répétition des notifications"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ANNULER"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Reporté pour <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">%d heure</item>
+      <item quantity="other">%d heures</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">%d minute</item>
+      <item quantity="other">%d minutes</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utilisation de la pile"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Le mode Économie d\'énergie n\'est pas accessible pendant la charge"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Économie d\'énergie"</string>

@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Іздеу"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін жоғары сырғыту."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін солға сырғыту."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Дабылдар, еске салғыштар, оқиғалар мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Дабылдар, еске салғыштар, оқиғалар мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндардың дыбысы өшірілмейді."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндардың дыбысы өшірілмейді."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Реттеу"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"БАРЛЫҚ, соның ішінде дабылдардың, музыканың, бейнелердің және ойындардың дыбыстары мен дірілдері өшіріледі. Бірақ телефон қоңыраулары шалына береді."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"БАРЛЫҚ, соның ішінде дабылдардың, музыканың, бейнелердің және ойындардың дыбыстары мен дірілдері өшіріледі."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Жоқ, рақмет"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Реттеу"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Қазір өшіру"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Қазір өшіру"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Жаю"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Жию"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Экран түйрелді"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Енді сізге бұл хабарландырулар жіберілмейді"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> хабарландыру санаттары"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Бұл қолданбада хабарландыру санаттары жоқ"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Бұл қолданбаның хабарландырулары өшірілмейді"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">Осы қолданбадан <xliff:g id="NUMBER_1">%d</xliff:g> ішінен 1 хабарландыру санаты</item>
       <item quantity="one">Осы қолданбадан <xliff:g id="NUMBER_0">%d</xliff:g> ішінен 1 хабарландыру санаты</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"хабарландыруды кідірту опциялары"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"КЕРІ ҚАЙТАРУ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> кідіртілді"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d сағат</item>
+      <item quantity="one">%d сағат</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d минут</item>
+      <item quantity="one">%d минут</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Батареяны пайдалану"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Зарядтау кезінде Батарея үнемдегіш қол жетімді емес"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батарея үнемдегіш"</string>

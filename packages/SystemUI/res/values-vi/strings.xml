@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Tìm kiếm"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Trượt lên để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Trượt sang trái để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức, nhắc nhở, sự kiện và người gọi mà bạn chỉ định."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức, nhắc nhở, sự kiện và người gọi mà bạn chỉ định. Bạn sẽ vẫn nghe thấy mọi thứ bạn chọn phát, bao gồm nhạc, video và trò chơi."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức. Bạn sẽ vẫn nghe thấy mọi thứ bạn chọn phát, bao gồm nhạc, video và trò chơi."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Tùy chỉnh"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Chế độ này sẽ chặn TẤT CẢ âm thanh và tiếng rung, bao gồm báo thức, âm nhạc, video và trò chơi. Bạn vẫn có thể gọi điện thoại."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Chế độ này sẽ chặn TẤT CẢ âm thanh và tiếng rung, bao gồm báo thức, âm nhạc, video và trò chơi."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ko, cảm ơn"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Thiết lập"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Kết thúc bây giờ"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Tắt ngay bây giờ"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Mở rộng"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Thu gọn"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Màn hình được ghim"</string>
@@ -554,8 +555,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Bạn sẽ không nhận được những thông báo này nữa"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> danh mục thông báo"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Ứng dụng này không có loại thông báo"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Không thể tắt thông báo từ ứng dụng này"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">1 trên tổng số <xliff:g id="NUMBER_1">%d</xliff:g> loại thông báo từ ứng dụng này</item>
       <item quantity="one">1 trên tổng số <xliff:g id="NUMBER_0">%d</xliff:g> loại thông báo từ ứng dụng này</item>
@@ -577,8 +577,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"Tùy chọn báo lại thông báo"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"HOÀN TÁC"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Báo lại sau <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d giờ</item>
+      <item quantity="one">%d giờ</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d phút</item>
+      <item quantity="one">%d phút</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Mức sử dụng pin"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Trình tiết kiệm pin không khả dụng trong khi sạc"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Trình tiết kiệm pin"</string>

@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"തിരയൽ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി മുകളിലേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി ഇടത്തേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"നിങ്ങൾ വ്യക്തമാക്കിയിട്ടുള്ള അലാറങ്ങൾ, റിമൈൻഡറുകൾ, ഇവന്റുകൾ, കോളർമാർ എന്നിവ ഒഴികെയുള്ള ശബ്‌ദങ്ങളോ വൈബ്രേഷനുകളോ കാരണം നിങ്ങൾക്ക് ശല്യമുണ്ടാകില്ല."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"നിങ്ങൾ സജ്ജീകരിച്ച അലാറങ്ങൾ, റിമൈൻഡറുകൾ, ഇവന്റുകൾ, കോളർമാർ എന്നിവയിൽ നിന്നുള്ള ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളുമൊഴികെ മറ്റൊന്നും നിങ്ങളെ ശല്യപ്പെടുത്തുകയില്ല. സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയുൾപ്പെടെ പ്ലേ ചെയ്യുന്നതെന്തും നിങ്ങൾക്ക് ‌തുടർന്നും കേൾക്കാൻ കഴിയും."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"അലാറങ്ങളിൽ നിന്നുള്ള ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളുമൊഴികെ മറ്റൊന്നും നിങ്ങളെ ശല്യപ്പെടുത്തുകയില്ല. സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയുൾപ്പെടെ പ്ലേ ചെയ്യുന്നതെന്തും നിങ്ങൾക്ക് ‌തുടർന്നും കേൾക്കാൻ കഴിയും."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ഇഷ്‌ടാനുസൃതമാക്കുക"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ഇത് അലാറങ്ങൾ, സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയിൽ നിന്നുൾപ്പെടെ എല്ലാ ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളും തടയുന്നു. നിങ്ങൾക്ക് തുടർന്നും ഫോൺ വിളിക്കാനാകും."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ഇത് അലാറങ്ങൾ, സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയിൽ നിന്നുൾപ്പെടെ എല്ലാ ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളും തടയുന്നു."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"വേണ്ട, നന്ദി"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"സജ്ജീകരിക്കുക"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"ഇപ്പോള്‍ അവസാനിപ്പിക്കുക"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"ഇപ്പോൾ ഓഫ് ചെയ്യുക"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"വികസിപ്പിക്കുക"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ചുരുക്കുക"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"സ്‌ക്രീൻ പിൻ ചെയ്‌തു"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"നിങ്ങൾക്ക് ഇനി ഈ അറിയിപ്പുകൾ ലഭിക്കില്ല"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> അറിയിപ്പ് വിഭാഗങ്ങൾ"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ഈ ആപ്പിന് അറിയിപ്പ് വിഭാഗങ്ങളില്ല"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ഈ ആപ്പിൽ നിന്നുള്ള അറിയിപ്പുകൾ ഓഫാക്കാൻ കഴിയില്ല"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">ഈ ആപ്പിൽ നിന്ന് 1 / <xliff:g id="NUMBER_1">%d</xliff:g> അറിയിപ്പ് വിഭാഗങ്ങൾ</item>
       <item quantity="one">ഈ ആപ്പിൽ നിന്ന് 1 / <xliff:g id="NUMBER_0">%d</xliff:g> അറിയിപ്പ് വിഭാഗം</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"അറിയിപ്പ് സ്‌നൂസ് ഓപ്ഷനുകൾ"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"പഴയപടിയാക്കുക"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> സമയത്തേക്ക് സ്‌നൂസ് ‌ചെയ്‌തു"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d മണിക്കൂർ</item>
+      <item quantity="one">%d മണിക്കൂർ</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d മിനിറ്റ്</item>
+      <item quantity="one">%d മിനിറ്റ്</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"ബാറ്ററി ഉപയോഗം"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി സേവർ ലഭ്യമല്ല"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ബാറ്ററി സേവർ"</string>

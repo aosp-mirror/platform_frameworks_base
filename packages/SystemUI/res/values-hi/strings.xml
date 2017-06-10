@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"खोजें"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए ऊपर स्‍लाइड करें."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए बाएं स्‍लाइड करें."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"आपको आपके द्वारा निर्दिष्ट किए गए अलार्म, रिमाइंडर्स, इवेंट और कॉलर को छोड़कर अन्य ध्वनियों और कंपनों के द्वारा परेशान नहीं किया जाएगा."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"आपको अलार्म, रिमाइंडर, इवेंट और आपने जिन कॉलर के बारे में विशेष रूप से बताया है, उन्हें छोड़कर ध्‍वनियों और कंपनों से परेशान नहीं किया जाएगा. आपको अभी भी संगीत, वीडियो और गेम सहित वह सब कुछ सुनाई देगा जो आपने चलाने के लिए चुना है."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"आपको अलार्म छोड़कर दूसरी ध्‍वनियों और कंपनों से परेशान नहीं किया जाएगा. आपको अभी भी संगीत, वीडियो और गेम सहित वह सब कुछ सुनाई देगा जो आपने चलाने के लिए चुना है."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"कस्टमाइज़ करें"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी ध्‍वनियां और कंपन अवरुद्ध हो जाते हैं. आप अभी भी फ़ोन काॅल कर सकेंगे."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी ध्वनियां और कंपन अवरुद्ध हो जाते हैं."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"रहने दें"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"सेट करें"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"अब समाप्त करें"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"अभी बंद करें"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"विस्तृत करें"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"संक्षिप्त करें"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्‍क्रीन पिन कर दी गई है"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"अब आपको ये नोटिफ़िकेशन नहीं मिलेंगे"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"नोटिफ़िकेशन की <xliff:g id="NUMBER">%d</xliff:g> श्रेणियां"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"इस ऐप्लिकेशन में नोटिफ़िकेशन श्रेणियां नहीं हैं"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"इस ऐप्लिकेशन के नोटिफ़िकेशन बंद नहीं किए जा सकते"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">इस ऐप्लिकेशन की <xliff:g id="NUMBER_1">%d</xliff:g> नोटिफ़िकेशन श्रेणियों में से 1 श्रेणी</item>
       <item quantity="other">इस ऐप्लिकेशन की <xliff:g id="NUMBER_1">%d</xliff:g> नोटिफ़िकेशन श्रेणियों में से 1 श्रेणी</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"नोटिफ़िकेशन की याद दिलाने के विकल्प"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"पहले जैसा करें"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> के लिए याद दिलाया गया"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">%d घंटे</item>
+      <item quantity="other">%d घंटे</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">%d मिनट</item>
+      <item quantity="other">%d मिनट</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"बैटरी उपयोग"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज किए जाने के दौरान बैटरी सेवर उपलब्ध नहीं है"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"बैटरी सेवर"</string>
