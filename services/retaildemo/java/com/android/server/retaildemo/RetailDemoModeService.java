@@ -547,21 +547,25 @@ public class RetailDemoModeService extends SystemService {
         mSafeBootRestrictionInitialState = mInjector.getUserManager().hasUserRestriction(
                 UserManager.DISALLOW_SAFE_BOOT, UserHandle.SYSTEM);
         mPackageVerifierEnableInitialState = Settings.Global.getInt(mInjector.getContentResolver(),
-                Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
+                Settings.Global.PACKAGE_VERIFIER_ENABLE, 1);
     }
 
     private void stopDemoMode() {
-        mDeviceInDemoMode = false;
-        mIsCarrierDemoMode = false;
         mPreloadAppsInstaller = null;
         mCameraIdsWithFlash = null;
         mInjector.destroyWakeLock();
         unregisterBroadcastReceiver();
 
-        mInjector.getUserManager().setUserRestriction(UserManager.DISALLOW_SAFE_BOOT,
-                mSafeBootRestrictionInitialState, UserHandle.SYSTEM);
-        Settings.Global.putInt(mInjector.getContentResolver(),
-                Settings.Global.PACKAGE_VERIFIER_ENABLE, mPackageVerifierEnableInitialState);
+        if (mDeviceInDemoMode) {
+            mInjector.getUserManager().setUserRestriction(UserManager.DISALLOW_SAFE_BOOT,
+                    mSafeBootRestrictionInitialState, UserHandle.SYSTEM);
+            Settings.Global.putInt(mInjector.getContentResolver(),
+                        Settings.Global.PACKAGE_VERIFIER_ENABLE,
+                        mPackageVerifierEnableInitialState);
+        }
+
+        mDeviceInDemoMode = false;
+        mIsCarrierDemoMode = false;
     }
 
     @Override
