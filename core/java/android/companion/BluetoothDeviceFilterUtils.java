@@ -58,7 +58,7 @@ public class BluetoothDeviceFilterUtils {
 
     static boolean matchesAddress(String deviceAddress, BluetoothDevice device) {
         final boolean result = deviceAddress == null
-                || (device == null || !deviceAddress.equals(device.getAddress()));
+                || (device != null && deviceAddress.equals(device.getAddress()));
         if (DEBUG) debugLogMatchResult(result, device, deviceAddress);
         return result;
     }
