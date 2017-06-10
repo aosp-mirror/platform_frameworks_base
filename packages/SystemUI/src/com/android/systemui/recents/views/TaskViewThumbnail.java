@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -37,7 +36,6 @@ import android.view.ViewDebug;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.EventBus.Event;
 import com.android.systemui.recents.events.ui.TaskSnapshotChangedEvent;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -386,15 +384,14 @@ public class TaskViewThumbnail extends View {
     }
 
     public final void onBusEvent(TaskSnapshotChangedEvent event) {
-        if (mTask == null || event.taskId != mTask.key.id || event.taskSnapshot == null) {
+        if (mTask == null || event.taskId != mTask.key.id || event.thumbnailData == null
+                || event.thumbnailData.thumbnail == null) {
             return;
         }
-        setThumbnail(ThumbnailData.createFromTaskSnapshot(event.taskSnapshot));
+        setThumbnail(event.thumbnailData);
     }
 
     public void dump(String prefix, PrintWriter writer) {
-        String innerPrefix = prefix + "  ";
-
         writer.print(prefix); writer.print("TaskViewThumbnail");
         writer.print(" mTaskViewRect="); writer.print(Utilities.dumpRect(mTaskViewRect));
         writer.print(" mThumbnailRect="); writer.print(Utilities.dumpRect(mThumbnailRect));
