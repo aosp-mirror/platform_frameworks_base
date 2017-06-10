@@ -254,6 +254,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             mService.saveANRStateLocked(appWindowToken, windowState, reason);
         }
 
+        // All the calls below need to happen without the WM lock held since they call into AM.
+        mService.mAmInternal.saveANRState(reason);
+
         if (appWindowToken != null && appWindowToken.appToken != null) {
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
