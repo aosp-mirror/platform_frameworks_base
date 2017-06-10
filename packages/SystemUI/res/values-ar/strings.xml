@@ -360,7 +360,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"بحث"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"تمرير لأعلى لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"تمرير لليسار لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"لن يتم إزعاجك بأصوات أو اهتزاز، عدا من التنبيهات والتذكيرات والأحداث والمتصلين الذين تحددهم."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"لن يتم إزعاجك بالأصوات والاهتزاز، عدا من التنبيهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى ومقاطع الفيديو والألعاب."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"لن يتم إزعاجك بالأصوات والاهتزاز، عدا من التنبيهات. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى ومقاطع الفيديو والألعاب."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"تخصيص"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"سيؤدي هذا إلى حظر جميع الأصوات والاهتزازات، بما في ذلك ما يرد من التنبيهات والموسيقى والفيديو والألعاب. إلا أنه سيظل بإمكانك إجراء مكالمات هاتفية."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"سيؤدي هذا إلى حظر جميع الأصوات والاهتزازات، بما في ذلك ما يرد من التنبيهات والموسيقى والفيديو والألعاب."</string>
@@ -482,7 +483,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"لا، شكرًا"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"إعداد"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"إنهاء الآن"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"إيقاف التشغيل الآن"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"توسيع"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"تصغير"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"تم تثبيت الشاشة"</string>
@@ -560,8 +561,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"لن تتلقى هذه الإشعارات بعد الآن."</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> فئة إشعار"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"لا يحتوي هذا التطبيق على فئات إشعار"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"لا يمكن إيقاف الإشعارات من هذا التطبيق"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="zero">1 من إجمالي <xliff:g id="NUMBER_1">%d</xliff:g> فئة إشعار من هذا التطبيق</item>
       <item quantity="two">1 من إجمالي فئتي إشعار (<xliff:g id="NUMBER_1">%d</xliff:g>) من هذا التطبيق</item>
@@ -591,8 +591,22 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"خيارات تأجيل الإشعارات"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"تراجع"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"تم تأجيل الإشعار لمدة <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="zero">‏%d ساعة</item>
+      <item quantity="two">‏ساعتان (%d)</item>
+      <item quantity="few">‏%d ساعات</item>
+      <item quantity="many">‏%d ساعة</item>
+      <item quantity="other">‏%d ساعة</item>
+      <item quantity="one">ساعة واحدة</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="zero">‏%d دقيقة</item>
+      <item quantity="two">‏دقيقتان (%d)</item>
+      <item quantity="few">‏%d دقائق</item>
+      <item quantity="many">‏%d دقيقة</item>
+      <item quantity="other">‏%d دقيقة</item>
+      <item quantity="one">دقيقة واحدة</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"استخدام البطارية"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"وضع توفير شحن البطارية غير متاح أثناء الشحن."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"توفير شحن البطارية"</string>

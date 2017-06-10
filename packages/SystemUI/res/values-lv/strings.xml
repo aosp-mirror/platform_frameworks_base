@@ -354,7 +354,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Meklēt"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Velciet uz augšu, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Velciet pa kreisi, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Jūs netraucēs skaņas un vibrosignāli, ja vien tie nebūs modinātāji, atgādinājumi, pasākumi vai konkrēti zvanītāji, kurus būsiet norādījis."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Jūs netraucēs skaņas un vibrācija, izņemot signālus, atgādinājumus, pasākumus un zvanītājus, ko būsiet norādījis. Jūs joprojām dzirdēsiet atskaņošanai izvēlētos vienumus, tostarp mūziku, videoklipus un spēles."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Jūs netraucēs skaņas un vibrācija, izņemot signālus. Jūs joprojām dzirdēsiet atskaņošanai izvēlētos vienumus, tostarp mūziku, videoklipus un spēles."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Pielāgot"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Tiks bloķētas VISAS skaņas un vibrosignāli, tostarp modinātāja, mūzikas, videoklipu un spēļu skaņas un signāli. Jūs joprojām varēsiet veikt tālruņa zvanus."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Tiks bloķētas VISAS skaņas un vibrosignāli, tostarp modinātāja, mūzikas, videoklipu un spēļu skaņas un signāli."</string>
@@ -476,7 +477,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nē"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Iestatīt"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Izslēgt"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Izslēgt tūlīt"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Izvērst"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sakļaut"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekrāns ir piesprausts"</string>
@@ -554,8 +555,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Jūs vairs nesaņemsiet šos paziņojumus"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> paziņojumu kategorijas"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Paziņojumu kategorijas šajā lietotnē nav pieejamas."</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Paziņojumus no šīs lietotnes nevar izslēgt"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="zero">1 no <xliff:g id="NUMBER_1">%d</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
       <item quantity="one">1 no <xliff:g id="NUMBER_1">%d</xliff:g> šīs lietotnes paziņojumu kategorijas.</item>
@@ -579,8 +579,16 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"paziņojumu atlikšanas opcijas"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ATSAUKT"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Atlikts: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="zero">%d stundas</item>
+      <item quantity="one">%d stunda</item>
+      <item quantity="other">%d stundas</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="zero">%d minūtes</item>
+      <item quantity="one">%d minūte</item>
+      <item quantity="other">%d minūtes</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akumulatora lietojums"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumulatora jaudas taupīšanas režīms uzlādes laikā nav pieejams."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumulatora jaudas taupīšanas režīms"</string>

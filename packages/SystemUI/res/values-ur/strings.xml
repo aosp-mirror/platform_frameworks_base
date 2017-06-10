@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"تلاش کریں"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> کیلئے اوپر سلائیڈ کریں۔"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> کیلئے بائیں سلائیڈ کریں۔"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"الارمز، یاد دہانیوں، ایونٹس اور آپ کے متعین کردہ کالرز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔"</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"الارمز، یاد دہانیوں، ایونٹس اور آپ کے متعین کردہ کالرز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ابھی بھی ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"الارمز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"حسب ضرورت بنائیں"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"یہ الارمز، موسیقی، ویڈیوز اور گیمز کی آوازوں اور وائبریشنز سمیت سبھی آوازیں اور وائبریشنز مسدود کر دیتا ہے۔ آپ ابھی بھی فون کالز کر سکیں گے۔"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"یہ الارمز، موسیقی، ویڈیوز اور گیمز کی آوازوں اور وائبریشنز سمیت سبھی آوازیں اور وائبریشنز مسدود کر دیتا ہے۔"</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"نہیں شکریہ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ترتیب دیں"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>۔ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"ابھی ختم کریں"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"ابھی بند کریں"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"پھیلائیں"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"سکیڑیں"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"اسکرین پن کردہ ہے"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"آپ کو یہ اطلاعات مزید نہیں ملیں گی"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"اطلاع کے <xliff:g id="NUMBER">%d</xliff:g> زمرے"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"اس ایپ میں اطلاعاتی زمرے نہیں ہیں"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"اس ایپ کی اطلاعات کو آف نہیں کیا جا سکتا"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">اس ایپ کے <xliff:g id="NUMBER_1">%d</xliff:g> اطلاعاتی زمروں میں سے 1</item>
       <item quantity="one">اس ایپ کے <xliff:g id="NUMBER_0">%d</xliff:g> اطلاعاتی زمرے میں سے 1</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"اطلاع اسنوز کرنے کے اختیارات"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"کالعدم کریں"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> کیلئے اسنوز کیا گیا"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">‏‎%d گھنٹے</item>
+      <item quantity="one">‏‎%d گھنٹہ</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">‏‎%d منٹ</item>
+      <item quantity="one">‏‎%d منٹ</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"بیٹری کا استعمال"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"چارجنگ کے دوران بیٹری سیور دستیاب نہیں ہے"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"بیٹری سیور"</string>

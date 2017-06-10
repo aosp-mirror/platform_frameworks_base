@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"ຊອກຫາ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"ເລື່ອນຂຶ້ນເພື່ອ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"ເລື່ອນໄປທາງຊ້າຍເພື່ອ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"ທ່ານ​ຈະ​ບໍ່​ຖືກ​ລົບ​ກວນ​ຈາກ​ສຽງ ແລະ​ການ​ສັ່ນ, ຍົກ​ເວັ້ນ​ຈາກ​ໂມງ​ປຸກ, ການ​ເຕືອນ, ເຫດ​ການ, ແລະ​ຜູ້​ໂທ​ທີ່​ທ່ານ​ລະ​ບຸ."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"ທ່ານຈະບໍ່ໄດ້ຮັບການລົບກວນຈາກສຽງ ຫຼື ການສັ່ງເຕືອນ, ຍົກເວັ້ນໃນເວລາໂມງ, ການແຈ້ງເຕືອນ, ນັດໝາຍ ແລະປະຕິທິນທີ່ທ່ານບຸ . ທ່ານອາດຍັງຄົງໄດ້ຍິນຫາກທ່ານເລືອກຫຼິ້ນເພລງ, ວິດີໂອ ລລະ ເກມ."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"ທ່ານຈະບໍ່ໄດ້ຮັບການລົບກວນຈາກສຽງ ຫຼື ການສັ່ງເຕືອນ, ຍົກເວັ້ນໃນເວລາໂມງປຸກດັງ. ທ່ານອາດຍັງຄົງໄດ້ຍິນຫາກທ່ານເລືອກຫຼິ້ນເພລງ, ວິດີໂອ ລລະ ເກມ."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ປັບແຕ່ງ"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ນີ້ຈະເປັນການປິດສຽງ ແລະ ການສັ່ນທັງໝົດ ຮວມທັງສຽງໂມງປຸກ, ເພງ, ວິດີໂອ ແລະ ເກມນຳ. ແຕ່ທ່ານຍັງສາມາດໂທລະສັບໄດ້ປົກກະຕິ."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ອັນ​ນີ້ບ​ລັອກ​ທຸກ​ສຽງ ແລະ​ການ​ສັ່ນ, ລວມ​ທັງ​ຈາກ​ໂມງ​ປຸກ, ເພງ, ວິ​ດີ​ໂອ, ແລະ​ເກມ."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ບໍ່, ຂອບໃຈ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ຕັ້ງຄ່າ"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"ຢຸດດຽວນີ້"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"ປິດດຽວນີ້"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ຂະຫຍາຍ"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ຫຍໍ້ລົງ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ປັກ​ໝຸດໜ້າ​ຈໍ​ແລ້ວ"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນເຫຼົ່ານີ້ອີກຕໍ່ໄປ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> ໝວດໝູ່ການແຈ້ງເຕືອນ"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ແອັບນີ້ບໍ່ມີໝວດໝູ່ການແຈ້ງເຕືອນ"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ການແຈ້ງເຕືອນຈາກແອັບນີ້ບໍ່ສາມາດປິດໄວ້ໄດ້"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">1 ຈາກທັງໝົດ <xliff:g id="NUMBER_1">%d</xliff:g> ໝວດໝູ່ການແຈ້ງເຕືອນຈາກແອັບນີ້</item>
       <item quantity="one">1 ຈາກທັງໝົດ <xliff:g id="NUMBER_0">%d</xliff:g> ໝວດໝູ່ການແຈ້ງເຕືອນຈາກແອັບນີ້</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ຕົວເລືອກການເລື່ອນການແຈ້ງເຕືອນ"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ຍົກເລີກ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"ເລື່ອນໄປ <xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ນາທີແລ້ວ"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d ຊົ່ວໂມງ</item>
+      <item quantity="one">%d ຊົ່ວໂມງ</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d ນາທີ</item>
+      <item quantity="one">%d ນາທີ</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"ການໃຊ້ແບັດເຕີຣີ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ຕົວປະຢັດແບັດເຕີຣີບໍ່ມີໃຫ້ນຳໃຊ້ໃນລະຫວ່າງການສາກ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ຕົວປະຢັດ​ແບັດເຕີຣີ"</string>

@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Cerca"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Llisca cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Llisca cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"No t\'interromprà cap so ni cap vibració, tret dels sons de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalitza"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"No"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configura"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Finalitza ara"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Desactiva ara"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Amplia"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Replega"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"La pantalla està fixada"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Ja no rebràs aquestes notificacions"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> categories de notificació"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Aquesta aplicació no té categories de notificació"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Les notificacions d\'aquesta aplicació no es poden desactivar"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">1 de <xliff:g id="NUMBER_1">%d</xliff:g> categories de notificació d\'aquesta aplicació</item>
       <item quantity="one">1 de <xliff:g id="NUMBER_0">%d</xliff:g> categoria de notificació d\'aquesta aplicació</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"opcions per posposar la notificació"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"DESFÉS"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"S\'ha posposat <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d hores</item>
+      <item quantity="one">%d hora</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d minuts</item>
+      <item quantity="one">%d minut</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Ús de la bateria"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Estalvi de bateria"</string>
