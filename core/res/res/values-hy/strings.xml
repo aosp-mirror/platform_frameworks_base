@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Ծառայությունը չի տրամադրվում:"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Դուք չեք կարող փոխել զանգողի ID-ի կարգավորումները:"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Տվյալների ծառայությունն անհասանելի է"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Արտակարգ իրավիճակների ծառայությունն անհասանելի է"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Հնարավոր չէ կատարել շտապ կանչ"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ձայնային ծառայությունն անհասանելի է"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ձայնային/արտակարգ իրավիճակների ծառայությունն անհասանելի է"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Ձեր օպերատորն այս վայրում ժամանակավորապես կասեցրել է տվյալների ծառայությունը"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Ձեր օպերատորն այս վայրում ժամանակավորապես կասեցրել է շտապ կանչերը"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Ձեր օպերատորն այս վայրում ժամանակավորապես կասեցրել է ձայնային կանչերը"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Ձեր օպերատորն այս վայրում ժամանակավորապես կասեցրել է ձայնային և շտապ կանչերը"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Ձեր գտնվելու վայրում ծառայությունը ժամանակավորապես չի տրամադրվում բջջային ցանցի կողմից"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ցանցն անհասանելի է"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Ազդանշանի ընդունման որակը բարելավելու համար փոխեք ցանցի տեսակը՝ անցնելով Համակարգ &gt; Ցանց և ինտերնետ &gt; Բջջային ցանցեր &gt; Ցանկալի ցանցի տեսակը։"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ծանուցումներ"</string>
@@ -1206,8 +1203,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՈՒՓՔԵւՕՖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Ցույց տալ այլ հավելվածների վրա"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>
