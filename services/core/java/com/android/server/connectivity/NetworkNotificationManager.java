@@ -210,6 +210,10 @@ public class NetworkNotificationManager {
             builder.setContentText(details);
         }
 
+        if (notifyType == NotificationType.SIGN_IN) {
+            builder.extend(new Notification.TvExtender().setChannelId(channelId));
+        }
+
         Notification notification = builder.build();
 
         mNotificationTypeMap.put(id, eventId);
