@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -31,8 +32,8 @@ import java.util.Map;
 public class StreamingServiceInfo extends ServiceInfo implements Parcelable {
 
     public StreamingServiceInfo(Map<Locale, String> newNames, String newClassName,
-            Locale newLocale, String newServiceId, Date start, Date end) {
-        super(newNames, newClassName, newLocale, newServiceId, start, end);
+            List<Locale> newLocales, String newServiceId, Date start, Date end) {
+        super(newNames, newClassName, newLocales, newServiceId, start, end);
     }
 
     public static final Parcelable.Creator<StreamingServiceInfo> CREATOR =

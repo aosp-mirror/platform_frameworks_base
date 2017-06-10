@@ -32,9 +32,10 @@ import java.util.Map;
 public class FileServiceInfo extends ServiceInfo implements Parcelable {
     public List<FileInfo> files;
 
-    public FileServiceInfo(Map<Locale, String> newNames, String newClassName, Locale newLocale,
-            String newServiceId, Date start, Date end, List<FileInfo> newFiles) {
-        super(newNames, newClassName, newLocale, newServiceId, start, end);
+    public FileServiceInfo(Map<Locale, String> newNames, String newClassName,
+            List<Locale> newLocales, String newServiceId, Date start, Date end,
+            List<FileInfo> newFiles) {
+        super(newNames, newClassName, newLocales, newServiceId, start, end);
         files = new ArrayList(newFiles);
     }
 
