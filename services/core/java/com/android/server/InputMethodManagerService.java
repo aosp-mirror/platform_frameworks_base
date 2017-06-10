@@ -2788,6 +2788,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return res;
     }
 
+    private boolean canShowInputMethodPickerLocked(IInputMethodClient client) {
+        final int uid = Binder.getCallingUid();
+        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID) {
+            return true;
+        } else if (mCurClient != null && client != null
+                && mCurClient.client.asBinder() == client.asBinder()) {
+            return true;
+        } else if (mCurIntent != null && InputMethodUtils.checkIfPackageBelongsToUid(
+                mAppOpsManager,
+                uid,
+                mCurIntent.getComponent().getPackageName())) {
+            return true;
+        } else if (mContext.checkCallingPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void showInputMethodPickerFromClient(
             IInputMethodClient client, int auxiliarySubtypeMode) {
@@ -2795,10 +2816,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         synchronized (mMethodMap) {
-            if (mCurClient == null || client == null
-                    || mCurClient.client.asBinder() != client.asBinder()) {
+            if(!canShowInputMethodPickerLocked(client)) {
                 Slog.w(TAG, "Ignoring showInputMethodPickerFromClient of uid "
                         + Binder.getCallingUid() + ": " + client);
+                return;
             }
 
             // Always call subtype picker, because subtype picker is a superset of input method
