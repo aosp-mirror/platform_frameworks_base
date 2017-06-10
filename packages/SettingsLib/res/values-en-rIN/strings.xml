@@ -28,6 +28,9 @@
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Not connected due to low quality network"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi Connection Failure"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Authentication problem"</string>
+    <string name="wifi_cant_connect" msgid="5410016875644565884">"Can\'t connect"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"Can\'t connect to \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
+    <string name="wifi_check_password_try_again" msgid="516958988102584767">"Check password and try again"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Not in range"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Won\'t automatically connect"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"No Internet access"</string>
@@ -37,18 +40,12 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Connected via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Available via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Connected, no Internet"</string>
-    <!-- no translation found for speed_label_very_slow (1867055264243608530) -->
-    <skip />
-    <!-- no translation found for speed_label_slow (813109590815810235) -->
-    <skip />
-    <!-- no translation found for speed_label_okay (5941436233638654215) -->
-    <skip />
-    <!-- no translation found for speed_label_medium (3175763313268941953) -->
-    <skip />
-    <!-- no translation found for speed_label_fast (7715732164050975057) -->
-    <skip />
-    <!-- no translation found for speed_label_very_fast (2265363430784523409) -->
-    <skip />
+    <string name="speed_label_very_slow" msgid="1867055264243608530">"Very slow"</string>
+    <string name="speed_label_slow" msgid="813109590815810235">"Slow"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"OK"</string>
+    <string name="speed_label_medium" msgid="3175763313268941953">"Medium"</string>
+    <string name="speed_label_fast" msgid="7715732164050975057">"Fast"</string>
+    <string name="speed_label_very_fast" msgid="2265363430784523409">"Very fast"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Disconnected"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Disconnecting…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Connecting…"</string>
@@ -59,21 +56,17 @@
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Connected (no message access)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Connected (no phone or media)"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Media audio"</string>
-    <!-- no translation found for bluetooth_profile_headset (7815495680863246034) -->
-    <skip />
+    <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Phone calls"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"File transfer"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Input device"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Internet access"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Contact sharing"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Use for contact sharing"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Internet connection sharing"</string>
-    <!-- no translation found for bluetooth_profile_map (1019763341565580450) -->
-    <skip />
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"Text messages"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM Access"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (5444517801472820055) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (8510588052415438887) -->
-    <skip />
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Connected to media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Connected to phone audio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Connected to file-transfer server"</string>
@@ -336,17 +329,17 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Colour correction"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"This feature is experimental and may affect performance."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Overridden by <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"About <xliff:g id="TIME">%1$s</xliff:g> left"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"About <xliff:g id="TIME">%1$s</xliff:g> left based on your usage"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> left until fully charged"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> left"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"<xliff:g id="TIME">%1$s</xliff:g> left based on your usage"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – about <xliff:g id="TIME">%2$s</xliff:g> left"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - about <xliff:g id="TIME">%2$s</xliff:g> left based on your usage"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> left"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"About <xliff:g id="TIME">^1</xliff:g> left"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"About <xliff:g id="TIME">^1</xliff:g> left based on your usage"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">^1</xliff:g> left until fully charged"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">^1</xliff:g> left"</string>
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"<xliff:g id="TIME">^1</xliff:g> left based on your usage"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> – about <xliff:g id="TIME">^2</xliff:g> left"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - about <xliff:g id="TIME">^2</xliff:g> left based on your usage"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> left"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> until fully charged"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> until fully charged"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Unknown"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Charging"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"charging"</string>
@@ -356,6 +349,10 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlled by admin"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Enabled by admin"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Disabled by admin"</string>
+    <string name="disabled" msgid="9206776641295849915">"Disabled"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Allowed"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Not allowed"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Install unknown apps"</string>
     <string name="home" msgid="3256884684164448244">"Settings Home"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

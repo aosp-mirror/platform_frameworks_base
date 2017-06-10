@@ -28,6 +28,9 @@
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ayixhunyiwe ngenxa yenethiwekhi yekhwalithi ephansi"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Ukwehlulekla koxhumo le-WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Inkinga yokufakazela ubuqiniso"</string>
+    <string name="wifi_cant_connect" msgid="5410016875644565884">"Ayikwazi ukuxhuma"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"Ayikwazi ukuxhumeka ku-\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
+    <string name="wifi_check_password_try_again" msgid="516958988102584767">"Hlola iphasiwedi uphinde uzame futhi"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ayikho ebubanzini"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Ngeke ize ixhumeke ngokuzenzakalela"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Akukho ukufinyelela ku-inthanethi"</string>
@@ -37,18 +40,12 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Kuxhumeke nge-%1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Iyatholakala nge-%1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Kuxhumekile, ayikho i-inthanethi"</string>
-    <!-- no translation found for speed_label_very_slow (1867055264243608530) -->
-    <skip />
-    <!-- no translation found for speed_label_slow (813109590815810235) -->
-    <skip />
-    <!-- no translation found for speed_label_okay (5941436233638654215) -->
-    <skip />
-    <!-- no translation found for speed_label_medium (3175763313268941953) -->
-    <skip />
-    <!-- no translation found for speed_label_fast (7715732164050975057) -->
-    <skip />
-    <!-- no translation found for speed_label_very_fast (2265363430784523409) -->
-    <skip />
+    <string name="speed_label_very_slow" msgid="1867055264243608530">"Phansi kakhulu"</string>
+    <string name="speed_label_slow" msgid="813109590815810235">"Phansi"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"KULUNGILE"</string>
+    <string name="speed_label_medium" msgid="3175763313268941953">"Okumaphakathi"</string>
+    <string name="speed_label_fast" msgid="7715732164050975057">"Sheshayo"</string>
+    <string name="speed_label_very_fast" msgid="2265363430784523409">"Kushesha kakhulu"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Ayixhunyiwe"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Inqamula uxhumano kwi-inthanethi..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Iyaxhuma..."</string>
@@ -59,21 +56,17 @@
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Kuxhunyiwe (akukho ukufinyelela umlayezo)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Ixhunyiwe (ayikho ifoni noma imidiya)"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Umsindo wemidiya"</string>
-    <!-- no translation found for bluetooth_profile_headset (7815495680863246034) -->
-    <skip />
+    <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Amakholi efoni"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Dlulisa ifayela"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Idivaysi yokufakwayo"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Ukufinyelela i-Inthanethi"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Ukwabelana kokuxhumana"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Sebenzisela ukwabelana kokuxhumana"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Ukwabelana ngoxhumano lwe-Inthanethi"</string>
-    <!-- no translation found for bluetooth_profile_map (1019763341565580450) -->
-    <skip />
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"Imilayezo yombhalo"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Ukufinyelela kwe-SIM"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (5444517801472820055) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (8510588052415438887) -->
-    <skip />
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"Umsindo we-HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"Umsindo we-HD"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Ixhume emsindweni wemidiya"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Ixhunywe kumsindo wefoni"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Ixhunywe kwiseva yokudlulisa ifayela"</string>
@@ -336,17 +329,17 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Ukulungiswa kombala"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Lesi sici esesilingo futhi singathinta ukusebenza."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Igitshezwe ngaphezulu yi-<xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Cishe u-<xliff:g id="TIME">%1$s</xliff:g> osele"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Cishe kusele okungu-<xliff:g id="TIME">%1$s</xliff:g> kusukela ekusetshenzisweni kwakho"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> kushiywe ishaja"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> esisele"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"<xliff:g id="TIME">%1$s</xliff:g> esele kusukela ekusetshenzisweni kwakho"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - cishe ngu-<xliff:g id="TIME">%2$s</xliff:g> osele"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - cishe ngu-<xliff:g id="TIME">%2$s</xliff:g> osele kusukela ekusetshenzisweni kwakho"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> okusele"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Cishe u-<xliff:g id="TIME">^1</xliff:g> osele"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Cishe kusele okungu-<xliff:g id="TIME">^1</xliff:g> kusukela ekusetshenzisweni kwakho"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">^1</xliff:g> kushiywe ishaja"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">^1</xliff:g> esisele"</string>
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"<xliff:g id="TIME">^1</xliff:g> esele kusukela ekusetshenzisweni kwakho"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> - cishe ngu-<xliff:g id="TIME">^2</xliff:g> osele"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - cishe ngu-<xliff:g id="TIME">^2</xliff:g> osele kusukela ekusetshenzisweni kwakho"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> okusele"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> kuze ligcwale ngokuphelele"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> kuze ligcwale ngokuphelele"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Akwaziwa"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Iyashaja"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"iyashaja"</string>
@@ -356,6 +349,10 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kulawulwa umqondisi"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Kunikwe amandla umlawuli"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Kukhutshazwe umlawuli"</string>
+    <string name="disabled" msgid="9206776641295849915">"Akusebenzi"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Kuvumelekile"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Akuvumelekile"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Faka izinhlelo zokusebenza ezingaziwa"</string>
     <string name="home" msgid="3256884684164448244">"Ikhaya lezilungiselelo"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
