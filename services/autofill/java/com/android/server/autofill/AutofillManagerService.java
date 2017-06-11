@@ -19,10 +19,10 @@ package com.android.server.autofill;
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 
+import static com.android.server.autofill.Helper.bundleToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
-import static com.android.server.autofill.Helper.bundleToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,6 +58,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillManagerInternal;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManager;
 import android.view.autofill.IAutoFillManagerClient;
@@ -251,6 +252,7 @@ public final class AutofillManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(AUTOFILL_MANAGER_SERVICE, new AutoFillManagerServiceStub());
+        publishLocalService(AutofillManagerInternal.class, new LocalService());
     }
 
     @Override
@@ -460,6 +462,15 @@ public final class AutofillManagerService extends SystemService {
             if (!service.isEnabled()) {
                 removeCachedServiceLocked(userId);
             }
+        }
+    }
+
+    private final class LocalService extends AutofillManagerInternal {
+
+        @Override
+        public void onBackKeyPressed() {
+            if (sDebug) Slog.d(TAG, "onBackKeyPressed()");
+            mUi.hideAll(null);
         }
     }
 

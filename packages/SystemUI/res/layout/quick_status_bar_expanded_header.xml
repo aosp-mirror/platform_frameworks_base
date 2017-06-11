@@ -54,15 +54,10 @@
             android:textColor="?android:attr/textColorPrimary"
             android:singleLine="true" />
 
-        <FrameLayout
-            android:id="@+id/system_icons_container"
-            android:layout_width="wrap_content"
+        <com.android.systemui.BatteryMeterView android:id="@+id/battery"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical">
-
-            <include layout="@layout/system_icons" />
-
-        </FrameLayout>
+            android:layout_width="wrap_content"
+            />
 
         <com.android.systemui.statusbar.policy.Clock
             android:id="@+id/clock"

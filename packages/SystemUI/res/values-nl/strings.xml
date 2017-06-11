@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Zoeken"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Veeg omhoog voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Veeg naar links voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"U wordt niet gestoord door geluiden en trillingen, behalve voor alarmen, herinneringen, afspraken en bellers die u specificeert."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Je wordt niet gestoord door geluiden en trillingen, behalve bij alarmen, herinneringen, afspraken en specifieke bellers die je selecteert. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Je wordt niet gestoord door geluiden en trillingen, behalve bij alarmen. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Aanpassen"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor alarmen, muziek, video\'s en games. U kunt wel nog steeds bellen."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor alarmen, muziek, video\'s en games."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nee, bedankt"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configureren"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Nu uitschakelen"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Nu uitschakelen"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Uitvouwen"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Samenvouwen"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Scherm is vastgezet"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Je ontvangt deze meldingen niet meer"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> meldingscategorieën"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Deze app heeft geen meldingscategorieën"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Meldingen van deze app kunnen niet worden uitgeschakeld"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">1 van <xliff:g id="NUMBER_1">%d</xliff:g> meldingscategorieën van deze app</item>
       <item quantity="one">1 van <xliff:g id="NUMBER_0">%d</xliff:g> meldingscategorie van deze app</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"snooze-opties voor meldingen"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ONGEDAAN MAKEN"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Snoozefunctie <xliff:g id="TIME_AMOUNT">%1$s</xliff:g> actief"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d uur</item>
+      <item quantity="one">%d uur</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d minuten</item>
+      <item quantity="one">%d minuut</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Accugebruik"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterijbesparing niet beschikbaar tijdens opladen"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterijbesparing"</string>

@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Isevisi ayilungiselelwe."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ngeke ukwazi ukuguqul izilungiselelo zemininingwane yoshayayo."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Ayikho isevisi yedatha"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Ayikho isevisi yesimo esiphuthumayo"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Akukho ukushaya kwesimo esiphuthumayo"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ayikho isevisi yezwi"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ayikho isevisi yezwi/yesimo esiphuthumayo"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Inkampani yakho yenethiwekhi imise okwesikhashana isevisi yedatha kule ndawo"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Inkampani yakho yenethiwekhi imise okwesikhashana amakholi esimo esiphuthumayo kule ndawo"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Inkampani yakho yenethiwekhi imise okwesikhashana amakholi ezwi kule ndawo"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Inkampani yakho yenethiwekhi imise okwesikhashana amakholi ezwi nawezimo eziphuthumayo kule ndawo"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Okwesikhashana akunikezwa inethiwekhi yeselula endaweni yakho"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ayikwazi ukufinyelela inethiwekhi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Ukuze kuthuthukiswe ukwamukelwa, zama ukushintsha uhlobo olukhethiwe kusistimu &gt; Inethiwekhi ne-inthanethi &gt; amanethiwekhi eselula &gt; uhlobo oluncanyelwayo lwenethiwekhi."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Izexwayiso"</string>
@@ -1206,8 +1203,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Thepha ukuze ukhethe ulimi nesakhiwo"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Bonisa ngaphezulu kwezinye izinhlelo zokusebenza"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ukubonisa ngaphezu kwezinye izinhlelo zokusebenza"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ibonisa ngaphezu kwezinye izinhlelo zokusebenza"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Uma ungafuni ukuthi i-<xliff:g id="NAME">%s</xliff:g> isebenzise lesi sici, thepha ukuze uvule izilungiselelo bese usivale."</string>

@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import static android.os.Build.VERSION_CODES.O;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -293,21 +291,9 @@ class DayPickerView extends ViewGroup {
      * @param timeInMillis the target day in milliseconds
      * @param animate whether to smooth scroll to the new position
      * @param setSelected whether to set the specified day as selected
-     *
-     * @throws IllegalArgumentException if the build version is greater than
-     *         {@link android.os.Build.VERSION_CODES#N_MR1} and the provided timeInMillis is before
-     *         the range start or after the range end.
      */
     private void setDate(long timeInMillis, boolean animate, boolean setSelected) {
         getTempCalendarForTime(timeInMillis);
-
-        final int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion >= O) {
-            if (mTempCalendar.before(mMinDate) || mTempCalendar.after(mMaxDate)) {
-                throw new IllegalArgumentException("timeInMillis must be between the values of "
-                        + "getMinDate() and getMaxDate()");
-            }
-        }
 
         if (setSelected) {
             mSelectedDay.setTimeInMillis(timeInMillis);
@@ -366,6 +352,13 @@ class DayPickerView extends ViewGroup {
      */
     public void onRangeChanged() {
         mAdapter.setRange(mMinDate, mMaxDate);
+
+        // Clamp the selected day to the new min/max.
+        if (mSelectedDay.before(mMinDate)) {
+            mSelectedDay.setTimeInMillis(mMinDate.getTimeInMillis());
+        } else if (mSelectedDay.after(mMaxDate)) {
+            mSelectedDay.setTimeInMillis(mMaxDate.getTimeInMillis());
+        }
 
         // Changing the min/max date changes the selection position since we
         // don't really have stable IDs. Jumps immediately to the new position.

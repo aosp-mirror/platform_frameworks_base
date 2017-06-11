@@ -358,7 +358,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Vyhledávání"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Přejeďte prstem nahoru: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Přejeďte prstem doleva: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Nebudou vás rušit zvuky ani vibrace s výjimkou budíků, upozornění, událostí a volajících, které zadáte."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Nebudou vás rušit zvuky ani vibrace s výjimkou budíků, upozornění, událostí a vybraných volajících. Nadále uslyšíte veškerý obsah, který si sami pustíte (např. hudba, videa nebo hry)."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Nebudou vás rušit zvuky ani vibrace s výjimkou budíků. Nadále uslyšíte veškerý obsah, který si sami pustíte (např. hudba, videa nebo hry)."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Přizpůsobit"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"V tomto režimu budou blokovány VŠECHNY zvuky a vibrace, včetně těch z budíků, hudby, videí a her. Telefonovat budete moci i nadále."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"V tomto režimu budou blokovány VŠECHNY zvuky a vibrace, včetně těch z budíků, hudby, videí a her."</string>
@@ -480,7 +481,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ne, děkuji"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Nastavit"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Ukončit"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Vypnout"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Rozbalit"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sbalit"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Obrazovka je připnuta"</string>
@@ -558,8 +559,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Tato oznámení již nebudete dostávat"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Kategorie oznámení: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Tato aplikace nemá kategorie oznámení"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Oznámení této aplikace nelze vypnout"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="few">1 ze <xliff:g id="NUMBER_1">%d</xliff:g> kategorií oznámení z této aplikace</item>
       <item quantity="many">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorie oznámení z této aplikace</item>
@@ -585,8 +585,18 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"Možnosti odložení oznámení"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"VRÁTIT ZPĚT"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Odloženo o <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="few">%d hodiny</item>
+      <item quantity="many">%d hodiny</item>
+      <item quantity="other">%d hodin</item>
+      <item quantity="one">%d hodina</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="few">%d minuty</item>
+      <item quantity="many">%d minuty</item>
+      <item quantity="other">%d minut</item>
+      <item quantity="one">%d minuta</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Využití baterie"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Spořič baterie při nabíjení není k dispozici."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Spořič baterie"</string>

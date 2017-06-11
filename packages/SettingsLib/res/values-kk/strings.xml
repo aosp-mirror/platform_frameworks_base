@@ -28,6 +28,12 @@
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Желі байланысының сапасы төмен болғандықтан қосылмады"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi байланысының қатесі"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Растау мәселесі"</string>
+    <!-- no translation found for wifi_cant_connect (5410016875644565884) -->
+    <skip />
+    <!-- no translation found for wifi_cant_connect_to_ap (1222553274052685331) -->
+    <skip />
+    <!-- no translation found for wifi_check_password_try_again (516958988102584767) -->
+    <skip />
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Аумақта жоқ"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Автоматты қосылмайды"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"Интернетпен байланыс жоқ"</string>
@@ -37,18 +43,13 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s арқылы қосылған"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s арқылы қолжетімді"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Қосылған, интернет жоқ"</string>
-    <!-- no translation found for speed_label_very_slow (1867055264243608530) -->
+    <string name="speed_label_very_slow" msgid="1867055264243608530">"Өте баяу"</string>
+    <string name="speed_label_slow" msgid="813109590815810235">"Баяу"</string>
+    <!-- no translation found for speed_label_okay (2331665440671174858) -->
     <skip />
-    <!-- no translation found for speed_label_slow (813109590815810235) -->
-    <skip />
-    <!-- no translation found for speed_label_okay (5941436233638654215) -->
-    <skip />
-    <!-- no translation found for speed_label_medium (3175763313268941953) -->
-    <skip />
-    <!-- no translation found for speed_label_fast (7715732164050975057) -->
-    <skip />
-    <!-- no translation found for speed_label_very_fast (2265363430784523409) -->
-    <skip />
+    <string name="speed_label_medium" msgid="3175763313268941953">"Орташа"</string>
+    <string name="speed_label_fast" msgid="7715732164050975057">"Жылдам"</string>
+    <string name="speed_label_very_fast" msgid="2265363430784523409">"Өте жылдам"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Ажыратылған"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Ажыратылуда…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Жалғауда..."</string>
@@ -59,21 +60,17 @@
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Жалғанған (хабарлар қол жетімсіз)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Жалғанған (телефон және медиа жоқ)"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Meдиа аудиосы"</string>
-    <!-- no translation found for bluetooth_profile_headset (7815495680863246034) -->
-    <skip />
+    <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Телефон қоңыраулары"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Файл жіберу"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Кіріс құрылғысы"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Интернетке қосылу"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Контактіні бөлісу"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Контактіні бөлісу үшін пайдалану"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Интернет байланысын ортақ қолдану"</string>
-    <!-- no translation found for bluetooth_profile_map (1019763341565580450) -->
-    <skip />
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"Мәтіндік хабарлар"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM картасына кіру"</string>
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality (5444517801472820055) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_a2dp_high_quality_unknown_codec (8510588052415438887) -->
-    <skip />
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD форматты аудиомазмұн: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD форматты аудиомазмұн"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Медиа аудиосына жалғанған"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Телефон аудиосына қосылған"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Файл жіберу серверіне жалғанған"</string>
@@ -336,17 +333,17 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Түсті түзету"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Бұл мүмкіндік эксперименттік болып табылады және өнімділікке әсер етуі мүмкін."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> үстінен басқан"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Қалған <xliff:g id="TIME">%1$s</xliff:g> туралы"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Пайдалану негізінде шамамен <xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Толық зарядқа <xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"Пайдалану негізінде <xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> – шамамен <xliff:g id="TIME">%2$s</xliff:g> қалды"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">%1$s</xliff:g> - пайдалану негізінде шамамен <xliff:g id="TIME">%2$s</xliff:g> қалды"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> қалды"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Қалған <xliff:g id="TIME">^1</xliff:g> туралы"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Пайдалану негізінде шамамен <xliff:g id="TIME">^1</xliff:g> қалды"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Толық зарядқа <xliff:g id="TIME">^1</xliff:g> қалды"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">^1</xliff:g> қалды"</string>
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"Пайдалану негізінде <xliff:g id="TIME">^1</xliff:g> қалды"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> – шамамен <xliff:g id="TIME">^2</xliff:g> қалды"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - пайдалану негізінде шамамен <xliff:g id="TIME">^2</xliff:g> қалды"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> қалды"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – толық зарядталғанға дейін <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – толық зарядталғанға дейін <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Белгісіз"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Зарядталуда"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"зарядталуда"</string>
@@ -356,6 +353,10 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Әкімші басқарады"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Әкімші қосқан"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Әкімші өшірген"</string>
+    <string name="disabled" msgid="9206776641295849915">"Өшірілген"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Рұқсат етілген"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Рұқсат етілмеген"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Белгісіз қолданбаларды орнату"</string>
     <string name="home" msgid="3256884684164448244">"Параметрлер негізгі беті"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

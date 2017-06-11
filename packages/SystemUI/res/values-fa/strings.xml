@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"جستجو"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"لغزاندن به بالا برای <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"لغزاندن به چپ برای <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"صداها و لرزش‌هایی به جز هشدارها، یادآوری‌ها، رویدادها و تماس‌گیرنده‌هایی که مشخص می‌کنید، مزاحم شما نمی‌شوند."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"بجز هشدارها، یادآوری‌ها، رویدادها و تماس‌گیرندگانی که خودتان مشخص می‌کنید، هیچ صدا و لرزشی نخواهید داشت. همچنان صدای مواردی را که پخش می‌کنید می‌شنوید از جمله صدای موسیقی، ویدیو و بازی."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"بجز هشدارها، هیچ صدا و لرزشی نخواهید داشت. همچنان صدای مواردی را که پخش می‌کنید می‌شنوید از جمله صدای موسیقی، ویدیو و بازی."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"سفارشی کردن"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"این کار «همه» صداها و لرزش‌ها از جمله هشدارها، موسیقی، ویدئوها و بازی‌ها را مسدود می‌کند. همچنان می‌توانید تماس تلفنی برقرار کنید."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"این کار «همه» صداها و لرزش‌ها از جمله هشدارها، موسیقی، ویدئوها و بازی‌ها را مسدود می‌کند."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"نه متشکرم"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"راه‌اندازی"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. ‏<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"اکنون به پایان برسد"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"اکنون خاموش کنید"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"بزرگ کردن"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"کوچک کردن"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"صفحه نمایش پین شد"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"دیگر این اعلان‌ها را دریافت نخواهید کرد"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> دسته اعلان"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"این برنامه دسته اعلان ندارد"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"نمی‌توان اعلان‌های این برنامه را خاموش کرد"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">۱ از <xliff:g id="NUMBER_1">%d</xliff:g> دسته اعلان این برنامه</item>
       <item quantity="other">۱ از <xliff:g id="NUMBER_1">%d</xliff:g> دسته اعلان این برنامه</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"گزینه‌های تعویق اعلان"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"واگرد"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> به تعویق افتاد"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">‏%d ساعت</item>
+      <item quantity="other">‏%d ساعت</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">‏%d دقیقه</item>
+      <item quantity="other">‏%d دقیقه</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"مصرف باتری"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"هنگام شارژ شدن، «بهینه‌سازی باتری» در دسترس نیست"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"بهینه‌سازی باتری"</string>
@@ -708,7 +714,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"باز کردن تنظیمات سریع."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"بستن تنظیمات سریع."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"تنظیم زنگ ساعت."</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"واردشده به سیستم به‌عنوان <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"با <xliff:g id="ID_1">%s</xliff:g> به سیستم وارد شده‌اید"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"عدم اتصال به اینترنت."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"باز کردن جزئیات."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"باز کردن تنظیمات <xliff:g id="ID_1">%s</xliff:g>."</string>

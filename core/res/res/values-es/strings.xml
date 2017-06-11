@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"El servicio no se suministra."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"No puedes modificar el ID de emisor."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Sin servicio de datos"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Sin servicio de emergencia"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"No se pueden hacer llamadas de emergencia"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Sin servicio de voz"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Sin servicio de emergencia ni de voz"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Tu operador ha suspendido temporalmente el servicio de datos en esta ubicación"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Tu operador ha suspendido temporalmente las llamadas de emergencia en esta ubicación"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Tu operador ha suspendido temporalmente las llamadas de voz en esta ubicación"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Tu operador ha suspendido temporalmente las llamadas de emergencia y de voz en esta ubicación"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"La red móvil disponible en tu ubicación no ofrece esta opción de forma temporal"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No se puede establecer conexión con la red"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para mejorar la recepción, prueba a cambiar el tipo de red seleccionado en Sistema &gt; Red e Internet &gt; Redes móviles &gt; Tipo de red preferido."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
@@ -1206,8 +1203,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca para seleccionar el idioma y el diseño"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Mostrar sobre otras aplicaciones"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras aplicaciones"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> se muestra sobre otras apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Si no quieres que <xliff:g id="NAME">%s</xliff:g> utilice esta función, toca la notificación para abrir los ajustes y desactivarla."</string>

@@ -22,6 +22,16 @@ import com.android.systemui.statusbar.policy.MobileSignalController.MobileIconGr
 class TelephonyIcons {
     //***** Data connection icons
 
+    static final int QS_DATA_G = R.drawable.ic_qs_signal_g;
+    static final int QS_DATA_3G = R.drawable.ic_qs_signal_3g;
+    static final int QS_DATA_E = R.drawable.ic_qs_signal_e;
+    static final int QS_DATA_H = R.drawable.ic_qs_signal_h;
+    static final int QS_DATA_1X = R.drawable.ic_qs_signal_1x;
+    static final int QS_DATA_4G = R.drawable.ic_qs_signal_4g;
+    static final int QS_DATA_4G_PLUS = R.drawable.ic_qs_signal_4g_plus;
+    static final int QS_DATA_LTE = R.drawable.ic_qs_signal_lte;
+    static final int QS_DATA_LTE_PLUS = R.drawable.ic_qs_signal_lte_plus;
+
     static final int FLIGHT_MODE_ICON = R.drawable.stat_sys_airplane_mode;
 
     static final int ICON_LTE = R.drawable.stat_sys_data_fully_connected_lte;
@@ -35,6 +45,8 @@ class TelephonyIcons {
     static final int ICON_1X = R.drawable.stat_sys_data_fully_connected_1x;
 
     static final int ICON_DATA_DISABLED = R.drawable.stat_sys_data_disabled;
+
+    static final int QS_ICON_DATA_DISABLED = R.drawable.ic_qs_data_disabled;
 
     static final MobileIconGroup CARRIER_NETWORK_CHANGE = new MobileIconGroup(
             "CARRIER_NETWORK_CHANGE",
@@ -63,7 +75,7 @@ class TelephonyIcons {
             R.string.accessibility_data_connection_3g,
             TelephonyIcons.ICON_3G,
             true,
-            TelephonyIcons.ICON_3G
+            TelephonyIcons.QS_DATA_3G
             );
 
     static final MobileIconGroup WFC = new MobileIconGroup(
@@ -102,7 +114,7 @@ class TelephonyIcons {
             R.string.accessibility_data_connection_edge,
             TelephonyIcons.ICON_E,
             false,
-            TelephonyIcons.ICON_E
+            TelephonyIcons.QS_DATA_E
             );
 
     static final MobileIconGroup ONE_X = new MobileIconGroup(
@@ -117,7 +129,7 @@ class TelephonyIcons {
             R.string.accessibility_data_connection_cdma,
             TelephonyIcons.ICON_1X,
             true,
-            TelephonyIcons.ICON_1X
+            TelephonyIcons.QS_DATA_1X
             );
 
     static final MobileIconGroup G = new MobileIconGroup(
@@ -132,7 +144,7 @@ class TelephonyIcons {
             R.string.accessibility_data_connection_gprs,
             TelephonyIcons.ICON_G,
             false,
-            TelephonyIcons.ICON_G
+            TelephonyIcons.QS_DATA_G
             );
 
     static final MobileIconGroup H = new MobileIconGroup(
@@ -147,7 +159,7 @@ class TelephonyIcons {
             R.string.accessibility_data_connection_3_5g,
             TelephonyIcons.ICON_H,
             false,
-            TelephonyIcons.ICON_H
+            TelephonyIcons.QS_DATA_H
             );
 
     static final MobileIconGroup FOUR_G = new MobileIconGroup(
@@ -162,7 +174,7 @@ class TelephonyIcons {
             R.string.accessibility_data_connection_4g,
             TelephonyIcons.ICON_4G,
             true,
-            TelephonyIcons.ICON_4G
+            TelephonyIcons.QS_DATA_4G
             );
 
     static final MobileIconGroup FOUR_G_PLUS = new MobileIconGroup(
@@ -177,7 +189,7 @@ class TelephonyIcons {
             R.string.accessibility_data_connection_4g_plus,
             TelephonyIcons.ICON_4G_PLUS,
             true,
-            TelephonyIcons.ICON_4G_PLUS
+            TelephonyIcons.QS_DATA_4G_PLUS
             );
 
     static final MobileIconGroup LTE = new MobileIconGroup(
@@ -192,7 +204,7 @@ class TelephonyIcons {
             R.string.accessibility_data_connection_lte,
             TelephonyIcons.ICON_LTE,
             true,
-            TelephonyIcons.ICON_LTE
+            TelephonyIcons.QS_DATA_LTE
             );
 
     static final MobileIconGroup LTE_PLUS = new MobileIconGroup(
@@ -207,7 +219,7 @@ class TelephonyIcons {
             R.string.accessibility_data_connection_lte_plus,
             TelephonyIcons.ICON_LTE_PLUS,
             true,
-            TelephonyIcons.ICON_LTE_PLUS
+            TelephonyIcons.QS_DATA_LTE_PLUS
             );
 
     static final MobileIconGroup DATA_DISABLED = new MobileIconGroup(
@@ -222,7 +234,7 @@ class TelephonyIcons {
             R.string.accessibility_cell_data_off,
             TelephonyIcons.ICON_DATA_DISABLED,
             false,
-            TelephonyIcons.ICON_DATA_DISABLED
+            TelephonyIcons.QS_ICON_DATA_DISABLED
             );
 }
 

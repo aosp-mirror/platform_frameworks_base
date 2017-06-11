@@ -288,6 +288,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     public SessionInfo generateInfo() {
+        return generateInfo(true);
+    }
+
+    public SessionInfo generateInfo(boolean includeIcon) {
         final SessionInfo info = new SessionInfo();
         synchronized (mLock) {
             info.sessionId = sessionId;
@@ -302,7 +306,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.installReason = params.installReason;
             info.sizeBytes = params.sizeBytes;
             info.appPackageName = params.appPackageName;
-            info.appIcon = params.appIcon;
+            if (includeIcon) {
+                info.appIcon = params.appIcon;
+            }
             info.appLabel = params.appLabel;
         }
         return info;

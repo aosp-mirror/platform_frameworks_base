@@ -328,11 +328,12 @@ static void FromColor_F16_Raw(void* dst, const SkColor src[], int width,
     uint64_t* d = (uint64_t*)dst;
 
     for (int i = 0; i < width; i++) {
-        const float* color = SkColor4f::FromColor(*src++).vec();
+        const SkColor4f color = SkColor4f::FromColor(*src++);
         uint16_t* scratch = reinterpret_cast<uint16_t*>(d++);
-        for (int i = 0; i < 4; ++i) {
-            scratch[i] = SkFloatToHalf(color[i]);
-        }
+        scratch[0] = SkFloatToHalf(color.fR);
+        scratch[1] = SkFloatToHalf(color.fG);
+        scratch[2] = SkFloatToHalf(color.fB);
+        scratch[3] = SkFloatToHalf(color.fA);
     }
 }
 

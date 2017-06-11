@@ -7,6 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"আপনার মোবাইল ডেটা নিষ্ক্রিয় করা হয়েছে"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s এর ওয়েবসাইটটি দেখার জন্য ট্যাপ করুন"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"অনুগ্রহ করে আপনার পরিষেবা প্রদানকারী %s এর সাথে যোগাযোগ করুন"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"কোনও মোবাইল ডেটা সংযোগ নেই"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s এর মাধ্যমে ডেটা অথবা রোমিং পরিকল্পনা যোগ করুন"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"মোবাইল ডেটার স্ট্যাটাস"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"মোবাইল নেটওয়ার্কে প্রবেশ করুন"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"আপনি যে নেটওয়ার্কে যোগ দেওয়ার চেষ্টা করছেন সেটিতে নিরাপত্তাজনিত সমস্যা আছে।"</string>

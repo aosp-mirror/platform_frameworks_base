@@ -7,6 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Mobilní data byla deaktivována"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Klepnutím přejdete na web %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Kontaktujte poskytovatele služeb %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Žádné připojení přes mobilní data"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Přidejte data nebo tarif roamingu prostřednictvím aplikace %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Stav mobilních dat"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Přihlásit se k mobilní síti"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Síť, ke které se pokoušíte připojit, má bezpečnostní problémy."</string>

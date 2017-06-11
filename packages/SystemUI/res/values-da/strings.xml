@@ -259,10 +259,10 @@
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Indstillinger for <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skærmen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skærmen er nu låst i liggende retning."</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skærmen er nu låst i stående retning."</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skærmen er nu låst i stående format."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Skærmen roteres nu automatisk."</string>
-    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Skærmen er nu låst i liggende tilstand."</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Skærmen er nu låst i stående tilstand."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Skærmen er nu låst i liggende format."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Skærmen er nu låst i stående format."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Dessertcase"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Pauseskærm"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
@@ -279,7 +279,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Roter skærmen automatisk"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"Tilstanden <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotationen er låst"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Stående"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Stående format"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Liggende"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Inputmetode"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Placering"</string>
@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Søgning"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Glid op for at <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Glid til venstre for at <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Du bliver ikke forstyrret af lyde og vibrationer undtagen fra de alarmer, påmindelser, begivenheder og opkaldere, som du angiver."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Du bliver ikke forstyrret af lyde eller vibrationer, undtagen fra alarmer, påmindelser, begivenheder og opkald fra personer, du angiver. Du kan stadig høre alt, du vælger at afspille, bl.a. musik samt lyd i videoer og spil."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Du bliver ikke forstyrret af lyde eller vibrationer, undtagen fra alarmer. Du kan stadig høre alt, du vælger at afspille, bl.a. musik samt lyd i videoer og spil."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Tilpas"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Dette blokerer ALLE lyde og vibrationer, bl.a. fra alarmer, musik, videoer og spil. Du vil stadig kunne foretage telefonopkald."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Dette blokerer ALLE lyde og vibrationer, bl.a. fra alarmer, musik, videoer og spil."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nej tak"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Konfigurer"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Afslut nu"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Deaktiver nu"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Udvid"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Skjul"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skærmen er fastgjort"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Du modtager ikke længere disse underretninger"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> underretningskategorier"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Denne app har ingen underretningskategorier"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Underretninger fra denne app kan ikke deaktiveres"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">1 ud af <xliff:g id="NUMBER_1">%d</xliff:g> underretningskategori fra denne app</item>
       <item quantity="other">1 ud af <xliff:g id="NUMBER_1">%d</xliff:g> underretningskategorier fra denne app</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"Indstillinger for udsættelse"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"FORTRYD"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Udsat i <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">%d time</item>
+      <item quantity="other">%d timer</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">%d minut</item>
+      <item quantity="other">%d minutter</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batteriforbrug"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterisparefunktionen er ikke tilgængelig under opladning"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterisparefunktion"</string>
