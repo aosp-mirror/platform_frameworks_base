@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"സേവനം വ്യവസ്ഥ ചെയ്‌തിട്ടില്ല."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"നിങ്ങൾക്ക് കോളർ ഐഡി ക്രമീകരണം മാറ്റാനാവില്ല."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ഡാറ്റ ‌സേവനം ലഭ്യമല്ല"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"അടിയന്തിര സേവനമില്ല"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"എമർജൻസി കോളിംഗ് സാധ്യമല്ല"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"വോയ്സ് സേവനമില്ല"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"വോയ്സ്/അടിയന്തിര സേവനമില്ല"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"നിങ്ങളുടെ കാരിയർ ഈ ലൊക്കേഷനിൽ ഡാറ്റാ സേവനം തൽക്കാലം നിർത്തിവച്ചിരിക്കുകയാണ്"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"നിങ്ങളുടെ കാരിയർ ഈ ലൊക്കേഷനിൽ അടിയന്തിര കോളുകൾ തൽക്കാലം നിർത്തിവച്ചിരിക്കുകയാണ്"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"നിങ്ങളുടെ കാരിയർ ഈ ലൊക്കേഷനിൽ വോയ്സ് കോളുകൾ തൽക്കാലം നിർത്തിവച്ചിരിക്കുകയാണ്"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ഈ ലൊക്കേഷനിൽ നിങ്ങളുടെ കാരിയർ വോയ്സ് കോളുകളും അടിയന്തിര കോളുകളും തൽക്കാലം നിർത്തിവച്ചിരിക്കുകയാണ്"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"നിങ്ങളുടെ ലൊക്കേഷനിൽ മൊബൈൽ നെറ്റ്‌വര്‍ക്ക് താൽക്കാലികമായി ലഭ്യമല്ല"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യാനാവുന്നില്ല"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"സ്വീകരണം മെച്ചപ്പെടുത്തുന്നതിന് സിസ്റ്റം &gt; നെറ്റ്‌വർക്കും ഇന്റർനെറ്റും &gt; മൊബൈൽ നെറ്റ്‌വർക്കുകൾ &gt; തിരഞ്ഞെടുത്ത നെറ്റ്‌വർക്ക് തരം എന്നതിൽ തിരഞ്ഞെടുത്തിരിക്കുന്ന തരം മാറ്റിക്കൊണ്ട് ശ്രമിച്ചുനോക്കുക."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"അലേർട്ടുകൾ"</string>
@@ -1205,8 +1202,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ഭാഷയും ലേഔട്ടും തിരഞ്ഞെടുക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"മറ്റ് ആപ്‌സിന് മുകളിൽ പ്രദർശിപ്പിക്കുക"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ഈ ഫീച്ചർ ഉപയോഗിക്കുന്നതിൽ നിങ്ങൾക്ക് താൽപ്പര്യമില്ലെങ്കിൽ, ടാപ്പുചെയ്‌ത് ക്രമീകരണം തുറന്ന് അത് ഓഫാക്കുക."</string>

@@ -92,13 +92,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Paslauga neteikiama."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Negalima pakeisti skambinančiojo ID nustatymo."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Duomenų paslauga neteikiama"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Skambučių pagalbos numeriais paslauga neteikiama"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Nėra skambučių pagalbos numeriu paslaugos"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Balso skambučių paslauga neteikiama"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Balso skambučių / skambučių pagalbos numeriais paslauga neteikiama"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Jūsų operatorius laikinai sustabdė duomenų paslaugą šioje vietovėje"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Jūsų operatorius laikinai sustabdė skambučius pagalbos numeriais šioje vietovėje"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Jūsų operatorius laikinai sustabdė balso skambučius šioje vietovėje"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Jūsų operatorius laikinai sustabdė balso skambučius ir skambučius pagalbos numeriais šioje vietovėje"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Laikinai nesiūloma mobiliojo ryšio tinkle jūsų vietovėje"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nepavyko pasiekti tinklo"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Kad pagerintumėte ryšį, pabandykite pakeisti tipą, pasirinktą skiltyje „Nustatymai“ &gt; „Tinklas ir internetas“ &gt; „Mobiliojo ryšio tinklai“ &gt; „Pageidaujamas tinklo tipas“."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Įspėjimai"</string>
@@ -1248,8 +1245,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Palieskite, kad pasirinktumėte kalbą ir išdėstymą"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCČDEĘĖFGHIĮYJKLMNOPRSŠTUŲŪVZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789AĄBCČDEĘĖFGHIĮYJKLMNOPRSŠTUŲŪVZŽ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Rodoma virš kitų programų"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> rodomi virš kitų programų"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> rodomi virš kitų programų."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jei nenorite, kad <xliff:g id="NAME">%s</xliff:g> naudotų šią funkciją, palietę atidarykite nustatymus ir išjunkite ją."</string>

@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Η υπηρεσία δεν προβλέπεται."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Δεν μπορείτε να αλλάξετε τη ρύθμιση του αναγνωριστικού καλούντος."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Δεν υπάρχει υπηρεσία δεδομένων"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Δεν υπάρχει υπηρεσία έκτακτης ανάγκης"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Αδυναμία πραγματοποίησης κλήσεων έκτακτης ανάγκης"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Δεν υπάρχει φωνητική υπηρεσία"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Δεν υπάρχει φωνητική υπηρεσία/υπηρεσία έκτακτης ανάγκης"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Η υπηρεσία δεδομένων έχει τεθεί προσωρινά σε αναστολή από την εταιρεία κινητής τηλεφωνίας σας σε αυτήν την περιοχή"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Οι κλήσεις έκτακτης ανάγκης έχουν τεθεί προσωρινά σε αναστολή από την εταιρεία κινητής τηλεφωνίας σας σε αυτήν την περιοχή"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Οι φωνητικές κλήσεις έχουν τεθεί προσωρινά σε αναστολή από την εταιρεία κινητής τηλεφωνίας σας"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Οι φωνητικές κλήσεις και οι κλήσεις έκτακτης ανάγκης έχουν τεθεί προσωρινά σε αναστολή από την εταιρεία κινητής τηλεφωνίας σας σε αυτήν την περιοχή"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Δεν προσφέρεται προσωρινά από το δίκτυο κινητής τηλεφωνίας στην τοποθεσία σας"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Δεν είναι δυνατή η σύνδεση στο δίκτυο"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Για να βελτιώσετε τη λήψη, δοκιμάστε να αλλάξετε τον επιλεγμένο τύπο από το Σύστημα &gt; Δίκτυο και διαδίκτυο &gt; Δίκτυα κινητής τηλεφωνίας &gt; Προτιμώμενος τύπος δικτύου."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ειδοποιήσεις"</string>
@@ -1204,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Πατήστε για να επιλέξετε γλώσσα και διάταξη"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Εμφάνιση πάνω σε άλλες εφαρμογές"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Η εφαρμογή <xliff:g id="NAME">%s</xliff:g> προβάλλεται πάνω από άλλες εφαρμογές"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"Η εφαρμογή <xliff:g id="NAME">%s</xliff:g> επικαλύπτει άλλες"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Εάν δεν θέλετε να χρησιμοποιείται αυτή η λειτουργία από την εφαρμογή <xliff:g id="NAME">%s</xliff:g>, πατήστε για να ανοίξετε τις ρυθμίσεις και απενεργοποιήστε την."</string>

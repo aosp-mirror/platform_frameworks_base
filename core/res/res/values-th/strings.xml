@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ไม่มีการนำเสนอบริการ"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"คุณไม่สามารถเปลี่ยนการตั้งค่าหมายเลขผู้โทร"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ไม่มีบริการอินเทอร์เน็ต"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"ไม่มีบริการฉุกเฉิน"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"ไม่มีหมายเลขฉุกเฉิน"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ไม่มีบริการเสียง"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ไม่มีบริการเสียง/บริการฉุกเฉิน"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"ผู้ให้บริการของคุณระงับบริการอินเทอร์เน็ตที่นี่ชั่วคราว"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"ผู้ให้บริการของคุณระงับหมายเลขฉุกเฉินที่นี่ชั่วคราว"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"ผู้ให้บริการของคุณระงับการโทรด้วยเสียงที่นี่ชั่วคราว"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"ผู้ให้บริการของคุณระงับการโทรด้วยเสียงและหมายเลขฉุกเฉินที่นี่ชั่วคราว"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"งดให้บริการชั่วคราวโดยเครือข่ายมือถือในตำแหน่งของคุณ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"เข้าถึงเครือข่ายไม่ได้"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"เพื่อให้การรับสัญญาณดีขึ้น ลองเปลี่ยนประเภทที่เลือกใน \"การตั้งค่า\" &gt; \"เครือข่ายและอินเทอร์เน็ต\" &gt; \"เครือข่ายมือถือ\" &gt; \"ประเภทเครือข่ายที่ต้องการ\""</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"การแจ้งเตือน"</string>
@@ -1204,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"แตะเพื่อเลือกภาษาและรูปแบบ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"แสดงทับแอปอื่นๆ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> แสดงทับแอปอื่นๆ"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> กำลังแสดงทับแอปอื่นๆ"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้ฟีเจอร์นี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดฟีเจอร์"</string>

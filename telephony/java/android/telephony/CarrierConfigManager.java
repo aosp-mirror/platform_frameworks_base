@@ -1292,6 +1292,15 @@ public class CarrierConfigManager {
             "network_notification_delay_int";
 
     /**
+     * When {@code true}, the carrier allows the user of the
+     * {@link TelephonyManager#sendUssdRequest(String, TelephonyManager.UssdResponseCallback,
+     * Handler)} API to perform USSD requests.  {@code True} by default.
+     * @hide
+     */
+    public static final String KEY_ALLOW_USSD_REQUESTS_VIA_TELEPHONY_MANAGER_BOOL =
+            "allow_ussd_requests_via_telephony_manager_bool";
+
+    /**
      * Indicates whether the carrier supports 3gpp call forwarding MMI codes while roaming. If
      * false, the user will be notified that call forwarding is not available when the MMI code
      * fails.
@@ -1648,6 +1657,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, false);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
+        sDefaults.putBoolean(KEY_ALLOW_USSD_REQUESTS_VIA_TELEPHONY_MANAGER_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL, true);
         sDefaults.putBoolean(KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL, false);
         sDefaults.putBoolean(KEY_EDITABLE_TETHER_APN_BOOL, false);

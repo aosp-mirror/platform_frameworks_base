@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -56,7 +57,7 @@ public class DataCollector implements SensorEventListener {
     private static final long TIMEOUT_MILLIS = 11000; // 11 seconds.
     public static final boolean DEBUG = false;
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
 
     // Err on the side of caution, so logging is not started after a crash even tough the screen

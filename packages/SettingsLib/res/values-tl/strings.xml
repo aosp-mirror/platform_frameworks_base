@@ -337,6 +337,10 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Pinapamahalaan ng admin"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Na-enable ng admin"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Na-disable ng admin"</string>
+    <string name="disabled" msgid="9206776641295849915">"Naka-disable"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Pinapayagan"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Hindi pinapayagan"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Mag-install ng mga hindi alam na app"</string>
     <string name="home" msgid="3256884684164448244">"Home ng Mga Setting"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

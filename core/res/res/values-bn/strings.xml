@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"পরিষেবা প্রস্তুত নয়৷"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"আপনি কলার ID এর সেটিংস পরিবর্তন করতে পারবেন না৷"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ডেটা পরিষেবা নেই"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"জরুরী পরিষেবা নেই"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"কোনও জরুরী অবস্থার কল নেই"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ভয়েস পরিষেবা নেই"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"কোনো ভয়েস/জরুরী পরিষেবা নেই"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"আপনার পরিষেবা প্রদানকারী এই অবস্থানে ডেটা পরিষেবা সাময়িকভাবে সাসপেন্ড করেছে"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"আপনার পরিষেবা প্রদানকারী এই অবস্থানে জরুরি কল সাময়িকভাবে সাসপেন্ড করেছে"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"আপনার পরিষেবা প্রদানকারী এই অবস্থানে ভয়েস কল সাময়িকভাবে সাসপেন্ড করেছে"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"আপনার পরিষেবা প্রদানকারী এই অবস্থানে ভয়েস এবং জরুরি কল সাময়িকভাবে সাসপেন্ড করেছে"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"সাময়িকভাবে মোবাইল নেটওয়ার্ক আপনার অবস্থানে এই পরিষেবা দিচ্ছে না"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"নেটওয়ার্কের সিগন্যাল নেই"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"রিসেপশন উন্নত করতে সিস্টেম &gt; নেটওয়ার্ক এবং ইন্টারনেট &gt; মোবাইল নেটওয়ার্ক &gt; পছন্দের নেটওয়ার্কের ধরণ এ গিয়ে নির্বাচিত নেটওয়ার্কের ধরণ পরিবর্তন করে দেখুন।"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"সতর্কবার্তা"</string>
@@ -1205,8 +1202,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ভাষা এবং লেআউট নির্বাচন করুন আলতো চাপ দিন"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"অন্যান্য অ্যাপের উপরে দেখুন"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> অন্যান্য অ্যাপ্লিকেশানের ওপরেও প্রদর্শিত"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> অন্যান্য অ্যাপের ওপর প্রদর্শিত হচ্ছে"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> কে এই বৈশিষ্ট্যটি ব্যবহার করতে দিতে না চাইলে, ট্যাপ করে সেটিংসে যান ও বৈশিষ্ট্যটি বন্ধ করে দিন।"</string>

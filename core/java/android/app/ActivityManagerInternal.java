@@ -249,4 +249,15 @@ public abstract class ActivityManagerInternal {
      * {@param vr2dDisplayId}.
      */
     public abstract void setVr2dDisplayId(int vr2dDisplayId);
+
+    /**
+     * Saves the current activity manager state and includes the saved state in the next dump of
+     * activity manager.
+     */
+    public abstract void saveANRState(String reason);
+
+    /**
+     * Clears the previously saved activity manager ANR state.
+     */
+    public abstract void clearSavedANRState();
 }

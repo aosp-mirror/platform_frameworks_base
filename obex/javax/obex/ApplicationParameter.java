@@ -55,7 +55,7 @@ public final class ApplicationParameter {
 
         public static final byte LISTSTARTOFFSET_TAGID = 0x05;
 
-        public static final byte FILTER_TAGID = 0x06;
+        public static final byte PROPERTY_SELECTOR_TAGID = 0x06;
 
         public static final byte FORMAT_TAGID = 0x07;
 
@@ -64,6 +64,20 @@ public final class ApplicationParameter {
 
         // only used in "mch" in response
         public static final byte NEWMISSEDCALLS_TAGID = 0x09;
+
+        public static final byte SUPPORTEDFEATURE_TAGID = 0x10;
+
+        public static final byte PRIMARYVERSIONCOUNTER_TAGID = 0x0A;
+
+        public static final byte SECONDARYVERSIONCOUNTER_TAGID = 0x0B;
+
+        public static final byte VCARDSELECTOR_TAGID = 0x0C;
+
+        public static final byte DATABASEIDENTIFIER_TAGID = 0x0D;
+
+        public static final byte VCARDSELECTOROPERATOR_TAGID = 0x0E;
+
+        public static final byte RESET_NEW_MISSED_CALLS_TAGID = 0x0F;
     }
 
     public static class TRIPLET_VALUE {
@@ -99,13 +113,27 @@ public final class ApplicationParameter {
 
         public static final byte LISTSTARTOFFSET_LENGTH = 2;
 
-        public static final byte FILTER_LENGTH = 8;
+        public static final byte PROPERTY_SELECTOR_LENGTH = 8;
 
         public static final byte FORMAT_LENGTH = 1;
 
         public static final byte PHONEBOOKSIZE_LENGTH = 2;
 
         public static final byte NEWMISSEDCALLS_LENGTH = 1;
+
+        public static final byte SUPPORTEDFEATURE_LENGTH = 4;
+
+        public static final byte PRIMARYVERSIONCOUNTER_LENGTH = 16;
+
+        public static final byte SECONDARYVERSIONCOUNTER_LENGTH = 16;
+
+        public static final byte VCARDSELECTOR_LENGTH = 8;
+
+        public static final byte DATABASEIDENTIFIER_LENGTH = 16;
+
+        public static final byte VCARDSELECTOROPERATOR_LENGTH = 1;
+
+        public static final byte RESETNEWMISSEDCALLS_LENGTH = 1;
     }
 
     public ApplicationParameter() {

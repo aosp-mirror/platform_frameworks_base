@@ -337,6 +337,10 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"प्रशासकद्वारा नियन्त्रित"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"प्रशासकद्वारा सक्षम पारिएको छ"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"प्रशासकद्वारा असक्षम पारिएको छ"</string>
+    <string name="disabled" msgid="9206776641295849915">"असक्षम पारियो"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"अनुमति छ"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"अनुमति छैन"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"अज्ञात अनुप्रयोगहरू स्थापना गर्नुहोस्"</string>
     <string name="home" msgid="3256884684164448244">"सेटिङहरूको गृहपृष्ठ"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"०%"</item>

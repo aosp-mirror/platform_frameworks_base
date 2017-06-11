@@ -23,11 +23,13 @@ import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextClock;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.R.id;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.SignalClusterView;
@@ -69,15 +71,11 @@ public class QuickStatusBarHeader extends RelativeLayout {
         float intensity = colorForeground == Color.WHITE ? 0 : 1;
         Rect tintArea = new Rect(0, 0, 0, 0);
 
-        applyDarkness(R.id.signal_cluster, tintArea, intensity, colorForeground);
         applyDarkness(R.id.battery, tintArea, intensity, colorForeground);
         applyDarkness(R.id.clock, tintArea, intensity, colorForeground);
 
         BatteryMeterView battery = findViewById(R.id.battery);
         battery.setForceShowPercent(true);
-        // Don't show the Wi-Fi indicator here, because it is shown just below in the tile.
-        SignalClusterView signalCluster = findViewById(R.id.signal_cluster);
-        signalCluster.setQsSignalCluster();
 
         mActivityStarter = Dependency.get(ActivityStarter.class);
     }

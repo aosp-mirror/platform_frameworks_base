@@ -337,6 +337,10 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"അഡ്‌മിൻ നിയന്ത്രിക്കുന്നത്"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"അഡ്‌മിൻ പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"അഡ്‌മിൻ പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="disabled" msgid="9206776641295849915">"പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"അനുവദനീയം"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"അനുവദിച്ചിട്ടില്ല"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"അറിഞ്ഞുകൂടാത്ത ആപ്‌സ് ഇൻസ്റ്റാളുചെയ്യുക"</string>
     <string name="home" msgid="3256884684164448244">"ക്രമീകരണ ഹോം"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

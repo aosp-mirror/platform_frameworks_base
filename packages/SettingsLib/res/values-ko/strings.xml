@@ -337,6 +337,10 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"관리자가 제어"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"관리자가 사용 설정함"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"관리자가 사용 중지함"</string>
+    <string name="disabled" msgid="9206776641295849915">"사용 안함"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"허용됨"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"허용되지 않음"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"알 수 없는 앱 설치"</string>
     <string name="home" msgid="3256884684164448244">"설정 홈"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

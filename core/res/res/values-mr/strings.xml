@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवेची तरतूद केलेली नाही."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"आपण कॉलर आयडी सेटिंग बदलू शकत नाही."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"डेटा सेवा नाही"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"आणीबाणी सेवा नाही"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"आणीबाणीत कॉल करू शकत नाही"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"व्हॉइस सेवा नाही"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"व्हॉइस/आणीबाणी सेवा नाही"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"आपल्या वाहकाने या स्थानावर डेटा सेवा तात्पुरती निलंबित केली आहे"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"आपल्या वाहकाने या स्थानावर आणीबाणी कॉल तात्पुरते निलंबित केले आहेत"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"आपल्या वाहकाने या स्थानावर व्हॉइस कॉल तात्पुरते निलंबित केले आहेत"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"आपल्या वाहकाने या स्थानावर व्हॉइस आणि आणीबाणी कॉल तात्पुरते निलंबित केले आहेत"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"तुम्‍ही असलेल्‍या स्‍थानी मोबाइल नेटवर्क तात्‍पुरते उपलब्‍ध नाही"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कवर पोहोचूू शकत नाही"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"रिसेप्शन सुधारण्यासाठी प्रणाली &gt; नेटवर्क आणि इंटरनेट &gt; मोबाइल नेटवर्क &gt; प्राधान्य दिलेला नेटवर्क प्रकार येथे निवडलेला प्रकार बदलून पहा."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"अलर्ट"</string>
@@ -1205,8 +1202,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"भाषा आणि लेआउट निवडण्यासाठी टॅप करा"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"इतर अ‍ॅप्सवर दाखवा"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> इतर अॅप्सवर प्रदर्शित करीत आहे"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> अन्‍य अॅप्सवर प्रदर्शित करीत आहे"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ने हे वैशिष्ट्य वापरू नये असे आपण इच्छित असल्यास, सेटिंग्ज उघडण्यासाठी टॅप करा आणि ते बंद करा."</string>

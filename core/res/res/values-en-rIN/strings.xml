@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Service not provisioned."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"You can\'t change the caller ID setting."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"No data service"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"No emergency service"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"No emergency calling"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"No voice service"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"No voice/emergency service"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Your operator has temporarily suspended data service at this location"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Your operator has temporarily suspended emergency calls at this location"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Your operator has temporarily suspended voice calls at this location"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Your operator has temporarily suspended voice and emergency calls at this location"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Temporarily not offered by the mobile network at your location"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Can’t find network"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"To improve reception, try changing the type selected at System &gt; Network &amp; Internet &gt; Mobile networks &gt; Preferred network type."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alerts"</string>
@@ -1204,8 +1201,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tap to select language and layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Display over other apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> displaying over other apps"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> is displaying over other apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"If you don’t want <xliff:g id="NAME">%s</xliff:g> to use this feature, tap to open settings and turn it off."</string>
