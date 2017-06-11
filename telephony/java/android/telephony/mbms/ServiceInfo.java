@@ -20,8 +20,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -44,9 +46,9 @@ public class ServiceInfo implements Parcelable {
     final String className;
 
     /**
-     * The language for this service content
+     * The languages available for this service content
      */
-    final Locale locale;
+    final List<Locale> locales;
 
     /**
      * The carrier's identifier for the service.
@@ -64,20 +66,23 @@ public class ServiceInfo implements Parcelable {
     final Date sessionEndTime;
 
 
-    public ServiceInfo(Map<Locale, String> newNames, String newClassName, Locale newLocale,
+    public ServiceInfo(Map<Locale, String> newNames, String newClassName, List<Locale> newLocales,
             String newServiceId, Date start, Date end) {
         if (newNames == null || newNames.isEmpty() || TextUtils.isEmpty(newClassName)
-                || newLocale == null || TextUtils.isEmpty(newServiceId)
+                || newLocales == null || newLocales.isEmpty() || TextUtils.isEmpty(newServiceId)
                 || start == null || end == null) {
             throw new IllegalArgumentException("Bad ServiceInfo construction");
         }
         if (newNames.size() > MAP_LIMIT) {
-            throw new RuntimeException("bad map length" + newNames.size());
+            throw new RuntimeException("bad map length " + newNames.size());
+        }
+        if (newLocales.size() > MAP_LIMIT) {
+            throw new RuntimeException("bad locales length " + newLocales.size());
         }
         names = new HashMap(newNames.size());
         names.putAll(newNames);
         className = newClassName;
-        locale = (Locale)newLocale.clone();
+        locales = new ArrayList(newLocales);
         serviceId = newServiceId;
         sessionStartTime = (Date)start.clone();
         sessionEndTime = (Date)end.clone();
@@ -99,7 +104,7 @@ public class ServiceInfo implements Parcelable {
     ServiceInfo(Parcel in) {
         int mapCount = in.readInt();
         if (mapCount > MAP_LIMIT || mapCount < 0) {
-              throw new RuntimeException("bad map length" + mapCount);
+            throw new RuntimeException("bad map length" + mapCount);
         }
         names = new HashMap(mapCount);
         while (mapCount-- > 0) {
@@ -108,7 +113,15 @@ public class ServiceInfo implements Parcelable {
             names.put(locale, name);
         }
         className = in.readString();
-        locale = (java.util.Locale) in.readSerializable();
+        int localesCount = in.readInt();
+        if (localesCount > MAP_LIMIT || localesCount < 0) {
+            throw new RuntimeException("bad locale length " + localesCount);
+        }
+        locales = new ArrayList<Locale>(localesCount);
+        while (localesCount-- > 0) {
+            Locale l = (java.util.Locale) in.readSerializable();
+            locales.add(l);
+        }
         serviceId = in.readString();
         sessionStartTime = (java.util.Date) in.readSerializable();
         sessionEndTime = (java.util.Date) in.readSerializable();
@@ -123,7 +136,11 @@ public class ServiceInfo implements Parcelable {
             dest.writeString(names.get(l));
         }
         dest.writeString(className);
-        dest.writeSerializable(locale);
+        int localesCount = locales.size();
+        dest.writeInt(localesCount);
+        for (Locale l : locales) {
+            dest.writeSerializable(l);
+        }
         dest.writeString(serviceId);
         dest.writeSerializable(sessionStartTime);
         dest.writeSerializable(sessionEndTime);
@@ -142,8 +159,8 @@ public class ServiceInfo implements Parcelable {
         return className;
     }
 
-    public Locale getLocale() {
-        return locale;
+    public List<Locale> getLocales() {
+        return locales;
     }
 
     public String getServiceId() {

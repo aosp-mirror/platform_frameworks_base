@@ -20,26 +20,28 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import android.support.test.runner.AndroidJUnit4;
-import com.google.android.collect.Lists;
 
 import android.os.Parcel;
 import android.support.test.filters.LargeTest;
 import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.MoreAsserts;
 import android.text.style.StyleSpan;
 import android.text.util.Rfc822Token;
 import android.text.util.Rfc822Tokenizer;
 import android.view.View;
 
+import com.google.android.collect.Lists;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * TextUtilsTest tests {@link TextUtils}.
@@ -579,5 +581,85 @@ public class TextUtilsTest {
                 TextUtils.getLayoutDirectionFromLocale(Locale.forLanguageTag("fa-US")));
         assertEquals(View.LAYOUT_DIRECTION_RTL,
                 TextUtils.getLayoutDirectionFromLocale(Locale.forLanguageTag("tr-Arab")));
+    }
+
+    @Test
+    public void testToUpperCase() {
+        {
+            final CharSequence result = TextUtils.toUpperCase(null, "abc", false);
+            assertEquals(StringBuilder.class, result.getClass());
+            assertEquals("ABC", result.toString());
+        }
+        {
+            final SpannableString str = new SpannableString("abc");
+            Object span = new Object();
+            str.setSpan(span, 1, 2, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+            final CharSequence result = TextUtils.toUpperCase(null, str, true /* copySpans */);
+            assertEquals(SpannableStringBuilder.class, result.getClass());
+            assertEquals("ABC", result.toString());
+            final Spanned spanned = (Spanned) result;
+            final Object[] resultSpans = spanned.getSpans(0, result.length(), Object.class);
+            assertEquals(1, resultSpans.length);
+            assertSame(span, resultSpans[0]);
+            assertEquals(1, spanned.getSpanStart(span));
+            assertEquals(2, spanned.getSpanEnd(span));
+            assertEquals(Spanned.SPAN_INCLUSIVE_INCLUSIVE, spanned.getSpanFlags(span));
+        }
+        {
+            final Locale turkish = new Locale("tr", "TR");
+            final CharSequence result = TextUtils.toUpperCase(turkish, "i", false);
+            assertEquals(StringBuilder.class, result.getClass());
+            assertEquals("İ", result.toString());
+        }
+        {
+            final String str = "ABC";
+            assertSame(str, TextUtils.toUpperCase(null, str, false));
+        }
+        {
+            final SpannableString str = new SpannableString("ABC");
+            str.setSpan(new Object(), 1, 2, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            assertSame(str, TextUtils.toUpperCase(null, str, true /* copySpans */));
+        }
+    }
+
+    // Copied from cts/tests/tests/widget/src/android/widget/cts/TextViewTest.java and modified
+    // for the TextUtils.toUpperCase method.
+    @Test
+    public void testToUpperCase_SpansArePreserved() {
+        final Locale greek = new Locale("el", "GR");
+        final String lowerString = "ι\u0301ριδα";  // ίριδα with first letter decomposed
+        final String upperString = "ΙΡΙΔΑ";  // uppercased
+        // expected lowercase to uppercase index map
+        final int[] indexMap = {0, 1, 1, 2, 3, 4, 5};
+        final int flags = Spanned.SPAN_INCLUSIVE_INCLUSIVE;
+
+        final Spannable source = new SpannableString(lowerString);
+        source.setSpan(new Object(), 0, 1, flags);
+        source.setSpan(new Object(), 1, 2, flags);
+        source.setSpan(new Object(), 2, 3, flags);
+        source.setSpan(new Object(), 3, 4, flags);
+        source.setSpan(new Object(), 4, 5, flags);
+        source.setSpan(new Object(), 5, 6, flags);
+        source.setSpan(new Object(), 0, 2, flags);
+        source.setSpan(new Object(), 1, 3, flags);
+        source.setSpan(new Object(), 2, 4, flags);
+        source.setSpan(new Object(), 0, 6, flags);
+        final Object[] sourceSpans = source.getSpans(0, source.length(), Object.class);
+
+        final CharSequence uppercase = TextUtils.toUpperCase(greek, source, true /* copySpans */);
+        assertEquals(SpannableStringBuilder.class, uppercase.getClass());
+        final Spanned result = (Spanned) uppercase;
+
+        assertEquals(upperString, result.toString());
+        final Object[] resultSpans = result.getSpans(0, result.length(), Object.class);
+        assertEquals(sourceSpans.length, resultSpans.length);
+        for (int i = 0; i < sourceSpans.length; i++) {
+            assertSame(sourceSpans[i], resultSpans[i]);
+            final Object span = sourceSpans[i];
+            assertEquals(indexMap[source.getSpanStart(span)], result.getSpanStart(span));
+            assertEquals(indexMap[source.getSpanEnd(span)], result.getSpanEnd(span));
+            assertEquals(source.getSpanFlags(span), result.getSpanFlags(span));
+        }
     }
 }

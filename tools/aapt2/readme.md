@@ -1,9 +1,19 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
 ## Version 2.17
-### `aapt2 compile ...`
-- Fixed an issue where symlinks would not be followed when compiling PNGs. (bug 62144459)
+### `aapt2 ...`
+- Fixed issue where symlinks would not be followed when compiling PNGs. (bug 62144459)
 - Fixed issue where overlays that declared `<add-resource>` did not compile. (bug 38355988)
+- Fixed issue where `%n` in a string resource was interpreted as a format argument. (bug 37132275)
+- Allow empty resources to compile, giving them a value of `""` or `@null`, depending on the
+  accepted formats. (bug 38425050)
+- Resources declared via `<item>` with no format attribute were changed to accept all
+  resource types. (bug 62260121)
+- Allow `<layout>` element under `<activity>` in AndroidManifest.xml. (bug 62189611)
+- Fix issue where `--no-version-vector` did not apply to `pathInterpolator` and `objectAnimator`.
+  (bug 62211148)
+- Fix issue where overlaid `<style>` would not be merged, and would replace the original resource
+  instead. This fix brings behavior in-line with AAPT. (bug 38355988)
 
 ## Version 2.16
 ### `aapt2 link ...`

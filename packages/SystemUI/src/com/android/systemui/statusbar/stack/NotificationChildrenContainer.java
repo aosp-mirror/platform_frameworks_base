@@ -313,7 +313,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         } else {
             header.reapply(getContext(), mNotificationHeader);
         }
-        mNotificationHeaderWrapper.notifyContentUpdated(mContainingNotification);
+        mNotificationHeaderWrapper.onContentUpdated(mContainingNotification);
         recreateLowPriorityHeader(builder);
         recreateAmbientHeader(builder);
         updateHeaderVisibility(false /* animate */);
@@ -332,14 +332,14 @@ public class NotificationChildrenContainer extends ViewGroup {
             mNotificationHeaderAmbient = (ViewGroup) header.apply(getContext(), this);
             mNotificationHeaderWrapperAmbient = NotificationViewWrapper.wrap(getContext(),
                     mNotificationHeaderAmbient, mContainingNotification);
-            mNotificationHeaderWrapperAmbient.notifyContentUpdated(mContainingNotification);
+            mNotificationHeaderWrapperAmbient.onContentUpdated(mContainingNotification);
             addView(mNotificationHeaderAmbient, 0);
             invalidate();
         } else {
             header.reapply(getContext(), mNotificationHeaderAmbient);
         }
         resetHeaderVisibilityIfNeeded(mNotificationHeaderAmbient, calculateDesiredHeader());
-        mNotificationHeaderWrapperAmbient.notifyContentUpdated(mContainingNotification);
+        mNotificationHeaderWrapperAmbient.onContentUpdated(mContainingNotification);
     }
 
     /**
@@ -370,7 +370,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             } else {
                 header.reapply(getContext(), mNotificationHeaderLowPriority);
             }
-            mNotificationHeaderWrapperLowPriority.notifyContentUpdated(mContainingNotification);
+            mNotificationHeaderWrapperLowPriority.onContentUpdated(mContainingNotification);
             resetHeaderVisibilityIfNeeded(mNotificationHeaderLowPriority, calculateDesiredHeader());
         } else {
             removeView(mNotificationHeaderLowPriority);

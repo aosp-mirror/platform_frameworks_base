@@ -961,6 +961,30 @@ namespace PaintGlue {
         return SkScalarToFloat(metrics.fDescent);
     }
 
+    static jfloat getUnderlinePosition(jlong paintHandle, jlong typefaceHandle) {
+        Paint::FontMetrics metrics;
+        getMetricsInternal(paintHandle, typefaceHandle, &metrics);
+        SkScalar position;
+        if (metrics.hasUnderlinePosition(&position)) {
+            return SkScalarToFloat(position);
+        } else {
+            const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getTextSize();
+            return SkScalarToFloat(Paint::kStdUnderline_Top * textSize);
+        }
+    }
+
+    static jfloat getUnderlineThickness(jlong paintHandle, jlong typefaceHandle) {
+        Paint::FontMetrics metrics;
+        getMetricsInternal(paintHandle, typefaceHandle, &metrics);
+        SkScalar thickness;
+        if (metrics.hasUnderlineThickness(&thickness)) {
+            return SkScalarToFloat(thickness);
+        } else {
+            const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getTextSize();
+            return SkScalarToFloat(Paint::kStdUnderline_Thickness * textSize);
+        }
+    }
+
     static void setShadowLayer(jlong paintHandle, jfloat radius,
                                jfloat dx, jfloat dy, jint color) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
@@ -1072,6 +1096,8 @@ static const JNINativeMethod methods[] = {
     {"nSetHyphenEdit", "(JI)V", (void*) PaintGlue::setHyphenEdit},
     {"nAscent","(JJ)F", (void*) PaintGlue::ascent},
     {"nDescent","(JJ)F", (void*) PaintGlue::descent},
+    {"nGetUnderlinePosition","(JJ)F", (void*) PaintGlue::getUnderlinePosition},
+    {"nGetUnderlineThickness","(JJ)F", (void*) PaintGlue::getUnderlineThickness},
     {"nSetShadowLayer", "(JFFFI)V", (void*)PaintGlue::setShadowLayer},
     {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer}
 };

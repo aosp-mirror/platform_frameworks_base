@@ -32,7 +32,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 
-import android.R.style;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
@@ -4789,7 +4788,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     /* Only ever called as a consequence of a lockscreen expansion gesture. */
     @Override
     public boolean onDraggedDown(View startingChild, int dragLengthY) {
-        if (hasActiveNotifications() && (!isDozing() || isPulsing())) {
+        if (mState == StatusBarState.KEYGUARD
+                && hasActiveNotifications() && (!isDozing() || isPulsing())) {
             mLockscreenGestureLogger.write(
                     MetricsEvent.ACTION_LS_SHADE,
                     (int) (dragLengthY / mDisplayMetrics.density),
@@ -5324,6 +5324,37 @@ public class StatusBar extends SystemUI implements DemoMode,
             mAnimateWakeup = animateWakeup;
         }
 
+        @Override
+        public void onDoubleTap(float screenX, float screenY) {
+            if (screenX > 0 && screenY > 0 && mAmbientIndicationContainer != null 
+                && mAmbientIndicationContainer.getVisibility() == View.VISIBLE) {
+                mAmbientIndicationContainer.getLocationOnScreen(mTmpInt2);
+                float viewX = screenX - mTmpInt2[0];
+                float viewY = screenY - mTmpInt2[1];
+                if (0 <= viewX && viewX <= mAmbientIndicationContainer.getWidth()
+                        && 0 <= viewY && viewY <= mAmbientIndicationContainer.getHeight()) {
+                    dispatchDoubleTap(viewX, viewY);
+                }
+            }
+        }
+
+        public void dispatchDoubleTap(float viewX, float viewY) {
+            dispatchTap(mAmbientIndicationContainer, viewX, viewY);
+            dispatchTap(mAmbientIndicationContainer, viewX, viewY);
+        }
+
+        private void dispatchTap(View view, float x, float y) {
+            long now = SystemClock.elapsedRealtime();
+            dispatchTouchEvent(view, x, y, now, MotionEvent.ACTION_DOWN);
+            dispatchTouchEvent(view, x, y, now, MotionEvent.ACTION_UP);
+        }
+
+        private void dispatchTouchEvent(View view, float x, float y, long now, int action) {
+            MotionEvent ev = MotionEvent.obtain(now, now, action, x, y, 0 /* meta */);
+            view.dispatchTouchEvent(ev);
+            ev.recycle();
+        }
+
         private boolean shouldAnimateWakeup() {
             return mAnimateWakeup;
         }
@@ -5768,11 +5799,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
-    private final NotificationListenerService mNotificationListener =
-            new NotificationListenerService() {
+    private final NotificationListenerWithPlugins mNotificationListener =
+            new NotificationListenerWithPlugins() {
         @Override
         public void onListenerConnected() {
             if (DEBUG) Log.d(TAG, "onListenerConnected");
+            onPluginConnected();
             final StatusBarNotification[] notifications = getActiveNotifications();
             if (notifications == null) {
                 Log.w(TAG, "onListenerConnected unable to get active notifications.");
@@ -5797,7 +5829,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onNotificationPosted(final StatusBarNotification sbn,
                 final RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
-            if (sbn != null) {
+            if (sbn != null && !onPluginNotificationPosted(sbn, rankingMap)) {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -5841,14 +5873,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onNotificationRemoved(StatusBarNotification sbn,
                 final RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn);
-            if (sbn != null) {
+            if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
                 final String key = sbn.getKey();
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        removeNotification(key, rankingMap);
-                    }
-                });
+                mHandler.post(() -> removeNotification(key, rankingMap));
             }
         }
 
@@ -5856,13 +5883,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onNotificationRankingUpdate(final RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onRankingUpdate");
             if (rankingMap != null) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateNotificationRanking(rankingMap);
-                }
-            });
-        }                            }
+                RankingMap r = onPluginRankingUpdate(rankingMap);
+                mHandler.post(() -> updateNotificationRanking(r));
+            }
+        }
 
     };
 

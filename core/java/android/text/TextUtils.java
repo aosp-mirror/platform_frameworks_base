@@ -23,6 +23,8 @@ import android.annotation.PluralsRes;
 import android.content.Context;
 import android.content.res.Resources;
 import android.icu.lang.UCharacter;
+import android.icu.text.CaseMap;
+import android.icu.text.Edits;
 import android.icu.util.ULocale;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1069,6 +1071,75 @@ public class TextUtils {
 
             dest.setSpan(spans[i], st - start + destoff, en - start + destoff,
                          fl);
+        }
+    }
+
+    /**
+     * Transforms a CharSequences to uppercase, copying the sources spans and keeping them spans as
+     * much as possible close to their relative original places. In the case the the uppercase
+     * string is identical to the sources, the source itself is returned instead of being copied.
+     *
+     * If copySpans is set, source must be an instance of Spanned.
+     *
+     * {@hide}
+     */
+    @NonNull
+    public static CharSequence toUpperCase(@Nullable Locale locale, @NonNull CharSequence source,
+            boolean copySpans) {
+        final Edits edits = new Edits();
+        if (!copySpans) { // No spans. Just uppercase the characters.
+            final StringBuilder result = CaseMap.toUpper().apply(
+                    locale, source, new StringBuilder(), edits);
+            return edits.hasChanges() ? result : source;
+        }
+
+        final SpannableStringBuilder result = CaseMap.toUpper().apply(
+                locale, source, new SpannableStringBuilder(), edits);
+        if (!edits.hasChanges()) {
+            // No changes happened while capitalizing. We can return the source as it was.
+            return source;
+        }
+
+        final Edits.Iterator iterator = edits.getFineIterator();
+        final int sourceLength = source.length();
+        final Spanned spanned = (Spanned) source;
+        final Object[] spans = spanned.getSpans(0, sourceLength, Object.class);
+        for (Object span : spans) {
+            final int sourceStart = spanned.getSpanStart(span);
+            final int sourceEnd = spanned.getSpanEnd(span);
+            final int flags = spanned.getSpanFlags(span);
+            // Make sure the indices are not at the end of the string, since in that case
+            // iterator.findSourceIndex() would fail.
+            final int destStart = sourceStart == sourceLength ? result.length() :
+                    toUpperMapToDest(iterator, sourceStart);
+            final int destEnd = sourceEnd == sourceLength ? result.length() :
+                    toUpperMapToDest(iterator, sourceEnd);
+            result.setSpan(span, destStart, destEnd, flags);
+        }
+        return result;
+    }
+
+    // helper method for toUpperCase()
+    private static int toUpperMapToDest(Edits.Iterator iterator, int sourceIndex) {
+        // Guaranteed to succeed if sourceIndex < source.length().
+        iterator.findSourceIndex(sourceIndex);
+        if (sourceIndex == iterator.sourceIndex()) {
+            return iterator.destinationIndex();
+        }
+        // We handle the situation differently depending on if we are in the changed slice or an
+        // unchanged one: In an unchanged slice, we can find the exact location the span
+        // boundary was before and map there.
+        //
+        // But in a changed slice, we need to treat the whole destination slice as an atomic unit.
+        // We adjust the span boundary to the end of that slice to reduce of the chance of adjacent
+        // spans in the source overlapping in the result. (The choice for the end vs the beginning
+        // is somewhat arbitrary, but was taken because we except to see slightly more spans only
+        // affecting a base character compared to spans only affecting a combining character.)
+        if (iterator.hasChange()) {
+            return iterator.destinationIndex() + iterator.newLength();
+        } else {
+            // Move the index 1:1 along with this unchanged piece of text.
+            return iterator.destinationIndex() + (sourceIndex - iterator.sourceIndex());
         }
     }
 

@@ -15,39 +15,56 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
+import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSTile.Icon;
 import com.android.systemui.plugins.qs.QSTile.State;
-import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon;
+import com.android.systemui.statusbar.phone.SignalDrawable;
+
+import java.util.Objects;
 
 // Exists to provide easy way to add sim icon to cell tile
 // TODO Find a better way to handle this and remove it.
 public class CellTileView extends SignalTileView {
 
-    private final ImageView mOverlay;
+    private final SignalDrawable mSignalDrawable;
 
     public CellTileView(Context context) {
         super(context);
-        mOverlay = new ImageView(mContext);
-        mOverlay.setImageTintList(ColorStateList.valueOf(Utils.getColorAttr(context,
-                android.R.attr.colorPrimary)));
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT);
-        int padding = context.getResources().getDimensionPixelOffset(R.dimen.cell_overlay_padding);
-        params.leftMargin = params.rightMargin = padding;
-        mIconFrame.addView(mOverlay, params);
+        mSignalDrawable = new SignalDrawable(mContext);
+        float dark = Utils.getColorAttr(context, android.R.attr.colorForeground) == 0xff000000
+                ? 1 : 0;
+        mSignalDrawable.setDarkIntensity(dark);
+        mSignalDrawable.setIntrinsicSize(context.getResources().getDimensionPixelSize(
+                R.dimen.qs_tile_icon_size));
     }
 
-    @Override
-    public void setIcon(State state) {
-        State s = state.copy();
-        updateIcon(mOverlay, state);
-        s.icon = ResourceIcon.get(R.drawable.ic_sim);
-        super.setIcon(s);
+    protected void updateIcon(ImageView iv, State state) {
+        if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))) {
+            mSignalDrawable.setLevel(((SignalIcon) state.icon).getState());
+            iv.setImageDrawable(mSignalDrawable);
+            iv.setTag(R.id.qs_icon_tag, state.icon);
+        }
+    }
+
+    public static class SignalIcon extends Icon {
+
+        private final int mState;
+
+        public SignalIcon(int state) {
+            mState = state;
+        }
+
+        public int getState() {
+            return mState;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            return null;
+        }
     }
 }

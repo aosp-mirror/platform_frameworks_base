@@ -47,6 +47,9 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -63,7 +66,14 @@ public class CaptivePortalLoginActivity extends Activity {
 
     private static final int SOCKET_TIMEOUT_MS = 10000;
 
-    private enum Result { DISMISSED, UNWANTED, WANTED_AS_IS };
+    private enum Result {
+        DISMISSED(MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_RESULT_DISMISSED),
+        UNWANTED(MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_RESULT_UNWANTED),
+        WANTED_AS_IS(MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_RESULT_WANTED_AS_IS);
+
+        final int metricsEvent;
+        Result(int metricsEvent) { this.metricsEvent = metricsEvent; }
+    };
 
     private URL mUrl;
     private String mUserAgent;
@@ -77,6 +87,9 @@ public class CaptivePortalLoginActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        logMetricsEvent(MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_ACTIVITY);
+
         mCm = ConnectivityManager.from(this);
         mNetwork = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_NETWORK);
         mCaptivePortal = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL);
@@ -173,6 +186,7 @@ public class CaptivePortalLoginActivity extends Activity {
             mCm.unregisterNetworkCallback(mNetworkCallback);
             mNetworkCallback = null;
         }
+        logMetricsEvent(result.metricsEvent);
         switch (result) {
             case DISMISSED:
                 mCaptivePortal.reportCaptivePortalDismissed();
@@ -381,6 +395,7 @@ public class CaptivePortalLoginActivity extends Activity {
 
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+            logMetricsEvent(MetricsEvent.CAPTIVE_PORTAL_LOGIN_ACTIVITY_SSL_ERROR);
             Log.w(TAG, "SSL error (error: " + error.getPrimaryError() + " host: " +
                     // Only show host to avoid leaking private info.
                     Uri.parse(error.getUrl()).getHost() + " certificate: " +
@@ -491,5 +506,9 @@ public class CaptivePortalLoginActivity extends Activity {
             return https + "://" + url.getHost();
         }
         return url.getHost();
+    }
+
+    private void logMetricsEvent(int event) {
+        MetricsLogger.action(this, event, getPackageName());
     }
 }
