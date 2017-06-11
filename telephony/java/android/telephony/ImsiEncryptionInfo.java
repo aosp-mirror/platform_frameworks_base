@@ -17,6 +17,7 @@ package android.telephony;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.util.Date;
 import android.util.Log;
 
 import java.security.KeyFactory;
@@ -34,7 +35,6 @@ import java.security.spec.X509EncodedKeySpec;
 public final class ImsiEncryptionInfo implements Parcelable {
 
     private static final String LOG_TAG = "ImsiEncryptionInfo";
-    private static final boolean DBG = false;
 
 
     private final String mcc;
@@ -42,14 +42,25 @@ public final class ImsiEncryptionInfo implements Parcelable {
     private final PublicKey publicKey;
     private final String keyIdentifier;
     private final int keyType;
+    //Date-Time in UTC when the key will expire.
+    private final Date expirationTime;
 
     public ImsiEncryptionInfo(String mcc, String mnc, int keyType, String keyIdentifier,
-                              PublicKey publicKey) {
+                              byte[] key, Date expirationTime) {
+        this(mcc, mnc, keyType, keyIdentifier, makeKeyObject(key), expirationTime);
+    }
+
+    public ImsiEncryptionInfo(String mcc, String mnc, int keyType, String keyIdentifier,
+                              PublicKey publicKey, Date expirationTime) {
+        // todo need to validate that ImsiEncryptionInfo is being created with the correct params.
+        //      Including validating that the public key is in "X.509" format. This will be done in
+        //      a subsequent CL.
         this.mcc = mcc;
         this.mnc = mnc;
         this.keyType = keyType;
         this.publicKey = publicKey;
         this.keyIdentifier = keyIdentifier;
+        this.expirationTime = expirationTime;
     }
 
     public ImsiEncryptionInfo(Parcel in) {
@@ -61,7 +72,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
         mnc = in.readString();
         keyIdentifier = in.readString();
         keyType = in.readInt();
-
+        expirationTime = new Date(in.readLong());
     }
 
     public String getMnc() {
@@ -84,6 +95,10 @@ public final class ImsiEncryptionInfo implements Parcelable {
         return this.publicKey;
     }
 
+    public Date getExpirationTime() {
+        return this.expirationTime;
+    }
+
     private static PublicKey makeKeyObject(byte[] publicKeyBytes) {
         try {
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(publicKeyBytes);
@@ -91,7 +106,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
         } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
             Log.e(LOG_TAG, "Error makeKeyObject: unable to convert into PublicKey", ex);
         }
-     return null;
+        throw new IllegalArgumentException();
     }
 
     /** Implement the Parcelable interface */
@@ -122,6 +137,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
         dest.writeString(mnc);
         dest.writeString(keyIdentifier);
         dest.writeInt(keyType);
+        dest.writeLong(expirationTime.getTime());
     }
 
     @Override
@@ -132,6 +148,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
                 + "publicKey=" + publicKey
                 + ", keyIdentifier=" + keyIdentifier
                 + ", keyType=" + keyType
+                + ", expirationTime=" + expirationTime
                 + "]";
     }
 }
