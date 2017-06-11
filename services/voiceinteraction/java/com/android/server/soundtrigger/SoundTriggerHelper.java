@@ -191,7 +191,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             // Process existing model first.
             if (model != null && !model.getModelId().equals(soundModel.uuid)) {
                 // The existing model has a different UUID, should be replaced.
-                int status = cleanUpExistingKeyphraseModel(model);
+                int status = cleanUpExistingKeyphraseModelLocked(model);
                 if (status != STATUS_OK) {
                     return status;
                 }
@@ -210,7 +210,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
-    private int cleanUpExistingKeyphraseModel(ModelData modelData) {
+    private int cleanUpExistingKeyphraseModelLocked(ModelData modelData) {
         // Stop and clean up a previous ModelData if one exists. This usually is used when the
         // previous model has a different UUID for the same keyphrase ID.
         int status = tryStopAndUnloadLocked(modelData, true /* stop */, true /* unload */);
@@ -620,7 +620,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         try {
             callback.onGenericSoundTriggerDetected((GenericRecognitionEvent) event);
         } catch (DeadObjectException e) {
-            forceStopAndUnloadModel(model, e);
+            forceStopAndUnloadModelLocked(model, e);
             return;
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException in onGenericSoundTriggerDetected", e);
@@ -710,7 +710,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             try {
                 modelData.getCallback().onRecognitionPaused();
             } catch (DeadObjectException e) {
-                forceStopAndUnloadModel(modelData, e);
+                forceStopAndUnloadModelLocked(modelData, e);
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in onRecognitionPaused", e);
             }
@@ -721,7 +721,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         Slog.w(TAG, "Recognition failure");
         MetricsLogger.count(mContext, "sth_recognition_failure_event", 1);
         try {
-            sendErrorCallbacksToAll(STATUS_ERROR);
+            sendErrorCallbacksToAllLocked(STATUS_ERROR);
         } finally {
             internalClearModelStateLocked();
             internalClearGlobalStateLocked();
@@ -763,7 +763,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         try {
             modelData.getCallback().onKeyphraseDetected((KeyphraseRecognitionEvent) event);
         } catch (DeadObjectException e) {
-            forceStopAndUnloadModel(modelData, e);
+            forceStopAndUnloadModelLocked(modelData, e);
             return;
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException in onKeyphraseDetected", e);
@@ -782,7 +782,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private void updateAllRecognitionsLocked(boolean notify) {
         boolean isAllowed = isRecognitionAllowed();
-        for (ModelData modelData : mModelDataMap.values()) {
+        // updateRecognitionLocked can possibly update the list of models
+        ArrayList<ModelData> modelDatas = new ArrayList<ModelData>(mModelDataMap.values());
+        for (ModelData modelData : modelDatas) {
             updateRecognitionLocked(modelData, isAllowed, notify);
         }
     }
@@ -804,7 +806,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private void onServiceDiedLocked() {
         try {
             MetricsLogger.count(mContext, "sth_service_died", 1);
-            sendErrorCallbacksToAll(SoundTrigger.STATUS_DEAD_OBJECT);
+            sendErrorCallbacksToAllLocked(SoundTrigger.STATUS_DEAD_OBJECT);
         } finally {
             internalClearModelStateLocked();
             internalClearGlobalStateLocked();
@@ -889,14 +891,14 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     // Sends an error callback to all models with a valid registered callback.
-    private void sendErrorCallbacksToAll(int errorCode) {
+    private void sendErrorCallbacksToAllLocked(int errorCode) {
         for (ModelData modelData : mModelDataMap.values()) {
             IRecognitionStatusCallback callback = modelData.getCallback();
             if (callback != null) {
                 try {
                     callback.onError(errorCode);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "RemoteException sendErrorCallbacksToAll for model handle " +
+                    Slog.w(TAG, "RemoteException sendErrorCallbacksToAllLocked for model handle " +
                             modelData.getHandle(), e);
                 }
             }
@@ -909,8 +911,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      * @param modelData The model data to remove.
      * @param exception Optional exception to print in logcat. May be null.
      */
-    private void forceStopAndUnloadModel(ModelData modelData, Exception exception) {
-      forceStopAndUnloadModel(modelData, exception, null /* modelDataIterator */);
+    private void forceStopAndUnloadModelLocked(ModelData modelData, Exception exception) {
+      forceStopAndUnloadModelLocked(modelData, exception, null /* modelDataIterator */);
     }
 
     /**
@@ -924,7 +926,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      *        ConcurrentModificationException, since this function will try and remove the model
      *        data from the mModelDataMap when it can successfully unload the model.
      */
-    private void forceStopAndUnloadModel(ModelData modelData, Exception exception,
+    private void forceStopAndUnloadModelLocked(ModelData modelData, Exception exception,
             Iterator modelDataIterator) {
         if (exception != null) {
           Slog.e(TAG, "forceStopAndUnloadModel", exception);
@@ -973,7 +975,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                         && !modelData.getCallback().asBinder().pingBinder())) {
                 // No one is listening on this model, so we might as well evict it.
                 Slog.w(TAG, "Removing model " + modelData.getHandle() + " that has no clients");
-                forceStopAndUnloadModel(modelData, null /* exception */, it);
+                forceStopAndUnloadModelLocked(modelData, null /* exception */, it);
             }
         }
     }
@@ -1067,7 +1069,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 try {
                     callback.onError(status);
                 } catch (DeadObjectException e) {
-                    forceStopAndUnloadModel(modelData, e);
+                    forceStopAndUnloadModelLocked(modelData, e);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "RemoteException in onError", e);
                 }
@@ -1081,7 +1083,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 try {
                     callback.onRecognitionResumed();
                 } catch (DeadObjectException e) {
-                    forceStopAndUnloadModel(modelData, e);
+                    forceStopAndUnloadModelLocked(modelData, e);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "RemoteException in onRecognitionResumed", e);
                 }
@@ -1108,7 +1110,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 try {
                     callback.onError(status);
                 } catch (DeadObjectException e) {
-                    forceStopAndUnloadModel(modelData, e);
+                    forceStopAndUnloadModelLocked(modelData, e);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "RemoteException in onError", e);
                 }
@@ -1121,7 +1123,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 try {
                     callback.onRecognitionPaused();
                 } catch (DeadObjectException e) {
-                    forceStopAndUnloadModel(modelData, e);
+                    forceStopAndUnloadModelLocked(modelData, e);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "RemoteException in onRecognitionPaused", e);
                 }
