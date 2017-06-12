@@ -731,6 +731,13 @@ public final class TvContract {
     }
 
     /**
+     * Returns {@code true}, if {@code uri} is a recorded program URI.
+     */
+    public static boolean isRecordedProgramUri(Uri uri) {
+        return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_RECORDED_PROGRAM);
+    }
+
+    /**
      * Requests to make a channel browsable.
      *
      * <p>Once called, the system will review the request and make the channel browsable based on
