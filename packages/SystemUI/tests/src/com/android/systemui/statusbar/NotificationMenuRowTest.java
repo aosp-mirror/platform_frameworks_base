@@ -42,7 +42,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testAttachDetach() {
         NotificationMenuRowPlugin row = new NotificationMenuRow(mContext);
-        row.createMenu(null);
+        row.createMenu(null, null);
         ViewUtils.attachView(row.getMenuView());
         TestableLooper.get(this).processAllMessages();
         ViewUtils.detachView(row.getMenuView());
@@ -52,9 +52,9 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testRecreateMenu() {
         NotificationMenuRowPlugin row = new NotificationMenuRow(mContext);
-        row.createMenu(null);
+        row.createMenu(null, null);
         assertTrue(row.getMenuView() != null);
-        row.createMenu(null);
+        row.createMenu(null, null);
         assertTrue(row.getMenuView() != null);
     }
 }
