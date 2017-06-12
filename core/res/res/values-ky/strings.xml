@@ -90,13 +90,10 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Кызмат камсыздалган эмес."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Чалуучунун далдаштырма дайындары жөндөөлөрүн өзгөртө албайсыз."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Мобилдик туташуу кызматы жок"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Өзгөчө кырдаалдагы кызматтар бөгөттөлгөн"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Шашылыш чалуу бөгөттөлгөн"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Аудио чалуу кызматы бөгөттөлгөн"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Бардык чалуулар жана кызматтар бөгөттөлгөн"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Операторуңуз бул аймактагы мобилдик туташуу кызматын убактылуу токтотуп койду"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Операторуңуз өзгөчө кырдаалдагы чалууларды бул аймактан убактылуу токтотуп койду"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Операторуңуз аудио чалууларды бул аймактан убактылуу токтотуп койду"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Операторуңуз аудио чалууларды жана өзгөчө кырдаалдагы чалууларды бул аймактан убактылуу токтотуп койду"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Өзгөчө кырдаалдагы кызматтар сиз жайгашкан жердеги мобилдик тармак тарабынан убактылуу бөгөттөлгөн"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Тармакка туташпай жатат"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Кабыл алуу мүмкүнчүлүгүн жакшыртуу үчүн Тутум &gt; Тармак жана Интернет &gt; Мобилдик тармактар &gt; Тандалган тармак бөлүмүнөн тармактын түрүн өзгөртүп көрүңүз."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Эскертүүлөр"</string>
@@ -1207,8 +1204,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Тил жана калып тандоо үчүн таптап коюңуз"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Башка терезелердин үстүнөн көрсөтүү"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> колдонмосун башка терезелердин үстүнөн көрсөтүү"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>: башка колдонмолордун үстүнөн"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
