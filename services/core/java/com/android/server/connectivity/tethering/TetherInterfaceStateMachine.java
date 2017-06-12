@@ -56,9 +56,10 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * @hide
+ * Provides the interface to IP-layer serving functionality for a given network
+ * interface, e.g. for tethering or "local-only hotspot" mode.
  *
- * Tracks the eligibility of a given network interface for tethering.
+ * @hide
  */
 public class TetherInterfaceStateMachine extends StateMachine {
     private static final IpPrefix LINK_LOCAL_PREFIX = new IpPrefix("fe80::/64");
@@ -117,6 +118,12 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private String mMyUpstreamIfaceName;  // may change over time
     private NetworkInterface mNetworkInterface;
     private byte[] mHwAddr;
+    // TODO: De-duplicate this with mLinkProperties above. Currently, these link
+    // properties are those selected by the IPv6TetheringCoordinator and relayed
+    // to us. By comparison, mLinkProperties contains the addresses and directly
+    // connected routes that have been formed from these properties iff. we have
+    // succeeded in configuring them and are able to announce them within Router
+    // Advertisements (otherwise, we do not add them to mLinkProperties at all).
     private LinkProperties mLastIPv6LinkProperties;
     private RouterAdvertisementDaemon mRaDaemon;
     private RaParams mLastRaParams;
@@ -133,7 +140,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
         mLinkProperties = new LinkProperties();
-        mLinkProperties.setInterfaceName(mIfaceName);
+        resetLinkProperties();
         mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
 
         mInitialState = new InitialState();
@@ -162,10 +169,15 @@ public class TetherInterfaceStateMachine extends StateMachine {
      * Internals.
      */
 
-    // configured when we start tethering and unconfig'd on error or conclusion
-    private boolean configureIfaceIp(boolean enabled) {
-        if (VDBG) Log.d(TAG, "configureIfaceIp(" + enabled + ")");
+    private boolean startIPv4() { return configureIPv4(true); }
 
+    private void stopIPv4() { configureIPv4(false); }
+
+    private boolean configureIPv4(boolean enabled) {
+        if (VDBG) Log.d(TAG, "configureIPv4(" + enabled + ")");
+
+        // TODO: Replace this hard-coded information with dynamically selected
+        // config passed down to us by a higher layer IP-coordinating element.
         String ipAsString = null;
         int prefixLen = 0;
         if (mInterfaceType == ConnectivityManager.TETHERING_USB) {
@@ -179,32 +191,45 @@ public class TetherInterfaceStateMachine extends StateMachine {
             return true;
         }
 
-        InterfaceConfiguration ifcg = null;
+        final LinkAddress linkAddr;
         try {
-            ifcg = mNMService.getInterfaceConfig(mIfaceName);
-            if (ifcg != null) {
-                InetAddress addr = NetworkUtils.numericToInetAddress(ipAsString);
-                ifcg.setLinkAddress(new LinkAddress(addr, prefixLen));
-                if (mInterfaceType == ConnectivityManager.TETHERING_WIFI) {
-                    // The WiFi stack has ownership of the interface up/down state.
-                    // It is unclear whether the bluetooth or USB stacks will manage their own
-                    // state.
-                    ifcg.ignoreInterfaceUpDownStatus();
-                } else {
-                    if (enabled) {
-                        ifcg.setInterfaceUp();
-                    } else {
-                        ifcg.setInterfaceDown();
-                    }
-                }
-                ifcg.clearFlag("running");
-                mNMService.setInterfaceConfig(mIfaceName, ifcg);
+            final InterfaceConfiguration ifcg = mNMService.getInterfaceConfig(mIfaceName);
+            if (ifcg == null) {
+                mLog.e("Received null interface config");
+                return false;
             }
+
+            InetAddress addr = NetworkUtils.numericToInetAddress(ipAsString);
+            linkAddr = new LinkAddress(addr, prefixLen);
+            ifcg.setLinkAddress(linkAddr);
+            if (mInterfaceType == ConnectivityManager.TETHERING_WIFI) {
+                // The WiFi stack has ownership of the interface up/down state.
+                // It is unclear whether the Bluetooth or USB stacks will manage their own
+                // state.
+                ifcg.ignoreInterfaceUpDownStatus();
+            } else {
+                if (enabled) {
+                    ifcg.setInterfaceUp();
+                } else {
+                    ifcg.setInterfaceDown();
+                }
+            }
+            ifcg.clearFlag("running");
+            mNMService.setInterfaceConfig(mIfaceName, ifcg);
         } catch (Exception e) {
             mLog.e("Error configuring interface " + e);
             return false;
         }
 
+        // Directly-connected route.
+        final RouteInfo route = new RouteInfo(linkAddr);
+        if (enabled) {
+            mLinkProperties.addLinkAddress(linkAddr);
+            mLinkProperties.addRoute(route);
+        } else {
+            mLinkProperties.removeLinkAddress(linkAddr);
+            mLinkProperties.removeRoute(route);
+        }
         return true;
     }
 
@@ -294,7 +319,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mLastIPv6LinkProperties = v6only;
     }
 
-    private void configureLocalRoutes(
+    private void configureLocalIPv6Routes(
             HashSet<IpPrefix> deprecatedPrefixes, HashSet<IpPrefix> newPrefixes) {
         // [1] Remove the routes that are deprecated.
         if (!deprecatedPrefixes.isEmpty()) {
@@ -309,6 +334,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
             } catch (RemoteException e) {
                 mLog.e("Failed to remove IPv6 routes from local table: " + e);
             }
+
+            for (RouteInfo route : toBeRemoved) mLinkProperties.removeRoute(route);
         }
 
         // [2] Add only the routes that have not previously been added.
@@ -340,11 +367,13 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 } catch (RemoteException e) {
                     mLog.e("Failed to add IPv6 routes to local table: " + e);
                 }
+
+                for (RouteInfo route : toBeAdded) mLinkProperties.addRoute(route);
             }
         }
     }
 
-    private void configureLocalDns(
+    private void configureLocalIPv6Dns(
             HashSet<Inet6Address> deprecatedDnses, HashSet<Inet6Address> newDnses) {
         final INetd netd = NetdService.getInstance();
         if (netd == null) {
@@ -362,6 +391,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 } catch (ServiceSpecificException | RemoteException e) {
                     mLog.e("Failed to remove local dns IP " + dnsString + ": " + e);
                 }
+
+                mLinkProperties.removeLinkAddress(new LinkAddress(dns, RFC7421_PREFIX_LENGTH));
             }
         }
 
@@ -380,6 +411,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
                     mLog.e("Failed to add local dns IP " + dnsString + ": " + e);
                     newDnses.remove(dns);
                 }
+
+                mLinkProperties.addLinkAddress(new LinkAddress(dns, RFC7421_PREFIX_LENGTH));
             }
         }
 
@@ -396,10 +429,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
             final RaParams deprecatedParams =
                     RaParams.getDeprecatedRaParams(mLastRaParams, newParams);
 
-            configureLocalRoutes(deprecatedParams.prefixes,
+            configureLocalIPv6Routes(deprecatedParams.prefixes,
                     (newParams != null) ? newParams.prefixes : null);
 
-            configureLocalDns(deprecatedParams.dnses,
+            configureLocalIPv6Dns(deprecatedParams.dnses,
                     (newParams != null) ? newParams.dnses : null);
 
             mRaDaemon.buildNewRa(deprecatedParams, newParams);
@@ -419,10 +452,17 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private void sendInterfaceState(int newInterfaceState) {
         mTetherController.updateInterfaceState(
                 TetherInterfaceStateMachine.this, newInterfaceState, mLastError);
-        // TODO: Populate mLinkProperties correctly, and send more sensible
-        // updates more frequently (not just here).
+        sendLinkProperties();
+    }
+
+    private void sendLinkProperties() {
         mTetherController.updateLinkProperties(
                 TetherInterfaceStateMachine.this, new LinkProperties(mLinkProperties));
+    }
+
+    private void resetLinkProperties() {
+        mLinkProperties.clear();
+        mLinkProperties.setInterfaceName(mIfaceName);
     }
 
     class InitialState extends State {
@@ -464,7 +504,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     class BaseServingState extends State {
         @Override
         public void enter() {
-            if (!configureIfaceIp(true)) {
+            if (!startIPv4()) {
                 mLastError = ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR;
                 return;
             }
@@ -498,7 +538,9 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 mLog.e("Failed to untether interface: " + e);
             }
 
-            configureIfaceIp(false);
+            stopIPv4();
+
+            resetLinkProperties();
         }
 
         @Override
@@ -515,6 +557,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                     break;
                 case CMD_IPV6_TETHER_UPDATE:
                     updateUpstreamIPv6LinkProperties((LinkProperties) message.obj);
+                    sendLinkProperties();
                     break;
                 case CMD_IP_FORWARDING_ENABLE_ERROR:
                 case CMD_IP_FORWARDING_DISABLE_ERROR:
@@ -625,7 +668,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
             if (super.processMessage(message)) return true;
 
             maybeLogMessage(this, message.what);
-            boolean retValue = true;
             switch (message.what) {
                 case CMD_TETHER_REQUESTED:
                     mLog.e("CMD_TETHER_REQUESTED while already tethering.");
@@ -655,10 +697,9 @@ public class TetherInterfaceStateMachine extends StateMachine {
                     mMyUpstreamIfaceName = newUpstreamIfaceName;
                     break;
                 default:
-                    retValue = false;
-                    break;
+                    return false;
             }
-            return retValue;
+            return true;
         }
     }
 
