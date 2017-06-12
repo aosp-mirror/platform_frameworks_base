@@ -1575,8 +1575,8 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Ukendt portrætformat"</string>
-    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Ukendt landskabsformat"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Ukendt stående format"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Ukendt liggende format"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Annulleret"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fejl ved skrivning af indhold"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"ukendt"</string>

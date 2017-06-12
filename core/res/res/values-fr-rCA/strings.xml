@@ -90,7 +90,7 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Ce service n\'est pas pris en charge."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Impossible de modifier le paramètre relatif au numéro de l\'appelant."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Aucun service de données"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Aucune appel d\'urgence"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Aucun appel d\'urgence"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Aucun service vocal"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Aucun service vocal ou d\'urgence"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Ce service est temporairement non offert par le réseau cellulaire à l\'endroit où vous êtes"</string>
