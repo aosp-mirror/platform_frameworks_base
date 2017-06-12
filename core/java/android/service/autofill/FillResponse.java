@@ -327,17 +327,6 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
-         * @deprecated Use {@link #setClientState(Bundle)} instead.
-         * @hide
-         */
-        @Deprecated
-        public Builder setExtras(@Nullable Bundle extras) {
-            throwIfDestroyed();
-            mCLientState = extras;
-            return this;
-        }
-
-        /**
          * Sets a {@link Bundle state} that will be passed to subsequent APIs that
          * manipulate this response. For example, they are passed to subsequent
          * calls to {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
