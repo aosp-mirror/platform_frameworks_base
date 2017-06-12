@@ -79,6 +79,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_DISMISS_KEYBOARD_SHORTCUTS    = 32 << MSG_SHIFT;
     private static final int MSG_HANDLE_SYSNAV_KEY             = 33 << MSG_SHIFT;
     private static final int MSG_SHOW_GLOBAL_ACTIONS           = 34 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_PANEL                  = 35 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -104,6 +105,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void disable(int state1, int state2, boolean animate) { }
         default void animateExpandNotificationsPanel() { }
         default void animateCollapsePanels(int flags) { }
+        default void togglePanel() { }
         default void animateExpandSettingsPanel(String obj) { }
         default void setSystemUiVisibility(int vis, int fullscreenStackVis,
                 int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
@@ -208,6 +210,13 @@ public class CommandQueue extends IStatusBar.Stub {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_COLLAPSE_PANELS);
             mHandler.obtainMessage(MSG_COLLAPSE_PANELS, flags, 0).sendToTarget();
+        }
+    }
+
+    public void togglePanel() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_TOGGLE_PANEL);
+            mHandler.obtainMessage(MSG_TOGGLE_PANEL, 0, 0).sendToTarget();
         }
     }
 
@@ -467,6 +476,11 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_COLLAPSE_PANELS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).animateCollapsePanels(msg.arg1);
+                    }
+                    break;
+                case MSG_TOGGLE_PANEL:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).togglePanel();
                     }
                     break;
                 case MSG_EXPAND_SETTINGS:

@@ -32,6 +32,7 @@ oneway interface IStatusBar
     void animateExpandNotificationsPanel();
     void animateExpandSettingsPanel(String subPanel);
     void animateCollapsePanels();
+    void togglePanel();
 
     /**
      * Notifies the status bar of a System UI visibility flag change.
