@@ -14,6 +14,10 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH;
+
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -24,25 +28,35 @@ import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Path.Direction;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
+import android.util.FloatProperty;
 
 public class SlashDrawable extends Drawable {
 
     private final Path mPath = new Path();
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private static float[] OFFSET = {
-        1.3f / 24f,-1.3f / 24f
-    };
-    private static float[][] PATH = {
-            {21.9f / 24f, 21.9f / 24f},
-            {2.1f / 24f, 2.1f / 24f},
-            {0.8f / 24f, 3.4f / 24f},
-            {20.6f / 24f, 23.2f / 24f},
-    };
+    // These values are derived in un-rotated (vertical) orientation
+    private static final float SLASH_WIDTH = 1.8384776f;
+    private static final float SLASH_HEIGHT = 28f;
+    private static final float CENTER_X = 10.65f;
+    private static final float CENTER_Y = 11.869239f;
+    private static final float SCALE = 24f;
+
+    // Bottom is derived during animation
+    private static final float LEFT = (CENTER_X - (SLASH_WIDTH / 2)) / SCALE;
+    private static final float TOP = (CENTER_Y - (SLASH_HEIGHT / 2)) / SCALE;
+    private static final float RIGHT = (CENTER_X + (SLASH_WIDTH / 2)) / SCALE;
+    // Draw the slash washington-monument style; rotate to no-u-turn style
+    private static final float DEFAULT_ROTATION = -45f;
+
     private Drawable mDrawable;
+    private final RectF mSlashRect = new RectF(0, 0, 0, 0);
     private float mRotation;
     private boolean mSlashed;
     private Mode mTintMode;
@@ -83,47 +97,70 @@ public class SlashDrawable extends Drawable {
         invalidateSelf();
     }
 
+    // Animate this value on change
+    private float mCurrentSlashLength;
+    private final FloatProperty mSlashLengthProp = new FloatProperty<SlashDrawable>("slashLength") {
+        @Override
+        public void setValue(SlashDrawable object, float value) {
+            object.mCurrentSlashLength = value;
+        }
+
+        @Override
+        public Float get(SlashDrawable object) {
+            return object.mCurrentSlashLength;
+        }
+    };
+
     public void setSlashed(boolean slashed) {
         if (mSlashed == slashed) return;
-        // TODO: Animate.
+
         mSlashed = slashed;
-        invalidateSelf();
+
+        final float end = mSlashed ? SLASH_HEIGHT / SCALE : 0f;
+        final float start = mSlashed ? 0f : SLASH_HEIGHT / SCALE;
+
+        ObjectAnimator anim = ObjectAnimator.ofFloat(this, mSlashLengthProp, start, end);
+        anim.addUpdateListener((ValueAnimator valueAnimator) -> {
+            invalidateSelf();
+        });
+        anim.setDuration(QS_ANIM_LENGTH);
+        anim.start();
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
         canvas.save();
-        if (mSlashed) {
-            Matrix m = new Matrix();
-            int width = getBounds().width();
-            int height = getBounds().height();
-            mPath.reset();
-            mPath.moveTo(scale(PATH[0][0], width), scale(PATH[0][1], height));
-            mPath.lineTo(scale(PATH[1][0], width), scale(PATH[1][1], height));
-            mPath.lineTo(scale(PATH[2][0], width), scale(PATH[2][1], height));
-            mPath.lineTo(scale(PATH[3][0], width), scale(PATH[3][1], height));
-            mPath.close();
-            m = new Matrix();
-            m.setRotate(mRotation, width / 2, height / 2);
-            mPath.transform(m);
-            canvas.drawPath(mPath, mPaint);
-            m = new Matrix();
-            m.setRotate(-mRotation, width / 2, height / 2);
-            mPath.transform(m);
+        Matrix m = new Matrix();
+        final int width = getBounds().width();
+        final int height = getBounds().height();
+        final float radiusX = scale(1f, width);
+        final float radiusY = scale(1f, height);
+        updateRect(
+                scale(LEFT, width),
+                scale(TOP, height),
+                scale(RIGHT, width),
+                scale(TOP + mCurrentSlashLength, height)
+        );
 
-            m = new Matrix();
-            m.setTranslate(scale(OFFSET[0], width), scale(OFFSET[1], height));
-            mPath.transform(m);
-            mPath.moveTo(scale(PATH[0][0], width), scale(PATH[0][1], height));
-            mPath.lineTo(scale(PATH[1][0], width), scale(PATH[1][1], height));
-            mPath.lineTo(scale(PATH[2][0], width), scale(PATH[2][1], height));
-            mPath.lineTo(scale(PATH[3][0], width), scale(PATH[3][1], height));
-            mPath.close();
-            m = new Matrix();
-            m.setRotate(mRotation, width / 2, height / 2);
-            mPath.transform(m);
-            canvas.clipOutPath(mPath);
-        }
+        mPath.reset();
+        // Draw the slash vertically
+        mPath.addRoundRect(mSlashRect, radiusX, radiusY, Direction.CW);
+        // Rotate -45 + desired rotation
+        m.setRotate(mRotation + DEFAULT_ROTATION, width / 2, height / 2);
+        mPath.transform(m);
+        canvas.drawPath(mPath, mPaint);
+
+        // Rotate back to vertical
+        m.setRotate(-mRotation - DEFAULT_ROTATION, width / 2, height / 2);
+        mPath.transform(m);
+
+        // Draw another rect right next to the first, for clipping
+        m.setTranslate(mSlashRect.width(), 0);
+        mPath.transform(m);
+        mPath.addRoundRect(mSlashRect, 1.0f * width, 1.0f * height, Direction.CW);
+        m.setRotate(mRotation + DEFAULT_ROTATION, width / 2, height / 2);
+        mPath.transform(m);
+        canvas.clipOutPath(mPath);
 
         mDrawable.draw(canvas);
         canvas.restore();
@@ -131,6 +168,13 @@ public class SlashDrawable extends Drawable {
 
     private float scale(float frac, int width) {
         return frac * width;
+    }
+
+    private void updateRect(float left, float top, float right, float bottom) {
+        mSlashRect.left = left;
+        mSlashRect.top = top;
+        mSlashRect.right = right;
+        mSlashRect.bottom = bottom;
     }
 
     @Override
