@@ -33,6 +33,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ShortcutInfo;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -2752,6 +2754,9 @@ public class Notification implements Parcelable
         private ArrayList<Action> mOriginalActions;
         private boolean mRebuildStyledRemoteViews;
 
+        private boolean mTintActionButtons;
+        private boolean mInNightMode;
+
         /**
          * Constructs a new Builder with the defaults:
          *
@@ -2783,6 +2788,14 @@ public class Notification implements Parcelable
          */
         public Builder(Context context, Notification toAdopt) {
             mContext = context;
+            Resources res = mContext.getResources();
+            mTintActionButtons = res.getBoolean(R.bool.config_tintNotificationActionButtons);
+
+            if (res.getBoolean(R.bool.config_enableNightMode)) {
+                Configuration currentConfig = res.getConfiguration();
+                mInNightMode = (currentConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                        == Configuration.UI_MODE_NIGHT_YES;
+            }
 
             if (toAdopt == null) {
                 mN = new Notification();
@@ -4631,14 +4644,14 @@ public class Notification implements Parcelable
                     // We need to set the text color as well since changing a text to uppercase
                     // clears its spans.
                     button.setTextColor(R.id.action0, outResultColor[0]);
-                } else if (mN.color != COLOR_DEFAULT && !isColorized()) {
+                } else if (mN.color != COLOR_DEFAULT && !isColorized() && mTintActionButtons) {
                     button.setTextColor(R.id.action0,resolveContrastColor());
                 }
             } else {
                 button.setTextViewText(R.id.action0, processLegacyText(action.title));
                 if (isColorized() && !ambient) {
                     setTextViewColorPrimary(button, R.id.action0);
-                } else if (mN.color != COLOR_DEFAULT) {
+                } else if (mN.color != COLOR_DEFAULT && mTintActionButtons) {
                     button.setTextColor(R.id.action0,
                             ambient ? resolveAmbientColor() : resolveContrastColor());
                 }
@@ -4717,7 +4730,7 @@ public class Notification implements Parcelable
                             int[] newColors = new int[colors.length];
                             for (int i = 0; i < newColors.length; i++) {
                                 newColors[i] = NotificationColorUtil.ensureLargeTextContrast(
-                                        colors[i], background);
+                                        colors[i], background, mInNightMode);
                             }
                             textColor = new ColorStateList(textColor.getStates().clone(),
                                     newColors);
@@ -4736,7 +4749,7 @@ public class Notification implements Parcelable
                         ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
                         int foregroundColor = originalSpan.getForegroundColor();
                         foregroundColor = NotificationColorUtil.ensureLargeTextContrast(
-                                foregroundColor, background);
+                                foregroundColor, background, mInNightMode);
                         resultSpan = new ForegroundColorSpan(foregroundColor);
                         if (fullLength) {
                             outResultColor[0] = ColorStateList.valueOf(foregroundColor);
@@ -4831,7 +4844,7 @@ public class Notification implements Parcelable
                 color = mSecondaryTextColor;
             } else {
                 color = NotificationColorUtil.resolveContrastColor(mContext, mN.color,
-                        background);
+                        background, mInNightMode);
             }
             if (Color.alpha(color) < 255) {
                 // alpha doesn't go well for color filters, so let's blend it manually
@@ -5062,6 +5075,10 @@ public class Notification implements Parcelable
 
         private boolean isColorized() {
             return mN.isColorized();
+        }
+
+        private boolean shouldTintActionButtons() {
+            return mTintActionButtons;
         }
 
         private boolean textColorsNeedInversion() {
@@ -6067,6 +6084,8 @@ public class Notification implements Parcelable
             BidiFormatter bidi = BidiFormatter.getInstance();
             SpannableStringBuilder sb = new SpannableStringBuilder();
             boolean colorize = builder.isColorized();
+            TextAppearanceSpan colorSpan;
+            CharSequence messageName;
             if (TextUtils.isEmpty(m.mSender)) {
                 CharSequence replyName = mUserDisplayName == null ? "" : mUserDisplayName;
                 sb.append(bidi.unicodeWrap(replyName),
@@ -6595,8 +6614,16 @@ public class Notification implements Parcelable
             RemoteViews button = new BuilderRemoteViews(mBuilder.mContext.getApplicationInfo(),
                     R.layout.notification_material_media_action);
             button.setImageViewIcon(R.id.action0, action.getIcon());
-            button.setDrawableParameters(R.id.action0, false, -1, color, PorterDuff.Mode.SRC_ATOP,
-                    -1);
+
+            // If the action buttons should not be tinted, then just use the default
+            // notification color. Otherwise, just use the passed-in color.
+            int tintColor = mBuilder.shouldTintActionButtons() || mBuilder.isColorized()
+                    ? color
+                    : NotificationColorUtil.resolveColor(mBuilder.mContext,
+                            Notification.COLOR_DEFAULT);
+
+            button.setDrawableParameters(R.id.action0, false, -1, tintColor,
+                    PorterDuff.Mode.SRC_ATOP, -1);
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }

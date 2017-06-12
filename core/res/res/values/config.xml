@@ -2978,4 +2978,11 @@
 
     <!-- An array of packages that need to be treated as type service in battery settings -->
     <string-array translatable="false" name="config_batteryPackageTypeService"/>
+
+    <!-- Flag indicating whether or not to enable night mode detection. -->
+    <bool name="config_enableNightMode">false</bool>
+
+    <!-- Flag indicating that the actions buttons for a notification should be tinted with by the
+         color supplied by the Notification.Builder if present. -->
+    <bool name="config_tintNotificationActionButtons">true</bool>
 </resources>
