@@ -949,7 +949,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public boolean isUserUnlocked(int userId) {
         checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isUserUnlocked");
-        return mLocalService.isUserUnlockingOrUnlocked(userId);
+        return mLocalService.isUserUnlocked(userId);
     }
 
     @Override
@@ -3692,19 +3692,29 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public boolean isUserUnlockingOrUnlocked(int userId) {
+            int state;
             synchronized (mUserStates) {
-                int state = mUserStates.get(userId, -1);
-                return (state == UserState.STATE_RUNNING_UNLOCKING)
-                        || (state == UserState.STATE_RUNNING_UNLOCKED);
+                state = mUserStates.get(userId, -1);
             }
+            // Special case, in the stopping/shutdown state user key can still be unlocked
+            if (state == UserState.STATE_STOPPING || state == UserState.STATE_SHUTDOWN) {
+                return StorageManager.isUserKeyUnlocked(userId);
+            }
+            return (state == UserState.STATE_RUNNING_UNLOCKING)
+                    || (state == UserState.STATE_RUNNING_UNLOCKED);
         }
 
         @Override
         public boolean isUserUnlocked(int userId) {
+            int state;
             synchronized (mUserStates) {
-                int state = mUserStates.get(userId, -1);
-                return state == UserState.STATE_RUNNING_UNLOCKED;
+                state = mUserStates.get(userId, -1);
             }
+            // Special case, in the stopping/shutdown state user key can still be unlocked
+            if (state == UserState.STATE_STOPPING || state == UserState.STATE_SHUTDOWN) {
+                return StorageManager.isUserKeyUnlocked(userId);
+            }
+            return state == UserState.STATE_RUNNING_UNLOCKED;
         }
     }
 
