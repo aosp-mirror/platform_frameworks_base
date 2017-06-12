@@ -683,7 +683,7 @@ public class WifiP2pManager {
         private DnsSdTxtRecordListener mDnsSdTxtListener;
         private UpnpServiceResponseListener mUpnpServRspListener;
         private HashMap<Integer, Object> mListenerMap = new HashMap<Integer, Object>();
-        private Object mListenerMapLock = new Object();
+        private final Object mListenerMapLock = new Object();
         private int mListenerKey = 0;
 
         private AsyncChannel mAsyncChannel;
