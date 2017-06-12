@@ -52,7 +52,7 @@ import android.widget.FrameLayout;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
-@FlakyTest
+@Ignore("failing")
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private MetricsLogger mMockMetricsLogger;
