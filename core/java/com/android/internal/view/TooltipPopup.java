@@ -97,6 +97,8 @@ public class TooltipPopup {
 
     private void computePosition(View anchorView, int anchorX, int anchorY, boolean fromTouch,
             WindowManager.LayoutParams outParams) {
+        outParams.token = anchorView.getWindowToken();
+
         final int tooltipPreciseAnchorThreshold = mContext.getResources().getDimensionPixelOffset(
                 com.android.internal.R.dimen.tooltip_precise_anchor_threshold);
 
