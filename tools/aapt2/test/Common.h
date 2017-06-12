@@ -141,8 +141,21 @@ MATCHER_P(ValueEq, a,
   return arg.Equals(&a);
 }
 
-MATCHER_P(StrValueEq, a, std::string(negation ? "isn't" : "is") + " equal to " + ::testing::PrintToString(a)) {
+MATCHER_P(StrValueEq, a,
+          std::string(negation ? "isn't" : "is") + " equal to " + ::testing::PrintToString(a)) {
   return *(arg.value) == a;
+}
+
+MATCHER_P(HasValue, name,
+          std::string(negation ? "does not have" : "has") + " value " +
+              ::testing::PrintToString(name)) {
+  return GetValueForConfig<Value>(&(*arg), name, {}) != nullptr;
+}
+
+MATCHER_P2(HasValue, name, config,
+           std::string(negation ? "does not have" : "has") + " value " +
+               ::testing::PrintToString(name) + " for config " + ::testing::PrintToString(config)) {
+  return GetValueForConfig<Value>(&(*arg), name, config) != nullptr;
 }
 
 }  // namespace test
