@@ -19,6 +19,7 @@ package android.net.wifi;
 
 import android.content.pm.ParceledListSlice;
 
+import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 
 import android.net.wifi.WifiConfiguration;
@@ -60,6 +61,8 @@ interface IWifiManager
     ParceledListSlice getPrivilegedConfiguredNetworks();
 
     WifiConfiguration getMatchingWifiConfig(in ScanResult scanResult);
+
+    List<OsuProvider> getMatchingOsuProviders(in ScanResult scanResult);
 
     int addOrUpdateNetwork(in WifiConfiguration config);
 
