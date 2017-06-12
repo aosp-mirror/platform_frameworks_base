@@ -25,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 public class TooltipPopup {
@@ -33,7 +32,6 @@ public class TooltipPopup {
 
     private final Context mContext;
 
-    private final PopupWindow mPopupWindow;
     private final View mContentView;
     private final TextView mMessageView;
 
@@ -45,8 +43,6 @@ public class TooltipPopup {
     public TooltipPopup(Context context) {
         mContext = context;
 
-        mPopupWindow = new PopupWindow(context);
-        mPopupWindow.setBackgroundDrawable(null);
         mContentView = LayoutInflater.from(mContext).inflate(
                 com.android.internal.R.layout.tooltip, null);
         mMessageView = (TextView) mContentView.findViewById(
@@ -74,16 +70,17 @@ public class TooltipPopup {
 
         computePosition(anchorView, anchorX, anchorY, fromTouch, mLayoutParams);
 
-        mPopupWindow.setContentView(mContentView);
-        mPopupWindow.showAtLocation(
-            anchorView, mLayoutParams.gravity, mLayoutParams.x, mLayoutParams.y);
+        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        wm.addView(mContentView, mLayoutParams);
     }
 
     public void hide() {
         if (!isShowing()) {
             return;
         }
-        mPopupWindow.dismiss();
+
+        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        wm.removeView(mContentView);
     }
 
     public View getContentView() {
@@ -91,7 +88,7 @@ public class TooltipPopup {
     }
 
     public boolean isShowing() {
-        return mPopupWindow.isShowing();
+        return mContentView.getParent() != null;
     }
 
     public void updateContent(CharSequence tooltipText) {
@@ -100,6 +97,8 @@ public class TooltipPopup {
 
     private void computePosition(View anchorView, int anchorX, int anchorY, boolean fromTouch,
             WindowManager.LayoutParams outParams) {
+        outParams.token = anchorView.getWindowToken();
+
         final int tooltipPreciseAnchorThreshold = mContext.getResources().getDimensionPixelOffset(
                 com.android.internal.R.dimen.tooltip_precise_anchor_threshold);
 
