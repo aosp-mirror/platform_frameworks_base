@@ -19,7 +19,7 @@ package com.android.server.wm;
 /** Interface used by the creator of the controller to listen to changes with the container. */
 public interface AppWindowContainerListener extends WindowContainerListener {
     /** Called when the windows associated app window container are drawn. */
-    void onWindowsDrawn();
+    void onWindowsDrawn(long timestamp);
     /** Called when the windows associated app window container are visible. */
     void onWindowsVisible();
     /** Called when the windows associated app window container are no longer visible. */
@@ -28,7 +28,7 @@ public interface AppWindowContainerListener extends WindowContainerListener {
     /**
      * Called when the starting window for this container is drawn.
      */
-    void onStartingWindowDrawn();
+    void onStartingWindowDrawn(long timestamp);
 
     /**
      * Called when the key dispatching to a window associated with the app window container

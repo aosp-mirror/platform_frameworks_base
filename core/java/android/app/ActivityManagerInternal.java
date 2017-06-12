@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
 
@@ -134,8 +135,10 @@ public abstract class ActivityManagerInternal {
      *
      * @param reasons A map from stack id to a reason integer why the transition was started,, which
      *                must be one of the APP_TRANSITION_* values.
+     * @param timestamp The time at which the app transition started in
+     *                  {@link SystemClock#uptimeMillis()} timebase.
      */
-    public abstract void notifyAppTransitionStarting(SparseIntArray reasons);
+    public abstract void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp);
 
     /**
      * Callback for window manager to let activity manager know that the app transition was
