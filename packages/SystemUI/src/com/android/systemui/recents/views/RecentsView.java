@@ -46,6 +46,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
@@ -113,7 +114,7 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
 
     private final float mScrimAlpha;
     private GradientDrawable mBackgroundScrim;
-    private final ColorExtractor mColorExtractor;
+    private final SysuiColorExtractor mColorExtractor;
     private Animator mBackgroundScrimAnimator;
 
     private RecentsTransitionHelper mTransitionHelper;
@@ -146,7 +147,7 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
         mBackgroundScrim = new GradientDrawable(context);
         mBackgroundScrim.setCallback(this);
         mBackgroundScrim.setAlpha((int) (mScrimAlpha * 255));
-        mColorExtractor = Dependency.get(ColorExtractor.class);
+        mColorExtractor = Dependency.get(SysuiColorExtractor.class);
 
         LayoutInflater inflater = LayoutInflater.from(context);
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
@@ -829,17 +830,23 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
     }
 
     @Override
-    public void onColorsChanged(ColorExtractor extractor, int which) {
+    public void onColorsChanged(ColorExtractor colorExtractor, int which) {
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
-            mBackgroundScrim.setColors(extractor.getColors(WallpaperManager.FLAG_SYSTEM));
+            // Recents doesn't care about the wallpaper being visible or not, it always
+            // wants to scrim with wallpaper colors
+            mBackgroundScrim.setColors(
+                    mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM, true));
         }
     }
 
     public void onStart() {
         mColorExtractor.addOnColorsChangedListener(this);
+        // Getting system scrim colors ignoring wallpaper visibility since it should never be grey.
+        ColorExtractor.GradientColors systemColors = mColorExtractor.getColors(
+                WallpaperManager.FLAG_SYSTEM, true);
         // We don't want to interpolate colors because we're defining the initial state.
         // Gradient should be set/ready when you open "Recents".
-        mBackgroundScrim.setColors(mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM), false);
+        mBackgroundScrim.setColors(systemColors, false);
     }
 
     public void onStop() {

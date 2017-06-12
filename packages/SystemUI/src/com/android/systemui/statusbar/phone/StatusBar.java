@@ -168,6 +168,7 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.ExtensionFragmentListener;
@@ -733,7 +734,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
     @Nullable private View mAmbientIndicationContainer;
-    private ColorExtractor mColorExtractor;
+    private SysuiColorExtractor mColorExtractor;
     private ForegroundServiceController mForegroundServiceController;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
@@ -780,7 +781,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mOverlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
 
-        mColorExtractor = Dependency.get(ColorExtractor.class);
+        mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
@@ -4515,10 +4516,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Ignore visibility since we calculate the theme based on the real colors,
         // not the current state.
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            useDarkTheme = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK)
+            useDarkTheme = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, true /* vis */)
                     .supportsDarkText();
         } else {
-            useDarkTheme = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM)
+            useDarkTheme = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM, true /* vis */)
                     .supportsDarkText();
         }
 
