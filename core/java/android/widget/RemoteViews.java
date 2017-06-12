@@ -2418,24 +2418,26 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
 
-    public synchronized RemoteViews clone() {
-        Preconditions.checkState(mIsRoot, "RemoteView has been attached to another RemoteView. "
-                + "May only clone the root of a RemoteView hierarchy.");
+    public RemoteViews clone() {
+        synchronized (this) {
+            Preconditions.checkState(mIsRoot, "RemoteView has been attached to another RemoteView. "
+                    + "May only clone the root of a RemoteView hierarchy.");
 
-        Parcel p = Parcel.obtain();
+            Parcel p = Parcel.obtain();
 
-        // Do not parcel the Bitmap cache - doing so creates an expensive copy of all bitmaps.
-        // Instead pretend we're not owning the cache while parceling.
-        mIsRoot = false;
-        writeToParcel(p, PARCELABLE_ELIDE_DUPLICATES);
-        p.setDataPosition(0);
-        mIsRoot = true;
+            // Do not parcel the Bitmap cache - doing so creates an expensive copy of all bitmaps.
+            // Instead pretend we're not owning the cache while parceling.
+            mIsRoot = false;
+            writeToParcel(p, PARCELABLE_ELIDE_DUPLICATES);
+            p.setDataPosition(0);
+            mIsRoot = true;
 
-        RemoteViews rv = new RemoteViews(p, mBitmapCache.clone(), mApplication, 0);
-        rv.mIsRoot = true;
+            RemoteViews rv = new RemoteViews(p, mBitmapCache.clone(), mApplication, 0);
+            rv.mIsRoot = true;
 
-        p.recycle();
-        return rv;
+            p.recycle();
+            return rv;
+        }
     }
 
     public String getPackage() {

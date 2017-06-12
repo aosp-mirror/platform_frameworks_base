@@ -279,7 +279,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    @SystemApi
     public static final String ACTION_STATE_USER_SETUP_COMPLETE =
             "android.app.action.STATE_USER_SETUP_COMPLETE";
 

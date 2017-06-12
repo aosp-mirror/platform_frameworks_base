@@ -78,14 +78,18 @@ public interface WebViewFactoryProvider {
         /**
          * Implement the API method
          * {@link android.webkit.WebView#initSafeBrowsing(Context , ValueCallback<Boolean>)}
+         * @hide
          */
-        void initSafeBrowsing(Context context, ValueCallback<Boolean> callback);
+        default void initSafeBrowsing(Context context, ValueCallback<Boolean> callback) {
+        }
 
         /**
          * Implement the API method
          * {@link android.webkit.WebView#shutdownSafeBrowsing()}
+         * @hide
          */
-        void shutdownSafeBrowsing();
+        default void shutdownSafeBrowsing() {
+        }
     }
 
     Statics getStatics();
