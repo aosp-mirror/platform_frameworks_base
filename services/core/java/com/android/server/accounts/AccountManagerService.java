@@ -4703,6 +4703,10 @@ public class AccountManagerService
         protected void checkKeyIntent(
                 int authUid,
                 Intent intent) throws SecurityException {
+            intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION));
             long bid = Binder.clearCallingIdentity();
             try {
                 PackageManager pm = mContext.getPackageManager();
