@@ -22,6 +22,7 @@ import static com.android.systemui.Interpolators.FAST_OUT_LINEAR_IN;
 import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
 import static com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN;
 
+import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
@@ -36,14 +37,15 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.Choreographer;
 import android.view.animation.Interpolator;
 
-import com.android.internal.os.BackgroundThread;
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PipSnapAlgorithm;
-import com.android.internal.view.SurfaceFlingerVsyncChoreographer;
+import com.android.systemui.recents.misc.ForegroundThread;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
@@ -52,7 +54,7 @@ import java.io.PrintWriter;
 /**
  * A helper to animate and manipulate the PiP.
  */
-public class PipMotionHelper {
+public class PipMotionHelper implements Handler.Callback {
 
     private static final String TAG = "PipMotionHelper";
     private static final boolean DEBUG = false;
@@ -74,38 +76,34 @@ public class PipMotionHelper {
     // The fraction of the stack height that the user has to drag offscreen to dismiss the PiP
     private static final float DISMISS_OFFSCREEN_FRACTION = 0.3f;
 
+    private static final int MSG_RESIZE_IMMEDIATE = 1;
+    private static final int MSG_RESIZE_ANIMATE = 2;
+
     private Context mContext;
     private IActivityManager mActivityManager;
-    private SurfaceFlingerVsyncChoreographer mVsyncChoreographer;
     private Handler mHandler;
 
     private PipMenuActivityController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
     private FlingAnimationUtils mFlingAnimationUtils;
+    private AnimationHandler mAnimationHandler;
 
     private final Rect mBounds = new Rect();
     private final Rect mStableInsets = new Rect();
 
     private ValueAnimator mBoundsAnimator = null;
-    private ValueAnimator.AnimatorUpdateListener mUpdateBoundsListener =
-            new AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mBounds.set((Rect) animation.getAnimatedValue());
-                }
-            };
 
     public PipMotionHelper(Context context, IActivityManager activityManager,
             PipMenuActivityController menuController, PipSnapAlgorithm snapAlgorithm,
             FlingAnimationUtils flingAnimationUtils) {
         mContext = context;
-        mHandler = BackgroundThread.getHandler();
+        mHandler = new Handler(ForegroundThread.get().getLooper(), this);
         mActivityManager = activityManager;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFlingAnimationUtils = flingAnimationUtils;
-        mVsyncChoreographer = new SurfaceFlingerVsyncChoreographer(mHandler, mContext.getDisplay(),
-                Choreographer.getInstance());
+        mAnimationHandler = new AnimationHandler();
+        mAnimationHandler.setProvider(new SfVsyncFrameCallbackProvider());
         onConfigurationChanged();
     }
 
@@ -252,8 +250,7 @@ public class PipMotionHelper {
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mBounds,
                 0 /* velocityX */, velocityY);
         if (!mBounds.equals(toBounds)) {
-            mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, 0, FAST_OUT_SLOW_IN,
-                    mUpdateBoundsListener);
+            mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, 0, FAST_OUT_SLOW_IN);
             mFlingAnimationUtils.apply(mBoundsAnimator, 0,
                     distanceBetweenRectOffsets(mBounds, toBounds),
                     velocityY);
@@ -271,7 +268,7 @@ public class PipMotionHelper {
         Rect toBounds = getClosestMinimizedBounds(mBounds, movementBounds);
         if (!mBounds.equals(toBounds)) {
             mBoundsAnimator = createAnimationToBounds(mBounds, toBounds,
-                    MINIMIZE_STACK_MAX_DURATION, LINEAR_OUT_SLOW_IN, mUpdateBoundsListener);
+                    MINIMIZE_STACK_MAX_DURATION, LINEAR_OUT_SLOW_IN);
             if (updateListener != null) {
                 mBoundsAnimator.addUpdateListener(updateListener);
             }
@@ -289,8 +286,7 @@ public class PipMotionHelper {
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mBounds,
                 velocityX, velocityY);
         if (!mBounds.equals(toBounds)) {
-            mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, 0, FAST_OUT_SLOW_IN,
-                    mUpdateBoundsListener);
+            mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, 0, FAST_OUT_SLOW_IN);
             mFlingAnimationUtils.apply(mBoundsAnimator, 0,
                     distanceBetweenRectOffsets(mBounds, toBounds),
                     velocity);
@@ -314,7 +310,7 @@ public class PipMotionHelper {
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mBounds);
         if (!mBounds.equals(toBounds)) {
             mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, SNAP_STACK_DURATION,
-                    FAST_OUT_SLOW_IN, mUpdateBoundsListener);
+                    FAST_OUT_SLOW_IN);
             if (updateListener != null) {
                 mBoundsAnimator.addUpdateListener(updateListener);
             }
@@ -379,7 +375,7 @@ public class PipMotionHelper {
         Rect toBounds = new Rect(pipBounds);
         toBounds.offsetTo(p.x, p.y);
         mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, DRAG_TO_DISMISS_STACK_DURATION,
-                FAST_OUT_LINEAR_IN, mUpdateBoundsListener);
+                FAST_OUT_LINEAR_IN);
         mBoundsAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -411,16 +407,20 @@ public class PipMotionHelper {
      * Creates an animation to move the PiP to give given {@param toBounds}.
      */
     private ValueAnimator createAnimationToBounds(Rect fromBounds, Rect toBounds, int duration,
-            Interpolator interpolator, ValueAnimator.AnimatorUpdateListener updateListener) {
-        ValueAnimator anim = ValueAnimator.ofObject(RECT_EVALUATOR, fromBounds, toBounds);
+            Interpolator interpolator) {
+        ValueAnimator anim = new ValueAnimator() {
+            @Override
+            public AnimationHandler getAnimationHandler() {
+                return mAnimationHandler;
+            }
+        };
+        anim.setObjectValues(fromBounds, toBounds);
+        anim.setEvaluator(RECT_EVALUATOR);
         anim.setDuration(duration);
         anim.setInterpolator(interpolator);
         anim.addUpdateListener((ValueAnimator animation) -> {
             resizePipUnchecked((Rect) animation.getAnimatedValue());
         });
-        if (updateListener != null) {
-            anim.addUpdateListener(updateListener);
-        }
         return anim;
     }
 
@@ -433,14 +433,9 @@ public class PipMotionHelper {
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
         if (!toBounds.equals(mBounds)) {
-            mVsyncChoreographer.scheduleAtSfVsync(() -> {
-                try {
-                    mActivityManager.resizePinnedStack(toBounds, null /* tempPinnedTaskBounds */);
-                    mBounds.set(toBounds);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not resize pinned stack to bounds: " + toBounds, e);
-                }
-            });
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = toBounds;
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_RESIZE_IMMEDIATE, args));
         }
     }
 
@@ -453,23 +448,10 @@ public class PipMotionHelper {
                     + " duration=" + duration + " callers=\n" + Debug.getCallers(5, "    "));
         }
         if (!toBounds.equals(mBounds)) {
-            mHandler.post(() -> {
-                try {
-                    StackInfo stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-                    if (stackInfo == null) {
-                        // In the case where we've already re-expanded or dismissed the PiP, then
-                        // just skip the resize
-                        return;
-                    }
-
-                    mActivityManager.resizeStack(PINNED_STACK_ID, toBounds,
-                            false /* allowResizeInDockedMode */, true /* preserveWindows */,
-                            true /* animate */, duration);
-                    mBounds.set(toBounds);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not animate resize pinned stack to bounds: " + toBounds, e);
-                }
-            });
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = toBounds;
+            args.argi1 = duration;
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_RESIZE_ANIMATE, args));
         }
     }
 
@@ -522,6 +504,50 @@ public class PipMotionHelper {
      */
     private float distanceBetweenRectOffsets(Rect r1, Rect r2) {
         return PointF.length(r1.left - r2.left, r1.top - r2.top);
+    }
+
+    /**
+     * Handles messages to be processed on the background thread.
+     */
+    public boolean handleMessage(Message msg) {
+        switch (msg.what) {
+            case MSG_RESIZE_IMMEDIATE: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                Rect toBounds = (Rect) args.arg1;
+                try {
+                    mActivityManager.resizePinnedStack(toBounds, null /* tempPinnedTaskBounds */);
+                    mBounds.set(toBounds);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not resize pinned stack to bounds: " + toBounds, e);
+                }
+                return true;
+            }
+
+            case MSG_RESIZE_ANIMATE: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                Rect toBounds = (Rect) args.arg1;
+                int duration = args.argi1;
+                try {
+                    StackInfo stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+                    if (stackInfo == null) {
+                        // In the case where we've already re-expanded or dismissed the PiP, then
+                        // just skip the resize
+                        return true;
+                    }
+
+                    mActivityManager.resizeStack(PINNED_STACK_ID, toBounds,
+                            false /* allowResizeInDockedMode */, true /* preserveWindows */,
+                            true /* animate */, duration);
+                    mBounds.set(toBounds);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not animate resize pinned stack to bounds: " + toBounds, e);
+                }
+                return true;
+            }
+
+            default:
+                return false;
+        }
     }
 
     public void dump(PrintWriter pw, String prefix) {

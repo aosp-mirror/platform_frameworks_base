@@ -20,6 +20,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.animation.AnimationHandler;
+import android.animation.AnimationHandler.AnimationFrameCallbackProvider;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
@@ -30,11 +32,13 @@ import android.os.IBinder;
 import android.os.Debug;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.Choreographer;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.WindowManagerInternal;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -49,7 +53,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * The object that is resized needs to implement {@link BoundsAnimationTarget} interface.
  *
- * NOTE: All calls to methods in this class should be done on the UI thread
+ * NOTE: All calls to methods in this class should be done on the Animation thread
  */
 public class BoundsAnimationController {
     private static final boolean DEBUG_LOCAL = false;
@@ -111,20 +115,24 @@ public class BoundsAnimationController {
     private final AppTransitionNotifier mAppTransitionNotifier = new AppTransitionNotifier();
     private final Interpolator mFastOutSlowInInterpolator;
     private boolean mFinishAnimationAfterTransition = false;
+    private final AnimationHandler mAnimationHandler;
 
     private static final int WAIT_FOR_DRAW_TIMEOUT_MS = 3000;
 
-    BoundsAnimationController(Context context, AppTransition transition, Handler handler) {
+    BoundsAnimationController(Context context, AppTransition transition, Handler handler,
+            AnimationHandler animationHandler) {
         mHandler = handler;
         mAppTransition = transition;
         mAppTransition.registerListenerLocked(mAppTransitionNotifier);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
+        mAnimationHandler = animationHandler;
     }
 
     @VisibleForTesting
     final class BoundsAnimator extends ValueAnimator
             implements ValueAnimator.AnimatorUpdateListener, ValueAnimator.AnimatorListener {
+
         private final BoundsAnimationTarget mTarget;
         private final Rect mFrom = new Rect();
         private final Rect mTo = new Rect();
@@ -349,6 +357,14 @@ public class BoundsAnimationController {
         @Override
         public void onAnimationRepeat(Animator animation) {
             // Do nothing
+        }
+
+        @Override
+        public AnimationHandler getAnimationHandler() {
+            if (mAnimationHandler != null) {
+                return mAnimationHandler;
+            }
+            return super.getAnimationHandler();
         }
     }
 
