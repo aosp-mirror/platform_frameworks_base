@@ -8,7 +8,7 @@
     <string name="portal_notification_detail" msgid="2295729385924660881">"タップして %s のウェブサイトにアクセス"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"ご利用のサービス プロバイダ %s にお問い合わせください"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"モバイルデータ接続を利用できません"</string>
-    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s からデータまたはローミング プランを追加してください"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s からデータプランまたはローミング プランを追加してください"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"モバイルデータのステータス"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"モバイル ネットワークにログイン"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"接続しようとしているネットワークにセキュリティの問題があります。"</string>
