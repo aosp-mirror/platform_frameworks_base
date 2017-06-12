@@ -16,25 +16,41 @@
 
 package com.android.server.connectivity.tethering;
 
+import android.net.LinkProperties;
+
 /**
  * @hide
  *
  * Interface with methods necessary to notify that a given interface is ready for tethering.
+ *
+ * Rename to something more representative, e.g. IpServingControlCallback.
+ *
+ * All methods MUST be called on the TetherMasterSM main Looper's thread.
  */
-public interface IControlsTethering {
-    public final int STATE_UNAVAILABLE = 0;
-    public final int STATE_AVAILABLE   = 1;
-    public final int STATE_TETHERED    = 2;
-    public final int STATE_LOCAL_ONLY  = 3;
+public class IControlsTethering {
+    public static final int STATE_UNAVAILABLE = 0;
+    public static final int STATE_AVAILABLE   = 1;
+    public static final int STATE_TETHERED    = 2;
+    public static final int STATE_LOCAL_ONLY  = 3;
 
     /**
-     * Notify that |who| has changed its tethering state.  This may be called from any thread.
+     * Notify that |who| has changed its tethering state.
      *
-     * @param iface a network interface (e.g. "wlan0")
+     * TODO: Remove the need for the |who| argument.
+     *
      * @param who corresponding instance of a TetherInterfaceStateMachine
      * @param state one of IControlsTethering.STATE_*
      * @param lastError one of ConnectivityManager.TETHER_ERROR_*
      */
-    void notifyInterfaceStateChange(String iface, TetherInterfaceStateMachine who,
-                                    int state, int lastError);
+    public void updateInterfaceState(TetherInterfaceStateMachine who, int state, int lastError) {}
+
+    /**
+     * Notify that |who| has new LinkProperties.
+     *
+     * TODO: Remove the need for the |who| argument.
+     *
+     * @param who corresponding instance of a TetherInterfaceStateMachine
+     * @param newLp the new LinkProperties to report
+     */
+    public void updateLinkProperties(TetherInterfaceStateMachine who, LinkProperties newLp) {}
 }
