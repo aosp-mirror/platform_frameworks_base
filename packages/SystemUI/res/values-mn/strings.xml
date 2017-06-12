@@ -350,7 +350,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Хайх"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-г гулсуулах."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> хийх зүүнлүү гулсуулах."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Танд сэрүүлгэ, сануулга, үйл явдлын сануулга, таны сануулсан дуудлага зэргээс бусад дуу чимээ, чичиргээ танд садаа болохгүй."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Танд сэрүүлэг, сануулга, үйл ажиллагаа, таны сонгосон дуудлага илгээгчээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Танд сэрүүлгээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Тохируулах"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Энэ нь сэрүүлэг, хөгжим, видео, тоглоом зэргийг оруулаад зэрэг БҮХ дуу, чичиргээг блоклодог. Та дуудлага хийх боломжтой хэвээр байна."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Энэ нь сэрүүлэг, хөгжим, видео, тоглоом зэргийг оруулаад зэрэг БҮХ дуу, чичиргээг блоклодог."</string>
@@ -472,7 +473,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Үгүй"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Тохируулах"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Одоо дуусгах"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Одоо унтраах"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Дэлгэх"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Хураах"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Дэлгэц эхэнд байрлуулагдсан"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Ta цаашид эдгээр мэдэгдлийг авахгүй"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> мэдэгдлийн ангилал"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Энэ апп-д мэдэгдлийн категори алга"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Энэ аппын мэдэгдлийг унтраах боломжгүй"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">Энэ аппын <xliff:g id="NUMBER_1">%d</xliff:g> мэдэгдлийн категорийн 1</item>
       <item quantity="one">Энэ аппын <xliff:g id="NUMBER_0">%d</xliff:g> мэдэгдлийн категорийн 1</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"мэдэгдэл түр хойшлуулагчийн сонголт"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"БУЦААХ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g>-д түр хойшлуулсан"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d цаг</item>
+      <item quantity="one">%d цаг</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d минут</item>
+      <item quantity="one">%d минут</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Тэжээл ашиглалт"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Цэнэглэх үед тэжээл хэмнэгч ажиллахгүй"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Тэжээл хэмнэгч"</string>

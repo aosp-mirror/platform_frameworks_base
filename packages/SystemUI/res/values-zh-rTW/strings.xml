@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"搜尋"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"你不會受到聲音和震動干擾，但鬧鐘、提醒、活動和指定來電者除外。"</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"裝置不會發出音效或震動造成干擾，但會保留鬧鐘、提醒、活動和你指定的來電者響鈴。如果你選擇播放特定音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"裝置不會發出音效或震動造成干擾，但會保留鬧鐘響鈴。如果你選擇播放特定音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"自訂"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"這會封鎖「所有」聲音和震動干擾，包括鬧鐘、音樂、影片和遊戲在內，但你仍然可以撥打電話。"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"這會封鎖「所有」聲音和震動干擾，包括鬧鐘、音樂、影片和遊戲在內。"</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"不用了，謝謝"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"設定"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"立刻結束"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"立即停用"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收合"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"你不會再收到這類通知"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> 個通知類別"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"這個應用程式沒有通知類別"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"無法關閉這個應用程式發出的通知"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">在 <xliff:g id="NUMBER_1">%d</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
       <item quantity="one">在 <xliff:g id="NUMBER_0">%d</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"通知延後選項"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"復原"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"已延後 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d 小時</item>
+      <item quantity="one">%d 小時</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d 分鐘</item>
+      <item quantity="one">%d 分鐘</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"電池用量"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充電時無法使用節約耗電量模式"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"節約耗電量"</string>
