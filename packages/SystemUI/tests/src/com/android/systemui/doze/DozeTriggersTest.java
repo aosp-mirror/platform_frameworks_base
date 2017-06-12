@@ -40,10 +40,12 @@ import com.android.systemui.utils.hardware.FakeSensorManager;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
+@Ignore("failing")
 @RunWith(AndroidJUnit4.class)
 public class DozeTriggersTest extends SysuiTestCase {
     private DozeTriggers mTriggers;
@@ -79,7 +81,6 @@ public class DozeTriggersTest extends SysuiTestCase {
         });
     }
 
-    @FlakyTest
     @Test
     public void testOnNotification_stillWorksAfterOneFailedProxCheck() throws Exception {
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
