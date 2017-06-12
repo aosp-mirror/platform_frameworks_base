@@ -49,6 +49,7 @@ public class DateView extends TextView {
             final String action = intent.getAction();
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 mScreenOn = true;
+                getHandler().post(() -> updateClock());
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOn = false;
             }
