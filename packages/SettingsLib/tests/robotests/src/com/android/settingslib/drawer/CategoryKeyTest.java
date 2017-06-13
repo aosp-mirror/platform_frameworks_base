@@ -54,13 +54,14 @@ public class CategoryKeyTest {
         allKeys.add(CategoryKey.CATEGORY_SOUND);
         allKeys.add(CategoryKey.CATEGORY_STORAGE);
         allKeys.add(CategoryKey.CATEGORY_SECURITY);
+        allKeys.add(CategoryKey.CATEGORY_SECURITY_LOCKSCREEN);
         allKeys.add(CategoryKey.CATEGORY_ACCOUNT);
         allKeys.add(CategoryKey.CATEGORY_SYSTEM);
         allKeys.add(CategoryKey.CATEGORY_SYSTEM_LANGUAGE);
         allKeys.add(CategoryKey.CATEGORY_SYSTEM_DEVELOPMENT);
         // DO NOT REMOVE ANYTHING ABOVE
 
-        assertThat(allKeys.size()).isEqualTo(13);
+        assertThat(allKeys.size()).isEqualTo(14);
     }
 
 }
