@@ -90,7 +90,7 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ਸੇਵਾ ਪ੍ਰਬੰਧਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"ਤੁਸੀਂ ਕਾਲਰ ID ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੇ।"</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ਕੋਈ ਡੈਟਾ ਸੇਵਾ ਨਹੀਂ"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"ਕੋਈ ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਨਹੀਂ"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"ਸੰਕਟਕਾਲ ਵਿੱਚ ਕੋਈ ਕਾਲ ਨਹੀਂ"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ਕੋਈ ਆਵਾਜ਼ੀ ਸੇਵਾ ਨਹੀਂ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ਕੋਈ ਆਵਾਜ਼ੀ/ਸੰਕਟਕਾਲੀਨ ਸੇਵਾ ਨਹੀਂ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"ਤੁਹਾਡੇ ਟਿਕਾਣੇ \'ਤੇ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਵੱਲੋਂ ਉਪਲਬਧ ਨਹੀਂ ਕਰਵਾਈ ਗਈ"</string>

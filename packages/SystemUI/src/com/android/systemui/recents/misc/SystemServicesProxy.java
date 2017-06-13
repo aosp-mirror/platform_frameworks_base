@@ -154,6 +154,13 @@ public class SystemServicesProxy {
     Canvas mBgProtectionCanvas;
 
     private final Handler mHandler = new H();
+    private final Runnable mGcRunnable = new Runnable() {
+        @Override
+        public void run() {
+            System.gc();
+            System.runFinalization();
+        }
+    };
 
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
@@ -365,13 +372,7 @@ public class SystemServicesProxy {
      * Requests a gc() from the background thread.
      */
     public void gc() {
-        BackgroundThread.getHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                System.gc();
-                System.runFinalization();
-            }
-        });
+        BackgroundThread.getHandler().post(mGcRunnable);
     }
 
     /**
@@ -799,11 +800,8 @@ public class SystemServicesProxy {
         if (RecentsDebugFlags.Static.EnableMockTasks) return;
 
         // Remove the task.
-        BackgroundThread.getHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                mAm.removeTask(taskId);
-            }
+        mUiOffloadThread.submit(() -> {
+            mAm.removeTask(taskId);
         });
     }
 

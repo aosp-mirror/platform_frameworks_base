@@ -21,11 +21,14 @@ import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.BatchedInputEventReceiver;
+import android.view.Choreographer;
 import android.view.InputChannel;
 import android.view.InputEvent;
-import android.view.InputEventReceiver;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
+
+import com.android.systemui.recents.misc.Utilities;
 
 import java.io.PrintWriter;
 
@@ -52,12 +55,13 @@ public class InputConsumerController {
     }
 
     /**
-     * Input handler used for the PiP input consumer.
+     * Input handler used for the PiP input consumer. Input events are batched and consumed with the
+     * SurfaceFlinger vsync.
      */
-    private final class PipInputEventReceiver extends InputEventReceiver {
+    private final class PipInputEventReceiver extends BatchedInputEventReceiver {
 
         public PipInputEventReceiver(InputChannel inputChannel, Looper looper) {
-            super(inputChannel, looper);
+            super(inputChannel, looper, Choreographer.getSfInstance());
         }
 
         @Override
