@@ -33,7 +33,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 
-public class IdleController extends StateController {
+public final class IdleController extends StateController {
     private static final String TAG = "IdleController";
 
     // Policy: we decide that we're "idle" if the device has been unused /
@@ -107,7 +107,7 @@ public class IdleController extends StateController {
         mIdleTracker.startTracking();
     }
 
-    class IdlenessTracker extends BroadcastReceiver {
+    final class IdlenessTracker extends BroadcastReceiver {
         private AlarmManager mAlarm;
         private PendingIntent mIdleTriggerIntent;
         boolean mIdle;
