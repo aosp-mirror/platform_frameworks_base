@@ -5917,11 +5917,9 @@ public class AccountManagerService
             String tokenType,
             String callingPackage,
             byte[] pkgSigDigest) {
-        synchronized (accounts.dbLock) {
-            synchronized (accounts.cacheLock) {
-                return accounts.accountTokenCaches.get(
-                        account, tokenType, callingPackage, pkgSigDigest);
-            }
+        synchronized (accounts.cacheLock) {
+            return accounts.accountTokenCaches.get(
+                    account, tokenType, callingPackage, pkgSigDigest);
         }
     }
 
