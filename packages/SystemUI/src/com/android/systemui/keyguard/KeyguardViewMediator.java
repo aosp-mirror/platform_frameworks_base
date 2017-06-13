@@ -1864,12 +1864,7 @@ public class KeyguardViewMediator extends SystemUI {
                         + " isSecure=" + isSecure() + " --> flags=0x" + Integer.toHexString(flags));
             }
 
-            if (!(mContext instanceof Activity)) {
-                final int finalFlags = flags;
-                mUiOffloadThread.submit(() -> {
-                    mStatusBarManager.disable(finalFlags);
-                });
-            }
+            mStatusBarManager.disable(flags);
         }
     }
 
