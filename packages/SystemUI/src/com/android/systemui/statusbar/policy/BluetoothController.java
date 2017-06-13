@@ -37,6 +37,9 @@ public interface BluetoothController extends CallbackController<Callback>, Dumpa
     void disconnect(CachedBluetoothDevice device);
     boolean canConfigBluetooth();
 
+    int getMaxConnectionState(CachedBluetoothDevice device);
+    int getBondState(CachedBluetoothDevice device);
+
     public interface Callback {
         void onBluetoothStateChange(boolean enabled);
         void onBluetoothDevicesChanged();
