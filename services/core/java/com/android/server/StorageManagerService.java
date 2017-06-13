@@ -90,14 +90,12 @@ import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.os.AppFuseMount;
-import com.android.internal.os.FuseAppLoop;
 import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
@@ -143,7 +141,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -3291,20 +3288,41 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    @Override
-    public long getAllocatableBytes(String volumeUuid, int flags) {
-        final StorageManager storage = mContext.getSystemService(StorageManager.class);
-        final StorageStatsManager stats = mContext.getSystemService(StorageStatsManager.class);
-
-        // Apps can't defy reserved space
-        flags &= ~StorageManager.FLAG_ALLOCATE_DEFY_RESERVED;
-
-        final boolean aggressive = (flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
-        if (aggressive) {
+    private int adjustAllocateFlags(int flags, int callingUid, String callingPackage) {
+        // Require permission to allocate aggressively
+        if ((flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.ALLOCATE_AGGRESSIVE, TAG);
         }
 
+        // Apps normally can't directly defy reserved space
+        flags &= ~StorageManager.FLAG_ALLOCATE_DEFY_ALL_RESERVED;
+        flags &= ~StorageManager.FLAG_ALLOCATE_DEFY_HALF_RESERVED;
+
+        // However, if app is actively using the camera, then we're willing to
+        // clear up to half of the reserved cache space, since the user might be
+        // trying to capture an important memory.
+        final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (appOps.isOperationActive(AppOpsManager.OP_CAMERA, callingUid, callingPackage)) {
+                Slog.d(TAG, "UID " + callingUid + " is actively using camera;"
+                        + " letting them defy reserved cached data");
+                flags |= StorageManager.FLAG_ALLOCATE_DEFY_HALF_RESERVED;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return flags;
+    }
+
+    @Override
+    public long getAllocatableBytes(String volumeUuid, int flags, String callingPackage) {
+        flags = adjustAllocateFlags(flags, Binder.getCallingUid(), callingPackage);
+
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final StorageStatsManager stats = mContext.getSystemService(StorageStatsManager.class);
         final long token = Binder.clearCallingIdentity();
         try {
             // In general, apps can allocate as much space as they want, except
@@ -3319,18 +3337,18 @@ class StorageManagerService extends IStorageManager.Stub
 
             if (stats.isQuotaSupported(volumeUuid)) {
                 final long cacheTotal = stats.getCacheBytes(volumeUuid);
-                final long cacheReserved = storage.getStorageCacheBytes(path);
+                final long cacheReserved = storage.getStorageCacheBytes(path, flags);
                 final long cacheClearable = Math.max(0, cacheTotal - cacheReserved);
 
-                if (aggressive) {
-                    return Math.max(0, (usable + cacheTotal) - fullReserved);
+                if ((flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0) {
+                    return Math.max(0, (usable + cacheClearable) - fullReserved);
                 } else {
                     return Math.max(0, (usable + cacheClearable) - lowReserved);
                 }
             } else {
                 // When we don't have fast quota information, we ignore cached
                 // data and only consider unused bytes.
-                if (aggressive) {
+                if ((flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0) {
                     return Math.max(0, usable - fullReserved);
                 } else {
                     return Math.max(0, usable - lowReserved);
@@ -3344,20 +3362,16 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public void allocateBytes(String volumeUuid, long bytes, int flags) {
-        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+    public void allocateBytes(String volumeUuid, long bytes, int flags, String callingPackage) {
+        flags = adjustAllocateFlags(flags, Binder.getCallingUid(), callingPackage);
 
-        // Apps can't defy reserved space
-        flags &= ~StorageManager.FLAG_ALLOCATE_DEFY_RESERVED;
-
-        // This method call will enforce FLAG_ALLOCATE_AGGRESSIVE permissions so
-        // we don't have to enforce them locally
-        final long allocatableBytes = getAllocatableBytes(volumeUuid, flags);
+        final long allocatableBytes = getAllocatableBytes(volumeUuid, flags, callingPackage);
         if (bytes > allocatableBytes) {
             throw new ParcelableException(new IOException("Failed to allocate " + bytes
                     + " because only " + allocatableBytes + " allocatable"));
         }
 
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
         final long token = Binder.clearCallingIdentity();
         try {
             // Free up enough disk space to satisfy both the requested allocation
