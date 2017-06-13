@@ -445,7 +445,6 @@ public final class ActivityThread {
                 sb.append(", startedActivity=").append(activity.mStartedActivity);
                 sb.append(", temporaryPause=").append(activity.mTemporaryPause);
                 sb.append(", changingConfigurations=").append(activity.mChangingConfigurations);
-                sb.append(", visibleBehind=").append(activity.mVisibleBehind);
                 sb.append("}");
             }
             sb.append("}");
@@ -1384,16 +1383,6 @@ public final class ActivityThread {
         }
 
         @Override
-        public void scheduleCancelVisibleBehind(IBinder token) {
-            sendMessage(H.CANCEL_VISIBLE_BEHIND, token);
-        }
-
-        @Override
-        public void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean visible) {
-            sendMessage(H.BACKGROUND_VISIBLE_BEHIND_CHANGED, token, visible ? 1 : 0);
-        }
-
-        @Override
         public void scheduleEnterAnimationComplete(IBinder token) {
             sendMessage(H.ENTER_ANIMATION_COMPLETE, token);
         }
@@ -1509,8 +1498,6 @@ public final class ActivityThread {
         public static final int TRANSLUCENT_CONVERSION_COMPLETE = 144;
         public static final int INSTALL_PROVIDER        = 145;
         public static final int ON_NEW_ACTIVITY_OPTIONS = 146;
-        public static final int CANCEL_VISIBLE_BEHIND = 147;
-        public static final int BACKGROUND_VISIBLE_BEHIND_CHANGED = 148;
         public static final int ENTER_ANIMATION_COMPLETE = 149;
         public static final int START_BINDER_TRACKING = 150;
         public static final int STOP_BINDER_TRACKING_AND_DUMP = 151;
@@ -1571,8 +1558,6 @@ public final class ActivityThread {
                     case TRANSLUCENT_CONVERSION_COMPLETE: return "TRANSLUCENT_CONVERSION_COMPLETE";
                     case INSTALL_PROVIDER: return "INSTALL_PROVIDER";
                     case ON_NEW_ACTIVITY_OPTIONS: return "ON_NEW_ACTIVITY_OPTIONS";
-                    case CANCEL_VISIBLE_BEHIND: return "CANCEL_VISIBLE_BEHIND";
-                    case BACKGROUND_VISIBLE_BEHIND_CHANGED: return "BACKGROUND_VISIBLE_BEHIND_CHANGED";
                     case ENTER_ANIMATION_COMPLETE: return "ENTER_ANIMATION_COMPLETE";
                     case MULTI_WINDOW_MODE_CHANGED: return "MULTI_WINDOW_MODE_CHANGED";
                     case PICTURE_IN_PICTURE_MODE_CHANGED: return "PICTURE_IN_PICTURE_MODE_CHANGED";
@@ -1814,12 +1799,6 @@ public final class ActivityThread {
                 case ON_NEW_ACTIVITY_OPTIONS:
                     Pair<IBinder, ActivityOptions> pair = (Pair<IBinder, ActivityOptions>) msg.obj;
                     onNewActivityOptions(pair.first, pair.second);
-                    break;
-                case CANCEL_VISIBLE_BEHIND:
-                    handleCancelVisibleBehind((IBinder) msg.obj);
-                    break;
-                case BACKGROUND_VISIBLE_BEHIND_CHANGED:
-                    handleOnBackgroundVisibleBehindChanged((IBinder) msg.obj, msg.arg1 > 0);
                     break;
                 case ENTER_ANIMATION_COMPLETE:
                     handleEnterAnimationComplete((IBinder) msg.obj);
@@ -3067,36 +3046,6 @@ public final class ActivityThread {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
             r.activity.onNewActivityOptions(options);
-        }
-    }
-
-    public void handleCancelVisibleBehind(IBinder token) {
-        ActivityClientRecord r = mActivities.get(token);
-        if (r != null) {
-            mSomeActivitiesChanged = true;
-            final Activity activity = r.activity;
-            if (activity.mVisibleBehind) {
-                activity.mCalled = false;
-                activity.onVisibleBehindCanceled();
-                // Tick, tick, tick. The activity has 500 msec to return or it will be destroyed.
-                if (!activity.mCalled) {
-                    throw new SuperNotCalledException("Activity " + activity.getLocalClassName() +
-                            " did not call through to super.onVisibleBehindCanceled()");
-                }
-                activity.mVisibleBehind = false;
-            }
-        }
-        try {
-            ActivityManager.getService().backgroundResourcesReleased(token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    public void handleOnBackgroundVisibleBehindChanged(IBinder token, boolean visible) {
-        ActivityClientRecord r = mActivities.get(token);
-        if (r != null) {
-            r.activity.onBackgroundVisibleBehindChanged(visible);
         }
     }
 

@@ -801,10 +801,6 @@ public class Activity extends ContextThemeWrapper
     final Handler mHandler = new Handler();
     final FragmentController mFragments = FragmentController.createController(new HostCallbacks());
 
-    // Most recent call to requestVisibleBehind().
-    @Deprecated
-    boolean mVisibleBehind;
-
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
             mCursor = cursor;
@@ -6459,10 +6455,6 @@ public class Activity extends ContextThemeWrapper
     @Deprecated
     @SystemApi
     public boolean isBackgroundVisibleBehind() {
-        try {
-            return ActivityManager.getService().isBackgroundVisibleBehind(mToken);
-        } catch (RemoteException e) {
-        }
         return false;
     }
 
