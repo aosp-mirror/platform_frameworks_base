@@ -94,6 +94,7 @@ import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
+import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -5462,8 +5463,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean useTombstonedForJavaTraces = false;
         File tracesFile;
 
-        final String tracesDir = SystemProperties.get("dalvik.vm.stack-trace-dir", "");
-        if (tracesDir.isEmpty()) {
+        final String tracesDirProp = SystemProperties.get("dalvik.vm.stack-trace-dir", "");
+        if (tracesDirProp.isEmpty()) {
             // When dalvik.vm.stack-trace-dir is not set, we are using the "old" trace
             // dumping scheme. All traces are written to a global trace file (usually
             // "/data/anr/traces.txt") so the code below must take care to unlink and recreate
@@ -5491,15 +5492,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return null;
             }
         } else {
+            File tracesDir = new File(tracesDirProp);
             // When dalvik.vm.stack-trace-dir is set, we use the "new" trace dumping scheme.
             // Each set of ANR traces is written to a separate file and dumpstate will process
             // all such files and add them to a captured bug report if they're recent enough.
-            //
+            maybePruneOldTraces(tracesDir);
+
             // NOTE: We should consider creating the file in native code atomically once we've
             // gotten rid of the old scheme of dumping and lot of the code that deals with paths
             // can be removed.
             try {
-                tracesFile = File.createTempFile("anr_", "", new File(tracesDir));
+                tracesFile = File.createTempFile("anr_", "", tracesDir);
                 FileUtils.setPermissions(tracesFile.getAbsolutePath(), 0600, -1, -1); // -rw-------
             } catch (IOException ioe) {
                 Slog.w(TAG, "Unable to create ANR traces file: ", ioe);
@@ -5512,6 +5515,28 @@ public class ActivityManagerService extends IActivityManager.Stub
         dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids,
                 useTombstonedForJavaTraces);
         return tracesFile;
+    }
+
+    /**
+     * Prune all trace files that are more than a day old.
+     *
+     * NOTE: It might make sense to move this functionality to tombstoned eventually, along with a
+     * shift away from anr_XX and tombstone_XX to a more descriptive name. We do it here for now
+     * since it's the system_server that creates trace files for most ANRs.
+     */
+    private static void maybePruneOldTraces(File tracesDir) {
+        final long now = System.currentTimeMillis();
+        final File[] traceFiles = tracesDir.listFiles();
+
+        if (traceFiles != null) {
+            for (File file : traceFiles) {
+                if ((now - file.lastModified()) > DAY_IN_MILLIS)  {
+                    if (!file.delete()) {
+                        Slog.w(TAG, "Unable to prune stale trace file: " + file);
+                    }
+                }
+            }
+        }
     }
 
     /**
