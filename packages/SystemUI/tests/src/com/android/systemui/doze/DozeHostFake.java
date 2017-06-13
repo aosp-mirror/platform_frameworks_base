@@ -28,6 +28,8 @@ class DozeHostFake implements DozeHost {
     boolean pulseExtended;
     boolean animateWakeup;
     boolean dozing;
+    float doubleTapX;
+    float doubleTapY;
 
     @Override
     public void addCallback(@NonNull Callback callback) {
@@ -87,5 +89,11 @@ class DozeHostFake implements DozeHost {
     @Override
     public void setAnimateWakeup(boolean animateWakeup) {
         this.animateWakeup = animateWakeup;
+    }
+
+    @Override
+    public void onDoubleTap(float x, float y) {
+        doubleTapX = y;
+        doubleTapY = y;
     }
 }
