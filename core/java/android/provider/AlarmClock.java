@@ -82,7 +82,8 @@ public final class AlarmClock {
      * If neither of the above are given then:
      * <ul>
      * <li>If exactly one active alarm exists, it is dismissed.
-     * <li>If more than one active alarm exists, the user is prompted to choose the alarm to dismiss.
+     * <li>If more than one active alarm exists, the user is prompted to choose the alarm to
+     * dismiss.
      * </ul>
      * </p><p>
      * If the extra {@link #EXTRA_ALARM_SEARCH_MODE} is used, and the search results contain two or
@@ -104,8 +105,7 @@ public final class AlarmClock {
      * @see #EXTRA_ALARM_SEARCH_MODE
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_DISMISS_ALARM =
-            "android.intent.action.DISMISS_ALARM";
+    public static final String ACTION_DISMISS_ALARM = "android.intent.action.DISMISS_ALARM";
 
     /**
      * Activity Action: Snooze a currently ringing alarm.
@@ -124,8 +124,7 @@ public final class AlarmClock {
      * @see #EXTRA_ALARM_SNOOZE_DURATION
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_SNOOZE_ALARM =
-            "android.intent.action.SNOOZE_ALARM";
+    public static final String ACTION_SNOOZE_ALARM = "android.intent.action.SNOOZE_ALARM";
 
     /**
      * Activity Action: Set a timer.
@@ -153,6 +152,16 @@ public final class AlarmClock {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
+
+    /**
+     * Activity Action: Dismiss timers.
+     * <p>
+     * Dismiss all currently expired timers. If there are no expired timers, then this is a no-op.
+     * </p>
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_DISMISS_TIMER = "android.intent.action.DISMISS_TIMER";
 
     /**
      * Activity Action: Show the timers.
@@ -200,8 +209,7 @@ public final class AlarmClock {
      * @see #ALARM_SEARCH_MODE_LABEL
      * @see #ACTION_DISMISS_ALARM
      */
-    public static final String EXTRA_ALARM_SEARCH_MODE =
-        "android.intent.extra.alarm.SEARCH_MODE";
+    public static final String EXTRA_ALARM_SEARCH_MODE = "android.intent.extra.alarm.SEARCH_MODE";
 
     /**
      * Search for the alarm that is most closely matched by the search parameters
