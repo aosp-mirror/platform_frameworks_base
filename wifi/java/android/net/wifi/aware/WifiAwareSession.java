@@ -67,6 +67,7 @@ public class WifiAwareSession implements AutoCloseable {
      * An application may re-attach after a destroy using
      * {@link WifiAwareManager#attach(AttachCallback, Handler)} .
      */
+    @Override
     public void close() {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
