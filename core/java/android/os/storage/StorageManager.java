@@ -29,6 +29,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.WorkerThread;
+import android.app.Activity;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -159,6 +160,12 @@ public class StorageManager {
      * If the sending application has a specific storage device or allocation
      * size in mind, they can optionally define {@link #EXTRA_UUID} or
      * {@link #EXTRA_REQUESTED_BYTES}, respectively.
+     * <p>
+     * This intent should be launched using
+     * {@link Activity#startActivityForResult(Intent, int)} so that the user
+     * knows which app is requesting the storage space. The returned result will
+     * be {@link Activity#RESULT_OK} if the requested space was made available,
+     * or {@link Activity#RESULT_CANCELED} otherwise.
      */
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_STORAGE = "android.os.storage.action.MANAGE_STORAGE";
@@ -1476,15 +1483,26 @@ public class StorageManager {
     }
 
     /**
-     * Opens seekable ParcelFileDescriptor that routes file operation requests to
-     * ProxyFileDescriptorCallback.
+     * Opens a seekable {@link ParcelFileDescriptor} that proxies all low-level
+     * I/O requests back to the given {@link ProxyFileDescriptorCallback}.
+     * <p>
+     * This can be useful when you want to provide quick access to a large file
+     * that isn't backed by a real file on disk, such as a file on a network
+     * share, cloud storage service, etc. As an example, you could respond to a
+     * {@link ContentResolver#openFileDescriptor(android.net.Uri, String)}
+     * request by returning a {@link ParcelFileDescriptor} created with this
+     * method, and then stream the content on-demand as requested.
+     * <p>
+     * Another useful example might be where you have an encrypted file that
+     * you're willing to decrypt on-demand, but where you want to avoid
+     * persisting the cleartext version.
      *
      * @param mode The desired access mode, must be one of
-     *     {@link ParcelFileDescriptor#MODE_READ_ONLY},
-     *     {@link ParcelFileDescriptor#MODE_WRITE_ONLY}, or
-     *     {@link ParcelFileDescriptor#MODE_READ_WRITE}
-     * @param callback Callback to process file operation requests issued on returned file
-     *     descriptor.
+     *            {@link ParcelFileDescriptor#MODE_READ_ONLY},
+     *            {@link ParcelFileDescriptor#MODE_WRITE_ONLY}, or
+     *            {@link ParcelFileDescriptor#MODE_READ_WRITE}
+     * @param callback Callback to process file operation requests issued on
+     *            returned file descriptor.
      * @param handler Handler that invokes callback methods.
      * @return Seekable ParcelFileDescriptor.
      * @throws IOException
@@ -1495,7 +1513,6 @@ public class StorageManager {
         Preconditions.checkNotNull(handler);
         return openProxyFileDescriptor(mode, callback, handler, null);
     }
-
 
     /** {@hide} */
     @VisibleForTesting
@@ -1678,6 +1695,10 @@ public class StorageManager {
      * persist, you can launch {@link #ACTION_MANAGE_STORAGE} with the
      * {@link #EXTRA_UUID} and {@link #EXTRA_REQUESTED_BYTES} options to help
      * involve the user in freeing up disk space.
+     * <p>
+     * If you're progressively allocating an unbounded amount of storage space
+     * (such as when recording a video) you should avoid calling this method
+     * more than once every 30 seconds.
      * <p class="note">
      * Note: if your app uses the {@code android:sharedUserId} manifest feature,
      * then allocatable space for all packages in your shared UID is tracked
@@ -1695,6 +1716,7 @@ public class StorageManager {
      * @throws IOException when the storage device isn't present, or when it
      *             doesn't support allocating space.
      */
+    @WorkerThread
     public @BytesLong long getAllocatableBytes(@NonNull UUID storageUuid)
             throws IOException {
         return getAllocatableBytes(storageUuid, 0);
@@ -1702,6 +1724,7 @@ public class StorageManager {
 
     /** @hide */
     @SystemApi
+    @WorkerThread
     @SuppressLint("Doclava125")
     public long getAllocatableBytes(@NonNull UUID storageUuid,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
@@ -1718,6 +1741,7 @@ public class StorageManager {
 
     /** @removed */
     @Deprecated
+    @WorkerThread
     @SuppressLint("Doclava125")
     public long getAllocatableBytes(@NonNull File path,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
@@ -1736,6 +1760,10 @@ public class StorageManager {
      * subject to race conditions. If possible, consider using
      * {@link #allocateBytes(FileDescriptor, long, int)} which will guarantee
      * that bytes are allocated to an opened file.
+     * <p>
+     * If you're progressively allocating an unbounded amount of storage space
+     * (such as when recording a video) you should avoid calling this method
+     * more than once every 60 seconds.
      *
      * @param storageUuid the UUID of the storage volume where you'd like to
      *            allocate disk space. The UUID for a specific path can be
@@ -1746,6 +1774,7 @@ public class StorageManager {
      *             trouble allocating the requested space.
      * @see #getAllocatableBytes(UUID, int)
      */
+    @WorkerThread
     public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes)
             throws IOException {
         allocateBytes(storageUuid, bytes, 0);
@@ -1753,6 +1782,7 @@ public class StorageManager {
 
     /** @hide */
     @SystemApi
+    @WorkerThread
     @SuppressLint("Doclava125")
     public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
@@ -1768,6 +1798,7 @@ public class StorageManager {
 
     /** @removed */
     @Deprecated
+    @WorkerThread
     @SuppressLint("Doclava125")
     public void allocateBytes(@NonNull File path, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
@@ -1786,6 +1817,10 @@ public class StorageManager {
      * otherwise it will throw if fast allocation is not possible. Fast
      * allocation is typically only supported in private app data directories,
      * and on shared/external storage devices which are emulated.
+     * <p>
+     * If you're progressively allocating an unbounded amount of storage space
+     * (such as when recording a video) you should avoid calling this method
+     * more than once every 60 seconds.
      *
      * @param fd the open file that you'd like to allocate disk space for.
      * @param bytes the number of bytes to allocate. This is the desired final
@@ -1799,12 +1834,14 @@ public class StorageManager {
      * @see #getAllocatableBytes(UUID, int)
      * @see Environment#isExternalStorageEmulated(File)
      */
+    @WorkerThread
     public void allocateBytes(FileDescriptor fd, @BytesLong long bytes) throws IOException {
         allocateBytes(fd, bytes, 0);
     }
 
     /** @hide */
     @SystemApi
+    @WorkerThread
     @SuppressLint("Doclava125")
     public void allocateBytes(FileDescriptor fd, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
