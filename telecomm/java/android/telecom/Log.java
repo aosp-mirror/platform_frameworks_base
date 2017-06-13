@@ -325,7 +325,8 @@ public class Log {
         return sEventManager;
     }
 
-    private static SessionManager getSessionManager() {
+    @VisibleForTesting
+    public static SessionManager getSessionManager() {
         // Checking for null again outside of synchronization because we only need to synchronize
         // during the lazy loading of the session logger. We don't need to synchronize elsewhere.
         if (sSessionManager == null) {
