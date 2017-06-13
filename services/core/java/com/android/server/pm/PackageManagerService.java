@@ -4258,10 +4258,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     volumeUuid);
             final boolean aggressive = (storageFlags
                     & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
-            final boolean defyReserved = (storageFlags
-                    & StorageManager.FLAG_ALLOCATE_DEFY_RESERVED) != 0;
-            final long reservedBytes = (aggressive || defyReserved) ? 0
-                    : storage.getStorageCacheBytes(file);
+            final long reservedBytes = storage.getStorageCacheBytes(file, storageFlags);
 
             // 1. Pre-flight to determine if we have any chance to succeed
             // 2. Consider preloaded data (after 1w honeymoon, unless aggressive)
