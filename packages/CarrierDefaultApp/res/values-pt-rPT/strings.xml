@@ -7,6 +7,8 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Os seus dados móveis foram desativados"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Tocar para aceder ao Website %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Contacte o seu fornecedor de serviços %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Sem ligação de dados móveis"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Adicionar dados ou um plano de roaming através de %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Estado dos dados móveis"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Iniciar sessão na rede móvel"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"A rede à qual está a tentar aceder tem problemas de segurança."</string>

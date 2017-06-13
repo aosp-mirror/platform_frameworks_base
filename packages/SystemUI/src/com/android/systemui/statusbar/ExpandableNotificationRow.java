@@ -352,7 +352,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mShowingPublicInitialized = false;
         updateNotificationColor();
         if (mMenuRow != null) {
-            mMenuRow.onNotificationUpdated();
+            mMenuRow.onNotificationUpdated(mStatusBarNotification);
         }
         if (mIsSummaryWithChildren) {
             mChildrenContainer.recreateNotificationHeader(mExpandClickListener);
@@ -831,7 +831,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public NotificationMenuRowPlugin createMenu() {
         if (mMenuRow.getMenuView() == null) {
-            mMenuRow.createMenu(this);
+            mMenuRow.createMenu(this, mStatusBarNotification);
             mMenuRow.setAppName(mAppName);
             FrameLayout.LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT);
@@ -848,6 +848,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void onDensityOrFontScaleChanged() {
         super.onDensityOrFontScaleChanged();
         initDimens();
+        initBackground();
         // Let's update our childrencontainer. This is intentionally not guarded with
         // mIsSummaryWithChildren since we might have had children but not anymore.
         if (mChildrenContainer != null) {
@@ -866,7 +867,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (oldMenu != null) {
             int menuIndex = indexOfChild(oldMenu);
             removeView(oldMenu);
-            mMenuRow.createMenu(ExpandableNotificationRow.this);
+            mMenuRow.createMenu(ExpandableNotificationRow.this, mStatusBarNotification);
             mMenuRow.setAppName(mAppName);
             addView(mMenuRow.getMenuView(), menuIndex);
         }

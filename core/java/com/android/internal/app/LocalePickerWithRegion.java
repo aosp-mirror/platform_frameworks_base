@@ -238,7 +238,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             mSearchView.setOnQueryTextListener(this);
 
             // Restore previous search status
-            if (!TextUtils.isEmpty(mPreviousSearch)) {
+            if (mPreviousSearch != null) {
                 searchMenuItem.expandActionView();
                 mSearchView.setIconified(false);
                 mSearchView.setActivated(true);

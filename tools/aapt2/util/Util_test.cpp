@@ -147,54 +147,48 @@ TEST(UtilTest, IsJavaPackageName) {
 
 TEST(UtilTest, FullyQualifiedClassName) {
   Maybe<std::string> res = util::GetFullyQualifiedClassName("android", ".asdf");
-  AAPT_ASSERT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_EQ(res.value(), "android.asdf");
 
   res = util::GetFullyQualifiedClassName("android", ".a.b");
-  AAPT_ASSERT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_EQ(res.value(), "android.a.b");
 
   res = util::GetFullyQualifiedClassName("android", "a.b");
-  AAPT_ASSERT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_EQ(res.value(), "a.b");
 
   res = util::GetFullyQualifiedClassName("", "a.b");
-  AAPT_ASSERT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_EQ(res.value(), "a.b");
 
   res = util::GetFullyQualifiedClassName("android", "Class");
-  AAPT_ASSERT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_EQ(res.value(), "android.Class");
 
   res = util::GetFullyQualifiedClassName("", "");
-  AAPT_ASSERT_FALSE(res);
+  ASSERT_FALSE(res);
 
   res = util::GetFullyQualifiedClassName("android", "./Apple");
-  AAPT_ASSERT_FALSE(res);
+  ASSERT_FALSE(res);
 }
 
 TEST(UtilTest, ExtractResourcePathComponents) {
   StringPiece prefix, entry, suffix;
-  ASSERT_TRUE(util::ExtractResFilePathParts("res/xml-sw600dp/entry.xml",
-                                            &prefix, &entry, &suffix));
+  ASSERT_TRUE(util::ExtractResFilePathParts("res/xml-sw600dp/entry.xml", &prefix, &entry, &suffix));
   EXPECT_EQ(prefix, "res/xml-sw600dp/");
   EXPECT_EQ(entry, "entry");
   EXPECT_EQ(suffix, ".xml");
 
-  ASSERT_TRUE(util::ExtractResFilePathParts("res/xml-sw600dp/entry.9.png",
-                                            &prefix, &entry, &suffix));
-
+  ASSERT_TRUE(util::ExtractResFilePathParts("res/xml-sw600dp/entry.9.png", &prefix, &entry, &suffix));
   EXPECT_EQ(prefix, "res/xml-sw600dp/");
   EXPECT_EQ(entry, "entry");
   EXPECT_EQ(suffix, ".9.png");
 
-  EXPECT_FALSE(util::ExtractResFilePathParts("AndroidManifest.xml", &prefix,
-                                             &entry, &suffix));
-  EXPECT_FALSE(
-      util::ExtractResFilePathParts("res/.xml", &prefix, &entry, &suffix));
+  EXPECT_FALSE(util::ExtractResFilePathParts("AndroidManifest.xml", &prefix, &entry, &suffix));
+  EXPECT_FALSE(util::ExtractResFilePathParts("res/.xml", &prefix, &entry, &suffix));
 
-  ASSERT_TRUE(
-      util::ExtractResFilePathParts("res//.", &prefix, &entry, &suffix));
+  ASSERT_TRUE(util::ExtractResFilePathParts("res//.", &prefix, &entry, &suffix));
   EXPECT_EQ(prefix, "res//");
   EXPECT_EQ(entry, "");
   EXPECT_EQ(suffix, ".");

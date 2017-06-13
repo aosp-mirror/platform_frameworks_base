@@ -2285,6 +2285,7 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports Wi-Fi Passpoint.
+     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
@@ -2342,6 +2343,7 @@ public abstract class PackageManager {
      * computers, laptops and variants such as convertibles or detachables.
      * Due to the larger screen, the device will most likely use the
      * {@link #FEATURE_FREEFORM_WINDOW_MANAGEMENT} feature as well.
+     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_PC = "android.hardware.type.pc";
@@ -5773,7 +5775,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SystemApi
     public static abstract class DexModuleRegisterCallback {
         public abstract void onDexModuleRegistered(String dexModulePath, boolean success,
                 String message);
@@ -5807,7 +5808,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SystemApi
     public abstract void registerDexModule(String dexModulePath,
             @Nullable DexModuleRegisterCallback callback);
 }

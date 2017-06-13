@@ -15,6 +15,7 @@
 package com.android.systemui.plugins.statusbar;
 
 import android.content.Context;
+import android.service.notification.StatusBarNotification;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +38,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem
 public interface NotificationMenuRowPlugin extends Plugin {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_NOTIFICATION_MENU_ROW";
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
 
     @ProvidesInterface(version = OnMenuEventListener.VERSION)
     public interface OnMenuEventListener {
@@ -77,7 +78,7 @@ public interface NotificationMenuRowPlugin extends Plugin {
 
     public void setAppName(String appName);
 
-    public void createMenu(ViewGroup parent);
+    public void createMenu(ViewGroup parent, StatusBarNotification sbn);
 
     public View getMenuView();
 
@@ -89,9 +90,13 @@ public interface NotificationMenuRowPlugin extends Plugin {
 
     public void onHeightUpdate();
 
-    public void onNotificationUpdated();
+    public void onNotificationUpdated(StatusBarNotification sbn);
 
     public boolean onTouchEvent(View view, MotionEvent ev, float velocity);
+
+    public default boolean onInterceptTouchEvent(View view, MotionEvent ev) {
+        return false;
+    }
 
     public default boolean useDefaultMenuItems() {
         return false;

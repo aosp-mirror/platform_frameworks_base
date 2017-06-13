@@ -1477,6 +1477,10 @@ final class UserController {
                 case UserState.STATE_RUNNING_UNLOCKING:
                 case UserState.STATE_RUNNING_UNLOCKED:
                     return true;
+                // In the stopping/shutdown state return unlock state of the user key
+                case UserState.STATE_STOPPING:
+                case UserState.STATE_SHUTDOWN:
+                    return StorageManager.isUserKeyUnlocked(userId);
                 default:
                     return false;
             }
@@ -1485,6 +1489,10 @@ final class UserController {
             switch (state.state) {
                 case UserState.STATE_RUNNING_UNLOCKED:
                     return true;
+                // In the stopping/shutdown state return unlock state of the user key
+                case UserState.STATE_STOPPING:
+                case UserState.STATE_SHUTDOWN:
+                    return StorageManager.isUserKeyUnlocked(userId);
                 default:
                     return false;
             }

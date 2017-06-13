@@ -20,6 +20,7 @@
 #include "test/Test.h"
 
 using ::google::protobuf::io::StringOutputStream;
+using ::testing::NotNull;
 
 namespace aapt {
 
@@ -46,8 +47,7 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
 
   // Make a plural.
   std::unique_ptr<Plural> plural = util::make_unique<Plural>();
-  plural->values[Plural::One] =
-      util::make_unique<String>(table->string_pool.MakeRef("one"));
+  plural->values[Plural::One] = util::make_unique<String>(table->string_pool.MakeRef("one"));
   ASSERT_TRUE(table->AddResource(test::ParseNameOrDie("com.app.a:plurals/hey"),
                                  ConfigDescription{}, {}, std::move(plural),
                                  context->GetDiagnostics()));
@@ -77,19 +77,19 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
                                  context->GetDiagnostics()));
 
   std::unique_ptr<pb::ResourceTable> pb_table = SerializeTableToPb(table.get());
-  ASSERT_NE(nullptr, pb_table);
+  ASSERT_THAT(pb_table, NotNull());
 
   std::unique_ptr<ResourceTable> new_table = DeserializeTableFromPb(
       *pb_table, Source{"test"}, context->GetDiagnostics());
-  ASSERT_NE(nullptr, new_table);
+  ASSERT_THAT(new_table, NotNull());
 
   Id* new_id = test::GetValue<Id>(new_table.get(), "com.app.a:id/foo");
-  ASSERT_NE(nullptr, new_id);
+  ASSERT_THAT(new_id, NotNull());
   EXPECT_EQ(id->IsWeak(), new_id->IsWeak());
 
   Maybe<ResourceTable::SearchResult> result =
       new_table->FindResource(test::ParseNameOrDie("com.app.a:layout/main"));
-  AAPT_ASSERT_TRUE(result);
+  ASSERT_TRUE(result);
   EXPECT_EQ(SymbolState::kPublic, result.value().type->symbol_status.state);
   EXPECT_EQ(SymbolState::kPublic, result.value().entry->symbol_status.state);
 
@@ -101,18 +101,18 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
   // Find the product-dependent values
   BinaryPrimitive* prim = test::GetValueForConfigAndProduct<BinaryPrimitive>(
       new_table.get(), "com.app.a:integer/one", test::ParseConfigOrDie("land"), "");
-  ASSERT_NE(nullptr, prim);
+  ASSERT_THAT(prim, NotNull());
   EXPECT_EQ(123u, prim->value.data);
 
   prim = test::GetValueForConfigAndProduct<BinaryPrimitive>(
       new_table.get(), "com.app.a:integer/one", test::ParseConfigOrDie("land"), "tablet");
-  ASSERT_NE(nullptr, prim);
+  ASSERT_THAT(prim, NotNull());
   EXPECT_EQ(321u, prim->value.data);
 
   Reference* actual_ref = test::GetValue<Reference>(new_table.get(), "com.app.a:layout/abc");
-  ASSERT_NE(nullptr, actual_ref);
-  AAPT_ASSERT_TRUE(actual_ref->name);
-  AAPT_ASSERT_TRUE(actual_ref->id);
+  ASSERT_THAT(actual_ref, NotNull());
+  ASSERT_TRUE(actual_ref->name);
+  ASSERT_TRUE(actual_ref->id);
   EXPECT_EQ(expected_ref.name.value(), actual_ref->name.value());
   EXPECT_EQ(expected_ref.id.value(), actual_ref->id.value());
 }
@@ -159,7 +159,7 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
 
   std::unique_ptr<ResourceFile> file = DeserializeCompiledFileFromPb(
       new_pb_file, Source("test"), context->GetDiagnostics());
-  ASSERT_NE(nullptr, file);
+  ASSERT_THAT(file, NotNull());
 
   uint64_t offset, len;
   ASSERT_TRUE(in_file_stream.ReadDataMetaData(&offset, &len));
@@ -171,16 +171,14 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
   EXPECT_EQ(0u, offset & 0x03);
 
   ASSERT_EQ(1u, file->exported_symbols.size());
-  EXPECT_EQ(test::ParseNameOrDie("id/unchecked"),
-            file->exported_symbols[0].name);
+  EXPECT_EQ(test::ParseNameOrDie("id/unchecked"), file->exported_symbols[0].name);
 
   // Read the second compiled file.
 
   ASSERT_TRUE(in_file_stream.ReadCompiledFile(&new_pb_file));
 
-  file = DeserializeCompiledFileFromPb(new_pb_file, Source("test"),
-                                       context->GetDiagnostics());
-  ASSERT_NE(nullptr, file);
+  file = DeserializeCompiledFileFromPb(new_pb_file, Source("test"), context->GetDiagnostics());
+  ASSERT_THAT(file, NotNull());
 
   ASSERT_TRUE(in_file_stream.ReadDataMetaData(&offset, &len));
 

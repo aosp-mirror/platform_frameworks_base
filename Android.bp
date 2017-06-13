@@ -16,8 +16,6 @@
 cc_library {
     name: "libplatformprotos",
     host_supported: true,
-    // b/34740546, work around clang-tidy segmentation fault.
-    tidy_checks: ["-modernize*"],
     proto: {
         export_proto_headers: true,
         include_dirs: ["external/protobuf/src"],

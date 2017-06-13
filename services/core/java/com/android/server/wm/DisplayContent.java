@@ -210,6 +210,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     final DisplayMetrics mRealDisplayMetrics = new DisplayMetrics();
     /** @see #computeCompatSmallestWidth(boolean, int, int, int, int) */
     private final DisplayMetrics mTmpDisplayMetrics = new DisplayMetrics();
+
     /**
      * Compat metrics computed based on {@link #mDisplayMetrics}.
      * @see #updateDisplayAndOrientation(int)
@@ -226,6 +227,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see #updateRotationUnchecked(boolean)
      */
     private int mRotation = 0;
+
     /**
      * Last applied orientation of the display.
      * Constants as per {@link android.content.pm.ActivityInfo.ScreenOrientation}.
@@ -233,6 +235,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see WindowManagerService#updateOrientationFromAppTokensLocked(boolean, int)
      */
     private int mLastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
     /**
      * Flag indicating that the application is receiving an orientation that has different metrics
      * than it expected. E.g. Portrait instead of Landscape.
@@ -240,6 +243,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see #updateRotationUnchecked(boolean)
      */
     private boolean mAltOrientation = false;
+
     /**
      * Orientation forced by some window. If there is no visible window that specifies orientation
      * it is set to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}.
@@ -247,6 +251,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see NonAppWindowContainers#getOrientation()
      */
     private int mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
     /**
      * Last orientation forced by the keyguard. It is applied when keyguard is shown and is not
      * occluded.
@@ -254,6 +259,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see NonAppWindowContainers#getOrientation()
      */
     private int mLastKeyguardForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
+    /**
+     * Keep track of wallpaper visibility to notify changes.
+     */
+    private boolean mLastWallpaperVisible = false;
 
     private Rect mBaseDisplayRect = new Rect();
     private Rect mContentRect = new Rect();
@@ -2753,6 +2763,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 true /* inTraversal, must call performTraversalInTrans... below */);
 
         stopDimmingIfNeeded();
+
+        final boolean wallpaperVisible = mWallpaperController.isWallpaperVisible();
+        if (wallpaperVisible != mLastWallpaperVisible) {
+            mLastWallpaperVisible = wallpaperVisible;
+            mService.mWallpaperVisibilityListeners.notifyWallpaperVisibilityChanged(this);
+        }
 
         while (!mTmpUpdateAllDrawn.isEmpty()) {
             final AppWindowToken atoken = mTmpUpdateAllDrawn.removeLast();

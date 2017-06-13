@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.util.Log;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -848,15 +849,12 @@ public final class PowerManager {
      * to {@link #boostScreenBrightness(long)}.
      * @return {@code True} if the screen brightness is currently boosted. {@code False} otherwise.
      *
+     * @deprecated This call is rarely used and will be phased out soon.
      * @hide
      */
-    @SystemApi
+    @SystemApi @Deprecated
     public boolean isScreenBrightnessBoosted() {
-        try {
-            return mService.isScreenBrightnessBoosted();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return false;
     }
 
     /**
@@ -1216,9 +1214,10 @@ public final class PowerManager {
      * Intent that is broadcast when the state of {@link #isScreenBrightnessBoosted()} has changed.
      * This broadcast is only sent to registered receivers.
      *
+     * @deprecated This intent is rarely used and will be phased out soon.
      * @hide
      **/
-    @SystemApi
+    @SystemApi @Deprecated
     public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED
             = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
 

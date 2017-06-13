@@ -36,6 +36,7 @@ import android.view.animation.PathInterpolator;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.ScrimView;
@@ -78,7 +79,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private final View mHeadsUpScrim;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
-    private final ColorExtractor mColorExtractor;
+    private final SysuiColorExtractor mColorExtractor;
     private ColorExtractor.GradientColors mLockColors;
     private ColorExtractor.GradientColors mLockColorsDark;
     private ColorExtractor.GradientColors mSystemColors;
@@ -131,15 +132,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mLightBarController = lightBarController;
         mScrimBehindAlpha = context.getResources().getFloat(R.dimen.scrim_behind_alpha);
 
-        mColorExtractor = Dependency.get(ColorExtractor.class);
+        mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
-        mLockColors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK);
-        mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM);
+        mLockColors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
+                ColorExtractor.TYPE_NORMAL, true /* ignoreVisibility */);
+        mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
+                ColorExtractor.TYPE_NORMAL, true /* ignoreVisibility */);
         // Darker gradient for the top scrim (mScrimInFront)
         mLockColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
-                ColorExtractor.TYPE_DARK);
+                ColorExtractor.TYPE_DARK, true /* ignoreVisibility */);
         mSystemColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
-                ColorExtractor.TYPE_DARK);
+                ColorExtractor.TYPE_DARK, true /* ignoreVisibility */);
         mNeedsDrawableColorUpdate = true;
 
         updateHeadsUpScrim(false);
@@ -659,18 +662,18 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     @Override
     public void onColorsChanged(ColorExtractor colorExtractor, int which) {
         if ((which & WallpaperManager.FLAG_LOCK) != 0) {
-            mLockColors = colorExtractor.getColors(WallpaperManager.FLAG_LOCK,
-                    ColorExtractor.TYPE_NORMAL);
-            mLockColorsDark = colorExtractor.getColors(WallpaperManager.FLAG_LOCK,
-                    ColorExtractor.TYPE_DARK);
+            mLockColors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
+                    ColorExtractor.TYPE_NORMAL, true /* ignoreVisibility */);
+            mLockColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
+                    ColorExtractor.TYPE_DARK, true /* ignoreVisibility */);
             mNeedsDrawableColorUpdate = true;
             scheduleUpdate();
         }
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
-            mSystemColors = colorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
-                    ColorExtractor.TYPE_NORMAL);
-            mSystemColorsDark = colorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
-                    ColorExtractor.TYPE_DARK);
+            mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
+                    ColorExtractor.TYPE_NORMAL, mKeyguardShowing);
+            mSystemColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
+                    ColorExtractor.TYPE_DARK, mKeyguardShowing);
             mNeedsDrawableColorUpdate = true;
             scheduleUpdate();
         }

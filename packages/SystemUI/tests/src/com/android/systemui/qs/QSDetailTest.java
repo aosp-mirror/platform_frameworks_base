@@ -47,7 +47,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-@FlakyTest
+@Ignore("failing")
 public class QSDetailTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;

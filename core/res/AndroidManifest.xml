@@ -94,6 +94,7 @@
     <protected-broadcast android:name="android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED_INTERNAL" />
 
+    <!-- @deprecated This is rarely used and will be phased out soon. -->
     <protected-broadcast android:name="android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED" />
 
     <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE" />
@@ -454,6 +455,7 @@
     <protected-broadcast android:name="com.android.server.NetworkTimeUpdateService.action.POLL" />
     <protected-broadcast android:name="com.android.server.telecom.intent.action.CALLS_ADD_ENTRY" />
     <protected-broadcast android:name="com.android.settings.location.MODE_CHANGING" />
+    <protected-broadcast android:name="com.android.settings.bluetooth.ACTION_DISMISS_PAIRING" />
 
     <protected-broadcast android:name="NotificationManagerService.TIMEOUT" />
     <protected-broadcast android:name="ScheduleConditionProvider.EVALUATE" />

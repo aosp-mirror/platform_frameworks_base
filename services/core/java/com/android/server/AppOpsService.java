@@ -2445,6 +2445,28 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    @Override
+    public boolean isOperationActive(int code, int uid, String packageName) {
+        verifyIncomingUid(uid);
+        verifyIncomingOp(code);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
+        if (resolvedPackageName == null) {
+            return false;
+        }
+        synchronized (this) {
+            for (int i = mClients.size() - 1; i >= 0; i--) {
+                final ClientState client = mClients.valueAt(i);
+                if (client.mStartedOps == null) continue;
+
+                for (int j = client.mStartedOps.size() - 1; j >= 0; j--) {
+                    final Op op = client.mStartedOps.get(j);
+                    if (op.op == code && op.uid == uid) return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void removeUidsForUserLocked(int userHandle) {
         for (int i = mUidStates.size() - 1; i >= 0; --i) {
             final int uid = mUidStates.keyAt(i);

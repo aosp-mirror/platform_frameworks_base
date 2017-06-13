@@ -121,8 +121,11 @@ public abstract class InstantAppResolver {
                 resolutionStatus = RESOLUTION_FAILURE;
             }
         }
-        logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE, startTime, token,
-                resolutionStatus);
+        // Only log successful instant application resolution
+        if (resolutionStatus == RESOLUTION_SUCCESS) {
+            logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE, startTime, token,
+                    resolutionStatus);
+        }
         if (DEBUG_EPHEMERAL && resolveInfo == null) {
             if (resolutionStatus == RESOLUTION_BIND_TIMEOUT) {
                 Log.d(TAG, "[" + token + "] Phase1; bind timed out");

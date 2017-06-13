@@ -152,7 +152,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         }
         if (state.slash == null) {
             state.slash = new SlashState();
-            state.slash.rotation = 8;
+            state.slash.rotation = 6;
         }
         state.slash.isSlashed = false;
         state.state = Tile.STATE_ACTIVE;

@@ -44,6 +44,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
@@ -1376,6 +1377,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * android.os.Handler, android.os.ParcelFileDescriptor.OnCloseListener)},
      * {@link ParcelFileDescriptor#createReliablePipe()}, or
      * {@link ParcelFileDescriptor#createReliableSocketPair()}.
+     * <p>
+     * If you need to return a large file that isn't backed by a real file on
+     * disk, such as a file on a network share or cloud storage service,
+     * consider using
+     * {@link StorageManager#openProxyFileDescriptor(int, android.os.ProxyFileDescriptorCallback, android.os.Handler)}
+     * which will let you to stream the content on-demand.
      *
      * <p class="note">For use in Intents, you will want to implement {@link #getType}
      * to return the appropriate MIME type for the data returned here with

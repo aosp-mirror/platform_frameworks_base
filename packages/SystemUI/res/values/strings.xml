@@ -838,16 +838,16 @@
     <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
 
     <!-- Zen mode: Priority only introduction message on first use -->
-    <string name="zen_priority_introduction">You won’t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify. You'll still hear anything you choose to play including music, videos, and games.</string>
+    <string name="zen_priority_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify. You\'ll still hear anything you choose to play including music, videos, and games.</string>
 
     <!-- Zen mode: Alarms only introduction message on first use -->
-    <string name="zen_alarms_introduction">You won’t be disturbed by sounds and vibrations, except from alarms. You'll still hear anything you choose to play including music, videos, and games.</string>
+    <string name="zen_alarms_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms. You\'ll still hear anything you choose to play including music, videos, and games.</string>
 
     <!-- Zen mode: Priority only customization button label -->
     <string name="zen_priority_customize_button">Customize</string>
 
     <!-- Zen mode: Total silence introduction message on first use (voice capable devices) -->
-    <string name="zen_silence_introduction_voice">This blocks ALL sounds and vibrations, including from alarms, music, videos, and games. You’ll still be able to make phone calls.</string>
+    <string name="zen_silence_introduction_voice">This blocks ALL sounds and vibrations, including from alarms, music, videos, and games. You\'ll still be able to make phone calls.</string>
 
     <!-- Zen mode: Total silence introduction message on first use (non-voice capable devices) -->
     <string name="zen_silence_introduction">This blocks ALL sounds and vibrations, including from alarms, music, videos, and games.</string>
@@ -1908,7 +1908,7 @@
     <string name="pip_notification_title"><xliff:g id="name" example="Google Maps">%s</xliff:g> is in picture-in-picture</string>
 
     <!-- PiP BTW notification description. [CHAR LIMIT=NONE] -->
-    <string name="pip_notification_message">If you don’t want <xliff:g id="name" example="Google Maps">%s</xliff:g> to use this feature, tap to open settings and turn it off.</string>
+    <string name="pip_notification_message">If you don\'t want <xliff:g id="name" example="Google Maps">%s</xliff:g> to use this feature, tap to open settings and turn it off.</string>
 
     <!-- Button to play the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
     <string name="pip_play">Play</string>

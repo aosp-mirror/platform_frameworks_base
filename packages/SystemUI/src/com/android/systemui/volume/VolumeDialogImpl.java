@@ -80,6 +80,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.HardwareUiLayout;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
@@ -172,7 +173,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable,
         mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
         mGradientDrawable = new GradientDrawable(mContext);
         mGradientDrawable.setAlpha((int) (ScrimController.GRADIENT_SCRIM_ALPHA * 255));
-        mColorExtractor = Dependency.get(ColorExtractor.class);
+        mColorExtractor = Dependency.get(SysuiColorExtractor.class);
     }
 
     public void init(int windowType, Callback callback) {
@@ -231,10 +232,6 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable,
 
         mColorExtractor.addOnColorsChangedListener(this);
         mGradientDrawable.setScreenSize(displaySize.x, displaySize.y);
-        ColorExtractor.GradientColors colors = mColorExtractor.getColors(
-                mKeyguard.isKeyguardLocked() ? WallpaperManager.FLAG_LOCK
-                        : WallpaperManager.FLAG_SYSTEM);
-        mGradientDrawable.setColors(colors, false);
 
         mDialogContentView = mDialog.findViewById(R.id.volume_dialog_content);
         mDialogRowsView = mDialogContentView.findViewById(R.id.volume_dialog_rows);
@@ -490,6 +487,10 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable,
         rescheduleTimeoutH();
         if (mShowing) return;
         mShowing = true;
+        ColorExtractor.GradientColors colors = mColorExtractor.getColors(
+                mKeyguard.isKeyguardLocked() ? WallpaperManager.FLAG_LOCK
+                        : WallpaperManager.FLAG_SYSTEM);
+        mGradientDrawable.setColors(colors, false);
         mMotion.startShow();
         Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
         mController.notifyVisible(true);

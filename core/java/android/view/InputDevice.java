@@ -772,6 +772,7 @@ public final class InputDevice implements Parcelable {
     /**
      * Returns true if input device is enabled.
      * @return Whether the input device is enabled.
+     * @hide
      */
     public boolean isEnabled() {
         return InputManager.getInstance().isInputDeviceEnabled(mId);

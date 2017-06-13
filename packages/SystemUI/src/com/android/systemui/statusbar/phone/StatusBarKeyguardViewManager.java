@@ -94,6 +94,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastBouncerDismissible;
     protected boolean mLastRemoteInputActive;
     private boolean mLastDozing;
+    private boolean mLastDeferScrimFadeOut;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
@@ -371,7 +372,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
             mFingerprintUnlockController.startKeyguardFadingAway();
             mBouncer.hide(true /* destroyView */);
-            updateStates();
             if (wakeUnlockPulsing) {
                 mStatusBarWindowManager.setKeyguardFadingAway(true);
                 mStatusBar.fadeKeyguardWhilePulsing();
@@ -403,6 +403,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     mFingerprintUnlockController.finishKeyguardFadingAway();
                 }
             }
+            updateStates();
             mStatusBarWindowManager.setKeyguardShowing(false);
             mViewMediatorCallback.keyguardGone();
         }
@@ -574,7 +575,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLastBouncerDismissible = bouncerDismissible;
         mLastRemoteInputActive = remoteInputActive;
         mLastDozing = mDozing;
-
+        mLastDeferScrimFadeOut = mDeferScrimFadeOut;
         mStatusBar.onKeyguardViewManagerStatesUpdated();
     }
 
@@ -582,15 +583,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * @return Whether the navigation bar should be made visible based on the current state.
      */
     protected boolean isNavBarVisible() {
-        return !(mShowing && !mOccluded) && !mDozing || mBouncer.isShowing() || mRemoteInputActive;
+        return (!(mShowing && !mOccluded) && !mDozing || mBouncer.isShowing() || mRemoteInputActive)
+                && !mDeferScrimFadeOut;
     }
 
     /**
      * @return Whether the navigation bar was made visible based on the last known state.
      */
     protected boolean getLastNavBarVisible() {
-        return !(mLastShowing && !mLastOccluded) && !mLastDozing || mLastBouncerShowing
-                || mLastRemoteInputActive;
+        return (!(mLastShowing && !mLastOccluded) && !mLastDozing || mLastBouncerShowing
+                || mLastRemoteInputActive) && !mLastDeferScrimFadeOut;
     }
 
     public boolean shouldDismissOnMenuPressed() {

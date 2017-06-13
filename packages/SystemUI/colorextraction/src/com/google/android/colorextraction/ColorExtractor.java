@@ -21,6 +21,7 @@ import android.app.WallpaperManager;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.graphics.ColorUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -41,15 +42,12 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
 
     private static final String TAG = "ColorExtractor";
 
-    @VisibleForTesting
-    static final int FALLBACK_COLOR = 0xff83888d;
+    public static final int FALLBACK_COLOR = 0xff83888d;
 
     private int mMainFallbackColor = FALLBACK_COLOR;
     private int mSecondaryFallbackColor = FALLBACK_COLOR;
     private final SparseArray<GradientColors[]> mGradientColors;
     private final ArrayList<OnColorsChangedListener> mOnColorsChangedListeners;
-    // Colors to return when the wallpaper isn't visible
-    private final GradientColors mWpHiddenColors;
     private final Context mContext;
     private final ExtractionType mExtractionType;
 
@@ -60,9 +58,6 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     @VisibleForTesting
     public ColorExtractor(Context context, ExtractionType extractionType) {
         mContext = context;
-        mWpHiddenColors = new GradientColors();
-        mWpHiddenColors.setMainColor(FALLBACK_COLOR);
-        mWpHiddenColors.setSecondaryColor(FALLBACK_COLOR);
         mExtractionType = extractionType;
 
         mGradientColors = new SparseArray<>();
@@ -123,7 +118,6 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         if (which != WallpaperManager.FLAG_LOCK && which != WallpaperManager.FLAG_SYSTEM) {
             throw new IllegalArgumentException("which should be FLAG_SYSTEM or FLAG_NORMAL");
         }
-
         return mGradientColors.get(which)[type];
     }
 
@@ -134,7 +128,6 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
             GradientColors[] lockColors = mGradientColors.get(WallpaperManager.FLAG_LOCK);
             extractInto(colors, lockColors[TYPE_NORMAL], lockColors[TYPE_DARK],
                     lockColors[TYPE_EXTRA_DARK]);
-
             changed = true;
         }
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
@@ -149,7 +142,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         }
     }
 
-    private void triggerColorsChanged(int which) {
+    protected void triggerColorsChanged(int which) {
         for (OnColorsChangedListener listener: mOnColorsChangedListeners) {
             listener.onColorsChanged(this, which);
         }

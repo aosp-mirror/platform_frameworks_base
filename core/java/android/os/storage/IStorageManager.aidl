@@ -293,7 +293,7 @@ interface IStorageManager {
     ParcelFileDescriptor openProxyFileDescriptor(int mountPointId, int fileId, int mode) = 74;
     long getCacheQuotaBytes(String volumeUuid, int uid) = 75;
     long getCacheSizeBytes(String volumeUuid, int uid) = 76;
-    long getAllocatableBytes(String volumeUuid, int flags) = 77;
-    void allocateBytes(String volumeUuid, long bytes, int flags) = 78;
+    long getAllocatableBytes(String volumeUuid, int flags, String callingPackage) = 77;
+    void allocateBytes(String volumeUuid, long bytes, int flags, String callingPackage) = 78;
     void secdiscard(in String path) = 79;
 }

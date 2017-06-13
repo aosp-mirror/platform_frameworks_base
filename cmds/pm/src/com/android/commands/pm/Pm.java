@@ -1473,7 +1473,7 @@ public final class Pm {
         ClearDataObserver obs = new ClearDataObserver();
         try {
             mPm.freeStorageAndNotify(volumeUuid, sizeVal,
-                    StorageManager.FLAG_ALLOCATE_DEFY_RESERVED, obs);
+                    StorageManager.FLAG_ALLOCATE_DEFY_ALL_RESERVED, obs);
             synchronized (obs) {
                 while (!obs.finished) {
                     try {
