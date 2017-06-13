@@ -369,6 +369,15 @@ public class TelecomManager {
     public static final String EXTRA_IS_HANDOVER = "android.telecom.extra.IS_HANDOVER";
 
     /**
+     * Parcelable extra used with {@link #EXTRA_IS_HANDOVER} to indicate the source
+     * {@link PhoneAccountHandle} when initiating a handover which {@link ConnectionService}
+     * the handover is from.
+     * @hide
+     */
+    public static final String EXTRA_HANDOVER_FROM_PHONE_ACCOUNT =
+            "android.telecom.extra.HANDOVER_FROM_PHONE_ACCOUNT";
+
+    /**
      * Extra key specified in the {@link ConnectionRequest#getExtras()} when Telecom calls
      * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}
      * to inform the {@link ConnectionService} what the initial {@link CallAudioState} of the
