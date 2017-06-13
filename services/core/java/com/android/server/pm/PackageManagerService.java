@@ -48,6 +48,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_L
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
@@ -17837,16 +17838,17 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Instant apps must have target SDK >= O and have targetSanboxVersion >= 2
         if (instantApp && pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
-            Slog.w(TAG, "Instant app package " + pkg.packageName
-                    + " does not target O, this will be a fatal error.");
-            // STOPSHIP: Make this a fatal error
-            pkg.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
+            Slog.w(TAG, "Instant app package " + pkg.packageName + " does not target O");
+            res.setError(INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE,
+                    "Instant app package must target O");
+            return;
         }
         if (instantApp && pkg.applicationInfo.targetSandboxVersion != 2) {
             Slog.w(TAG, "Instant app package " + pkg.packageName
-                    + " does not target targetSandboxVersion 2, this will be a fatal error.");
-            // STOPSHIP: Make this a fatal error
-            pkg.applicationInfo.targetSandboxVersion = 2;
+                    + " does not target targetSandboxVersion 2");
+            res.setError(INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE,
+                    "Instant app package must use targetSanboxVersion 2");
+            return;
         }
 
         if (pkg.applicationInfo.isStaticSharedLibrary()) {
