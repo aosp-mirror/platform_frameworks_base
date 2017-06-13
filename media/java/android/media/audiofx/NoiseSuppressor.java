@@ -20,7 +20,7 @@ import android.util.Log;
 
 /**
  * Noise Suppressor (NS).
- * <p>Noise suppression (NS) is an audio pre-processing which removes background noise from the
+ * <p>Noise suppression (NS) is an audio pre-processor which removes background noise from the
  * captured signal. The component of the signal considered as noise can be either stationary
  * (car/airplane engine, AC system) or non-stationary (other peoples conversations, car horn) for
  * more advanced implementations.
