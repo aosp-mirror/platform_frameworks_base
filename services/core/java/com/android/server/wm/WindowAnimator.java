@@ -108,7 +108,8 @@ public class WindowAnimator {
     }
 
     void addDisplayLocked(final int displayId) {
-        // Create the DisplayContentsAnimator object by retrieving it.
+        // Create the DisplayContentsAnimator object by retrieving it if the associated
+        // {@link DisplayContent} exists.
         getDisplayContentsAnimatorLocked(displayId);
         if (displayId == DEFAULT_DISPLAY) {
             mInitialized = true;
@@ -356,8 +357,16 @@ public class WindowAnimator {
     }
 
     private DisplayContentsAnimator getDisplayContentsAnimatorLocked(int displayId) {
+        if (displayId < 0) {
+            return null;
+        }
+
         DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.get(displayId);
-        if (displayAnimator == null) {
+
+        // It is possible that this underlying {@link DisplayContent} has been removed. In this
+        // case, we do not want to create an animator associated with it as {link #animate} will
+        // fail.
+        if (displayAnimator == null && mService.mRoot.getDisplayContent(displayId) != null) {
             displayAnimator = new DisplayContentsAnimator();
             mDisplayContentsAnimators.put(displayId, displayAnimator);
         }
@@ -365,8 +374,10 @@ public class WindowAnimator {
     }
 
     void setScreenRotationAnimationLocked(int displayId, ScreenRotationAnimation animation) {
-        if (displayId >= 0) {
-            getDisplayContentsAnimatorLocked(displayId).mScreenRotationAnimation = animation;
+        final DisplayContentsAnimator animator = getDisplayContentsAnimatorLocked(displayId);
+
+        if (animator != null) {
+            animator.mScreenRotationAnimation = animation;
         }
     }
 
@@ -374,7 +385,9 @@ public class WindowAnimator {
         if (displayId < 0) {
             return null;
         }
-        return getDisplayContentsAnimatorLocked(displayId).mScreenRotationAnimation;
+
+        DisplayContentsAnimator animator = getDisplayContentsAnimatorLocked(displayId);
+        return animator != null? animator.mScreenRotationAnimation : null;
     }
 
     void requestRemovalOfReplacedWindows(WindowState win) {
