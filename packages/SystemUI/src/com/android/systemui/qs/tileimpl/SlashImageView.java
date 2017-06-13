@@ -18,12 +18,14 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.qs.QSTile.SlashState;
 import com.android.systemui.qs.SlashDrawable;
 
 public class SlashImageView extends ImageView {
 
-    private SlashDrawable mSlash;
+    @VisibleForTesting
+    protected SlashDrawable mSlash;
 
     public SlashImageView(Context context) {
         super(context);
@@ -38,10 +40,13 @@ public class SlashImageView extends ImageView {
 
     @Override
     public void setImageDrawable(Drawable drawable) {
-        if (mSlash != null) {
-            mSlash.setDrawable(drawable);
-        } else {
+        if (drawable == null) {
+            mSlash = null;
+            super.setImageDrawable(null);
+        } else if (mSlash == null) {
             super.setImageDrawable(drawable);
+        } else {
+            mSlash.setDrawable(drawable);
         }
     }
 
