@@ -47,6 +47,7 @@ import android.net.IConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.NetworkState;
 import android.net.util.SharedLog;
 
 import android.support.test.filters.SmallTest;
@@ -253,31 +254,32 @@ public class UpstreamNetworkMonitorTest {
 
         mUNM.start();
         // There are no networks, so there is nothing to select.
-        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         final TestNetworkAgent wifiAgent = new TestNetworkAgent(mCM, TRANSPORT_WIFI);
         wifiAgent.fakeConnect();
         // WiFi is up, we should prefer it.
-        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
         wifiAgent.fakeDisconnect();
         // There are no networks, so there is nothing to select.
-        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         final TestNetworkAgent cellAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
         cellAgent.fakeConnect();
-        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         preferredTypes.add(TYPE_MOBILE_DUN);
         // This is coupled with preferred types in TetheringConfiguration.
         mUNM.updateMobileRequiresDun(true);
         // DUN is available, but only use regular cell: no upstream selected.
-        assertEquals(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_NONE, mUNM.selectPreferredUpstreamType(preferredTypes));
         preferredTypes.remove(TYPE_MOBILE_DUN);
         // No WiFi, but our preferred flavour of cell is up.
         preferredTypes.add(TYPE_MOBILE_HIPRI);
         // This is coupled with preferred types in TetheringConfiguration.
         mUNM.updateMobileRequiresDun(false);
-        assertEquals(TYPE_MOBILE_HIPRI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_MOBILE_HIPRI,
+                mUNM.selectPreferredUpstreamType(preferredTypes));
         // Check to see we filed an explicit request.
         assertEquals(1, mCM.requested.size());
         NetworkRequest netReq = (NetworkRequest) mCM.requested.values().toArray()[0];
@@ -286,30 +288,41 @@ public class UpstreamNetworkMonitorTest {
 
         wifiAgent.fakeConnect();
         // WiFi is up, and we should prefer it over cell.
-        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
         assertEquals(0, mCM.requested.size());
 
         preferredTypes.remove(TYPE_MOBILE_HIPRI);
         preferredTypes.add(TYPE_MOBILE_DUN);
         // This is coupled with preferred types in TetheringConfiguration.
         mUNM.updateMobileRequiresDun(true);
-        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         final TestNetworkAgent dunAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
         dunAgent.networkCapabilities.addCapability(NET_CAPABILITY_DUN);
         dunAgent.fakeConnect();
 
         // WiFi is still preferred.
-        assertEquals(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_WIFI, mUNM.selectPreferredUpstreamType(preferredTypes));
 
         // WiFi goes down, cell and DUN are still up but only DUN is preferred.
         wifiAgent.fakeDisconnect();
-        assertEquals(TYPE_MOBILE_DUN, mUNM.selectPreferredUpstreamType(preferredTypes));
+        assertSatisfiesLegacyType(TYPE_MOBILE_DUN,
+                mUNM.selectPreferredUpstreamType(preferredTypes));
         // Check to see we filed an explicit request.
         assertEquals(1, mCM.requested.size());
         netReq = (NetworkRequest) mCM.requested.values().toArray()[0];
         assertTrue(netReq.networkCapabilities.hasTransport(TRANSPORT_CELLULAR));
         assertTrue(netReq.networkCapabilities.hasCapability(NET_CAPABILITY_DUN));
+    }
+
+    private void assertSatisfiesLegacyType(int legacyType, NetworkState ns) {
+        if (legacyType == TYPE_NONE) {
+            assertTrue(ns == null);
+            return;
+        }
+
+        final NetworkCapabilities nc = ConnectivityManager.networkCapabilitiesForType(legacyType);
+        assertTrue(nc.satisfiedByNetworkCapabilities(ns.networkCapabilities));
     }
 
     private void assertUpstreamTypeRequested(int upstreamType) throws Exception {
