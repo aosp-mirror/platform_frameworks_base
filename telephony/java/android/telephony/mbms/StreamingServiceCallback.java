@@ -16,8 +16,6 @@
 
 package android.telephony.mbms;
 
-import android.net.Uri;
-
 /**
  * A Callback class for use when the application is actively streaming content.
  * @hide
@@ -43,17 +41,21 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
      * See {@link StreamingService#STATE_STOPPED}, {@link StreamingService#STATE_STARTED}
      * and {@link StreamingService#STATE_STALLED}.
      */
-    public void streamStateChanged(int state) {
+    public void streamStateUpdated(int state) {
         // default implementation empty
     }
 
     /**
-     * Called to indicate published Download Services have changed.
+     * Called to indicate the mpd of a the stream has changed.
+     *
+     * Depending on the Dash Client it may need to be either reset
+     * (less drastic, but original spec didn't allow mpd to change so not
+     * always supported) or restarted.
      *
      * This may be called when a looping stream hits the end or
-     * when the a new URI should be used to correct for time drift.
+     * when parameters have changed to account for time drift.
      */
-    public void uriUpdated(Uri uri) {
+    public void mediaDescriptionUpdated() {
         // default implementation empty
     }
 
@@ -68,6 +70,26 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
      * for this service due to timing, geography or popularity.
      */
     public void broadcastSignalStrengthUpdated(int signalStrength) {
+        // default implementation empty
+    }
+
+    /**
+     * Notify of bcast/unicast method being used.
+     *
+     * This is intended to be informational.  Indicates
+     * whether we're able to use cell broadcast or have
+     * had to fallback to unicast for this stream.
+     *
+     * This must be called once at the beginning of the stream
+     * around the same time as we change to STATE_STARTED, but
+     * strict ordering is not specified.  It must be called
+     * again if we change modes, but if that doesn't happen
+     * the callback won't be used again.
+     *
+     * See {@link StreamingService#BROADCAST_METHOD} and
+     * {@link StreamingService#UNICAST_METHOD}
+     */
+    public void streamMethodUpdated(int methodType) {
         // default implementation empty
     }
 }
