@@ -29,7 +29,7 @@ import android.util.Slog;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-public class GrantedUriPermissions {
+public final class GrantedUriPermissions {
     private final int mGrantFlags;
     private final int mSourceUserId;
     private final String mTag;

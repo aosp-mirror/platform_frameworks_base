@@ -38,7 +38,7 @@ import java.util.ListIterator;
  * This class sets an alarm for the next expiring job, and determines whether a job's minimum
  * delay has been satisfied.
  */
-public class TimeController extends StateController {
+public final class TimeController extends StateController {
     private static final String TAG = "JobScheduler.Time";
 
     /** Deadline alarm tag for logging purposes */
