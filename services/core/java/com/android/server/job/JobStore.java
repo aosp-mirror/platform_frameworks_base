@@ -66,7 +66,7 @@ import org.xmlpull.v1.XmlSerializer;
  *      and {@link com.android.server.job.JobStore.ReadJobMapFromDiskRunnable} lock on that
  *      object.
  */
-public class JobStore {
+public final class JobStore {
     private static final String TAG = "JobStore";
     private static final boolean DEBUG = JobSchedulerService.DEBUG;
 
@@ -263,7 +263,7 @@ public class JobStore {
      * Runnable that writes {@link #mJobSet} out to xml.
      * NOTE: This Runnable locks on mLock
      */
-    private class WriteJobsMapToDiskRunnable implements Runnable {
+    private final class WriteJobsMapToDiskRunnable implements Runnable {
         @Override
         public void run() {
             final long startElapsed = SystemClock.elapsedRealtime();
@@ -444,7 +444,7 @@ public class JobStore {
      * Runnable that reads list of persisted job from xml. This is run once at start up, so doesn't
      * need to go through {@link JobStore#add(com.android.server.job.controllers.JobStatus)}.
      */
-    private class ReadJobMapFromDiskRunnable implements Runnable {
+    private final class ReadJobMapFromDiskRunnable implements Runnable {
         private final JobSet jobSet;
 
         /**
@@ -796,7 +796,7 @@ public class JobStore {
         }
     }
 
-    static class JobSet {
+    static final class JobSet {
         // Key is the getUid() originator of the jobs in each sheaf
         private SparseArray<ArraySet<JobStatus>> mJobs;
 

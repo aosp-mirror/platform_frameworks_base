@@ -39,7 +39,7 @@ import java.util.ArrayList;
 /**
  * Controller for monitoring changes to content URIs through a ContentObserver.
  */
-public class ContentObserverController extends StateController {
+public final class ContentObserverController extends StateController {
     private static final String TAG = "JobScheduler.Content";
     private static final boolean DEBUG = false;
 
