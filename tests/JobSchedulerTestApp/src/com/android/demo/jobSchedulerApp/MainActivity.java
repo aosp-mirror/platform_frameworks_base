@@ -63,6 +63,7 @@ public class MainActivity extends Activity {
         mDeadlineEditText = findViewById(R.id.deadline_time);
         mWiFiConnectivityRadioButton = findViewById(R.id.checkbox_unmetered);
         mAnyConnectivityRadioButton = findViewById(R.id.checkbox_any);
+        mCellConnectivityRadioButton = findViewById(R.id.checkbox_metered);
         mRequiresChargingCheckBox = findViewById(R.id.checkbox_charging);
         mRequiresIdleCheckbox = findViewById(R.id.checkbox_idle);
         mIsPersistedCheckbox = findViewById(R.id.checkbox_persisted);
@@ -85,6 +86,7 @@ public class MainActivity extends Activity {
     EditText mDeadlineEditText;
     RadioButton mWiFiConnectivityRadioButton;
     RadioButton mAnyConnectivityRadioButton;
+    RadioButton mCellConnectivityRadioButton;
     CheckBox mRequiresChargingCheckBox;
     CheckBox mRequiresIdleCheckbox;
     CheckBox mIsPersistedCheckbox;
@@ -141,9 +143,12 @@ public class MainActivity extends Activity {
             builder.setOverrideDeadline(Long.parseLong(deadline) * 1000);
         }
         boolean requiresUnmetered = mWiFiConnectivityRadioButton.isChecked();
+        boolean requiresMetered = mCellConnectivityRadioButton.isChecked();
         boolean requiresAnyConnectivity = mAnyConnectivityRadioButton.isChecked();
         if (requiresUnmetered) {
             builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
+        } else if (requiresMetered) {
+            builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_METERED);
         } else if (requiresAnyConnectivity) {
             builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
         }
