@@ -43,7 +43,7 @@ import java.io.PrintWriter;
  * status due to user-requested network policies, so we need to check
  * constraints on a per-UID basis.
  */
-public class ConnectivityController extends StateController implements
+public final class ConnectivityController extends StateController implements
         ConnectivityManager.OnNetworkActiveListener {
     private static final String TAG = "JobScheduler.Conn";
     private static final boolean DEBUG = false;

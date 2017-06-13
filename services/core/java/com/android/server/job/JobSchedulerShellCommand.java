@@ -26,7 +26,7 @@ import android.os.UserHandle;
 
 import java.io.PrintWriter;
 
-public class JobSchedulerShellCommand extends ShellCommand {
+public final class JobSchedulerShellCommand extends ShellCommand {
     public static final int CMD_ERR_NO_PACKAGE = -1000;
     public static final int CMD_ERR_NO_JOB = -1001;
     public static final int CMD_ERR_CONSTRAINTS = -1002;
