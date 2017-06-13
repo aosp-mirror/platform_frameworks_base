@@ -698,7 +698,8 @@ public final class JobStatus {
     static final int CONSTRAINTS_OF_INTEREST =
             CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_STORAGE_NOT_LOW |
             CONSTRAINT_TIMING_DELAY |
-            CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED | CONSTRAINT_NOT_ROAMING |
+            CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED |
+            CONSTRAINT_NOT_ROAMING | CONSTRAINT_METERED |
             CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
 
     // Soft override covers all non-"functional" constraints
@@ -864,6 +865,9 @@ public final class JobStatus {
         }
         if ((constraints&CONSTRAINT_NOT_ROAMING) != 0) {
             pw.print(" NOT_ROAMING");
+        }
+        if ((constraints&CONSTRAINT_METERED) != 0) {
+            pw.print(" METERED");
         }
         if ((constraints&CONSTRAINT_APP_NOT_IDLE) != 0) {
             pw.print(" APP_NOT_IDLE");
