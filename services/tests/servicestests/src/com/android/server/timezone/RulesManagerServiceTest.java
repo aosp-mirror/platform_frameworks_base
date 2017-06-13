@@ -16,6 +16,9 @@
 
 package com.android.server.timezone;
 
+import com.android.timezone.distro.DistroVersion;
+import com.android.timezone.distro.StagedDistroOperation;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,8 +32,6 @@ import android.os.ParcelFileDescriptor;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
-import libcore.tzdata.shared2.DistroVersion;
-import libcore.tzdata.shared2.StagedDistroOperation;
 import libcore.tzdata.update2.TimeZoneDistroInstaller;
 
 import static com.android.server.timezone.RulesManagerService.REQUIRED_UPDATER_PERMISSION;
