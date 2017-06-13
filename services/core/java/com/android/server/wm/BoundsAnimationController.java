@@ -206,6 +206,10 @@ public class BoundsAnimationController {
             mTmpRect.set(mFrom.left, mFrom.top, mFrom.left + mFrozenTaskWidth,
                     mFrom.top + mFrozenTaskHeight);
 
+            // Boost the thread priority of the animation thread while the bounds animation is
+            // running
+            updateBooster();
+
             // Ensure that we have prepared the target for animation before
             // we trigger any size changes, so it can swap surfaces
             // in to appropriate modes, or do as it wishes otherwise.
@@ -316,6 +320,9 @@ public class BoundsAnimationController {
             removeListener(this);
             removeUpdateListener(this);
             mRunningAnimations.remove(mTarget);
+
+            // Reset the thread priority of the animation thread after the bounds animation is done
+            updateBooster();
         }
 
         @Override
@@ -445,5 +452,10 @@ public class BoundsAnimationController {
             final BoundsAnimator b = mRunningAnimations.valueAt(i);
             b.resume();
         }
+    }
+
+    private void updateBooster() {
+        WindowManagerService.sThreadPriorityBooster.setBoundsAnimationRunning(
+                !mRunningAnimations.isEmpty());
     }
 }
