@@ -454,7 +454,7 @@ public final class SystemServer {
             // If '/cache/recovery/block.map' hasn't been created, stop the
             // reboot which will fail for sure, and get a chance to capture a
             // bugreport when that's still feasible. (Bug: 26444951)
-            if (PowerManager.REBOOT_RECOVERY_UPDATE.equals(reason)) {
+            if (reason != null && reason.startsWith(PowerManager.REBOOT_RECOVERY_UPDATE)) {
                 File packageFile = new File(UNCRYPT_PACKAGE_FILE);
                 if (packageFile.exists()) {
                     String filename = null;

@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -704,7 +705,9 @@ public final class AccessibilityManager {
 
     /**
      * Registers a {@link AccessibilityRequestPreparer}.
+     * @hide
      */
+    @TestApi
     public void addAccessibilityRequestPreparer(AccessibilityRequestPreparer preparer) {
         if (mRequestPreparerLists == null) {
             mRequestPreparerLists = new SparseArray<>(1);
@@ -720,7 +723,9 @@ public final class AccessibilityManager {
 
     /**
      * Unregisters a {@link AccessibilityRequestPreparer}.
+     * @hide
      */
+    @TestApi
     public void removeAccessibilityRequestPreparer(AccessibilityRequestPreparer preparer) {
         if (mRequestPreparerLists == null) {
             return;

@@ -1625,6 +1625,7 @@ public class WebView extends AbsoluteLayout
      * @param context is the activity context the WebView will be used in.
      * @param callback will be called with the value true if initialization is
      * successful. The callback will be run on the UI thread.
+     * @hide
      */
     public static void initSafeBrowsing(Context context, ValueCallback<Boolean> callback) {
         getFactory().getStatics().initSafeBrowsing(context, callback);
@@ -1632,6 +1633,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Shuts down Safe Browsing. This should only be called once.
+     * @hide
      */
     public static void shutdownSafeBrowsing() {
         getFactory().getStatics().shutdownSafeBrowsing();

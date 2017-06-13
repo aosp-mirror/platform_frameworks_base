@@ -41,10 +41,10 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s မှတစ်ဆင့်ရနိုင်သည်"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"ချိတ်ဆက်ထားသည်၊ အင်တာနက်မရှိ"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"အလွန်နှေး"</string>
-    <string name="speed_label_slow" msgid="813109590815810235">"နှေးသည်"</string>
+    <string name="speed_label_slow" msgid="813109590815810235">"နှေး"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"OK"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"အတော်အသင့်"</string>
-    <string name="speed_label_fast" msgid="7715732164050975057">"မြန်သည်"</string>
+    <string name="speed_label_fast" msgid="7715732164050975057">"မြန်"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"အလွန်မြန်"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ချိတ်ဆက်မှုပြတ်တောက်သည်"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"အဆက်အသွယ်ဖြတ်တောက်သည်"</string>

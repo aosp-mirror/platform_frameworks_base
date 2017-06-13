@@ -37,6 +37,8 @@ import java.util.Objects;
 
 public class QSIconViewImpl extends QSIconView {
 
+    public static final long QS_ANIM_LENGTH = 350;
+
     protected final View mIcon;
     protected final int mIconSizePx;
     protected final int mTilePaddingBelowIconPx;
@@ -148,7 +150,7 @@ public class QSIconViewImpl extends QSIconView {
         final float toChannel = Color.red(toColor);
 
         ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-        anim.setDuration(350);
+        anim.setDuration(QS_ANIM_LENGTH);
 
         anim.addUpdateListener(animation -> {
             float fraction = animation.getAnimatedFraction();

@@ -161,7 +161,9 @@
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Keine SIM-Karte"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Netzwerk des Mobilfunkanbieters wird gewechselt"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Akkudetails öffnen"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Akku bei <xliff:g id="NUMBER">%d</xliff:g> Prozent."</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
+    <skip />
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
     <skip />

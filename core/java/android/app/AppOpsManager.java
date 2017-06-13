@@ -1947,4 +1947,13 @@ public class AppOpsManager {
     public void finishOp(int op) {
         finishOp(op, Process.myUid(), mContext.getOpPackageName());
     }
+
+    /** @hide */
+    public boolean isOperationActive(int code, int uid, String packageName) {
+        try {
+            return mService.isOperationActive(code, uid, packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
