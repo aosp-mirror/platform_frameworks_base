@@ -154,10 +154,12 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             readInstalledPrintServicesLocked();
             upgradePersistentStateIfNeeded();
             readDisabledPrintServicesLocked();
+        }
 
-            // Some print services might have gotten installed before the User State came up
-            prunePrintServices();
+        // Some print services might have gotten installed before the User State came up
+        prunePrintServices();
 
+        synchronized (mLock) {
             onConfigurationChangedLocked();
         }
     }
