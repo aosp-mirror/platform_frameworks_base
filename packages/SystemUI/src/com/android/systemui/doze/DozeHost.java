@@ -38,6 +38,8 @@ public interface DozeHost {
 
     void setAnimateWakeup(boolean animateWakeup);
 
+    void onDoubleTap(float x, float y);
+
     interface Callback {
         default void onNotificationHeadsUp() {}
         default void onPowerSaveChanged(boolean active) {}

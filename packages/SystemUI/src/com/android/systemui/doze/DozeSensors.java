@@ -81,17 +81,18 @@ public class DozeSensors {
                         mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION),
                         null /* setting */,
                         dozeParameters.getPulseOnSigMotion(),
-                        DozeLog.PULSE_REASON_SENSOR_SIGMOTION),
+                        DozeLog.PULSE_REASON_SENSOR_SIGMOTION, false /* touchCoords */),
                 mPickupSensor = new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE),
                         Settings.Secure.DOZE_PULSE_ON_PICK_UP,
                         config.pulseOnPickupAvailable(),
-                        DozeLog.PULSE_REASON_SENSOR_PICKUP),
+                        DozeLog.PULSE_REASON_SENSOR_PICKUP, false /* touchCoords */),
                 new TriggerSensor(
                         findSensorWithType(config.doubleTapSensorType()),
                         Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
                         true /* configured */,
-                        DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP)
+                        DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP,
+                        dozeParameters.doubleTapReportsTouchCoordinates())
         };
 
         mProxSensor = new ProxSensor();
@@ -207,16 +208,19 @@ public class DozeSensors {
         final boolean mConfigured;
         final int mPulseReason;
         final String mSetting;
+        final boolean mReportsTouchCoordinates;
 
         private boolean mRequested;
         private boolean mRegistered;
         private boolean mDisabled;
 
-        public TriggerSensor(Sensor sensor, String setting, boolean configured, int pulseReason) {
+        public TriggerSensor(Sensor sensor, String setting, boolean configured, int pulseReason,
+                boolean reportsTouchCoordinates) {
             mSensor = sensor;
             mSetting = setting;
             mConfigured = configured;
             mPulseReason = pulseReason;
+            mReportsTouchCoordinates = reportsTouchCoordinates;
         }
 
         public void setListening(boolean listen) {
@@ -276,7 +280,13 @@ public class DozeSensors {
                 }
 
                 mRegistered = false;
-                mCallback.onSensorPulse(mPulseReason, sensorPerformsProxCheck);
+                float screenX = -1;
+                float screenY = -1;
+                if (mReportsTouchCoordinates && event.values.length >= 2) {
+                    screenX = event.values[0];
+                    screenY = event.values[1];
+                }
+                mCallback.onSensorPulse(mPulseReason, sensorPerformsProxCheck, screenX, screenY);
                 updateListener();  // reregister, this sensor only fires once
             }));
         }
@@ -309,7 +319,12 @@ public class DozeSensors {
          * Called when a sensor requests a pulse
          * @param pulseReason Requesting sensor, e.g. {@link DozeLog#PULSE_REASON_SENSOR_PICKUP}
          * @param sensorPerformedProxCheck true if the sensor already checked for FAR proximity.
+         * @param screenX the location on the screen where the sensor fired or -1
+         *                if the sensor doesn't support reporting screen locations.
+         * @param screenY the location on the screen where the sensor fired or -1
+         *                if the sensor doesn't support reporting screen locations.
          */
-        void onSensorPulse(int pulseReason, boolean sensorPerformedProxCheck);
+        void onSensorPulse(int pulseReason, boolean sensorPerformedProxCheck,
+                float screenX, float screenY);
     }
 }
