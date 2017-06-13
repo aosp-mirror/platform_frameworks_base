@@ -34,6 +34,11 @@ namespace convert {
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
 
+JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Properties &properties,
+        jint moduleId, const std::string& serviceName);
+JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_1::Properties &properties,
+        jint moduleId, const std::string& serviceName);
+
 JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
 V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region);
 

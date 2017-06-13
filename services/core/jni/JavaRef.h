@@ -37,6 +37,8 @@ JavaRef<T> make_javaref(JNIEnv *env, T ref) {
     });
 }
 
+JavaRef<jstring> make_javastr(JNIEnv *env, const std::string &str);
+
 class EnvWrapper {
 public:
     EnvWrapper(JNIEnv *env);

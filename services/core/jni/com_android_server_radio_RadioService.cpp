@@ -24,7 +24,9 @@
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadio.h>
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
+#include <android/hidl/manager/1.0/IServiceManager.h>
 #include <core_jni_helpers.h>
+#include <hidl/ServiceManagement.h>
 #include <utils/Log.h>
 #include <JNIHelp.h>
 
@@ -34,6 +36,7 @@ namespace radio {
 namespace RadioService {
 
 using hardware::Return;
+using hardware::hidl_string;
 using hardware::hidl_vec;
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
@@ -53,16 +56,27 @@ static struct {
     struct {
         jclass clazz;
         jmethodID cstor;
+        jmethodID add;
+    } ArrayList;
+    struct {
+        jclass clazz;
+        jmethodID cstor;
     } Tuner;
 } gjni;
 
 struct ServiceContext {
     ServiceContext() {}
 
-    sp<V1_0::IBroadcastRadio> mModule;
+    std::vector<sp<V1_0::IBroadcastRadio>> mModules;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(ServiceContext);
+};
+
+const std::vector<Class> gAllClasses = {
+    Class::AM_FM,
+    Class::SAT,
+    Class::DT,
 };
 
 
@@ -92,39 +106,85 @@ static void nativeFinalize(JNIEnv *env, jobject obj, jlong nativeContext) {
     delete ctx;
 }
 
-static sp<V1_0::IBroadcastRadio> getModule(jlong nativeContext) {
-    ALOGV("getModule()");
+static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) {
+    ALOGV("nativeLoadModules()");
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
 
-    if (ctx.mModule != nullptr) {
-        return ctx.mModule;
+    // Get list of registered HIDL HAL implementations.
+    auto manager = hardware::defaultServiceManager();
+    hidl_vec<hidl_string> services;
+    if (manager == nullptr) {
+        ALOGE("Can't reach service manager, using default service implementation only");
+        services = std::vector<hidl_string>({ "default" });
+    } else {
+        manager->listByInterface(V1_0::IBroadcastRadioFactory::descriptor,
+                [&services](const hidl_vec<hidl_string> &registered) {
+            services = registered;
+        });
     }
 
-    // TODO(b/36863239): what about other HAL implementations?
-    auto factory = V1_0::IBroadcastRadioFactory::getService();
-    if (factory == nullptr) {
-        ALOGE("Can't retrieve radio HAL implementation");
-        return nullptr;
-    }
+    // Scan provided list for actually implemented modules.
+    ctx.mModules.clear();
+    auto jModules = make_javaref(env, env->NewObject(gjni.ArrayList.clazz, gjni.ArrayList.cstor));
+    for (auto&& serviceName : services) {
+        ALOGV("checking service: %s", serviceName.c_str());
 
-    sp<V1_0::IBroadcastRadio> module = nullptr;
-    // TODO(b/36863239): not only AM/FM
-    factory->connectModule(Class::AM_FM, [&](Result retval,
-            const sp<V1_0::IBroadcastRadio>& result) {
-        if (retval == Result::OK) {
-            module = result;
+        auto factory = V1_0::IBroadcastRadioFactory::getService(serviceName);
+        if (factory == nullptr) {
+            ALOGE("can't load service %s", serviceName.c_str());
+            continue;
         }
-    });
 
-    ALOGE_IF(module == nullptr, "Couldn't connect module");
-    ctx.mModule = module;
-    return module;
+        // Second level of scanning - that's unfortunate.
+        for (auto&& clazz : gAllClasses) {
+            sp<V1_0::IBroadcastRadio> module10 = nullptr;
+            sp<V1_1::IBroadcastRadio> module11 = nullptr;
+            factory->connectModule(clazz, [&](Result res, const sp<V1_0::IBroadcastRadio>& module) {
+                if (res == Result::OK) {
+                    module10 = module;
+                    module11 = V1_1::IBroadcastRadio::castFrom(module).withDefault(nullptr);
+                } else if (res != Result::INVALID_ARGUMENTS) {
+                    ALOGE("couldn't load %s:%s module",
+                            serviceName.c_str(), V1_0::toString(clazz).c_str());
+                }
+            });
+            if (module10 == nullptr) continue;
+
+            auto idx = ctx.mModules.size();
+            ctx.mModules.push_back(module10);
+            ALOGI("loaded broadcast radio module %zu: %s:%s",
+                    idx, serviceName.c_str(), V1_0::toString(clazz).c_str());
+
+            JavaRef<jobject> jModule = nullptr;
+            Result halResult = Result::OK;
+            Return<void> hidlResult;
+            if (module11 != nullptr) {
+                hidlResult = module11->getProperties_1_1([&](const V1_1::Properties& properties) {
+                    jModule = convert::ModulePropertiesFromHal(env, properties, idx, serviceName);
+                });
+            } else {
+                hidlResult = module10->getProperties([&](Result result,
+                        const V1_0::Properties& properties) {
+                    halResult = result;
+                    if (result != Result::OK) return;
+                    jModule = convert::ModulePropertiesFromHal(env, properties, idx, serviceName);
+                });
+            }
+            if (convert::ThrowIfFailed(env, hidlResult, halResult)) return nullptr;
+
+            env->CallBooleanMethod(jModules.get(), gjni.ArrayList.add, jModule.get());
+        }
+    }
+
+    return jModules.release();
 }
 
 static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jint moduleId,
         jobject bandConfig, bool withAudio, jobject callback) {
     ALOGV("nativeOpenTuner()");
+    AutoMutex _l(gContextMutex);
+    auto& ctx = getNativeContext(nativeContext);
     EnvWrapper wrap(env);
 
     if (callback == nullptr) {
@@ -132,11 +192,11 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
         return nullptr;
     }
 
-    // TODO(b/36863239): use moduleId
-    auto module = getModule(nativeContext);
-    if (module == nullptr) {
+    if (moduleId < 0 || static_cast<size_t>(moduleId) >= ctx.mModules.size()) {
+        ALOGE("Invalid module ID: %d", moduleId);
         return nullptr;
     }
+    auto module = ctx.mModules[moduleId];
 
     HalRevision halRev;
     if (V1_1::IBroadcastRadio::castFrom(module).withDefault(nullptr) != nullptr) {
@@ -181,6 +241,7 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
 static const JNINativeMethod gRadioServiceMethods[] = {
     { "nativeInit", "()J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
+    { "nativeLoadModules", "(J)Ljava/util/List;", (void*)nativeLoadModules },
     { "nativeOpenTuner", "(JILandroid/hardware/radio/RadioManager$BandConfig;Z"
             "Landroid/hardware/radio/ITunerCallback;)Lcom/android/server/radio/Tuner;",
             (void*)nativeOpenTuner },
@@ -199,6 +260,11 @@ void register_android_server_radio_RadioService(JNIEnv *env) {
     gjni.Tuner.clazz = MakeGlobalRefOrDie(env, tunerClass);
     gjni.Tuner.cstor = GetMethodIDOrDie(env, tunerClass, "<init>",
             "(Landroid/hardware/radio/ITunerCallback;IIZ)V");
+
+    auto arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
+    gjni.ArrayList.clazz = MakeGlobalRefOrDie(env, arrayListClass);
+    gjni.ArrayList.cstor = GetMethodIDOrDie(env, arrayListClass, "<init>", "()V");
+    gjni.ArrayList.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
     auto res = jniRegisterNativeMethods(env, "com/android/server/radio/RadioService",
             gRadioServiceMethods, NELEM(gRadioServiceMethods));
