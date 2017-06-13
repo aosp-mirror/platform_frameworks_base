@@ -295,8 +295,6 @@
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
         <item name="bgProtectTextColor">?android:attr/textColorPrimaryInverse</item>
         <item name="bgProtectSecondaryTextColor">?android:attr/textColorSecondaryInverse</item>
-        <item name="pinDividerColor">@color/pin_divider_color</item>
-        <item name="pinDeleteColor">@color/pin_delete_color</item>
         <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
     </style>
 
