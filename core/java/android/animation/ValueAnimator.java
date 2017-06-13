@@ -1469,24 +1469,21 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (!mSelfPulse) {
             return;
         }
-        AnimationHandler handler = AnimationHandler.getInstance();
-        handler.addOneShotCommitCallback(this);
+        getAnimationHandler().addOneShotCommitCallback(this);
     }
 
     private void removeAnimationCallback() {
         if (!mSelfPulse) {
             return;
         }
-        AnimationHandler handler = AnimationHandler.getInstance();
-        handler.removeCallback(this);
+        getAnimationHandler().removeCallback(this);
     }
 
     private void addAnimationCallback(long delay) {
         if (!mSelfPulse) {
             return;
         }
-        AnimationHandler handler = AnimationHandler.getInstance();
-        handler.addAnimationFrameCallback(this, delay);
+        getAnimationHandler().addAnimationFrameCallback(this, delay);
     }
 
     /**
@@ -1642,5 +1639,13 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     @Override
     public void setAllowRunningAsynchronously(boolean mayRunAsync) {
         // It is up to subclasses to support this, if they can.
+    }
+
+    /**
+     * @return The {@link AnimationHandler} that will be used to schedule updates for this animator.
+     * @hide
+     */
+    public AnimationHandler getAnimationHandler() {
+        return AnimationHandler.getInstance();
     }
 }

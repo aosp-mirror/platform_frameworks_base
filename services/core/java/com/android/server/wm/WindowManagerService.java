@@ -103,6 +103,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.Manifest;
 import android.Manifest.permission;
+import android.animation.AnimationHandler;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -212,6 +213,7 @@ import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -1049,8 +1051,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition = new AppTransition(context, this);
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
+        final AnimationHandler animationHandler = new AnimationHandler();
+        animationHandler.setProvider(new SfVsyncFrameCallbackProvider());
         mBoundsAnimationController = new BoundsAnimationController(context, mAppTransition,
-                UiThread.getHandler());
+                AnimationThread.getHandler(), animationHandler);
 
         mActivityManager = ActivityManager.getService();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
