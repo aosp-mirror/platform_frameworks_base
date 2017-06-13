@@ -1196,6 +1196,12 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             mBackgroundControl.deferTransactionUntil(handle, frame);
         }
 
+        @Override
+        public void deferTransactionUntil(Surface barrier, long frame) {
+            super.deferTransactionUntil(barrier, frame);
+            mBackgroundControl.deferTransactionUntil(barrier, frame);
+        }
+
         void updateBackgroundVisibility() {
             if (mOpaque && mVisible) {
                 mBackgroundControl.show();
