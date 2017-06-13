@@ -82,7 +82,7 @@ public class QSFragment extends Fragment implements QS {
         mContainer = view.findViewById(id.quick_settings_container);
         mGutterHeight = getContext().getResources().getDimensionPixelSize(R.dimen.qs_gutter_height);
 
-        mQSDetail.setQsPanel(mQSPanel, mHeader);
+        mQSDetail.setQsPanel(mQSPanel, mHeader, mFooter);
 
         // If the quick settings row is not shown, then there is no need for the animation from
         // the row to the full QS panel.

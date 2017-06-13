@@ -23,6 +23,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.After;
+import org.junit.Ignore;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -37,8 +39,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 
-import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +65,7 @@ public class QSDetailTest extends SysuiTestCase {
             mQsDetail = (QSDetail) LayoutInflater.from(mContext).inflate(R.layout.qs_detail, null);
             mQsPanel = mock(QSPanel.class);
             mQuickHeader = mock(QuickStatusBarHeader.class);
-            mQsDetail.setQsPanel(mQsPanel, mQuickHeader);
+            mQsDetail.setQsPanel(mQsPanel, mQuickHeader, mock(View.class));
 
             mMockDetailAdapter = mock(DetailAdapter.class);
             when(mMockDetailAdapter.createDetailView(any(), any(), any()))
