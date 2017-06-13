@@ -1224,7 +1224,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mSnapAlgorithm.getMiddleTarget());
     }
 
-    public final void onBusEvent(RecentsDrawnEvent drawnEvent) {
+    public void onRecentsDrawn() {
         if (mState.animateAfterRecentsDrawn) {
             mState.animateAfterRecentsDrawn = false;
             updateDockSide();
