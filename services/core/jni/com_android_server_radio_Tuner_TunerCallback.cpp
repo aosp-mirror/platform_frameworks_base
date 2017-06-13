@@ -53,6 +53,13 @@ static struct {
         jmethodID onError;
         jmethodID onConfigurationChanged;
         jmethodID onProgramInfoChanged;
+        jmethodID onMetadataChanged;
+        jmethodID onTrafficAnnouncement;
+        jmethodID onEmergencyAnnouncement;
+        jmethodID onAntennaState;
+        jmethodID onBackgroundScanAvailabilityChange;
+        jmethodID onBackgroundScanComplete;
+        jmethodID onProgramListChanged;
     } TunerCallback;
 } gjni;
 
@@ -63,6 +70,8 @@ enum class TunerError : jint {
     CANCELLED = 2,
     SCAN_TIMEOUT = 3,
     CONFIG = 4,
+    BACKGROUND_SCAN_UNAVAILABLE = 5,
+    BACKGROUND_SCAN_FAILED = 6,
 };
 
 static Mutex gContextMutex;
@@ -191,48 +200,93 @@ Return<void> NativeCallback::tuneComplete_1_1(Result result, const V1_1::Program
 }
 
 Return<void> NativeCallback::afSwitch(const V1_0::ProgramInfo& info) {
-    ALOGE("Not implemented: afSwitch");
-    return Return<void>();
+    ALOGV("afSwitch()");
+    return tuneComplete(Result::OK, info);
 }
 
 Return<void> NativeCallback::afSwitch_1_1(const V1_1::ProgramInfo& info) {
-    ALOGE("Not implemented: afSwitch_1_1");
-    return Return<void>();
+    ALOGV("afSwitch_1_1()");
+    return tuneComplete_1_1(Result::OK, info);
 }
 
 Return<void> NativeCallback::antennaStateChange(bool connected) {
-    ALOGE("Not implemented: antennaStateChange");
+    ALOGV("antennaStateChange(%d)", connected);
+
+    mCallbackThread.enqueue([this, connected](JNIEnv *env) {
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onAntennaState, connected);
+    });
+
     return Return<void>();
 }
 
 Return<void> NativeCallback::trafficAnnouncement(bool active) {
-    ALOGE("Not implemented: trafficAnnouncement");
+    ALOGV("trafficAnnouncement(%d)", active);
+
+    mCallbackThread.enqueue([this, active](JNIEnv *env) {
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onTrafficAnnouncement, active);
+    });
+
     return Return<void>();
 }
 
 Return<void> NativeCallback::emergencyAnnouncement(bool active) {
-    ALOGE("Not implemented: emergencyAnnouncement");
+    ALOGV("emergencyAnnouncement(%d)", active);
+
+    mCallbackThread.enqueue([this, active](JNIEnv *env) {
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onEmergencyAnnouncement, active);
+    });
+
     return Return<void>();
 }
 
 Return<void> NativeCallback::newMetadata(uint32_t channel, uint32_t subChannel,
         const hidl_vec<MetaData>& metadata) {
-    ALOGE("Not implemented: newMetadata");
+    // channel and subChannel are not used
+    ALOGV("newMetadata(%d, %d)", channel, subChannel);
+
+    mCallbackThread.enqueue([this, metadata](JNIEnv *env) {
+        auto jMetadata = convert::MetadataFromHal(env, metadata);
+        if (jMetadata == nullptr) return;
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onMetadataChanged, jMetadata.get());
+    });
+
     return Return<void>();
 }
 
 Return<void> NativeCallback::backgroundScanAvailable(bool isAvailable) {
-    ALOGE("Not implemented: backgroundScanAvailable");
+    ALOGV("backgroundScanAvailable(%d)", isAvailable);
+
+    mCallbackThread.enqueue([this, isAvailable](JNIEnv *env) {
+        env->CallVoidMethod(mJCallback,
+                gjni.TunerCallback.onBackgroundScanAvailabilityChange, isAvailable);
+    });
+
     return Return<void>();
 }
 
 Return<void> NativeCallback::backgroundScanComplete(ProgramListResult result) {
-    ALOGE("Not implemented: backgroundScanComplete");
+    ALOGV("backgroundScanComplete(%d)", result);
+
+    mCallbackThread.enqueue([this, result](JNIEnv *env) {
+        if (result == ProgramListResult::OK) {
+            env->CallVoidMethod(mJCallback, gjni.TunerCallback.onBackgroundScanComplete);
+        } else {
+            auto cause = (result == ProgramListResult::UNAVAILABLE) ?
+                    TunerError::BACKGROUND_SCAN_UNAVAILABLE : TunerError::BACKGROUND_SCAN_FAILED;
+            env->CallVoidMethod(mJCallback, gjni.TunerCallback.onError, cause);
+        }
+    });
+
     return Return<void>();
 }
 
 Return<void> NativeCallback::programListChanged() {
-    ALOGE("Not implemented: programListChanged");
+    ALOGV("programListChanged()");
+
+    mCallbackThread.enqueue([this](JNIEnv *env) {
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramListChanged);
+    });
+
     return Return<void>();
 }
 
@@ -310,6 +364,20 @@ void register_android_server_radio_TunerCallback(JavaVM *vm, JNIEnv *env) {
             "onConfigurationChanged", "(Landroid/hardware/radio/RadioManager$BandConfig;)V");
     gjni.TunerCallback.onProgramInfoChanged = GetMethodIDOrDie(env, tunerCbClass,
             "onProgramInfoChanged", "(Landroid/hardware/radio/RadioManager$ProgramInfo;)V");
+    gjni.TunerCallback.onMetadataChanged = GetMethodIDOrDie(env, tunerCbClass,
+            "onMetadataChanged", "(Landroid/hardware/radio/RadioMetadata;)V");
+    gjni.TunerCallback.onTrafficAnnouncement = GetMethodIDOrDie(env, tunerCbClass,
+            "onTrafficAnnouncement", "(Z)V");
+    gjni.TunerCallback.onEmergencyAnnouncement = GetMethodIDOrDie(env, tunerCbClass,
+            "onEmergencyAnnouncement", "(Z)V");
+    gjni.TunerCallback.onAntennaState = GetMethodIDOrDie(env, tunerCbClass,
+            "onAntennaState", "(Z)V");
+    gjni.TunerCallback.onBackgroundScanAvailabilityChange = GetMethodIDOrDie(env, tunerCbClass,
+            "onBackgroundScanAvailabilityChange", "(Z)V");
+    gjni.TunerCallback.onBackgroundScanComplete = GetMethodIDOrDie(env, tunerCbClass,
+            "onBackgroundScanComplete", "()V");
+    gjni.TunerCallback.onProgramListChanged = GetMethodIDOrDie(env, tunerCbClass,
+            "onProgramListChanged", "()V");
 
     auto res = jniRegisterNativeMethods(env, "com/android/server/radio/TunerCallback",
             gTunerCallbackMethods, NELEM(gTunerCallbackMethods));

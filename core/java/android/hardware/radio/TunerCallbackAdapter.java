@@ -51,4 +51,39 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
     public void onProgramInfoChanged(RadioManager.ProgramInfo info) {
         mHandler.post(() -> mCallback.onProgramInfoChanged(info));
     }
+
+    @Override
+    public void onMetadataChanged(RadioMetadata metadata) {
+        mHandler.post(() -> mCallback.onMetadataChanged(metadata));
+    }
+
+    @Override
+    public void onTrafficAnnouncement(boolean active) {
+        mHandler.post(() -> mCallback.onTrafficAnnouncement(active));
+    }
+
+    @Override
+    public void onEmergencyAnnouncement(boolean active) {
+        mHandler.post(() -> mCallback.onEmergencyAnnouncement(active));
+    }
+
+    @Override
+    public void onAntennaState(boolean connected) {
+        mHandler.post(() -> mCallback.onAntennaState(connected));
+    }
+
+    @Override
+    public void onBackgroundScanAvailabilityChange(boolean isAvailable) {
+        mHandler.post(() -> mCallback.onBackgroundScanAvailabilityChange(isAvailable));
+    }
+
+    @Override
+    public void onBackgroundScanComplete() {
+        mHandler.post(() -> mCallback.onBackgroundScanComplete());
+    }
+
+    @Override
+    public void onProgramListChanged() {
+        mHandler.post(() -> mCallback.onProgramListChanged());
+    }
 }
