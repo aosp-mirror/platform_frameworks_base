@@ -395,7 +395,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         mMockAppTransition = new MockAppTransition(context);
         mMockAnimator = new MockValueAnimator();
         mTarget = new TestBoundsAnimationTarget();
-        mController = new BoundsAnimationController(context, mMockAppTransition, handler);
+        mController = new BoundsAnimationController(context, mMockAppTransition, handler, null);
         mDriver = new BoundsAnimationDriver(mController, mTarget);
     }
 
