@@ -18,32 +18,35 @@ package com.android.systemui.colorextraction;
 
 import static org.junit.Assert.assertEquals;
 
+import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.graphics.Color;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Pair;
 
 import com.android.systemui.SysuiTestCase;
 
 import com.google.android.colorextraction.ColorExtractor;
 import com.google.android.colorextraction.types.Tonal;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests color extraction generation.
  */
-@Ignore
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SysuiColorExtractorTests extends SysuiTestCase {
 
-    private static int[] sWhich = new int[] {
+    private static int[] sWhich = new int[]{
             WallpaperManager.FLAG_SYSTEM,
             WallpaperManager.FLAG_LOCK};
-    private static int[] sTypes = new int[] {
+    private static int[] sTypes = new int[]{
             ColorExtractor.TYPE_NORMAL,
             ColorExtractor.TYPE_DARK,
             ColorExtractor.TYPE_EXTRA_DARK};
@@ -55,6 +58,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         fallbackColors.setSecondaryColor(ColorExtractor.FALLBACK_COLOR);
 
         SysuiColorExtractor extractor = new SysuiColorExtractor(getContext(), new Tonal(), false);
+        simulateEvent(extractor);
         extractor.setWallpaperVisible(false);
 
         for (int which : sWhich) {
@@ -79,6 +83,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
                     outGradientColorsExtraDark.set(colors);
                     return true;
                 }, false);
+        simulateEvent(extractor);
         extractor.setWallpaperVisible(true);
 
         for (int which : sWhich) {
@@ -87,5 +92,13 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
                         extractor.getColors(which, type), colors);
             }
         }
+    }
+
+    private void simulateEvent(SysuiColorExtractor extractor) {
+        // Let's fake a color event
+        List<Pair<Color, Integer>> dummyColors = new ArrayList<>();
+        dummyColors.add(new Pair<>(Color.valueOf(Color.BLACK), 1));
+        extractor.onColorsChanged(new WallpaperColors(dummyColors),
+                WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
     }
 }
