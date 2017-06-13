@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.volume;
 
 import android.animation.Animator;
@@ -41,10 +42,8 @@ public class VolumeDialogMotion {
     private final View mDialogView;
     private final ViewGroup mContents;  // volume rows + zen footer
     private final View mChevron;
-    private final Drawable mBackground;
     private final Handler mHandler = new Handler();
     private final Callback mCallback;
-    private final int mBackgroundTargetAlpha;
 
     private boolean mAnimating;  // show or dismiss animation is running
     private boolean mShowing;  // show animation is running
@@ -53,14 +52,12 @@ public class VolumeDialogMotion {
     private ValueAnimator mContentsPositionAnimator;
 
     public VolumeDialogMotion(Dialog dialog, View dialogView, ViewGroup contents, View chevron,
-            Drawable background, Callback callback) {
+            Callback callback) {
         mDialog = dialog;
         mDialogView = dialogView;
         mContents = contents;
         mChevron = chevron;
         mCallback = callback;
-        mBackground = background;
-        mBackgroundTargetAlpha = mBackground.getAlpha();
         mDialog.setOnDismissListener(new OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
@@ -71,9 +68,8 @@ public class VolumeDialogMotion {
             @Override
             public void onShow(DialogInterface dialog) {
                 if (D.BUG) Log.d(TAG, "mDialog.onShow");
-                final int w = mDialogView.getWidth() / 4;
-                mDialogView.setTranslationX(w);
-                mBackground.setAlpha(0);
+                final int h = mDialogView.getHeight();
+                mDialogView.setTranslationY(-h);
                 startShowAnimation();
             }
         });
@@ -122,7 +118,7 @@ public class VolumeDialogMotion {
     }
 
     private int chevronDistance() {
-        return 0;
+        return mChevron.getHeight() / 6;
     }
 
     private int chevronPosY() {
@@ -133,29 +129,26 @@ public class VolumeDialogMotion {
     private void startShowAnimation() {
         if (D.BUG) Log.d(TAG, "startShowAnimation");
         mDialogView.animate()
-                .translationX(0)
                 .translationY(0)
-                .alpha(1)
                 .setDuration(scaledDuration(300))
                 .setInterpolator(new LogDecelerateInterpolator())
                 .setListener(null)
                 .setUpdateListener(animation -> {
-                    mBackground.setAlpha(
-                            (int) (animation.getAnimatedFraction() * mBackgroundTargetAlpha));
                     if (mChevronPositionAnimator != null) {
                         final float v = (Float) mChevronPositionAnimator.getAnimatedValue();
                         if (mChevronPositionAnimator == null) return;
                         // reposition chevron
                         final int posY = chevronPosY();
+                        mChevron.setTranslationY(posY + v + -mDialogView.getTranslationY());
                     }
                 })
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        mBackground.setAlpha(mBackgroundTargetAlpha);
                         if (mChevronPositionAnimator == null) return;
                         // reposition chevron
                         final int posY = chevronPosY();
+                        mChevron.setTranslationY(posY + -mDialogView.getTranslationY());
                     }
                 })
                 .start();
@@ -171,11 +164,17 @@ public class VolumeDialogMotion {
                 if (D.BUG) Log.d(TAG, "show.onAnimationEnd");
                 setShowing(false);
             }
-
             @Override
             public void onAnimationCancel(Animator animation) {
                 if (D.BUG) Log.d(TAG, "show.onAnimationCancel");
                 mCancelled = true;
+            }
+        });
+        mContentsPositionAnimator.addUpdateListener(new AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float v = (Float) animation.getAnimatedValue();
+                mContents.setTranslationY(v + -mDialogView.getTranslationY());
             }
         });
         mContentsPositionAnimator.setInterpolator(new LogDecelerateInterpolator());
@@ -219,30 +218,34 @@ public class VolumeDialogMotion {
             setShowing(false);
         }
         mDialogView.animate()
-                .translationX(mDialogView.getWidth() / 4)
-                .alpha(0)
+                .translationY(-mDialogView.getHeight())
                 .setDuration(scaledDuration(250))
                 .setInterpolator(new LogAccelerateInterpolator())
-                .setUpdateListener(animation -> {
-                    final float v = 1 - mChevronPositionAnimator.getAnimatedFraction();
-                    mBackground.setAlpha((int) (v * mBackgroundTargetAlpha));
+                .setUpdateListener(new AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        mContents.setTranslationY(-mDialogView.getTranslationY());
+                        final int posY = chevronPosY();
+                        mChevron.setTranslationY(posY + -mDialogView.getTranslationY());
+                    }
                 })
                 .setListener(new AnimatorListenerAdapter() {
                     private boolean mCancelled;
-
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         if (mCancelled) return;
                         if (D.BUG) Log.d(TAG, "dismiss.onAnimationEnd");
-                        mHandler.postDelayed(() -> {
-                            if (D.BUG) Log.d(TAG, "mDialog.dismiss()");
-                            mDialog.dismiss();
-                            onComplete.run();
-                            setDismissing(false);
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (D.BUG) Log.d(TAG, "mDialog.dismiss()");
+                                mDialog.dismiss();
+                                onComplete.run();
+                                setDismissing(false);
+                            }
                         }, PRE_DISMISS_DELAY);
 
                     }
-
                     @Override
                     public void onAnimationCancel(Animator animation) {
                         if (D.BUG) Log.d(TAG, "dismiss.onAnimationCancel");
