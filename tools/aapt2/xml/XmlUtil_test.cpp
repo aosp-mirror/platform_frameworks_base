@@ -21,37 +21,30 @@
 namespace aapt {
 
 TEST(XmlUtilTest, ExtractPackageFromNamespace) {
-  AAPT_ASSERT_FALSE(xml::ExtractPackageFromNamespace("com.android"));
-  AAPT_ASSERT_FALSE(
-      xml::ExtractPackageFromNamespace("http://schemas.android.com/apk"));
-  AAPT_ASSERT_FALSE(
-      xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res"));
-  AAPT_ASSERT_FALSE(
-      xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res/"));
-  AAPT_ASSERT_FALSE(xml::ExtractPackageFromNamespace(
-      "http://schemas.android.com/apk/prv/res/"));
+  ASSERT_FALSE(xml::ExtractPackageFromNamespace("com.android"));
+  ASSERT_FALSE(xml::ExtractPackageFromNamespace("http://schemas.android.com/apk"));
+  ASSERT_FALSE(xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res"));
+  ASSERT_FALSE(xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res/"));
+  ASSERT_FALSE(xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/prv/res/"));
 
   Maybe<xml::ExtractedPackage> p =
       xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res/a");
-  AAPT_ASSERT_TRUE(p);
+  ASSERT_TRUE(p);
   EXPECT_EQ(std::string("a"), p.value().package);
   EXPECT_FALSE(p.value().private_namespace);
 
-  p = xml::ExtractPackageFromNamespace(
-      "http://schemas.android.com/apk/prv/res/android");
-  AAPT_ASSERT_TRUE(p);
+  p = xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/prv/res/android");
+  ASSERT_TRUE(p);
   EXPECT_EQ(std::string("android"), p.value().package);
   EXPECT_TRUE(p.value().private_namespace);
 
-  p = xml::ExtractPackageFromNamespace(
-      "http://schemas.android.com/apk/prv/res/com.test");
-  AAPT_ASSERT_TRUE(p);
+  p = xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/prv/res/com.test");
+  ASSERT_TRUE(p);
   EXPECT_EQ(std::string("com.test"), p.value().package);
   EXPECT_TRUE(p.value().private_namespace);
 
-  p = xml::ExtractPackageFromNamespace(
-      "http://schemas.android.com/apk/res-auto");
-  AAPT_ASSERT_TRUE(p);
+  p = xml::ExtractPackageFromNamespace("http://schemas.android.com/apk/res-auto");
+  ASSERT_TRUE(p);
   EXPECT_EQ(std::string(), p.value().package);
   EXPECT_TRUE(p.value().private_namespace);
 }

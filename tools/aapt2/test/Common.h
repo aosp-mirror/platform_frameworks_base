@@ -34,15 +34,6 @@
 #include "io/File.h"
 #include "process/IResourceTableConsumer.h"
 
-//
-// GTEST 1.7 doesn't explicitly cast to bool, which causes explicit operators to
-// fail to compile.
-//
-#define AAPT_ASSERT_TRUE(v) ASSERT_TRUE(bool(v))
-#define AAPT_ASSERT_FALSE(v) ASSERT_FALSE(bool(v))
-#define AAPT_EXPECT_TRUE(v) EXPECT_TRUE(bool(v))
-#define AAPT_EXPECT_FALSE(v) EXPECT_FALSE(bool(v))
-
 namespace aapt {
 namespace test {
 
@@ -148,6 +139,10 @@ namespace test {
 MATCHER_P(ValueEq, a,
           std::string(negation ? "isn't" : "is") + " equal to " + ::testing::PrintToString(a)) {
   return arg.Equals(&a);
+}
+
+MATCHER_P(StrValueEq, a, std::string(negation ? "isn't" : "is") + " equal to " + ::testing::PrintToString(a)) {
+  return *(arg.value) == a;
 }
 
 }  // namespace test

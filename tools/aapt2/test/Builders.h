@@ -212,8 +212,7 @@ class StyleBuilder {
   }
 
   StyleBuilder& AddItem(const android::StringPiece& str, std::unique_ptr<Item> value) {
-    style_->entries.push_back(
-        Style::Entry{Reference(ParseNameOrDie(str)), std::move(value)});
+    style_->entries.push_back(Style::Entry{Reference(ParseNameOrDie(str)), std::move(value)});
     return *this;
   }
 
@@ -224,7 +223,9 @@ class StyleBuilder {
     return *this;
   }
 
-  std::unique_ptr<Style> Build() { return std::move(style_); }
+  std::unique_ptr<Style> Build() {
+    return std::move(style_);
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(StyleBuilder);

@@ -21,6 +21,8 @@
 
 #include "test/Test.h"
 
+using ::testing::NotNull;
+
 namespace aapt {
 
 constexpr const char* kXmlPreamble =
@@ -41,10 +43,10 @@ TEST(XmlDomTest, Inflate) {
   const Source source = {"test.xml"};
   StdErrDiagnostics diag;
   std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, source);
-  ASSERT_NE(doc, nullptr);
+  ASSERT_THAT(doc, NotNull());
 
   xml::Namespace* ns = xml::NodeCast<xml::Namespace>(doc->root.get());
-  ASSERT_NE(ns, nullptr);
+  ASSERT_THAT(ns, NotNull());
   EXPECT_EQ(ns->namespace_uri, xml::kSchemaAndroid);
   EXPECT_EQ(ns->namespace_prefix, "android");
 }
@@ -55,19 +57,19 @@ TEST(XmlDomTest, ForwardEscapes) {
       <element value="\?hello" pattern="\\d{5}">\\d{5}</element>)EOF");
 
   xml::Element* el = xml::FindRootElement(doc->root.get());
-  ASSERT_NE(nullptr, el);
+  ASSERT_THAT(el, NotNull());
 
   xml::Attribute* attr = el->FindAttribute({}, "pattern");
-  ASSERT_NE(nullptr, attr);
+  ASSERT_THAT(attr, NotNull());
   EXPECT_EQ("\\\\d{5}", attr->value);
 
   attr = el->FindAttribute({}, "value");
-  ASSERT_NE(nullptr, attr);
+  ASSERT_THAT(attr, NotNull());
   EXPECT_EQ("\\?hello", attr->value);
 
   ASSERT_EQ(1u, el->children.size());
   xml::Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
-  ASSERT_NE(nullptr, text);
+  ASSERT_THAT(text, NotNull());
   EXPECT_EQ("\\\\d{5}", text->text);
 }
 
