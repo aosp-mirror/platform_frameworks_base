@@ -677,13 +677,6 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     final SparseIntArray mIsolatedOwners = new SparseIntArray();
 
-    // List of APK paths to load for each user and package. This data is never
-    // persisted by the package manager. Instead, the overlay manager will
-    // ensure the data is up-to-date in runtime.
-    @GuardedBy("mPackages")
-    final SparseArray<ArrayMap<String, ArrayList<String>>> mEnabledOverlayPaths =
-        new SparseArray<ArrayMap<String, ArrayList<String>>>();
-
     /**
      * Tracks new system packages [received in an OTA] that we expect to
      * find updated user-installed versions. Keys are package name, values
@@ -3584,8 +3577,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
 
-        rebaseEnabledOverlays(packageInfo.applicationInfo, userId);
-
         packageInfo.packageName = packageInfo.applicationInfo.packageName =
                 resolveExternalPackageNameLPr(p);
 
@@ -4097,7 +4088,6 @@ public class PackageManagerService extends IPackageManager.Stub
             ApplicationInfo ai = PackageParser.generateApplicationInfo(ps.pkg, flags,
                     ps.readUserState(userId), userId);
             if (ai != null) {
-                rebaseEnabledOverlays(ai, userId);
                 ai.packageName = resolveExternalPackageNameLPr(ps.pkg);
             }
             return ai;
@@ -4146,7 +4136,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 ApplicationInfo ai = PackageParser.generateApplicationInfo(
                         p, flags, ps.readUserState(userId), userId);
                 if (ai != null) {
-                    rebaseEnabledOverlays(ai, userId);
                     ai.packageName = resolveExternalPackageNameLPr(p);
                 }
                 return ai;
@@ -4161,26 +4150,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return null;
-    }
-
-    private void rebaseEnabledOverlays(@NonNull ApplicationInfo ai, int userId) {
-        List<String> paths = new ArrayList<>();
-        ArrayMap<String, ArrayList<String>> userSpecificOverlays =
-            mEnabledOverlayPaths.get(userId);
-        if (userSpecificOverlays != null) {
-            if (!"android".equals(ai.packageName)) {
-                ArrayList<String> frameworkOverlays = userSpecificOverlays.get("android");
-                if (frameworkOverlays != null) {
-                    paths.addAll(frameworkOverlays);
-                }
-            }
-
-            ArrayList<String> appOverlays = userSpecificOverlays.get(ai.packageName);
-            if (appOverlays != null) {
-                paths.addAll(appOverlays);
-            }
-        }
-        ai.resourceDirs = paths.size() > 0 ? paths.toArray(new String[paths.size()]) : null;
     }
 
     private String normalizePackageNameLPr(String packageName) {
@@ -4567,24 +4536,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return updateFlagsForComponent(flags, userId, intent /*cookie*/);
     }
 
-    private ActivityInfo generateActivityInfo(ActivityInfo ai, int flags, PackageUserState state,
-            int userId) {
-        ActivityInfo ret = PackageParser.generateActivityInfo(ai, flags, state, userId);
-        if (ret != null) {
-            rebaseEnabledOverlays(ret.applicationInfo, userId);
-        }
-        return ret;
-    }
-
-    private ActivityInfo generateActivityInfo(PackageParser.Activity a, int flags,
-            PackageUserState state, int userId) {
-        ActivityInfo ai = PackageParser.generateActivityInfo(a, flags, state, userId);
-        if (ai != null) {
-            rebaseEnabledOverlays(ai.applicationInfo, userId);
-        }
-        return ai;
-    }
-
     @Override
     public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
         return getActivityInfoInternal(component, flags, Binder.getCallingUid(), userId);
@@ -4612,11 +4563,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (filterAppAccessLPr(ps, filterCallingUid, component, TYPE_ACTIVITY, userId)) {
                     return null;
                 }
-                return generateActivityInfo(a, flags, ps.readUserState(userId), userId);
+                return PackageParser.generateActivityInfo(
+                        a, flags, ps.readUserState(userId), userId);
             }
             if (mResolveComponentName.equals(component)) {
-                return generateActivityInfo(mResolveActivity, flags, new PackageUserState(),
-                        userId);
+                return PackageParser.generateActivityInfo(
+                        mResolveActivity, flags, new PackageUserState(), userId);
             }
         }
         return null;
@@ -4670,7 +4622,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (filterAppAccessLPr(ps, callingUid, component, TYPE_RECEIVER, userId)) {
                     return null;
                 }
-                return generateActivityInfo(a, flags, ps.readUserState(userId), userId);
+                return PackageParser.generateActivityInfo(
+                        a, flags, ps.readUserState(userId), userId);
             }
         }
         return null;
@@ -4806,12 +4759,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (filterAppAccessLPr(ps, callingUid, component, TYPE_SERVICE, userId)) {
                     return null;
                 }
-                ServiceInfo si = PackageParser.generateServiceInfo(s, flags,
-                        ps.readUserState(userId), userId);
-                if (si != null) {
-                    rebaseEnabledOverlays(si.applicationInfo, userId);
-                }
-                return si;
+                return PackageParser.generateServiceInfo(
+                        s, flags, ps.readUserState(userId), userId);
             }
         }
         return null;
@@ -4834,12 +4783,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (filterAppAccessLPr(ps, callingUid, component, TYPE_PROVIDER, userId)) {
                     return null;
                 }
-                ProviderInfo pi = PackageParser.generateProviderInfo(p, flags,
-                        ps.readUserState(userId), userId);
-                if (pi != null) {
-                    rebaseEnabledOverlays(pi.applicationInfo, userId);
-                }
-                return pi;
+                return PackageParser.generateProviderInfo(
+                        p, flags, ps.readUserState(userId), userId);
             }
         }
         return null;
@@ -8265,7 +8210,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         ai = PackageParser.generateApplicationInfo(ps.pkg, effectiveFlags,
                                 ps.readUserState(userId), userId);
                         if (ai != null) {
-                            rebaseEnabledOverlays(ai, userId);
                             ai.packageName = resolveExternalPackageNameLPr(ps.pkg);
                         }
                     } else {
@@ -8292,7 +8236,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
                                 ps.readUserState(userId), userId);
                         if (ai != null) {
-                            rebaseEnabledOverlays(ai, userId);
                             ai.packageName = resolveExternalPackageNameLPr(p);
                             list.add(ai);
                         }
@@ -8446,7 +8389,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
                                 ps.readUserState(userId), userId);
                         if (ai != null) {
-                            rebaseEnabledOverlays(ai, userId);
                             finalList.add(ai);
                         }
                     }
@@ -13317,7 +13259,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return null;
             }
             final PackageUserState userState = ps.readUserState(userId);
-            ActivityInfo ai = generateActivityInfo(activity, mFlags, userState, userId);
+            ActivityInfo ai =
+                    PackageParser.generateActivityInfo(activity, mFlags, userState, userId);
             if (ai == null) {
                 return null;
             }
@@ -22296,11 +22239,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpCompilerStatsLPr(pw, packageName);
             }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_ENABLED_OVERLAYS)) {
-                if (dumpState.onTitlePrinted()) pw.println();
-                dumpEnabledOverlaysLPr(pw);
-            }
-
             if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
                 if (dumpState.onTitlePrinted()) pw.println();
                 mSettings.dumpReadMessagesLPr(pw, dumpState);
@@ -22494,23 +22432,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 stats.dump(ipw);
             }
             ipw.decreaseIndent();
-        }
-    }
-
-    private void dumpEnabledOverlaysLPr(PrintWriter pw) {
-        pw.println("Enabled overlay paths:");
-        final int N = mEnabledOverlayPaths.size();
-        for (int i = 0; i < N; i++) {
-            final int userId = mEnabledOverlayPaths.keyAt(i);
-            pw.println(String.format("    User %d:", userId));
-            final ArrayMap<String, ArrayList<String>> userSpecificOverlays =
-                mEnabledOverlayPaths.valueAt(i);
-            final int M = userSpecificOverlays.size();
-            for (int j = 0; j < M; j++) {
-                final String targetPackageName = userSpecificOverlays.keyAt(j);
-                final ArrayList<String> overlayPackagePaths = userSpecificOverlays.valueAt(j);
-                pw.println(String.format("        %s: %s", targetPackageName, overlayPackagePaths));
-            }
         }
     }
 
@@ -24688,11 +24609,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     Slog.e(TAG, "failed to find package " + targetPackageName);
                     return false;
                 }
-
-                ArrayList<String> paths = null;
-                if (overlayPackageNames != null) {
+                ArrayList<String> overlayPaths = null;
+                if (overlayPackageNames != null && overlayPackageNames.size() > 0) {
                     final int N = overlayPackageNames.size();
-                    paths = new ArrayList<>(N);
+                    overlayPaths = new ArrayList<>(N);
                     for (int i = 0; i < N; i++) {
                         final String packageName = overlayPackageNames.get(i);
                         final PackageParser.Package pkg = mPackages.get(packageName);
@@ -24700,22 +24620,17 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                             Slog.e(TAG, "failed to find package " + packageName);
                             return false;
                         }
-                        paths.add(pkg.baseCodePath);
+                        overlayPaths.add(pkg.baseCodePath);
                     }
                 }
 
-                ArrayMap<String, ArrayList<String>> userSpecificOverlays =
-                    mEnabledOverlayPaths.get(userId);
-                if (userSpecificOverlays == null) {
-                    userSpecificOverlays = new ArrayMap<>();
-                    mEnabledOverlayPaths.put(userId, userSpecificOverlays);
+                final PackageSetting ps = mSettings.mPackages.get(targetPackageName);
+                String[] frameworkOverlayPaths = null;
+                if (!"android".equals(targetPackageName)) {
+                    frameworkOverlayPaths =
+                            mSettings.mPackages.get("android").getOverlayPaths(userId);
                 }
-
-                if (paths != null && paths.size() > 0) {
-                    userSpecificOverlays.put(targetPackageName, paths);
-                } else {
-                    userSpecificOverlays.remove(targetPackageName);
-                }
+                ps.setOverlayPaths(overlayPaths, frameworkOverlayPaths, userId);
                 return true;
             }
         }

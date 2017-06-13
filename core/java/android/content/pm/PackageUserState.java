@@ -55,7 +55,7 @@ public class PackageUserState {
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
 
-    public String[] resourceDirs;
+    public String[] overlayPaths;
 
     public PackageUserState() {
         installed = true;
@@ -83,8 +83,8 @@ public class PackageUserState {
         installReason = o.installReason;
         disabledComponents = ArrayUtils.cloneOrNull(o.disabledComponents);
         enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
-        resourceDirs =
-            o.resourceDirs == null ? null : Arrays.copyOf(o.resourceDirs, o.resourceDirs.length);
+        overlayPaths =
+            o.overlayPaths == null ? null : Arrays.copyOf(o.overlayPaths, o.overlayPaths.length);
     }
 
     /**

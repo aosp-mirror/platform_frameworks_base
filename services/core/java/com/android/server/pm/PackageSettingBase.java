@@ -31,6 +31,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.google.android.collect.Lists;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -327,6 +328,27 @@ abstract class PackageSettingBase extends SettingBase {
 
     void setInstallReason(int installReason, int userId) {
         modifyUserState(userId).installReason = installReason;
+    }
+
+    void setOverlayPaths(List<String> overlayPaths, String[] frameworkOverlayPaths, int userId) {
+        if (overlayPaths == null && frameworkOverlayPaths == null) {
+            modifyUserState(userId).overlayPaths = null;
+            return;
+        }
+        final List<String> paths;
+        if (frameworkOverlayPaths == null) {
+            paths = overlayPaths;
+        } else {
+            paths = Lists.newArrayList(frameworkOverlayPaths);
+            if (overlayPaths != null) {
+                paths.addAll(overlayPaths);
+            }
+        }
+        modifyUserState(userId).overlayPaths = paths.toArray(new String[paths.size()]);
+    }
+
+    String[] getOverlayPaths(int userId) {
+        return readUserState(userId).overlayPaths;
     }
 
     /** Only use for testing. Do NOT use in production code. */
