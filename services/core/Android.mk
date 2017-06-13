@@ -25,7 +25,7 @@ LOCAL_JAVA_LIBRARIES := \
     android.hidl.manager-V1.0-java \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    tzdata_shared2 \
+    time_zone_distro \
     tzdata_update2 \
     android.hidl.base-V1.0-java-static \
     android.hardware.tetheroffload.control-V1.0-java-static \
