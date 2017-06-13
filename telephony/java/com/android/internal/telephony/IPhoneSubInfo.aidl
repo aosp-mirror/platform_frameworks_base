@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import android.telephony.ImsiEncryptionInfo;
+
 /**
  * Interface used to retrieve various phone-related subscriber information.
  *
@@ -136,6 +138,18 @@ interface IPhoneSubInfo {
      * Retrieves the complete voice mail number for particular subId
      */
     String getCompleteVoiceMailNumberForSubscriber(int subId);
+
+    /**
+     * Retrieves the Carrier information used to encrypt IMSI and IMPI.
+     */
+    ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int subId, int keyType,
+    String callingPackage);
+
+    /**
+     * Stores the Carrier information used to encrypt IMSI and IMPI.
+     */
+    void setCarrierInfoForImsiEncryption(int subId, String callingPackage,
+    in ImsiEncryptionInfo imsiEncryptionInfo);
 
     /**
      * Retrieves the alpha identifier associated with the voice mail number.
