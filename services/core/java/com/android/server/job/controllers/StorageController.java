@@ -35,7 +35,7 @@ import java.io.PrintWriter;
 /**
  * Simple controller that tracks the status of the device's storage.
  */
-public class StorageController extends StateController {
+public final class StorageController extends StateController {
     private static final String TAG = "JobScheduler.Stor";
 
     private static final Object sCreationLock = new Object();
@@ -112,7 +112,7 @@ public class StorageController extends StateController {
         }
     }
 
-    public class StorageTracker extends BroadcastReceiver {
+    public final class StorageTracker extends BroadcastReceiver {
         /**
          * Track whether storage is low.
          */

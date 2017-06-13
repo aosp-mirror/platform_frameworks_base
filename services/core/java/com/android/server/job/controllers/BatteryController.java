@@ -39,7 +39,7 @@ import java.io.PrintWriter;
  * be charging when it's been plugged in for more than two minutes, and the system has broadcast
  * ACTION_BATTERY_OK.
  */
-public class BatteryController extends StateController {
+public final class BatteryController extends StateController {
     private static final String TAG = "JobScheduler.Batt";
 
     private static final Object sCreationLock = new Object();
@@ -121,7 +121,7 @@ public class BatteryController extends StateController {
         }
     }
 
-    public class ChargingTracker extends BroadcastReceiver {
+    public final class ChargingTracker extends BroadcastReceiver {
         /**
          * Track whether we're "charging", where charging means that we're ready to commit to
          * doing work.
