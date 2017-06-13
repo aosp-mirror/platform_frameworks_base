@@ -341,7 +341,7 @@
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> حتى يكتمل الشحن"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"غير معروف"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"جاري الشحن"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"جارٍ الشحن"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"لا يتم الشحن"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"لا يتم الشحن"</string>
