@@ -192,18 +192,12 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
 
     if (env->IsInstanceOf(excep, gErrorOffsets.mClass)) {
         /*
-         * It's an Error: Reraise the exception, detach this thread, and
-         * wait for the fireworks. Die even more blatantly after a minute
-         * if the gentler attempt doesn't do the trick.
-         *
-         * The GetJavaVM function isn't on the "approved" list of JNI calls
-         * that can be made while an exception is pending, so we want to
-         * get the VM ptr, throw the exception, and then detach the thread.
+         * It's an Error: Reraise the exception and ask the runtime to abort.
          */
         env->Throw(excep);
+        ALOGE("java.lang.Error thrown during binder transaction (stack trace follows) : ");
         env->ExceptionDescribe();
-        ALOGE("Forcefully exiting");
-        exit(1);
+        env->FatalError("java.lang.Error thrown during binder transaction.");
     }
 
 bail:
