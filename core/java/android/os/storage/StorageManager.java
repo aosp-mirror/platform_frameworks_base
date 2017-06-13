@@ -1174,7 +1174,7 @@ public class StorageManager {
      *
      * @hide
      */
-    public long getStorageCacheBytes(File path) {
+    public long getStorageCacheBytes(File path, @AllocateFlags int flags) {
         final long cachePercent = Settings.Global.getInt(mResolver,
                 Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE, DEFAULT_CACHE_PERCENTAGE);
         final long cacheBytes = (path.getTotalSpace() * cachePercent) / 100;
@@ -1182,7 +1182,16 @@ public class StorageManager {
         final long maxCacheBytes = Settings.Global.getLong(mResolver,
                 Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES, DEFAULT_CACHE_MAX_BYTES);
 
-        return Math.min(cacheBytes, maxCacheBytes);
+        final long result = Math.min(cacheBytes, maxCacheBytes);
+        if ((flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0) {
+            return 0;
+        } else if ((flags & StorageManager.FLAG_ALLOCATE_DEFY_ALL_RESERVED) != 0) {
+            return 0;
+        } else if ((flags & StorageManager.FLAG_ALLOCATE_DEFY_HALF_RESERVED) != 0) {
+            return result / 2;
+        } else {
+            return result;
+        }
     }
 
     /**
@@ -1628,17 +1637,26 @@ public class StorageManager {
     public static final int FLAG_ALLOCATE_AGGRESSIVE = 1 << 0;
 
     /**
-     * Flag indicating that a disk space allocation request should defy any
-     * reserved disk space.
+     * Flag indicating that a disk space allocation request should be allowed to
+     * clear up to all reserved disk space.
      *
      * @hide
      */
-    public static final int FLAG_ALLOCATE_DEFY_RESERVED = 1 << 1;
+    public static final int FLAG_ALLOCATE_DEFY_ALL_RESERVED = 1 << 1;
+
+    /**
+     * Flag indicating that a disk space allocation request should be allowed to
+     * clear up to half of all reserved disk space.
+     *
+     * @hide
+     */
+    public static final int FLAG_ALLOCATE_DEFY_HALF_RESERVED = 1 << 2;
 
     /** @hide */
     @IntDef(flag = true, value = {
             FLAG_ALLOCATE_AGGRESSIVE,
-            FLAG_ALLOCATE_DEFY_RESERVED,
+            FLAG_ALLOCATE_DEFY_ALL_RESERVED,
+            FLAG_ALLOCATE_DEFY_HALF_RESERVED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllocateFlags {}
@@ -1688,7 +1706,8 @@ public class StorageManager {
     public long getAllocatableBytes(@NonNull UUID storageUuid,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         try {
-            return mStorageManager.getAllocatableBytes(convert(storageUuid), flags);
+            return mStorageManager.getAllocatableBytes(convert(storageUuid), flags,
+                    mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
@@ -1738,7 +1757,8 @@ public class StorageManager {
     public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         try {
-            mStorageManager.allocateBytes(convert(storageUuid), bytes, flags);
+            mStorageManager.allocateBytes(convert(storageUuid), bytes, flags,
+                    mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
         } catch (RemoteException e) {

@@ -491,12 +491,12 @@ public class MockStorageManager implements IStorageManager {
     }
 
     @Override
-    public long getAllocatableBytes(String path, int flags) {
+    public long getAllocatableBytes(String path, int flags, String callingPackage) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void allocateBytes(String path, long bytes, int flags) {
+    public void allocateBytes(String path, long bytes, int flags, String callingPackage) {
         throw new UnsupportedOperationException();
     }
 
@@ -504,5 +504,4 @@ public class MockStorageManager implements IStorageManager {
     public void secdiscard(String path) throws RemoteException {
         throw new UnsupportedOperationException();
     }
-
 }
