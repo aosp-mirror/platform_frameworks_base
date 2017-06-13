@@ -40,6 +40,7 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
+import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
@@ -556,6 +557,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     final KeyguardController mKeyguardController;
 
+    private PowerManager mPowerManager;
+    private int mDeferResumeCount;
+
     /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
@@ -604,9 +608,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * initialized.  So we initialize our wakelocks afterwards.
      */
     void initPowerManagement() {
-        PowerManager pm = (PowerManager)mService.mContext.getSystemService(Context.POWER_SERVICE);
-        mGoingToSleep = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
-        mLaunchingActivity = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*launch*");
+        mPowerManager = (PowerManager)mService.mContext.getSystemService(Context.POWER_SERVICE);
+        mGoingToSleep = mPowerManager
+                .newWakeLock(PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
+        mLaunchingActivity = mPowerManager.newWakeLock(PARTIAL_WAKE_LOCK, "*launch*");
         mLaunchingActivity.setReferenceCounted(false);
     }
 
@@ -1334,184 +1339,196 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        r.startFreezingScreenLocked(app, 0);
-        if (r.getStack().checkKeyguardVisibility(r, true /* shouldBeVisible */, true /* isTop */)) {
-            // We only set the visibility to true if the activity is allowed to be visible based on
-            // keyguard state. This avoids setting this into motion in window manager that is later
-            // cancelled due to later calls to ensure visible activities that set visibility back to
-            // false.
-            r.setVisibility(true);
-        }
-
-        // schedule launch ticks to collect information about slow apps.
-        r.startLaunchTickingLocked();
-
-        // Have the window manager re-evaluate the orientation of the screen based on the new
-        // activity order.  Note that as a result of this, it can call back into the activity
-        // manager with a new orientation.  We don't care about that, because the activity is not
-        // currently running so we are just restarting it anyway.
-        if (checkConfig) {
-            final int displayId = r.getDisplayId();
-            final Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                    getDisplayOverrideConfiguration(displayId),
-                    r.mayFreezeScreenLocked(app) ? r.appToken : null, displayId);
-            // Deferring resume here because we're going to launch new activity shortly.
-            // We don't want to perform a redundant launch of the same record while ensuring
-            // configurations and trying to resume top activity of focused stack.
-            mService.updateDisplayOverrideConfigurationLocked(config, r, true /* deferResume */,
-                    displayId);
-        }
-
-        if (mKeyguardController.isKeyguardLocked()) {
-            r.notifyUnknownVisibilityLaunched();
-        }
-        final int applicationInfoUid =
-                (r.info.applicationInfo != null) ? r.info.applicationInfo.uid : -1;
-        if ((r.userId != app.userId) || (r.appInfo.uid != applicationInfoUid)) {
-            Slog.wtf(TAG,
-                    "User ID for activity changing for " + r
-                            + " appInfo.uid=" + r.appInfo.uid
-                            + " info.ai.uid=" + applicationInfoUid
-                            + " old=" + r.app + " new=" + app);
-        }
-
-        r.app = app;
-        app.waitingToKill = null;
-        r.launchCount++;
-        r.lastLaunchTime = SystemClock.uptimeMillis();
-
-        if (DEBUG_ALL) Slog.v(TAG, "Launching: " + r);
-
-        int idx = app.activities.indexOf(r);
-        if (idx < 0) {
-            app.activities.add(r);
-        }
-        mService.updateLruProcessLocked(app, true, null);
-        mService.updateOomAdjLocked();
-
         final TaskRecord task = r.getTask();
-        if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE ||
-                task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV) {
-            setLockTaskModeLocked(task, LOCK_TASK_MODE_LOCKED, "mLockTaskAuth==LAUNCHABLE", false);
-        }
-
         final ActivityStack stack = task.getStack();
+
+        beginDeferResume();
+
         try {
-            if (app.thread == null) {
-                throw new RemoteException();
+            r.startFreezingScreenLocked(app, 0);
+
+            // schedule launch ticks to collect information about slow apps.
+            r.startLaunchTickingLocked();
+
+            r.app = app;
+
+            // Have the window manager re-evaluate the orientation of the screen based on the new
+            // activity order.  Note that as a result of this, it can call back into the activity
+            // manager with a new orientation.  We don't care about that, because the activity is
+            // not currently running so we are just restarting it anyway.
+            if (checkConfig) {
+                final int displayId = r.getDisplayId();
+                final Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                        getDisplayOverrideConfiguration(displayId),
+                        r.mayFreezeScreenLocked(app) ? r.appToken : null, displayId);
+                // Deferring resume here because we're going to launch new activity shortly.
+                // We don't want to perform a redundant launch of the same record while ensuring
+                // configurations and trying to resume top activity of focused stack.
+                mService.updateDisplayOverrideConfigurationLocked(config, r, true /* deferResume */,
+                        displayId);
             }
-            List<ResultInfo> results = null;
-            List<ReferrerIntent> newIntents = null;
-            if (andResume) {
-                // We don't need to deliver new intents and/or set results if activity is going
-                // to pause immediately after launch.
-                results = r.results;
-                newIntents = r.newIntents;
+
+            if (r.getStack().checkKeyguardVisibility(r, true /* shouldBeVisible */,
+                    true /* isTop */)) {
+                // We only set the visibility to true if the activity is allowed to be visible
+                // based on
+                // keyguard state. This avoids setting this into motion in window manager that is
+                // later cancelled due to later calls to ensure visible activities that set
+                // visibility back to false.
+                r.setVisibility(true);
             }
-            if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
-                    "Launching: " + r + " icicle=" + r.icicle + " with results=" + results
-                    + " newIntents=" + newIntents + " andResume=" + andResume);
-            EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY, r.userId,
-                    System.identityHashCode(r), task.taskId, r.shortComponentName);
-            if (r.isHomeActivity()) {
-                // Home process is the root process of the task.
-                mService.mHomeProcess = task.mActivities.get(0).app;
+
+            if (mKeyguardController.isKeyguardLocked()) {
+                r.notifyUnknownVisibilityLaunched();
             }
-            mService.notifyPackageUse(r.intent.getComponent().getPackageName(),
-                                      PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY);
-            r.sleeping = false;
-            r.forceNewConfig = false;
-            mService.showUnsupportedZoomDialogIfNeededLocked(r);
-            mService.showAskCompatModeDialogLocked(r);
-            r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
-            ProfilerInfo profilerInfo = null;
-            if (mService.mProfileApp != null && mService.mProfileApp.equals(app.processName)) {
-                if (mService.mProfileProc == null || mService.mProfileProc == app) {
-                    mService.mProfileProc = app;
-                    final String profileFile = mService.mProfileFile;
-                    if (profileFile != null) {
-                        ParcelFileDescriptor profileFd = mService.mProfileFd;
-                        if (profileFd != null) {
-                            try {
-                                profileFd = profileFd.dup();
-                            } catch (IOException e) {
-                                if (profileFd != null) {
-                                    try {
-                                        profileFd.close();
-                                    } catch (IOException o) {
+            final int applicationInfoUid =
+                    (r.info.applicationInfo != null) ? r.info.applicationInfo.uid : -1;
+            if ((r.userId != app.userId) || (r.appInfo.uid != applicationInfoUid)) {
+                Slog.wtf(TAG,
+                        "User ID for activity changing for " + r
+                                + " appInfo.uid=" + r.appInfo.uid
+                                + " info.ai.uid=" + applicationInfoUid
+                                + " old=" + r.app + " new=" + app);
+            }
+
+            app.waitingToKill = null;
+            r.launchCount++;
+            r.lastLaunchTime = SystemClock.uptimeMillis();
+
+            if (DEBUG_ALL) Slog.v(TAG, "Launching: " + r);
+
+            int idx = app.activities.indexOf(r);
+            if (idx < 0) {
+                app.activities.add(r);
+            }
+            mService.updateLruProcessLocked(app, true, null);
+            mService.updateOomAdjLocked();
+
+            if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE ||
+                    task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV) {
+                setLockTaskModeLocked(task, LOCK_TASK_MODE_LOCKED, "mLockTaskAuth==LAUNCHABLE",
+                        false);
+            }
+
+            try {
+                if (app.thread == null) {
+                    throw new RemoteException();
+                }
+                List<ResultInfo> results = null;
+                List<ReferrerIntent> newIntents = null;
+                if (andResume) {
+                    // We don't need to deliver new intents and/or set results if activity is going
+                    // to pause immediately after launch.
+                    results = r.results;
+                    newIntents = r.newIntents;
+                }
+                if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
+                        "Launching: " + r + " icicle=" + r.icicle + " with results=" + results
+                                + " newIntents=" + newIntents + " andResume=" + andResume);
+                EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY, r.userId,
+                        System.identityHashCode(r), task.taskId, r.shortComponentName);
+                if (r.isHomeActivity()) {
+                    // Home process is the root process of the task.
+                    mService.mHomeProcess = task.mActivities.get(0).app;
+                }
+                mService.notifyPackageUse(r.intent.getComponent().getPackageName(),
+                        PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY);
+                r.sleeping = false;
+                r.forceNewConfig = false;
+                mService.showUnsupportedZoomDialogIfNeededLocked(r);
+                mService.showAskCompatModeDialogLocked(r);
+                r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
+                ProfilerInfo profilerInfo = null;
+                if (mService.mProfileApp != null && mService.mProfileApp.equals(app.processName)) {
+                    if (mService.mProfileProc == null || mService.mProfileProc == app) {
+                        mService.mProfileProc = app;
+                        final String profileFile = mService.mProfileFile;
+                        if (profileFile != null) {
+                            ParcelFileDescriptor profileFd = mService.mProfileFd;
+                            if (profileFd != null) {
+                                try {
+                                    profileFd = profileFd.dup();
+                                } catch (IOException e) {
+                                    if (profileFd != null) {
+                                        try {
+                                            profileFd.close();
+                                        } catch (IOException o) {
+                                        }
+                                        profileFd = null;
                                     }
-                                    profileFd = null;
                                 }
                             }
+
+                            profilerInfo = new ProfilerInfo(profileFile, profileFd,
+                                    mService.mSamplingInterval, mService.mAutoStopProfiler,
+                                    mService.mStreamingOutput);
                         }
-
-                        profilerInfo = new ProfilerInfo(profileFile, profileFd,
-                                mService.mSamplingInterval, mService.mAutoStopProfiler,
-                                mService.mStreamingOutput);
                     }
                 }
-            }
 
-            app.hasShownUi = true;
-            app.pendingUiClean = true;
-            app.forceProcessStateUpTo(mService.mTopProcessState);
-            // Because we could be starting an Activity in the system process this may not go across
-            // a Binder interface which would create a new Configuration. Consequently we have to
-            // always create a new Configuration here.
+                app.hasShownUi = true;
+                app.pendingUiClean = true;
+                app.forceProcessStateUpTo(mService.mTopProcessState);
+                // Because we could be starting an Activity in the system process this may not go
+                // across a Binder interface which would create a new Configuration. Consequently
+                // we have to always create a new Configuration here.
 
-            final MergedConfiguration mergedConfiguration = new MergedConfiguration(
-                    mService.getGlobalConfiguration(), r.getMergedOverrideConfiguration());
-            r.setLastReportedConfiguration(mergedConfiguration);
+                final MergedConfiguration mergedConfiguration = new MergedConfiguration(
+                        mService.getGlobalConfiguration(), r.getMergedOverrideConfiguration());
+                r.setLastReportedConfiguration(mergedConfiguration);
 
-            logIfTransactionTooLarge(r.intent, r.icicle);
-            app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
-                    System.identityHashCode(r), r.info,
-                    // TODO: Have this take the merged configuration instead of separate global and
-                    // override configs.
-                    mergedConfiguration.getGlobalConfiguration(),
-                    mergedConfiguration.getOverrideConfiguration(), r.compat,
-                    r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
-                    r.persistentState, results, newIntents, !andResume,
-                    mService.isNextTransitionForward(), profilerInfo);
+                logIfTransactionTooLarge(r.intent, r.icicle);
+                app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
+                        System.identityHashCode(r), r.info,
+                        // TODO: Have this take the merged configuration instead of separate global
+                        // and override configs.
+                        mergedConfiguration.getGlobalConfiguration(),
+                        mergedConfiguration.getOverrideConfiguration(), r.compat,
+                        r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
+                        r.persistentState, results, newIntents, !andResume,
+                        mService.isNextTransitionForward(), profilerInfo);
 
-            if ((app.info.privateFlags&ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
-                // This may be a heavy-weight process!  Note that the package
-                // manager will ensure that only activity can run in the main
-                // process of the .apk, which is the only thing that will be
-                // considered heavy-weight.
-                if (app.processName.equals(app.info.packageName)) {
-                    if (mService.mHeavyWeightProcess != null
-                            && mService.mHeavyWeightProcess != app) {
-                        Slog.w(TAG, "Starting new heavy weight process " + app
-                                + " when already running "
-                                + mService.mHeavyWeightProcess);
+                if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
+                    // This may be a heavy-weight process!  Note that the package
+                    // manager will ensure that only activity can run in the main
+                    // process of the .apk, which is the only thing that will be
+                    // considered heavy-weight.
+                    if (app.processName.equals(app.info.packageName)) {
+                        if (mService.mHeavyWeightProcess != null
+                                && mService.mHeavyWeightProcess != app) {
+                            Slog.w(TAG, "Starting new heavy weight process " + app
+                                    + " when already running "
+                                    + mService.mHeavyWeightProcess);
+                        }
+                        mService.mHeavyWeightProcess = app;
+                        Message msg = mService.mHandler.obtainMessage(
+                                ActivityManagerService.POST_HEAVY_NOTIFICATION_MSG);
+                        msg.obj = r;
+                        mService.mHandler.sendMessage(msg);
                     }
-                    mService.mHeavyWeightProcess = app;
-                    Message msg = mService.mHandler.obtainMessage(
-                            ActivityManagerService.POST_HEAVY_NOTIFICATION_MSG);
-                    msg.obj = r;
-                    mService.mHandler.sendMessage(msg);
                 }
-            }
 
-        } catch (RemoteException e) {
-            if (r.launchFailed) {
-                // This is the second time we failed -- finish activity
-                // and give up.
-                Slog.e(TAG, "Second failure launching "
-                      + r.intent.getComponent().flattenToShortString()
-                      + ", giving up", e);
-                mService.appDiedLocked(app);
-                stack.requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
-                        "2nd-crash", false);
-                return false;
-            }
+            } catch (RemoteException e) {
+                if (r.launchFailed) {
+                    // This is the second time we failed -- finish activity
+                    // and give up.
+                    Slog.e(TAG, "Second failure launching "
+                            + r.intent.getComponent().flattenToShortString()
+                            + ", giving up", e);
+                    mService.appDiedLocked(app);
+                    stack.requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
+                            "2nd-crash", false);
+                    return false;
+                }
 
-            // This is the first time we failed -- restart process and
-            // retry.
-            r.launchFailed = true;
-            app.activities.remove(r);
-            throw e;
+                // This is the first time we failed -- restart process and
+                // retry.
+                r.launchFailed = true;
+                app.activities.remove(r);
+                throw e;
+            }
+        } finally {
+            endDeferResume();
         }
 
         r.launchFailed = false;
@@ -1519,7 +1536,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             Slog.w(TAG, "Activity " + r + " being launched, but already in LRU list");
         }
 
-        if (andResume) {
+        if (andResume && readyToResume()) {
             // As part of the process of launching, ActivityThread also performs
             // a resume.
             stack.minimalResumeActivityLocked(r);
@@ -2073,9 +2090,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     boolean resumeFocusedStackTopActivityLocked(
             ActivityStack targetStack, ActivityRecord target, ActivityOptions targetOptions) {
+
+        if (!readyToResume()) {
+            return false;
+        }
+
         if (targetStack != null && isFocusedStack(targetStack)) {
             return targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);
         }
+
         final ActivityRecord r = mFocusedStack.topRunningActivityLocked();
         if (r == null || r.state != RESUMED) {
             mFocusedStack.resumeTopActivityUncheckedLocked(null, null);
@@ -2083,6 +2106,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Kick off any lingering app transitions form the MoveTaskToFront operation.
             mFocusedStack.executeAppTransition(targetOptions);
         }
+
         return false;
     }
 
@@ -4359,6 +4383,31 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     void setDockedStackMinimized(boolean minimized) {
         mIsDockMinimized = minimized;
+    }
+
+    void wakeUp(String reason) {
+        mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.server.am:TURN_ON:" + reason);
+    }
+
+    /**
+     * Begin deferring resume to avoid duplicate resumes in one pass.
+     */
+    private void beginDeferResume() {
+        mDeferResumeCount++;
+    }
+
+    /**
+     * End deferring resume and determine if resume can be called.
+     */
+    private void endDeferResume() {
+        mDeferResumeCount--;
+    }
+
+    /**
+     * @return True if resume can be called.
+     */
+    private boolean readyToResume() {
+        return mDeferResumeCount == 0;
     }
 
     private final class ActivityStackSupervisorHandler extends Handler {

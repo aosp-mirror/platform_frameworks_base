@@ -941,7 +941,11 @@ public interface WindowManager extends ViewManager {
          * {@link #FLAG_DISMISS_KEYGUARD} to automatically fully dismisss
          * non-secure keyguards.  This flag only applies to the top-most
          * full-screen window.
+         * @deprecated Use {@link android.R.attr#showWhenLocked} or
+         * {@link android.app.Activity#setShowWhenLocked(boolean)} instead to prevent an
+         * unintentional double life-cycle event.
          */
+        @Deprecated
         public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
 
         /** Window flag: ask that the system wallpaper be shown behind
@@ -966,7 +970,12 @@ public interface WindowManager extends ViewManager {
         /** Window flag: when set as a window is being added or made
          * visible, once the window has been shown then the system will
          * poke the power manager's user activity (as if the user had woken
-         * up the device) to turn the screen on. */
+         * up the device) to turn the screen on.
+         * @deprecated Use {@link android.R.attr#turnScreenOn} or
+         * {@link android.app.Activity#setTurnScreenOn(boolean)} instead to prevent an
+         * unintentional double life-cycle event.
+         */
+        @Deprecated
         public static final int FLAG_TURN_SCREEN_ON = 0x00200000;
 
         /** Window flag: when set the window will cause the keyguard to

@@ -24447,4 +24447,37 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mNmi != null;
         }
     }
+
+    @Override
+    public void setShowWhenLocked(IBinder token, boolean showWhenLocked)
+            throws RemoteException {
+        synchronized (this) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return;
+            }
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                r.setShowWhenLocked(showWhenLocked);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    @Override
+    public void setTurnScreenOn(IBinder token, boolean turnScreenOn) throws RemoteException {
+        synchronized (this) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return;
+            }
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                r.setTurnScreenOn(turnScreenOn);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
 }

@@ -7548,6 +7548,53 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /**
+     * Specifies whether an {@link Activity} should be shown on top of the the lock screen whenever
+     * the lockscreen is up and the activity is resumed. Normally an activity will be transitioned
+     * to the stopped state if it is started while the lockscreen is up, but with this flag set the
+     * activity will remain in the resumed state visible on-top of the lock screen. This value can
+     * be set as a manifest attribute using {@link android.R.attr#showWhenLocked}.
+     *
+     * @param showWhenLocked {@code true} to show the {@link Activity} on top of the lock screen;
+     *                                   {@code false} otherwise.
+     * @see #setTurnScreenOn(boolean)
+     * @see android.R.attr#turnScreenOn
+     * @see android.R.attr#showWhenLocked
+     */
+    public void setShowWhenLocked(boolean showWhenLocked) {
+        try {
+            ActivityManager.getService().setShowWhenLocked(mToken, showWhenLocked);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to call setShowWhenLocked", e);
+        }
+    }
+
+    /**
+     * Specifies whether the screen should be turned on when the {@link Activity} is resumed.
+     * Normally an activity will be transitioned to the stopped state if it is started while the
+     * screen if off, but with this flag set the activity will cause the screen to turn on if the
+     * activity will be visible and resumed due to the screen coming on. The screen will not be
+     * turned on if the activity won't be visible after the screen is turned on. This flag is
+     * normally used in conjunction with the {@link android.R.attr#showWhenLocked} flag to make sure
+     * the activity is visible after the screen is turned on when the lockscreen is up. In addition,
+     * if this flag is set and the activity calls {@link
+     * KeyguardManager#requestDismissKeyguard(Activity, KeyguardManager.KeyguardDismissCallback)}
+     * the screen will turn on.
+     *
+     * @param turnScreenOn {@code true} to turn on the screen; {@code false} otherwise.
+     *
+     * @see #setShowWhenLocked(boolean)
+     * @see android.R.attr#turnScreenOn
+     * @see android.R.attr#showWhenLocked
+     */
+    public void setTurnScreenOn(boolean turnScreenOn) {
+        try {
+            ActivityManager.getService().setTurnScreenOn(mToken, turnScreenOn);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to call setTurnScreenOn", e);
+        }
+    }
+
     class HostCallbacks extends FragmentHostCallback<Activity> {
         public HostCallbacks() {
             super(Activity.this /*activity*/);

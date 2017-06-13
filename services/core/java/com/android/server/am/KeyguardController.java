@@ -30,7 +30,6 @@ import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AW
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_OCCLUDE;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_UNOCCLUDE;
-import static com.android.server.wm.AppTransition.TRANSIT_NONE;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 
 import android.os.IBinder;
@@ -144,6 +143,13 @@ class KeyguardController {
             failCallback(callback);
             return;
         }
+
+        // If the client has requested to dismiss the keyguard and the Activity has the flag to
+        // turn the screen on, wakeup the screen if it's the top Activity.
+        if (activityRecord.getTurnScreenOnFlag() && activityRecord.isTopRunningActivity()) {
+            mStackSupervisor.wakeUp("dismissKeyguard");
+        }
+
         mWindowManager.dismissKeyguard(callback);
     }
 

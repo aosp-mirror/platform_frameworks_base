@@ -633,4 +633,7 @@ interface IActivityManager {
     // side. If so, make sure they are using the correct transaction ids and arguments.
     // If a transaction which will also be used on the native side is being inserted, add it
     // alongside with other transactions of this kind at the top of this file.
+
+     void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
+     void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
 }
