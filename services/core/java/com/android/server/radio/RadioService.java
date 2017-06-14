@@ -16,7 +16,9 @@
 
 package com.android.server.radio;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
@@ -65,8 +67,16 @@ public class RadioService extends SystemService {
     }
 
     private class RadioServiceImpl extends IRadioService.Stub {
+        private void enforcePolicyAccess() {
+            if (PackageManager.PERMISSION_GRANTED != getContext().checkCallingPermission(
+                    Manifest.permission.ACCESS_FM_RADIO)) {
+                throw new SecurityException("ACCESS_FM_RADIO permission not granted");
+            }
+        }
+
         @Override
         public List<RadioManager.ModuleProperties> listModules() {
+            enforcePolicyAccess();
             synchronized (mLock) {
                 if (mModules != null) return mModules;
 
@@ -83,6 +93,7 @@ public class RadioService extends SystemService {
         @Override
         public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
                 boolean withAudio, ITunerCallback callback) {
+            enforcePolicyAccess();
             if (callback == null) {
                 throw new IllegalArgumentException("Callback must not be empty");
             }
