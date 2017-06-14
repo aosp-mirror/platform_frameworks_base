@@ -293,9 +293,19 @@ class DayPickerView extends ViewGroup {
      * @param setSelected whether to set the specified day as selected
      */
     private void setDate(long timeInMillis, boolean animate, boolean setSelected) {
+        boolean dateClamped = false;
+        // Clamp the target day in milliseconds to the min or max if outside the range.
+        if (timeInMillis < mMinDate.getTimeInMillis()) {
+            timeInMillis = mMinDate.getTimeInMillis();
+            dateClamped = true;
+        } else if (timeInMillis > mMaxDate.getTimeInMillis()) {
+            timeInMillis = mMaxDate.getTimeInMillis();
+            dateClamped = true;
+        }
+
         getTempCalendarForTime(timeInMillis);
 
-        if (setSelected) {
+        if (setSelected || dateClamped) {
             mSelectedDay.setTimeInMillis(timeInMillis);
         }
 
@@ -352,13 +362,6 @@ class DayPickerView extends ViewGroup {
      */
     public void onRangeChanged() {
         mAdapter.setRange(mMinDate, mMaxDate);
-
-        // Clamp the selected day to the new min/max.
-        if (mSelectedDay.before(mMinDate)) {
-            mSelectedDay.setTimeInMillis(mMinDate.getTimeInMillis());
-        } else if (mSelectedDay.after(mMaxDate)) {
-            mSelectedDay.setTimeInMillis(mMaxDate.getTimeInMillis());
-        }
 
         // Changing the min/max date changes the selection position since we
         // don't really have stable IDs. Jumps immediately to the new position.
