@@ -996,6 +996,9 @@ public final class ThreadedRenderer {
         observer.mNative = null;
     }
 
+    /** Not actually public - internal use only. This doc to make lint happy */
+    public static native void disableVsync();
+
     static native void setupShadersDiskCache(String cacheFile);
 
     private static native void nRotateProcessStatsBuffer();

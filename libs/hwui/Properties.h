@@ -318,6 +318,12 @@ public:
     // any overhead they add
     static bool filterOutTestOverhead;
 
+    // Workaround a device lockup in edge cases by switching to async mode
+    // instead of the default vsync (b/38372997). Only system_server should hit this.
+    // Any existing RenderProxy & Surface combination will be unaffected, only things
+    // created after changing this.
+    static bool disableVsync;
+
     // Used for testing only to change the render pipeline.
 #ifdef HWUI_GLES_WRAP_ENABLED
     static void overrideRenderPipelineType(RenderPipelineType);
