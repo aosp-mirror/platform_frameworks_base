@@ -4858,6 +4858,15 @@ final class Settings {
             pw.print(ps.getEnabled(user.id));
             pw.print(" instant=");
             pw.println(ps.getInstantApp(user.id));
+
+            String[] overlayPaths = ps.getOverlayPaths(user.id);
+            if (overlayPaths != null && overlayPaths.length > 0) {
+                pw.println("Overlay paths:");
+                for (String path : overlayPaths) {
+                    pw.println(path);
+                }
+            }
+
             String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
             if (lastDisabledAppCaller != null) {
                 pw.print(prefix); pw.print("    lastDisabledCaller: ");

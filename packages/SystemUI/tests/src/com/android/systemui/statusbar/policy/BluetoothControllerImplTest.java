@@ -14,16 +14,21 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.os.Looper;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.Log;
 
 import com.android.settingslib.bluetooth.BluetoothEventManager;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -79,5 +84,57 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mBluetoothControllerImpl.onConnectionStateChanged(null,
                 BluetoothAdapter.STATE_DISCONNECTED);
         assertTrue(mBluetoothControllerImpl.isBluetoothConnected());
+    }
+
+    @Test
+    public void testDefaultConnectionState() {
+        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        assertEquals(BluetoothDevice.BOND_NONE, mBluetoothControllerImpl.getBondState(device));
+        assertEquals(BluetoothProfile.STATE_DISCONNECTED,
+                mBluetoothControllerImpl.getMaxConnectionState(device));
+    }
+
+    @Test
+    public void testAsyncBondState() throws Exception {
+        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        when(device.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
+        mBluetoothControllerImpl.addCallback(callback);
+
+        // Grab the main looper, we'll need it later.
+        TestableLooper mainLooper = new TestableLooper(Looper.getMainLooper());
+
+        // Trigger the state getting.
+        assertEquals(BluetoothDevice.BOND_NONE, mBluetoothControllerImpl.getBondState(device));
+
+        mTestableLooper.processMessages(1);
+        mainLooper.processAllMessages();
+
+        assertEquals(BluetoothDevice.BOND_BONDED, mBluetoothControllerImpl.getBondState(device));
+        verify(callback).onBluetoothDevicesChanged();
+        mainLooper.destroy();
+    }
+
+    @Test
+    public void testAsyncConnectionState() throws Exception {
+        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
+        BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
+        mBluetoothControllerImpl.addCallback(callback);
+
+        // Grab the main looper, we'll need it later.
+        TestableLooper mainLooper = new TestableLooper(Looper.getMainLooper());
+
+        // Trigger the state getting.
+        assertEquals(BluetoothProfile.STATE_DISCONNECTED,
+                mBluetoothControllerImpl.getMaxConnectionState(device));
+
+        mTestableLooper.processMessages(1);
+        mainLooper.processAllMessages();
+
+        assertEquals(BluetoothProfile.STATE_CONNECTED,
+                mBluetoothControllerImpl.getMaxConnectionState(device));
+        verify(callback).onBluetoothDevicesChanged();
+        mainLooper.destroy();
     }
 }

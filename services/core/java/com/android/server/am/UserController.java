@@ -599,6 +599,7 @@ final class UserController {
     void finishUserStopping(final int userId, final UserState uss) {
         // On to the next.
         final Intent shutdownIntent = new Intent(Intent.ACTION_SHUTDOWN);
+        shutdownIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         // This is the result receiver for the final shutdown broadcast.
         final IIntentReceiver shutdownReceiver = new IIntentReceiver.Stub() {
             @Override

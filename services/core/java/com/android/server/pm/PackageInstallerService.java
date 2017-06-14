@@ -81,8 +81,10 @@ import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.Xml;
 
+import java.io.CharArrayWriter;
 import libcore.io.IoUtils;
 
 import com.android.internal.R;
@@ -195,7 +197,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     /** Historical sessions kept around for debugging purposes */
     @GuardedBy("mSessions")
-    private final SparseArray<PackageInstallerSession> mHistoricalSessions = new SparseArray<>();
+    private final List<String> mHistoricalSessions = new ArrayList<>();
+
+    @GuardedBy("mSessions")
+    private final SparseIntArray mHistoricalSessionsByInstaller = new SparseIntArray();
 
     /** Sessions allocated to legacy users */
     @GuardedBy("mSessions")
@@ -371,7 +376,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                             // Since this is early during boot we don't send
                             // any observer events about the session, but we
                             // keep details around for dumpsys.
-                            mHistoricalSessions.put(session.sessionId, session);
+                            addHistoricalSessionLocked(session);
                         }
                         mAllocatedSessions.put(session.sessionId, true);
                     }
@@ -384,6 +389,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         } finally {
             IoUtils.closeQuietly(fis);
         }
+    }
+
+    private void addHistoricalSessionLocked(PackageInstallerSession session) {
+        CharArrayWriter writer = new CharArrayWriter();
+        IndentingPrintWriter pw = new IndentingPrintWriter(writer, "    ");
+        session.dump(pw);
+        mHistoricalSessions.add(writer.toString());
+
+        // Increment the number of sessions by this installerUid.
+        mHistoricalSessionsByInstaller.put(
+                session.installerUid,
+                mHistoricalSessionsByInstaller.get(session.installerUid) + 1);
     }
 
     private PackageInstallerSession readSessionLocked(XmlPullParser in) throws IOException,
@@ -676,7 +693,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 throw new IllegalStateException(
                         "Too many active sessions for UID " + callingUid);
             }
-            final int historicalCount = getSessionCount(mHistoricalSessions, callingUid);
+            final int historicalCount = mHistoricalSessionsByInstaller.get(callingUid);
             if (historicalCount >= MAX_HISTORICAL_SESSIONS) {
                 throw new IllegalStateException(
                         "Too many historical sessions for UID " + callingUid);
@@ -1228,8 +1245,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             pw.increaseIndent();
             N = mHistoricalSessions.size();
             for (int i = 0; i < N; i++) {
-                final PackageInstallerSession session = mHistoricalSessions.valueAt(i);
-                session.dump(pw);
+                pw.print(mHistoricalSessions.get(i));
                 pw.println();
             }
             pw.println();
@@ -1264,7 +1280,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 public void run() {
                     synchronized (mSessions) {
                         mSessions.remove(session.sessionId);
-                        mHistoricalSessions.put(session.sessionId, session);
+                        addHistoricalSessionLocked(session);
 
                         final File appIconFile = buildAppIconFile(session.sessionId);
                         if (appIconFile.exists()) {
