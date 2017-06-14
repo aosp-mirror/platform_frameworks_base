@@ -5219,6 +5219,7 @@ public final class Settings {
          * Whether the current user has been set up via setup wizard (0 = false, 1 = true)
          * @hide
          */
+        @TestApi
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
 
         /**
