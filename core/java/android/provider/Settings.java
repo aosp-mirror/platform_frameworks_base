@@ -6810,6 +6810,22 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SENSITIVITY = "assist_gesture_sensitivity";
 
         /**
+         * Whether the assist gesture should silence alerts.
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_SILENCE_ALERTS_ENABLED =
+                "assist_gesture_silence_alerts_enabled";
+
+        /**
+         * Whether the assist gesture should wake the phone.
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_WAKE_ENABLED =
+                "assist_gesture_wake_enabled";
+
+        /**
          * Whether Assist Gesture Deferred Setup has been completed
          *
          * @hide
@@ -7103,6 +7119,9 @@ public final class Settings {
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             ASSIST_GESTURE_ENABLED,
             ASSIST_GESTURE_SENSITIVITY,
+            ASSIST_GESTURE_SETUP_COMPLETE,
+            ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
+            ASSIST_GESTURE_WAKE_ENABLED,
             VR_DISPLAY_MODE,
             NOTIFICATION_BADGING
         };
