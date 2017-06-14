@@ -25,6 +25,7 @@ import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.HardwareUiLayout;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.volume.VolumeDialogImpl;
@@ -1227,7 +1228,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
             mClickListener = clickListener;
             mLongClickListener = longClickListener;
             mGradientDrawable = new GradientDrawable(mContext);
-            mColorExtractor = Dependency.get(ColorExtractor.class);
+            mColorExtractor = Dependency.get(SysuiColorExtractor.class);
 
             // Window initialization
             Window window = getWindow();

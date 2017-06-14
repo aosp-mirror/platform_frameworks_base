@@ -39,7 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Tests tonal palette generation.
+ * Tests color extraction generation.
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -101,14 +101,12 @@ public class ColorExtractorTest {
         };
         ColorExtractor extractor = new ColorExtractor(mContext, type);
 
-        assertEquals("Extracted colors not being used!",
-                extractor.getColors(WallpaperManager.FLAG_SYSTEM, ColorExtractor.TYPE_NORMAL),
-                colorsExpectedNormal);
-        assertEquals("Extracted colors not being used!",
-                extractor.getColors(WallpaperManager.FLAG_SYSTEM, ColorExtractor.TYPE_DARK),
-                colorsExpectedDark);
-        assertEquals("Extracted colors not being used!",
-                extractor.getColors(WallpaperManager.FLAG_SYSTEM, ColorExtractor.TYPE_EXTRA_DARK),
-                colorsExpectedExtraDark);
+        GradientColors colors = extractor.getColors(WallpaperManager.FLAG_SYSTEM,
+                ColorExtractor.TYPE_NORMAL);
+        assertEquals("Extracted colors not being used!", colors, colorsExpectedNormal);
+        colors = extractor.getColors(WallpaperManager.FLAG_SYSTEM, ColorExtractor.TYPE_DARK);
+        assertEquals("Extracted colors not being used!", colors, colorsExpectedDark);
+        colors = extractor.getColors(WallpaperManager.FLAG_SYSTEM, ColorExtractor.TYPE_EXTRA_DARK);
+        assertEquals("Extracted colors not being used!", colors, colorsExpectedExtraDark);
     }
 }
