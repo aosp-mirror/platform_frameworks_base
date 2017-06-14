@@ -6852,7 +6852,7 @@ public class PackageParser {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
         ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
-        ai.resourceDirs = state.resourceDirs;
+        ai.resourceDirs = state.overlayPaths;
     }
 
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
@@ -7000,6 +7000,7 @@ public class PackageParser {
             return null;
         }
         if (!copyNeeded(flags, a.owner, state, a.metaData, userId)) {
+            updateApplicationInfo(a.info.applicationInfo, flags, state);
             return a.info;
         }
         // Make shallow copies so we can store the metadata safely
@@ -7088,6 +7089,7 @@ public class PackageParser {
             return null;
         }
         if (!copyNeeded(flags, s.owner, state, s.metaData, userId)) {
+            updateApplicationInfo(s.info.applicationInfo, flags, state);
             return s.info;
         }
         // Make shallow copies so we can store the metadata safely
@@ -7183,6 +7185,7 @@ public class PackageParser {
         if (!copyNeeded(flags, p.owner, state, p.metaData, userId)
                 && ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) != 0
                         || p.info.uriPermissionPatterns == null)) {
+            updateApplicationInfo(p.info.applicationInfo, flags, state);
             return p.info;
         }
         // Make shallow copies so we can store the metadata safely

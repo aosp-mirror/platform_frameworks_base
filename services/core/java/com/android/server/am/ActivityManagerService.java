@@ -1804,7 +1804,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     AppErrorResult res = (AppErrorResult) data.get("result");
                     if (mShowDialogs && !mSleeping && !mShuttingDown) {
-                        Dialog d = new StrictModeViolationDialog(mContext,
+                        Dialog d = new StrictModeViolationDialog(mUiContext,
                                 ActivityManagerService.this, res, proc);
                         d.show();
                         proc.crashDialog = d;

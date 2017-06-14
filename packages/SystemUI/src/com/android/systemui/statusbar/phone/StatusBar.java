@@ -32,7 +32,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 
-import android.R.style;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
@@ -303,7 +302,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private static final String NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION
             = "com.android.systemui.statusbar.work_challenge_unlocked_notification_action";
     public static final String TAG = "StatusBar";
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
@@ -5323,6 +5322,37 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void setAnimateWakeup(boolean animateWakeup) {
             mAnimateWakeup = animateWakeup;
+        }
+
+        @Override
+        public void onDoubleTap(float screenX, float screenY) {
+            if (screenX > 0 && screenY > 0 && mAmbientIndicationContainer != null 
+                && mAmbientIndicationContainer.getVisibility() == View.VISIBLE) {
+                mAmbientIndicationContainer.getLocationOnScreen(mTmpInt2);
+                float viewX = screenX - mTmpInt2[0];
+                float viewY = screenY - mTmpInt2[1];
+                if (0 <= viewX && viewX <= mAmbientIndicationContainer.getWidth()
+                        && 0 <= viewY && viewY <= mAmbientIndicationContainer.getHeight()) {
+                    dispatchDoubleTap(viewX, viewY);
+                }
+            }
+        }
+
+        public void dispatchDoubleTap(float viewX, float viewY) {
+            dispatchTap(mAmbientIndicationContainer, viewX, viewY);
+            dispatchTap(mAmbientIndicationContainer, viewX, viewY);
+        }
+
+        private void dispatchTap(View view, float x, float y) {
+            long now = SystemClock.elapsedRealtime();
+            dispatchTouchEvent(view, x, y, now, MotionEvent.ACTION_DOWN);
+            dispatchTouchEvent(view, x, y, now, MotionEvent.ACTION_UP);
+        }
+
+        private void dispatchTouchEvent(View view, float x, float y, long now, int action) {
+            MotionEvent ev = MotionEvent.obtain(now, now, action, x, y, 0 /* meta */);
+            view.dispatchTouchEvent(ev);
+            ev.recycle();
         }
 
         private boolean shouldAnimateWakeup() {
