@@ -279,6 +279,9 @@ bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
         }
     }
     mCurrentSurface = surface;
+    if (Properties::disableVsync) {
+        eglSwapInterval(mEglDisplay, 0);
+    }
     return true;
 }
 
