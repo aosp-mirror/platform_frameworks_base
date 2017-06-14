@@ -181,6 +181,7 @@ import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.IRotationWatcher;
+import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.IWindowManager;
@@ -549,9 +550,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     class RotationWatcher {
-        IRotationWatcher mWatcher;
-        IBinder.DeathRecipient mDeathRecipient;
-        int mDisplayId;
+        final IRotationWatcher mWatcher;
+        final IBinder.DeathRecipient mDeathRecipient;
+        final int mDisplayId;
         RotationWatcher(IRotationWatcher watcher, IBinder.DeathRecipient deathRecipient,
                 int displayId) {
             mWatcher = watcher;
@@ -562,6 +563,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     ArrayList<RotationWatcher> mRotationWatchers = new ArrayList<>();
     int mDeferredRotationPauseCount;
+    final WallpaperVisibilityListeners mWallpaperVisibilityListeners =
+            new WallpaperVisibilityListeners();
 
     int mSystemDecorLayer = 0;
     final Rect mScreenRect = new Rect();
@@ -3934,6 +3937,29 @@ public class WindowManagerService extends IWindowManager.Stub
                     i--;
                 }
             }
+        }
+    }
+
+    @Override
+    public boolean registerWallpaperVisibilityListener(IWallpaperVisibilityListener listener,
+            int displayId) {
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = mRoot.getDisplayContentOrCreate(displayId);
+            if (displayContent == null) {
+                throw new IllegalArgumentException("Trying to register visibility event "
+                        + "for invalid display: " + displayId);
+            }
+            mWallpaperVisibilityListeners.registerWallpaperVisibilityListener(listener, displayId);
+            return displayContent.mWallpaperController.isWallpaperVisible();
+        }
+    }
+
+    @Override
+    public void unregisterWallpaperVisibilityListener(IWallpaperVisibilityListener listener,
+            int displayId) {
+        synchronized (mWindowMap) {
+            mWallpaperVisibilityListeners
+                    .unregisterWallpaperVisibilityListener(listener, displayId);
         }
     }
 

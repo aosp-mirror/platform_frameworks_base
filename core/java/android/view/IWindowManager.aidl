@@ -39,6 +39,7 @@ import android.view.IDockedStackListener;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.IRotationWatcher;
+import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
@@ -254,6 +255,19 @@ interface IWindowManager
      * Screenshot the current wallpaper layer, including the whole screen.
      */
     Bitmap screenshotWallpaper();
+
+    /**
+     * Registers a wallpaper visibility listener.
+     * @return Current visibility.
+     */
+    boolean registerWallpaperVisibilityListener(IWallpaperVisibilityListener listener,
+        int displayId);
+
+    /**
+     * Remove a visibility watcher that was added using registerWallpaperVisibilityListener.
+     */
+    void unregisterWallpaperVisibilityListener(IWallpaperVisibilityListener listener,
+        int displayId);
 
     /**
      * Used only for assist -- request a screenshot of the current application.
