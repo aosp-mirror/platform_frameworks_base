@@ -81,21 +81,21 @@ public class SignalDrawable extends Drawable {
             {-1.9f / VIEWPORT, -1.9f / VIEWPORT},
     };
 
-    // Rounded corners are achieved by arcing a circle of radius `mCornerRadius` from its tangent
-    // points along the curve. On the top and left corners of the triangle, the tangents are as
-    // follows:
+    // Rounded corners are achieved by arcing a circle of radius `R` from its tangent points along
+    // the curve (curve ≡ triangle). On the top and left corners of the triangle, the tangents are
+    // as follows:
     //      1) Along the straight lines (y = 0 and x = width):
-    //          Ps = R / tan(45)
+    //          Ps = circleOffset + R
     //      2) Along the diagonal line (y = x):
     //          Pd = √((Ps^2) / 2)
-    //
-    // I.e., the points where we stop the straight lines lie at (starting drawing from the bottom-
-    // right corner and counter-clockwise): (width, height - Radius), (width, Ps), (width - Pd, Pd),
-    // (Pd, height - Pd), (Ps, height), and finally (width - Radius, height).
-    private static final double TAN_THETA = Math.tan(Math.PI / 8.f);
-    private final float mCornerRadius;
-    private final float mCircleOffsetStraight;
-    private final float mCircleOffsetDiag;
+    //              or (remember: sin(π/4) ≈ 0.7071)
+    //          Pd = (circleOffset + R - 0.7071, height - R - 0.7071)
+    //         Where Pd is the (x,y) coords of the point that intersects the circle at the bottom
+    //         left of the triangle
+    private static final float RADIUS_RATIO = 0.75f / 17f;
+    private static final float DIAG_OFFSET_MULTIPLIER = 0.707107f;
+    // How far the circle defining the corners is inset from the edges
+    private final float mAppliedCornerInset;
 
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mForegroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -129,10 +129,8 @@ public class SignalDrawable extends Drawable {
         mHandler = new Handler();
         setDarkIntensity(0);
 
-        mCornerRadius = context.getResources()
-                .getDimensionPixelSize(R.dimen.stat_sys_mobile_signal_corner_radius);
-        mCircleOffsetStraight = mCornerRadius / (float) TAN_THETA;
-        mCircleOffsetDiag = (float) Math.sqrt(Math.pow(mCircleOffsetStraight, 2.f) / 2.f);
+        mAppliedCornerInset = context.getResources()
+                .getDimensionPixelSize(R.dimen.stat_sys_mobile_signal_circle_inset);
     }
 
     @Override
@@ -222,38 +220,42 @@ public class SignalDrawable extends Drawable {
         }
         mFullPath.reset();
         mFullPath.setFillType(FillType.WINDING);
-        float width = getBounds().width();
-        float height = getBounds().height();
-        float padding = (int) (PAD * width);  // Stay on pixel boundary
+        final float width = getBounds().width();
+        final float height = getBounds().height();
+        final float padding = (int) (PAD * width);  // Stay on pixel boundary
+        final float cornerRadius = RADIUS_RATIO * height;
+        // Offset from circle where the hypotenuse meets the circle
+        final float diagOffset = DIAG_OFFSET_MULTIPLIER * cornerRadius;
 
         // 1 - Bottom right, above corner
-        mFullPath.moveTo(width - padding, height - padding - mCornerRadius);
+        mFullPath.moveTo(width - padding, height - padding - cornerRadius);
         // 2 - Line to top right, below corner
-        mFullPath.lineTo(width - padding, padding + mCircleOffsetStraight);
+        mFullPath.lineTo(width - padding, padding + cornerRadius + mAppliedCornerInset);
         // 3 - Arc to top right, on hypotenuse
         mFullPath.arcTo(
-                width - padding - (2 * mCornerRadius),
-                padding + mCircleOffsetStraight - mCornerRadius,
+                width - padding - (2 * cornerRadius),
+                padding + mAppliedCornerInset,
                 width - padding,
-                padding + mCircleOffsetStraight + mCornerRadius,
+                padding + mAppliedCornerInset + (2 * cornerRadius),
                 0.f, -135.f, false
         );
         // 4 - Line to bottom left, on hypotenuse
-        mFullPath.lineTo(padding + mCircleOffsetDiag, height - padding - mCircleOffsetDiag);
+        mFullPath.lineTo(padding + mAppliedCornerInset + cornerRadius - diagOffset,
+                height - padding - cornerRadius - diagOffset);
         // 5 - Arc to bottom left, on leg
         mFullPath.arcTo(
-                padding + mCircleOffsetStraight - mCornerRadius,
-                height - padding - (2 * mCornerRadius),
-                padding + mCircleOffsetStraight + mCornerRadius,
+                padding + mAppliedCornerInset,
+                height - padding - (2 * cornerRadius),
+                padding + mAppliedCornerInset + ( 2 * cornerRadius),
                 height - padding,
                 -135.f, -135.f, false
         );
         // 6 - Line to bottom rght, before corner
-        mFullPath.lineTo(width - padding - mCornerRadius, height - padding);
+        mFullPath.lineTo(width - padding - cornerRadius, height - padding);
         // 7 - Arc to beginning (bottom right, above corner)
         mFullPath.arcTo(
-                width - padding - (2 * mCornerRadius),
-                height - padding - (2 * mCornerRadius),
+                width - padding - (2 * cornerRadius),
+                height - padding - (2 * cornerRadius),
                 width - padding,
                 height - padding,
                 90.f, -90.f, false
