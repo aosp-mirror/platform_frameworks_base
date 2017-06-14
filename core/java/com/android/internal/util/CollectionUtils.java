@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -101,12 +102,23 @@ public class CollectionUtils {
     /**
      * Returns the given list, or an immutable empty list if the provided list is null
      *
-     * This can be used to guaranty null-safety without paying the price of extra allocations
+     * This can be used to guarantee null-safety without paying the price of extra allocations
      *
      * @see Collections#emptyList
      */
     public static @NonNull <T> List<T> emptyIfNull(@Nullable List<T> cur) {
         return cur == null ? Collections.emptyList() : cur;
+    }
+
+    /**
+     * Returns the given set, or an immutable empty set if the provided set is null
+     *
+     * This can be used to guarantee null-safety without paying the price of extra allocations
+     *
+     * @see Collections#emptySet
+     */
+    public static @NonNull <T> Set<T> emptyIfNull(@Nullable Set<T> cur) {
+        return cur == null ? Collections.emptySet() : cur;
     }
 
     /**
