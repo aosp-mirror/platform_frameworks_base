@@ -32,12 +32,10 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -50,11 +48,9 @@ import android.provider.Settings.Global;
 import android.transition.AutoTransition;
 import android.transition.Transition;
 import android.transition.TransitionManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
@@ -62,7 +58,6 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
@@ -74,25 +69,22 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.HardwareUiLayout;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
-import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerZenModePanel;
-
 import com.google.android.colorextraction.ColorExtractor;
 import com.google.android.colorextraction.drawable.GradientDrawable;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +109,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable,
     private final H mHandler = new H();
     private final GradientDrawable mGradientDrawable;
     private final ColorExtractor mColorExtractor;
-    private VolumeDialogController mController;
+    private final VolumeDialogController mController;
 
     private Window mWindow;
     private CustomDialog mDialog;
@@ -580,7 +572,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable,
         final VolumeRow activeRow = getActiveRow();
         if (!dismissing) {
             mWindow.setLayout(mWindow.getAttributes().width, MATCH_PARENT);
-            TransitionManager.beginDelayedTransition(mDialogView, getTransistion());
+            TransitionManager.beginDelayedTransition(mDialogView, getTransition());
         }
         updateRowsH(activeRow);
         rescheduleTimeoutH();
@@ -958,7 +950,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable,
         }
     }
 
-    private AutoTransition getTransistion() {
+    private AutoTransition getTransition() {
         AutoTransition transition = new AutoTransition();
         transition.setDuration(mExpandButtonAnimationDuration);
         transition.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
