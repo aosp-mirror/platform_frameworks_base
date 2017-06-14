@@ -18,6 +18,7 @@
 
 #include "DeferredLayerUpdater.h"
 #include "DisplayList.h"
+#include "Properties.h"
 #include "Readback.h"
 #include "Rect.h"
 #include "renderthread/CanvasContext.h"
@@ -706,6 +707,10 @@ void RenderProxy::onBitmapDestroyed(uint32_t pixelRefId) {
     args->thread = &thread;
     args->pixelRefId = pixelRefId;
     thread.queue(task);
+}
+
+void RenderProxy::disableVsync() {
+    Properties::disableVsync = true;
 }
 
 void RenderProxy::post(RenderTask* task) {
