@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"ಹುಡುಕಿ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ಗಾಗಿ ಮೇಲಕ್ಕೆ ಸ್ಲೈಡ್ ಮಾಡಿ."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ಗಾಗಿ ಎಡಕ್ಕೆ ಸ್ಲೈಡ್ ಮಾಡಿ."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"ಅಲಾರಮ್‌ಗಳು, ಜ್ಞಾಪನೆಗಳು, ಈವೆಂಟ್‌ಗಳು ಮತ್ತು ನೀವು ಸೂಚಿಸುವ ಕರೆದಾರರನ್ನು ಹೊರತುಪಡಿಸಿ, ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳಿಂದ ನಿಮಗೆ ತೊಂದರೆ ಆಗುವುದಿಲ್ಲ."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"ಅಲಾರಾಂಗಳು, ಜ್ಞಾಪನೆಗಳು, ಈವೆಂಟ್‌ಗಳು ಹಾಗೂ ನೀವು ಸೂಚಿಸಿರುವ ಕರೆದಾರರನ್ನು ಹೊರತುಪಡಿಸಿ ಬೇರಾವುದೇ ಸದ್ದುಗಳು ಅಥವಾ ವೈಬ್ರೇಶನ್‌ಗಳು ನಿಮಗೆ ತೊಂದರೆ ನೀಡುವುದಿಲ್ಲ. ಹಾಗಿದ್ದರೂ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಸಂಗೀತ, ವೀಡಿಯೊಗಳು ಮತ್ತು ಆಟಗಳ ಆಡಿಯೊ ನಿಮಗೆ ಕೇಳಿಸುತ್ತದೆ."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"ಅಲಾರಾಂಗಳನ್ನು ಹೊರತುಪಡಿಸಿ, ಬೇರಾವುದೇ ಸದ್ದುಗಳು ಅಥವಾ ವೈಬ್ರೇಶನ್‌ಗಳು ನಿಮಗೆ ತೊಂದರೆ ನೀಡುವುದಿಲ್ಲ. ಹಾಗಿದ್ದರೂ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಸಂಗೀತ, ವೀಡಿಯೊಗಳು ಮತ್ತು ಆಟಗಳ ಆಡಿಯೊ ನಿಮಗೆ ಕೇಳಿಸುತ್ತದೆ."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ಕಸ್ಟಮೈಸ್ ಮಾಡು"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ಇದು ಅಲಾರಮ್‌ಗಳು, ಸಂಗೀತ, ವೀಡಿಯೊಗಳು, ಮತ್ತು ಗೇಮ್‌ಗಳು ಸೇರಿದಂತೆ ಎಲ್ಲಾ ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ. ನಿಮಗೆ ಈಗಲೂ ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ಇದು ಅಲಾರಮ್‌ಗಳು, ಸಂಗೀತ, ವೀಡಿಯೊಗಳು, ಮತ್ತು ಗೇಮ್‌ಗಳು ಸೇರಿದಂತೆ ಎಲ್ಲಾ ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ಧನ್ಯವಾದಗಳು"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ಹೊಂದಿಸು"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"ಈಗಲೇ ಅಂತ್ಯಗೊಳಿಸು"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"ಈಗ ಆಫ್ ಮಾಡಿ"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ವಿಸ್ತರಿಸು"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ಸಂಕುಚಿಸು"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ಪರದೆಯನ್ನು ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"ನೀವು ಇನ್ನು ಮುಂದೆ ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಪಡೆಯುವುದಿಲ್ಲ"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> ಅಧಿಸೂಚನೆ ವರ್ಗಗಳು"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಅಧಿಸೂಚನೆ ವರ್ಗಗಳನ್ನು ಹೊಂದಿಲ್ಲ"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ <xliff:g id="NUMBER_1">%d</xliff:g> ಅಧಿಸೂಚನೆ ವರ್ಗಗಳಲ್ಲಿ 1 ವರ್ಗ</item>
       <item quantity="other">ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ <xliff:g id="NUMBER_1">%d</xliff:g> ಅಧಿಸೂಚನೆ ವರ್ಗಗಳಲ್ಲಿ 1 ವರ್ಗ</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ಅಧಿಸೂಚನೆ ಸ್ನೂಜ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ರದ್ದುಮಾಡಿ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ಗೆ ಸ್ನೂಜ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">%d ಗಂಟೆಗಳು</item>
+      <item quantity="other">%d ಗಂಟೆಗಳು</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">%d ನಿಮಿಷಗಳು</item>
+      <item quantity="other">%d ನಿಮಿಷಗಳು</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"ಬ್ಯಾಟರಿ ಬಳಕೆ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ಚಾರ್ಜಿಂಗ್ ಸಮಯದಲ್ಲಿ ಬ್ಯಾಟರಿ ಸೇವರ್‌‌ ಲಭ್ಯವಿರುವುದಿಲ್ಲ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ಬ್ಯಾಟರಿ ಸೇವರ್‌‌"</string>

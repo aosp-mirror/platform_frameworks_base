@@ -291,10 +291,7 @@ public final class Settings {
 
     /**
      * Activity Action: Show settings to allow configuration of trusted external sources
-     * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
-     * <p>
+     *
      * Input: Optionally, the Intent's data URI can specify the application package name to
      * directly invoke the management GUI specific to the package name. For example
      * "package:com.my.app".
@@ -5222,6 +5219,7 @@ public final class Settings {
          * Whether the current user has been set up via setup wizard (0 = false, 1 = true)
          * @hide
          */
+        @TestApi
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
 
         /**
@@ -6812,6 +6810,22 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SENSITIVITY = "assist_gesture_sensitivity";
 
         /**
+         * Whether the assist gesture should silence alerts.
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_SILENCE_ALERTS_ENABLED =
+                "assist_gesture_silence_alerts_enabled";
+
+        /**
+         * Whether the assist gesture should wake the phone.
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_WAKE_ENABLED =
+                "assist_gesture_wake_enabled";
+
+        /**
          * Whether Assist Gesture Deferred Setup has been completed
          *
          * @hide
@@ -7105,6 +7119,9 @@ public final class Settings {
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             ASSIST_GESTURE_ENABLED,
             ASSIST_GESTURE_SENSITIVITY,
+            ASSIST_GESTURE_SETUP_COMPLETE,
+            ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
+            ASSIST_GESTURE_WAKE_ENABLED,
             VR_DISPLAY_MODE,
             NOTIFICATION_BADGING
         };

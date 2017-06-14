@@ -356,7 +356,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Paieška"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Slyskite aukštyn link <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Slyskite į kairę link <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Jūsų netrikdys garsai ir vibravimas, išskyrus nurodytų signalų, priminimų, įvykių ir skambintojų garsus ir vibravimą."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Jūsų netrikdys garsai ir vibravimas, išskyrus nurodytų signalų, priminimų, įvykių ir skambintojų garsus. Vis tiek girdėsite viską, ką pasirinksite leisti, įskaitant muziką, vaizdo įrašus ir žaidimus."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Jūsų netrikdys garsai ir vibravimas, išskyrus signalus. Vis tiek girdėsite viską, ką pasirinksite leisti, įskaitant muziką, vaizdo įrašus ir žaidimus."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Tinkinti"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Taip bus užblokuoti VISI garsai ir vibravimas, įskaitant signalų, muzikos, vaizdo įrašų ir žaidimų garsus ir vibravimą. Vis tiek galėsite skambinti telefonu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Taip bus užblokuoti VISI garsai ir vibravimas, įskaitant signalų, muzikos, vaizdo įrašų ir žaidimų garsus ir vibravimą."</string>
@@ -478,7 +479,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ne, ačiū"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Nustatyti"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Baigti dabar"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Išjungti dabar"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Išskleisti"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sutraukti"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekranas prisegtas"</string>
@@ -556,8 +557,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Nebegausite šių pranešimų"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Pranešimų kategorijų: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Šioje programoje nėra pranešimų kategorijų"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Šios programos pranešimų negalima išjungti"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">1 iš <xliff:g id="NUMBER_1">%d</xliff:g> šios programos pranešimų kategorijos</item>
       <item quantity="few">1 iš <xliff:g id="NUMBER_1">%d</xliff:g> šios programos pranešimų kategorijų</item>
@@ -583,8 +583,18 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"pranešimų snaudimo parinktys"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ANULIUOTI"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Nustatyta snausti <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">%d valanda</item>
+      <item quantity="few">%d valandos</item>
+      <item quantity="many">%d valandos</item>
+      <item quantity="other">%d valandų</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">%d minutė</item>
+      <item quantity="few">%d minutės</item>
+      <item quantity="many">%d minutės</item>
+      <item quantity="other">%d minučių</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akum. energ. vartoj."</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumuliatoriaus tausojimo priemonė nepasiekiama įkraunant"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumuliatoriaus tausojimo priemonė"</string>

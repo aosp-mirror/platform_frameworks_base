@@ -27,9 +27,20 @@ import android.util.Log;
  */
 public class StreamingService {
     private static final String LOG_TAG = "MbmsStreamingService";
+
+    /**
+     * The state of a stream, reported via {@link StreamingServiceCallback#streamStateUpdated}
+     */
     public final static int STATE_STOPPED = 1;
     public final static int STATE_STARTED = 2;
     public final static int STATE_STALLED = 3;
+
+    /**
+     * The method of transmission currently used for a stream,
+     * reported via {@link StreamingServiceCallback#streamMethodUpdated}
+     */
+    public final static int BROADCAST_METHOD = 1;
+    public final static int UNICAST_METHOD   = 2;
 
     private final String mAppName;
     private final int mSubscriptionId;

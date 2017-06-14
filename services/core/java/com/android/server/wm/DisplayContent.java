@@ -324,6 +324,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // the display's direct children should be allowed.
     private boolean mRemovingDisplay = false;
 
+    // {@code false} if this display is in the processing of being created.
+    private boolean mDisplayReady = false;
+
     private final WindowLayersController mLayersController;
     WallpaperController mWallpaperController;
     int mInputMethodAnimLayerAdjustment;
@@ -730,7 +733,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     DisplayContent(Display display, WindowManagerService service,
             WindowLayersController layersController, WallpaperController wallpaperController) {
-
         if (service.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
                     + " already exists=" + service.mRoot.getDisplayContent(display.getDisplayId())
@@ -758,6 +760,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // Add itself as a child to the root container.
         mService.mRoot.addChild(this, null);
+
+        // TODO(b/62541591): evaluate whether this is the best spot to declare the
+        // {@link DisplayContent} ready for use.
+        mDisplayReady = true;
+    }
+
+    boolean isReady() {
+        // The display is ready when the system and the individual display are both ready.
+        return mService.mDisplayReady && mDisplayReady;
     }
 
     int getDisplayId() {

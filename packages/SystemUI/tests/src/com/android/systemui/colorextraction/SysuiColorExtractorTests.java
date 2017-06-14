@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 
 import android.app.WallpaperManager;
 import android.graphics.Color;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -30,12 +28,14 @@ import com.android.systemui.SysuiTestCase;
 import com.google.android.colorextraction.ColorExtractor;
 import com.google.android.colorextraction.types.Tonal;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
  * Tests color extraction generation.
  */
+@Ignore
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SysuiColorExtractorTests extends SysuiTestCase {
@@ -48,8 +48,6 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
             ColorExtractor.TYPE_DARK,
             ColorExtractor.TYPE_EXTRA_DARK};
 
-    @FlakyTest
-    @UiThreadTest
     @Test
     public void getColors_usesGreyIfWallpaperNotVisible() {
         ColorExtractor.GradientColors fallbackColors = new ColorExtractor.GradientColors();
@@ -67,8 +65,6 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         }
     }
 
-    @FlakyTest
-    @UiThreadTest
     @Test
     public void getColors_doesntUseFallbackIfVisible() {
         ColorExtractor.GradientColors colors = new ColorExtractor.GradientColors();

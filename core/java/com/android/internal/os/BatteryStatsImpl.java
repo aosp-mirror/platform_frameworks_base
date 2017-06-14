@@ -95,6 +95,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -121,15 +122,34 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int VERSION = 159 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
-    private static final int MAX_HISTORY_ITEMS = 2000;
+    private static final int MAX_HISTORY_ITEMS;
 
     // No, really, THIS is the maximum number of items we will record in the history.
-    private static final int MAX_MAX_HISTORY_ITEMS = 3000;
+    private static final int MAX_MAX_HISTORY_ITEMS;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
     // in to one common name.
-    private static final int MAX_WAKELOCKS_PER_UID = 100;
+    private static final int MAX_WAKELOCKS_PER_UID;
+
+    static final int MAX_HISTORY_BUFFER; // 256KB
+    static final int MAX_MAX_HISTORY_BUFFER; // 320KB
+
+    static {
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            MAX_HISTORY_ITEMS = 800;
+            MAX_MAX_HISTORY_ITEMS = 1200;
+            MAX_WAKELOCKS_PER_UID = 40;
+            MAX_HISTORY_BUFFER = 96*1024;  // 96KB
+            MAX_MAX_HISTORY_BUFFER = 128*1024; // 128KB
+        } else {
+            MAX_HISTORY_ITEMS = 2000;
+            MAX_MAX_HISTORY_ITEMS = 3000;
+            MAX_WAKELOCKS_PER_UID = 100;
+            MAX_HISTORY_BUFFER = 256*1024;  // 256KB
+            MAX_MAX_HISTORY_BUFFER = 320*1024;  // 256KB
+        }
+    }
 
     // Number of transmit power states the Wifi controller can be in.
     private static final int NUM_WIFI_TX_LEVELS = 1;
@@ -236,12 +256,12 @@ public class BatteryStatsImpl extends BatteryStats {
         int UPDATE_BT = 0x08;
         int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT;
 
-        void scheduleSync(String reason, int flags);
-        void scheduleCpuSyncDueToRemovedUid(int uid);
+        Future<?> scheduleSync(String reason, int flags);
+        Future<?> scheduleCpuSyncDueToRemovedUid(int uid);
     }
 
     public final MyHandler mHandler;
-    private final ExternalStatsSync mExternalSync;
+    private ExternalStatsSync mExternalSync = null;
 
     private BatteryCallback mCallback;
 
@@ -299,8 +319,6 @@ public class BatteryStatsImpl extends BatteryStats {
     boolean mRecordingHistory = false;
     int mNumHistoryItems;
 
-    static final int MAX_HISTORY_BUFFER = 256*1024; // 256KB
-    static final int MAX_MAX_HISTORY_BUFFER = 320*1024; // 320KB
     final Parcel mHistoryBuffer = Parcel.obtain();
     final HistoryItem mHistoryLastWritten = new HistoryItem();
     final HistoryItem mHistoryLastLastWritten = new HistoryItem();
@@ -630,7 +648,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mCheckinFile = null;
         mDailyFile = null;
         mHandler = null;
-        mExternalSync = null;
         mPlatformIdleStateCallback = null;
         clearHistoryLocked();
     }
@@ -8597,17 +8614,16 @@ public class BatteryStatsImpl extends BatteryStats {
         return mCpuFreqs;
     }
 
-    public BatteryStatsImpl(File systemDir, Handler handler, ExternalStatsSync externalSync) {
-        this(new SystemClocks(), systemDir, handler, externalSync, null);
+    public BatteryStatsImpl(File systemDir, Handler handler) {
+        this(new SystemClocks(), systemDir, handler, null);
     }
 
-    public BatteryStatsImpl(File systemDir, Handler handler, ExternalStatsSync externalSync,
-                            PlatformIdleStateCallback cb) {
-        this(new SystemClocks(), systemDir, handler, externalSync, cb);
+    public BatteryStatsImpl(File systemDir, Handler handler, PlatformIdleStateCallback cb) {
+        this(new SystemClocks(), systemDir, handler, cb);
     }
 
     public BatteryStatsImpl(Clocks clocks, File systemDir, Handler handler,
-            ExternalStatsSync externalSync, PlatformIdleStateCallback cb) {
+            PlatformIdleStateCallback cb) {
         init(clocks);
 
         if (systemDir != null) {
@@ -8618,7 +8634,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
         mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
-        mExternalSync = externalSync;
         mHandler = new MyHandler(handler.getLooper());
         mStartCount++;
         mScreenOnTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase);
@@ -8743,6 +8758,10 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mPhoneSignalScanningTimer != null) {
             mPhoneSignalScanningTimer.setTimeout(timeout);
         }
+    }
+
+    public void setExternalStatsSyncLocked(ExternalStatsSync sync) {
+        mExternalSync = sync;
     }
 
     public void updateDailyDeadlineLocked() {
@@ -9750,7 +9769,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
 
-            final long elapsedRealtimeMs = SystemClock.elapsedRealtime();
+            final long elapsedRealtimeMs = mClocks.elapsedRealtime();
             long radioTime = mMobileRadioActivePerAppTimer.getTimeSinceMarkLocked(
                     elapsedRealtimeMs * 1000);
             mMobileRadioActivePerAppTimer.setMark(elapsedRealtimeMs);

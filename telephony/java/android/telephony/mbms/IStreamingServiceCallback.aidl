@@ -16,14 +16,13 @@
 
 package android.telephony.mbms;
 
-import android.net.Uri;
-
 /**
  * @hide
  */
 oneway interface IStreamingServiceCallback {
     void error(int errorCode, String message);
-    void streamStateChanged(int state);
-    void uriUpdated(in Uri uri);
+    void streamStateUpdated(int state);
+    void mediaDescriptionUpdated();
     void broadcastSignalStrengthUpdated(int signalStrength);
+    void streamMethodUpdated(int methodType);
 }

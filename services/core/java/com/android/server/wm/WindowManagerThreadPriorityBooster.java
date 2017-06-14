@@ -23,6 +23,7 @@ import static android.os.Process.setThreadPriority;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.am.ActivityManagerService.TOP_APP_PRIORITY_BOOST;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.AnimationThread;
 import com.android.server.ThreadPriorityBooster;
 
@@ -32,12 +33,18 @@ import com.android.server.ThreadPriorityBooster;
  */
 class WindowManagerThreadPriorityBooster extends ThreadPriorityBooster {
 
-    private final AnimationThread mAnimationThread;
+    private final Object mLock = new Object();
+
+    private final int mAnimationThreadId;
+
+    @GuardedBy("mLock")
     private boolean mAppTransitionRunning;
+    @GuardedBy("mLock")
+    private boolean mBoundsAnimationRunning;
 
     WindowManagerThreadPriorityBooster() {
         super(THREAD_PRIORITY_DISPLAY, INDEX_WINDOW);
-        mAnimationThread = AnimationThread.get();
+        mAnimationThreadId = AnimationThread.get().getThreadId();
     }
 
     @Override
@@ -45,7 +52,7 @@ class WindowManagerThreadPriorityBooster extends ThreadPriorityBooster {
 
         // Do not boost the animation thread. As the animation thread is changing priorities,
         // boosting it might mess up the priority because we reset it the the previous priority.
-        if (myTid() == mAnimationThread.getThreadId()) {
+        if (myTid() == mAnimationThreadId) {
             return;
         }
         super.boost();
@@ -55,24 +62,35 @@ class WindowManagerThreadPriorityBooster extends ThreadPriorityBooster {
     public void reset() {
 
         // See comment in boost().
-        if (myTid() == mAnimationThread.getThreadId()) {
+        if (myTid() == mAnimationThreadId) {
             return;
         }
         super.reset();
     }
 
     void setAppTransitionRunning(boolean running) {
-        if (mAppTransitionRunning == running) {
-            return;
+        synchronized (mLock) {
+            if (mAppTransitionRunning != running) {
+                mAppTransitionRunning = running;
+                updatePriorityLocked();
+            }
         }
-
-        final int priority = calculatePriority(running);
-        setBoostToPriority(priority);
-        setThreadPriority(mAnimationThread.getThreadId(), priority);
-        mAppTransitionRunning = running;
     }
 
-    private int calculatePriority(boolean appTransitionRunning) {
-        return appTransitionRunning ? TOP_APP_PRIORITY_BOOST : THREAD_PRIORITY_DISPLAY;
+    void setBoundsAnimationRunning(boolean running) {
+        synchronized (mLock) {
+            if (mBoundsAnimationRunning != running) {
+                mBoundsAnimationRunning = running;
+                updatePriorityLocked();
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void updatePriorityLocked() {
+        int priority = (mAppTransitionRunning || mBoundsAnimationRunning)
+                ? TOP_APP_PRIORITY_BOOST : THREAD_PRIORITY_DISPLAY;
+        setBoostToPriority(priority);
+        setThreadPriority(mAnimationThreadId, priority);
     }
 }
