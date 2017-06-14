@@ -120,6 +120,10 @@ void Texture::resetCachedParams() {
 void Texture::upload(GLint internalFormat, uint32_t width, uint32_t height,
         GLenum format, GLenum type, const void* pixels) {
     GL_CHECKPOINT(MODERATE);
+
+    // We don't have color space information, we assume the data is gamma encoded
+    mIsLinear = false;
+
     bool needsAlloc = updateLayout(width, height, internalFormat, format, GL_TEXTURE_2D);
     if (!mId) {
         glGenTextures(1, &mId);
@@ -309,11 +313,16 @@ void Texture::upload(Bitmap& bitmap) {
     bool rgba16fNeedsConversion = bitmap.colorType() == kRGBA_F16_SkColorType
             && internalFormat != GL_RGBA16F;
 
+    // RGBA16F is always linear extended sRGB
+    if (internalFormat == GL_RGBA16F) {
+        mIsLinear = true;
+    }
+
     mConnector.reset();
 
-    // RGBA16F is always extended sRGB, alpha masks don't have color profiles
+    // Alpha masks don't have color profiles
     // If an RGBA16F bitmap needs conversion, we know the target will be sRGB
-    if (internalFormat != GL_RGBA16F && internalFormat != GL_ALPHA && !rgba16fNeedsConversion) {
+    if (!mIsLinear && internalFormat != GL_ALPHA && !rgba16fNeedsConversion) {
         SkColorSpace* colorSpace = bitmap.info().colorSpace();
         // If the bitmap is sRGB we don't need conversion
         if (colorSpace != nullptr && !colorSpace->isSRGB()) {

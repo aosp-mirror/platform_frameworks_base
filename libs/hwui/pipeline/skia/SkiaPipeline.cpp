@@ -72,16 +72,18 @@ void SkiaPipeline::unpinImages() {
 }
 
 void SkiaPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-        LayerUpdateQueue* layerUpdateQueue, bool opaque,
+        LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
         const BakedOpRenderer::LightInfo& lightInfo) {
     updateLighting(lightGeometry, lightInfo);
     ATRACE_NAME("draw layers");
     renderVectorDrawableCache();
-    renderLayersImpl(*layerUpdateQueue, opaque);
+    renderLayersImpl(*layerUpdateQueue, opaque, wideColorGamut);
     layerUpdateQueue->clear();
 }
 
-void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) {
+void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers,
+        bool opaque, bool wideColorGamut) {
+    // TODO: Handle wide color gamut
     // Render all layers that need to be updated, in order.
     for (size_t i = 0; i < layers.entries().size(); i++) {
         RenderNode* layerNode = layers.entries()[i].renderNode.get();
@@ -129,12 +131,13 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
 }
 
 bool SkiaPipeline::createOrUpdateLayer(RenderNode* node,
-        const DamageAccumulator& damageAccumulator) {
+        const DamageAccumulator& damageAccumulator, bool wideColorGamut) {
     SkSurface* layer = node->getLayerSurface();
     if (!layer || layer->width() != node->getWidth() || layer->height() != node->getHeight()) {
         SkImageInfo info = SkImageInfo::MakeN32Premul(node->getWidth(), node->getHeight());
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
+        // TODO: Handle wide color gamut requests
         node->setLayerSurface(
                 SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
                         info, 0, &props));
@@ -203,13 +206,13 @@ void SkiaPipeline::renderVectorDrawableCache() {
 }
 
 void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
-        const std::vector<sp<RenderNode>>& nodes, bool opaque, const Rect &contentDrawBounds,
-        sk_sp<SkSurface> surface) {
+        const std::vector<sp<RenderNode>>& nodes, bool opaque, bool wideColorGamut,
+        const Rect &contentDrawBounds, sk_sp<SkSurface> surface) {
 
     renderVectorDrawableCache();
 
     // draw all layers up front
-    renderLayersImpl(layers, opaque);
+    renderLayersImpl(layers, opaque, wideColorGamut);
 
     // initialize the canvas for the current frame
     SkCanvas* canvas = surface->getCanvas();
@@ -227,7 +230,7 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
         }
     }
 
-    renderFrameImpl(layers, clip, nodes, opaque, contentDrawBounds, canvas);
+    renderFrameImpl(layers, clip, nodes, opaque, wideColorGamut, contentDrawBounds, canvas);
 
     if (skpCaptureEnabled() && recordingPicture) {
         sk_sp<SkPicture> picture = recorder->finishRecordingAsPicture();
@@ -260,8 +263,8 @@ static Rect nodeBounds(RenderNode& node) {
 }
 
 void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
-        const std::vector<sp<RenderNode>>& nodes, bool opaque, const Rect &contentDrawBounds,
-        SkCanvas* canvas) {
+        const std::vector<sp<RenderNode>>& nodes, bool opaque, bool wideColorGamut,
+        const Rect &contentDrawBounds, SkCanvas* canvas) {
     SkAutoCanvasRestore saver(canvas, true);
     canvas->androidFramework_setDeviceClipRestriction(clip.roundOut());
 
@@ -388,7 +391,7 @@ void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& 
     // each time a pixel would have been drawn.
     // Pass true for opaque so we skip the clear - the overdrawCanvas is already zero
     // initialized.
-    renderFrameImpl(layers, clip, nodes, true, contentDrawBounds, &overdrawCanvas);
+    renderFrameImpl(layers, clip, nodes, true, false, contentDrawBounds, &overdrawCanvas);
     sk_sp<SkImage> counts = offscreen->makeImageSnapshot();
 
     // Draw overdraw colors to the canvas.  The color filter will convert counts to colors.
