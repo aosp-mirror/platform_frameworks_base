@@ -524,12 +524,11 @@ public class RankingHelper implements RankingConfig {
         if (r == null) {
             throw new IllegalArgumentException("Invalid package");
         }
-        LogMaker lm = new LogMaker(MetricsProto.MetricsEvent.ACTION_NOTIFICATION_CHANNEL_GROUP)
-                .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
-                .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_GROUP_ID,
-                        group.getId())
-                .setPackageName(pkg);
-        MetricsLogger.action(lm);
+        final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
+        if (!group.equals(oldGroup)) {
+            // will log for new entries as well as name changes
+            MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
+        }
         r.groups.put(group.getId(), group);
         updateConfig();
     }
@@ -557,13 +556,16 @@ public class RankingHelper implements RankingConfig {
         if (existing != null && fromTargetApp) {
             if (existing.isDeleted()) {
                 existing.setDeleted(false);
+
+                // log a resurrected channel as if it's new again
+                MetricsLogger.action(getChannelLog(channel, pkg).setType(
+                        MetricsProto.MetricsEvent.TYPE_OPEN));
             }
 
             existing.setName(channel.getName().toString());
             existing.setDescription(channel.getDescription());
             existing.setBlockableSystem(channel.isBlockableSystem());
 
-            MetricsLogger.action(getChannelLog(channel, pkg));
             updateConfig();
             return;
         }
@@ -621,7 +623,10 @@ public class RankingHelper implements RankingConfig {
             r.showBadge = updatedChannel.canShowBadge();
         }
 
-        MetricsLogger.action(getChannelLog(updatedChannel, pkg));
+        if (!channel.equals(updatedChannel)) {
+            // only log if there are real changes
+            MetricsLogger.action(getChannelLog(updatedChannel, pkg));
+        }
         updateConfig();
     }
 
@@ -1138,6 +1143,14 @@ public class RankingHelper implements RankingConfig {
                         channel.getId())
                 .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE,
                         channel.getImportance());
+    }
+
+    private LogMaker getChannelGroupLog(String groupId, String pkg) {
+        return new LogMaker(MetricsProto.MetricsEvent.ACTION_NOTIFICATION_CHANNEL_GROUP)
+                .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_GROUP_ID,
+                        groupId)
+                .setPackageName(pkg);
     }
 
     public void updateBadgingEnabled() {
