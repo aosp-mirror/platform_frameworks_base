@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 import android.telephony.SubscriptionManager;
+import android.telephony.SubscriptionInfo;
 import android.telephony.euicc.EuiccManager;
 
 import java.lang.ref.WeakReference;
@@ -58,8 +59,11 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
     public static boolean isEsimLocked(Context context, int subId) {
         EuiccManager euiccManager =
                 (EuiccManager) context.getSystemService(Context.EUICC_SERVICE);
-        return euiccManager.isEnabled()
-                && SubscriptionManager.from(context).getActiveSubscriptionInfo(subId).isEmbedded();
+        if (!euiccManager.isEnabled()) {
+            return false;
+        }
+        SubscriptionInfo sub = SubscriptionManager.from(context).getActiveSubscriptionInfo(subId);
+        return  sub != null && sub.isEmbedded();
     }
 
 }
