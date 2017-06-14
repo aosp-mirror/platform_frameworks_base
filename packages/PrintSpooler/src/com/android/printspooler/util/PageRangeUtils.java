@@ -426,7 +426,7 @@ public final class PageRangeUtils {
             // be based off the start of the written ones instead of zero.
             // The written pages are always non-null and not empty.
             final int offset = -pagesWrittenToFile[0].getStart();
-            PageRangeUtils.offset(pagesInDocRequested, offset);
+            PageRangeUtils.offset(pagesInDocRequested.clone(), offset);
             return pagesInDocRequested;
         } else if (Arrays.equals(pagesInDocRequested, ALL_PAGES_RANGE)
                 && isAllPages(pagesWrittenToFile, pageCount)) {
