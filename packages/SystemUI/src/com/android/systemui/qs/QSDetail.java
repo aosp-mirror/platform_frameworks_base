@@ -73,6 +73,7 @@ public class QSDetail extends LinearLayout {
     private int mOpenY;
     private boolean mAnimatingOpen;
     private boolean mSwitchState;
+    private View mFooter;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -116,9 +117,10 @@ public class QSDetail extends LinearLayout {
         mDetailDoneButton.setOnClickListener(doneListener);
     }
 
-    public void setQsPanel(QSPanel panel, QuickStatusBarHeader header) {
+    public void setQsPanel(QSPanel panel, QuickStatusBarHeader header, View footer) {
         mQsPanel = panel;
         mHeader = header;
+        mFooter = footer;
         mHeader.setCallback(mQsPanelCallback);
         mQsPanel.setCallback(mQsPanelCallback);
     }
@@ -214,6 +216,7 @@ public class QSDetail extends LinearLayout {
             mDetailAdapter = null;
             listener = mTeardownDetailWhenDone;
             mHeader.setVisibility(View.VISIBLE);
+            mFooter.setVisibility(View.VISIBLE);
             mQsPanel.setGridContentVisibility(true);
             mQsPanelCallback.onScanStateChanged(false);
         }
@@ -345,6 +348,7 @@ public class QSDetail extends LinearLayout {
             if (mDetailAdapter != null) {
                 mQsPanel.setGridContentVisibility(false);
                 mHeader.setVisibility(View.INVISIBLE);
+                mFooter.setVisibility(View.INVISIBLE);
             }
             mAnimatingOpen = false;
             checkPendingAnimations();

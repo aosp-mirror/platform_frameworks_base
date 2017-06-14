@@ -80,7 +80,7 @@ public class QSFragment extends Fragment implements QS {
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
 
-        mQSDetail.setQsPanel(mQSPanel, mHeader);
+        mQSDetail.setQsPanel(mQSPanel, mHeader, mFooter);
 
         // If the quick settings row is not shown, then there is no need for the animation from
         // the row to the full QS panel.
