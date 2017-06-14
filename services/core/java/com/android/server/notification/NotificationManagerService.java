@@ -607,7 +607,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onPanelRevealed(boolean clearEffects, int items) {
             MetricsLogger.visible(getContext(), MetricsEvent.NOTIFICATION_PANEL);
-            MetricsLogger.histogram(getContext(), "notification_load", items);
+            MetricsLogger.histogram(getContext(), "note_load", items);
             EventLogTags.writeNotificationPanelRevealed(items);
             if (clearEffects) {
                 clearEffects();
