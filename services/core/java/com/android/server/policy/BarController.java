@@ -166,8 +166,14 @@ public class BarController {
         return change || stateChanged;
     }
 
-    void setOnBarVisibilityChangedListener(OnBarVisibilityChangedListener listener) {
+    void setOnBarVisibilityChangedListener(OnBarVisibilityChangedListener listener,
+            boolean invokeWithState) {
         mVisibilityChangeListener = listener;
+        if (invokeWithState) {
+            // Optionally report the initial window state for initialization purposes
+            mHandler.obtainMessage(MSG_NAV_BAR_VISIBILITY_CHANGED,
+                    (mState == StatusBarManager.WINDOW_STATE_SHOWING) ? 1 : 0, 0).sendToTarget();
+        }
     }
 
     protected boolean skipAnimation() {
