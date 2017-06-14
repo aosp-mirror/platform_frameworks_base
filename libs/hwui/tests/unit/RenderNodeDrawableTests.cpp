@@ -450,7 +450,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     LayerUpdateQueue layerUpdateQueue;
     layerUpdateQueue.enqueueLayerWithDamage(child.get(),
             android::uirenderer::Rect(LAYER_WIDTH, LAYER_HEIGHT));
-    SkiaPipeline::renderLayersImpl(layerUpdateQueue, true);
+    SkiaPipeline::renderLayersImpl(layerUpdateQueue, true, false);
     EXPECT_EQ(1, drawCounter);  //assert index 0 is drawn on the layer
 
     RenderNodeDrawable drawable(parent.get(), surfaceLayer1->getCanvas(), true);

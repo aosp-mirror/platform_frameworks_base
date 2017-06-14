@@ -421,7 +421,7 @@ void CanvasContext::draw() {
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
 
     bool drew = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue,
-            mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes, &(profiler()));
+            mContentDrawBounds, mOpaque, mWideColorGamut, mLightInfo, mRenderNodes, &(profiler()));
 
     waitOnFences();
 
@@ -563,7 +563,8 @@ void CanvasContext::buildLayer(RenderNode* node) {
     // purposes when the frame is actually drawn
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
-    mRenderPipeline->renderLayers(mLightGeometry, &mLayerUpdateQueue, mOpaque, mLightInfo);
+    mRenderPipeline->renderLayers(mLightGeometry, &mLayerUpdateQueue,
+            mOpaque, mWideColorGamut, mLightInfo);
 
     node->incStrong(nullptr);
     mPrefetchedLayers.insert(node);

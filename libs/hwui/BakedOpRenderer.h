@@ -54,12 +54,13 @@ public:
         uint8_t spotShadowAlpha;
     };
 
-    BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque,
+    BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque, bool wideColorGamut,
             const LightInfo& lightInfo)
             : mGlopReceiver(DefaultGlopReceiver)
             , mRenderState(renderState)
             , mCaches(caches)
             , mOpaque(opaque)
+            , mWideColorGamut(wideColorGamut)
             , mLightInfo(lightInfo) {
     }
 
@@ -118,6 +119,7 @@ private:
     RenderState& mRenderState;
     Caches& mCaches;
     bool mOpaque;
+    bool mWideColorGamut;
     bool mHasDrawn = false;
 
     // render target state - setup by start/end layer/frame
