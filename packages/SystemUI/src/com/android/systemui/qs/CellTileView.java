@@ -35,9 +35,7 @@ public class CellTileView extends SignalTileView {
     public CellTileView(Context context) {
         super(context);
         mSignalDrawable = new SignalDrawable(mContext);
-        float dark = Utils.getColorAttr(context, android.R.attr.colorForeground) == 0xff000000
-                ? 1 : 0;
-        mSignalDrawable.setDarkIntensity(dark);
+        mSignalDrawable.setDarkIntensity(isDark(mContext));
         mSignalDrawable.setIntrinsicSize(context.getResources().getDimensionPixelSize(
                 R.dimen.qs_tile_icon_size));
     }
@@ -48,6 +46,10 @@ public class CellTileView extends SignalTileView {
             iv.setImageDrawable(mSignalDrawable);
             iv.setTag(R.id.qs_icon_tag, state.icon);
         }
+    }
+
+    private static int isDark(Context context) {
+        return Utils.getColorAttr(context, android.R.attr.colorForeground) == 0xff000000 ? 1 : 0;
     }
 
     public static class SignalIcon extends Icon {
@@ -64,7 +66,11 @@ public class CellTileView extends SignalTileView {
 
         @Override
         public Drawable getDrawable(Context context) {
-            return null;
+            //TODO: Not the optimal solution to create this drawable
+            SignalDrawable d = new SignalDrawable(context);
+            d.setDarkIntensity(isDark(context));
+            d.setLevel(getState());
+            return d;
         }
     }
 }
