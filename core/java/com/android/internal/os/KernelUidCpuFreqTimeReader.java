@@ -76,6 +76,17 @@ public class KernelUidCpuFreqTimeReader {
         mLastUidCpuFreqTimeMs.delete(uid);
     }
 
+    public void removeUidsInRange(int startUid, int endUid) {
+        if (endUid < startUid) {
+            return;
+        }
+        mLastUidCpuFreqTimeMs.put(startUid, null);
+        mLastUidCpuFreqTimeMs.put(endUid, null);
+        final int firstIndex = mLastUidCpuFreqTimeMs.indexOfKey(startUid);
+        final int lastIndex = mLastUidCpuFreqTimeMs.indexOfKey(endUid);
+        mLastUidCpuFreqTimeMs.removeAtRange(firstIndex, lastIndex - firstIndex + 1);
+    }
+
     @VisibleForTesting
     public void readDelta(BufferedReader reader, @Nullable Callback callback) throws IOException {
         String line = reader.readLine();

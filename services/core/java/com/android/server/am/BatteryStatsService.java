@@ -34,6 +34,7 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.os.WorkSource;
 import android.os.health.HealthStatsParceler;
 import android.os.health.HealthStatsWriter;
@@ -79,6 +80,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private static IBatteryStats sService;
 
     final BatteryStatsImpl mStats;
+    private final BatteryStatsImpl.UserInfoProvider mUserManagerUserInfoProvider;
     private final Context mContext;
     private final BatteryExternalStatsWorker mWorker;
 
@@ -140,7 +142,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     BatteryStatsService(Context context, File systemDir, Handler handler) {
         // BatteryStatsImpl expects the ActivityManagerService handler, so pass that one through.
         mContext = context;
-        mStats = new BatteryStatsImpl(systemDir, handler, this);
+        mUserManagerUserInfoProvider = new BatteryStatsImpl.UserInfoProvider() {
+            private UserManagerInternal umi;
+            @Override
+            public int[] getUserIds() {
+                if (umi == null) {
+                    umi = LocalServices.getService(UserManagerInternal.class);
+                }
+                return (umi != null) ? umi.getUserIds() : null;
+            }
+        };
+        mStats = new BatteryStatsImpl(systemDir, handler, this, mUserManagerUserInfoProvider);
         mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
@@ -239,6 +251,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     void removeUid(int uid) {
         synchronized (mStats) {
             mStats.removeUidStatsLocked(uid);
+        }
+    }
+
+    void onCleanupUser(int userId) {
+        synchronized (mStats) {
+            mStats.onCleanupUserLocked(userId);
+        }
+    }
+
+    void onUserRemoved(int userId) {
+        synchronized (mStats) {
+            mStats.onUserRemovedLocked(userId);
         }
     }
 
@@ -1260,7 +1284,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.unmarshall(raw, 0, raw.length);
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
-                                        null, mStats.mHandler, null);
+                                        null, mStats.mHandler, null, mUserManagerUserInfoProvider);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpCheckinLocked(mContext, pw, apps, flags,

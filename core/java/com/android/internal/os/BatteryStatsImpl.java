@@ -42,7 +42,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
@@ -75,7 +75,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
-import com.android.server.NetworkManagementSocketTagger;
+
 import libcore.util.EmptyArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -194,6 +194,17 @@ public class BatteryStatsImpl extends BatteryStats {
         public String getSubsystemLowPowerStats();
     }
 
+    public static abstract class UserInfoProvider {
+        private int[] userIds;
+        protected abstract @Nullable int[] getUserIds();
+        private final void refreshUserIds() {
+            userIds = getUserIds();
+        }
+        private final boolean exists(int userId) {
+            return userIds != null ? ArrayUtils.contains(userIds, userId) : true;
+        }
+    }
+
     private final PlatformIdleStateCallback mPlatformIdleStateCallback;
 
     final class MyHandler extends Handler {
@@ -262,6 +273,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public final MyHandler mHandler;
     private ExternalStatsSync mExternalSync = null;
+    private UserInfoProvider mUserInfoProvider = null;
 
     private BatteryCallback mCallback;
 
@@ -649,6 +661,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDailyFile = null;
         mHandler = null;
         mPlatformIdleStateCallback = null;
+        mUserInfoProvider = null;
         clearHistoryLocked();
     }
 
@@ -8588,16 +8601,14 @@ public class BatteryStatsImpl extends BatteryStats {
         return mCpuFreqs;
     }
 
-    public BatteryStatsImpl(File systemDir, Handler handler) {
-        this(new SystemClocks(), systemDir, handler, null);
+    public BatteryStatsImpl(File systemDir, Handler handler, PlatformIdleStateCallback cb,
+            UserInfoProvider userInfoProvider) {
+        this(new SystemClocks(), systemDir, handler, cb, userInfoProvider);
     }
 
-    public BatteryStatsImpl(File systemDir, Handler handler, PlatformIdleStateCallback cb) {
-        this(new SystemClocks(), systemDir, handler, cb);
-    }
-
-    public BatteryStatsImpl(Clocks clocks, File systemDir, Handler handler,
-            PlatformIdleStateCallback cb) {
+    private BatteryStatsImpl(Clocks clocks, File systemDir, Handler handler,
+            PlatformIdleStateCallback cb,
+            UserInfoProvider userInfoProvider) {
         init(clocks);
 
         if (systemDir != null) {
@@ -8684,6 +8695,7 @@ public class BatteryStatsImpl extends BatteryStats {
         clearHistoryLocked();
         updateDailyDeadlineLocked();
         mPlatformIdleStateCallback = cb;
+        mUserInfoProvider = userInfoProvider;
     }
 
     public BatteryStatsImpl(Parcel p) {
@@ -10172,6 +10184,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // we read, we get a delta. If we are to distribute the cpu time, then do so. Otherwise
         // we just ignore the data.
         final long startTimeMs = mClocks.uptimeMillis();
+        mUserInfoProvider.refreshUserIds();
         mKernelUidCpuTimeReader.readDelta(!mOnBatteryInternal ? null :
                 new KernelUidCpuTimeReader.Callback() {
                     @Override
@@ -10183,6 +10196,11 @@ public class BatteryStatsImpl extends BatteryStats {
                             mKernelUidCpuTimeReader.removeUid(uid);
                             Slog.d(TAG, "Got readings for an isolated uid with"
                                     + " no mapping to owning uid: " + uid);
+                            return;
+                        }
+                        if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
+                            Slog.d(TAG, "Got readings for an invalid user's uid " + uid);
+                            mKernelUidCpuTimeReader.removeUid(uid);
                             return;
                         }
                         final Uid u = getUidStatsLocked(uid);
@@ -10355,6 +10373,11 @@ public class BatteryStatsImpl extends BatteryStats {
                             mKernelUidCpuFreqTimeReader.removeUid(uid);
                             Slog.d(TAG, "Got freq readings for an isolated uid with"
                                     + " no mapping to owning uid: " + uid);
+                            return;
+                        }
+                        if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
+                            Slog.d(TAG, "Got readings for an invalid user's uid " + uid);
+                            mKernelUidCpuFreqTimeReader.removeUid(uid);
                             return;
                         }
                         final Uid u = getUidStatsLocked(uid);
@@ -11016,6 +11039,23 @@ public class BatteryStatsImpl extends BatteryStats {
             mUidStats.put(uid, u);
         }
         return u;
+    }
+
+    public void onCleanupUserLocked(int userId) {
+        final int firstUidForUser = UserHandle.getUid(userId, 0);
+        final int lastUidForUser = UserHandle.getUid(userId, UserHandle.PER_USER_RANGE - 1);
+        mKernelUidCpuFreqTimeReader.removeUidsInRange(firstUidForUser, lastUidForUser);
+        mKernelUidCpuTimeReader.removeUidsInRange(firstUidForUser, lastUidForUser);
+    }
+
+    public void onUserRemovedLocked(int userId) {
+        final int firstUidForUser = UserHandle.getUid(userId, 0);
+        final int lastUidForUser = UserHandle.getUid(userId, UserHandle.PER_USER_RANGE - 1);
+        mUidStats.put(firstUidForUser, null);
+        mUidStats.put(lastUidForUser, null);
+        final int firstIndex = mUidStats.indexOfKey(firstUidForUser);
+        final int lastIndex = mUidStats.indexOfKey(lastUidForUser);
+        mUidStats.removeAtRange(firstIndex, lastIndex - firstIndex + 1);
     }
 
     /**

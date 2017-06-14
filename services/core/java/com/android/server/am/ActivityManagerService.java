@@ -2654,6 +2654,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             mService.start();
         }
 
+        @Override
+        public void onCleanupUser(int userId) {
+            mService.mBatteryStatsService.onCleanupUser(userId);
+        }
+
         public ActivityManagerService getService() {
             return mService;
         }
@@ -23797,6 +23802,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.onUserStoppedLocked(userId);
             }
+            mBatteryStatsService.onUserRemoved(userId);
         }
 
         @Override
