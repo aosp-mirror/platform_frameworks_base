@@ -59,7 +59,7 @@ public:
     virtual bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
             const FrameBuilder::LightGeometry& lightGeometry,
             LayerUpdateQueue* layerUpdateQueue,
-            const Rect& contentDrawBounds, bool opaque,
+            const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
             const BakedOpRenderer::LightInfo& lightInfo,
             const std::vector< sp<RenderNode> >& renderNodes,
             FrameInfoVisualizer* profiler) = 0;
@@ -73,11 +73,11 @@ public:
     virtual bool isContextReady() = 0;
     virtual void onDestroyHardwareResources() = 0;
     virtual void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue, bool opaque,
+            LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
             const BakedOpRenderer::LightInfo& lightInfo) = 0;
     virtual TaskManager* getTaskManager() = 0;
     virtual bool createOrUpdateLayer(RenderNode* node,
-            const DamageAccumulator& damageAccumulator) = 0;
+            const DamageAccumulator& damageAccumulator, bool wideColorGamut) = 0;
     virtual bool pinImages(std::vector<SkImage*>& mutableImages) = 0;
     virtual bool pinImages(LsaVector<sk_sp<Bitmap>>& images) = 0;
     virtual void unpinImages() = 0;

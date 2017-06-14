@@ -32,7 +32,8 @@ namespace uirenderer {
 OffscreenBuffer* BakedOpRenderer::startTemporaryLayer(uint32_t width, uint32_t height) {
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
-    OffscreenBuffer* buffer = mRenderState.layerPool().get(mRenderState, width, height);
+    OffscreenBuffer* buffer = mRenderState.layerPool().get(
+            mRenderState, width, height, mWideColorGamut);
     startRepaintLayer(buffer, Rect(width, height));
     return buffer;
 }
@@ -103,7 +104,8 @@ void BakedOpRenderer::endLayer() {
 OffscreenBuffer* BakedOpRenderer::copyToLayer(const Rect& area) {
     const uint32_t width = area.getWidth();
     const uint32_t height = area.getHeight();
-    OffscreenBuffer* buffer = mRenderState.layerPool().get(mRenderState, width, height);
+    OffscreenBuffer* buffer = mRenderState.layerPool().get(
+            mRenderState, width, height, mWideColorGamut);
     if (!area.isEmpty() && width != 0 && height != 0) {
         mCaches.textureState().activateTexture(0);
         mCaches.textureState().bindTexture(buffer->texture.id());

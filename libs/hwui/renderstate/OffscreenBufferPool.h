@@ -43,7 +43,7 @@ class RenderState;
 class OffscreenBuffer : GpuMemoryTracker {
 public:
     OffscreenBuffer(RenderState& renderState, Caches& caches,
-            uint32_t viewportWidth, uint32_t viewportHeight);
+            uint32_t viewportWidth, uint32_t viewportHeight, bool wideColorGamut = false);
     ~OffscreenBuffer();
 
     Rect getTextureCoordinates();
@@ -68,6 +68,8 @@ public:
     uint32_t viewportHeight;
     Texture texture;
 
+    bool wideColorGamut = false;
+
     // Portion of layer that has been drawn to. Used to minimize drawing area when
     // drawing back to screen / parent FBO.
     Region region;
@@ -90,7 +92,7 @@ public:
     ~OffscreenBufferPool();
 
     WARN_UNUSED_RESULT OffscreenBuffer* get(RenderState& renderState,
-            const uint32_t width, const uint32_t height);
+            const uint32_t width, const uint32_t height, bool wideColorGamut = false);
 
     WARN_UNUSED_RESULT OffscreenBuffer* resize(OffscreenBuffer* layer,
             const uint32_t width, const uint32_t height);
@@ -122,14 +124,16 @@ private:
     struct Entry {
         Entry() {}
 
-        Entry(const uint32_t layerWidth, const uint32_t layerHeight)
+        Entry(const uint32_t layerWidth, const uint32_t layerHeight, bool wideColorGamut)
                 : width(OffscreenBuffer::computeIdealDimension(layerWidth))
-                , height(OffscreenBuffer::computeIdealDimension(layerHeight)) {}
+                , height(OffscreenBuffer::computeIdealDimension(layerHeight))
+                , wideColorGamut(wideColorGamut) {}
 
         explicit Entry(OffscreenBuffer* layer)
                 : layer(layer)
                 , width(layer->texture.width())
-                , height(layer->texture.height()) {
+                , height(layer->texture.height())
+                , wideColorGamut(layer->wideColorGamut) {
         }
 
         static int compare(const Entry& lhs, const Entry& rhs);
@@ -149,6 +153,7 @@ private:
         OffscreenBuffer* layer = nullptr;
         uint32_t width = 0;
         uint32_t height = 0;
+        bool wideColorGamut = false;
     }; // struct Entry
 
     std::multiset<Entry> mPool;
