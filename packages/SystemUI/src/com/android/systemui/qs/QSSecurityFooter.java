@@ -27,6 +27,7 @@ import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -244,8 +245,9 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
 
         mDialog = new SystemUIDialog(mContext);
         mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        View dialogView = LayoutInflater.from(mContext)
-               .inflate(R.layout.quick_settings_footer_dialog, null, false);
+        View dialogView = LayoutInflater.from(
+                new ContextThemeWrapper(mContext, R.style.Theme_SystemUI_Dialog))
+                .inflate(R.layout.quick_settings_footer_dialog, null, false);
         mDialog.setView(dialogView);
         mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
 
