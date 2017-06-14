@@ -8273,12 +8273,12 @@ public class PackageManagerService extends IPackageManager.Stub
         if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return false;
         }
-        int callingUid = Binder.getCallingUid();
-        if (Process.isIsolated(callingUid)) {
-            callingUid = mIsolatedOwners.get(callingUid);
-        }
 
         synchronized (mPackages) {
+            int callingUid = Binder.getCallingUid();
+            if (Process.isIsolated(callingUid)) {
+                callingUid = mIsolatedOwners.get(callingUid);
+            }
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             PackageParser.Package pkg = mPackages.get(packageName);
             final boolean returnAllowed =
