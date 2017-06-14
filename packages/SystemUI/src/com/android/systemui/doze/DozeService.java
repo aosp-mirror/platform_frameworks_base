@@ -16,23 +16,27 @@
 
 package com.android.systemui.doze;
 
+import android.content.Context;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.service.dreams.DreamService;
 import android.util.Log;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.DozeServicePlugin;
 import com.android.systemui.plugins.PluginManager;
-
+import com.android.systemui.plugins.DozeServicePlugin.RequestDoze;
+import com.android.systemui.plugins.PluginListener;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-public class DozeService extends DreamService implements DozeMachine.Service {
+public class DozeService extends DreamService
+        implements DozeMachine.Service, RequestDoze, PluginListener<DozeServicePlugin> {
     private static final String TAG = "DozeService";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private DozeMachine mDozeMachine;
+    private DozeServicePlugin mDozePlugin;
 
     public DozeService() {
         setDebug(DEBUG);
@@ -48,8 +52,23 @@ public class DozeService extends DreamService implements DozeMachine.Service {
             finish();
             return;
         }
-
+        Dependency.get(PluginManager.class).addPluginListener(this,
+                DozeServicePlugin.class, false /* Allow multiple */);
         mDozeMachine = new DozeFactory().assembleMachine(this);
+    }
+
+    @Override
+    public void onPluginConnected(DozeServicePlugin plugin, Context pluginContext) {
+        mDozePlugin = plugin;
+        mDozePlugin.setDozeRequester(this);
+    }
+
+    @Override
+    public void onPluginDisconnected(DozeServicePlugin plugin) {
+        if (mDozePlugin != null) {
+            mDozePlugin.onDreamingStopped();
+            mDozePlugin = null;
+        }
     }
 
     @Override
@@ -59,12 +78,18 @@ public class DozeService extends DreamService implements DozeMachine.Service {
         startDozing();
         setDozeScreenBrightness(getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessDoze));
+        if (mDozePlugin != null) {
+            mDozePlugin.onDreamingStarted();
+        }
     }
 
     @Override
     public void onDreamingStopped() {
         super.onDreamingStopped();
         mDozeMachine.requestState(DozeMachine.State.FINISH);
+        if (mDozePlugin != null) {
+            mDozePlugin.onDreamingStopped();
+        }
     }
 
     @Override
@@ -78,5 +103,19 @@ public class DozeService extends DreamService implements DozeMachine.Service {
     public void requestWakeUp() {
         PowerManager pm = getSystemService(PowerManager.class);
         pm.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:NODOZE");
+    }
+
+    @Override
+    public void onRequestShowDoze() {
+        if (mDozeMachine != null) {
+            mDozeMachine.requestState(DozeMachine.State.DOZE_AOD);
+        }
+    }
+
+    @Override
+    public void onRequestHideDoze() {
+        if (mDozeMachine != null) {
+            mDozeMachine.requestState(DozeMachine.State.DOZE);
+        }
     }
 }
