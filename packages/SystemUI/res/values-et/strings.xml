@@ -354,7 +354,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Otsing"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lohistage üles: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Lohistage vasakule: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Teid segatakse helide ja värinaga vaid teie määratud alarmide, meeldetuletuste, sündmuste ning helistajate puhul."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Helid ja vibratsioonid ei sega teid. Kuulete siiski enda määratud alarme, meeldetuletusi, sündmusi ja helistajaid. Samuti kuulete kõike, mille esitamise ise valite, sh muusika, videod ja mängud."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Helid ja vibratsioonid ei sega teid. Kuulete siiski alarme. Samuti kuulete kõike, mille esitamise ise valite, sh muusika, videod ja mängud."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Kohanda"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"See blokeerib KÕIK – sealhulgas alarmide, muusika, videote ja mängude – helid ja värinad. Saate siiski helistada."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"See blokeerib KÕIK – sealhulgas alarmide, muusika, videote ja mängude – helid ja vibratsioonid."</string>
@@ -476,7 +477,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Tänan, ei"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Seadistus"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Lõpeta nüüd"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Lülita kohe välja"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Laiendamine"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Ahendamine"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekraan on kinnitatud"</string>
@@ -554,8 +555,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Te ei saa enam neid märguandeid"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> märguandekategooriat"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Sellel rakendusel ei ole märguannete kategooriaid"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Selle rakenduse märguandeid ei saa välja lülitada"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">1 <xliff:g id="NUMBER_1">%d</xliff:g>-st märguannete kategooriast sellelt rakenduselt</item>
       <item quantity="one">1 <xliff:g id="NUMBER_0">%d</xliff:g>-st märguannete kategooriast sellelt rakenduselt</item>
@@ -577,8 +577,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"märguannete edasilükkamise valikud"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"VÕTA TAGASI"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Edasi lükatud <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d tundi</item>
+      <item quantity="one">%d tund</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d minutit</item>
+      <item quantity="one">%d minut</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akukasutus"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akusäästja pole laadimise ajal saadaval"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akusäästja"</string>

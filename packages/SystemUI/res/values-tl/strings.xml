@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Maghanap"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Mag-slide pataas para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Mag-slide pakaliwa para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Hindi ka magagambala ng mga tunog at pag-vibrate, maliban mula sa mga alarm, paalala, kaganapan at mga tinukoy mong tumatawag."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban sa mga alarm, paalala, kaganapan, at tumatawag na tutukuyin mo. Maririnig mo pa rin ang anumang pipiliin mong i-play kabilang ang musika, mga video, at mga laro."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban sa mga alarm. Maririnig mo pa rin ang anumang pipiliin mong i-play kabilang ang musika, mga video, at mga laro."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"I-customize"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Bina-block nito ang LAHAT ng tunog at pag-vibrate, kabilang ang mula sa mga alarm, musika, video at laro. Magagawa mo pa ring tumawag."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Bina-block nito ang LAHAT ng tunog at pag-vibrate, kabilang ang mula sa mga alarm, musika, video at laro."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Hindi"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"I-set up"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Tapusin ngayon"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"I-off na ngayon"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Palawakin"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"I-collapse"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Naka-pin ang screen"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Hindi ka na makakatanggap ng ganitong mga notification"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> (na) kategorya ng notification"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Walang kategorya ng notification ang app na ito"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Hindi maaaring i-off ang mga notification mula sa app na ito"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">1 sa <xliff:g id="NUMBER_1">%d</xliff:g> kategorya ng notification mula sa app na ito</item>
       <item quantity="other">1 sa <xliff:g id="NUMBER_1">%d</xliff:g> na kategorya ng notification mula sa app na ito</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"mga opsyon sa pag-snooze ng notification"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"I-UNDO"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Na-snooze ng <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">%d oras</item>
+      <item quantity="other">%d na oras</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">%d minuto</item>
+      <item quantity="other">%d na minuto</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Paggamit ng baterya"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Hindi available ang Pangtipid sa Baterya kapag nagcha-charge"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Pangtipid sa Baterya"</string>

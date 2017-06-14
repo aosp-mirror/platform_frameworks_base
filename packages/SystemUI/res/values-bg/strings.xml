@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Търсене"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Плъзнете нагоре за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Плъзнете наляво за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Няма да бъдете обезпокоявани от звуци и вибрирания, различни от будилници, напомняния, събития и обаждания от посочени от вас контакти."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Няма да бъдете обезпокоявани от звуци и вибрирания освен от будилници, напомняния, събития и обаждания от посочени от вас контакти. Пак ще чувате всичко, което изберете да се пусне, включително музика, видеоклипове и игри."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Няма да бъдете обезпокоявани от звуци и вибрирания освен от будилници. Пак ще чувате всичко, което изберете да се пусне, включително музика, видеоклипове и игри."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Персонализиране"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Този режим блокира ВСИЧКИ звуци и вибрирания, включително от будилници, музика, видеоклипове и игри. Пак ще можете да извършвате телефонни обаждания."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Този режим блокира ВСИЧКИ звуци и вибрирания, включително от будилници, музика, видеоклипове и игри."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Няма нужда"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Настройване"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Прекратяване сега"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Изключване сега"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Разгъване"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Свиване"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Екранът е фиксиран"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Вече няма да получавате тези известия"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> категории известия"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"За това приложение няма категории на известията"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Известията от това приложение не могат да бъдат изключени"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">1 от <xliff:g id="NUMBER_1">%d</xliff:g> категории известия от това приложение</item>
       <item quantity="one">1 от <xliff:g id="NUMBER_0">%d</xliff:g> категория известия от това приложение</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"опции за отлагане на известията"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ОТМЯНА"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Отложено за <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d часа</item>
+      <item quantity="one">%d час</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d минути</item>
+      <item quantity="one">%d минута</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Ползв. на батерията"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режимът за запазване на батерията не е налице при зареждане"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим за запазване на батерията"</string>

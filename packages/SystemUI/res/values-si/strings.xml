@@ -352,7 +352,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"සෙවීම"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> සඳහා උඩට සර්පණය කරන්න."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> සඳහා වමට සර්පණය කරන්න."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"එලාම, සිහිකැඳවීම්, සිදුවීම් සහ ඔබ සඳහන් කරන අමතන්නන් වෙතින් හැර, ශබ්ද සහ කම්පනවලින් ඔබට බාධා නොවනු ඇත."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"එලාම සිහිකැඳවීම්, සිදුවීම්, සහ ඔබ සඳහන් කළ අමතන්නන් හැර, ශබ්ද සහ කම්පනවලින් ඔබට බාධා නොවනු ඇත. සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු ඔබ වාදනය කිරීමට තෝරන ලද සියලු දේ ඔබට තවම ඇසෙනු ඇත."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"එලාම හැර, ශබ්ද සහ කම්පනවලින් ඔබට බාධා නොවනු ඇත. සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු ඔබ වාදනය කිරීමට තෝරන ලද සියලු දේ ඔබට තවම ඇසෙනු ඇත."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"අභිරුචිකරණය"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"මෙය එලාම්, සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු, සියලු ශබ්ද සහ කම්පන අවහිර කරයි. ඔබට තවමත් දුරකථන ඇමතුම් ගැනීමට හැකියාව ඇත."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"මෙය එලාම්, සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු, සියලු ශබ්ද සහ කම්පන අවහිර කරයි."</string>
@@ -474,7 +475,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"එපා ස්තූතියි"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"සකසන්න"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"දැන් අවසන් කරන්න"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"දැන් ක්‍රියාවිරහිත කරන්න"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"දිග හරින්න"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"හකුළන්න"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"තීරය අමුණන ලදි"</string>
@@ -552,8 +553,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"ඔබට තවදුරටත් මෙම දැනුම්දීම් නොලැබෙනු ඇත"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"දැනුම්දීම් කාණ්ඩ <xliff:g id="NUMBER">%d</xliff:g>ක්"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"මෙම යෙදුම හට දැනුම්දීම් ප්‍රවර්ග නොමැත"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"මෙම යෙදුම වෙතින් වන දැනුම්දීම් ක්‍රියාවිරහිත කළ නොහැකිය"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">මෙම යෙදුමෙන් දැනුම්දීම් ප්‍රවර්ග <xliff:g id="NUMBER_1">%d</xliff:g>න් 1ක්</item>
       <item quantity="other">මෙම යෙදුමෙන් දැනුම්දීම් ප්‍රවර්ග <xliff:g id="NUMBER_1">%d</xliff:g>න් 1ක්</item>
@@ -575,8 +575,14 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"දැනුම්දීම් මදක් නතර කිරීමේ විකල්ප"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"අස් කරන්න"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g>ක් මදක් නතර කරන ලදී"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">පැය %d</item>
+      <item quantity="other">පැය %d</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">මිනිත්තු %d</item>
+      <item quantity="other">මිනිත්තු %d</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"බැටරි භාවිතය"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ආරෝපණය අතරතුර බැටරි සුරැකුම ලබා ගත නොහැකිය."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"බැටරි සුරැකුම"</string>
