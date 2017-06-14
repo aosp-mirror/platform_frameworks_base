@@ -926,6 +926,10 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     return createBitmap(env, bitmap.release(), android::bitmap::kBitmapCreateFlag_Mutable);
 }
 
+static void android_view_ThreadedRenderer_disableVsync(JNIEnv*, jclass) {
+    RenderProxy::disableVsync();
+}
+
 // ----------------------------------------------------------------------------
 // FrameMetricsObserver
 // ----------------------------------------------------------------------------
@@ -1024,6 +1028,7 @@ static const JNINativeMethod gMethods[] = {
                 (void*)android_view_ThreadedRenderer_copySurfaceInto },
     { "nCreateHardwareBitmap", "(JII)Landroid/graphics/Bitmap;",
             (void*)android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode },
+    { "disableVsync", "()V", (void*)android_view_ThreadedRenderer_disableVsync },
 };
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {

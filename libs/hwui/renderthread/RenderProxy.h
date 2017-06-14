@@ -138,6 +138,8 @@ public:
     static int copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap);
 
     static void onBitmapDestroyed(uint32_t pixelRefId);
+
+    ANDROID_API static void disableVsync();
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;
