@@ -48,6 +48,8 @@
 
     <!-- The size of the dots in the PIN unlock method. -->
     <dimen name="password_dot_size">9dp</dimen>
+    <!-- The size of PIN text in the PIN unlock method. -->
+    <integer name="scaled_password_text_size">40</integer>
 
     <!-- The padding between chars of the password view. -->
     <dimen name="password_char_padding">8dp</dimen>
