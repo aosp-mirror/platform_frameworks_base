@@ -39,7 +39,7 @@ static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jo
 
 }
 
-static void android_server_SystemServer_startHidlServices(JNIEnv* /* env */, jobject /* clazz */) {
+static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /* clazz */) {
     using ::android::frameworks::schedulerservice::V1_0::ISchedulingPolicyService;
     using ::android::frameworks::schedulerservice::V1_0::implementation::SchedulingPolicyService;
     using ::android::frameworks::sensorservice::V1_0::ISensorManager;
@@ -50,7 +50,10 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* /* env */, job
 
     configureRpcThreadpool(5, false /* callerWillJoin */);
 
-    sp<ISensorManager> sensorService = new SensorManager();
+    JavaVM *vm;
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Cannot get Java VM");
+
+    sp<ISensorManager> sensorService = new SensorManager(vm);
     err = sensorService->registerAsService();
     ALOGE_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
 
