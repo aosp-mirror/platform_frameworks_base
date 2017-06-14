@@ -36,7 +36,7 @@ public:
     bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
             const FrameBuilder::LightGeometry& lightGeometry,
             LayerUpdateQueue* layerUpdateQueue,
-            const Rect& contentDrawBounds, bool opaque,
+            const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
             const BakedOpRenderer::LightInfo& lightInfo,
             const std::vector< sp<RenderNode> >& renderNodes,
             FrameInfoVisualizer* profiler) override;
@@ -50,11 +50,11 @@ public:
     bool isContextReady() override;
     void onDestroyHardwareResources() override;
     void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue, bool opaque,
+            LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
             const BakedOpRenderer::LightInfo& lightInfo) override;
     TaskManager* getTaskManager() override;
     bool createOrUpdateLayer(RenderNode* node,
-            const DamageAccumulator& damageAccumulator) override;
+            const DamageAccumulator& damageAccumulator, bool wideColorGamut) override;
     bool pinImages(std::vector<SkImage*>& mutableImages) override { return false; }
     bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override;
     void unpinImages() override;

@@ -45,7 +45,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(LeakCheck, saveLayer_overdrawRejection) {
     FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
             sLightGeometery, Caches::getInstance());
     frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(node));
-    BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
+    BakedOpRenderer renderer(caches, renderState, true, false, sLightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
 }
 
@@ -62,6 +62,6 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(LeakCheck, saveLayerUnclipped_simple) {
     FrameBuilder frameBuilder(SkRect::MakeWH(200, 200), 200, 200,
             sLightGeometery, Caches::getInstance());
     frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(node));
-    BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
+    BakedOpRenderer renderer(caches, renderState, true, false, sLightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
 }

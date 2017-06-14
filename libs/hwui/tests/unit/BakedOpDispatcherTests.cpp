@@ -37,7 +37,7 @@ const FrameBuilder::LightGeometry sLightGeometry = { {100, 100, 100}, 50};
 class ValidatingBakedOpRenderer : public BakedOpRenderer {
 public:
     ValidatingBakedOpRenderer(RenderState& renderState, std::function<void(const Glop& glop)> validator)
-            : BakedOpRenderer(Caches::getInstance(), renderState, true, sLightInfo)
+            : BakedOpRenderer(Caches::getInstance(), renderState, true, false, sLightInfo)
             , mValidator(validator) {
         mGlopReceiver = ValidatingGlopReceiver;
     }

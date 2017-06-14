@@ -58,7 +58,7 @@ Frame OpenGLPipeline::getFrame() {
 bool OpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
         const FrameBuilder::LightGeometry& lightGeometry,
         LayerUpdateQueue* layerUpdateQueue,
-        const Rect& contentDrawBounds, bool opaque,
+        const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
         const BakedOpRenderer::LightInfo& lightInfo,
         const std::vector< sp<RenderNode> >& renderNodes,
         FrameInfoVisualizer* profiler) {
@@ -77,7 +77,7 @@ bool OpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const S
     frameBuilder.deferRenderNodeScene(renderNodes, contentDrawBounds);
 
     BakedOpRenderer renderer(caches, mRenderThread.renderState(),
-            opaque, lightInfo);
+            opaque, wideColorGamut, lightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
     ProfileRenderer profileRenderer(renderer);
     profiler->draw(profileRenderer);
@@ -184,14 +184,14 @@ void OpenGLPipeline::onDestroyHardwareResources() {
 }
 
 void OpenGLPipeline::renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-        LayerUpdateQueue* layerUpdateQueue, bool opaque,
+        LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
         const BakedOpRenderer::LightInfo& lightInfo) {
     static const std::vector< sp<RenderNode> > emptyNodeList;
     auto& caches = Caches::getInstance();
     FrameBuilder frameBuilder(*layerUpdateQueue, lightGeometry, caches);
     layerUpdateQueue->clear();
-    BakedOpRenderer renderer(caches, mRenderThread.renderState(),
-            opaque, lightInfo);
+    // TODO: Handle wide color gamut contexts
+    BakedOpRenderer renderer(caches, mRenderThread.renderState(), opaque, wideColorGamut, lightInfo);
     LOG_ALWAYS_FATAL_IF(renderer.didDraw(), "shouldn't draw in buildlayer case");
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
 }
@@ -205,12 +205,13 @@ static bool layerMatchesWH(OffscreenBuffer* layer, int width, int height) {
 }
 
 bool OpenGLPipeline::createOrUpdateLayer(RenderNode* node,
-        const DamageAccumulator& damageAccumulator) {
+        const DamageAccumulator& damageAccumulator, bool wideColorGamut) {
     RenderState& renderState = mRenderThread.renderState();
     OffscreenBufferPool& layerPool = renderState.layerPool();
     bool transformUpdateNeeded = false;
     if (node->getLayer() == nullptr) {
-        node->setLayer(layerPool.get(renderState, node->getWidth(), node->getHeight()));
+        node->setLayer(layerPool.get(renderState,
+                node->getWidth(), node->getHeight(), wideColorGamut));
         transformUpdateNeeded = true;
     } else if (!layerMatchesWH(node->getLayer(), node->getWidth(), node->getHeight())) {
         // TODO: remove now irrelevant, currently enqueued damage (respecting damage ordering)
