@@ -62,7 +62,8 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final TaskSnapshot snapshot = new TaskSnapshot(buffer,
                 ORIENTATION_PORTRAIT, contentInsets, false, 1.0f);
         mSurface = new TaskSnapshotSurface(sWm, new Window(), new Surface(), snapshot, "Test",
-                Color.WHITE, Color.RED, Color.BLUE, sysuiVis, windowFlags, 0, taskBounds);
+                Color.WHITE, Color.RED, Color.BLUE, sysuiVis, windowFlags, 0, taskBounds,
+                ORIENTATION_PORTRAIT);
     }
 
     private void setupSurface(int width, int height) {
