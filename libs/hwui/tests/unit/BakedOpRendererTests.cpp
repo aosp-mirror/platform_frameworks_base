@@ -24,7 +24,8 @@ using namespace android::uirenderer;
 const BakedOpRenderer::LightInfo sLightInfo = { 128, 128 };
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpRenderer, startRepaintLayer_clear) {
-    BakedOpRenderer renderer(Caches::getInstance(), renderThread.renderState(), true, sLightInfo);
+    BakedOpRenderer renderer(Caches::getInstance(), renderThread.renderState(),
+            true, false, sLightInfo);
     OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 200u, 200u);
 
     layer.dirty(Rect(200, 200));

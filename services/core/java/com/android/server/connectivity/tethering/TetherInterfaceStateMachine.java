@@ -16,17 +16,28 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
+
 import android.net.ConnectivityManager;
+import android.net.INetd;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
+import android.net.RouteInfo;
+import android.net.ip.RouterAdvertisementDaemon;
+import android.net.ip.RouterAdvertisementDaemon.RaParams;
+import android.net.util.NetdService;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.MessageUtils;
@@ -34,7 +45,15 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
+import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Random;
 
 /**
  * @hide
@@ -42,6 +61,8 @@ import java.net.InetAddress;
  * Tracks the eligibility of a given network interface for tethering.
  */
 public class TetherInterfaceStateMachine extends StateMachine {
+    private static final IpPrefix LINK_LOCAL_PREFIX = new IpPrefix("fe80::/64");
+
     private static final String USB_NEAR_IFACE_ADDR = "192.168.42.129";
     private static final int USB_PREFIX_LENGTH = 24;
     private static final String WIFI_HOST_IFACE_ADDR = "192.168.43.1";
@@ -91,15 +112,19 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private final String mIfaceName;
     private final int mInterfaceType;
     private final LinkProperties mLinkProperties;
-    private final IPv6TetheringInterfaceServices mIPv6TetherSvc;
 
     private int mLastError;
     private String mMyUpstreamIfaceName;  // may change over time
+    private NetworkInterface mNetworkInterface;
+    private byte[] mHwAddr;
+    private LinkProperties mLastIPv6LinkProperties;
+    private RouterAdvertisementDaemon mRaDaemon;
+    private RaParams mLastRaParams;
 
     public TetherInterfaceStateMachine(
             String ifaceName, Looper looper, int interfaceType, SharedLog log,
             INetworkManagementService nMService, INetworkStatsService statsService,
-            IControlsTethering tetherController, IPv6TetheringInterfaceServices ipv6Svc) {
+            IControlsTethering tetherController) {
         super(ifaceName, looper);
         mLog = log.forSubComponent(ifaceName);
         mNMService = nMService;
@@ -109,7 +134,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mInterfaceType = interfaceType;
         mLinkProperties = new LinkProperties();
         mLinkProperties.setInterfaceName(mIfaceName);
-        mIPv6TetherSvc = ipv6Svc;
         mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
 
         mInitialState = new InitialState();
@@ -133,6 +157,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
     public void stop() { sendMessage(CMD_INTERFACE_DOWN); }
 
     public void unwanted() { sendMessage(CMD_TETHER_UNREQUESTED); }
+
+    /**
+     * Internals.
+     */
 
     // configured when we start tethering and unconfig'd on error or conclusion
     private boolean configureIfaceIp(boolean enabled) {
@@ -180,6 +208,206 @@ public class TetherInterfaceStateMachine extends StateMachine {
         return true;
     }
 
+    private boolean startIPv6() {
+        // TODO: Refactor for testability (perhaps passing an android.system.Os
+        // instance and calling getifaddrs() directly).
+        try {
+            mNetworkInterface = NetworkInterface.getByName(mIfaceName);
+        } catch (SocketException e) {
+            mLog.e("Error looking up NetworkInterfaces: " + e);
+            stopIPv6();
+            return false;
+        }
+        if (mNetworkInterface == null) {
+            mLog.e("Failed to find NetworkInterface");
+            stopIPv6();
+            return false;
+        }
+
+        try {
+            mHwAddr = mNetworkInterface.getHardwareAddress();
+        } catch (SocketException e) {
+            mLog.e("Failed to find hardware address: " + e);
+            stopIPv6();
+            return false;
+        }
+
+        final int ifindex = mNetworkInterface.getIndex();
+        mRaDaemon = new RouterAdvertisementDaemon(mIfaceName, ifindex, mHwAddr);
+        if (!mRaDaemon.start()) {
+            stopIPv6();
+            return false;
+        }
+
+        return true;
+    }
+
+    private void stopIPv6() {
+        mNetworkInterface = null;
+        mHwAddr = null;
+        setRaParams(null);
+
+        if (mRaDaemon != null) {
+            mRaDaemon.stop();
+            mRaDaemon = null;
+        }
+    }
+
+    // IPv6TetheringCoordinator sends updates with carefully curated IPv6-only
+    // LinkProperties. These have extraneous data filtered out and only the
+    // necessary prefixes included (per its prefix distribution policy).
+    //
+    // TODO: Evaluate using a data structure than is more directly suited to
+    // communicating only the relevant information.
+    private void updateUpstreamIPv6LinkProperties(LinkProperties v6only) {
+        if (mRaDaemon == null) return;
+
+        // Avoid unnecessary work on spurious updates.
+        if (Objects.equals(mLastIPv6LinkProperties, v6only)) {
+            return;
+        }
+
+        RaParams params = null;
+
+        if (v6only != null) {
+            params = new RaParams();
+            params.mtu = v6only.getMtu();
+            params.hasDefaultRoute = v6only.hasIPv6DefaultRoute();
+
+            for (LinkAddress linkAddr : v6only.getLinkAddresses()) {
+                if (linkAddr.getPrefixLength() != RFC7421_PREFIX_LENGTH) continue;
+
+                final IpPrefix prefix = new IpPrefix(
+                        linkAddr.getAddress(), linkAddr.getPrefixLength());
+                params.prefixes.add(prefix);
+
+                final Inet6Address dnsServer = getLocalDnsIpFor(prefix);
+                if (dnsServer != null) {
+                    params.dnses.add(dnsServer);
+                }
+            }
+        }
+        // If v6only is null, we pass in null to setRaParams(), which handles
+        // deprecation of any existing RA data.
+
+        setRaParams(params);
+        mLastIPv6LinkProperties = v6only;
+    }
+
+    private void configureLocalRoutes(
+            HashSet<IpPrefix> deprecatedPrefixes, HashSet<IpPrefix> newPrefixes) {
+        // [1] Remove the routes that are deprecated.
+        if (!deprecatedPrefixes.isEmpty()) {
+            final ArrayList<RouteInfo> toBeRemoved =
+                    getLocalRoutesFor(mIfaceName, deprecatedPrefixes);
+            try {
+                final int removalFailures = mNMService.removeRoutesFromLocalNetwork(toBeRemoved);
+                if (removalFailures > 0) {
+                    mLog.e(String.format("Failed to remove %d IPv6 routes from local table.",
+                            removalFailures));
+                }
+            } catch (RemoteException e) {
+                mLog.e("Failed to remove IPv6 routes from local table: " + e);
+            }
+        }
+
+        // [2] Add only the routes that have not previously been added.
+        if (newPrefixes != null && !newPrefixes.isEmpty()) {
+            HashSet<IpPrefix> addedPrefixes = (HashSet) newPrefixes.clone();
+            if (mLastRaParams != null) {
+                addedPrefixes.removeAll(mLastRaParams.prefixes);
+            }
+
+            if (mLastRaParams == null || mLastRaParams.prefixes.isEmpty()) {
+                // We need to be able to send unicast RAs, and clients might
+                // like to ping the default router's link-local address.  Note
+                // that we never remove the link-local route from the network
+                // until Tethering disables tethering on the interface. We
+                // only need to add the link-local prefix once, but in the
+                // event we add it more than once netd silently ignores EEXIST.
+                addedPrefixes.add(LINK_LOCAL_PREFIX);
+            }
+
+            if (!addedPrefixes.isEmpty()) {
+                final ArrayList<RouteInfo> toBeAdded =
+                        getLocalRoutesFor(mIfaceName, addedPrefixes);
+                try {
+                    // It's safe to call addInterfaceToLocalNetwork() even if
+                    // the interface is already in the local_network. Note also
+                    // that adding routes that already exist does not cause an
+                    // error (EEXIST is silently ignored).
+                    mNMService.addInterfaceToLocalNetwork(mIfaceName, toBeAdded);
+                } catch (RemoteException e) {
+                    mLog.e("Failed to add IPv6 routes to local table: " + e);
+                }
+            }
+        }
+    }
+
+    private void configureLocalDns(
+            HashSet<Inet6Address> deprecatedDnses, HashSet<Inet6Address> newDnses) {
+        final INetd netd = NetdService.getInstance();
+        if (netd == null) {
+            if (newDnses != null) newDnses.clear();
+            mLog.e("No netd service instance available; not setting local IPv6 addresses");
+            return;
+        }
+
+        // [1] Remove deprecated local DNS IP addresses.
+        if (!deprecatedDnses.isEmpty()) {
+            for (Inet6Address dns : deprecatedDnses) {
+                final String dnsString = dns.getHostAddress();
+                try {
+                    netd.interfaceDelAddress(mIfaceName, dnsString, RFC7421_PREFIX_LENGTH);
+                } catch (ServiceSpecificException | RemoteException e) {
+                    mLog.e("Failed to remove local dns IP " + dnsString + ": " + e);
+                }
+            }
+        }
+
+        // [2] Add only the local DNS IP addresses that have not previously been added.
+        if (newDnses != null && !newDnses.isEmpty()) {
+            final HashSet<Inet6Address> addedDnses = (HashSet) newDnses.clone();
+            if (mLastRaParams != null) {
+                addedDnses.removeAll(mLastRaParams.dnses);
+            }
+
+            for (Inet6Address dns : addedDnses) {
+                final String dnsString = dns.getHostAddress();
+                try {
+                    netd.interfaceAddAddress(mIfaceName, dnsString, RFC7421_PREFIX_LENGTH);
+                } catch (ServiceSpecificException | RemoteException e) {
+                    mLog.e("Failed to add local dns IP " + dnsString + ": " + e);
+                    newDnses.remove(dns);
+                }
+            }
+        }
+
+        try {
+            netd.tetherApplyDnsInterfaces();
+        } catch (ServiceSpecificException | RemoteException e) {
+            mLog.e("Failed to update local DNS caching server");
+            if (newDnses != null) newDnses.clear();
+        }
+    }
+
+    private void setRaParams(RaParams newParams) {
+        if (mRaDaemon != null) {
+            final RaParams deprecatedParams =
+                    RaParams.getDeprecatedRaParams(mLastRaParams, newParams);
+
+            configureLocalRoutes(deprecatedParams.prefixes,
+                    (newParams != null) ? newParams.prefixes : null);
+
+            configureLocalDns(deprecatedParams.dnses,
+                    (newParams != null) ? newParams.dnses : null);
+
+            mRaDaemon.buildNewRa(deprecatedParams, newParams);
+        }
+
+        mLastRaParams = newParams;
+    }
+
     private void maybeLogMessage(State state, int what) {
         if (DBG) {
             Log.d(TAG, state.getName() + " got " +
@@ -224,8 +452,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                     transitionTo(mUnavailableState);
                     break;
                 case CMD_IPV6_TETHER_UPDATE:
-                    mIPv6TetherSvc.updateUpstreamIPv6LinkProperties(
-                            (LinkProperties) message.obj);
+                    updateUpstreamIPv6LinkProperties((LinkProperties) message.obj);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -250,8 +477,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 return;
             }
 
-            if (!mIPv6TetherSvc.start()) {
-                mLog.e("Failed to start IPv6TetheringInterfaceServices");
+            if (!startIPv6()) {
+                mLog.e("Failed to startIPv6");
                 // TODO: Make this a fatal error once Bluetooth IPv6 is sorted.
                 return;
             }
@@ -262,7 +489,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
             // Note that at this point, we're leaving the tethered state.  We can fail any
             // of these operations, but it doesn't really change that we have to try them
             // all in sequence.
-            mIPv6TetherSvc.stop();
+            stopIPv6();
 
             try {
                 mNMService.untetherInterface(mIfaceName);
@@ -287,8 +514,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                     if (DBG) Log.d(TAG, "Untethered (ifdown)" + mIfaceName);
                     break;
                 case CMD_IPV6_TETHER_UPDATE:
-                    mIPv6TetherSvc.updateUpstreamIPv6LinkProperties(
-                            (LinkProperties) message.obj);
+                    updateUpstreamIPv6LinkProperties((LinkProperties) message.obj);
                     break;
                 case CMD_IP_FORWARDING_ENABLE_ERROR:
                 case CMD_IP_FORWARDING_DISABLE_ERROR:
@@ -449,5 +675,35 @@ public class TetherInterfaceStateMachine extends StateMachine {
             mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
             sendInterfaceState(IControlsTethering.STATE_UNAVAILABLE);
         }
+    }
+
+    // Accumulate routes representing "prefixes to be assigned to the local
+    // interface", for subsequent modification of local_network routing.
+    private static ArrayList<RouteInfo> getLocalRoutesFor(
+            String ifname, HashSet<IpPrefix> prefixes) {
+        final ArrayList<RouteInfo> localRoutes = new ArrayList<RouteInfo>();
+        for (IpPrefix ipp : prefixes) {
+            localRoutes.add(new RouteInfo(ipp, null, ifname));
+        }
+        return localRoutes;
+    }
+
+    // Given a prefix like 2001:db8::/64 return an address like 2001:db8::1.
+    private static Inet6Address getLocalDnsIpFor(IpPrefix localPrefix) {
+        final byte[] dnsBytes = localPrefix.getRawAddress();
+        dnsBytes[dnsBytes.length - 1] = getRandomNonZeroByte();
+        try {
+            return Inet6Address.getByAddress(null, dnsBytes, 0);
+        } catch (UnknownHostException e) {
+            Slog.wtf(TAG, "Failed to construct Inet6Address from: " + localPrefix);
+            return null;
+        }
+    }
+
+    private static byte getRandomNonZeroByte() {
+        final byte random = (byte) (new Random()).nextInt();
+        // Don't pick the subnet-router anycast address, since that might be
+        // in use on the upstream already.
+        return (random != 0) ? random : 0x1;
     }
 }

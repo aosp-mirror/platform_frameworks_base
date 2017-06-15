@@ -41,6 +41,19 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBuffer, construct) {
     EXPECT_EQ(64u * 192u * 4u, layer.getSizeInBytes());
 }
 
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBuffer, constructWideColorGamut) {
+    OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 49u, 149u, true);
+    EXPECT_EQ(49u, layer.viewportWidth);
+    EXPECT_EQ(149u, layer.viewportHeight);
+
+    EXPECT_EQ(64u, layer.texture.width());
+    EXPECT_EQ(192u, layer.texture.height());
+
+    EXPECT_TRUE(layer.wideColorGamut);
+
+    EXPECT_EQ(64u * 192u * 8u, layer.getSizeInBytes());
+}
+
 RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBuffer, getTextureCoordinates) {
     OffscreenBuffer layerAligned(renderThread.renderState(), Caches::getInstance(), 256u, 256u);
     EXPECT_EQ(Rect(0, 1, 1, 0),
@@ -88,6 +101,47 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, getPutClear) {
     EXPECT_EQ(0u, pool.getCount());
 }
 
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, getPutClearWideColorGamut) {
+    OffscreenBufferPool pool;
+
+    auto layer = pool.get(renderThread.renderState(), 100u, 200u, true);
+    EXPECT_EQ(100u, layer->viewportWidth);
+    EXPECT_EQ(200u, layer->viewportHeight);
+    EXPECT_TRUE(layer->wideColorGamut);
+
+    ASSERT_LT(layer->getSizeInBytes(), pool.getMaxSize());
+
+    pool.putOrDelete(layer);
+    ASSERT_EQ(layer->getSizeInBytes(), pool.getSize());
+
+    auto layer2 = pool.get(renderThread.renderState(), 102u, 202u, true);
+    EXPECT_EQ(layer, layer2) << "layer should be recycled";
+    ASSERT_EQ(0u, pool.getSize()) << "pool should have been emptied by removing only layer";
+
+    pool.putOrDelete(layer2);
+    EXPECT_EQ(1u, pool.getCount());
+    pool.clear();
+    EXPECT_EQ(0u, pool.getSize());
+    EXPECT_EQ(0u, pool.getCount());
+
+    // add non wide gamut layer
+    auto layer3 = pool.get(renderThread.renderState(), 100u, 200u);
+    EXPECT_FALSE(layer3->wideColorGamut);
+    pool.putOrDelete(layer3);
+    EXPECT_EQ(1u, pool.getCount());
+
+    auto layer4 = pool.get(renderThread.renderState(), 100u, 200u, true);
+    EXPECT_TRUE(layer4->wideColorGamut);
+    EXPECT_EQ(1u, pool.getCount());
+    ASSERT_NE(layer3, layer4);
+
+    pool.putOrDelete(layer4);
+
+    pool.clear();
+    EXPECT_EQ(0u, pool.getSize());
+    EXPECT_EQ(0u, pool.getCount());
+}
+
 RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, resize) {
     OffscreenBufferPool pool;
 
@@ -123,6 +177,43 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, resize) {
     pool.putOrDelete(layer2);
 }
 
+RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, resizeWideColorGamut) {
+    OffscreenBufferPool pool;
+
+    auto layer = pool.get(renderThread.renderState(), 64u, 64u, true);
+
+    // resize in place
+    ASSERT_EQ(layer, pool.resize(layer, 60u, 55u));
+    EXPECT_EQ(60u, layer->viewportWidth);
+    EXPECT_EQ(55u, layer->viewportHeight);
+    EXPECT_EQ(64u, layer->texture.width());
+    EXPECT_EQ(64u, layer->texture.height());
+
+    EXPECT_TRUE(layer->wideColorGamut);
+    EXPECT_EQ(64u * 64u * 8u, layer->getSizeInBytes());
+
+    // resized to use different object in pool
+    auto layer2 = pool.get(renderThread.renderState(), 128u, 128u, true);
+    pool.putOrDelete(layer2);
+    ASSERT_EQ(1u, pool.getCount());
+
+    // add a non-wide gamut layer
+    auto layer3 = pool.get(renderThread.renderState(), 128u, 128u);
+    pool.putOrDelete(layer3);
+    ASSERT_EQ(2u, pool.getCount());
+
+    ASSERT_EQ(layer2, pool.resize(layer, 120u, 125u));
+    EXPECT_EQ(120u, layer2->viewportWidth);
+    EXPECT_EQ(125u, layer2->viewportHeight);
+    EXPECT_EQ(128u, layer2->texture.width());
+    EXPECT_EQ(128u, layer2->texture.height());
+
+    EXPECT_TRUE(layer2->wideColorGamut);
+    EXPECT_EQ(128u * 128u * 8u, layer2->getSizeInBytes());
+
+    pool.putOrDelete(layer2);
+}
+
 RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, putAndDestroy) {
     OffscreenBufferPool pool;
     // layer too big to return to the pool
@@ -153,3 +244,4 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, clear) {
 
     EXPECT_EQ(0, GpuMemoryTracker::getInstanceCount(GpuObjectType::OffscreenBuffer));
 }
+

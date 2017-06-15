@@ -5135,7 +5135,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     && task.getRootActivity() != null) {
                 mService.mActivityStarter.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */);
                 mActivityMetricsLogger.notifyActivityLaunching();
-                mService.moveTaskToFrontLocked(task.taskId, 0, bOptions);
+                mService.moveTaskToFrontLocked(task.taskId, 0, bOptions, true /* fromRecents */);
                 mActivityMetricsLogger.notifyActivityLaunched(ActivityManager.START_TASK_TO_FRONT,
                         task.getTopActivity());
 

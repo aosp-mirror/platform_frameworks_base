@@ -92,11 +92,18 @@ class TaskSnapshotController {
      */
     private final boolean mIsRunningOnTv;
 
+    /**
+     * Flag indicating whether we are running on an IoT device.
+     */
+    private final boolean mIsRunningOnIoT;
+
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
         mCache = new TaskSnapshotCache(mService, mLoader);
         mIsRunningOnTv = mService.mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
+        mIsRunningOnIoT = mService.mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_EMBEDDED);
     }
 
     void systemReady() {
@@ -194,7 +201,8 @@ class TaskSnapshotController {
     }
 
     private boolean shouldDisableSnapshots() {
-        return !ENABLE_TASK_SNAPSHOTS || ActivityManager.isLowRamDeviceStatic() || mIsRunningOnTv;
+        return !ENABLE_TASK_SNAPSHOTS || ActivityManager.isLowRamDeviceStatic()
+                || mIsRunningOnTv || mIsRunningOnIoT;
     }
 
     private Rect minRect(Rect rect1, Rect rect2) {

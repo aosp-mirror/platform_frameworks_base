@@ -90,6 +90,16 @@ public abstract class EuiccService extends Service {
      */
     public static final String ACTION_RESOLVE_NO_PRIVILEGES =
             "android.service.euicc.action.RESOLVE_NO_PRIVILEGES";
+
+    /** Result code for a successful operation. */
+    public static final int RESULT_OK = 0;
+    /** Result code indicating that an active SIM must be deactivated to perform the operation. */
+    public static final int RESULT_MUST_DEACTIVATE_SIM = -1;
+    // New predefined codes should have negative values.
+
+    /** Start of implementation-specific error results. */
+    public static final int RESULT_FIRST_USER = 1;
+
     /**
      * List of all valid resolution actions for validation purposes.
      * @hide
@@ -138,9 +148,8 @@ public abstract class EuiccService extends Service {
      *     but is here to future-proof the APIs.
      * @param subscription A subscription whose metadata needs to be populated.
      * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
-     *     eUICC, perform this action automatically. Otherwise,
-     *     {@link GetDownloadableSubscriptionMetadataResult#mustDeactivateSim()} should be returned
-     *     to allow the user to consent to this operation first.
+     *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM)}
+     *     should be returned to allow the user to consent to this operation first.
      * @return The result of the operation.
      * @see android.telephony.euicc.EuiccManager#getDownloadableSubscriptionMetadata
      */
@@ -153,9 +162,8 @@ public abstract class EuiccService extends Service {
      * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
      *     but is here to future-proof the APIs.
      * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
-     *     eUICC, perform this action automatically. Otherwise,
-     *     {@link GetDefaultDownloadableSubscriptionListResult#mustDeactivateSim()} should be
-     *     returned to allow the user to consent to this operation first.
+     *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM)}
+     *     should be returned to allow the user to consent to this operation first.
      * @return The result of the list operation.
      * @see android.telephony.euicc.EuiccManager#getDefaultDownloadableSubscriptionList
      */
@@ -171,13 +179,13 @@ public abstract class EuiccService extends Service {
      * @param switchAfterDownload If true, the subscription should be enabled upon successful
      *     download.
      * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
-     *     eUICC, perform this action automatically. Otherwise,
-     *     {@link DownloadResult#mustDeactivateSim()} should be returned to allow the user to
-     *     consent to this operation first.
-     * @return the result of the download operation.
+     *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM}
+     *     should be returned to allow the user to consent to this operation first.
+     * @return the result of the download operation. May be one of the predefined {@code RESULT_}
+     *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#downloadSubscription
      */
-    public abstract DownloadResult onDownloadSubscription(int slotId,
+    public abstract int onDownloadSubscription(int slotId,
             DownloadableSubscription subscription, boolean switchAfterDownload,
             boolean forceDeactivateSim);
 
@@ -211,10 +219,11 @@ public abstract class EuiccService extends Service {
      * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
      *     but is here to future-proof the APIs.
      * @param iccid the ICCID of the subscription to delete.
-     * @return the result of the delete operation.
+     * @return the result of the delete operation. May be one of the predefined {@code RESULT_}
+     *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#deleteSubscription
      */
-    public abstract DeleteResult onDeleteSubscription(int slotId, String iccid);
+    public abstract int onDeleteSubscription(int slotId, String iccid);
 
     /**
      * Switch to the given subscription.
@@ -225,13 +234,13 @@ public abstract class EuiccService extends Service {
      *     profile should be deactivated and no profile should be activated to replace it - this is
      *     equivalent to a physical SIM being ejected.
      * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
-     *     eUICC, perform this action automatically. Otherwise,
-     *     {@link SwitchResult#mustDeactivateSim()} should be returned to allow the user to consent
-     *     to this operation first.
-     * @return the result of the switch operation.
+     *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM}
+     *     should be returned to allow the user to consent to this operation first.
+     * @return the result of the switch operation. May be one of the predefined {@code RESULT_}
+     *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#switchToSubscription
      */
-    public abstract SwitchResult onSwitchToSubscription(int slotId, @Nullable String iccid,
+    public abstract int onSwitchToSubscription(int slotId, @Nullable String iccid,
             boolean forceDeactivateSim);
 
     /**
@@ -241,10 +250,11 @@ public abstract class EuiccService extends Service {
      *     but is here to future-proof the APIs.
      * @param iccid the ICCID of the subscription to update.
      * @param nickname the new nickname to apply.
-     * @return the result of the update operation.
+     * @return the result of the update operation. May be one of the predefined {@code RESULT_}
+     *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#updateSubscriptionNickname
      */
-    public abstract UpdateNicknameResult onUpdateSubscriptionNickname(int slotId, String iccid,
+    public abstract int onUpdateSubscriptionNickname(int slotId, String iccid,
             String nickname);
 
     /**
@@ -255,10 +265,11 @@ public abstract class EuiccService extends Service {
      *
      * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
      *     but is here to future-proof the APIs.
-     * @return the result of the erase operation.
+     * @return the result of the erase operation. May be one of the predefined {@code RESULT_}
+     *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#eraseSubscriptions
      */
-    public abstract EraseResult onEraseSubscriptions(int slotId);
+    public abstract int onEraseSubscriptions(int slotId);
 
     /**
      * Wrapper around IEuiccService that forwards calls to implementations of {@link EuiccService}.
@@ -268,7 +279,7 @@ public abstract class EuiccService extends Service {
         public void downloadSubscription(int slotId, DownloadableSubscription subscription,
                 boolean switchAfterDownload, boolean forceDeactivateSim,
                 IDownloadSubscriptionCallback callback) {
-            DownloadResult result = EuiccService.this.onDownloadSubscription(
+            int result = EuiccService.this.onDownloadSubscription(
                     slotId, subscription, switchAfterDownload, forceDeactivateSim);
             try {
                 callback.onComplete(result);
@@ -339,7 +350,7 @@ public abstract class EuiccService extends Service {
         @Override
         public void deleteSubscription(int slotId, String iccid,
                 IDeleteSubscriptionCallback callback) {
-            DeleteResult result = EuiccService.this.onDeleteSubscription(slotId, iccid);
+            int result = EuiccService.this.onDeleteSubscription(slotId, iccid);
             try {
                 callback.onComplete(result);
             } catch (RemoteException e) {
@@ -350,7 +361,7 @@ public abstract class EuiccService extends Service {
         @Override
         public void switchToSubscription(int slotId, String iccid, boolean forceDeactivateSim,
                 ISwitchToSubscriptionCallback callback) {
-            SwitchResult result =
+            int result =
                     EuiccService.this.onSwitchToSubscription(slotId, iccid, forceDeactivateSim);
             try {
                 callback.onComplete(result);
@@ -362,8 +373,7 @@ public abstract class EuiccService extends Service {
         @Override
         public void updateSubscriptionNickname(int slotId, String iccid, String nickname,
                 IUpdateSubscriptionNicknameCallback callback) {
-            UpdateNicknameResult result =
-                    EuiccService.this.onUpdateSubscriptionNickname(slotId, iccid, nickname);
+            int result = EuiccService.this.onUpdateSubscriptionNickname(slotId, iccid, nickname);
             try {
                 callback.onComplete(result);
             } catch (RemoteException e) {
@@ -373,7 +383,7 @@ public abstract class EuiccService extends Service {
 
         @Override
         public void eraseSubscriptions(int slotId, IEraseSubscriptionsCallback callback) {
-            EraseResult result = EuiccService.this.onEraseSubscriptions(slotId);
+            int result = EuiccService.this.onEraseSubscriptions(slotId);
             try {
                 callback.onComplete(result);
             } catch (RemoteException e) {
