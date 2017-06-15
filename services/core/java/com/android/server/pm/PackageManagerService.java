@@ -19364,7 +19364,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps == null || filterAppAccessLPr(ps, Binder.getCallingUid(), userId)) {
-                return true;
+                return false;
             }
             return mSettings.getBlockUninstallLPr(userId, packageName);
         }
