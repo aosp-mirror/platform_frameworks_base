@@ -1273,14 +1273,6 @@ public class WindowManagerService extends IWindowManager.Stub
                           + token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_APP_EXITING;
                 }
-                if (rootType == TYPE_APPLICATION_STARTING
-                        && (attrs.privateFlags & PRIVATE_FLAG_TASK_SNAPSHOT) == 0
-                        && atoken.firstWindowDrawn) {
-                    // No need for this guy!
-                    if (DEBUG_STARTING_WINDOW || localLOGV) Slog.v(
-                            TAG_WM, "**** NO NEED TO START: " + attrs.getTitle());
-                    return WindowManagerGlobal.ADD_STARTING_NOT_NEEDED;
-                }
             } else if (rootType == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
                     Slog.w(TAG_WM, "Attempted to add input method window with bad token "
