@@ -9818,6 +9818,16 @@ public final class Settings {
         public static final String ENABLE_EPHEMERAL_FEATURE = "enable_ephemeral_feature";
 
         /**
+         * Toggle to enable/disable dexopt for instant applications. The default is for dexopt
+         * to be disabled.
+         * <p>
+         * Type: int (0 to disable, 1 to enable)
+         *
+         * @hide
+         */
+        public static final String INSTANT_APP_DEXOPT_ENABLED = "instant_app_dexopt_enabled";
+
+        /**
          * The min period for caching installed instant apps in milliseconds.
          * <p>
          * Type: long
