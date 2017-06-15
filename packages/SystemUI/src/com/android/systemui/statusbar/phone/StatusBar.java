@@ -661,7 +661,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // Tracks notifications currently visible in mNotificationStackScroller and
     // emits visibility events via NoMan on changes.
-    private final Runnable mVisibilityReporter = new Runnable() {
+    protected final Runnable mVisibilityReporter = new Runnable() {
         private final ArraySet<NotificationVisibility> mTmpNewlyVisibleNotifications =
                 new ArraySet<>();
         private final ArraySet<NotificationVisibility> mTmpCurrentlyVisibleNotifications =
@@ -3831,6 +3831,17 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    void handlePeekToExpandTransistion() {
+        try {
+            // consider the transition from peek to expanded to be a panel open,
+            // but not one that clears notification effects.
+            int notificationLoad = mNotificationData.getActiveNotifications().size();
+            mBarService.onPanelRevealed(false, notificationLoad);
+        } catch (RemoteException ex) {
+            // Won't fail unless the world has ended.
+        }
+    }
+
     /**
      * The LEDs are turned off when the notification panel is shown, even just a little bit.
      * See also StatusBar.setPanelExpanded for another place where we attempt to do this.
@@ -3846,8 +3857,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 int notificationLoad = mNotificationData.getActiveNotifications().size();
                 if (pinnedHeadsUp && isPanelFullyCollapsed())  {
                     notificationLoad = 1;
-                } else {
-                    mMetricsLogger.histogram("note_load", notificationLoad);
                 }
                 mBarService.onPanelRevealed(clearNotificationEffects, notificationLoad);
             } else {
