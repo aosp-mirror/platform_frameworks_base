@@ -79,6 +79,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_SAVED_STATE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_SCREENSHOTS = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_SERVICE = DEBUG_ALL || false;
+    static final boolean DEBUG_FOREGROUND_SERVICE = DEBUG_ALL || false;
     static final boolean DEBUG_SERVICE_EXECUTING = DEBUG_ALL || false;
     static final boolean DEBUG_STACK = DEBUG_ALL || false;
     static final boolean DEBUG_STATES = DEBUG_ALL_ACTIVITIES || false;
