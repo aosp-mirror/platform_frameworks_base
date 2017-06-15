@@ -47,9 +47,9 @@ public class ZoneGetterTest {
     }
 
     @Test
-    public void getTimeZoneOffsetAndName_setLondon_returnLondon() {
-        // Check it will ends with 'London', not 'British Summer Time' or sth else
-        testTimeZoneOffsetAndNameInner(TIME_ZONE_LONDON_ID, "London");
+    public void getTimeZoneOffsetAndName_setLondon_returnBritishSummerTime() {
+        // Check it will ends with 'British Summer Time', not 'London' or sth else
+        testTimeZoneOffsetAndNameInner(TIME_ZONE_LONDON_ID, "British Summer Time");
     }
 
     @Test
