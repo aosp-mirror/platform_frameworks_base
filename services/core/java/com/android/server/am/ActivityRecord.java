@@ -1928,18 +1928,19 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     @Override
-    public void onStartingWindowDrawn() {
+    public void onStartingWindowDrawn(long timestamp) {
         synchronized (service) {
-            mStackSupervisor.mActivityMetricsLogger.notifyStartingWindowDrawn(getStackId());
+            mStackSupervisor.mActivityMetricsLogger.notifyStartingWindowDrawn(
+                    getStackId(), timestamp);
         }
     }
 
     @Override
-    public void onWindowsDrawn() {
+    public void onWindowsDrawn(long timestamp) {
         synchronized (service) {
-            mStackSupervisor.mActivityMetricsLogger.notifyWindowsDrawn(getStackId());
+            mStackSupervisor.mActivityMetricsLogger.notifyWindowsDrawn(getStackId(), timestamp);
             if (displayStartTime != 0) {
-                reportLaunchTimeLocked(SystemClock.uptimeMillis());
+                reportLaunchTimeLocked(timestamp);
             }
             mStackSupervisor.sendWaitingVisibleReportLocked(this);
             startTime = 0;
