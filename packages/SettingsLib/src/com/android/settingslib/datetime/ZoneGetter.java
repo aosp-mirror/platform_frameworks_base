@@ -88,21 +88,16 @@ public class ZoneGetter {
     private static final String XMLTAG_TIMEZONE = "timezone";
 
     public static CharSequence getTimeZoneOffsetAndName(Context context, TimeZone tz, Date now) {
-        final Locale locale = Locale.getDefault();
-        final CharSequence gmtText = getGmtOffsetText(context, locale, tz, now);
-        final TimeZoneNames timeZoneNames = TimeZoneNames.getInstance(locale);
-        final ZoneGetterData data = new ZoneGetterData(context);
-
-        final boolean useExemplarLocationForLocalNames =
-                shouldUseExemplarLocationForLocalNames(data, timeZoneNames);
-        final CharSequence zoneName = getTimeZoneDisplayName(data, timeZoneNames,
-                useExemplarLocationForLocalNames, tz, tz.getID());
-        if (zoneName == null) {
+        Locale locale = Locale.getDefault();
+        CharSequence gmtText = getGmtOffsetText(context, locale, tz, now);
+        TimeZoneNames timeZoneNames = TimeZoneNames.getInstance(locale);
+        String zoneNameString = getZoneLongName(timeZoneNames, tz, now);
+        if (zoneNameString == null) {
             return gmtText;
         }
 
         // We don't use punctuation here to avoid having to worry about localizing that too!
-        return TextUtils.concat(gmtText, " ", zoneName);
+        return TextUtils.concat(gmtText, " ", zoneNameString);
     }
 
     public static List<Map<String, Object>> getZonesList(Context context) {
