@@ -394,6 +394,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     startingWindow.mPolicyVisibility = false;
                     startingWindow.mPolicyVisibilityAfterAnim = false;
                 }
+
+                // We are becoming visible, so better freeze the screen with the windows that are
+                // getting visible so we also wait for them.
+                forAllWindows(mService::makeWindowFreezingScreenIfNeededLocked, true);
             }
 
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "setVisibility: " + this
@@ -891,8 +895,24 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return mPendingRelaunchCount > 0;
     }
 
+    boolean shouldFreezeBounds() {
+        final Task task = getTask();
+
+        // For freeform windows, we can't freeze the bounds at the moment because this would make
+        // the resizing unresponsive.
+        if (task == null || task.inFreeformWorkspace()) {
+            return false;
+        }
+
+        // We freeze the bounds while drag resizing to deal with the time between
+        // the divider/drag handle being released, and the handling it's new
+        // configuration. If we are relaunched outside of the drag resizing state,
+        // we need to be careful not to do this.
+        return getTask().isDragResizing();
+    }
+
     void startRelaunching() {
-        if (canFreezeBounds()) {
+        if (shouldFreezeBounds()) {
             freezeBounds();
         }
 
@@ -909,9 +929,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     void finishRelaunching() {
-        if (canFreezeBounds()) {
-            unfreezeBounds();
-        }
+        unfreezeBounds();
+
         if (mPendingRelaunchCount > 0) {
             mPendingRelaunchCount--;
         } else {
@@ -926,9 +945,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mPendingRelaunchCount == 0) {
             return;
         }
-        if (canFreezeBounds()) {
-            unfreezeBounds();
-        }
+        unfreezeBounds();
         mPendingRelaunchCount = 0;
     }
 
@@ -1032,14 +1049,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    private boolean canFreezeBounds() {
-        final Task task = getTask();
-
-        // For freeform windows, we can't freeze the bounds at the moment because this would make
-        // the resizing unresponsive.
-        return task != null && !task.inFreeformWorkspace();
-    }
-
     /**
      * Freezes the task bounds. The size of this task reported the app will be fixed to the bounds
      * freezed by {@link Task#prepareFreezingBounds} until {@link #unfreezeBounds} gets called, even
@@ -1064,9 +1073,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      * Unfreezes the previously frozen bounds. See {@link #freezeBounds}.
      */
     private void unfreezeBounds() {
-        if (!mFrozenBounds.isEmpty()) {
-            mFrozenBounds.remove();
+        if (mFrozenBounds.isEmpty()) {
+            return;
         }
+        mFrozenBounds.remove();
         if (!mFrozenMergedConfig.isEmpty()) {
             mFrozenMergedConfig.remove();
         }

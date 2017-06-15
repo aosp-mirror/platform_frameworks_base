@@ -357,6 +357,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IPinnedStackController.aidl \
 	core/java/android/view/IPinnedStackListener.aidl \
 	core/java/android/view/IRotationWatcher.aidl \
+	core/java/android/view/IWallpaperVisibilityListener.aidl \
 	core/java/android/view/IWindow.aidl \
 	core/java/android/view/IWindowFocusObserver.aidl \
 	core/java/android/view/IWindowId.aidl \
@@ -772,14 +773,9 @@ aidl_files := \
 	frameworks/base/core/java/android/view/textservice/SuggestionsInfo.aidl \
 	frameworks/base/core/java/android/service/carrier/CarrierIdentifier.aidl \
 	frameworks/base/core/java/android/service/carrier/MessagePdu.aidl \
-	frameworks/base/core/java/android/service/euicc/DeleteResult.aidl \
-	frameworks/base/core/java/android/service/euicc/DownloadResult.aidl \
-	frameworks/base/core/java/android/service/euicc/EraseResult.aidl \
 	frameworks/base/core/java/android/service/euicc/GetDefaultDownloadableSubscriptionListResult.aidl \
 	frameworks/base/core/java/android/service/euicc/GetDownloadableSubscriptionMetadataResult.aidl \
 	frameworks/base/core/java/android/service/euicc/GetEuiccProfileInfoListResult.aidl \
-	frameworks/base/core/java/android/service/euicc/SwitchResult.aidl \
-	frameworks/base/core/java/android/service/euicc/UpdateNicknameResult.aidl \
 	frameworks/base/core/java/android/service/notification/Adjustment.aidl \
 	frameworks/base/core/java/android/service/notification/Condition.aidl \
 	frameworks/base/core/java/android/service/notification/SnoozeCriterion.aidl \

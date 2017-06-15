@@ -88,7 +88,8 @@ public:
      * The image data is undefined after calling this.
      */
     void resize(uint32_t width, uint32_t height, GLint internalFormat, GLint format) {
-        upload(internalFormat, width, height, format, GL_UNSIGNED_BYTE, nullptr);
+        upload(internalFormat, width, height, format,
+                internalFormat == GL_RGBA16F ? GL_HALF_FLOAT : GL_UNSIGNED_BYTE, nullptr);
     }
 
     /**
@@ -155,7 +156,7 @@ public:
      * Returns true if this texture uses a linear encoding format.
      */
     constexpr bool isLinear() const {
-        return mInternalFormat == GL_RGBA16F;
+        return mIsLinear;
     }
 
     /**
@@ -218,6 +219,9 @@ private:
     GLenum mWrapT = GL_REPEAT;
     GLenum mMinFilter = GL_NEAREST_MIPMAP_LINEAR;
     GLenum mMagFilter = GL_LINEAR;
+
+    // Indicates whether the content of the texture is in linear space
+    bool mIsLinear = false;
 
     Caches& mCaches;
 

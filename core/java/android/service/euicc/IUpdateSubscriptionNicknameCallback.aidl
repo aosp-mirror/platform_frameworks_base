@@ -16,9 +16,7 @@
 
 package android.service.euicc;
 
-import android.service.euicc.UpdateNicknameResult;
-
 /** @hide */
 oneway interface IUpdateSubscriptionNicknameCallback {
-    void onComplete(in UpdateNicknameResult result);
+    void onComplete(int result);
 }

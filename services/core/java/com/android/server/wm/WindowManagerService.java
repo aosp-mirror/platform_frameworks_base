@@ -181,6 +181,7 @@ import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.IRotationWatcher;
+import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.IWindowManager;
@@ -549,9 +550,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     class RotationWatcher {
-        IRotationWatcher mWatcher;
-        IBinder.DeathRecipient mDeathRecipient;
-        int mDisplayId;
+        final IRotationWatcher mWatcher;
+        final IBinder.DeathRecipient mDeathRecipient;
+        final int mDisplayId;
         RotationWatcher(IRotationWatcher watcher, IBinder.DeathRecipient deathRecipient,
                 int displayId) {
             mWatcher = watcher;
@@ -562,6 +563,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     ArrayList<RotationWatcher> mRotationWatchers = new ArrayList<>();
     int mDeferredRotationPauseCount;
+    final WallpaperVisibilityListeners mWallpaperVisibilityListeners =
+            new WallpaperVisibilityListeners();
 
     int mSystemDecorLayer = 0;
     final Rect mScreenRect = new Rect();
@@ -893,10 +896,26 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void closeSurfaceTransaction() {
+        closeSurfaceTransaction(true /* withLockHeld */);
+    }
+
+    /**
+     * Closes a surface transaction.
+     *
+     * @param withLockHeld Whether to acquire the window manager while doing so. In some cases
+     *                     holding the lock my lead to starvation in WM in case closeTransaction
+     *                     blocks and we call it repeatedly, like we do for animations.
+     */
+    void closeSurfaceTransaction(boolean withLockHeld) {
         synchronized (mWindowMap) {
             if (mRoot.mSurfaceTraceEnabled) {
                 mRoot.mRemoteEventTrace.closeSurfaceTransaction();
             }
+            if (withLockHeld) {
+                SurfaceControl.closeTransaction();
+            }
+        }
+        if (!withLockHeld) {
             SurfaceControl.closeTransaction();
         }
     }
@@ -1269,14 +1288,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG_WM, "Attempted to add window with exiting application token "
                           + token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_APP_EXITING;
-                }
-                if (rootType == TYPE_APPLICATION_STARTING
-                        && (attrs.privateFlags & PRIVATE_FLAG_TASK_SNAPSHOT) == 0
-                        && atoken.firstWindowDrawn) {
-                    // No need for this guy!
-                    if (DEBUG_STARTING_WINDOW || localLOGV) Slog.v(
-                            TAG_WM, "**** NO NEED TO START: " + attrs.getTitle());
-                    return WindowManagerGlobal.ADD_STARTING_NOT_NEEDED;
                 }
             } else if (rootType == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
@@ -3934,6 +3945,29 @@ public class WindowManagerService extends IWindowManager.Stub
                     i--;
                 }
             }
+        }
+    }
+
+    @Override
+    public boolean registerWallpaperVisibilityListener(IWallpaperVisibilityListener listener,
+            int displayId) {
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = mRoot.getDisplayContentOrCreate(displayId);
+            if (displayContent == null) {
+                throw new IllegalArgumentException("Trying to register visibility event "
+                        + "for invalid display: " + displayId);
+            }
+            mWallpaperVisibilityListeners.registerWallpaperVisibilityListener(listener, displayId);
+            return displayContent.mWallpaperController.isWallpaperVisible();
+        }
+    }
+
+    @Override
+    public void unregisterWallpaperVisibilityListener(IWallpaperVisibilityListener listener,
+            int displayId) {
+        synchronized (mWindowMap) {
+            mWallpaperVisibilityListeners
+                    .unregisterWallpaperVisibilityListener(listener, displayId);
         }
     }
 

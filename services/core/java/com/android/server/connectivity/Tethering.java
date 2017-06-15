@@ -88,7 +88,6 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.connectivity.tethering.IControlsTethering;
 import com.android.server.connectivity.tethering.IPv6TetheringCoordinator;
-import com.android.server.connectivity.tethering.IPv6TetheringInterfaceServices;
 import com.android.server.connectivity.tethering.OffloadController;
 import com.android.server.connectivity.tethering.SimChangeListener;
 import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
@@ -1865,8 +1864,7 @@ public class Tethering extends BaseNetworkObserver {
         final TetherState tetherState = new TetherState(
                 new TetherInterfaceStateMachine(
                     iface, mLooper, interfaceType, mLog, mNMService, mStatsService,
-                    makeControlCallback(iface),
-                    new IPv6TetheringInterfaceServices(iface, mNMService, mLog)));
+                    makeControlCallback(iface)));
         mTetherStates.put(iface, tetherState);
         tetherState.stateMachine.start();
     }

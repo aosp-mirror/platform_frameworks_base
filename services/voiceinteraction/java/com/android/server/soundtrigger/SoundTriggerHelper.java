@@ -558,6 +558,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
+    boolean isRecognitionRequested(UUID modelId) {
+        synchronized (mLock) {
+            ModelData modelData = mModelDataMap.get(modelId);
+            return modelData != null && modelData.isRequested();
+        }
+    }
+
     //---- SoundTrigger.StatusListener methods
     @Override
     public void onRecognition(RecognitionEvent event) {

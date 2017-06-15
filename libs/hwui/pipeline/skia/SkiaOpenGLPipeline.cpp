@@ -61,7 +61,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty,
         const SkRect& dirty,
         const FrameBuilder::LightGeometry& lightGeometry,
         LayerUpdateQueue* layerUpdateQueue,
-        const Rect& contentDrawBounds, bool opaque,
+        const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
         const BakedOpRenderer::LightInfo& lightInfo,
         const std::vector<sp<RenderNode>>& renderNodes,
         FrameInfoVisualizer* profiler) {
@@ -85,7 +85,8 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty,
             mRenderThread.getGrContext(), renderTargetDesc, &props));
 
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
-    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
+    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, wideColorGamut,
+            contentDrawBounds, surface);
     layerUpdateQueue->clear();
 
     // Draw visual debugging features

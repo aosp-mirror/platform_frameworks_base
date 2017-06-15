@@ -83,7 +83,7 @@ void BM_FrameBuilder_deferAndRender(benchmark::State& state) {
                     sLightGeometry, caches);
             frameBuilder.deferRenderNode(*node);
 
-            BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
+            BakedOpRenderer renderer(caches, renderState, true, false, sLightInfo);
             frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
             benchmark::DoNotOptimize(&renderer);
         }
@@ -142,7 +142,7 @@ void BM_FrameBuilder_deferAndRender_scene(benchmark::State& state) {
                     sLightGeometry, Caches::getInstance());
             frameBuilder.deferRenderNode(*node);
 
-            BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
+            BakedOpRenderer renderer(caches, renderState, true, false, sLightInfo);
             frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
             benchmark::DoNotOptimize(&renderer);
         }

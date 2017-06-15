@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-package android.service.euicc;
+package android.view;
 
-parcelable UpdateNicknameResult;
+/**
+ * Listener to be invoked when wallpaper visibility changes.
+ * {@hide}
+ */
+oneway interface IWallpaperVisibilityListener {
+    /**
+     * Method that will be invoked when wallpaper becomes visible or hidden.
+     * @param visible True if wallpaper is being displayed; false otherwise.
+     * @param displayId The id of the display where wallpaper visibility changed.
+     */
+    void onWallpaperVisibilityChanged(boolean visible, int displayId);
+}
