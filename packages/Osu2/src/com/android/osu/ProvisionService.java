@@ -17,12 +17,15 @@
 package com.android.osu;
 
 import android.content.Context;
+import android.net.Network;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+
+import java.io.IOException;
 
 /**
  * Service responsible for performing Passpoint subscription provisioning tasks.
@@ -37,6 +40,9 @@ public class ProvisionService implements OsuService {
     private final HandlerThread mHandlerThread;
     private final ServiceHandler mServiceHandler;
     private final OsuProvider mProvider;
+
+    private boolean mStarted = false;
+    private NetworkConnection mNetworkConnection = null;
 
     public ProvisionService(Context context, OsuProvider provider) {
         mContext = context;
@@ -68,15 +74,46 @@ public class ProvisionService implements OsuService {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case COMMAND_START:
-                    Log.e(TAG, "Start provision service");
+                    if (mStarted) {
+                        Log.e(TAG, "Service already started");
+                        return;
+                    }
+                    try {
+                        // Initiate network connection to the OSU AP.
+                        mNetworkConnection = new NetworkConnection(
+                                mContext, this, mProvider.getOsuSsid(),
+                                mProvider.getNetworkAccessIdentifier(), new NetworkCallbacks());
+                        mStarted = true;
+                    } catch (IOException e) {
+                        // TODO(zqiu): broadcast failure event via LocalBroadcastManager.
+                    }
                     break;
                 case COMMAND_STOP:
+                    if (!mStarted) {
+                        Log.e(TAG, "Service not started");
+                        return;
+                    }
                     Log.e(TAG, "Stop provision service");
                     break;
                 default:
                     Log.e(TAG, "Unknown command: " + msg.what);
                     break;
             }
+        }
+    }
+
+    private final class NetworkCallbacks implements NetworkConnection.Callbacks {
+        @Override
+        public void onConnected(Network network) {
+            Log.d(TAG, "Connected to OSU AP");
+        }
+
+        @Override
+        public void onDisconnected() {
+        }
+
+        @Override
+        public void onTimeout() {
         }
     }
 }
