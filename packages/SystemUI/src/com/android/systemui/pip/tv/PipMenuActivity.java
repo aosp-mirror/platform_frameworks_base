@@ -19,22 +19,27 @@ package com.android.systemui.pip.tv;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.view.View;
 
 import com.android.systemui.R;
 
+import java.util.Collections;
 /**
  * Activity to show the PIP menu to control PIP.
  */
 public class PipMenuActivity extends Activity implements PipManager.Listener {
     private static final String TAG = "PipMenuActivity";
 
+    static final String EXTRA_CUSTOM_ACTIONS = "custom_actions";
+
     private final PipManager mPipManager = PipManager.getInstance();
 
     private Animator mFadeInAnimation;
     private Animator mFadeOutAnimation;
-    private View mPipControlsView;
+    private PipControlsView mPipControlsView;
     private boolean mRestorePipSizeWhenClose;
 
     @Override
@@ -51,6 +56,15 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         mFadeOutAnimation = AnimatorInflater.loadAnimator(
                 this, R.anim.tv_pip_menu_fade_out_animation);
         mFadeOutAnimation.setTarget(mPipControlsView);
+
+        onPipMenuActionsChanged(getIntent().getParcelableExtra(EXTRA_CUSTOM_ACTIONS));
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        onPipMenuActionsChanged(getIntent().getParcelableExtra(EXTRA_CUSTOM_ACTIONS));
     }
 
     private void restorePipAndFinish() {
@@ -93,6 +107,12 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     @Override
     public void onPipActivityClosed() {
         finish();
+    }
+
+    @Override
+    public void onPipMenuActionsChanged(ParceledListSlice actions) {
+        boolean hasCustomActions = actions != null && !actions.getList().isEmpty();
+        mPipControlsView.setActions(hasCustomActions ? actions.getList() : Collections.EMPTY_LIST);
     }
 
     @Override
