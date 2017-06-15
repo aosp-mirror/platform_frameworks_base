@@ -54,13 +54,6 @@ public class NfcTile extends QSTile<QSTile.BooleanState> {
         if (mListening) {
             mContext.registerReceiver(mNfcReceiver,
                     new IntentFilter(NfcAdapter.ACTION_ADAPTER_STATE_CHANGED));
-            if (mAdapter == null) {
-                try {
-                    mAdapter = NfcAdapter.getNfcAdapter(mContext);
-                } catch (UnsupportedOperationException e) {
-                    mAdapter = null;
-                }
-            }
         } else {
             mContext.unregisterReceiver(mNfcReceiver);
         }
@@ -82,12 +75,11 @@ public class NfcTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleClick() {
-        if (mAdapter == null) return;
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
-        if (!mAdapter.isEnabled()) {
-            mAdapter.enable();
+        if (!getAdapter().isEnabled()) {
+            getAdapter().enable();
         } else {
-            mAdapter.disable();
+            getAdapter().disable();
         }
     }
 
@@ -105,7 +97,7 @@ public class NfcTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final Drawable mEnable = mContext.getDrawable(R.drawable.ic_qs_nfc_enabled);
         final Drawable mDisable = mContext.getDrawable(R.drawable.ic_qs_nfc_disabled);
-        state.value = mAdapter == null ? false : mAdapter.isEnabled();
+        state.value = getAdapter().isEnabled();
         state.label = mContext.getString(R.string.quick_settings_nfc_label);
         state.icon = new DrawableIcon(state.value ? mEnable : mDisable);
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
@@ -125,6 +117,17 @@ public class NfcTile extends QSTile<QSTile.BooleanState> {
         } else {
             return mContext.getString(R.string.quick_settings_nfc_off);
         }
+    }
+
+    private NfcAdapter getAdapter() {
+        if (mAdapter == null) {
+            try {
+                mAdapter = NfcAdapter.getNfcAdapter(mContext);
+            } catch (UnsupportedOperationException e) {
+                mAdapter = null;
+            }
+        }
+        return mAdapter;
     }
 
     private BroadcastReceiver mNfcReceiver = new BroadcastReceiver() {
