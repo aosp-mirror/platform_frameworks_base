@@ -35,8 +35,14 @@ final class ActivityManagerConstants extends ContentObserver {
     // Key names stored in the settings value.
     private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
     private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
-    private static final String KEY_FOREGROUND_SERVICE_UI_MIN_TIME
-            = "foreground_service_ui_min_time";
+    private static final String KEY_FGSERVICE_MIN_SHOWN_TIME
+            = "fgservice_min_shown_time";
+    private static final String KEY_FGSERVICE_MIN_REPORT_TIME
+            = "fgservice_min_report_time";
+    private static final String KEY_FGSERVICE_SCREEN_ON_BEFORE_TIME
+            = "fgservice_screen_on_before_time";
+    private static final String KEY_FGSERVICE_SCREEN_ON_AFTER_TIME
+            = "fgservice_screen_on_after_time";
     private static final String KEY_CONTENT_PROVIDER_RETAIN_TIME = "content_provider_retain_time";
     private static final String KEY_GC_TIMEOUT = "gc_timeout";
     private static final String KEY_GC_MIN_INTERVAL = "gc_min_interval";
@@ -58,7 +64,10 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
-    private static final long DEFAULT_FOREGROUND_SERVICE_UI_MIN_TIME = 30*1000;
+    private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
+    private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
+    private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
+    private static final long DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME = 5*1000;
     private static final long DEFAULT_CONTENT_PROVIDER_RETAIN_TIME = 20*1000;
     private static final long DEFAULT_GC_TIMEOUT = 5*1000;
     private static final long DEFAULT_GC_MIN_INTERVAL = 60*1000;
@@ -85,8 +94,26 @@ final class ActivityManagerConstants extends ContentObserver {
     // before we start restricting what it can do.
     public long BACKGROUND_SETTLE_TIME = DEFAULT_BACKGROUND_SETTLE_TIME;
 
-    // The minimum time a foreground service will be shown as running in the notification UI.
-    public long FOREGROUND_SERVICE_UI_MIN_TIME = DEFAULT_FOREGROUND_SERVICE_UI_MIN_TIME;
+    // The minimum time we allow a foreground service to run with a notification and the
+    // screen on without otherwise telling the user about it.  (If it runs for less than this,
+    // it will still be reported to the user as a running app for at least this amount of time.)
+    public long FGSERVICE_MIN_SHOWN_TIME = DEFAULT_FGSERVICE_MIN_SHOWN_TIME;
+
+    // If a foreground service is shown for less than FGSERVICE_MIN_SHOWN_TIME, we will display
+    // the background app running notification about it for at least this amount of time (if it
+    // is larger than the remaining shown time).
+    public long FGSERVICE_MIN_REPORT_TIME = DEFAULT_FGSERVICE_MIN_REPORT_TIME;
+
+    // The minimum amount of time the foreground service needs to have remain being shown
+    // before the screen goes on for us to consider it not worth showing to the user.  That is
+    // if an app has a foreground service that stops itself this amount of time or more before
+    // the user turns on the screen, we will just let it go without the user being told about it.
+    public long FGSERVICE_SCREEN_ON_BEFORE_TIME = DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME;
+
+    // The minimum amount of time a foreground service should remain reported to the user if
+    // it is stopped when the screen turns on.  This is the time from when the screen turns
+    // on until we will stop reporting it.
+    public long FGSERVICE_SCREEN_ON_AFTER_TIME = DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME;
 
     // How long we will retain processes hosting content providers in the "last activity"
     // state before allowing them to drop down to the regular cached LRU list.  This is
@@ -225,8 +252,14 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_MAX_CACHED_PROCESSES);
             BACKGROUND_SETTLE_TIME = mParser.getLong(KEY_BACKGROUND_SETTLE_TIME,
                     DEFAULT_BACKGROUND_SETTLE_TIME);
-            FOREGROUND_SERVICE_UI_MIN_TIME = mParser.getLong(KEY_FOREGROUND_SERVICE_UI_MIN_TIME,
-                    DEFAULT_FOREGROUND_SERVICE_UI_MIN_TIME);
+            FGSERVICE_MIN_SHOWN_TIME = mParser.getLong(KEY_FGSERVICE_MIN_SHOWN_TIME,
+                    DEFAULT_FGSERVICE_MIN_SHOWN_TIME);
+            FGSERVICE_MIN_REPORT_TIME = mParser.getLong(KEY_FGSERVICE_MIN_REPORT_TIME,
+                    DEFAULT_FGSERVICE_MIN_REPORT_TIME);
+            FGSERVICE_SCREEN_ON_BEFORE_TIME = mParser.getLong(KEY_FGSERVICE_SCREEN_ON_BEFORE_TIME,
+                    DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME);
+            FGSERVICE_SCREEN_ON_AFTER_TIME = mParser.getLong(KEY_FGSERVICE_SCREEN_ON_AFTER_TIME,
+                    DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME);
             CONTENT_PROVIDER_RETAIN_TIME = mParser.getLong(KEY_CONTENT_PROVIDER_RETAIN_TIME,
                     DEFAULT_CONTENT_PROVIDER_RETAIN_TIME);
             GC_TIMEOUT = mParser.getLong(KEY_GC_TIMEOUT,
@@ -284,8 +317,14 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(MAX_CACHED_PROCESSES);
         pw.print("  "); pw.print(KEY_BACKGROUND_SETTLE_TIME); pw.print("=");
         pw.println(BACKGROUND_SETTLE_TIME);
-        pw.print("  "); pw.print(KEY_FOREGROUND_SERVICE_UI_MIN_TIME); pw.print("=");
-        pw.println(FOREGROUND_SERVICE_UI_MIN_TIME);
+        pw.print("  "); pw.print(KEY_FGSERVICE_MIN_SHOWN_TIME); pw.print("=");
+        pw.println(FGSERVICE_MIN_SHOWN_TIME);
+        pw.print("  "); pw.print(KEY_FGSERVICE_MIN_REPORT_TIME); pw.print("=");
+        pw.println(FGSERVICE_MIN_REPORT_TIME);
+        pw.print("  "); pw.print(KEY_FGSERVICE_SCREEN_ON_BEFORE_TIME); pw.print("=");
+        pw.println(FGSERVICE_SCREEN_ON_BEFORE_TIME);
+        pw.print("  "); pw.print(KEY_FGSERVICE_SCREEN_ON_AFTER_TIME); pw.print("=");
+        pw.println(FGSERVICE_SCREEN_ON_AFTER_TIME);
         pw.print("  "); pw.print(KEY_CONTENT_PROVIDER_RETAIN_TIME); pw.print("=");
         pw.println(CONTENT_PROVIDER_RETAIN_TIME);
         pw.print("  "); pw.print(KEY_GC_TIMEOUT); pw.print("=");
