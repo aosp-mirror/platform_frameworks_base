@@ -47,6 +47,7 @@ import android.os.IBinder;
 import android.os.IDeviceIdleController;
 import android.os.IInterface;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -345,7 +346,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private static boolean isCallerSystem() {
-        return getCallingUserId() == UserHandle.USER_SYSTEM;
+        return Binder.getCallingUid() == Process.SYSTEM_UID;
     }
 
     private ServiceConnection createServiceConnection(
