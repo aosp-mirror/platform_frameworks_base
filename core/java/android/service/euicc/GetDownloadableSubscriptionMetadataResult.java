@@ -15,14 +15,10 @@
  */
 package android.service.euicc;
 
-import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.euicc.DownloadableSubscription;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Result of a {@link EuiccService#onGetDownloadableSubscriptionMetadata} operation.
@@ -45,77 +41,54 @@ public final class GetDownloadableSubscriptionMetadataResult implements Parcelab
         }
     };
 
-    /** @hide */
-    @IntDef({
-            RESULT_OK,
-            RESULT_GENERIC_ERROR,
-            RESULT_MUST_DEACTIVATE_SIM,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ResultCode {}
-
-    public static final int RESULT_OK = 0;
-    public static final int RESULT_MUST_DEACTIVATE_SIM = 1;
-    public static final int RESULT_GENERIC_ERROR = 2;
-
-    /** Result of the operation - one of the RESULT_* constants. */
-    public final @ResultCode int result;
+    /**
+     * Result of the operation.
+     *
+     * <p>May be one of the predefined {@code RESULT_} constants in EuiccService or any
+     * implementation-specific code starting with {@link EuiccService#RESULT_FIRST_USER}.
+     */
+    public final int result;
 
     /**
      * The {@link DownloadableSubscription} with filled-in metadata.
      *
-     * <p>Only non-null if {@link #result} is {@link #RESULT_OK}.
+     * <p>Only non-null if {@link #result} is {@link EuiccService#RESULT_OK}.
      */
     @Nullable
     public final DownloadableSubscription subscription;
 
-    /** Implementation-defined detailed error code in case of a failure not covered here. */
-    public final int detailedCode;
-
-    private GetDownloadableSubscriptionMetadataResult(int result,
-            @Nullable DownloadableSubscription subscription, int detailedCode) {
+    /**
+     * Construct a new {@link GetDownloadableSubscriptionMetadataResult}.
+     *
+     * @param result Result of the operation. May be one of the predefined {@code RESULT_} constants
+     *     in EuiccService or any implementation-specific code starting with
+     *     {@link EuiccService#RESULT_FIRST_USER}.
+     * @param subscription The subscription with filled-in metadata. Should only be provided if the
+     *     result is {@link EuiccService#RESULT_OK}.
+     */
+    public GetDownloadableSubscriptionMetadataResult(int result,
+            @Nullable DownloadableSubscription subscription) {
         this.result = result;
-        this.subscription = subscription;
-        this.detailedCode = detailedCode;
+        if (this.result == EuiccService.RESULT_OK) {
+            this.subscription = subscription;
+        } else {
+            if (subscription != null) {
+                throw new IllegalArgumentException(
+                        "Error result with non-null subscription: " + result);
+            }
+            this.subscription = null;
+        }
     }
 
     private GetDownloadableSubscriptionMetadataResult(Parcel in) {
         this.result = in.readInt();
         this.subscription = in.readTypedObject(DownloadableSubscription.CREATOR);
-        this.detailedCode = in.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(result);
         dest.writeTypedObject(this.subscription, flags);
-        dest.writeInt(detailedCode);
-    }
-
-    /** Return a result indicating that the lookup was successful. */
-    public static GetDownloadableSubscriptionMetadataResult success(
-            DownloadableSubscription subscription) {
-        return new GetDownloadableSubscriptionMetadataResult(RESULT_OK, subscription,
-                0 /* detailedCode */);
-    }
-
-    /**
-     * Return a result indicating that an active SIM must be deactivated to perform the operation.
-     */
-    public static GetDownloadableSubscriptionMetadataResult mustDeactivateSim() {
-        return new GetDownloadableSubscriptionMetadataResult(RESULT_MUST_DEACTIVATE_SIM,
-                null /* subscription */, 0 /* detailedCode */);
-    }
-
-    /**
-     * Return a result indicating that an error occurred for which no other more specific error
-     * code has been defined.
-     *
-     * @param detailedCode an implementation-defined detailed error code for debugging purposes.
-     */
-    public static GetDownloadableSubscriptionMetadataResult genericError(int detailedCode) {
-        return new GetDownloadableSubscriptionMetadataResult(RESULT_GENERIC_ERROR,
-                null /* subscription */, detailedCode);
     }
 
     @Override
