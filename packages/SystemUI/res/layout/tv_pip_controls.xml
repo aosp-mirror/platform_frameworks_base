@@ -22,24 +22,24 @@
 
     <com.android.systemui.pip.tv.PipControlButtonView
         android:id="@+id/full_button"
-        android:layout_width="100dp"
+        android:layout_width="@dimen/picture_in_picture_button_width"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_fullscreen_white_24dp"
         android:text="@string/pip_fullscreen" />
 
     <com.android.systemui.pip.tv.PipControlButtonView
         android:id="@+id/close_button"
-        android:layout_width="100dp"
+        android:layout_width="@dimen/picture_in_picture_button_width"
         android:layout_height="wrap_content"
-        android:layout_marginStart="-50dp"
+        android:layout_marginStart="@dimen/picture_in_picture_button_start_margin"
         android:src="@drawable/ic_close_white"
         android:text="@string/pip_close" />
 
     <com.android.systemui.pip.tv.PipControlButtonView
         android:id="@+id/play_pause_button"
-        android:layout_width="100dp"
+        android:layout_width="@dimen/picture_in_picture_button_width"
         android:layout_height="wrap_content"
-        android:layout_marginStart="-50dp"
+        android:layout_marginStart="@dimen/picture_in_picture_button_start_margin"
         android:src="@drawable/ic_pause_white"
         android:text="@string/pip_pause"
         android:visibility="gone" />
