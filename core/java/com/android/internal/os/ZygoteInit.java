@@ -24,7 +24,6 @@ import android.content.res.TypedArray;
 import android.icu.impl.CacheValue;
 import android.icu.text.DecimalFormatSymbols;
 import android.icu.util.ULocale;
-import android.net.LocalServerSocket;
 import android.opengl.EGL14;
 import android.os.Build;
 import android.os.IInstalld;
@@ -517,15 +516,12 @@ public class ZygoteInit {
      * namespace, i.e., this classloader can access platform-private native libraries. The
      * classloader will use java.library.path as the native library path.
      */
-    static PathClassLoader createPathClassLoader(String classPath, int targetSdkVersion) {
-      String libraryPath = System.getProperty("java.library.path");
+    static ClassLoader createPathClassLoader(String classPath, int targetSdkVersion) {
+        String libraryPath = System.getProperty("java.library.path");
 
-      return PathClassLoaderFactory.createClassLoader(classPath,
-                                                      libraryPath,
-                                                      libraryPath,
-                                                      ClassLoader.getSystemClassLoader(),
-                                                      targetSdkVersion,
-                                                      true /* isNamespaceShared */);
+        return ClassLoaderFactory.createClassLoader(classPath, libraryPath, libraryPath,
+                ClassLoader.getSystemClassLoader(), targetSdkVersion, true /* isNamespaceShared */,
+                null /* classLoaderName */);
     }
 
     /**
