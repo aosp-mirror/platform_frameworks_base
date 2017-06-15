@@ -92,15 +92,12 @@ public class EuiccManager {
     public static final int EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR = 1;
 
     /**
-     * Result code for an operation indicating that a generic error occurred.
+     * Result code for an operation indicating that an unresolvable error occurred.
      *
-     * <p>Note that in the future, other result codes may be returned indicating more specific
-     * errors. Thus, the caller should check for {@link #EMBEDDED_SUBSCRIPTION_RESULT_OK} or
-     * {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} to determine if the operation
-     * succeeded or failed with a user-resolvable error, and assume the operation failed for any
-     * other result, rather than checking for this specific value.
+     * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} will be populated with a detailed error
+     * code for logging/debugging purposes only.
      */
-    public static final int EMBEDDED_SUBSCRIPTION_RESULT_GENERIC_ERROR = 2;
+    public static final int EMBEDDED_SUBSCRIPTION_RESULT_ERROR = 2;
 
     /**
      * Key for an extra set on {@link PendingIntent} result callbacks providing a detailed result
@@ -472,7 +469,7 @@ public class EuiccManager {
 
     private static void sendUnavailableError(PendingIntent callbackIntent) {
         try {
-            callbackIntent.send(EMBEDDED_SUBSCRIPTION_RESULT_GENERIC_ERROR);
+            callbackIntent.send(EMBEDDED_SUBSCRIPTION_RESULT_ERROR);
         } catch (PendingIntent.CanceledException e) {
             // Caller canceled the callback; do nothing.
         }

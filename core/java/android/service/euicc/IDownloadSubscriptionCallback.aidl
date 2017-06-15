@@ -16,9 +16,7 @@
 
 package android.service.euicc;
 
-import android.service.euicc.DownloadResult;
-
 /** @hide */
 oneway interface IDownloadSubscriptionCallback {
-    void onComplete(in DownloadResult result);
+    void onComplete(int result);
 }

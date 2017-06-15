@@ -16,9 +16,7 @@
 
 package android.service.euicc;
 
-import android.service.euicc.DeleteResult;
-
 /** @hide */
 oneway interface IDeleteSubscriptionCallback {
-    void onComplete(in DeleteResult result);
+    void onComplete(int result);
 }

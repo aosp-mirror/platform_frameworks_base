@@ -16,9 +16,7 @@
 
 package android.service.euicc;
 
-import android.service.euicc.SwitchResult;
-
 /** @hide */
 oneway interface ISwitchToSubscriptionCallback {
-    void onComplete(in SwitchResult result);
+    void onComplete(int result);
 }

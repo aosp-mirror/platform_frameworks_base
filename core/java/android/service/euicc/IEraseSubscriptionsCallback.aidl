@@ -16,9 +16,7 @@
 
 package android.service.euicc;
 
-import android.service.euicc.EraseResult;
-
 /** @hide */
 oneway interface IEraseSubscriptionsCallback {
-    void onComplete(in EraseResult result);
+    void onComplete(int result);
 }
