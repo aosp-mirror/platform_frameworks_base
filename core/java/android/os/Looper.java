@@ -310,7 +310,20 @@ public final class Looper {
      */
     public void dump(@NonNull Printer pw, @NonNull String prefix) {
         pw.println(prefix + toString());
-        mQueue.dump(pw, prefix + "  ");
+        mQueue.dump(pw, prefix + "  ", null);
+    }
+
+    /**
+     * Dumps the state of the looper for debugging purposes.
+     *
+     * @param pw A printer to receive the contents of the dump.
+     * @param prefix A prefix to prepend to each line which is printed.
+     * @param handler Only dump messages for this Handler.
+     * @hide
+     */
+    public void dump(@NonNull Printer pw, @NonNull String prefix, Handler handler) {
+        pw.println(prefix + toString());
+        mQueue.dump(pw, prefix + "  ", handler);
     }
 
     /** @hide */
