@@ -40,6 +40,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Trace;
 import android.util.Slog;
+import android.view.DisplayInfo;
 import android.view.IApplicationToken;
 import android.view.WindowManagerPolicy.StartingSurface;
 
@@ -481,7 +482,7 @@ public class AppWindowContainerController
     public boolean addStartingWindow(String pkg, int theme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
-            boolean allowTaskSnapshot, boolean activityCreated) {
+            boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents) {
         synchronized(mWindowMap) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "setAppStartingWindow: token=" + mToken
                     + " pkg=" + pkg + " transferFrom=" + transferFrom + " newTask=" + newTask
@@ -510,11 +511,14 @@ public class AppWindowContainerController
                 return false;
             }
 
+            final TaskSnapshot snapshot = mService.mTaskSnapshotController.getSnapshot(
+                    mContainer.getTask().mTaskId, mContainer.getTask().mUserId,
+                    false /* restoreFromDisk */, false /* reducedResolution */);
             final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
-                    allowTaskSnapshot, activityCreated);
+                    allowTaskSnapshot, activityCreated, fromRecents, snapshot);
 
             if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
-                return createSnapshot();
+                return createSnapshot(snapshot);
             }
 
             // If this is a translucent window, then don't show a starting window -- the current
@@ -582,7 +586,8 @@ public class AppWindowContainerController
     }
 
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
-            boolean allowTaskSnapshot, boolean activityCreated) {
+            boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents,
+            TaskSnapshot snapshot) {
         if (mService.mAppTransition.getAppTransition() == TRANSIT_DOCK_TASK_FROM_RECENTS) {
             // TODO(b/34099271): Remove this statement to add back the starting window and figure
             // out why it causes flickering, the starting window appears over the thumbnail while
@@ -591,7 +596,9 @@ public class AppWindowContainerController
         } else if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
-            return STARTING_WINDOW_TYPE_SNAPSHOT;
+            return snapshot == null ? STARTING_WINDOW_TYPE_NONE
+                    : snapshotFillsWidth(snapshot) || fromRecents ? STARTING_WINDOW_TYPE_SNAPSHOT
+                    : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else {
             return STARTING_WINDOW_TYPE_NONE;
         }
@@ -605,11 +612,7 @@ public class AppWindowContainerController
         mService.mAnimationHandler.postAtFrontOfQueue(mAddStartingWindow);
     }
 
-    private boolean createSnapshot() {
-        final TaskSnapshot snapshot = mService.mTaskSnapshotController.getSnapshot(
-                mContainer.getTask().mTaskId, mContainer.getTask().mUserId,
-                false /* restoreFromDisk */, false /* reducedResolution */);
-
+    private boolean createSnapshot(TaskSnapshot snapshot) {
         if (snapshot == null) {
             return false;
         }
@@ -618,6 +621,24 @@ public class AppWindowContainerController
         mContainer.startingData = new SnapshotStartingData(mService, snapshot);
         scheduleAddStartingWindow();
         return true;
+    }
+
+    private boolean snapshotFillsWidth(TaskSnapshot snapshot) {
+        if (snapshot == null) {
+            return false;
+        }
+        final Rect rect = new Rect(0, 0, snapshot.getSnapshot().getWidth(),
+                snapshot.getSnapshot().getHeight());
+        rect.inset(snapshot.getContentInsets());
+        final Rect taskBoundsWithoutInsets = new Rect();
+        mContainer.getTask().getBounds(taskBoundsWithoutInsets);
+        final DisplayInfo di = mContainer.getDisplayContent().getDisplayInfo();
+        final Rect displayBounds = new Rect(0, 0, di.logicalWidth, di.logicalHeight);
+        final Rect stableInsets = new Rect();
+        mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
+                stableInsets);
+        displayBounds.inset(stableInsets);
+        return rect.width() >= displayBounds.width();
     }
 
     public void removeStartingWindow() {
