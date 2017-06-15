@@ -23752,9 +23752,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void notifyAppTransitionStarting(SparseIntArray reasons) {
+        public void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp) {
             synchronized (ActivityManagerService.this) {
-                mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(reasons);
+                mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(
+                        reasons, timestamp);
             }
         }
 
