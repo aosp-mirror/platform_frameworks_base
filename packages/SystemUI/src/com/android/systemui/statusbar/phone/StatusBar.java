@@ -5041,6 +5041,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDozing = mDozingRequested && mState == StatusBarState.KEYGUARD
                 || mFingerprintUnlockController.getMode()
                         == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
+        // When in wake-and-unlock we may not have received a change to mState
+        // but we still should not be dozing, manually set to false.
+        if (mFingerprintUnlockController.getMode() ==
+                FingerprintUnlockController.MODE_WAKE_AND_UNLOCK) {
+            mDozing = false;
+        }
         mStatusBarWindowManager.setDozing(mDozing);
         updateDozingState();
         Trace.endSection();
