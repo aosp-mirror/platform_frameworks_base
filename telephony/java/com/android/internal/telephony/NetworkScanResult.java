@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.telephony.CellInfo;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Defines the incremental network scan result.
@@ -108,7 +109,7 @@ public final class NetworkScanResult implements Parcelable {
     public int hashCode () {
         return ((scanStatus * 31)
                 + (scanError * 23)
-                + (networkInfos.hashCode() * 37));
+                + (Objects.hashCode(networkInfos) * 37));
     }
 
     public static final Creator<NetworkScanResult> CREATOR =
