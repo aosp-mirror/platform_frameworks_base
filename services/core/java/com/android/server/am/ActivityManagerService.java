@@ -10254,11 +10254,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToFront: moving taskId=" + taskId);
         synchronized(this) {
-            moveTaskToFrontLocked(taskId, flags, bOptions);
+            moveTaskToFrontLocked(taskId, flags, bOptions, false /* fromRecents */);
         }
     }
 
-    void moveTaskToFrontLocked(int taskId, int flags, Bundle bOptions) {
+    void moveTaskToFrontLocked(int taskId, int flags, Bundle bOptions, boolean fromRecents) {
         ActivityOptions options = ActivityOptions.fromBundle(bOptions);
 
         if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
@@ -10291,7 +10291,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // We are reshowing a task, use a starting window to hide the initial draw delay
                 // so the transition can start earlier.
                 topActivity.showStartingWindow(null /* prev */, false /* newTask */,
-                        true /* taskSwitch */);
+                        true /* taskSwitch */, fromRecents);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
