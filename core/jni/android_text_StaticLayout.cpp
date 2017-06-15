@@ -137,15 +137,19 @@ static jlong nLoadHyphenator(JNIEnv* env, jclass, jobject buffer, jint offset,
     return reinterpret_cast<jlong>(hyphenator);
 }
 
-static void nSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleName,
-        jlong nativeHyphenator) {
-    ScopedIcuLocale icuLocale(env, javaLocaleName);
+static void nSetLocales(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleNames,
+        jlongArray nativeHyphenators) {
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
-    minikin::Hyphenator* hyphenator = reinterpret_cast<minikin::Hyphenator*>(nativeHyphenator);
 
-    if (icuLocale.valid()) {
-        b->setLocale(icuLocale.locale(), hyphenator);
+    ScopedUtfChars localeNames(env, javaLocaleNames);
+    ScopedLongArrayRO hyphArr(env, nativeHyphenators);
+    const size_t numLocales = hyphArr.size();
+    std::vector<minikin::Hyphenator*> hyphVec;
+    hyphVec.reserve(numLocales);
+    for (size_t i = 0; i < numLocales; i++) {
+        hyphVec.push_back(reinterpret_cast<minikin::Hyphenator*>(hyphArr[i]));
     }
+    b->setLocales(localeNames.c_str(), hyphVec);
 }
 
 static void nSetIndents(JNIEnv* env, jclass, jlong nativePtr, jintArray indents) {
@@ -194,7 +198,7 @@ static const JNINativeMethod gMethods[] = {
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
     {"nLoadHyphenator", "(Ljava/nio/ByteBuffer;III)J", (void*) nLoadHyphenator},
-    {"nSetLocale", "(JLjava/lang/String;J)V", (void*) nSetLocale},
+    {"nSetLocales", "(JLjava/lang/String;[J)V", (void*) nSetLocales},
     {"nSetupParagraph", "(J[CIFIF[IIIIZ)V", (void*) nSetupParagraph},
     {"nSetIndents", "(J[I)V", (void*) nSetIndents},
     {"nAddStyleRun", "(JJJIIZ)F", (void*) nAddStyleRun},
