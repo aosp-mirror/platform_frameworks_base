@@ -219,6 +219,10 @@ message SystemMessage {
     // Package: com.android.systemui
     NOTE_TV_PIP = 1100;
 
+    // Notify the user that open Wi-Fi networks are available.
+    // Package: android
+    NOTE_NETWORK_AVAILABLE = 17303299;
+
     // Communicate to the user about remote bugreports.
     // Package: android
     NOTE_REMOTE_BUGREPORT = 678432343;
