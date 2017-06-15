@@ -9029,7 +9029,10 @@ public final class Settings {
          * <pre>
          * max_cached_processes                 (int)
          * background_settle_time               (long)
-         * foreground_service_ui_min_time       (long)
+         * fgservice_min_shown_time             (long)
+         * fgservice_min_report_time            (long)
+         * fgservice_screen_on_before_time      (long)
+         * fgservice_screen_on_after_time       (long)
          * content_provider_retain_time         (long)
          * gc_timeout                           (long)
          * gc_min_interval                      (long)

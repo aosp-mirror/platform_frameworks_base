@@ -620,6 +620,23 @@ public final class MessageQueue {
         }
     }
 
+    boolean hasMessages(Handler h) {
+        if (h == null) {
+            return false;
+        }
+
+        synchronized (this) {
+            Message p = mMessages;
+            while (p != null) {
+                if (p.target == h) {
+                    return true;
+                }
+                p = p.next;
+            }
+            return false;
+        }
+    }
+
     void removeMessages(Handler h, int what, Object object) {
         if (h == null) {
             return;
@@ -759,12 +776,14 @@ public final class MessageQueue {
         }
     }
 
-    void dump(Printer pw, String prefix) {
+    void dump(Printer pw, String prefix, Handler h) {
         synchronized (this) {
             long now = SystemClock.uptimeMillis();
             int n = 0;
             for (Message msg = mMessages; msg != null; msg = msg.next) {
-                pw.println(prefix + "Message " + n + ": " + msg.toString(now));
+                if (h == null || h == msg.target) {
+                    pw.println(prefix + "Message " + n + ": " + msg.toString(now));
+                }
                 n++;
             }
             pw.println(prefix + "(Total messages: " + n + ", polling=" + isPollingLocked()
