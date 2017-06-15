@@ -81,6 +81,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.EventLog;
+import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -175,6 +176,9 @@ public final class ActiveServices {
         long mStartVisibleTime;
         long mEndTime;
         int mNumActive;
+
+        // Temp output of foregroundAppShownEnoughLocked
+        long mHideTime;
     }
 
     /**
@@ -736,50 +740,90 @@ public final class ActiveServices {
         }
     }
 
+    boolean foregroundAppShownEnoughLocked(ActiveForegroundApp aa, long nowElapsed) {
+        if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Shown enough: pkg=" + aa.mPackageName + ", uid="
+                + aa.mUid);
+        boolean canRemove = false;
+        aa.mHideTime = Long.MAX_VALUE;
+        if (aa.mShownWhileTop) {
+            // If the app was ever at the top of the screen while the foreground
+            // service was running, then we can always just immediately remove it.
+            canRemove = true;
+            if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "YES - shown while on top");
+        } else if (mScreenOn || aa.mShownWhileScreenOn) {
+            final long minTime = aa.mStartVisibleTime
+                    + (aa.mStartTime != aa.mStartVisibleTime
+                            ? mAm.mConstants.FGSERVICE_SCREEN_ON_AFTER_TIME
+                            : mAm.mConstants.FGSERVICE_MIN_SHOWN_TIME);
+            if (nowElapsed >= minTime) {
+                // If shown while the screen is on, and it has been shown for
+                // at least the minimum show time, then we can now remove it.
+                if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "YES - shown long enough with screen on");
+                canRemove = true;
+            } else {
+                // This is when we will be okay to stop telling the user.
+                long reportTime = nowElapsed + mAm.mConstants.FGSERVICE_MIN_REPORT_TIME;
+                aa.mHideTime = reportTime > minTime ? reportTime : minTime;
+                if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "NO -- wait " + (aa.mHideTime-nowElapsed)
+                        + " with screen on");
+            }
+        } else {
+            final long minTime = aa.mEndTime
+                    + mAm.mConstants.FGSERVICE_SCREEN_ON_BEFORE_TIME;
+            if (nowElapsed >= minTime) {
+                // If the foreground service has only run while the screen is
+                // off, but it has been gone now for long enough that we won't
+                // care to tell the user about it when the screen comes back on,
+                // then we can remove it now.
+                if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "YES - gone long enough with screen off");
+                canRemove = true;
+            } else {
+                // This is when we won't care about this old fg service.
+                aa.mHideTime = minTime;
+                if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "NO -- wait " + (aa.mHideTime-nowElapsed)
+                        + " with screen off");
+            }
+        }
+        return canRemove;
+    }
+
     void updateForegroundApps(ServiceMap smap) {
         // This is called from the handler without the lock held.
         ArrayList<ActiveForegroundApp> active = null;
         synchronized (mAm) {
             final long now = SystemClock.elapsedRealtime();
-            final long nowPlusMin = now + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME;
             long nextUpdateTime = Long.MAX_VALUE;
             if (smap != null) {
+                if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Updating foreground apps for user "
+                        + smap.mUserId);
                 for (int i = smap.mActiveForegroundApps.size()-1; i >= 0; i--) {
                     ActiveForegroundApp aa = smap.mActiveForegroundApps.valueAt(i);
-                    if (aa.mEndTime != 0 && (mScreenOn || aa.mShownWhileScreenOn)) {
-                        if (!aa.mShownWhileTop && aa.mEndTime < (aa.mStartVisibleTime
-                                + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME)) {
-                            // Check to see if this should still be displayed...  we continue
-                            // until it has been shown for at least the timeout duration.
-                            if (nowPlusMin >= aa.mStartVisibleTime) {
-                                // All over!
-                                smap.mActiveForegroundApps.removeAt(i);
-                                smap.mActiveForegroundAppsChanged = true;
-                                continue;
-                            } else {
-                                long hideTime = aa.mStartVisibleTime
-                                        + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME;
-                                if (hideTime < nextUpdateTime) {
-                                    nextUpdateTime = hideTime;
-                                }
-                            }
-                        } else {
+                    if (aa.mEndTime != 0) {
+                        boolean canRemove = foregroundAppShownEnoughLocked(aa, now);
+                        if (canRemove) {
                             // This was up for longer than the timeout, so just remove immediately.
                             smap.mActiveForegroundApps.removeAt(i);
                             smap.mActiveForegroundAppsChanged = true;
                             continue;
+                        }
+                        if (aa.mHideTime < nextUpdateTime) {
+                            nextUpdateTime = aa.mHideTime;
                         }
                     }
                     if (!aa.mAppOnTop) {
                         if (active == null) {
                             active = new ArrayList<>();
                         }
+                        if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Adding active: pkg="
+                                + aa.mPackageName + ", uid=" + aa.mUid);
                         active.add(aa);
                     }
                 }
                 smap.removeMessages(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);
                 if (nextUpdateTime < Long.MAX_VALUE) {
-                    Message msg = smap.obtainMessage();
+                    if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Next update time in: "
+                            + (nextUpdateTime-now));
+                    Message msg = smap.obtainMessage(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);
                     smap.sendMessageAtTime(msg, nextUpdateTime
                             + SystemClock.uptimeMillis() - SystemClock.elapsedRealtime());
                 }
@@ -882,15 +926,14 @@ public final class ActiveServices {
             active.mNumActive--;
             if (active.mNumActive <= 0) {
                 active.mEndTime = SystemClock.elapsedRealtime();
-                if (active.mShownWhileTop || active.mEndTime >= (active.mStartVisibleTime
-                        + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME)) {
+                if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Ended running of service");
+                if (foregroundAppShownEnoughLocked(active, active.mEndTime)) {
                     // Have been active for long enough that we will remove it immediately.
                     smap.mActiveForegroundApps.remove(r.packageName);
                     smap.mActiveForegroundAppsChanged = true;
                     requestUpdateActiveForegroundAppsLocked(smap, 0);
-                } else {
-                    requestUpdateActiveForegroundAppsLocked(smap, active.mStartVisibleTime
-                            + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME);
+                } else if (active.mHideTime < Long.MAX_VALUE){
+                    requestUpdateActiveForegroundAppsLocked(smap, active.mHideTime);
                 }
             }
         }
@@ -904,26 +947,44 @@ public final class ActiveServices {
             // services that were started while the screen was off.
             if (screenOn) {
                 final long nowElapsed = SystemClock.elapsedRealtime();
+                if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Screen turned on");
                 for (int i = mServiceMap.size()-1; i >= 0; i--) {
                     ServiceMap smap = mServiceMap.valueAt(i);
+                    long nextUpdateTime = Long.MAX_VALUE;
                     boolean changed = false;
                     for (int j = smap.mActiveForegroundApps.size()-1; j >= 0; j--) {
                         ActiveForegroundApp active = smap.mActiveForegroundApps.valueAt(j);
-                        if (!active.mShownWhileScreenOn) {
-                            changed = true;
-                            active.mShownWhileScreenOn = mScreenOn;
-                            active.mStartVisibleTime = nowElapsed;
-                            if (active.mEndTime != 0) {
-                                active.mEndTime = nowElapsed;
+                        if (active.mEndTime == 0) {
+                            if (!active.mShownWhileScreenOn) {
+                                active.mShownWhileScreenOn = true;
+                                active.mStartVisibleTime = nowElapsed;
+                            }
+                        } else {
+                            if (!active.mShownWhileScreenOn
+                                    && active.mStartVisibleTime == active.mStartTime) {
+                                // If this was never shown while the screen was on, then we will
+                                // count the time it started being visible as now, to tell the user
+                                // about it now that they have a screen to look at.
+                                active.mEndTime = active.mStartVisibleTime = nowElapsed;
+                            }
+                            if (foregroundAppShownEnoughLocked(active, nowElapsed)) {
+                                // Have been active for long enough that we will remove it
+                                // immediately.
+                                smap.mActiveForegroundApps.remove(active.mPackageName);
+                                smap.mActiveForegroundAppsChanged = true;
+                                changed = true;
+                            } else {
+                                if (active.mHideTime < nextUpdateTime) {
+                                    nextUpdateTime = active.mHideTime;
+                                }
                             }
                         }
                     }
                     if (changed) {
-                        requestUpdateActiveForegroundAppsLocked(smap,
-                                nowElapsed + mAm.mConstants.FOREGROUND_SERVICE_UI_MIN_TIME);
-                    } else if (smap.mActiveForegroundApps.size() > 0) {
-                        // Just being paranoid.
+                        // Need to immediately update.
                         requestUpdateActiveForegroundAppsLocked(smap, 0);
+                    } else if (nextUpdateTime < Long.MAX_VALUE) {
+                        requestUpdateActiveForegroundAppsLocked(smap, nextUpdateTime);
                     }
                 }
             }
@@ -2318,7 +2379,7 @@ public final class ActiveServices {
             return true;
         }
 
-        // Is someone still bound to us keepign us running?
+        // Is someone still bound to us keeping us running?
         if (!knowConn) {
             hasConn = r.hasAutoCreateConnections();
         }
@@ -3740,6 +3801,17 @@ public final class ActiveServices {
                             TimeUtils.formatDuration(aa.mEndTime - nowElapsed, pw);
                             pw.println();
                         }
+                    }
+                    if (smap.hasMessagesOrCallbacks()) {
+                        if (needSep) {
+                            pw.println();
+                        }
+                        printedAnything = true;
+                        needSep = true;
+                        pw.print("  Handler - user ");
+                        pw.print(user);
+                        pw.println(":");
+                        smap.dumpMine(new PrintWriterPrinter(pw), "    ");
                     }
                 }
             }
