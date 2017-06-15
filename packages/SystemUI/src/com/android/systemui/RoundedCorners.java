@@ -108,15 +108,12 @@ public class RoundedCorners extends SystemUI implements Tunable {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                0
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                    | WindowManager.LayoutParams.FLAG_SLIPPERY
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                ,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                        | WindowManager.LayoutParams.FLAG_SLIPPERY
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("RoundedOverlay");
