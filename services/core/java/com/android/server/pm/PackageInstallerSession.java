@@ -834,8 +834,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
                         mResolvedInstructionSets.add(archSubDir.getName());
                         List<File> oatFiles = Arrays.asList(archSubDir.listFiles());
-                        if (!oatFiles.isEmpty()) {
-                            mResolvedInheritedFiles.addAll(oatFiles);
+
+                        // Only add compiled files associated with the base.
+                        // Once b/62269291 is resolved, we can add all compiled files again.
+                        for (File oatFile : oatFiles) {
+                            if (oatFile.getName().equals("base.art")
+                                    || oatFile.getName().equals("base.odex")
+                                    || oatFile.getName().equals("base.vdex")) {
+                                mResolvedInheritedFiles.add(oatFile);
+                            }
                         }
                     }
                 }
