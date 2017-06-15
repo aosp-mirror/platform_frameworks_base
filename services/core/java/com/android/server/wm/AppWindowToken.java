@@ -394,6 +394,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     startingWindow.mPolicyVisibility = false;
                     startingWindow.mPolicyVisibilityAfterAnim = false;
                 }
+
+                // We are becoming visible, so better freeze the screen with the windows that are
+                // getting visible so we also wait for them.
+                forAllWindows(mService::makeWindowFreezingScreenIfNeededLocked, true);
             }
 
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "setVisibility: " + this
