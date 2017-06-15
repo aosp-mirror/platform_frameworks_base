@@ -246,20 +246,20 @@ public final class AutofillManager {
         /**
          * Finds views by traversing the hierarchies of the client.
          *
-         * @param viewIds The accessibility ids of the views to find
+         * @param viewIds The autofill ids of the views to find
          *
          * @return And array containing the views (empty if no views found).
          */
-        @NonNull View[] findViewsByAccessibilityIdTraversal(@NonNull int[] viewIds);
+        @NonNull View[] findViewsByAutofillIdTraversal(@NonNull int[] viewIds);
 
         /**
          * Finds a view by traversing the hierarchies of the client.
          *
-         * @param viewId The accessibility id of the views to find
+         * @param viewId The autofill id of the views to find
          *
          * @return The view, or {@code null} if not found
          */
-        @Nullable View findViewByAccessibilityIdTraversal(int viewId);
+        @Nullable View findViewByAutofillIdTraversal(int viewId);
 
         /**
          * Runs the specified action on the UI thread.
@@ -795,11 +795,11 @@ public final class AutofillManager {
     }
 
     private static AutofillId getAutofillId(View view) {
-        return new AutofillId(view.getAccessibilityViewId());
+        return new AutofillId(view.getAutofillViewId());
     }
 
     private static AutofillId getAutofillId(View parent, int virtualId) {
-        return new AutofillId(parent.getAccessibilityViewId(), virtualId);
+        return new AutofillId(parent.getAutofillViewId(), virtualId);
     }
 
     private void startSessionLocked(@NonNull AutofillId id, @NonNull Rect bounds,
@@ -1039,7 +1039,7 @@ public final class AutofillManager {
             final int itemCount = ids.size();
             int numApplied = 0;
             ArrayMap<View, SparseArray<AutofillValue>> virtualValues = null;
-            final View[] views = client.findViewsByAccessibilityIdTraversal(getViewIds(ids));
+            final View[] views = client.findViewsByAutofillIdTraversal(getViewIds(ids));
 
             for (int i = 0; i < itemCount; i++) {
                 final AutofillId id = ids.get(i);
@@ -1232,7 +1232,7 @@ public final class AutofillManager {
             return null;
         }
 
-        return client.findViewByAccessibilityIdTraversal(autofillId.getViewId());
+        return client.findViewByAutofillIdTraversal(autofillId.getViewId());
     }
 
     /** @hide */
