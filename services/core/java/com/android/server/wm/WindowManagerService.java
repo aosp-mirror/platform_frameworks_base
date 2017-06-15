@@ -893,10 +893,26 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void closeSurfaceTransaction() {
+        closeSurfaceTransaction(true /* withLockHeld */);
+    }
+
+    /**
+     * Closes a surface transaction.
+     *
+     * @param withLockHeld Whether to acquire the window manager while doing so. In some cases
+     *                     holding the lock my lead to starvation in WM in case closeTransaction
+     *                     blocks and we call it repeatedly, like we do for animations.
+     */
+    void closeSurfaceTransaction(boolean withLockHeld) {
         synchronized (mWindowMap) {
             if (mRoot.mSurfaceTraceEnabled) {
                 mRoot.mRemoteEventTrace.closeSurfaceTransaction();
             }
+            if (withLockHeld) {
+                SurfaceControl.closeTransaction();
+            }
+        }
+        if (!withLockHeld) {
             SurfaceControl.closeTransaction();
         }
     }
