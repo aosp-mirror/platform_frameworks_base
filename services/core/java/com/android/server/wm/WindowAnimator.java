@@ -227,7 +227,10 @@ public class WindowAnimator {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
             if (transactionOpen) {
-                mService.closeSurfaceTransaction();
+
+                // Do not hold window manager lock while closing the transaction, as this might be
+                // blocking until the next frame, which can lead to total lock starvation.
+                mService.closeSurfaceTransaction(false /* withLockHeld */);
                 if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION animate");
             }
         }
