@@ -1524,7 +1524,10 @@ class WindowStateAnimator {
     void prepareSurfaceLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
         if (!hasSurface()) {
-            if (w.mOrientationChanging) {
+
+            // There is no need to wait for an animation change if our window is gone for layout
+            // already as we'll never be visible.
+            if (w.mOrientationChanging && w.isGoneForLayoutLw()) {
                 if (DEBUG_ORIENTATION) {
                     Slog.v(TAG, "Orientation change skips hidden " + w);
                 }
@@ -1557,13 +1560,11 @@ class WindowStateAnimator {
             hide("prepareSurfaceLocked");
             mWallpaperControllerLocked.hideWallpapers(w);
 
-            // If we are waiting for this window to handle an
-            // orientation change, well, it is hidden, so
-            // doesn't really matter.  Note that this does
-            // introduce a potential glitch if the window
-            // becomes unhidden before it has drawn for the
-            // new orientation.
-            if (w.mOrientationChanging) {
+            // If we are waiting for this window to handle an orientation change. If this window is
+            // really hidden (gone for layout), there is no point in still waiting for it.
+            // Note that this does introduce a potential glitch if the window becomes unhidden
+            // before it has drawn for the new orientation.
+            if (w.mOrientationChanging && w.isGoneForLayoutLw()) {
                 w.mOrientationChanging = false;
                 if (DEBUG_ORIENTATION) Slog.v(TAG,
                         "Orientation change skips hidden " + w);
@@ -1630,18 +1631,19 @@ class WindowStateAnimator {
             displayed = true;
         }
 
-        if (displayed) {
-            if (w.mOrientationChanging) {
-                if (!w.isDrawnLw()) {
-                    mAnimator.mBulkUpdateParams &= ~SET_ORIENTATION_CHANGE_COMPLETE;
-                    mAnimator.mLastWindowFreezeSource = w;
-                    if (DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Orientation continue waiting for draw in " + w);
-                } else {
-                    w.mOrientationChanging = false;
-                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Orientation change complete in " + w);
-                }
+        if (w.mOrientationChanging) {
+            if (!w.isDrawnLw()) {
+                mAnimator.mBulkUpdateParams &= ~SET_ORIENTATION_CHANGE_COMPLETE;
+                mAnimator.mLastWindowFreezeSource = w;
+                if (DEBUG_ORIENTATION) Slog.v(TAG,
+                        "Orientation continue waiting for draw in " + w);
+            } else {
+                w.mOrientationChanging = false;
+                if (DEBUG_ORIENTATION) Slog.v(TAG, "Orientation change complete in " + w);
             }
+        }
+
+        if (displayed) {
             w.mToken.hasVisible = true;
         }
     }
