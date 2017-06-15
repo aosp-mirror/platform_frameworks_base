@@ -28,6 +28,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -747,5 +748,37 @@ public class WifiTrackerTest {
                 WifiTracker.MainHandler.MSG_WIFI_STATE_CHANGED)).isFalse();
 
         verifyNoMoreInteractions(mockWifiListener);
+    }
+
+    @Test
+    public void stopTrackingShouldSetStaleBitWhichPreventsCallbacksUntilNextScanResult()
+            throws Exception {
+        WifiTracker tracker = createMockedWifiTracker();
+        startTracking(tracker);
+        tracker.stopTracking();
+
+        CountDownLatch latch1 = new CountDownLatch(1);
+        tracker.mMainHandler.post(() -> {
+                latch1.countDown();
+        });
+        assertTrue("Latch 1 timed out", latch1.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+
+        startTracking(tracker);
+
+        tracker.mReceiver.onReceive(mContext, new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
+        tracker.mReceiver.onReceive(
+                mContext, new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION));
+        tracker.mReceiver.onReceive(
+                mContext, new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION));
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        tracker.mMainHandler.post(() -> {
+            latch2.countDown();
+        });
+        assertTrue("Latch 2 timed out", latch2.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+
+        verify(mockWifiListener, never()).onAccessPointsChanged();
+
+        sendScanResultsAndProcess(tracker); // verifies onAccessPointsChanged is invoked
     }
 }

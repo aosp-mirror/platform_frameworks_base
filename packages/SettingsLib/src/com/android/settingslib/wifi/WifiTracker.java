@@ -142,6 +142,7 @@ public class WifiTracker {
 
     @VisibleForTesting
     Scanner mScanner;
+    private boolean mStaleScanResults = false;
 
     public WifiTracker(Context context, WifiListener wifiListener,
             boolean includeSaved, boolean includeScans) {
@@ -330,7 +331,11 @@ public class WifiTracker {
      * Stop tracking wifi networks and scores.
      *
      * <p>This should always be called when done with a WifiTracker (if startTracking was called) to
-     * ensure proper cleanup and prevent any further callbacks from occuring.
+     * ensure proper cleanup and prevent any further callbacks from occurring.
+     *
+     * <p>Calling this method will set the {@link #mStaleScanResults} bit, which prevents
+     * {@link WifiListener#onAccessPointsChanged()} callbacks from being invoked (until the bit
+     * is unset on the next SCAN_RESULTS_AVAILABLE_ACTION).
      */
     @MainThread
     public void stopTracking() {
@@ -346,6 +351,7 @@ public class WifiTracker {
             mWorkHandler.removePendingMessages();
             mMainHandler.removePendingMessages();
         }
+        mStaleScanResults = true;
     }
 
     private void unregisterAndClearScoreCache() {
@@ -712,6 +718,11 @@ public class WifiTracker {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+
+            if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
+                mStaleScanResults = false;
+            }
+
             if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
                 updateWifiState(intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                         WifiManager.WIFI_STATE_UNKNOWN));
@@ -822,7 +833,9 @@ public class WifiTracker {
 
             switch (msg.what) {
                 case MSG_UPDATE_ACCESS_POINTS:
-                    updateAccessPointsLocked();
+                    if (!mStaleScanResults) {
+                        updateAccessPointsLocked();
+                    }
                     break;
                 case MSG_UPDATE_NETWORK_INFO:
                     updateNetworkInfo((NetworkInfo) msg.obj);
