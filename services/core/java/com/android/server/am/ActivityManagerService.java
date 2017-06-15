@@ -6712,10 +6712,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
             mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
-            if (app.isolated) {
-                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
-                getPackageManagerInternalLocked().removeIsolatedUid(app.uid);
-            }
             boolean willRestart = false;
             if (app.persistent && !app.isolated) {
                 if (!callerWillRestart) {
@@ -6725,6 +6721,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             app.kill(reason, true);
+            if (app.isolated) {
+                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
+                getPackageManagerInternalLocked().removeIsolatedUid(app.uid);
+            }
             handleAppDiedLocked(app, willRestart, allowRestart);
             if (willRestart) {
                 removeLruProcessLocked(app);
@@ -6764,14 +6764,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mHeavyWeightProcess = null;
             }
             mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
-            if (app.isolated) {
-                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
-            }
             // Take care of any launching providers waiting for this process.
             cleanupAppInLaunchingProvidersLocked(app, true);
             // Take care of any services that are waiting for the process.
             mServices.processStartTimedOutLocked(app);
             app.kill("start timeout", true);
+            if (app.isolated) {
+                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
+            }
             removeLruProcessLocked(app);
             if (mBackupTarget != null && mBackupTarget.app.pid == pid) {
                 Slog.w(TAG, "Unattached app died before backup, skipping");
