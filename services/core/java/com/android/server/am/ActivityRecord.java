@@ -2153,6 +2153,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch) {
+        showStartingWindow(prev, newTask, taskSwitch, false /* fromRecents */);
+    }
+
+    void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch,
+            boolean fromRecents) {
         if (mWindowContainerController == null) {
             return;
         }
@@ -2167,7 +2172,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
                 allowTaskSnapshot(),
-                state.ordinal() >= RESUMED.ordinal() && state.ordinal() <= STOPPED.ordinal());
+                state.ordinal() >= RESUMED.ordinal() && state.ordinal() <= STOPPED.ordinal(),
+                fromRecents);
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
