@@ -35,7 +35,7 @@ public class Utils {
     private static String sServicesSystemSharedLibPackageName;
     private static String sSharedSystemSharedLibPackageName;
 
-    public static final int[] WIFI_PIE_FOR_BADGING = {
+    static final int[] WIFI_PIE_FOR_BADGING = {
           com.android.internal.R.drawable.ic_signal_wifi_badged_0_bars,
           com.android.internal.R.drawable.ic_signal_wifi_badged_1_bar,
           com.android.internal.R.drawable.ic_signal_wifi_badged_2_bars,
@@ -294,12 +294,7 @@ public class Utils {
                 });
     }
 
-    /**
-     * Returns the resource id for the given badge or {@link View.NO_ID} if no badge is to be shown.
-     *
-     * @throws IllegalArgumentException if the given badge value is not supported.
-     */
-    public static int getWifiBadgeResource(int badge) {
+    private static int getWifiBadgeResource(int badge) {
         switch (badge) {
             case NetworkBadging.BADGING_NONE:
                 return View.NO_ID;
