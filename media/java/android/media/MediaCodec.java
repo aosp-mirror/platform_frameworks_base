@@ -340,7 +340,8 @@ import java.util.Map;
    </tr>
    <tr>
     <td>FLAC</td>
-    <td>Metadata blocks</td>
+    <td>mandatory metadata block (called the STREAMINFO block),<br>
+        optionally followed by any number of other metadata blocks</td>
     <td class=NA>Not Used</td>
     <td class=NA>Not Used</td>
    </tr>
