@@ -155,6 +155,10 @@ class PinnedStackController {
         mSnapAlgorithm = new PipSnapAlgorithm(service.mContext);
         mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
         reloadResources();
+        // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
+        // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
+        // triggers a configuration change and the resources to be reloaded.
+        mAspectRatio = mDefaultAspectRatio;
     }
 
     void onConfigurationChanged() {
@@ -171,7 +175,6 @@ class PinnedStackController {
         mCurrentMinSize = mDefaultMinSize;
         mDefaultAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio);
-        mAspectRatio = mDefaultAspectRatio;
         final String screenEdgeInsetsDpString = res.getString(
                 com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets);
         final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
