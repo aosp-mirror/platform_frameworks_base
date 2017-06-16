@@ -156,12 +156,10 @@ bool __ThrowIfFailed(JNIEnv *env, const ProgramListResult halResult) {
 }
 
 void ThrowParcelableRuntimeException(JNIEnv *env, const std::string& msg) {
-    EnvWrapper wrap(env);
-
-    auto jMsg = wrap(env->NewStringUTF(msg.c_str()));
-    auto runtimeExc = wrap(env->NewObject(gjni.RuntimeException.clazz,
+    auto jMsg = make_javastr(env, msg);
+    auto runtimeExc = make_javaref(env, env->NewObject(gjni.RuntimeException.clazz,
             gjni.RuntimeException.cstor, jMsg.get()));
-    auto parcelableExc = wrap(env->NewObject(gjni.ParcelableException.clazz,
+    auto parcelableExc = make_javaref(env, env->NewObject(gjni.ParcelableException.clazz,
             gjni.ParcelableException.cstor, runtimeExc.get()));
 
     auto res = env->Throw(static_cast<jthrowable>(parcelableExc.get()));
@@ -334,11 +332,10 @@ Direction DirectionToHal(bool directionDown) {
 
 JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &metadata) {
     ALOGV("MetadataFromHal()");
-    EnvWrapper wrap(env);
-
     if (metadata.size() == 0) return nullptr;
 
-    auto jMetadata = wrap(env->NewObject(gjni.RadioMetadata.clazz, gjni.RadioMetadata.cstor));
+    auto jMetadata = make_javaref(env, env->NewObject(
+            gjni.RadioMetadata.clazz, gjni.RadioMetadata.cstor));
 
     for (auto& item : metadata) {
         jint key = static_cast<jint>(item.key);
@@ -351,7 +348,7 @@ JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &me
                 break;
             case MetadataType::TEXT: {
                 ALOGV("metadata TEXT %d", key);
-                auto value = wrap(env->NewStringUTF(item.stringValue.c_str()));
+                auto value = make_javastr(env, item.stringValue);
                 status = env->CallIntMethod(jMetadata.get(), gjni.RadioMetadata.putStringFromNative,
                         key, value.get());
                 break;
@@ -360,7 +357,7 @@ JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &me
                 ALOGV("metadata RAW %d", key);
                 auto len = item.rawValue.size();
                 if (len == 0) break;
-                auto value = wrap(env->NewByteArray(len));
+                auto value = make_javaref(env, env->NewByteArray(len));
                 if (value == nullptr) {
                     ALOGE("Failed to allocate byte array of len %zu", len);
                     break;
@@ -389,15 +386,14 @@ JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &me
 static JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info10,
         const V1_1::ProgramInfo *info11) {
     ALOGV("ProgramInfoFromHal()");
-    EnvWrapper wrap(env);
 
     auto jMetadata = MetadataFromHal(env, info10.metadata);
-    auto jVendorExtension = info11 ?
-            wrap(env->NewStringUTF(info11->vendorExension.c_str())) : nullptr;
+    auto jVendorExtension = info11 ? make_javastr(env, info11->vendorExension) : nullptr;
 
-    return wrap(env->NewObject(gjni.ProgramInfo.clazz, gjni.ProgramInfo.cstor, info10.channel,
-            info10.subChannel, info10.tuned, info10.stereo, info10.digital, info10.signalStrength,
-            jMetadata.get(), info11 ? info11->flags : 0, jVendorExtension.get()));
+    return make_javaref(env, env->NewObject(gjni.ProgramInfo.clazz, gjni.ProgramInfo.cstor,
+            info10.channel, info10.subChannel, info10.tuned, info10.stereo, info10.digital,
+            info10.signalStrength, jMetadata.get(), info11 ? info11->flags : 0,
+            jVendorExtension.get()));
 }
 
 JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info) {

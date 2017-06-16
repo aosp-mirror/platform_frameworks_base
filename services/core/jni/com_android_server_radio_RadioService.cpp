@@ -185,7 +185,6 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
     ALOGV("nativeOpenTuner()");
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
-    EnvWrapper wrap(env);
 
     if (callback == nullptr) {
         ALOGE("Callback is empty");
@@ -210,7 +209,7 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
     Region region;
     BandConfig bandConfigHal = convert::BandConfigToHal(env, bandConfig, region);
 
-    auto tuner = wrap(env->NewObject(gjni.Tuner.clazz, gjni.Tuner.cstor,
+    auto tuner = make_javaref(env, env->NewObject(gjni.Tuner.clazz, gjni.Tuner.cstor,
             callback, halRev, region, withAudio));
     if (tuner == nullptr) {
         ALOGE("Unable to create new tuner object.");
