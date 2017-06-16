@@ -255,7 +255,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
             final ViewNode node = nodes[i];
             if (node == null) {
-                Slog.w(TAG, "fillStructureWithAllowedValues(): no node for " + viewState.id);
+                if (sVerbose) {
+                    Slog.v(TAG, "fillStructureWithAllowedValues(): no node for " + viewState.id);
+                }
                 continue;
             }
 
@@ -862,11 +864,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int numContexts = mContexts.size();
         for (int i = 0; i < numContexts; i++) {
             final FillContext context = mContexts.get(i);
-            // TODO: create a function that gets just one node so it doesn't create an array
-            // unnecessarily
-            final ViewNode[] nodes = context.findViewNodesByAutofillIds(id);
-            if (nodes != null) {
-                AutofillValue candidate = nodes[0].getAutofillValue();
+            final ViewNode node = context.findViewNodeByAutofillId(id);
+            if (node != null) {
+                final AutofillValue candidate = node.getAutofillValue();
                 if (sDebug) {
                     Slog.d(TAG, "getValueFromContexts(" + id + ") at " + i + ": " + candidate);
                 }
