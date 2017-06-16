@@ -1242,8 +1242,10 @@ public abstract class Window {
 
     /** @hide */
     public boolean shouldCloseOnTouch(Context context, MotionEvent event) {
-        if (mCloseOnTouchOutside && event.getAction() == MotionEvent.ACTION_DOWN
-                && isOutOfBounds(context, event) && peekDecorView() != null) {
+        final boolean isOutside =
+                event.getAction() == MotionEvent.ACTION_DOWN && isOutOfBounds(context, event)
+                || event.getAction() == MotionEvent.ACTION_OUTSIDE;
+        if (mCloseOnTouchOutside && peekDecorView() != null && isOutside) {
             return true;
         }
         return false;
