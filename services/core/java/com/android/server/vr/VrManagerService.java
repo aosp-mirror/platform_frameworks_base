@@ -24,9 +24,12 @@ import android.app.AppOpsManager;
 import android.app.Vr2dDisplayProperties;
 import android.app.NotificationManager;
 import android.annotation.NonNull;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -39,6 +42,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
@@ -140,7 +144,13 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private final NotificationAccessManager mNotifAccessManager = new NotificationAccessManager();
     /** Tracks the state of the screen and keyguard UI.*/
     private int mSystemSleepFlags = FLAG_AWAKE;
+    /**
+     * Set when ACTION_USER_UNLOCKED is fired. We shouldn't try to bind to the
+     * vr service before then.
+     */
+    private boolean mUserUnlocked;
     private Vr2dDisplay mVr2dDisplay;
+    private boolean mBootsToVr;
 
     private static final int MSG_VR_STATE_CHANGE = 0;
     private static final int MSG_PENDING_VR_STATE_CHANGE = 1;
@@ -152,15 +162,20 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      * If VR mode is not allowed to be enabled, calls to set VR mode will be cached.  When VR mode
      * is again allowed to be enabled, the most recent cached state will be applied.
      *
-     * @param allowed {@code true} if calling any of the setVrMode methods may cause the device to
-     *   enter VR mode.
      */
-    private void setVrModeAllowedLocked(boolean allowed) {
+    private void updateVrModeAllowedLocked() {
+        boolean allowed = mSystemSleepFlags == FLAG_ALL && mUserUnlocked;
         if (mVrModeAllowed != allowed) {
             mVrModeAllowed = allowed;
             if (DBG) Slog.d(TAG, "VR mode is " + ((allowed) ? "allowed" : "disallowed"));
             if (mVrModeAllowed) {
+                if (mBootsToVr) {
+                    setPersistentVrModeEnabled(true);
+                }
                 consumeAndApplyPendingStateLocked();
+                if (mBootsToVr && !mVrModeEnabled) {
+                  setVrMode(true, mDefaultVrService, 0, null);
+                }
             } else {
                 // Disable persistent mode when VR mode isn't allowed, allows an escape hatch to
                 // exit persistent VR mode when screen is turned off.
@@ -187,7 +202,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 mSystemSleepFlags &= ~FLAG_AWAKE;
             }
 
-            setVrModeAllowedLocked(mSystemSleepFlags == FLAG_ALL);
+            updateVrModeAllowedLocked();
         }
     }
 
@@ -198,7 +213,14 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             } else {
                 mSystemSleepFlags &= ~FLAG_SCREEN_ON;
             }
-            setVrModeAllowedLocked(mSystemSleepFlags == FLAG_ALL);
+            updateVrModeAllowedLocked();
+        }
+    }
+
+    private void setUserUnlocked() {
+        synchronized(mLock) {
+            mUserUnlocked = true;
+            updateVrModeAllowedLocked();
         }
     }
 
@@ -563,6 +585,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             mContext = getContext();
         }
 
+        mBootsToVr = SystemProperties.getBoolean("ro.boot.vr", false);
         publishLocalService(VrManagerInternal.class, new LocalService());
         publishBinderService(Context.VR_SERVICE, mVrManager.asBinder());
     }
@@ -597,10 +620,17 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
             mVr2dDisplay = new Vr2dDisplay(dm, ami, mVrManager);
             mVr2dDisplay.init(getContext());
-        } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
-            synchronized (mLock) {
-                mVrModeAllowed = true;
-            }
+
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
+            getContext().registerReceiver(new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
+                            VrManagerService.this.setUserUnlocked();
+                        }
+                    }
+                }, intentFilter);
         }
     }
 
