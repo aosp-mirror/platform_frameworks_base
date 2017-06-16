@@ -25,6 +25,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -169,6 +170,11 @@ public final class NotificationRecord {
 
     private Uri calculateSound() {
         final Notification n = sbn.getNotification();
+
+        // No notification sounds on tv
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            return null;
+        }
 
         Uri sound = mChannel.getSound();
         if (mPreChannelsNotification && (getChannel().getUserLockedFields()
