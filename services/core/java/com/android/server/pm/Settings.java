@@ -4861,9 +4861,9 @@ final class Settings {
 
             String[] overlayPaths = ps.getOverlayPaths(user.id);
             if (overlayPaths != null && overlayPaths.length > 0) {
-                pw.println("Overlay paths:");
+                pw.print(prefix); pw.println("  overlay paths:");
                 for (String path : overlayPaths) {
-                    pw.println(path);
+                    pw.print(prefix); pw.print("    "); pw.println(path);
                 }
             }
 

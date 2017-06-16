@@ -21583,8 +21583,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public static final int DUMP_FROZEN = 1 << 19;
         public static final int DUMP_DEXOPT = 1 << 20;
         public static final int DUMP_COMPILER_STATS = 1 << 21;
-        public static final int DUMP_ENABLED_OVERLAYS = 1 << 22;
-        public static final int DUMP_CHANGES = 1 << 23;
+        public static final int DUMP_CHANGES = 1 << 22;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -21828,8 +21827,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpState.setDump(DumpState.DUMP_DEXOPT);
             } else if ("compiler-stats".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_COMPILER_STATS);
-            } else if ("enabled-overlays".equals(cmd)) {
-                dumpState.setDump(DumpState.DUMP_ENABLED_OVERLAYS);
             } else if ("changes".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_CHANGES);
             } else if ("write".equals(cmd)) {
@@ -24606,12 +24603,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
 
                 final PackageSetting ps = mSettings.mPackages.get(targetPackageName);
-                String[] frameworkOverlayPaths = null;
-                if (!"android".equals(targetPackageName)) {
-                    frameworkOverlayPaths =
-                            mSettings.mPackages.get("android").getOverlayPaths(userId);
-                }
-                ps.setOverlayPaths(overlayPaths, frameworkOverlayPaths, userId);
+                ps.setOverlayPaths(overlayPaths, userId);
                 return true;
             }
         }
