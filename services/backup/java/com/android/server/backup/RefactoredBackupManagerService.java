@@ -17,7 +17,6 @@
 package com.android.server.backup;
 
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
-
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_FULL_CONFIRMATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_OP_COMPLETE;
@@ -30,7 +29,6 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_BACKU
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_BACKUP;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_CLEAR;
-import static com.android.server.backup.internal.BackupHandler.MSG_RUN_INITIALIZE;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACKUP_PACKAGE;
 
@@ -83,6 +81,7 @@ import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Pair;
@@ -102,6 +101,7 @@ import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.internal.BackupRequest;
 import com.android.server.backup.internal.ClearDataObserver;
 import com.android.server.backup.internal.Operation;
+import com.android.server.backup.internal.PerformInitializeTask;
 import com.android.server.backup.internal.ProvisionedObserver;
 import com.android.server.backup.internal.RunBackupReceiver;
 import com.android.server.backup.internal.RunInitializeReceiver;
@@ -142,6 +142,7 @@ import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -517,12 +518,12 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mCurrentToken = currentToken;
     }
 
-    public HashSet<String> getPendingInits() {
+    public ArraySet<String> getPendingInits() {
         return mPendingInits;
     }
 
-    public void setPendingInits(HashSet<String> pendingInits) {
-        mPendingInits = pendingInits;
+    public void clearPendingInits() {
+        mPendingInits.clear();
     }
 
     public PerformFullTransportBackupTask getRunningFullBackupTask() {
@@ -659,7 +660,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // Persistently track the need to do a full init
     private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
-    private HashSet<String> mPendingInits = new HashSet<>();  // transport names
+    private ArraySet<String> mPendingInits = new ArraySet<>();  // transport names
 
     // Round-robin queue for scheduling full backup passes
     private static final int SCHEDULE_FILE_VERSION = 1; // current version of the schedule file
@@ -806,11 +807,11 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         Intent backupIntent = new Intent(RUN_BACKUP_ACTION);
         backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mRunBackupIntent = PendingIntent.getBroadcast(context, MSG_RUN_BACKUP, backupIntent, 0);
+        mRunBackupIntent = PendingIntent.getBroadcast(context, 0, backupIntent, 0);
 
         Intent initIntent = new Intent(RUN_INITIALIZE_ACTION);
         backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mRunInitIntent = PendingIntent.getBroadcast(context, MSG_RUN_INITIALIZE, initIntent, 0);
+        mRunInitIntent = PendingIntent.getBroadcast(context, 0, initIntent, 0);
 
         // Set up the backup-request journaling
         mJournalDir = new File(mBaseStateDir, "pending");
@@ -2542,6 +2543,23 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 dataChangedImpl(packageName, targets);
             }
         });
+    }
+
+    // Run an initialize operation for the given transport
+    @Override
+    public void initializeTransports(String[] transportNames, IBackupObserver observer) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "initializeTransport");
+        if (MORE_DEBUG || true) {
+            Slog.v(TAG, "initializeTransport(): " + Arrays.asList(transportNames));
+        }
+
+        final long oldId = Binder.clearCallingIdentity();
+        try {
+            mWakelock.acquire();
+            mBackupHandler.post(new PerformInitializeTask(this, transportNames, observer));
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
     }
 
     // Clear the given package's backup data from the current transport

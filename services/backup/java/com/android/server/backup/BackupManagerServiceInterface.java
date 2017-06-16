@@ -77,6 +77,9 @@ public interface BackupManagerServiceInterface {
 
   void dataChanged(String packageName);
 
+  // Initialize the given transport
+  void initializeTransports(String[] transportName, IBackupObserver observer);
+
   // Clear the given package's backup data from the current transport
   void clearBackupData(String transportName, String packageName);
 

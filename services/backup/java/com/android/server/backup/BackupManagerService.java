@@ -106,6 +106,7 @@ import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
@@ -123,8 +124,8 @@ import com.android.server.EventLogTags;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
-
 import com.android.server.power.BatterySaverPolicy.ServiceType;
+
 import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -259,7 +260,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     private static final int MSG_RUN_ADB_BACKUP = 2;
     private static final int MSG_RUN_RESTORE = 3;
     private static final int MSG_RUN_CLEAR = 4;
-    private static final int MSG_RUN_INITIALIZE = 5;
     private static final int MSG_RUN_GET_RESTORE_SETS = 6;
     private static final int MSG_RESTORE_SESSION_TIMEOUT = 8;
     private static final int MSG_FULL_CONFIRMATION_TIMEOUT = 9;
@@ -733,7 +733,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // Persistently track the need to do a full init
     static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
-    HashSet<String> mPendingInits = new HashSet<String>();  // transport names
+    ArraySet<String> mPendingInits = new ArraySet<String>();  // transport names
 
     // Round-robin queue for scheduling full backup passes
     static final int SCHEDULE_FILE_VERSION = 1; // current version of the schedule file
@@ -1044,20 +1044,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 break;
             }
 
-            case MSG_RUN_INITIALIZE:
-            {
-                HashSet<String> queue;
-
-                // Snapshot the pending-init queue and work on that
-                synchronized (mQueueLock) {
-                    queue = new HashSet<String>(mPendingInits);
-                    mPendingInits.clear();
-                }
-
-                (new PerformInitializeTask(queue)).run();
-                break;
-            }
-
             case MSG_RETRY_INIT:
             {
                 synchronized (mQueueLock) {
@@ -1321,7 +1307,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
         Intent initIntent = new Intent(RUN_INITIALIZE_ACTION);
         backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mRunInitIntent = PendingIntent.getBroadcast(context, MSG_RUN_INITIALIZE, initIntent, 0);
+        mRunInitIntent = PendingIntent.getBroadcast(context, 0, initIntent, 0);
 
         // Set up the backup-request journaling
         mJournalDir = new File(mBaseStateDir, "pending");
@@ -1408,15 +1394,15 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     private class RunInitializeReceiver extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
             if (RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
+                // Snapshot the pending-init queue and work on that
                 synchronized (mQueueLock) {
-                    if (DEBUG) Slog.v(TAG, "Running a device init");
+                    String[] queue = mPendingInits.toArray(new String[mPendingInits.size()]);
+                    mPendingInits.clear();
 
                     // Acquire the wakelock and pass it to the init thread.  it will
                     // be released once init concludes.
                     mWakelock.acquire();
-
-                    Message msg = mBackupHandler.obtainMessage(MSG_RUN_INITIALIZE);
-                    mBackupHandler.sendMessage(msg);
+                    mBackupHandler.post(new PerformInitializeTask(queue, null));
                 }
             }
         }
@@ -9768,13 +9754,37 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     class PerformInitializeTask implements Runnable {
-        HashSet<String> mQueue;
+        String[] mQueue;
+        IBackupObserver mObserver;
 
-        PerformInitializeTask(HashSet<String> transportNames) {
+        PerformInitializeTask(String[] transportNames, IBackupObserver observer) {
             mQueue = transportNames;
+            mObserver = observer;
+        }
+
+        private void notifyResult(String target, int status) {
+            try {
+                if (mObserver != null) {
+                    mObserver.onResult(target, status);
+                }
+            } catch (RemoteException ignored) {
+                mObserver = null;       // don't try again
+            }
+        }
+
+        private void notifyFinished(int status) {
+            try {
+                if (mObserver != null) {
+                    mObserver.backupFinished(status);
+                }
+            } catch (RemoteException ignored) {
+                mObserver = null;
+            }
         }
 
         public void run() {
+            // mWakelock is *acquired* when execution begins here
+            int result = BackupTransport.TRANSPORT_OK;
             try {
                 for (String transportName : mQueue) {
                     IBackupTransport transport =
@@ -9803,6 +9813,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         synchronized (mQueueLock) {
                             recordInitPendingLocked(false, transportName);
                         }
+                        notifyResult(transportName, BackupTransport.TRANSPORT_OK);
                     } else {
                         // If this didn't work, requeue this one and try again
                         // after a suitable interval
@@ -9811,6 +9822,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         synchronized (mQueueLock) {
                             recordInitPendingLocked(true, transportName);
                         }
+                        notifyResult(transportName, status);
+                        result = status;
+
                         // do this via another alarm to make sure of the wakelock states
                         long delay = transport.requestBackupTime();
                         Slog.w(TAG, "Init failed on " + transportName + " resched in " + delay);
@@ -9820,8 +9834,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 }
             } catch (Exception e) {
                 Slog.e(TAG, "Unexpected error performing init", e);
+                result = BackupTransport.TRANSPORT_ERROR;
             } finally {
                 // Done; release the wakelock
+                notifyFinished(result);
                 mWakelock.release();
             }
         }
@@ -9937,6 +9953,23 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     dataChangedImpl(packageName, targets);
                 }
             });
+    }
+
+    // Run an initialize operation for the given transport
+    @Override
+    public void initializeTransports(String[] transportNames, IBackupObserver observer) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "initializeTransport");
+        if (MORE_DEBUG) {
+            Slog.v(TAG, "initializeTransports() of " + transportNames);
+        }
+
+        final long oldId = Binder.clearCallingIdentity();
+        try {
+            mWakelock.acquire();
+            mBackupHandler.post(new PerformInitializeTask(transportNames, observer));
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
     }
 
     // Clear the given package's backup data from the current transport

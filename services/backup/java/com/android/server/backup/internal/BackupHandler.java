@@ -64,7 +64,6 @@ public class BackupHandler extends Handler {
     public static final int MSG_RUN_ADB_BACKUP = 2;
     public static final int MSG_RUN_RESTORE = 3;
     public static final int MSG_RUN_CLEAR = 4;
-    public static final int MSG_RUN_INITIALIZE = 5;
     public static final int MSG_RUN_GET_RESTORE_SETS = 6;
     public static final int MSG_RESTORE_SESSION_TIMEOUT = 8;
     public static final int MSG_FULL_CONFIRMATION_TIMEOUT = 9;
@@ -262,19 +261,6 @@ public class BackupHandler extends Handler {
                 // reenqueues if the transport remains unavailable
                 ClearRetryParams params = (ClearRetryParams) msg.obj;
                 backupManagerService.clearBackupData(params.transportName, params.packageName);
-                break;
-            }
-
-            case MSG_RUN_INITIALIZE: {
-                HashSet<String> queue;
-
-                // Snapshot the pending-init queue and work on that
-                synchronized (backupManagerService.getQueueLock()) {
-                    queue = new HashSet<>(backupManagerService.getPendingInits());
-                    backupManagerService.getPendingInits().clear();
-                }
-
-                (new PerformInitializeTask(backupManagerService, queue)).run();
                 break;
             }
 
