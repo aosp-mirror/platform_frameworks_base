@@ -161,6 +161,7 @@ public class OffloadController {
             }
         }
 
-        return mHwInterface.setUpstreamParameters(iface, v4addr, v4gateway, v6gateways);
+        return mHwInterface.setUpstreamParameters(
+                iface, v4addr, v4gateway, (v6gateways.isEmpty() ? null : v6gateways));
     }
 }

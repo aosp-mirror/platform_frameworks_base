@@ -155,8 +155,7 @@ public class OffloadControllerTest {
         lp.setInterfaceName(testIfName);
         offload.setUpstreamLinkProperties(lp);
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
-                eq(testIfName), eq(null), eq(null), mStringArrayCaptor.capture());
-        assertTrue(mStringArrayCaptor.getValue().isEmpty());
+                eq(testIfName), eq(null), eq(null), eq(null));
         inOrder.verifyNoMoreInteractions();
 
         final String ipv4Addr = "192.0.2.5";
@@ -164,16 +163,14 @@ public class OffloadControllerTest {
         lp.addLinkAddress(new LinkAddress(linkAddr));
         offload.setUpstreamLinkProperties(lp);
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
-                eq(testIfName), eq(ipv4Addr), eq(null), mStringArrayCaptor.capture());
-        assertTrue(mStringArrayCaptor.getValue().isEmpty());
+                eq(testIfName), eq(ipv4Addr), eq(null), eq(null));
         inOrder.verifyNoMoreInteractions();
 
         final String ipv4Gateway = "192.0.2.1";
         lp.addRoute(new RouteInfo(InetAddress.getByName(ipv4Gateway)));
         offload.setUpstreamLinkProperties(lp);
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
-                eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), mStringArrayCaptor.capture());
-        assertTrue(mStringArrayCaptor.getValue().isEmpty());
+                eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), eq(null));
         inOrder.verifyNoMoreInteractions();
 
         final String ipv6Gw1 = "fe80::cafe";
