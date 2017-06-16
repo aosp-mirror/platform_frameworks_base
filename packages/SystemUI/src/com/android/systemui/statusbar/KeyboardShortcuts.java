@@ -62,7 +62,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -371,7 +371,7 @@ public final class KeyboardShortcuts {
 
     private void showKeyboardShortcuts(int deviceId) {
         retrieveKeyCharacterMap(deviceId);
-        Recents.getSystemServices().requestKeyboardShortcuts(mContext,
+        SystemServicesProxy.getInstance(mContext).requestKeyboardShortcuts(mContext,
                 new KeyboardShortcutsReceiver() {
                     @Override
                     public void onKeyboardShortcutsReceived(
