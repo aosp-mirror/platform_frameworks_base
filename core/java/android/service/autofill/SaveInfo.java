@@ -273,13 +273,24 @@ public final class SaveInfo implements Parcelable {
          *
          * <p>See {@link SaveInfo} for more info.
          *
-         * @throws IllegalArgumentException if {@code requiredIds} is {@code null} or empty.
+         * @throws IllegalArgumentException if {@code requiredIds} is {@code null} or empty, or if
+         * it contains any {@code null} entry.
          */
         public Builder(@SaveDataType int type, @NonNull AutofillId[] requiredIds) {
-            Preconditions.checkArgument(requiredIds != null && requiredIds.length > 0,
-                    "must have at least one required id: " + Arrays.toString(requiredIds));
+            // TODO: add CTS unit tests (not integration) to assert the null cases
             mType = type;
-            mRequiredIds = requiredIds;
+            mRequiredIds = assertValid(requiredIds);
+        }
+
+        private AutofillId[] assertValid(AutofillId[] ids) {
+            Preconditions.checkArgument(ids != null && ids.length > 0,
+                    "must have at least one id: " + Arrays.toString(ids));
+            for (int i = 0; i < ids.length; i++) {
+                final AutofillId id = ids[i];
+                Preconditions.checkArgument(id != null,
+                        "cannot have null id: " + Arrays.toString(ids));
+            }
+            return ids;
         }
 
         /**
@@ -302,12 +313,14 @@ public final class SaveInfo implements Parcelable {
          *
          * @param ids The ids of the optional views.
          * @return This builder.
+         *
+         * @throws IllegalArgumentException if {@code ids} is {@code null} or empty, or if
+         * it contains any {@code null} entry.
          */
-        public @NonNull Builder setOptionalIds(@Nullable AutofillId[] ids) {
+        public @NonNull Builder setOptionalIds(@NonNull AutofillId[] ids) {
+            // TODO: add CTS unit tests (not integration) to assert the null cases
             throwIfDestroyed();
-            if (ids != null && ids.length != 0) {
-                mOptionalIds = ids;
-            }
+            mOptionalIds = assertValid(ids);
             return this;
         }
 
@@ -421,7 +434,10 @@ public final class SaveInfo implements Parcelable {
             final Builder builder = new Builder(parcel.readInt(),
                     parcel.readParcelableArray(null, AutofillId.class));
             builder.setNegativeAction(parcel.readInt(), parcel.readParcelable(null));
-            builder.setOptionalIds(parcel.readParcelableArray(null, AutofillId.class));
+            final AutofillId[] optionalIds = parcel.readParcelableArray(null, AutofillId.class);
+            if (optionalIds != null) {
+                builder.setOptionalIds(optionalIds);
+            }
             builder.setDescription(parcel.readCharSequence());
             builder.setFlags(parcel.readInt());
             return builder.build();
