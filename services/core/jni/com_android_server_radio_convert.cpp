@@ -39,6 +39,8 @@ using V1_0::Result;
 using V1_0::Rds;
 using V1_1::ProgramListResult;
 
+static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
+
 static struct {
     struct {
         jfieldID descriptor;
@@ -59,12 +61,26 @@ static struct {
     } AmBandConfig;
 
     struct {
+        jclass clazz;
         jfieldID region;
         jfieldID type;
         jfieldID lowerLimit;
         jfieldID upperLimit;
         jfieldID spacing;
     } BandDescriptor;
+    struct {
+        jclass clazz;
+        jmethodID cstor;
+    } FmBandDescriptor;
+    struct {
+        jclass clazz;
+        jmethodID cstor;
+    } AmBandDescriptor;
+
+    struct {
+        jclass clazz;
+        jmethodID cstor;
+    } ModuleProperties;
 
     struct {
         jclass clazz;
@@ -184,9 +200,46 @@ static Deemphasis DeemphasisForRegion(Region region) {
     }
 }
 
-JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region) {
-    ALOGV("BandConfigFromHal()");
-    EnvWrapper wrap(env);
+static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Properties &prop10,
+        const V1_1::Properties *prop11, jint moduleId, const std::string& serviceName) {
+    ALOGV("ModulePropertiesFromHal()");
+
+    auto jServiceName = make_javastr(env, serviceName);
+    auto jImplementor = make_javastr(env, prop10.implementor);
+    auto jProduct = make_javastr(env, prop10.product);
+    auto jVersion = make_javastr(env, prop10.version);
+    auto jSerial = make_javastr(env, prop10.serial);
+    bool isBgScanSupported = prop11 ? prop11->supportsBackgroundScanning : false;
+    auto jVendorExtension = prop11 ? make_javastr(env, prop11->vendorExension) : nullptr;
+
+    auto jBands = make_javaref(env, env->NewObjectArray(prop10.bands.size(),
+            gjni.BandDescriptor.clazz, nullptr));
+    int i = 0;
+    for (auto &&band : prop10.bands) {
+        // ITU_1 is the default region just because its index is 0.
+        auto jBand = BandDescriptorFromHal(env, band, Region::ITU_1);
+        env->SetObjectArrayElement(jBands.get(), i++, jBand.get());
+    }
+
+    return make_javaref(env, env->NewObject(gjni.ModuleProperties.clazz,
+            gjni.ModuleProperties.cstor, moduleId, jServiceName.get(), prop10.classId,
+            jImplementor.get(), jProduct.get(), jVersion.get(), jSerial.get(), prop10.numTuners,
+            prop10.numAudioSources, prop10.supportsCapture, jBands.get(), isBgScanSupported,
+            jVendorExtension.get()));
+}
+
+JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Properties &properties,
+        jint moduleId, const std::string& serviceName) {
+    return ModulePropertiesFromHal(env, properties, nullptr, moduleId, serviceName);
+}
+
+JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_1::Properties &properties,
+        jint moduleId, const std::string& serviceName) {
+    return ModulePropertiesFromHal(env, properties.base, &properties, moduleId, serviceName);
+}
+
+static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region) {
+    ALOGV("BandDescriptorFromHal()");
 
     jint spacing = config.spacings.size() > 0 ? config.spacings[0] : 0;
     ALOGW_IF(config.spacings.size() == 0, "No channel spacing specified");
@@ -195,16 +248,41 @@ JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, 
         case Band::FM:
         case Band::FM_HD: {
             auto& fm = config.ext.fm;
-            return wrap(env->NewObject(gjni.FmBandConfig.clazz, gjni.FmBandConfig.cstor,
+            return make_javaref(env, env->NewObject(
+                    gjni.FmBandDescriptor.clazz, gjni.FmBandDescriptor.cstor,
                     region, config.type, config.lowerLimit, config.upperLimit, spacing,
                     fm.stereo, fm.rds != Rds::NONE, fm.ta, fm.af, fm.ea));
         }
         case Band::AM:
         case Band::AM_HD: {
             auto& am = config.ext.am;
-            return wrap(env->NewObject(gjni.AmBandConfig.clazz, gjni.AmBandConfig.cstor,
+            return make_javaref(env, env->NewObject(
+                    gjni.AmBandDescriptor.clazz, gjni.AmBandDescriptor.cstor,
                     region, config.type, config.lowerLimit, config.upperLimit, spacing,
                     am.stereo));
+        }
+        default:
+            ALOGE("Unsupported band type: %d", config.type);
+            return nullptr;
+    }
+}
+
+JavaRef<jobject> BandConfigFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region) {
+    ALOGV("BandConfigFromHal()");
+
+    auto descriptor = BandDescriptorFromHal(env, config, region);
+    if (descriptor == nullptr) return nullptr;
+
+    switch (config.type) {
+        case Band::FM:
+        case Band::FM_HD: {
+            return make_javaref(env, env->NewObject(
+                    gjni.FmBandConfig.clazz, gjni.FmBandConfig.cstor, descriptor.get()));
+        }
+        case Band::AM:
+        case Band::AM_HD: {
+            return make_javaref(env, env->NewObject(
+                    gjni.AmBandConfig.clazz, gjni.AmBandConfig.cstor, descriptor.get()));
         }
         default:
             ALOGE("Unsupported band type: %d", config.type);
@@ -345,7 +423,7 @@ void register_android_server_radio_convert(JNIEnv *env) {
             "android/hardware/radio/RadioManager$FmBandConfig");
     gjni.FmBandConfig.clazz = MakeGlobalRefOrDie(env, fmBandConfigClass);
     gjni.FmBandConfig.cstor = GetMethodIDOrDie(env, fmBandConfigClass,
-            "<init>", "(IIIIIZZZZZ)V");
+            "<init>", "(Landroid/hardware/radio/RadioManager$FmBandDescriptor;)V");
     gjni.FmBandConfig.stereo = GetFieldIDOrDie(env, fmBandConfigClass, "mStereo", "Z");
     gjni.FmBandConfig.rds = GetFieldIDOrDie(env, fmBandConfigClass, "mRds", "Z");
     gjni.FmBandConfig.ta = GetFieldIDOrDie(env, fmBandConfigClass, "mTa", "Z");
@@ -355,16 +433,38 @@ void register_android_server_radio_convert(JNIEnv *env) {
     auto amBandConfigClass = FindClassOrDie(env,
             "android/hardware/radio/RadioManager$AmBandConfig");
     gjni.AmBandConfig.clazz = MakeGlobalRefOrDie(env, amBandConfigClass);
-    gjni.AmBandConfig.cstor = GetMethodIDOrDie(env, amBandConfigClass, "<init>", "(IIIIIZ)V");
+    gjni.AmBandConfig.cstor = GetMethodIDOrDie(env, amBandConfigClass,
+            "<init>", "(Landroid/hardware/radio/RadioManager$AmBandDescriptor;)V");
     gjni.AmBandConfig.stereo = GetFieldIDOrDie(env, amBandConfigClass, "mStereo", "Z");
 
     auto bandDescriptorClass = FindClassOrDie(env,
             "android/hardware/radio/RadioManager$BandDescriptor");
+    gjni.BandDescriptor.clazz = MakeGlobalRefOrDie(env, bandDescriptorClass);
     gjni.BandDescriptor.region = GetFieldIDOrDie(env, bandDescriptorClass, "mRegion", "I");
     gjni.BandDescriptor.type = GetFieldIDOrDie(env, bandDescriptorClass, "mType", "I");
     gjni.BandDescriptor.lowerLimit = GetFieldIDOrDie(env, bandDescriptorClass, "mLowerLimit", "I");
     gjni.BandDescriptor.upperLimit = GetFieldIDOrDie(env, bandDescriptorClass, "mUpperLimit", "I");
     gjni.BandDescriptor.spacing = GetFieldIDOrDie(env, bandDescriptorClass, "mSpacing", "I");
+
+    auto fmBandDescriptorClass = FindClassOrDie(env,
+            "android/hardware/radio/RadioManager$FmBandDescriptor");
+    gjni.FmBandDescriptor.clazz = MakeGlobalRefOrDie(env, fmBandDescriptorClass);
+    gjni.FmBandDescriptor.cstor = GetMethodIDOrDie(env, fmBandDescriptorClass,
+            "<init>", "(IIIIIZZZZZ)V");
+
+    auto amBandDescriptorClass = FindClassOrDie(env,
+            "android/hardware/radio/RadioManager$AmBandDescriptor");
+    gjni.AmBandDescriptor.clazz = MakeGlobalRefOrDie(env, amBandDescriptorClass);
+    gjni.AmBandDescriptor.cstor = GetMethodIDOrDie(env, amBandDescriptorClass,
+            "<init>", "(IIIIIZ)V");
+
+    auto modulePropertiesClass = FindClassOrDie(env,
+            "android/hardware/radio/RadioManager$ModuleProperties");
+    gjni.ModuleProperties.clazz = MakeGlobalRefOrDie(env, modulePropertiesClass);
+    gjni.ModuleProperties.cstor = GetMethodIDOrDie(env, modulePropertiesClass, "<init>",
+            "(ILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;"
+            "Ljava/lang/String;IIZ[Landroid/hardware/radio/RadioManager$BandDescriptor;Z"
+            "Ljava/lang/String;)V");
 
     auto programInfoClass = FindClassOrDie(env, "android/hardware/radio/RadioManager$ProgramInfo");
     gjni.ProgramInfo.clazz = MakeGlobalRefOrDie(env, programInfoClass);

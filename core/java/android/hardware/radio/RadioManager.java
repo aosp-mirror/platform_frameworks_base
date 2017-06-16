@@ -31,8 +31,8 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * The RadioManager class allows to control a broadcast radio tuner present on the device.
@@ -111,6 +111,7 @@ public class RadioManager {
     public static class ModuleProperties implements Parcelable {
 
         private final int mId;
+        @NonNull private final String mServiceName;
         private final int mClassId;
         private final String mImplementor;
         private final String mProduct;
@@ -123,10 +124,12 @@ public class RadioManager {
         private final boolean mIsBgScanSupported;
         private final String mVendorExension;
 
-        ModuleProperties(int id, int classId, String implementor, String product, String version,
-                String serial, int numTuners, int numAudioSources, boolean isCaptureSupported,
-                BandDescriptor[] bands, boolean isBgScanSupported, String vendorExension) {
+        ModuleProperties(int id, String serviceName, int classId, String implementor,
+                String product, String version, String serial, int numTuners, int numAudioSources,
+                boolean isCaptureSupported, BandDescriptor[] bands, boolean isBgScanSupported,
+                String vendorExension) {
             mId = id;
+            mServiceName = TextUtils.isEmpty(serviceName) ? "default" : serviceName;
             mClassId = classId;
             mImplementor = implementor;
             mProduct = product;
@@ -147,6 +150,16 @@ public class RadioManager {
          */
         public int getId() {
             return mId;
+        }
+
+        /**
+         * Module service (driver) name as registered with HIDL.
+         * @return the module service name.
+         *
+         * @hide FutureFeature
+         */
+        public @NonNull String getServiceName() {
+            return mServiceName;
         }
 
         /** Module class identifier: {@link #CLASS_AM_FM}, {@link #CLASS_SAT}, {@link #CLASS_DT}
@@ -250,6 +263,8 @@ public class RadioManager {
 
         private ModuleProperties(Parcel in) {
             mId = in.readInt();
+            String serviceName = in.readString();
+            mServiceName = TextUtils.isEmpty(serviceName) ? "default" : serviceName;
             mClassId = in.readInt();
             mImplementor = in.readString();
             mProduct = in.readString();
@@ -281,6 +296,7 @@ public class RadioManager {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mId);
+            dest.writeString(mServiceName);
             dest.writeInt(mClassId);
             dest.writeString(mImplementor);
             dest.writeString(mProduct);
@@ -301,7 +317,8 @@ public class RadioManager {
 
         @Override
         public String toString() {
-            return "ModuleProperties [mId=" + mId + ", mClassId=" + mClassId
+            return "ModuleProperties [mId=" + mId
+                    + ", mServiceName=" + mServiceName + ", mClassId=" + mClassId
                     + ", mImplementor=" + mImplementor + ", mProduct=" + mProduct
                     + ", mVersion=" + mVersion + ", mSerial=" + mSerial
                     + ", mNumTuners=" + mNumTuners
@@ -316,6 +333,7 @@ public class RadioManager {
             final int prime = 31;
             int result = 1;
             result = prime * result + mId;
+            result = prime * result + mServiceName.hashCode();
             result = prime * result + mClassId;
             result = prime * result + ((mImplementor == null) ? 0 : mImplementor.hashCode());
             result = prime * result + ((mProduct == null) ? 0 : mProduct.hashCode());
@@ -339,6 +357,7 @@ public class RadioManager {
             ModuleProperties other = (ModuleProperties) obj;
             if (mId != other.getId())
                 return false;
+            if (!TextUtils.equals(mServiceName, other.mServiceName)) return false;
             if (mClassId != other.getClassId())
                 return false;
             if (mImplementor == null) {
@@ -1457,7 +1476,35 @@ public class RadioManager {
      *  <li>{@link #STATUS_DEAD_OBJECT} if the binder transaction to the native service fails, </li>
      * </ul>
      */
-    public native int listModules(List <ModuleProperties> modules);
+    public int listModules(List<ModuleProperties> modules) {
+        if (modules == null) {
+            Log.e(TAG, "the output list must not be empty");
+            return STATUS_BAD_VALUE;
+        }
+
+        if (mService == null) {
+            return nativeListModules(modules);
+        }
+
+        Log.v(TAG, "Listing available tuners...");
+        List<ModuleProperties> returnedList;
+        try {
+            returnedList = mService.listModules();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed listing available tuners", e);
+            return STATUS_DEAD_OBJECT;
+        }
+
+        if (returnedList == null) {
+            Log.e(TAG, "Returned list was a null");
+            return STATUS_ERROR;
+        }
+
+        modules.addAll(returnedList);
+        return STATUS_OK;
+    }
+
+    private native int nativeListModules(List<ModuleProperties> modules);
 
     /**
      * Open an interface to control a tuner on a given broadcast radio module.
@@ -1487,7 +1534,8 @@ public class RadioManager {
             try {
                 tuner = mService.openTuner(moduleId, config, withAudio, halCallback);
             } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+                Log.e(TAG, "Failed to open tuner", e);
+                return null;
             }
             if (tuner == null) {
                 Log.e(TAG, "Failed to open tuner");
