@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.RecoverySystem;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.telephony.euicc.EuiccManager;
 import android.util.Log;
 import android.util.Slog;
@@ -31,14 +33,29 @@ import android.view.WindowManager;
 import com.android.internal.R;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class MasterClearReceiver extends BroadcastReceiver {
     private static final String TAG = "MasterClear";
+    private static final String ACTION_WIPE_EUICC_DATA =
+            "com.android.internal.action.wipe_euicc_data";
+    private static final long DEFAULT_EUICC_WIPING_TIMEOUT_MILLIS = 30000L; // 30 s
     private boolean mWipeExternalStorage;
-    private boolean mWipeEims;
+    private boolean mWipeEsims;
+    private static CountDownLatch mEuiccFactoryResetLatch;
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
+        if (ACTION_WIPE_EUICC_DATA.equals(intent.getAction())) {
+            if (getResultCode() != EuiccManager.EMBEDDED_SUBSCRIPTION_RESULT_OK) {
+                int detailedCode = intent.getIntExtra(
+                    EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE, 0);
+                Slog.e(TAG, "Error wiping euicc data, Detailed code = " + detailedCode);
+            }
+            mEuiccFactoryResetLatch.countDown();
+            return;
+        }
         if (intent.getAction().equals(Intent.ACTION_REMOTE_INTENT)) {
             if (!"google.com".equals(intent.getStringExtra("from"))) {
                 Slog.w(TAG, "Ignoring master clear request -- not from trusted server.");
@@ -57,7 +74,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
         final boolean shutdown = intent.getBooleanExtra("shutdown", false);
         final String reason = intent.getStringExtra(Intent.EXTRA_REASON);
         mWipeExternalStorage = intent.getBooleanExtra(Intent.EXTRA_WIPE_EXTERNAL_STORAGE, false);
-        mWipeEims = intent.getBooleanExtra(Intent.EXTRA_WIPE_ESIMS, false);
+        mWipeEsims = intent.getBooleanExtra(Intent.EXTRA_WIPE_ESIMS, false);
         final boolean forceWipe = intent.getBooleanExtra(Intent.EXTRA_FORCE_MASTER_CLEAR, false)
                 || intent.getBooleanExtra(Intent.EXTRA_FORCE_FACTORY_RESET, false);
 
@@ -77,7 +94,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
             }
         };
 
-        if (mWipeExternalStorage || mWipeEims) {
+        if (mWipeExternalStorage || mWipeEsims) {
             // thr will be started at the end of this task.
             new WipeDataTask(context, thr).execute();
         } else {
@@ -112,10 +129,31 @@ public class MasterClearReceiver extends BroadcastReceiver {
                         Context.STORAGE_SERVICE);
                 sm.wipeAdoptableDisks();
             }
-            if (mWipeEims) {
+            if (mWipeEsims) {
                 EuiccManager euiccManager = (EuiccManager) mContext.getSystemService(
                         Context.EUICC_SERVICE);
-                // STOPSHIP: add EuiccManager API to factory reset eUICC
+                Intent intent = new Intent(mContext, MasterClearReceiver.class);
+                intent.setAction(ACTION_WIPE_EUICC_DATA);
+                PendingIntent callbackIntent = PendingIntent.getBroadcast(
+                        mContext,
+                        0 /* requestCode */,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+                mEuiccFactoryResetLatch = new CountDownLatch(1);
+                euiccManager.eraseSubscriptions(callbackIntent);
+                try {
+                    long waitingTime = Settings.Global.getLong(
+                            mContext.getContentResolver(),
+                            Settings.Global.EUICC_WIPING_TIMEOUT_MILLIS,
+                            DEFAULT_EUICC_WIPING_TIMEOUT_MILLIS);
+
+                    if (!mEuiccFactoryResetLatch.await(waitingTime, TimeUnit.MILLISECONDS)) {
+                        Slog.e(TAG, "Timeout wiping eUICC data.");
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    Slog.e(TAG, "Wiping eUICC data interrupted", e);
+                }
             }
             return null;
         }
