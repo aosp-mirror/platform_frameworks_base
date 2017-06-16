@@ -1244,7 +1244,7 @@ public class ActivityOptions {
                 // Once we parcel the thumbnail for transfering over to the system, create a copy of
                 // the bitmap to a hardware bitmap and pass through the GraphicBuffer
                 if (mThumbnail != null) {
-                    final Bitmap hwBitmap = mThumbnail.copy(Config.HARDWARE, true /* immutable */);
+                    final Bitmap hwBitmap = mThumbnail.copy(Config.HARDWARE, false /* isMutable */);
                     if (hwBitmap != null) {
                         b.putParcelable(KEY_ANIM_THUMBNAIL, hwBitmap.createGraphicBufferHandle());
                     } else {
