@@ -357,6 +357,43 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
+    public void testCancelAllNotificationsMultipleEnqueuedDoesNotCrash() throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        for (int i = 0; i < 10; i++) {
+            mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        }
+        mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
+        waitForIdle();
+    }
+
+    @Test
+    public void testCancelGroupSummaryMultipleEnqueuedChildrenDoesNotCrash() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group1", true);
+        final NotificationRecord parentAsChild = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group1", false);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group1", false);
+
+        // fully post parent notification
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                parent.sbn.getId(), parent.sbn.getNotification(), parent.sbn.getUserId());
+        waitForIdle();
+
+        // enqueue the child several times
+        for (int i = 0; i < 10; i++) {
+            mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                    child.sbn.getId(), child.sbn.getNotification(), child.sbn.getUserId());
+        }
+        // make the parent a child, which will cancel the child notification
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                parentAsChild.sbn.getId(), parentAsChild.sbn.getNotification(),
+                parentAsChild.sbn.getUserId());
+        waitForIdle();
+    }
+
+    @Test
     public void testCancelAllNotifications_IgnoreForegroundService() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
