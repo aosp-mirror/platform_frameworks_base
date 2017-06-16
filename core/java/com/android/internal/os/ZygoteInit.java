@@ -546,12 +546,13 @@ public class ZygoteInit {
         for (String classPathElement : classPathElements) {
             // System server is fully AOTed and never profiled
             // for profile guided compilation.
-            // TODO: Make this configurable between INTERPRET_ONLY, SPEED, SPACE and EVERYTHING?
+            String systemServerFilter = SystemProperties.get(
+                    "dalvik.vm.systemservercompilerfilter", "speed");
 
             int dexoptNeeded;
             try {
                 dexoptNeeded = DexFile.getDexOptNeeded(
-                    classPathElement, instructionSet, "speed",
+                    classPathElement, instructionSet, systemServerFilter,
                     false /* newProfile */, false /* downgrade */);
             } catch (FileNotFoundException ignored) {
                 // Do not add to the classpath.
@@ -570,7 +571,7 @@ public class ZygoteInit {
                 final String packageName = "*";
                 final String outputPath = null;
                 final int dexFlags = 0;
-                final String compilerFilter = "speed";
+                final String compilerFilter = systemServerFilter;
                 final String uuid = StorageManager.UUID_PRIVATE_INTERNAL;
                 final String seInfo = null;
                 try {
