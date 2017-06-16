@@ -548,6 +548,7 @@ public abstract class WallpaperService extends Service {
         /**
          * Notifies the engine that wallpaper colors changed significantly.
          * This will trigger a {@link #onComputeWallpaperColors()} call.
+         * @hide
          */
         public void invalidateColors() {
             try {
@@ -564,6 +565,7 @@ public abstract class WallpaperService extends Service {
          * you might want to call {@link #invalidateColors()} in a near future.
          *
          * @return List of wallpaper colors and their weights.
+         * @hide
          */
         public @Nullable WallpaperColors onComputeWallpaperColors() {
             return null;
