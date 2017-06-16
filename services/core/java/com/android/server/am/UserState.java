@@ -69,7 +69,6 @@ public final class UserState {
     public boolean setState(int oldState, int newState) {
         if (state == oldState) {
             setState(newState);
-            EventLogTags.writeAmUserStateChanged(mHandle.getIdentifier(), newState);
             return true;
         } else {
             Slog.w(TAG, "Expected user " + mHandle.getIdentifier() + " in state "
@@ -84,6 +83,7 @@ public final class UserState {
         }
         Slog.i(TAG, "User " + mHandle.getIdentifier() + " state changed from "
                 + stateToString(state) + " to " + stateToString(newState));
+        EventLogTags.writeAmUserStateChanged(mHandle.getIdentifier(), newState);
         lastState = state;
         state = newState;
     }
