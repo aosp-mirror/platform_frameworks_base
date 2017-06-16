@@ -16,6 +16,8 @@
 
 package com.android.server.connectivity.tethering;
 
+import static com.android.internal.util.BitUtils.uint16;
+
 import android.hardware.tetheroffload.control.V1_0.IOffloadControl;
 import android.hardware.tetheroffload.control.V1_0.ITetheringOffloadCallback;
 import android.hardware.tetheroffload.control.V1_0.NatTimeoutUpdate;
@@ -33,6 +35,9 @@ import java.util.ArrayList;
  */
 public class OffloadHardwareInterface {
     private static final String TAG = OffloadHardwareInterface.class.getSimpleName();
+    private static final String NO_INTERFACE_NAME = "";
+    private static final String NO_IPV4_ADDRESS = "";
+    private static final String NO_IPV4_GATEWAY = "";
 
     private static native boolean configOffload();
 
@@ -107,6 +112,11 @@ public class OffloadHardwareInterface {
 
     public boolean setUpstreamParameters(
             String iface, String v4addr, String v4gateway, ArrayList<String> v6gws) {
+        iface = iface != null ? iface : NO_INTERFACE_NAME;
+        v4addr = v4addr != null ? v4addr : NO_IPV4_ADDRESS;
+        v4gateway = v4gateway != null ? v4gateway : NO_IPV4_GATEWAY;
+        v6gws = v6gws != null ? v6gws : new ArrayList<>();
+
         final CbResults results = new CbResults();
         try {
             mOffloadControl.setUpstreamParameters(
@@ -143,8 +153,8 @@ public class OffloadHardwareInterface {
             handler.post(() -> {
                     controlCb.onNatTimeoutUpdate(
                         params.proto,
-                        params.src.addr, params.src.port,
-                        params.dst.addr, params.dst.port);
+                        params.src.addr, uint16(params.src.port),
+                        params.dst.addr, uint16(params.dst.port));
             });
         }
     }
