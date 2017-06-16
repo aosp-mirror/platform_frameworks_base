@@ -153,6 +153,12 @@ public class EuiccManager {
     public static final String EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT =
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT";
 
+    /**
+     * Optional meta-data attribute for a carrier app providing an icon to use to represent the
+     * carrier. If not provided, the app's launcher icon will be used as a fallback.
+     */
+    public static final String META_DATA_CARRIER_ICON = "android.telephony.euicc.carriericon";
+
     private final Context mContext;
     private final IEuiccController mController;
 
