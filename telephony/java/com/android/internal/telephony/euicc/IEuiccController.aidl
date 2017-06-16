@@ -40,4 +40,5 @@ interface IEuiccController {
     oneway void updateSubscriptionNickname(int subscriptionId, String nickname,
         in PendingIntent callbackIntent);
     oneway void eraseSubscriptions(in PendingIntent callbackIntent);
+    oneway void retainSubscriptionsForFactoryReset(in PendingIntent callbackIntent);
 }
