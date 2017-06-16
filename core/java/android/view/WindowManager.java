@@ -1391,6 +1391,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_TASK_SNAPSHOT = 0x00080000;
 
         /**
+         * Flag to indicate that this window should be ignored when determining what parts of the
+         * screen can be magnified.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_NO_MAGNIFICATION_REGION_EFFECT = 0x00100000;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */
