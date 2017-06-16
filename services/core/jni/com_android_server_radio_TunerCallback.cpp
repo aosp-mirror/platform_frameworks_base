@@ -17,7 +17,7 @@
 #define LOG_TAG "radio.TunerCallback.jni"
 #define LOG_NDEBUG 0
 
-#include "com_android_server_radio_Tuner_TunerCallback.h"
+#include "com_android_server_radio_TunerCallback.h"
 
 #include "com_android_server_radio_convert.h"
 #include "com_android_server_radio_Tuner.h"
