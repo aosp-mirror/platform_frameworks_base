@@ -2027,7 +2027,18 @@ class ActivityStarter {
             return mSupervisor.mFocusedStack;
         }
 
-        if (mSourceDisplayId == DEFAULT_DISPLAY) {
+        if (mSourceDisplayId != DEFAULT_DISPLAY) {
+            // Try to put the activity in a stack on a secondary display.
+            stack = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
+            if (stack == null) {
+                // If source display is not suitable - look for topmost valid stack in the system.
+                if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
+                        "computeStackFocus: Can't launch on mSourceDisplayId=" + mSourceDisplayId
+                                + ", looking on all displays.");
+                stack = mSupervisor.getNextValidLaunchStackLocked(r, mSourceDisplayId);
+            }
+        }
+        if (stack == null) {
             // We first try to put the task in the first dynamic stack on home display.
             final ArrayList<ActivityStack> homeDisplayStacks = mSupervisor.mHomeStack.mStacks;
             for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
@@ -2043,8 +2054,6 @@ class ActivityStarter {
                     bounds != null ? FREEFORM_WORKSPACE_STACK_ID :
                             FULLSCREEN_WORKSPACE_STACK_ID;
             stack = mSupervisor.getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
-        } else {
-            stack = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
         }
         if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
                 + r + " stackId=" + stack.mStackId);
