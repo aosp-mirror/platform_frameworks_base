@@ -165,6 +165,9 @@ public class TileUtils {
      * Name of the meta-data item that should be set in the AndroidManifest.xml to specify the
      * custom view which should be displayed for the preference. The custom view will be inflated
      * as a remote view.
+     *
+     * This also can be used with {@link META_DATA_PREFERENCE_SUMMARY_URI} above, by setting the id
+     * of the summary TextView to '@android:id/summary'.
      */
     public static final String META_DATA_PREFERENCE_CUSTOM_VIEW =
             "com.android.settings.custom_view";
@@ -315,6 +318,7 @@ public class TileUtils {
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivitiesAsUser(intent,
                 PackageManager.GET_META_DATA, user.getIdentifier());
+        Map<String, IContentProvider> providerMap = new HashMap<>();
         for (ResolveInfo resolved : results) {
             if (!resolved.system) {
                 // Do not allow any app to add to settings, only system ones.
@@ -346,7 +350,7 @@ public class TileUtils {
                 tile.priority = usePriority ? resolved.priority : 0;
                 tile.metaData = activityInfo.metaData;
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo,
-                        pm);
+                        pm, providerMap);
                 if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
 
                 addedCache.put(key, tile);
@@ -361,14 +365,14 @@ public class TileUtils {
     }
 
     private static boolean updateTileData(Context context, Tile tile,
-            ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm) {
+            ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm,
+            Map<String, IContentProvider> providerMap) {
         if (applicationInfo.isSystemApp()) {
             int icon = 0;
             Pair<String, Integer> iconFromUri = null;
             CharSequence title = null;
             String summary = null;
             String keyHint = null;
-            Uri uri = null;
             RemoteViews remoteViews = null;
 
             // Get the activity's meta-data
@@ -414,6 +418,15 @@ public class TileUtils {
                     if (metaData.containsKey(META_DATA_PREFERENCE_CUSTOM_VIEW)) {
                         int layoutId = metaData.getInt(META_DATA_PREFERENCE_CUSTOM_VIEW);
                         remoteViews = new RemoteViews(applicationInfo.packageName, layoutId);
+                        if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
+                            String uriString = metaData.getString(
+                                    META_DATA_PREFERENCE_SUMMARY_URI);
+                            String overrideSummary = getTextFromUri(context, uriString, providerMap,
+                                    META_DATA_PREFERENCE_SUMMARY);
+                            if (overrideSummary != null) {
+                                remoteViews.setTextViewText(android.R.id.summary, overrideSummary);
+                            }
+                        }
                     }
                 }
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
