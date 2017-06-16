@@ -12591,6 +12591,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.restoreCallingIdentity(ident);
             }
         }
+        closeSystemDialogs("setLockScreenShown");
     }
 
     @Override
