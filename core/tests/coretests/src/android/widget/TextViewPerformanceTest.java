@@ -20,15 +20,20 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.MediumTest;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.SpannedString;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-public class TextViewPerformanceTest extends AndroidTestCase {
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+public class TextViewPerformanceTest {
 
     private String mString = "The quick brown fox";
     private Canvas mCanvas;
@@ -36,16 +41,16 @@ public class TextViewPerformanceTest extends AndroidTestCase {
     private Paint mPaint;
     private PerformanceLabelView mLabelView;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() {
         Bitmap mBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.RGB_565);
         mCanvas = new Canvas(mBitmap);
 
         ViewGroup.LayoutParams p = new ViewGroup.LayoutParams(320, 240);
 
-        mLabelView = new PerformanceLabelView(mContext);
+        final Context context = InstrumentationRegistry.getContext();
+
+        mLabelView = new PerformanceLabelView(context);
         mLabelView.setText(mString);
         mLabelView.measure(View.MeasureSpec.AT_MOST | 320, View.MeasureSpec.AT_MOST | 240);
         mLabelView.mySetFrame(320, 240);
@@ -54,7 +59,7 @@ public class TextViewPerformanceTest extends AndroidTestCase {
 
         mPaint = new Paint();
         mCanvas.save();
-        mTextView = new PerformanceTextView(mContext);
+        mTextView = new PerformanceTextView(context);
         mTextView.setLayoutParams(p);
         mTextView.setText(mString);
         mTextView.mySetFrame(320, 240);
@@ -62,7 +67,8 @@ public class TextViewPerformanceTest extends AndroidTestCase {
     }
 
     @MediumTest
-    public void testDrawTextViewLine() throws Exception {
+    @Test
+    public void testDrawTextViewLine() {
         mTextView.myDraw(mCanvas);
         mTextView.myDraw(mCanvas);
         mTextView.myDraw(mCanvas);
@@ -76,7 +82,8 @@ public class TextViewPerformanceTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testSpan() throws Exception {
+    @Test
+    public void testSpan() {
         CharSequence charSeq = new SpannedString(mString);
         mTextView.setText(charSeq);
 
@@ -93,12 +100,14 @@ public class TextViewPerformanceTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testCanvasDrawText() throws Exception {
+    @Test
+    public void testCanvasDrawText() {
         mCanvas.drawText(mString, 30, 30, mPaint);
     }
 
     @SmallTest
-    public void testLabelViewDraw() throws Exception {
+    @Test
+    public void testLabelViewDraw() {
         mLabelView.myDraw(mCanvas);
     }
 
