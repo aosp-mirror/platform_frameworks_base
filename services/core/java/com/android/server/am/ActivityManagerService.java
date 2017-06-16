@@ -24015,6 +24015,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (reason != null) {
                     pw.println("  Reason: " + reason);
                 }
+                pw.println("  mLastHomeActivityStartResult: "
+                        + mActivityStarter.mLastHomeActivityStartResult);
+                final ActivityRecord r = mActivityStarter.mLastHomeActivityStartRecord[0];
+                if (r != null) {
+                    pw.println("  mLastHomeActivityStartRecord:");
+                    r.dump(pw, "   ");
+                }
                 pw.println();
                 dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
                         true /* dumpAll */, false /* dumpClient */, null /* dumpPackage */,
