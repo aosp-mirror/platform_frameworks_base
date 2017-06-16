@@ -76,6 +76,13 @@ public final class PhoneAccount implements Parcelable {
     public static final String EXTRA_CALL_SUBJECT_CHARACTER_ENCODING =
             "android.telecom.extra.CALL_SUBJECT_CHARACTER_ENCODING";
 
+     /**
+     * Indicating flag for phone account whether to use voip audio mode for voip calls
+     * @hide
+     */
+    public static final String EXTRA_ALWAYS_USE_VOIP_AUDIO_MODE =
+            "android.telecom.extra.ALWAYS_USE_VOIP_AUDIO_MODE";
+
     /**
      * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
      * indicates whether this {@link PhoneAccount} is capable of supporting a request to handover a
