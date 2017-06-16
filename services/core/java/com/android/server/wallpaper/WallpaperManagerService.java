@@ -52,7 +52,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -92,7 +91,6 @@ import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.graphics.palette.Palette;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -168,7 +166,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String WALLPAPER_LOCK_ORIG = "wallpaper_lock_orig";
     static final String WALLPAPER_LOCK_CROP = "wallpaper_lock";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
-    static final int MAX_WALLPAPER_EXTRACTION_AREA = 112 * 112;
 
     // All the various per-user state files we need to be aware of
     static final String[] sPerUserFiles = new String[] {
@@ -397,8 +394,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         // It prevents color extraction on big bitmaps.
         int wallpaperId = -1;
 
+        boolean imageWallpaper = false;
         synchronized (mLock) {
-            final boolean imageWallpaper = mImageWallpaper.equals(wallpaper.wallpaperComponent)
+            imageWallpaper = mImageWallpaper.equals(wallpaper.wallpaperComponent)
                     || wallpaper.wallpaperComponent == null;
             if (imageWallpaper) {
                 if (wallpaper.cropFile != null && wallpaper.cropFile.exists()) {
@@ -422,45 +420,33 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             wallpaperId = wallpaper.wallpaperId;
         }
 
-        Bitmap bitmap = null;
+        WallpaperColors colors = null;
         if (cropFile != null) {
-            bitmap = BitmapFactory.decodeFile(cropFile);
+            Bitmap bitmap = BitmapFactory.decodeFile(cropFile);
+            colors = WallpaperColors.fromBitmap(bitmap);
+            bitmap.recycle();
         } else if (thumbnail != null) {
-            // Calculate how big the bitmap needs to be.
-            // This avoids unnecessary processing and allocation inside Palette.
-            final int requestedArea = thumbnail.getIntrinsicWidth() *
-                    thumbnail.getIntrinsicHeight();
-            double scale = 1;
-            if (requestedArea > MAX_WALLPAPER_EXTRACTION_AREA) {
-                scale = Math.sqrt(MAX_WALLPAPER_EXTRACTION_AREA / (double) requestedArea);
-            }
-            bitmap = Bitmap.createBitmap((int) (thumbnail.getIntrinsicWidth() * scale),
-                    (int) (thumbnail.getIntrinsicHeight() * scale), Bitmap.Config.ARGB_8888);
-            final Canvas bmpCanvas = new Canvas(bitmap);
-            thumbnail.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
-            thumbnail.draw(bmpCanvas);
+            colors = WallpaperColors.fromDrawable(thumbnail);
         }
 
-        if (bitmap == null) {
+        if (colors == null) {
             Slog.w(TAG, "Cannot extract colors because wallpaper could not be read.");
             return;
         }
 
-        Palette palette = Palette
-                .from(bitmap)
-                .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
-                .generate();
-        bitmap.recycle();
-
-        final List<Pair<Color, Integer>> colors = new ArrayList<>();
-        for (Palette.Swatch swatch : palette.getSwatches()) {
-            colors.add(new Pair<>(Color.valueOf(swatch.getRgb()),
-                    swatch.getPopulation()));
+        // Even though we can extract colors from live wallpaper thumbnails,
+        // it's risky to assume that it might support dark text on top of it:
+        //    • Thumbnail might not be accurate.
+        //    • Colors might change over time.
+        if (!imageWallpaper) {
+            int colorHints = colors.getColorHints();
+            colorHints &= ~WallpaperColors.HINT_SUPPORTS_DARK_TEXT;
+            colors.setColorHints(colorHints);
         }
 
         synchronized (mLock) {
             if (wallpaper.wallpaperId == wallpaperId) {
-                wallpaper.primaryColors = new WallpaperColors(colors);
+                wallpaper.primaryColors = colors;
             } else {
                 Slog.w(TAG, "Not setting primary colors since wallpaper changed");
             }
@@ -2224,17 +2210,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
 
         if (wallpaper.primaryColors != null) {
-            int colorsCount = wallpaper.primaryColors.getColors().size();
+            int colorsCount = wallpaper.primaryColors.getMainColors().size();
             out.attribute(null, "colorsCount", Integer.toString(colorsCount));
             if (colorsCount > 0) {
                 for (int i = 0; i < colorsCount; i++) {
-                    Pair<Color, Integer> wc = wallpaper.primaryColors.getColors().get(i);
-                    out.attribute(null, "colorValue"+i, Integer.toString(wc.first.toArgb()));
-                    out.attribute(null, "colorWeight"+i, Integer.toString(wc.second));
+                    final Color wc = wallpaper.primaryColors.getMainColors().get(i);
+                    out.attribute(null, "colorValue"+i, Integer.toString(wc.toArgb()));
                 }
             }
             out.attribute(null, "supportsDarkText",
-                    Integer.toString(wallpaper.primaryColors.supportsDarkText() ? 1 : 0));
+                    Integer.toString(wallpaper.primaryColors.getColorHints()));
         }
 
         out.attribute(null, "name", wallpaper.name);
@@ -2469,15 +2454,22 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         wallpaper.padding.bottom = getAttributeInt(parser, "paddingBottom", 0);
         int colorsCount = getAttributeInt(parser, "colorsCount", 0);
         if (colorsCount > 0) {
-            List<Pair<Color, Integer>> colors = new ArrayList<>();
+            Color primary = null, secondary = null, tertiary = null;
+            final List<Color> colors = new ArrayList<>();
             for (int i = 0; i < colorsCount; i++) {
-                colors.add(new Pair<>(
-                    Color.valueOf(getAttributeInt(parser, "colorValue"+i, 0)),
-                    getAttributeInt(parser, "colorWeight"+i, 0)
-                ));
+                Color color = Color.valueOf(getAttributeInt(parser, "colorValue" + i, 0));
+                if (i == 0) {
+                    primary = color;
+                } else if (i == 1) {
+                    secondary = color;
+                } else if (i == 2) {
+                    tertiary = color;
+                } else {
+                    break;
+                }
             }
-            boolean dark = getAttributeInt(parser, "supportsDarkText", 0) == 1;
-            wallpaper.primaryColors = new WallpaperColors(colors, dark);
+            int colorHints = getAttributeInt(parser, "colorHints", 0);
+            wallpaper.primaryColors = new WallpaperColors(primary, secondary, tertiary, colorHints);
         }
         wallpaper.name = parser.getAttributeValue(null, "name");
         wallpaper.allowBackup = "true".equals(parser.getAttributeValue(null, "backup"));
