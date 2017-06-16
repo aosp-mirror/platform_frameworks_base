@@ -921,7 +921,8 @@ public class PackageManagerService extends IPackageManager.Stub
     final ArraySet<String> mTransferedPackages = new ArraySet<String>();
 
     // Broadcast actions that are only available to the system.
-    final ArraySet<String> mProtectedBroadcasts = new ArraySet<String>();
+    @GuardedBy("mProtectedBroadcasts")
+    final ArraySet<String> mProtectedBroadcasts = new ArraySet<>();
 
     /** List of packages waiting for verification. */
     final SparseArray<PackageVerificationState> mPendingVerification
@@ -5805,7 +5806,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean isProtectedBroadcast(String actionName) {
         // allow instant applications
-        synchronized (mPackages) {
+        synchronized (mProtectedBroadcasts) {
             if (mProtectedBroadcasts.contains(actionName)) {
                 return true;
             } else if (actionName != null) {
@@ -11447,8 +11448,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (pkg.protectedBroadcasts != null) {
                 N = pkg.protectedBroadcasts.size();
-                for (i=0; i<N; i++) {
-                    mProtectedBroadcasts.add(pkg.protectedBroadcasts.get(i));
+                synchronized (mProtectedBroadcasts) {
+                    for (i = 0; i < N; i++) {
+                        mProtectedBroadcasts.add(pkg.protectedBroadcasts.get(i));
+                    }
                 }
             }
         }
