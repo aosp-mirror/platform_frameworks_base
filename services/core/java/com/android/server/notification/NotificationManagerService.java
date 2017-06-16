@@ -307,11 +307,15 @@ public class NotificationManagerService extends SystemService {
 
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
+    @GuardedBy("mNotificationLock")
     final ArrayList<NotificationRecord> mNotificationList =
             new ArrayList<NotificationRecord>();
+    @GuardedBy("mNotificationLock")
     final ArrayMap<String, NotificationRecord> mNotificationsByKey =
             new ArrayMap<String, NotificationRecord>();
+    @GuardedBy("mNotificationLock")
     final ArrayList<NotificationRecord> mEnqueuedNotifications = new ArrayList<>();
+    @GuardedBy("mNotificationLock")
     final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
@@ -2806,7 +2810,8 @@ public class NotificationManagerService extends SystemService {
             // Clear summary.
             final NotificationRecord removed = findNotificationByKeyLocked(summaries.remove(pkg));
             if (removed != null) {
-                cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED);
+                boolean wasPosted = removeFromNotificationListsLocked(removed);
+                cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED, wasPosted);
             }
         }
     }
@@ -3420,7 +3425,8 @@ public class NotificationManagerService extends SystemService {
                     .setType(MetricsEvent.TYPE_CLOSE)
                     .addTaggedData(MetricsEvent.NOTIFICATION_SNOOZED_CRITERIA,
                             mSnoozeCriterionId == null ? 0 : 1));
-            cancelNotificationLocked(r, false, REASON_SNOOZED);
+            boolean wasPosted = removeFromNotificationListsLocked(r);
+            cancelNotificationLocked(r, false, REASON_SNOOZED, wasPosted);
             updateLightsLocked();
             if (mSnoozeCriterionId != null) {
                 mNotificationAssistants.notifyAssistantSnoozedLocked(r.sbn, mSnoozeCriterionId);
@@ -4206,15 +4212,18 @@ public class NotificationManagerService extends SystemService {
         manager.sendAccessibilityEvent(event);
     }
 
+    /**
+     * Removes all NotificationsRecords with the same key as the given notification record
+     * from both lists. Do not call this method while iterating over either list.
+     */
     @GuardedBy("mNotificationLock")
-    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason) {
-        final String canceledKey = r.getKey();
-
-        // Remove from both lists, either list could have a separate Record for what is effectively
-        // the same notification.
+    private boolean removeFromNotificationListsLocked(NotificationRecord r) {
+        // Remove from both lists, either list could have a separate Record for what is
+        // effectively the same notification.
         boolean wasPosted = false;
         NotificationRecord recordInList = null;
-        if ((recordInList = findNotificationByListLocked(mNotificationList, r.getKey())) != null) {
+        if ((recordInList = findNotificationByListLocked(mNotificationList, r.getKey()))
+                != null) {
             mNotificationList.remove(recordInList);
             mNotificationsByKey.remove(recordInList.sbn.getKey());
             wasPosted = true;
@@ -4223,6 +4232,13 @@ public class NotificationManagerService extends SystemService {
                 != null) {
             mEnqueuedNotifications.remove(recordInList);
         }
+        return wasPosted;
+    }
+
+    @GuardedBy("mNotificationLock")
+    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason,
+            boolean wasPosted) {
+        final String canceledKey = r.getKey();
 
         // Record caller.
         recordCallerLocked(r);
@@ -4363,7 +4379,8 @@ public class NotificationManagerService extends SystemService {
                         }
 
                         // Cancel the notification.
-                        cancelNotificationLocked(r, sendDelete, reason);
+                        boolean wasPosted = removeFromNotificationListsLocked(r);
+                        cancelNotificationLocked(r, sendDelete, reason, wasPosted);
                         cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
                                 sendDelete);
                         updateLightsLocked();
@@ -4440,11 +4457,11 @@ public class NotificationManagerService extends SystemService {
                     cancelAllNotificationsByListLocked(mNotificationList, callingUid, callingPid,
                             pkg, true /*nullPkgIndicatesUserSwitch*/, channelId, flagChecker,
                             false /*includeCurrentProfiles*/, userId, false /*sendDelete*/, reason,
-                            listenerName);
+                            listenerName, true /* wasPosted */);
                     cancelAllNotificationsByListLocked(mEnqueuedNotifications, callingUid,
                             callingPid, pkg, true /*nullPkgIndicatesUserSwitch*/, channelId,
                             flagChecker, false /*includeCurrentProfiles*/, userId,
-                            false /*sendDelete*/, reason, listenerName);
+                            false /*sendDelete*/, reason, listenerName, false /* wasPosted */);
                     mSnoozeHelper.cancel(userId, pkg);
                 }
             }
@@ -4460,7 +4477,7 @@ public class NotificationManagerService extends SystemService {
     private void cancelAllNotificationsByListLocked(ArrayList<NotificationRecord> notificationList,
             int callingUid, int callingPid, String pkg, boolean nullPkgIndicatesUserSwitch,
             String channelId, FlagChecker flagChecker, boolean includeCurrentProfiles, int userId,
-            boolean sendDelete, int reason, String listenerName) {
+            boolean sendDelete, int reason, String listenerName, boolean wasPosted) {
         ArrayList<NotificationRecord> canceledNotifications = null;
         for (int i = notificationList.size() - 1; i >= 0; --i) {
             NotificationRecord r = notificationList.get(i);
@@ -4488,8 +4505,9 @@ public class NotificationManagerService extends SystemService {
             if (canceledNotifications == null) {
                 canceledNotifications = new ArrayList<>();
             }
+            notificationList.remove(i);
             canceledNotifications.add(r);
-            cancelNotificationLocked(r, sendDelete, reason);
+            cancelNotificationLocked(r, sendDelete, reason, wasPosted);
         }
         if (canceledNotifications != null) {
             final int M = canceledNotifications.size();
@@ -4548,11 +4566,11 @@ public class NotificationManagerService extends SystemService {
                     cancelAllNotificationsByListLocked(mNotificationList, callingUid, callingPid,
                             null, false /*nullPkgIndicatesUserSwitch*/, null, flagChecker,
                             includeCurrentProfiles, userId, true /*sendDelete*/, reason,
-                            listenerName);
+                            listenerName, true);
                     cancelAllNotificationsByListLocked(mEnqueuedNotifications, callingUid,
                             callingPid, null, false /*nullPkgIndicatesUserSwitch*/, null,
                             flagChecker, includeCurrentProfiles, userId, true /*sendDelete*/,
-                            reason, listenerName);
+                            reason, listenerName, false);
                     mSnoozeHelper.cancel(userId, includeCurrentProfiles);
                 }
             }
@@ -4569,7 +4587,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         String pkg = r.sbn.getPackageName();
-        int userId = r.getUserId();
 
         if (pkg == null) {
             if (DBG) Log.e(TAG, "No package for group summary: " + r.getKey());
@@ -4577,15 +4594,15 @@ public class NotificationManagerService extends SystemService {
         }
 
         cancelGroupChildrenByListLocked(mNotificationList, r, callingUid, callingPid, listenerName,
-                sendDelete);
+                sendDelete, true);
         cancelGroupChildrenByListLocked(mEnqueuedNotifications, r, callingUid, callingPid,
-                listenerName, sendDelete);
+                listenerName, sendDelete, false);
     }
 
     @GuardedBy("mNotificationLock")
     private void cancelGroupChildrenByListLocked(ArrayList<NotificationRecord> notificationList,
             NotificationRecord parentNotification, int callingUid, int callingPid,
-            String listenerName, boolean sendDelete) {
+            String listenerName, boolean sendDelete, boolean wasPosted) {
         final String pkg = parentNotification.sbn.getPackageName();
         final int userId = parentNotification.getUserId();
         final int reason = REASON_GROUP_SUMMARY_CANCELED;
@@ -4597,7 +4614,8 @@ public class NotificationManagerService extends SystemService {
                     && (childR.getFlags() & Notification.FLAG_FOREGROUND_SERVICE) == 0) {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),
                         childSbn.getTag(), userId, 0, 0, reason, listenerName);
-                cancelNotificationLocked(childR, sendDelete, reason);
+                notificationList.remove(i);
+                cancelNotificationLocked(childR, sendDelete, reason, wasPosted);
             }
         }
     }
