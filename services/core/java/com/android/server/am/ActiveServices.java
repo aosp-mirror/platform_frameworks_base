@@ -626,19 +626,19 @@ public final class ActiveServices {
                             != ActivityManager.APP_START_MODE_NORMAL) {
                         if (stopping == null) {
                             stopping = new ArrayList<>();
-                            String compName = service.name.flattenToShortString();
-                            EventLogTags.writeAmStopIdleService(service.appInfo.uid, compName);
-                            StringBuilder sb = new StringBuilder(64);
-                            sb.append("Stopping service due to app idle: ");
-                            UserHandle.formatUid(sb, service.appInfo.uid);
-                            sb.append(" ");
-                            TimeUtils.formatDuration(service.createTime
-                                    - SystemClock.elapsedRealtime(), sb);
-                            sb.append(" ");
-                            sb.append(compName);
-                            Slog.w(TAG, sb.toString());
-                            stopping.add(service);
                         }
+                        String compName = service.name.flattenToShortString();
+                        EventLogTags.writeAmStopIdleService(service.appInfo.uid, compName);
+                        StringBuilder sb = new StringBuilder(64);
+                        sb.append("Stopping service due to app idle: ");
+                        UserHandle.formatUid(sb, service.appInfo.uid);
+                        sb.append(" ");
+                        TimeUtils.formatDuration(service.createTime
+                                - SystemClock.elapsedRealtime(), sb);
+                        sb.append(" ");
+                        sb.append(compName);
+                        Slog.w(TAG, sb.toString());
+                        stopping.add(service);
                     }
                 }
             }
