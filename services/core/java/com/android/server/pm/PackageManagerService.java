@@ -18113,8 +18113,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // step during installation. Instead, we'll take extra time the first time the
             // instant app starts. It's preferred to do it this way to provide continuous
             // progress to the user instead of mysteriously blocking somewhere in the
-            // middle of running an instant app.
-            if (!instantApp) {
+            // middle of running an instant app. The default behaviour can be overridden
+            // via gservices.
+            if (!instantApp || Global.getInt(
+                        mContext.getContentResolver(), Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
                 // Do not run PackageDexOptimizer through the local performDexOpt
                 // method because `pkg` may not be in `mPackages` yet.
