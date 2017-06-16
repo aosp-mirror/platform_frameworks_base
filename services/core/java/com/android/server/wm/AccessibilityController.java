@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MAGNIFICATION_REGION_EFFECT;
+
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -418,13 +421,7 @@ final class AccessibilityController {
         public MagnificationSpec getMagnificationSpecForWindowLocked(WindowState windowState) {
             MagnificationSpec spec = mMagnifedViewport.getMagnificationSpecLocked();
             if (spec != null && !spec.isNop()) {
-                WindowManagerPolicy policy = mWindowManagerService.mPolicy;
-                final int windowType = windowState.mAttrs.type;
-                if (!policy.isTopLevelWindow(windowType) && windowState.isChildWindow()
-                        && !policy.canMagnifyWindow(windowType)) {
-                    return null;
-                }
-                if (!policy.canMagnifyWindow(windowState.mAttrs.type)) {
+                if (!mWindowManagerService.mPolicy.canMagnifyWindow(windowState.mAttrs.type)) {
                     return null;
                 }
             }
@@ -540,8 +537,9 @@ final class AccessibilityController {
                 final int visibleWindowCount = visibleWindows.size();
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     WindowState windowState = visibleWindows.valueAt(i);
-                    if (windowState.mAttrs.type == WindowManager
-                            .LayoutParams.TYPE_MAGNIFICATION_OVERLAY) {
+                    if ((windowState.mAttrs.type == TYPE_MAGNIFICATION_OVERLAY)
+                            || ((windowState.mAttrs.privateFlags
+                            & PRIVATE_FLAG_NO_MAGNIFICATION_REGION_EFFECT) != 0)) {
                         continue;
                     }
 
@@ -715,7 +713,7 @@ final class AccessibilityController {
                     mSurfaceControl.setLayerStack(mWindowManager.getDefaultDisplay()
                             .getLayerStack());
                     mSurfaceControl.setLayer(mWindowManagerService.mPolicy.getWindowLayerFromTypeLw(
-                            WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY)
+                            TYPE_MAGNIFICATION_OVERLAY)
                             * WindowManagerService.TYPE_LAYER_MULTIPLIER);
                     mSurfaceControl.setPosition(0, 0);
                     mSurface.copyFrom(mSurfaceControl);
@@ -1313,7 +1311,7 @@ final class AccessibilityController {
                     && windowType != WindowManager.LayoutParams.TYPE_DRAG
                     && windowType != WindowManager.LayoutParams.TYPE_INPUT_CONSUMER
                     && windowType != WindowManager.LayoutParams.TYPE_POINTER
-                    && windowType != WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY
+                    && windowType != TYPE_MAGNIFICATION_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION);
