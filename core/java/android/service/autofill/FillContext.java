@@ -106,15 +106,15 @@ public final class FillContext implements Parcelable {
     }
 
     /**
-     * Finds {@link ViewNode}s that have the requested ids.
+     * Finds {@link ViewNode ViewNodes} that have the requested ids.
      *
-     * @param ids The ids of the node to find
+     * @param ids The ids of the node to find.
      *
-     * @return The nodes indexed in the same way as the ids
+     * @return The nodes indexed in the same way as the ids.
      *
      * @hide
      */
-    @NonNull public ViewNode[] findViewNodesByAutofillIds(@NonNull AutofillId... ids) {
+    @NonNull public ViewNode[] findViewNodesByAutofillIds(@NonNull AutofillId[] ids) {
         final LinkedList<ViewNode> nodesToProcess = new LinkedList<>();
         final ViewNode[] foundNodes = new AssistStructure.ViewNode[ids.length];
 
@@ -176,6 +176,30 @@ public final class FillContext implements Parcelable {
         }
 
         return foundNodes;
+    }
+
+    /**
+     * Finds the {@link ViewNode} that has the requested {@code id}, if any.
+     *
+     * @hide
+     */
+    @Nullable public ViewNode findViewNodeByAutofillId(@NonNull AutofillId id) {
+        final LinkedList<ViewNode> nodesToProcess = new LinkedList<>();
+        final int numWindowNodes = mStructure.getWindowNodeCount();
+        for (int i = 0; i < numWindowNodes; i++) {
+            nodesToProcess.add(mStructure.getWindowNodeAt(i).getRootViewNode());
+        }
+        while (!nodesToProcess.isEmpty()) {
+            final ViewNode node = nodesToProcess.removeFirst();
+            if (id.equals(node.getAutofillId())) {
+                return node;
+            }
+            for (int i = 0; i < node.getChildCount(); i++) {
+                nodesToProcess.addLast(node.getChildAt(i));
+            }
+        }
+
+        return null;
     }
 
     public static final Parcelable.Creator<FillContext> CREATOR =
