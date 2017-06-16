@@ -610,7 +610,9 @@ public class PerformAdbRestoreTask implements Runnable {
                             // All set; now set up the IPC and launch the agent
                             setUpPipes();
                             mAgent = mBackupManagerService.bindToAgentSynchronous(mTargetApp,
-                                    ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
+                                    FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)
+                                            ? ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
+                                            : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
                             mAgentPackage = pkg;
                         } catch (IOException e) {
                             // fall through to error handling
