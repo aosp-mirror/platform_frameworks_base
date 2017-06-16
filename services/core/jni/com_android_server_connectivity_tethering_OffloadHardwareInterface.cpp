@@ -71,7 +71,7 @@ int conntrackSocket(unsigned groups) {
 // auto-close it (otherwise there would be double-close problems).
 //
 // Rely upon the compiler to eliminate the constexprs used for clarity.
-hidl_handle&& handleFromFileDescriptor(base::unique_fd fd) {
+hidl_handle handleFromFileDescriptor(base::unique_fd fd) {
     hidl_handle h;
 
     NATIVE_HANDLE_DECLARE_STORAGE(storage, 0, 0);
@@ -83,7 +83,7 @@ hidl_handle&& handleFromFileDescriptor(base::unique_fd fd) {
     static constexpr bool kTakeOwnership = true;
     h.setTo(nh, kTakeOwnership);
 
-    return std::move(h);
+    return h;
 }
 
 }  // namespace
@@ -116,13 +116,14 @@ static jboolean android_server_connectivity_tethering_OffloadHardwareInterface_c
 
     bool rval;
     hidl_string msg;
-    configInterface->setHandles(h1, h2,
+    const auto status = configInterface->setHandles(h1, h2,
             [&rval, &msg](bool success, const hidl_string& errMsg) {
                 rval = success;
                 msg = errMsg;
             });
-    if (!rval) {
-        ALOGE("IOffloadConfig::setHandles() error: %s", msg.c_str());
+    if (!status.isOk() || !rval) {
+        ALOGE("IOffloadConfig::setHandles() error: '%s' / '%s'",
+              status.description().c_str(), msg.c_str());
     }
 
     return rval;
