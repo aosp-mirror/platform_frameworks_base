@@ -18,6 +18,9 @@ package com.android.server.timezone;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
+import com.android.timezone.distro.DistroException;
+import com.android.timezone.distro.DistroVersion;
+import com.android.timezone.distro.StagedDistroOperation;
 
 import android.app.timezone.Callback;
 import android.app.timezone.DistroFormatVersion;
@@ -36,9 +39,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import libcore.tzdata.shared2.DistroException;
-import libcore.tzdata.shared2.DistroVersion;
-import libcore.tzdata.shared2.StagedDistroOperation;
 import libcore.tzdata.update2.TimeZoneDistroInstaller;
 
 // TODO(nfuller) Add EventLog calls where useful in the system server.
