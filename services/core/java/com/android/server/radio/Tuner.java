@@ -44,7 +44,7 @@ class Tuner extends ITuner.Stub {
         mTunerCallback = new TunerCallback(this, clientCallback, halRev);
         mRegion = region;
         mWithAudio = withAudio;
-        mNativeContext = nativeInit(halRev);
+        mNativeContext = nativeInit(halRev, withAudio);
     }
 
     @Override
@@ -53,7 +53,7 @@ class Tuner extends ITuner.Stub {
         super.finalize();
     }
 
-    private native long nativeInit(int halRev);
+    private native long nativeInit(int halRev, boolean withAudio);
     private native void nativeFinalize(long nativeContext);
     private native void nativeClose(long nativeContext);
 
@@ -122,7 +122,7 @@ class Tuner extends ITuner.Stub {
             if (mIsMuted == mute) return;
             mIsMuted = mute;
 
-            // TODO(b/34348946): notifify audio policy manager of media activity on radio audio
+            // TODO(b/62713378): notifify audio policy manager of media activity on radio audio
             // device. This task is pulled directly from previous implementation of native service.
         }
     }
