@@ -188,6 +188,11 @@ class ActivityStarter {
 
     private boolean mUsingVr2dDisplay;
 
+    // Last home activity record we attempted to start
+    final ActivityRecord[] mLastHomeActivityStartRecord = new ActivityRecord[1];
+    // The result of the last home activity we attempted to start.
+    int mLastHomeActivityStartResult;
+
     private void reset() {
         mStartActivity = null;
         mIntent = null;
@@ -592,12 +597,13 @@ class ActivityStarter {
 
     void startHomeActivityLocked(Intent intent, ActivityInfo aInfo, String reason) {
         mSupervisor.moveHomeStackTaskToTop(reason);
-        startActivityLocked(null /*caller*/, intent, null /*ephemeralIntent*/,
-                null /*resolvedType*/, aInfo, null /*rInfo*/, null /*voiceSession*/,
-                null /*voiceInteractor*/, null /*resultTo*/, null /*resultWho*/,
-                0 /*requestCode*/, 0 /*callingPid*/, 0 /*callingUid*/, null /*callingPackage*/,
-                0 /*realCallingPid*/, 0 /*realCallingUid*/, 0 /*startFlags*/, null /*options*/,
-                false /*ignoreTargetSecurity*/, false /*componentSpecified*/, null /*outActivity*/,
+        mLastHomeActivityStartResult = startActivityLocked(null /*caller*/, intent,
+                null /*ephemeralIntent*/, null /*resolvedType*/, aInfo, null /*rInfo*/,
+                null /*voiceSession*/, null /*voiceInteractor*/, null /*resultTo*/,
+                null /*resultWho*/, 0 /*requestCode*/, 0 /*callingPid*/, 0 /*callingUid*/,
+                null /*callingPackage*/, 0 /*realCallingPid*/, 0 /*realCallingUid*/,
+                0 /*startFlags*/, null /*options*/, false /*ignoreTargetSecurity*/,
+                false /*componentSpecified*/, mLastHomeActivityStartRecord /*outActivity*/,
                 null /*container*/, null /*inTask*/);
         if (mSupervisor.inResumeTopActivity) {
             // If we are in resume section already, home activity will be initialized, but not
