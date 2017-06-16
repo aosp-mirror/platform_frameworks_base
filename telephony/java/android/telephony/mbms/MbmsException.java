@@ -22,7 +22,7 @@ public class MbmsException extends Exception {
     public static final int ERROR_NO_SERVICE_INSTALLED = 1;
     public static final int ERROR_MULTIPLE_SERVICES_INSTALLED = 2;
     public static final int ERROR_BIND_TIMEOUT_OR_FAILURE = 3;
-    public static final int ERROR_UNABLE_TO_INITIALIZE = 4;
+    public static final int ERROR_MIDDLEWARE_NOT_YET_READY = 4;
     public static final int ERROR_ALREADY_INITIALIZED = 5;
     public static final int ERROR_CONCURRENT_SERVICE_LIMIT_REACHED = 6;
     public static final int ERROR_MIDDLEWARE_NOT_BOUND = 7;
