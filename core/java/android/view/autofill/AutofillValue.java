@@ -141,7 +141,10 @@ public final class AutofillValue implements Parcelable {
      * @hide
      */
     public boolean isEmpty() {
-        return isText() && ((CharSequence) mValue).length() == 0;
+        if (!isText()) return false;
+
+        final CharSequence text = (CharSequence) mValue;
+        return text == null || TextUtils.getTrimmedLength(text) == 0;
     }
 
     /////////////////////////////////////
