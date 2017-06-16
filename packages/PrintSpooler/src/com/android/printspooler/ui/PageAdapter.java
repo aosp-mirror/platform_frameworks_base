@@ -16,6 +16,7 @@
 
 package com.android.printspooler.ui;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -24,8 +25,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.print.PageRange;
-import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Margins;
+import android.print.PrintAttributes.MediaSize;
 import android.print.PrintDocumentInfo;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -33,11 +34,12 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.View.MeasureSpec;
 import android.widget.TextView;
+
 import com.android.printspooler.R;
 import com.android.printspooler.model.OpenDocumentCallback;
 import com.android.printspooler.model.PageContentRepository;
@@ -45,6 +47,7 @@ import com.android.printspooler.model.PageContentRepository.PageContentProvider;
 import com.android.printspooler.util.PageRangeUtils;
 import com.android.printspooler.widget.PageContentView;
 import com.android.printspooler.widget.PreviewPageFrame;
+
 import dalvik.system.CloseGuard;
 
 import java.util.ArrayList;
@@ -794,14 +797,16 @@ public final class PageAdapter extends Adapter<ViewHolder> {
         page.setTag(null);
     }
 
-    public void startPreloadContent(PageRange pageRangeInAdapter) {
-        final int startPageInDocument = computePageIndexInDocument(pageRangeInAdapter.getStart());
-        final int startPageInFile = computePageIndexInFile(startPageInDocument);
-        final int endPageInDocument = computePageIndexInDocument(pageRangeInAdapter.getEnd());
-        final int endPageInFile = computePageIndexInFile(endPageInDocument);
-        if (startPageInDocument != INVALID_PAGE_INDEX && endPageInDocument != INVALID_PAGE_INDEX) {
-            mPageContentRepository.startPreload(startPageInFile, endPageInFile);
+    void startPreloadContent(@NonNull PageRange visiblePagesInAdapter) {
+        int startVisibleDocument = computePageIndexInDocument(visiblePagesInAdapter.getStart());
+        int endVisibleDocument = computePageIndexInDocument(visiblePagesInAdapter.getEnd());
+        if (startVisibleDocument == INVALID_PAGE_INDEX
+                || endVisibleDocument == INVALID_PAGE_INDEX) {
+            return;
         }
+
+        mPageContentRepository.startPreload(new PageRange(startVisibleDocument, endVisibleDocument),
+                mSelectedPages, mWrittenPages);
     }
 
     public void stopPreloadContent() {
