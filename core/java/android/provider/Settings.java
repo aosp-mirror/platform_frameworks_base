@@ -7876,6 +7876,16 @@ public final class Settings {
         */
        public static final String NETWORK_SCORER_APP = "network_scorer_app";
 
+        /**
+         * Configures the duration of the the ConnectivityService net transition wakelock.
+         *
+         * A setting of > 0 enacts this override duration in favor of the default or
+         * any other configured wakelock duration.
+         * A setting of == 0 effectively disables the net transition wakelock.
+         */
+        public static final String NET_TRANSITION_WAKELOCK_OVERRIDE_MS =
+                "net_transition_wakelock_override_ms";
+
        /**
         * If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment
         * to SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been
