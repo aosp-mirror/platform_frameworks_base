@@ -20,7 +20,7 @@
 #include "com_android_server_radio_Tuner.h"
 
 #include "com_android_server_radio_convert.h"
-#include "com_android_server_radio_Tuner_TunerCallback.h"
+#include "com_android_server_radio_TunerCallback.h"
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
 #include <core_jni_helpers.h>
