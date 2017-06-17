@@ -227,14 +227,13 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *
      * <p>This intent will have 3 extras:
      * <ul>
-     *   <li> {@link #EXTRA_IND_ID} - The Assigned number of headset Indicator which is supported by
-                                        the headset ( as indicated by AT+BIND
-                                        command in the SLC sequence).or whose value
-                                        is changed (indicated by AT+BIEV command)</li>
-     *   <li> {@link #EXTRA_IND_VALUE}- The updated value of headset indicator. </li>
+     *   <li> {@link #EXTRA_HF_INDICATORS_IND_ID} - The Assigned number of headset Indicator which
+     *              is supported by the headset ( as indicated by AT+BIND command in the SLC
+     *              sequence).or whose value is changed (indicated by AT+BIEV command) </li>
+     *   <li> {@link #EXTRA_HF_INDICATORS_IND_VALUE}- The updated value of headset indicator. </li>
      *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
      * </ul>
-     * <p>{@link #EXTRA_IND_ID} is defined by Bluetooth SIG and each of the indicators are
+     * <p>{@link #EXTRA_HF_INDICATORS_IND_ID} is defined by Bluetooth SIG and each of the indicators are
      * given an assigned number. Below shows the assigned number of Indicator added so far
      * - Enhanced Safety - 1
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
