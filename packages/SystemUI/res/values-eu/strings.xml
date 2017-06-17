@@ -555,7 +555,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Aurrerantzean ez duzu jasoko horrelako jakinarazpenik"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Jakinarazpenen <xliff:g id="NUMBER">%d</xliff:g> kategoria"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Aplikazio honek ez du jakinarazpen-kategoriarik"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Aplikazio honen jakinarazpenak ezin dira desaktibatu"</string>
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Ezin dira desaktibatu aplikazio honen jakinarazpenak"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">Aplikazio honen 1/<xliff:g id="NUMBER_1">%d</xliff:g> jakinarazpen-kategoria</item>
       <item quantity="one">Aplikazio honen 1/<xliff:g id="NUMBER_0">%d</xliff:g> jakinarazpen-kategoria</item>
