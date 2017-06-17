@@ -1777,4 +1777,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-г хийгээгүй"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM боломжгүй"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Утас боломжгүй"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"гэнэт гарч ирэх цонх"</string>
 </resources>

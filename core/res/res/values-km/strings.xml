@@ -1781,4 +1781,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"សីុម​មិន​ត្រូវបាន​ផ្តល់ជូន​ទេ"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"មិន​អនុញ្ញាត​ចំពោះសីុម​ទេ"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"មិន​អនុញ្ញាត​ចំពោះទូរសព្ទ​ទេ"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"វិនដូលេចឡើង"</string>
 </resources>
