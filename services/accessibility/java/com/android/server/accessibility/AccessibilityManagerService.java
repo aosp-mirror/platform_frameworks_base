@@ -243,6 +243,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private WindowsForAccessibilityCallback mWindowsForAccessibilityCallback;
 
+    private boolean mIsAccessibilityButtonShown;
+
     private UserState getCurrentUserStateLocked() {
         return getUserStateLocked(mCurrentUserId);
     }
@@ -881,21 +883,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
-     * Invoked remotely over AIDL by SysUi when the availability of the accessibility
+     * Invoked remotely over AIDL by SysUi when the visibility of the accessibility
      * button within the system's navigation area has changed.
      *
-     * @param available {@code true} if the accessibility button is available to the
+     * @param shown {@code true} if the accessibility button is shown to the
      *                  user, {@code false} otherwise
      */
     @Override
-    public void notifyAccessibilityButtonAvailabilityChanged(boolean available) {
+    public void notifyAccessibilityButtonVisibilityChanged(boolean shown) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold permission "
                     + android.Manifest.permission.STATUS_BAR_SERVICE);
         }
         synchronized (mLock) {
-            notifyAccessibilityButtonAvailabilityChangedLocked(available);
+            notifyAccessibilityButtonVisibilityChangedLocked(shown);
         }
     }
 
@@ -1200,13 +1202,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
-    private void notifyAccessibilityButtonAvailabilityChangedLocked(boolean available) {
+    private void notifyAccessibilityButtonVisibilityChangedLocked(boolean available) {
         final UserState state = getCurrentUserStateLocked();
-        state.mIsAccessibilityButtonAvailable = available;
+        mIsAccessibilityButtonShown = available;
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             final Service service = state.mBoundServices.get(i);
             if (service.mRequestAccessibilityButton) {
-                service.notifyAccessibilityButtonAvailabilityChangedLocked(available);
+                service.notifyAccessibilityButtonAvailabilityChangedLocked(
+                        service.isAccessibilityButtonAvailableLocked(state));
             }
         }
     }
@@ -1733,7 +1736,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
         updateRelevantEventsLocked(userState);
-        updateAccessibilityButtonTargets(userState);
+        updateAccessibilityButtonTargetsLocked(userState);
     }
 
     private void updateAccessibilityFocusBehaviorLocked(UserState userState) {
@@ -2183,18 +2186,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
-    private void updateAccessibilityButtonTargets(UserState userState) {
-        final List<Service> services;
-        synchronized (mLock) {
-            services = userState.mBoundServices;
-            int numServices = services.size();
-            for (int i = 0; i < numServices; i++) {
-                final Service service = services.get(i);
-                if (service.mRequestAccessibilityButton) {
-                    boolean available = service.mComponentName.equals(
-                            userState.mServiceAssignedToAccessibilityButton);
-                    service.notifyAccessibilityButtonAvailabilityChangedLocked(available);
-                }
+    private void updateAccessibilityButtonTargetsLocked(UserState userState) {
+        for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+            final Service service = userState.mBoundServices.get(i);
+            if (service.mRequestAccessibilityButton) {
+                service.notifyAccessibilityButtonAvailabilityChangedLocked(
+                        service.isAccessibilityButtonAvailableLocked(userState));
             }
         }
     }
@@ -2501,7 +2498,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
                 case MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER: {
                     showAccessibilityButtonTargetSelection();
-                }
+                } break;
             }
         }
 
@@ -2655,6 +2652,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         boolean mCaptureFingerprintGestures;
 
         boolean mRequestAccessibilityButton;
+
+        boolean mReceivedAccessibilityButtonCallbackSinceBind;
+
+        boolean mLastAccessibilityButtonCallbackState;
 
         int mFetchFlags;
 
@@ -3596,9 +3597,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     return false;
                 }
                 userState = getCurrentUserStateLocked();
+                return isAccessibilityButtonAvailableLocked(userState);
             }
-
-            return mRequestAccessibilityButton && userState.mIsAccessibilityButtonAvailable;
         }
 
         @Override
@@ -3656,6 +3656,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mService = null;
             }
             mServiceInterface = null;
+            mReceivedAccessibilityButtonCallbackSinceBind = false;
         }
 
         public boolean isConnectedLocked() {
@@ -3725,6 +3726,48 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 message.arg1 = serviceWantsEvent ? 1 : 0;
 
                 mEventDispatchHandler.sendMessageDelayed(message, mNotificationTimeout);
+            }
+        }
+
+        private boolean isAccessibilityButtonAvailableLocked(UserState userState) {
+            // If the service does not request the accessibility button, it isn't available
+            if (!mRequestAccessibilityButton) {
+                return false;
+            }
+
+            // If the accessibility button isn't currently shown, it cannot be available to services
+            if (!mIsAccessibilityButtonShown) {
+                return false;
+            }
+
+            // If magnification is on and assigned to the accessibility button, services cannot be
+            if (userState.mIsNavBarMagnificationEnabled
+                    && userState.mIsNavBarMagnificationAssignedToAccessibilityButton) {
+                return false;
+            }
+
+            int requestingServices = 0;
+            for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+                final Service service = userState.mBoundServices.get(i);
+                if (service.mRequestAccessibilityButton) {
+                    requestingServices++;
+                }
+            }
+
+            if (requestingServices == 1) {
+                // If only a single service is requesting, it must be this service, and the
+                // accessibility button is available to it
+                return true;
+            } else {
+                // With more than one active service, we derive the target from the user's settings
+                if (userState.mServiceAssignedToAccessibilityButton == null) {
+                    // If the user has not made an assignment, we treat the button as available to
+                    // all services until the user interacts with the button to make an assignment
+                    return true;
+                } else {
+                    // If an assignment was made, it defines availability
+                    return mComponentName.equals(userState.mServiceAssignedToAccessibilityButton);
+                }
             }
         }
 
@@ -3875,6 +3918,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private void notifyAccessibilityButtonAvailabilityChangedInternal(boolean available) {
+            // Only notify the service if it's not been notified or the state has changed
+            if (mReceivedAccessibilityButtonCallbackSinceBind
+                    && (mLastAccessibilityButtonCallbackState == available)) {
+                return;
+            }
+            mReceivedAccessibilityButtonCallbackSinceBind = true;
+            mLastAccessibilityButtonCallbackState = available;
             final IAccessibilityServiceClient listener;
             synchronized (mLock) {
                 listener = mServiceInterface;
@@ -4874,7 +4924,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public int mSoftKeyboardShowMode = 0;
 
-        public boolean mIsAccessibilityButtonAvailable;
         public boolean mIsNavBarMagnificationAssignedToAccessibilityButton;
         public ComponentName mServiceAssignedToAccessibilityButton;
 
@@ -4954,9 +5003,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mIsNavBarMagnificationAssignedToAccessibilityButton = false;
             mIsAutoclickEnabled = false;
             mSoftKeyboardShowMode = 0;
-
-            // Clear state tracked from system UI
-            mIsAccessibilityButtonAvailable = false;
         }
 
         public void destroyUiAutomationService() {
