@@ -719,7 +719,7 @@ public class Activity extends ContextThemeWrapper
     public static final int FINISH_TASK_WITH_ACTIVITY = 2;
 
     static final String FRAGMENTS_TAG = "android:fragments";
-    private static final String LAST_ACCESSIBILITY_ID = "android:lastAccessibilityId";
+    private static final String LAST_AUTOFILL_ID = "android:lastAutofillId";
 
     private static final String AUTOFILL_RESET_NEEDED = "@android:autofillResetNeeded";
     private static final String WINDOW_HIERARCHY_TAG = "android:viewHierarchyState";
@@ -853,8 +853,8 @@ public class Activity extends ContextThemeWrapper
 
     private boolean mAutoFillResetNeeded;
 
-    /** The last accessibility id that was returned from {@link #getNextAccessibilityId()} */
-    private int mLastAccessibilityId = View.LAST_APP_ACCESSIBILITY_ID;
+    /** The last autofill id that was returned from {@link #getNextAutofillId()} */
+    private int mLastAutofillId = View.LAST_APP_AUTOFILL_ID;
 
     private AutofillPopupWindow mAutofillPopupWindow;
 
@@ -999,7 +999,7 @@ public class Activity extends ContextThemeWrapper
         }
         if (savedInstanceState != null) {
             mAutoFillResetNeeded = savedInstanceState.getBoolean(AUTOFILL_RESET_NEEDED, false);
-            mLastAccessibilityId = savedInstanceState.getInt(LAST_ACCESSIBILITY_ID, View.NO_ID);
+            mLastAutofillId = savedInstanceState.getInt(LAST_AUTOFILL_ID, View.NO_ID);
 
             if (mAutoFillResetNeeded) {
                 getAutofillManager().onCreate(savedInstanceState);
@@ -1348,24 +1348,23 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Gets the next accessibility ID.
+     * Gets the next autofill ID.
      *
-     * <p>All IDs will be bigger than {@link View#LAST_APP_ACCESSIBILITY_ID}. All IDs returned
+     * <p>All IDs will be bigger than {@link View#LAST_APP_AUTOFILL_ID}. All IDs returned
      * will be unique.
      *
      * @return A ID that is unique in the activity
      *
      * {@hide}
      */
-    @Override
-    public int getNextAccessibilityId() {
-        if (mLastAccessibilityId == Integer.MAX_VALUE - 1) {
-            mLastAccessibilityId = View.LAST_APP_ACCESSIBILITY_ID;
+    public int getNextAutofillId() {
+        if (mLastAutofillId == Integer.MAX_VALUE - 1) {
+            mLastAutofillId = View.LAST_APP_AUTOFILL_ID;
         }
 
-        mLastAccessibilityId++;
+        mLastAutofillId++;
 
-        return mLastAccessibilityId;
+        return mLastAutofillId;
     }
 
     /**
@@ -1563,7 +1562,7 @@ public class Activity extends ContextThemeWrapper
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBundle(WINDOW_HIERARCHY_TAG, mWindow.saveHierarchyState());
 
-        outState.putInt(LAST_ACCESSIBILITY_ID, mLastAccessibilityId);
+        outState.putInt(LAST_AUTOFILL_ID, mLastAutofillId);
         Parcelable p = mFragments.saveAllState();
         if (p != null) {
             outState.putParcelable(FRAGMENTS_TAG, p);
@@ -7455,7 +7454,7 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    @NonNull public View[] findViewsByAccessibilityIdTraversal(@NonNull int[] viewIds) {
+    @NonNull public View[] findViewsByAutofillIdTraversal(@NonNull int[] viewIds) {
         final View[] views = new View[viewIds.length];
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
@@ -7466,7 +7465,7 @@ public class Activity extends ContextThemeWrapper
             if (rootView != null) {
                 for (int viewNum = 0; viewNum < viewIds.length; viewNum++) {
                     if (views[viewNum] == null) {
-                        views[viewNum] = rootView.findViewByAccessibilityIdTraversal(
+                        views[viewNum] = rootView.findViewByAutofillIdTraversal(
                                 viewIds[viewNum]);
                     }
                 }
@@ -7478,14 +7477,14 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    @Nullable public View findViewByAccessibilityIdTraversal(int viewId) {
+    @Nullable public View findViewByAutofillIdTraversal(int viewId) {
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
         for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
             final View rootView = roots.get(rootNum).getView();
 
             if (rootView != null) {
-                final View view = rootView.findViewByAccessibilityIdTraversal(viewId);
+                final View view = rootView.findViewByAutofillIdTraversal(viewId);
                 if (view != null) {
                     return view;
                 }
@@ -7499,7 +7498,7 @@ public class Activity extends ContextThemeWrapper
     @Override
     @NonNull public boolean[] getViewVisibility(@NonNull int[] viewIds) {
         final boolean[] isVisible = new boolean[viewIds.length];
-        final View views[] = findViewsByAccessibilityIdTraversal(viewIds);
+        final View views[] = findViewsByAutofillIdTraversal(viewIds);
 
         for (int i = 0; i < viewIds.length; i++) {
             View view = views[i];
