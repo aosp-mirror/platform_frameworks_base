@@ -540,7 +540,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
 
-        mSeen = seen;
+        // Only replace the previous value if we have a recent scan result to use
+        if (seen != 0) {
+            mSeen = seen;
+        }
     }
 
     /**
@@ -984,8 +987,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
         security = getSecurity(result);
         if (security == SECURITY_PSK)
             pskType = getPskType(result);
-        mRssi = result.level;
-        mSeen = result.timestamp;
+
+        mScanResultCache.put(result.BSSID, result);
+        updateRssi();
+        mSeen = result.timestamp; // even if the timestamp is old it is still valid
     }
 
     public void saveWifiState(Bundle savedState) {
