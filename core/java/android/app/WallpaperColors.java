@@ -27,6 +27,7 @@ import android.os.Parcelable;
 import android.util.Size;
 
 import com.android.internal.graphics.palette.Palette;
+import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,6 +143,8 @@ public final class WallpaperColors implements Parcelable {
 
         final Palette palette = Palette
                 .from(bitmap)
+                .setQuantizer(new VariationalKMeansQuantizer())
+                .maximumColorCount(5)
                 .clearFilters()
                 .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
                 .generate();
