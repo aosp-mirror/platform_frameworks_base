@@ -802,7 +802,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * {@hide}
      */
-    public static final int LAST_APP_ACCESSIBILITY_ID = Integer.MAX_VALUE / 2;
+    public static final int LAST_APP_AUTOFILL_ID = Integer.MAX_VALUE / 2;
 
     /**
      * Attribute to find the autofilled highlight
@@ -2045,6 +2045,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private SparseArray<Object> mKeyedTags;
 
     /**
+     * The next available accessibility id.
+     */
+    private static int sNextAccessibilityViewId;
+
+    /**
      * The animation currently associated with this view.
      * @hide
      */
@@ -2086,16 +2091,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(resolveId = true)
     int mID = NO_ID;
 
-    /** The ID of this view for accessibility and autofill purposes.
+    /** The ID of this view for autofill purposes.
      * <ul>
      *     <li>== {@link #NO_ID}: ID has not been assigned yet
-     *     <li>&le; {@link #LAST_APP_ACCESSIBILITY_ID}: View is not part of a activity. The ID is
+     *     <li>&le; {@link #LAST_APP_AUTOFILL_ID}: View is not part of a activity. The ID is
      *                                                  unique in the process. This might change
      *                                                  over activity lifecycle events.
-     *     <li>&gt; {@link #LAST_APP_ACCESSIBILITY_ID}: View is part of a activity. The ID is
+     *     <li>&gt; {@link #LAST_APP_AUTOFILL_ID}: View is part of a activity. The ID is
      *                                                  unique in the activity. This stays the same
      *                                                  over activity lifecycle events.
      */
+    private int mAutofillViewId = NO_ID;
+
+    // ID for accessibility purposes. This ID must be unique for every window
     private int mAccessibilityViewId = NO_ID;
 
     private int mAccessibilityCursorPosition = ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
@@ -7721,7 +7729,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mAutofillId == null) {
             // The autofill id needs to be unique, but its value doesn't matter,
             // so it's better to reuse the accessibility id to save space.
-            mAutofillId = new AutofillId(getAccessibilityViewId());
+            mAutofillId = new AutofillId(getAutofillViewId());
         }
         return mAutofillId;
     }
@@ -7954,7 +7962,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private boolean isAutofillable() {
         return getAutofillType() != AUTOFILL_TYPE_NONE && isImportantForAutofill()
-                && getAccessibilityViewId() > LAST_APP_ACCESSIBILITY_ID;
+                && getAutofillViewId() > LAST_APP_AUTOFILL_ID;
     }
 
     private void populateVirtualStructure(ViewStructure structure,
@@ -8472,9 +8480,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public int getAccessibilityViewId() {
         if (mAccessibilityViewId == NO_ID) {
-            mAccessibilityViewId = mContext.getNextAccessibilityId();
+            mAccessibilityViewId = sNextAccessibilityViewId++;
         }
         return mAccessibilityViewId;
+    }
+
+    /**
+     * Gets the unique identifier of this view on the screen for autofill purposes.
+     *
+     * @return The view autofill id.
+     *
+     * @hide
+     */
+    public int getAutofillViewId() {
+        if (mAutofillViewId == NO_ID) {
+            mAutofillViewId = mContext.getNextAutofillId();
+        }
+        return mAutofillViewId;
     }
 
     /**
@@ -12125,7 +12147,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (isAutofillable()) {
             AutofillManager afm = getAutofillManager();
 
-            if (afm != null && getAccessibilityViewId() > LAST_APP_ACCESSIBILITY_ID) {
+            if (afm != null && getAutofillViewId() > LAST_APP_AUTOFILL_ID) {
                 if (mVisibilityChangeForAutofillHandler != null) {
                     mVisibilityChangeForAutofillHandler.removeMessages(0);
                 }
@@ -17555,16 +17577,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return Returns a Parcelable object containing the view's current dynamic
      *         state, or null if there is nothing interesting to save.
-     * @see #onRestoreInstanceState(android.os.Parcelable)
-     * @see #saveHierarchyState(android.util.SparseArray)
-     * @see #dispatchSaveInstanceState(android.util.SparseArray)
+     * @see #onRestoreInstanceState(Parcelable)
+     * @see #saveHierarchyState(SparseArray)
+     * @see #dispatchSaveInstanceState(SparseArray)
      * @see #setSaveEnabled(boolean)
      */
     @CallSuper
     @Nullable protected Parcelable onSaveInstanceState() {
         mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
         if (mStartActivityRequestWho != null || isAutofilled()
-                || mAccessibilityViewId > LAST_APP_ACCESSIBILITY_ID) {
+                || mAutofillViewId > LAST_APP_AUTOFILL_ID) {
             BaseSavedState state = new BaseSavedState(AbsSavedState.EMPTY_STATE);
 
             if (mStartActivityRequestWho != null) {
@@ -17575,13 +17597,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 state.mSavedData |= BaseSavedState.IS_AUTOFILLED;
             }
 
-            if (mAccessibilityViewId > LAST_APP_ACCESSIBILITY_ID) {
-                state.mSavedData |= BaseSavedState.ACCESSIBILITY_ID;
+            if (mAutofillViewId > LAST_APP_AUTOFILL_ID) {
+                state.mSavedData |= BaseSavedState.AUTOFILL_ID;
             }
 
             state.mStartActivityRequestWhoSaved = mStartActivityRequestWho;
             state.mIsAutofilled = isAutofilled();
-            state.mAccessibilityViewId = mAccessibilityViewId;
+            state.mAutofillViewId = mAutofillViewId;
             return state;
         }
         return BaseSavedState.EMPTY_STATE;
@@ -17659,8 +17681,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if ((baseState.mSavedData & BaseSavedState.IS_AUTOFILLED) != 0) {
                 setAutofilled(baseState.mIsAutofilled);
             }
-            if ((baseState.mSavedData & BaseSavedState.ACCESSIBILITY_ID) != 0) {
-                mAccessibilityViewId = baseState.mAccessibilityViewId;
+            if ((baseState.mSavedData & BaseSavedState.AUTOFILL_ID) != 0) {
+                mAutofillViewId = baseState.mAutofillViewId;
             }
         }
     }
@@ -21484,7 +21506,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param accessibilityId The searched accessibility id.
      * @return The found view.
      */
-    final <T extends View> T  findViewByAccessibilityId(int accessibilityId) {
+    final <T extends View> T findViewByAccessibilityId(int accessibilityId) {
         if (accessibilityId < 0) {
             return null;
         }
@@ -21496,11 +21518,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Performs the traversal to find a view by its unuque and stable accessibility id.
+     * Performs the traversal to find a view by its unique and stable accessibility id.
      *
      * <strong>Note:</strong>This method does not stop at the root namespace
      * boundary since the user can touch the screen at an arbitrary location
-     * potentially crossing the root namespace bounday which will send an
+     * potentially crossing the root namespace boundary which will send an
      * accessibility event to accessibility services and they should be able
      * to obtain the event source. Also accessibility ids are guaranteed to be
      * unique in the window.
@@ -21511,6 +21533,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public <T extends View> T findViewByAccessibilityIdTraversal(int accessibilityId) {
         if (getAccessibilityViewId() == accessibilityId) {
+            return (T) this;
+        }
+        return null;
+    }
+
+    /**
+     * Performs the traversal to find a view by its autofill id.
+     *
+     * <strong>Note:</strong>This method does not stop at the root namespace
+     * boundary.
+     *
+     * @param autofillId The autofill id.
+     * @return The found view.
+     * @hide
+     */
+    public <T extends View> T findViewByAutofillIdTraversal(int autofillId) {
+        if (getAutofillViewId() == autofillId) {
             return (T) this;
         }
         return null;
@@ -24982,13 +25021,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static class BaseSavedState extends AbsSavedState {
         static final int START_ACTIVITY_REQUESTED_WHO_SAVED = 0b1;
         static final int IS_AUTOFILLED = 0b10;
-        static final int ACCESSIBILITY_ID = 0b100;
+        static final int AUTOFILL_ID = 0b100;
 
         // Flags that describe what data in this state is valid
         int mSavedData;
         String mStartActivityRequestWhoSaved;
         boolean mIsAutofilled;
-        int mAccessibilityViewId;
+        int mAutofillViewId;
 
         /**
          * Constructor used when reading from a parcel. Reads the state of the superclass.
@@ -25011,7 +25050,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mSavedData = source.readInt();
             mStartActivityRequestWhoSaved = source.readString();
             mIsAutofilled = source.readBoolean();
-            mAccessibilityViewId = source.readInt();
+            mAutofillViewId = source.readInt();
         }
 
         /**
@@ -25030,7 +25069,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             out.writeInt(mSavedData);
             out.writeString(mStartActivityRequestWhoSaved);
             out.writeBoolean(mIsAutofilled);
-            out.writeInt(mAccessibilityViewId);
+            out.writeInt(mAutofillViewId);
         }
 
         public static final Parcelable.Creator<BaseSavedState> CREATOR

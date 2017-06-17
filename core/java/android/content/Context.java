@@ -487,27 +487,27 @@ public abstract class Context {
      */
     public abstract Context getApplicationContext();
 
-    /** Non-activity related accessibility ids are unique in the app */
-    private static int sLastAccessibilityId = View.NO_ID;
+    /** Non-activity related autofill ids are unique in the app */
+    private static int sLastAutofillId = View.NO_ID;
 
     /**
-     * Gets the next accessibility ID.
+     * Gets the next autofill ID.
      *
-     * <p>All IDs will be smaller or the same as {@link View#LAST_APP_ACCESSIBILITY_ID}. All IDs
+     * <p>All IDs will be smaller or the same as {@link View#LAST_APP_AUTOFILL_ID}. All IDs
      * returned will be unique.
      *
      * @return A ID that is unique in the process
      *
      * {@hide}
      */
-    public int getNextAccessibilityId() {
-        if (sLastAccessibilityId == View.LAST_APP_ACCESSIBILITY_ID - 1) {
-            sLastAccessibilityId = View.NO_ID;
+    public int getNextAutofillId() {
+        if (sLastAutofillId == View.LAST_APP_AUTOFILL_ID - 1) {
+            sLastAutofillId = View.NO_ID;
         }
 
-        sLastAccessibilityId++;
+        sLastAutofillId++;
 
-        return sLastAccessibilityId;
+        return sLastAutofillId;
     }
 
     /**
