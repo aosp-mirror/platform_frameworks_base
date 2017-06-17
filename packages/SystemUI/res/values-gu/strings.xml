@@ -352,10 +352,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"શોધો"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> માટે ઉપર સ્લાઇડ કરો."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> માટે ડાબે સ્લાઇડ કરો."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"તમને ધ્વનિ કે વાઇબ્રેશનો દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં, સિવાય કે અલાર્મ, સ્મૃતિપત્રો, ઇવેન્ટ અને તમે ઉલ્લેખ કરો તે કૉલર. તમે સંગીત, વીડિયો અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરો તે હજુ પણ સંભળાશે."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"તમને ધ્વનિ કે વાઇબ્રેશનો દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં, સિવાય કે અલાર્મ. તમે સંગીત, વીડિયો અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરો તે હજુ પણ સંભળાશે."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"અલાર્મ, સ્મૃતિપત્રો, ઇવેન્ટ અને તમે ઉલ્લેખ કરો તે કૉલર સિવાય તમને ધ્વનિ કે વાઇબ્રેશન દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં. સંગીત, વીડિઓ અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરશો તે સંભળાતું રહેશે."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"અલાર્મ સિવાય તમને ધ્વનિ કે વાઇબ્રેશન દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં. સંગીત, વીડિઓ અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરશો તે સંભળાતું રહેશે."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"કસ્ટમાઇઝ કરો"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"આ એલાર્મ્સ, સંગીત, વિડિઓઝ અને રમતો સહિત તમામ ધ્વનિઓ અને વાઇબ્રેશન્સને અવરોધિત કરે છે.  તમે હજુ પણ ફોન કૉલ્સ કરવા માટે સમર્થ હશો."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"આ અલાર્મ, સંગીત, વીડિઓ અને રમતો સહિત બધા ધ્વનિ કે વાઇબ્રેશનને અવરોધિત કરે છે. ફોન કૉલ કરવા માટે તમે હજી પણ સમર્થ રહેશો."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"એલાર્મ્સ, સંગીત, વિડિઓઝ અને રમતો સહિત તમામ ધ્વનિઓ અને વાઇબ્રેશન્સને આ અવરોધિત કરે છે."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"નીચે ઓછી તાકીદની સૂચનાઓ"</string>
@@ -727,7 +727,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"છોડી દેવા માટે નીચે ખેંચો"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"ચિત્રમાં ચિત્ર મેનૂ"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ચિત્રમાં-ચિત્રની અંદર છે"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"જો તમે નથી ઈચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તે સુવિધાને બંધ કરો."</string>
     <string name="pip_play" msgid="1417176722760265888">"ચલાવો"</string>
     <string name="pip_pause" msgid="8881063404466476571">"થોભાવો"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"આગલા પર જાઓ"</string>
