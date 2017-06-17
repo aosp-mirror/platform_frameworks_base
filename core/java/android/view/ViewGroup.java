@@ -1361,6 +1361,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return null;
     }
 
+    /** @hide */
+    @Override
+    public View findViewByAutofillIdTraversal(int autofillId) {
+        View foundView = super.findViewByAutofillIdTraversal(autofillId);
+        if (foundView != null) {
+            return foundView;
+        }
+
+        final int childrenCount = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < childrenCount; i++) {
+            View child = children[i];
+            foundView = child.findViewByAutofillIdTraversal(autofillId);
+            if (foundView != null) {
+                return foundView;
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public void dispatchWindowFocusChanged(boolean hasFocus) {
         super.dispatchWindowFocusChanged(hasFocus);
