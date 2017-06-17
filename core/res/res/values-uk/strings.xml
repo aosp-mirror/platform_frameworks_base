@@ -1847,4 +1847,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-карту не затверджено"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-карта заборонена"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Телефон заборонено"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Спливаюче вікно"</string>
 </resources>

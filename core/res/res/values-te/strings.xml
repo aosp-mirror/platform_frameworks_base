@@ -90,7 +90,7 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"సేవ కేటాయించబడలేదు."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"డేటా సేవ లేదు"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"అత్యవసర కాలింగ్ లేదు"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"అత్యవసర కాలింగ్ సదుపాయం లేదు"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"వాయిస్ సేవ లేదు"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"వాయిస్/అత్యవసర సేవ లేదు"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"మీ స్థానంలో మొబైల్ నెట్‌వర్క్ ద్వారా తాత్కాలికంగా అందించబడదు"</string>
@@ -1780,4 +1780,6 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM సక్రియం కాలేదు"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM అనుమతించబడదు"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ఫోన్ అనుమతించబడదు"</string>
+    <!-- no translation found for popup_window_default_title (4874318849712115433) -->
+    <skip />
 </resources>

@@ -1780,4 +1780,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM карта таанылган жок"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM картаны колдонууга тыюу салынган"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Телефонду колдонууга тыюу салынган"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Калкып чыкма терезе"</string>
 </resources>
