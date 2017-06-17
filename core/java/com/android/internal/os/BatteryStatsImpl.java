@@ -119,7 +119,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 161 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 162 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -10267,12 +10267,6 @@ public class BatteryStatsImpl extends BatteryStats {
         // If no app is holding a wakelock, then the distribution is normal.
         final int wakelockWeight = 50;
 
-        // Read the time spent for each cluster at various cpu frequencies.
-        final long[][] clusterSpeeds = new long[mKernelCpuSpeedReaders.length][];
-        for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
-            clusterSpeeds[cluster] = mKernelCpuSpeedReaders[cluster].readDelta();
-        }
-
         int numWakelocks = 0;
 
         // Calculate how many wakelocks we have to distribute amongst. The system is excluded.
@@ -10295,6 +10289,8 @@ public class BatteryStatsImpl extends BatteryStats {
         final int numWakelocksF = numWakelocks;
         mTempTotalCpuUserTimeUs = 0;
         mTempTotalCpuSystemTimeUs = 0;
+
+        final SparseLongArray updatedUids = new SparseLongArray();
 
         // Read the CPU data for each UID. This will internally generate a snapshot so next time
         // we read, we get a delta. If we are to distribute the cpu time, then do so. Otherwise
@@ -10353,32 +10349,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
                         u.mUserCpuTime.addCountLocked(userTimeUs);
                         u.mSystemCpuTime.addCountLocked(systemTimeUs);
-
-                        // Add the cpu speeds to this UID. These are used as a ratio
-                        // for computing the power this UID used.
-                        final int numClusters = mPowerProfile.getNumCpuClusters();
-                        if (u.mCpuClusterSpeed == null || u.mCpuClusterSpeed.length !=
-                                numClusters) {
-                            u.mCpuClusterSpeed = new LongSamplingCounter[numClusters][];
-                        }
-
-                        for (int cluster = 0; cluster < clusterSpeeds.length; cluster++) {
-                            final int speedsInCluster = mPowerProfile.getNumSpeedStepsInCpuCluster(
-                                    cluster);
-                            if (u.mCpuClusterSpeed[cluster] == null || speedsInCluster !=
-                                    u.mCpuClusterSpeed[cluster].length) {
-                                u.mCpuClusterSpeed[cluster] =
-                                        new LongSamplingCounter[speedsInCluster];
-                            }
-
-                            final LongSamplingCounter[] cpuSpeeds = u.mCpuClusterSpeed[cluster];
-                            for (int speed = 0; speed < clusterSpeeds[cluster].length; speed++) {
-                                if (cpuSpeeds[speed] == null) {
-                                    cpuSpeeds[speed] = new LongSamplingCounter(mOnBatteryTimeBase);
-                                }
-                                cpuSpeeds[speed].addCountLocked(clusterSpeeds[cluster][speed]);
-                            }
-                        }
+                        updatedUids.put(u.getUid(), userTimeUs + systemTimeUs);
                     }
                 });
 
@@ -10418,6 +10389,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
                     timer.mUid.mUserCpuTime.addCountLocked(userTimeUs);
                     timer.mUid.mSystemCpuTime.addCountLocked(systemTimeUs);
+                    final int uid = timer.mUid.getUid();
+                    updatedUids.put(uid, updatedUids.get(uid, 0) + userTimeUs + systemTimeUs);
 
                     final Uid.Proc proc = timer.mUid.getProcessStatsLocked("*wakelock*");
                     proc.addCpuTimeLocked(userTimeUs / 1000, systemTimeUs / 1000);
@@ -10442,10 +10415,57 @@ public class BatteryStatsImpl extends BatteryStats {
                 final Uid u = getUidStatsLocked(Process.SYSTEM_UID);
                 u.mUserCpuTime.addCountLocked(mTempTotalCpuUserTimeUs);
                 u.mSystemCpuTime.addCountLocked(mTempTotalCpuSystemTimeUs);
+                updatedUids.put(Process.SYSTEM_UID, updatedUids.get(Process.SYSTEM_UID, 0)
+                        + mTempTotalCpuUserTimeUs + mTempTotalCpuSystemTimeUs);
 
                 final Uid.Proc proc = u.getProcessStatsLocked("*lost*");
                 proc.addCpuTimeLocked((int) mTempTotalCpuUserTimeUs / 1000,
                         (int) mTempTotalCpuSystemTimeUs / 1000);
+            }
+        }
+
+        long totalCpuClustersTime = 0;
+        // Read the time spent for each cluster at various cpu frequencies.
+        final long[][] clusterSpeeds = new long[mKernelCpuSpeedReaders.length][];
+        for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
+            clusterSpeeds[cluster] = mKernelCpuSpeedReaders[cluster].readDelta();
+            if (clusterSpeeds[cluster] != null) {
+                for (int speed = clusterSpeeds[cluster].length - 1; speed >= 0; --speed) {
+                    totalCpuClustersTime += clusterSpeeds[cluster][speed];
+                }
+            }
+        }
+        if (totalCpuClustersTime != 0) {
+            // We have cpu times per freq aggregated over all uids but we need the times per uid.
+            // So, we distribute total time spent by an uid to different cpu freqs based on the
+            // amount of time cpu was running at that freq.
+            final int updatedUidsCount = updatedUids.size();
+            for (int i = 0; i < updatedUidsCount; ++i) {
+                final Uid u = getUidStatsLocked(updatedUids.keyAt(i));
+                final long appCpuTimeMs = updatedUids.valueAt(i) / 1000;
+                // Add the cpu speeds to this UID.
+                final int numClusters = mPowerProfile.getNumCpuClusters();
+                if (u.mCpuClusterSpeed == null || u.mCpuClusterSpeed.length !=
+                        numClusters) {
+                    u.mCpuClusterSpeed = new LongSamplingCounter[numClusters][];
+                }
+
+                for (int cluster = 0; cluster < clusterSpeeds.length; cluster++) {
+                    final int speedsInCluster = clusterSpeeds[cluster].length;
+                    if (u.mCpuClusterSpeed[cluster] == null || speedsInCluster !=
+                            u.mCpuClusterSpeed[cluster].length) {
+                        u.mCpuClusterSpeed[cluster] = new LongSamplingCounter[speedsInCluster];
+                    }
+
+                    final LongSamplingCounter[] cpuSpeeds = u.mCpuClusterSpeed[cluster];
+                    for (int speed = 0; speed < speedsInCluster; speed++) {
+                        if (cpuSpeeds[speed] == null) {
+                            cpuSpeeds[speed] = new LongSamplingCounter(mOnBatteryTimeBase);
+                        }
+                        cpuSpeeds[speed].addCountLocked(appCpuTimeMs * clusterSpeeds[cluster][speed]
+                                / totalCpuClustersTime);
+                    }
+                }
             }
         }
 
