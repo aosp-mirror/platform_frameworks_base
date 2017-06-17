@@ -352,10 +352,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Kërko"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Rrëshqit lart për <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Rrëshqit majtas për <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Nuk do të shqetësohesh nga tingujt dhe dridhjet, përveç alarmeve, alarmeve rikujtuese, ngjarjeve dhe telefonuesve që specifikon. Do të vazhdosh të dëgjosh gjithçka që zgjedh të luash duke përfshirë muzikën, videot dhe lojërat."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Nuk do të shqetësohesh nga tingujt dhe dridhjet, përveç alarmeve. Do të vazhdosh të dëgjosh gjithçka që zgjedh të luash duke përfshirë muzikën, videot dhe lojërat."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Nuk do të shqetësohesh nga tingujt dhe dridhjet, përveç alarmeve, alarmeve rikujtuese, ngjarjeve dhe telefonuesve që specifikon. Do të vazhdosh të dëgjosh çdo gjë që zgjedh të luash duke përfshirë muzikën, videot dhe lojërat."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Nuk do të shqetësohesh nga tingujt dhe dridhjet, përveç alarmeve. Do të vazhdosh të dëgjosh çdo gjë që zgjedh të luash duke përfshirë muzikën, videot dhe lojërat."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizo"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Kjo bllokon TË GJITHË tingujt dhe dridhjet, duke përfshirë edhe nga alarmet, muzika, videot dhe lojërat. Përsëri do të mund të bësh telefonata."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Kjo bllokon TË GJITHË tingujt dhe dridhjet, duke përfshirë edhe nga alarmet, muzika, videot dhe lojërat. Përsëri do të mund të bësh telefonata."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Kjo bllokon TË GJITHË tingujt dhe dridhjet, duke përfshirë edhe nga alarmet, muzika, videot dhe lojërat."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Njoftimet më pak urgjente, më poshtë!"</string>
@@ -727,7 +727,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Zvarrit poshtë për të larguar"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Menyja e \"Figurës brenda figurës\""</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> është në figurë brenda figurës"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Nëse nuk dëshiron që <xliff:g id="NAME">%s</xliff:g> ta përdorë këtë funksion, trokit për të hapur cilësimet dhe për ta çaktivizuar."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Nëse nuk dëshiron që <xliff:g id="NAME">%s</xliff:g> ta përdorë këtë funksion, trokit për të hapur cilësimet dhe për ta çaktivizuar."</string>
     <string name="pip_play" msgid="1417176722760265888">"Luaj"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Ndërprit"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Kalo te tjetra"</string>

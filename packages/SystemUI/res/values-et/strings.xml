@@ -354,10 +354,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Otsing"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lohistage üles: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Lohistage vasakule: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Helid ja vibratsioonid ei sega teid. Kuulete siiski enda määratud alarme, meeldetuletusi, sündmusi ja helistajaid. Samuti kuulete kõike, mille esitamise ise valite, sh muusika, videod ja mängud."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Helid ja vibratsioonid ei sega teid. Kuulete siiski alarme. Samuti kuulete kõike, mille esitamise ise valite, sh muusika, videod ja mängud."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Helid ja vibratsioonid ei sega teid. Kuulete siiski enda määratud alarme, meeldetuletusi, sündmusi ja helistajaid. Samuti kuulete kõike, mille esitamise ise valite, sh muusika, videod ja mängud."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Helid ja vibratsioonid ei sega teid. Kuulete siiski alarme. Samuti kuulete kõike, mille esitamise ise valite, sh muusika, videod ja mängud."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Kohanda"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"See blokeerib KÕIK – sealhulgas alarmide, muusika, videote ja mängude – helid ja värinad. Saate siiski helistada."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"See blokeerib KÕIK helid ja vibratsioonid, sh alarmid, muusika, videod ja mängud. Siiski saate helistada."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"See blokeerib KÕIK – sealhulgas alarmide, muusika, videote ja mängude – helid ja vibratsioonid."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Vähem kiireloomulised märguanded on allpool"</string>
@@ -729,7 +729,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Loobumiseks lohistage alla"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Menüü Pilt pildis"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> on režiimis Pilt pildis"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Kui te ei soovi, et rakendus <xliff:g id="NAME">%s</xliff:g> seda funktsiooni kasutaks, puudutage seadete avamiseks ja lülitage see välja."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Kui te ei soovi, et rakendus <xliff:g id="NAME">%s</xliff:g> seda funktsiooni kasutaks, puudutage seadete avamiseks ja lülitage see välja."</string>
     <string name="pip_play" msgid="1417176722760265888">"Esita"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Peata"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Järgmise juurde"</string>

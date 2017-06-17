@@ -354,10 +354,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Bilatu"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lerratu gora hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Lerratu ezkerrera hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaeren abisu-tonuak eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak joko ditu. Hala ere, zuk erreproduzitutako guztia entzun ahal izango duzu, besteak beste, musika, bideoak eta jokoak."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaera eta abisuen tonuak, eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak joko ditu. Hala ere, zuk erreproduzitutako guztia entzun ahal izango duzu, besteak beste, musika, bideoak eta jokoak."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Pertsonalizatu"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Horren premiazkoak ez diren jakinarazpenak daude behean"</string>
@@ -555,7 +555,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Aurrerantzean ez duzu jasoko horrelako jakinarazpenik"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Jakinarazpenen <xliff:g id="NUMBER">%d</xliff:g> kategoria"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Aplikazio honek ez du jakinarazpen-kategoriarik"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Aplikazio honen jakinarazpenak ezin dira desaktibatu"</string>
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Ezin dira desaktibatu aplikazio honen jakinarazpenak"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="other">Aplikazio honen 1/<xliff:g id="NUMBER_1">%d</xliff:g> jakinarazpen-kategoria</item>
       <item quantity="one">Aplikazio honen 1/<xliff:g id="NUMBER_0">%d</xliff:g> jakinarazpen-kategoria</item>
@@ -729,7 +729,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Baztertzeko, arrastatu behera"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Pantaila txikiaren menua"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Pantaila txikian dago <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="pip_play" msgid="1417176722760265888">"Erreproduzitu"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pausatu"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Saltatu hurrengora"</string>

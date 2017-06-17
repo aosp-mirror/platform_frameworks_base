@@ -356,10 +356,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Căutați"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Glisați în sus pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Glisați spre stânga pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Se vor anunța prin sunete și vibrații numai alarmele, mementourile, evenimentele și apelanții specificați de dvs. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Se vor anunța prin sunete și vibrații numai alarmele. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Se vor anunța prin sunete și vibrații numai alarmele, mementourile, evenimentele și apelanții specificați de dvs. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Se vor anunța prin sunete și vibrații numai alarmele. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizați"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Această opțiune blochează TOATE sunetele și vibrațiile, inclusiv cele ale alarmelor, muzicii, videoclipurilor și jocurilor. Totuși, veți putea iniția apeluri."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Această opțiune blochează TOATE sunetele și vibrațiile, inclusiv cele ale alarmelor, muzicii, videoclipurilor și jocurilor. Totuși, veți putea iniția apeluri."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Această opțiune blochează TOATE sunetele și vibrațiile, inclusiv cele ale alarmelor, muzicii, videoclipurilor și jocurilor."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificările mai puțin urgente mai jos"</string>
@@ -735,7 +735,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Trageți în jos pentru a închide"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Meniul imagine în imagine"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> este în modul picture-in-picture"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Dacă nu doriți ca <xliff:g id="NAME">%s</xliff:g> să utilizeze această funcție, atingeți pentru a deschide setările și dezactivați-o."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Dacă nu doriți ca <xliff:g id="NAME">%s</xliff:g> să utilizeze această funcție, atingeți pentru a deschide setările și dezactivați-o."</string>
     <string name="pip_play" msgid="1417176722760265888">"Redați"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Întrerupeți"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Treceți la următorul"</string>
