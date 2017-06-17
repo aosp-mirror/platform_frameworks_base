@@ -64,7 +64,7 @@ interface IAccessibilityManager {
 
     void notifyAccessibilityButtonClicked();
 
-    void notifyAccessibilityButtonAvailabilityChanged(boolean available);
+    void notifyAccessibilityButtonVisibilityChanged(boolean available);
 
     // Requires WRITE_SECURE_SETTINGS
     void performAccessibilityShortcut();
