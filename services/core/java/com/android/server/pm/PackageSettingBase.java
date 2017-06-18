@@ -330,21 +330,9 @@ abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).installReason = installReason;
     }
 
-    void setOverlayPaths(List<String> overlayPaths, String[] frameworkOverlayPaths, int userId) {
-        if (overlayPaths == null && frameworkOverlayPaths == null) {
-            modifyUserState(userId).overlayPaths = null;
-            return;
-        }
-        final List<String> paths;
-        if (frameworkOverlayPaths == null) {
-            paths = overlayPaths;
-        } else {
-            paths = Lists.newArrayList(frameworkOverlayPaths);
-            if (overlayPaths != null) {
-                paths.addAll(overlayPaths);
-            }
-        }
-        modifyUserState(userId).overlayPaths = paths.toArray(new String[paths.size()]);
+    void setOverlayPaths(List<String> overlayPaths, int userId) {
+        modifyUserState(userId).overlayPaths = overlayPaths == null ? null :
+            overlayPaths.toArray(new String[overlayPaths.size()]);
     }
 
     String[] getOverlayPaths(int userId) {
