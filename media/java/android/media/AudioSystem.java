@@ -758,6 +758,8 @@ public class AudioSystem
 
     public static native int systemReady();
 
+    public static native float getStreamVolumeDB(int stream, int index, int device);
+
     // Items shared with audio service
 
     /**
