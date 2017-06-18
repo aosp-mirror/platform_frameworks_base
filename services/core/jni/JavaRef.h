@@ -37,20 +37,7 @@ JavaRef<T> make_javaref(JNIEnv *env, T ref) {
     });
 }
 
-class EnvWrapper {
-public:
-    EnvWrapper(JNIEnv *env);
-
-    template <typename T>
-    JavaRef<T> operator() (T ref) const {
-        return make_javaref(mEnv, ref);
-    }
-
-private:
-    JNIEnv *mEnv;
-
-    DISALLOW_COPY_AND_ASSIGN(EnvWrapper);
-};
+JavaRef<jstring> make_javastr(JNIEnv *env, const std::string &str);
 
 } // namespace android
 

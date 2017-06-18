@@ -352,10 +352,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Sesha"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Shelelisela ngenhla ku-<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Shelelisela ngakwesokunxele ku-<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Ngeke uphazanyiswe yimisindo nokudlidliza, ngaphandle kwama-alamu, izikhumbuzi, izehlakalo, nabashayi obacacisayo. Usazokuzwa okuthile okhetha ukudlala kufaka phakathi umculo, amavidiyo, namageyimu."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Ngeke uphazanyiswe yimisindo nokudlidliza, ngaphandle kwama-alamu. Usazokuzwa okuthile okhetha ukudlala kufaka phakathi umculo, amavidiyo, namageyimu."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Ngeke uphazanyiswe imisindo nokudlidliza, ngaphandle kusukela kuma-alamu, izikhumbuzi, imicimbi, nabafonayo obacacisayo. Usazozwa noma yini okhetha ukuyidlala okufaka umculo, amavidiyo, namageyimu."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Ngeke uze uphazanyiswe imisindo nokudlidliza, ngaphandle kusukela kuma-alamu. Usazozwa noma yini okhetha ukuyidlala okufaka umculo, amavidiyo, namageyimu."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Enza ngendlela oyifisayo"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Lokhu kuvimbela YONKE imisindo nokudludliza, kufaka phakathi ama-alamu, umculo, amavidiyo, namageyimu. Usazokwazi ukwenza amkholi wefoni."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Lokhu kuvimbela YONKE imisindo nokudlidliza, okufaka kusukela kuma-alamu, umculo, amavidiyo, namageyimu. Usazokwazi ukwenza amakholi efoni."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Lokhu kuvimbela YONKE imisindo nokudlidliza, kufaka phakathi kusuka kuma-alamu, umculo, amavidiyo, namageyimu."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Izaziso ezingasheshi kakhulu ezingezansi"</string>
@@ -727,7 +727,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Hudulela phansi ukuze ucashise"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Isithombe ngemenyu yesithombe ngesithombe"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"U-<xliff:g id="NAME">%s</xliff:g> ungaphakathi kwesithombe esiphakathi kwesithombe"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Uma ungafuni ukuthi i-<xliff:g id="NAME">%s</xliff:g> isebenzise lesi sici, thepha ukuze uvule izilungiselelo bese usivale."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Uma ungafuni i-<xliff:g id="NAME">%s</xliff:g> ukuthi isebenzise lesi sici, thepha ukuze uvule izilungiselelo uphinde uyivale."</string>
     <string name="pip_play" msgid="1417176722760265888">"Dlala"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Misa isikhashana"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Yeqela kokulandelayo"</string>

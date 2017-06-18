@@ -1780,4 +1780,6 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"सिमसाठी तरतूद नाही"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"सिमला अनुमती नाही"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"फोनला अनुमती नाही"</string>
+    <!-- no translation found for popup_window_default_title (4874318849712115433) -->
+    <skip />
 </resources>

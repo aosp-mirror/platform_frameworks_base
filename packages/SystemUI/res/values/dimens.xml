@@ -823,5 +823,7 @@
 
     <!-- Intended corner radius when drawing the mobile signal -->
     <dimen name="stat_sys_mobile_signal_corner_radius">0.75dp</dimen>
+    <!-- How far to inset the rounded edges -->
+    <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
 
 </resources>

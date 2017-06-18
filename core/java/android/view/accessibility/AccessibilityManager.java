@@ -966,14 +966,14 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Notifies that the availability of the accessibility button in the system's navigation area
+     * Notifies that the visibility of the accessibility button in the system's navigation area
      * has changed.
      *
-     * @param available {@code true} if the accessibility button is available within the system
+     * @param shown {@code true} if the accessibility button is visible within the system
      *                  navigation area, {@code false} otherwise
      * @hide
      */
-    public void notifyAccessibilityButtonAvailabilityChanged(boolean available) {
+    public void notifyAccessibilityButtonVisibilityChanged(boolean shown) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -982,9 +982,9 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.notifyAccessibilityButtonAvailabilityChanged(available);
+            service.notifyAccessibilityButtonVisibilityChanged(shown);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while dispatching accessibility button availability change", re);
+            Log.e(LOG_TAG, "Error while dispatching accessibility button visibility change", re);
         }
     }
 

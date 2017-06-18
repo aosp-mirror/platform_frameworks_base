@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "JavaRef"
-//#define LOG_NDEBUG 0
-
 #include "JavaRef.h"
 
-#include <utils/Log.h>
+#include <string>
 
 namespace android {
 
-EnvWrapper::EnvWrapper(JNIEnv *env) : mEnv(env) {
-    ALOGE_IF(env == nullptr, "Environment is a nullptr");
+JavaRef<jstring> make_javastr(JNIEnv *env, const std::string &str) {
+    return make_javaref(env, env->NewStringUTF(str.c_str()));
 }
 
 } // namespace android

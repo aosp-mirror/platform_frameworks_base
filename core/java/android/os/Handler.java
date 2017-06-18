@@ -696,6 +696,14 @@ public class Handler {
     }
 
     /**
+     * Return whether there are any messages or callbacks currently scheduled on this handler.
+     * @hide
+     */
+    public final boolean hasMessagesOrCallbacks() {
+        return mQueue.hasMessages(this);
+    }
+
+    /**
      * Check if there are any pending posts of messages with code 'what' and
      * whose obj is 'object' in the message queue.
      */
@@ -725,6 +733,18 @@ public class Handler {
             pw.println(prefix + "looper uninitialized");
         } else {
             mLooper.dump(pw, prefix + "  ");
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public final void dumpMine(Printer pw, String prefix) {
+        pw.println(prefix + this + " @ " + SystemClock.uptimeMillis());
+        if (mLooper == null) {
+            pw.println(prefix + "looper uninitialized");
+        } else {
+            mLooper.dump(pw, prefix + "  ", this);
         }
     }
 

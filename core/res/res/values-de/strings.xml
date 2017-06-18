@@ -447,7 +447,7 @@
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"Tethering-Konnektivität ändern"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Ermöglicht der App, den Status der Tethering-Konnektivität zu ändern"</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"WLAN-Verbindungen abrufen"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Ermöglicht der App, Informationen zu WLANs abzurufen, etwa ob ein WLAN aktiviert ist, und den Namen verbundener WLAN-Geräte."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Ermöglicht der App, Informationen zu WLAN-Netzwerken abzurufen, etwa ob ein WLAN aktiviert ist, und den Namen verbundener WLAN-Geräte."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"WLAN-Verbindungen herstellen und trennen"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Ermöglicht der App, eine Verbindung zu WLAN-Zugangspunkten herzustellen und solche zu trennen und Änderungen an der Gerätekonfiguration für WLAN-Netzwerke vorzunehmen."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"WLAN-Multicast-Empfang zulassen"</string>
@@ -1779,4 +1779,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM nicht eingerichtet"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-Karte nicht zulässig"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Smartphone nicht zulässig"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Pop-up-Fenster"</string>
 </resources>

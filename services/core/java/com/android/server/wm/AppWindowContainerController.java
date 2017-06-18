@@ -38,6 +38,8 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.DisplayInfo;
@@ -62,23 +64,38 @@ public class AppWindowContainerController
     private final IApplicationToken mToken;
     private final Handler mHandler;
 
-    private final Runnable mOnStartingWindowDrawn = () -> {
-        if (mListener == null) {
-            return;
-        }
-        if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting drawn in "
-                + AppWindowContainerController.this.mToken);
-        mListener.onStartingWindowDrawn();
-    };
+    private final class H extends Handler {
+        public static final int NOTIFY_WINDOWS_DRAWN = 1;
+        public static final int NOTIFY_STARTING_WINDOW_DRAWN = 2;
 
-    private final Runnable mOnWindowsDrawn = () -> {
-        if (mListener == null) {
-            return;
+        public H(Looper looper) {
+            super(looper);
         }
-        if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting drawn in "
-                + AppWindowContainerController.this.mToken);
-        mListener.onWindowsDrawn();
-    };
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case NOTIFY_WINDOWS_DRAWN:
+                    if (mListener == null) {
+                        return;
+                    }
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting drawn in "
+                            + AppWindowContainerController.this.mToken);
+                    mListener.onWindowsDrawn(msg.getWhen());
+                    break;
+                case NOTIFY_STARTING_WINDOW_DRAWN:
+                    if (mListener == null) {
+                        return;
+                    }
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting drawn in "
+                            + AppWindowContainerController.this.mToken);
+                    mListener.onStartingWindowDrawn(msg.getWhen());
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
     private final Runnable mOnWindowsVisible = () -> {
         if (mListener == null) {
@@ -213,7 +230,7 @@ public class AppWindowContainerController
             int targetSdkVersion, int rotationAnimationHint, long inputDispatchingTimeoutNanos,
             WindowManagerService service, Configuration overrideConfig, Rect bounds) {
         super(listener, service);
-        mHandler = new Handler(service.mH.getLooper());
+        mHandler = new H(service.mH.getLooper());
         mToken = token;
         synchronized(mWindowMap) {
             AppWindowToken atoken = mRoot.getAppWindowToken(mToken.asBinder());
@@ -761,11 +778,11 @@ public class AppWindowContainerController
     }
 
     void reportStartingWindowDrawn() {
-        mHandler.post(mOnStartingWindowDrawn);
+        mHandler.sendMessage(mHandler.obtainMessage(H.NOTIFY_STARTING_WINDOW_DRAWN));
     }
 
     void reportWindowsDrawn() {
-        mHandler.post(mOnWindowsDrawn);
+        mHandler.sendMessage(mHandler.obtainMessage(H.NOTIFY_WINDOWS_DRAWN));
     }
 
     void reportWindowsVisible() {

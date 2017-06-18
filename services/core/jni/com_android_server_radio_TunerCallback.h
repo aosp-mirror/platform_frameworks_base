@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// TODO(b/36863239): rename s/_Tuner_TunerCallback/_TunerCallback/, as this
-// module is no longer a part of Tuner - it's an independent java class.
 #ifndef _ANDROID_SERVER_RADIO_TUNERCALLBACK_H
 #define _ANDROID_SERVER_RADIO_TUNERCALLBACK_H
 

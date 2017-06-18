@@ -352,10 +352,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Axtar"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün yuxarı sürüşdürün."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün sola sürüşdür."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Seçdiyiniz siqnal, xatırladıcı, tədbir və zənglər istisna olmaqla səslər və vibrasiyalar Sizi narahat etməyəcək. Musiqi, video və oyunlar da daxil olmaqla oxutmaq istədiyiniz hər şeyi eşidəcəksiniz."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Siqnallar istisna olmaqla səslər və vibrasiyalar Sizi narahat etməyəcək. Musiqi, video və oyunlar da daxil olmaqla oxutmaq istədiyiniz hər şeyi eşidəcəksiniz."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Seçdiyiniz siqnal, xatırladıcı, tədbir və zənglər istisna olmaqla səslər və vibrasiyalar Sizi narahat etməyəcək. Musiqi, video və oyunlar da daxil olmaqla oxutmaq istədiyiniz hər şeyi eşidəcəksiniz."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Siqnallar istisna olmaqla səslər və vibrasiyalar Sizi narahat etməyəcək. Musiqi, video və oyunlar da daxil olmaqla oxutmaq istədiyiniz hər şeyi eşidəcəksiniz."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Fərdiləşdirin"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Bu, zəng, musiqi, video və oyunlar daxil olmaqla BÜTÜN səs və vibrasiyanı bloklayır. Yenə də telefon zəngi edə bilərsiniz."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Bu, zəng, musiqi, video və oyunlar daxil olmaqla BÜTÜN səs və vibrasiyanı blok edir. Hələ də telefon zəngi edə biləcəksiniz."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Bu, zəng, musiqi, video və oyunlar daxil olmaqla BÜTÜN səs və vibrasiyanı bloklayır."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Daha az təcili bildirişlər aşağıdadır"</string>
@@ -727,7 +727,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Rədd etmək üçün aşağı çəkin"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Şəkil-içində-şəkil menyusu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> şəkil içində şəkildədir"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> adlı şəxsin bu funksiyadan istifadə etməyini istəmirsinizsə, ayarları açmaq və deaktiv etmək üçün klikləyin."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g> tətbiqinin bu funksiyadan istifadə etməyini istəmirsinizsə, ayarları açmaq və deaktiv etmək üçün klikləyin."</string>
     <string name="pip_play" msgid="1417176722760265888">"Oxudun"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Fasilə verin"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Növbətiyə keçin"</string>

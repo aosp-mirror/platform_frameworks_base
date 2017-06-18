@@ -17,10 +17,12 @@
 package android.widget.espresso;
 
 import static android.support.test.espresso.action.ViewActions.actionWithAssertions;
+
 import android.graphics.Rect;
 import android.support.test.espresso.PerformException;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.action.CoordinatesProvider;
+import android.support.test.espresso.action.GeneralLocation;
 import android.support.test.espresso.action.Press;
 import android.support.test.espresso.action.Tap;
 import android.support.test.espresso.util.HumanReadables;
@@ -51,6 +53,20 @@ public final class TextViewActions {
     public static ViewAction clickOnTextAtIndex(int index) {
         return actionWithAssertions(
                 new ViewClickAction(Tap.SINGLE, new TextCoordinates(index), Press.FINGER));
+    }
+
+
+    /**
+     * Returns an action that single-clicks by mouse on the View.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a View displayed on screen
+     * <ul>
+     */
+    public static ViewAction mouseClick() {
+        return actionWithAssertions(new MouseClickAction(Tap.SINGLE, GeneralLocation.VISIBLE_CENTER,
+                MotionEvent.BUTTON_PRIMARY));
     }
 
     /**

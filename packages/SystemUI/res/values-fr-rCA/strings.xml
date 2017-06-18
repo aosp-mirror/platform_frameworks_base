@@ -354,10 +354,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Recherche"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Faire glisser le doigt vers le haut : <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Faites glisser votre doigt vers la gauche pour <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes, les rappels, les événements et les appelants. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes, les rappels, les événements et les appelants que vous sélectionnez. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personnaliser"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez quand même faire des appels téléphoniques."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez quand même faire des appels téléphoniques."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Cette option permet de bloquer TOUS les sons et vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifications moins urgentes affichées ci-dessous"</string>
@@ -729,7 +729,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Faire glisser vers le bas pour ignorer"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Menu d\'incrustation d\'image"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> est en mode d\'incrustation d\'image"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Si vous ne voulez pas que <xliff:g id="NAME">%s</xliff:g> utilise cette fonctionnalité, touchez l\'écran pour ouvrir les paramètres, puis désactivez-la."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Si vous ne voulez pas que <xliff:g id="NAME">%s</xliff:g> utilise cette fonctionnalité, touchez l\'écran pour ouvrir les paramètres, puis désactivez-la."</string>
     <string name="pip_play" msgid="1417176722760265888">"Lire"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Interrompre"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Passer au suivant"</string>

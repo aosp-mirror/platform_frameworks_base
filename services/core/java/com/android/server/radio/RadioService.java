@@ -16,14 +16,19 @@
 
 package com.android.server.radio;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.os.ParcelableException;
 import android.util.Slog;
 
 import com.android.server.SystemService;
+
+import java.util.List;
 
 public class RadioService extends SystemService {
     // TODO(b/36863239): rename to RadioService when native service goes away
@@ -37,6 +42,7 @@ public class RadioService extends SystemService {
     private final long mNativeContext = nativeInit();
 
     private final Object mLock = new Object();
+    private List<RadioManager.ModuleProperties> mModules = null;
 
     public RadioService(Context context) {
         super(context);
@@ -50,6 +56,7 @@ public class RadioService extends SystemService {
 
     private native long nativeInit();
     private native void nativeFinalize(long nativeContext);
+    private native List<RadioManager.ModuleProperties> nativeLoadModules(long nativeContext);
     private native Tuner nativeOpenTuner(long nativeContext, int moduleId,
             RadioManager.BandConfig config, boolean withAudio, ITunerCallback callback);
 
@@ -60,9 +67,33 @@ public class RadioService extends SystemService {
     }
 
     private class RadioServiceImpl extends IRadioService.Stub {
+        private void enforcePolicyAccess() {
+            if (PackageManager.PERMISSION_GRANTED != getContext().checkCallingPermission(
+                    Manifest.permission.ACCESS_FM_RADIO)) {
+                throw new SecurityException("ACCESS_FM_RADIO permission not granted");
+            }
+        }
+
+        @Override
+        public List<RadioManager.ModuleProperties> listModules() {
+            enforcePolicyAccess();
+            synchronized (mLock) {
+                if (mModules != null) return mModules;
+
+                mModules = nativeLoadModules(mNativeContext);
+                if (mModules == null) {
+                    throw new ParcelableException(new NullPointerException(
+                            "couldn't load radio modules"));
+                }
+
+                return mModules;
+            }
+        }
+
         @Override
         public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
                 boolean withAudio, ITunerCallback callback) {
+            enforcePolicyAccess();
             if (callback == null) {
                 throw new IllegalArgumentException("Callback must not be empty");
             }

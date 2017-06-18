@@ -24,7 +24,7 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_power_PowerManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_radio_RadioService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_radio_Tuner.cpp \
-    $(LOCAL_REL_DIR)/com_android_server_radio_Tuner_TunerCallback.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_radio_TunerCallback.cpp \
     $(LOCAL_REL_DIR)/com_android_server_radio_convert.cpp \
     $(LOCAL_REL_DIR)/com_android_server_SerialService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_storage_AppFuseBridge.cpp \

@@ -12591,6 +12591,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.restoreCallingIdentity(ident);
             }
         }
+        closeSystemDialogs("setLockScreenShown");
     }
 
     @Override
@@ -23843,9 +23844,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void notifyAppTransitionStarting(SparseIntArray reasons) {
+        public void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp) {
             synchronized (ActivityManagerService.this) {
-                mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(reasons);
+                mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(
+                        reasons, timestamp);
             }
         }
 
@@ -24104,6 +24106,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  ANR time: " + DateFormat.getDateTimeInstance().format(new Date()));
                 if (reason != null) {
                     pw.println("  Reason: " + reason);
+                }
+                pw.println("  mLastHomeActivityStartResult: "
+                        + mActivityStarter.mLastHomeActivityStartResult);
+                final ActivityRecord r = mActivityStarter.mLastHomeActivityStartRecord[0];
+                if (r != null) {
+                    pw.println("  mLastHomeActivityStartRecord:");
+                    r.dump(pw, "   ");
                 }
                 pw.println();
                 dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,

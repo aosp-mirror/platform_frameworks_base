@@ -96,9 +96,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
 
     private void simulateEvent(SysuiColorExtractor extractor) {
         // Let's fake a color event
-        List<Pair<Color, Integer>> dummyColors = new ArrayList<>();
-        dummyColors.add(new Pair<>(Color.valueOf(Color.BLACK), 1));
-        extractor.onColorsChanged(new WallpaperColors(dummyColors),
+        extractor.onColorsChanged(new WallpaperColors(Color.valueOf(Color.BLACK), null, null, 0),
                 WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
     }
 }

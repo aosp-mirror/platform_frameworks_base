@@ -199,6 +199,7 @@ public class TvView extends ViewGroup {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_HDMI_CEC_ACTIVE_SOURCE)
     public void setMain() {
         synchronized (sMainTvViewLock) {
             sMainTvView = new WeakReference<>(this);

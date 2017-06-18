@@ -116,11 +116,11 @@
     <color name="segmented_buttons_background">#14FFFFFF</color><!-- 8% white -->
 
     <color name="dark_mode_icon_color_single_tone">#99000000</color>
-    <color name="dark_mode_icon_color_dual_tone_background">#3d000000</color>
+    <color name="dark_mode_icon_color_dual_tone_background">#4d000000</color>
     <color name="dark_mode_icon_color_dual_tone_fill">#7a000000</color>
 
     <color name="light_mode_icon_color_single_tone">#ffffff</color>
-    <color name="light_mode_icon_color_dual_tone_background">#4dffffff</color>
+    <color name="light_mode_icon_color_dual_tone_background">#5dffffff</color>
     <color name="light_mode_icon_color_dual_tone_fill">#ffffff</color>
 
     <color name="volume_settings_icon_color">#7fffffff</color>

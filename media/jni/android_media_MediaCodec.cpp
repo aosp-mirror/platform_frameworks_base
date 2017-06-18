@@ -1726,7 +1726,7 @@ static void android_media_MediaCodec_setVideoScalingMode(
 
     if (mode != NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW
             && mode != NATIVE_WINDOW_SCALING_MODE_SCALE_CROP) {
-        jniThrowException(env, "java/lang/InvalidArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
 

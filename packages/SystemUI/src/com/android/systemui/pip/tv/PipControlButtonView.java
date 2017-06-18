@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +34,7 @@ import com.android.systemui.R;
  * A view containing PIP controls including fullscreen, close, and media controls.
  */
 public class PipControlButtonView extends RelativeLayout {
+
     private OnFocusChangeListener mFocusChangeListener;
     private ImageView mIconImageView;
     ImageView mButtonImageView;
@@ -122,18 +124,37 @@ public class PipControlButtonView extends RelativeLayout {
     }
 
     /**
+     * Sets the drawable for the button with the given drawable.
+     */
+    public void setImageDrawable(Drawable d) {
+        mIconImageView.setImageDrawable(d);
+    }
+
+    /**
      * Sets the drawable for the button with the given resource id.
      */
     public void setImageResource(int resId) {
-        mIconImageView.setImageResource(resId);
+        if (resId != 0) {
+            mIconImageView.setImageResource(resId);
+        }
+    }
+
+    /**
+     * Sets the text for description the with the given string.
+     */
+    public void setText(CharSequence text) {
+        mButtonImageView.setContentDescription(text);
+        mDescriptionTextView.setText(text);
     }
 
     /**
      * Sets the text for description the with the given resource id.
      */
     public void setText(int resId) {
-        mButtonImageView.setContentDescription(getContext().getString(resId));
-        mDescriptionTextView.setText(resId);
+        if (resId != 0) {
+            mButtonImageView.setContentDescription(getContext().getString(resId));
+            mDescriptionTextView.setText(resId);
+        }
     }
 
     private static void cancelAnimator(Animator animator) {

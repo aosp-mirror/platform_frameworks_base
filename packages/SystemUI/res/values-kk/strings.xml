@@ -352,10 +352,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Іздеу"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін жоғары сырғыту."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін солға сырғыту."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Дабылдар, еске салғыштар, оқиғалар мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндардың дыбысы өшірілмейді."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндардың дыбысы өшірілмейді."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Дабылдар, еске салғыштар, оқиғалар мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндарды ести алатын боласыз."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндарды ести алатын боласыз."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Реттеу"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"БАРЛЫҚ, соның ішінде дабылдардың, музыканың, бейнелердің және ойындардың дыбыстары мен дірілдері өшіріледі. Бірақ телефон қоңыраулары шалына береді."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Дабыл, музыка, бейнелер мен ойындарды қоса алғанда, барлық дыбыстар мен дірілдер бөгелетін болады. Қоңырау шала беруіңізге болады."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"БАРЛЫҚ, соның ішінде дабылдардың, музыканың, бейнелердің және ойындардың дыбыстары мен дірілдері өшіріледі."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Шұғылдығы азырақ хабарландырулар төменде"</string>
@@ -727,7 +727,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Жабу үшін төмен қарай сүйреңіз"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"\"Сурет ішіндегі сурет\" мәзірі"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> \"сурет ішіндегі сурет\" режимінде"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> деген пайдаланушының бұл функцияны пайдалануына жол бермеу үшін параметрлерді түртіп ашыңыз да, оларды өшіріңіз."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g> деген пайдаланушының бұл мүмкіндікті пайдалануын қаламасаңыз, параметрлерді түртіп ашыңыз да, оларды өшіріңіз."</string>
     <string name="pip_play" msgid="1417176722760265888">"Ойнату"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Кідірту"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Келесіге өту"</string>

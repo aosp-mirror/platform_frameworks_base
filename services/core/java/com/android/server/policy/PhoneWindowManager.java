@@ -1033,7 +1033,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             new BarController.OnBarVisibilityChangedListener() {
         @Override
         public void onBarVisibilityChanged(boolean visible) {
-            mAccessibilityManager.notifyAccessibilityButtonAvailabilityChanged(visible);
+            mAccessibilityManager.notifyAccessibilityButtonVisibilityChanged(visible);
         }
     };
 
@@ -3017,7 +3017,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mNavigationBar = win;
                 mNavigationBarController.setWindow(win);
                 mNavigationBarController.setOnBarVisibilityChangedListener(
-                        mNavBarVisibilityListener);
+                        mNavBarVisibilityListener, true);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:

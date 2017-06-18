@@ -352,10 +352,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Pesquisar"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Deslize para cima para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Deslize para a esquerda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Não é incomodado por sons e vibrações, exceto de alarmes, lembretes, eventos e autores de chamadas que especificar. Continua a ouvir tudo o que optar por reproduzir, incluindo música, vídeos e jogos."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Não é incomodado por sons e vibrações, exceto de alarmes. Continua a ouvir tudo o que optar por reproduzir, incluindo música, vídeos e jogos."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Não é incomodado por sons e vibrações, exceto de alarmes, lembretes, eventos e autores de chamadas que especificar. Continua a ouvir tudo o que optar por reproduzir, incluindo música, vídeos e jogos."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Não é incomodado por sons e vibrações, exceto de alarmes. Continua a ouvir tudo o que optar por reproduzir, incluindo música, vídeos e jogos."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizar"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Esta ação bloqueia TODOS os sons e as vibrações, incluindo de alarmes, de músicas, de vídeos e de jogos. Continua a ser possível telefonar."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Esta ação bloqueia TODOS os sons e as vibrações, incluindo de alarmes, música, vídeos e jogos. Continua a poder telefonar."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Esta ação bloqueia TODOS os sons e as vibrações, incluindo de alarmes, de músicas, de vídeos e de jogos."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificações menos urgentes abaixo"</string>
@@ -727,7 +727,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Arrastar para baixo para ignorar"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Menu de imagem na imagem"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"A aplicação <xliff:g id="NAME">%s</xliff:g> está no modo de imagem na imagem"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Se não pretende que a aplicação <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Se não pretende que a aplicação <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="pip_play" msgid="1417176722760265888">"Reproduzir"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Colocar em pausa"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Mudar para o seguinte"</string>
