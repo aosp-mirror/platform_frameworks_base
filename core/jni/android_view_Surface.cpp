@@ -394,6 +394,16 @@ static void nativeAllocateBuffers(JNIEnv* /* env */ , jclass /* clazz */,
 
 static jlong nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
         jlong surfaceControlNativeObj) {
+    sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
+    sp<Surface> surface(ctrl->createSurface());
+    if (surface != NULL) {
+        surface->incStrong(&sRefBaseOwner);
+    }
+    return reinterpret_cast<jlong>(surface.get());
+}
+
+static jlong nativeGetFromSurfaceControl(JNIEnv* env, jclass clazz,
+        jlong surfaceControlNativeObj) {
     /*
      * This is used by the WindowManagerService just after constructing
      * a Surface and is necessary for returning the Surface reference to
@@ -590,6 +600,8 @@ static const JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeAllocateBuffers },
     {"nativeCreateFromSurfaceControl", "(J)J",
             (void*)nativeCreateFromSurfaceControl },
+    {"nativeGetFromSurfaceControl", "(J)J",
+            (void*)nativeGetFromSurfaceControl },
     {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J",
             (void*)nativeReadFromParcel },
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",

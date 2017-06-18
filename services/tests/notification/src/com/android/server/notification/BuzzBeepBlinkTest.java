@@ -20,39 +20,8 @@ import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.GROUP_ALERT_SUMMARY;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-
-import com.android.server.lights.Light;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import android.app.ActivityManager;
-import android.app.Notification;
-import android.app.Notification.Builder;
-import android.app.NotificationManager;
-import android.app.NotificationChannel;
-import android.graphics.Color;
-import android.media.AudioAttributes;
-import android.media.AudioManager;
-import android.net.Uri;
-import android.os.Handler;
-import android.os.RemoteException;
-import android.os.UserHandle;
-import android.os.Vibrator;
-import android.os.VibrationEffect;
-import android.provider.Settings;
-import android.service.notification.StatusBarNotification;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
-
-import org.mockito.ArgumentMatcher;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -61,10 +30,42 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.Notification.Builder;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.server.lights.Light;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -163,6 +164,11 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
                 true /* noisy */, false /* buzzy*/, false /* lights */);
     }
 
+    private NotificationRecord getInsistentBeepyLeanbackNotification() {
+        return getLeanbackNotificationRecord(mId, true /* insistent */, false /* once */,
+                true /* noisy */, false /* buzzy*/, false /* lights */);
+    }
+
     private NotificationRecord getBuzzyNotification() {
         return getNotificationRecord(mId, false /* insistent */, false /* once */,
                 false /* noisy */, true /* buzzy*/, false /* lights */);
@@ -192,23 +198,30 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         return getNotificationRecord(mId, false /* insistent */, true /* once */,
                 false /* noisy */, true /* buzzy*/, true /* lights */,
                 true /* defaultVibration */, true /* defaultSound */, false /* defaultLights */,
-                null, Notification.GROUP_ALERT_ALL);
+                null, Notification.GROUP_ALERT_ALL, false);
     }
 
     private NotificationRecord getNotificationRecord(int id, boolean insistent, boolean once,
             boolean noisy, boolean buzzy, boolean lights) {
         return getNotificationRecord(id, insistent, once, noisy, buzzy, lights, true, true, true,
-                null, Notification.GROUP_ALERT_ALL);
+                null, Notification.GROUP_ALERT_ALL, false);
+    }
+
+    private NotificationRecord getLeanbackNotificationRecord(int id, boolean insistent, boolean once,
+            boolean noisy, boolean buzzy, boolean lights) {
+        return getNotificationRecord(id, insistent, once, noisy, buzzy, lights, true, true, true,
+                null, Notification.GROUP_ALERT_ALL, true);
     }
 
     private NotificationRecord getBeepyNotificationRecord(String groupKey, int groupAlertBehavior) {
         return getNotificationRecord(mId, false, false, true, false, false, true, true, true,
-                groupKey, groupAlertBehavior);
+                groupKey, groupAlertBehavior, false);
     }
 
     private NotificationRecord getNotificationRecord(int id, boolean insistent, boolean once,
             boolean noisy, boolean buzzy, boolean lights, boolean defaultVibration,
-            boolean defaultSound, boolean defaultLights, String groupKey, int groupAlertBehavior) {
+            boolean defaultSound, boolean defaultLights, String groupKey, int groupAlertBehavior,
+            boolean isLeanback) {
         NotificationChannel channel =
                 new NotificationChannel("test", "test", IMPORTANCE_HIGH);
         final Builder builder = new Builder(getContext())
@@ -257,9 +270,15 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
             n.flags |= Notification.FLAG_INSISTENT;
         }
 
+        Context context = spy(getContext());
+        PackageManager packageManager = spy(context.getPackageManager());
+        when(context.getPackageManager()).thenReturn(packageManager);
+        when(packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
+                .thenReturn(isLeanback);
+
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, id, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+        NotificationRecord r = new NotificationRecord(context, sbn, channel);
         mService.addNotification(r);
         return r;
     }
@@ -364,6 +383,15 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         mService.buzzBeepBlinkLocked(r);
 
         verifyBeep();
+    }
+
+    @Test
+    public void testNoLeanbackBeep() throws Exception {
+        NotificationRecord r = getInsistentBeepyLeanbackNotification();
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverBeep();
     }
 
     @Test

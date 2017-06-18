@@ -2044,7 +2044,10 @@ public class AppTransition implements Dump {
         if (forceOverride || isKeyguardTransit(transit) || !isTransitionSet()
                 || mNextAppTransition == TRANSIT_NONE) {
             setAppTransition(transit, flags);
-        } else if (!alwaysKeepCurrent) {
+        }
+        // We never want to change from a Keyguard transit to a non-Keyguard transit, as our logic
+        // relies on the fact that we always execute a Keyguard transition after preparing one.
+        else if (!alwaysKeepCurrent && !isKeyguardTransit(transit)) {
             if (transit == TRANSIT_TASK_OPEN && isTransitionEqual(TRANSIT_TASK_CLOSE)) {
                 // Opening a new task always supersedes a close for the anim.
                 setAppTransition(transit, flags);

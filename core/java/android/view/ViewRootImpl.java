@@ -2471,6 +2471,9 @@ public final class ViewRootImpl implements ViewParent,
         mInLayout = true;
 
         final View host = mView;
+        if (host == null) {
+            return;
+        }
         if (DEBUG_ORIENTATION || DEBUG_LAYOUT) {
             Log.v(mTag, "Laying out " + host + " to (" +
                     host.getMeasuredWidth() + ", " + host.getMeasuredHeight() + ")");
@@ -2777,6 +2780,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private void performDraw() {
         if (mAttachInfo.mDisplayState == Display.STATE_OFF && !mReportNextDraw) {
+            return;
+        } else if (mView == null) {
             return;
         }
 

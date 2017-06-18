@@ -9029,7 +9029,10 @@ public final class Settings {
          * <pre>
          * max_cached_processes                 (int)
          * background_settle_time               (long)
-         * foreground_service_ui_min_time       (long)
+         * fgservice_min_shown_time             (long)
+         * fgservice_min_report_time            (long)
+         * fgservice_screen_on_before_time      (long)
+         * fgservice_screen_on_after_time       (long)
          * content_provider_retain_time         (long)
          * gc_timeout                           (long)
          * gc_min_interval                      (long)
@@ -9816,6 +9819,16 @@ public final class Settings {
          * @hide
          */
         public static final String ENABLE_EPHEMERAL_FEATURE = "enable_ephemeral_feature";
+
+        /**
+         * Toggle to enable/disable dexopt for instant applications. The default is for dexopt
+         * to be disabled.
+         * <p>
+         * Type: int (0 to disable, 1 to enable)
+         *
+         * @hide
+         */
+        public static final String INSTANT_APP_DEXOPT_ENABLED = "instant_app_dexopt_enabled";
 
         /**
          * The min period for caching installed instant apps in milliseconds.

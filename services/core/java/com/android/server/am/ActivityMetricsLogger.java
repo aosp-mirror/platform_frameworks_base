@@ -230,12 +230,12 @@ class ActivityMetricsLogger {
     /**
      * Notifies the tracker that all windows of the app have been drawn.
      */
-    void notifyWindowsDrawn(int stackId) {
+    void notifyWindowsDrawn(int stackId, long timestamp) {
         final StackTransitionInfo info = mStackTransitionInfo.get(stackId);
         if (info == null || info.loggedWindowsDrawn) {
             return;
         }
-        info.windowsDrawnDelayMs = calculateCurrentDelay();
+        info.windowsDrawnDelayMs = calculateDelay(timestamp);
         info.loggedWindowsDrawn = true;
         if (allStacksWindowsDrawn() && mLoggedTransitionStarting) {
             reset(false /* abort */);
@@ -245,13 +245,13 @@ class ActivityMetricsLogger {
     /**
      * Notifies the tracker that the starting window was drawn.
      */
-    void notifyStartingWindowDrawn(int stackId) {
+    void notifyStartingWindowDrawn(int stackId, long timestamp) {
         final StackTransitionInfo info = mStackTransitionInfo.get(stackId);
         if (info == null || info.loggedStartingWindowDrawn) {
             return;
         }
         info.loggedStartingWindowDrawn = true;
-        info.startingWindowDelayMs = calculateCurrentDelay();
+        info.startingWindowDelayMs = calculateDelay(timestamp);
     }
 
     /**
@@ -260,11 +260,11 @@ class ActivityMetricsLogger {
      * @param stackIdReasons A map from stack id to a reason integer, which must be on of
      *                       ActivityManagerInternal.APP_TRANSITION_* reasons.
      */
-    void notifyTransitionStarting(SparseIntArray stackIdReasons) {
+    void notifyTransitionStarting(SparseIntArray stackIdReasons, long timestamp) {
         if (!isAnyTransitionActive() || mLoggedTransitionStarting) {
             return;
         }
-        mCurrentTransitionDelayMs = calculateCurrentDelay();
+        mCurrentTransitionDelayMs = calculateDelay(timestamp);
         mLoggedTransitionStarting = true;
         for (int index = stackIdReasons.size() - 1; index >= 0; index--) {
             final int stackId = stackIdReasons.keyAt(index);
@@ -342,6 +342,11 @@ class ActivityMetricsLogger {
 
         // Shouldn't take more than 25 days to launch an app, so int is fine here.
         return (int) (SystemClock.uptimeMillis() - mCurrentTransitionStartTime);
+    }
+
+    private int calculateDelay(long timestamp) {
+        // Shouldn't take more than 25 days to launch an app, so int is fine here.
+        return (int) (timestamp - mCurrentTransitionStartTime);
     }
 
     private void logAppTransitionMultiEvents() {

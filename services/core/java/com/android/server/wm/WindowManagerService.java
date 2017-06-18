@@ -5158,7 +5158,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 break;
                 case NOTIFY_APP_TRANSITION_STARTING: {
-                    mAmInternal.notifyAppTransitionStarting((SparseIntArray) msg.obj);
+                    mAmInternal.notifyAppTransitionStarting((SparseIntArray) msg.obj,
+                            msg.getWhen());
                 }
                 break;
                 case NOTIFY_APP_TRANSITION_CANCELLED: {
