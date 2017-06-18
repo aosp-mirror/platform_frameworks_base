@@ -9130,7 +9130,10 @@ public final class Settings {
          * <pre>
          * max_cached_processes                 (int)
          * background_settle_time               (long)
-         * foreground_service_ui_min_time       (long)
+         * fgservice_min_shown_time             (long)
+         * fgservice_min_report_time            (long)
+         * fgservice_screen_on_before_time      (long)
+         * fgservice_screen_on_after_time       (long)
          * content_provider_retain_time         (long)
          * gc_timeout                           (long)
          * gc_min_interval                      (long)
@@ -9936,6 +9939,16 @@ public final class Settings {
         public static final String ENABLE_EPHEMERAL_FEATURE = "enable_ephemeral_feature";
 
         /**
+         * Toggle to enable/disable dexopt for instant applications. The default is for dexopt
+         * to be disabled.
+         * <p>
+         * Type: int (0 to disable, 1 to enable)
+         *
+         * @hide
+         */
+        public static final String INSTANT_APP_DEXOPT_ENABLED = "instant_app_dexopt_enabled";
+
+        /**
          * The min period for caching installed instant apps in milliseconds.
          * <p>
          * Type: long
@@ -10083,6 +10096,15 @@ public final class Settings {
          */
         public static final String BACKUP_REFACTORED_SERVICE_DISABLED =
             "backup_refactored_service_disabled";
+
+        /**
+         * Flag to set the waiting time for euicc factory reset inside System > Settings
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String EUICC_WIPING_TIMEOUT_MILLIS =
+                "euicc_wiping_timeout_millis";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

@@ -407,6 +407,10 @@ public abstract class PanelView extends FrameLayout {
         return Math.abs(yDiff) >= Math.abs(xDiff);
     }
 
+    protected void startExpandingFromPeek() {
+        mStatusBar.handlePeekToExpandTransistion();
+    }
+
     protected void startExpandMotion(float newX, float newY, boolean startTracking,
             float expandedHeight) {
         mInitialOffsetOnTouch = expandedHeight;

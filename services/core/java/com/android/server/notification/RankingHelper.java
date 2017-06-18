@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1186,6 +1187,6 @@ public class RankingHelper implements RankingConfig {
         boolean showBadge = DEFAULT_SHOW_BADGE;
 
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();
-        ArrayMap<String, NotificationChannelGroup> groups = new ArrayMap<>();
+        Map<String, NotificationChannelGroup> groups = new ConcurrentHashMap<>();
    }
 }

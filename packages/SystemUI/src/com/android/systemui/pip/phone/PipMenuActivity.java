@@ -427,16 +427,19 @@ public class PipMenuActivity extends Activity {
         } else {
             actionsContainer.setVisibility(View.VISIBLE);
             if (mActionsGroup != null) {
-                // Hide extra views
-                for (int i = mActions.size(); i < mActionsGroup.getChildCount(); i++) {
-                    mActionsGroup.getChildAt(i).setVisibility(View.GONE);
-                }
-                // Add needed views
+                // Ensure we have as many buttons as actions
                 final LayoutInflater inflater = LayoutInflater.from(this);
                 while (mActionsGroup.getChildCount() < mActions.size()) {
                     final ImageView actionView = (ImageView) inflater.inflate(
                             R.layout.pip_menu_action, mActionsGroup, false);
                     mActionsGroup.addView(actionView);
+                }
+
+                // Update the visibility of all views
+                for (int i = 0; i < mActionsGroup.getChildCount(); i++) {
+                    mActionsGroup.getChildAt(i).setVisibility(i < mActions.size()
+                            ? View.VISIBLE
+                            : View.GONE);
                 }
 
                 // Recreate the layout
@@ -460,10 +463,9 @@ public class PipMenuActivity extends Activity {
                                 Log.w(TAG, "Failed to send action", e);
                             }
                         });
-                    } else {
-                        actionView.setAlpha(DISABLED_ACTION_ALPHA);
                     }
                     actionView.setEnabled(action.isEnabled());
+                    actionView.setAlpha(action.isEnabled() ? 1f : DISABLED_ACTION_ALPHA);
 
                     // Update the margin between actions
                     LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)

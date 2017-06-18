@@ -25,6 +25,12 @@ import android.telephony.euicc.DownloadableSubscription;
 import android.telephony.euicc.EuiccInfo;
 import android.util.ArraySet;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Service interface linking the system with an eUICC local profile assistant (LPA) application.
  *
@@ -116,8 +122,43 @@ public abstract class EuiccService extends Service {
 
     private final IEuiccService.Stub mStubWrapper;
 
+    private ThreadPoolExecutor mExecutor;
+
     public EuiccService() {
         mStubWrapper = new IEuiccServiceWrapper();
+    }
+
+    @Override
+    @CallSuper
+    public void onCreate() {
+        super.onCreate();
+        // We use a oneway AIDL interface to avoid blocking phone process binder threads on IPCs to
+        // an external process, but doing so means the requests are serialized by binder, which is
+        // not desired. Spin up a background thread pool to allow requests to be parallelized.
+        // TODO(b/38206971): Consider removing this if basic card-level functions like listing
+        // profiles are moved to the platform.
+        mExecutor = new ThreadPoolExecutor(
+                4 /* corePoolSize */,
+                4 /* maxPoolSize */,
+                30, TimeUnit.SECONDS, /* keepAliveTime */
+                new LinkedBlockingQueue<>(), /* workQueue */
+                new ThreadFactory() {
+                    private final AtomicInteger mCount = new AtomicInteger(1);
+
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        return new Thread(r, "EuiccService #" + mCount.getAndIncrement());
+                    }
+                }
+        );
+        mExecutor.allowCoreThreadTimeOut(true);
+    }
+
+    @Override
+    @CallSuper
+    public void onDestroy() {
+        mExecutor.shutdownNow();
+        super.onDestroy();
     }
 
     /**
@@ -279,23 +320,33 @@ public abstract class EuiccService extends Service {
         public void downloadSubscription(int slotId, DownloadableSubscription subscription,
                 boolean switchAfterDownload, boolean forceDeactivateSim,
                 IDownloadSubscriptionCallback callback) {
-            int result = EuiccService.this.onDownloadSubscription(
-                    slotId, subscription, switchAfterDownload, forceDeactivateSim);
-            try {
-                callback.onComplete(result);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    int result = EuiccService.this.onDownloadSubscription(
+                            slotId, subscription, switchAfterDownload, forceDeactivateSim);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
         }
 
         @Override
         public void getEid(int slotId, IGetEidCallback callback) {
-            String eid = EuiccService.this.onGetEid(slotId);
-            try {
-                callback.onSuccess(eid);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String eid = EuiccService.this.onGetEid(slotId);
+                    try {
+                        callback.onSuccess(eid);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
         }
 
         @Override
@@ -303,92 +354,135 @@ public abstract class EuiccService extends Service {
                 DownloadableSubscription subscription,
                 boolean forceDeactivateSim,
                 IGetDownloadableSubscriptionMetadataCallback callback) {
-            GetDownloadableSubscriptionMetadataResult result =
-                    EuiccService.this.onGetDownloadableSubscriptionMetadata(
-                            slotId, subscription, forceDeactivateSim);
-            try {
-                callback.onComplete(result);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    GetDownloadableSubscriptionMetadataResult result =
+                            EuiccService.this.onGetDownloadableSubscriptionMetadata(
+                                    slotId, subscription, forceDeactivateSim);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
         }
 
         @Override
         public void getDefaultDownloadableSubscriptionList(int slotId, boolean forceDeactivateSim,
                 IGetDefaultDownloadableSubscriptionListCallback callback) {
-            GetDefaultDownloadableSubscriptionListResult result =
-                    EuiccService.this.onGetDefaultDownloadableSubscriptionList(
-                            slotId, forceDeactivateSim);
-            try {
-                callback.onComplete(result);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    GetDefaultDownloadableSubscriptionListResult result =
+                            EuiccService.this.onGetDefaultDownloadableSubscriptionList(
+                                    slotId, forceDeactivateSim);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
         }
 
         @Override
         public void getEuiccProfileInfoList(int slotId, IGetEuiccProfileInfoListCallback callback) {
-            GetEuiccProfileInfoListResult result =
-                    EuiccService.this.onGetEuiccProfileInfoList(slotId);
-            try {
-                callback.onComplete(result);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    GetEuiccProfileInfoListResult result =
+                            EuiccService.this.onGetEuiccProfileInfoList(slotId);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
         }
 
         @Override
         public void getEuiccInfo(int slotId, IGetEuiccInfoCallback callback) {
-            EuiccInfo euiccInfo = EuiccService.this.onGetEuiccInfo(slotId);
-            try {
-                callback.onSuccess(euiccInfo);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    EuiccInfo euiccInfo = EuiccService.this.onGetEuiccInfo(slotId);
+                    try {
+                        callback.onSuccess(euiccInfo);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
+
         }
 
         @Override
         public void deleteSubscription(int slotId, String iccid,
                 IDeleteSubscriptionCallback callback) {
-            int result = EuiccService.this.onDeleteSubscription(slotId, iccid);
-            try {
-                callback.onComplete(result);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    int result = EuiccService.this.onDeleteSubscription(slotId, iccid);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
         }
 
         @Override
         public void switchToSubscription(int slotId, String iccid, boolean forceDeactivateSim,
                 ISwitchToSubscriptionCallback callback) {
-            int result =
-                    EuiccService.this.onSwitchToSubscription(slotId, iccid, forceDeactivateSim);
-            try {
-                callback.onComplete(result);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    int result =
+                            EuiccService.this.onSwitchToSubscription(
+                                    slotId, iccid, forceDeactivateSim);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
         }
 
         @Override
         public void updateSubscriptionNickname(int slotId, String iccid, String nickname,
                 IUpdateSubscriptionNicknameCallback callback) {
-            int result = EuiccService.this.onUpdateSubscriptionNickname(slotId, iccid, nickname);
-            try {
-                callback.onComplete(result);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    int result =
+                            EuiccService.this.onUpdateSubscriptionNickname(slotId, iccid, nickname);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
         }
 
         @Override
         public void eraseSubscriptions(int slotId, IEraseSubscriptionsCallback callback) {
-            int result = EuiccService.this.onEraseSubscriptions(slotId);
-            try {
-                callback.onComplete(result);
-            } catch (RemoteException e) {
-                // Can't communicate with the phone process; ignore.
-            }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    int result = EuiccService.this.onEraseSubscriptions(slotId);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
         }
     }
 }

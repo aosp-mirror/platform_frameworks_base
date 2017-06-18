@@ -961,8 +961,7 @@ public class ContextWrapper extends Context {
     /**
      * @hide
      */
-    @Override
-    public int getNextAccessibilityId() {
-        return mBase.getNextAccessibilityId();
+    public int getNextAutofillId() {
+        return mBase.getNextAutofillId();
     }
 }
