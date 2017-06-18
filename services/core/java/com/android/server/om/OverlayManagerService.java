@@ -714,11 +714,17 @@ public final class OverlayManagerService extends SystemService {
 
         final Map<String, List<String>> pendingChanges = new ArrayMap<>(targetPackageNames.size());
         synchronized (mLock) {
+            final List<String> frameworkOverlays =
+                mImpl.getEnabledOverlayPackageNames("android", userId);
             final int N = targetPackageNames.size();
             for (int i = 0; i < N; i++) {
                 final String targetPackageName = targetPackageNames.get(i);
-                pendingChanges.put(targetPackageName,
-                        mImpl.getEnabledOverlayPackageNames(targetPackageName, userId));
+                List<String> list = new ArrayList<>();
+                if (!"android".equals(targetPackageName)) {
+                    list.addAll(frameworkOverlays);
+                }
+                list.addAll(mImpl.getEnabledOverlayPackageNames(targetPackageName, userId));
+                pendingChanges.put(targetPackageName, list);
             }
         }
 

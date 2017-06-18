@@ -170,6 +170,7 @@ final class OverlayManagerServiceImpl {
 
         final PackageInfo targetPackage = mPackageManager.getPackageInfo(packageName, userId);
         updateAllOverlaysForTarget(packageName, userId, targetPackage);
+        mListener.onOverlaysChanged(packageName, userId);
     }
 
     void onTargetPackageChanged(@NonNull final String packageName, final int userId) {
@@ -178,7 +179,9 @@ final class OverlayManagerServiceImpl {
         }
 
         final PackageInfo targetPackage = mPackageManager.getPackageInfo(packageName, userId);
-        updateAllOverlaysForTarget(packageName, userId, targetPackage);
+        if (updateAllOverlaysForTarget(packageName, userId, targetPackage)) {
+            mListener.onOverlaysChanged(packageName, userId);
+        }
     }
 
     void onTargetPackageUpgrading(@NonNull final String packageName, final int userId) {
@@ -186,7 +189,9 @@ final class OverlayManagerServiceImpl {
             Slog.d(TAG, "onTargetPackageUpgrading packageName=" + packageName + " userId=" + userId);
         }
 
-        updateAllOverlaysForTarget(packageName, userId, null);
+        if (updateAllOverlaysForTarget(packageName, userId, null)) {
+            mListener.onOverlaysChanged(packageName, userId);
+        }
     }
 
     void onTargetPackageUpgraded(@NonNull final String packageName, final int userId) {
@@ -195,7 +200,9 @@ final class OverlayManagerServiceImpl {
         }
 
         final PackageInfo targetPackage = mPackageManager.getPackageInfo(packageName, userId);
-        updateAllOverlaysForTarget(packageName, userId, targetPackage);
+        if (updateAllOverlaysForTarget(packageName, userId, targetPackage)) {
+            mListener.onOverlaysChanged(packageName, userId);
+        }
     }
 
     void onTargetPackageRemoved(@NonNull final String packageName, final int userId) {
