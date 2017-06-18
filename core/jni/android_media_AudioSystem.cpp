@@ -1761,6 +1761,14 @@ android_media_AudioSystem_systemReady(JNIEnv *env, jobject thiz)
     return nativeToJavaStatus(AudioSystem::systemReady());
 }
 
+static jfloat
+android_media_AudioSystem_getStreamVolumeDB(JNIEnv *env, jobject thiz,
+                                            jint stream, jint index, jint device)
+{
+    return (jfloat)AudioSystem::getStreamVolumeDB((audio_stream_type_t)stream,
+                                                  (int)index,
+                                                  (audio_devices_t)device);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -1814,6 +1822,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_register_recording_callback", "()V",
                                     (void *)android_media_AudioSystem_registerRecordingCallback},
     {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
+    {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
 };
 
 

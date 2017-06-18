@@ -166,7 +166,6 @@ public class AudioService extends IAudioService.Stub
 
     /** debug calls to devices APIs */
     protected static final boolean DEBUG_DEVICES = Log.isLoggable(TAG + ".DEVICES", Log.DEBUG);
-
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
 
@@ -692,6 +691,7 @@ public class AudioService extends IAudioService.Stub
         // the mcc is read by onConfigureSafeVolume()
         mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_safe_media_volume_index) * 10;
+        mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
 
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
@@ -1347,7 +1347,7 @@ public class AudioService extends IAudioService.Stub
             // This is simulated by stepping by the full allowed volume range
             if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE &&
                     (device & mSafeMediaVolumeDevices) != 0) {
-                step = mSafeMediaVolumeIndex;
+                step = safeMediaVolumeIndex(device);
             } else {
                 step = streamState.getMaxIndex();
             }
@@ -1693,7 +1693,7 @@ public class AudioService extends IAudioService.Stub
                 if (index != 0) {
                     if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE &&
                             (device & mSafeMediaVolumeDevices) != 0) {
-                        index = mSafeMediaVolumeIndex;
+                        index = safeMediaVolumeIndex(device);
                     } else {
                         index = streamState.getMaxIndex();
                     }
@@ -3436,7 +3436,7 @@ public class AudioService extends IAudioService.Stub
                             MUSIC_ACTIVE_POLL_PERIOD_MS);
                     int index = mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(device);
                     if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0) &&
-                            (index > mSafeMediaVolumeIndex)) {
+                            (index > safeMediaVolumeIndex(device))) {
                         // Approximate cumulative active music time
                         mMusicActiveMs += MUSIC_ACTIVE_POLL_PERIOD_MS;
                         if (mMusicActiveMs > UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX) {
@@ -3454,12 +3454,40 @@ public class AudioService extends IAudioService.Stub
         mAudioHandler.obtainMessage(MSG_PERSIST_MUSIC_ACTIVE_MS, mMusicActiveMs, 0).sendToTarget();
     }
 
+    private int getSafeUsbMediaVolumeIndex()
+    {
+        // determine UI volume index corresponding to the wanted safe gain in dBFS
+        int min = MIN_STREAM_VOLUME[AudioSystem.STREAM_MUSIC];
+        int max = MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC];
+
+        while (Math.abs(max-min) > 1) {
+            int index = (max + min) / 2;
+            float gainDB = AudioSystem.getStreamVolumeDB(
+                    AudioSystem.STREAM_MUSIC, index, AudioSystem.DEVICE_OUT_USB_HEADSET);
+            if (gainDB == Float.NaN) {
+                //keep last min in case of read error
+                break;
+            } else if (gainDB == SAVE_VOLUME_GAIN_DBFS) {
+                min = index;
+                break;
+            } else if (gainDB < SAVE_VOLUME_GAIN_DBFS) {
+                min = index;
+            } else {
+                max = index;
+            }
+        }
+        return min * 10;
+    }
+
     private void onConfigureSafeVolume(boolean force, String caller) {
         synchronized (mSafeMediaVolumeState) {
             int mcc = mContext.getResources().getConfiguration().mcc;
             if ((mMcc != mcc) || ((mMcc == 0) && force)) {
                 mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                         com.android.internal.R.integer.config_safe_media_volume_index) * 10;
+
+                mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
+
                 boolean safeMediaVolumeEnabled =
                         SystemProperties.getBoolean("audio.safemedia.force", false)
                         || mContext.getResources().getBoolean(
@@ -5302,38 +5330,20 @@ public class AudioService extends IAudioService.Stub
         return delay;
     }
 
-    private void sendDeviceConnectionIntent(int device, int state, String address,
-            String deviceName) {
-        if (DEBUG_DEVICES) {
-            Slog.i(TAG, "sendDeviceConnectionIntent(dev:0x" + Integer.toHexString(device) +
-                    " state:0x" + Integer.toHexString(state) + " address:" + address +
-                    " name:" + deviceName + ");");
-        }
-        Intent intent = new Intent();
-
-        intent.putExtra(CONNECT_INTENT_KEY_STATE, state);
-        intent.putExtra(CONNECT_INTENT_KEY_ADDRESS, address);
-        intent.putExtra(CONNECT_INTENT_KEY_PORT_NAME, deviceName);
-
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-
+    private void updateAudioRoutes(int device, int state)
+    {
         int connType = 0;
 
         if (device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) {
             connType = AudioRoutesInfo.MAIN_HEADSET;
-            intent.setAction(Intent.ACTION_HEADSET_PLUG);
-            intent.putExtra("microphone", 1);
         } else if (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE ||
                    device == AudioSystem.DEVICE_OUT_LINE) {
-            /*do apps care about line-out vs headphones?*/
             connType = AudioRoutesInfo.MAIN_HEADPHONES;
-            intent.setAction(Intent.ACTION_HEADSET_PLUG);
-            intent.putExtra("microphone", 0);
         } else if (device == AudioSystem.DEVICE_OUT_HDMI ||
                 device == AudioSystem.DEVICE_OUT_HDMI_ARC) {
             connType = AudioRoutesInfo.MAIN_HDMI;
-            configureHdmiPlugIntent(intent, state);
-        } else if (device == AudioSystem.DEVICE_OUT_USB_DEVICE) {
+        } else if (device == AudioSystem.DEVICE_OUT_USB_DEVICE||
+                device == AudioSystem.DEVICE_OUT_USB_HEADSET) {
             connType = AudioRoutesInfo.MAIN_USB;
         }
 
@@ -5352,6 +5362,34 @@ public class AudioService extends IAudioService.Stub
                 }
             }
         }
+    }
+
+    private void sendDeviceConnectionIntent(int device, int state, String address,
+            String deviceName) {
+        if (DEBUG_DEVICES) {
+            Slog.i(TAG, "sendDeviceConnectionIntent(dev:0x" + Integer.toHexString(device) +
+                    " state:0x" + Integer.toHexString(state) + " address:" + address +
+                    " name:" + deviceName + ");");
+        }
+        Intent intent = new Intent();
+
+        if (device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) {
+            intent.setAction(Intent.ACTION_HEADSET_PLUG);
+            intent.putExtra("microphone", 1);
+        } else if (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE ||
+                   device == AudioSystem.DEVICE_OUT_LINE) {
+            intent.setAction(Intent.ACTION_HEADSET_PLUG);
+            intent.putExtra("microphone", 0);
+        } else if (device == AudioSystem.DEVICE_OUT_HDMI ||
+                device == AudioSystem.DEVICE_OUT_HDMI_ARC) {
+            configureHdmiPlugIntent(intent, state);
+        }
+
+        intent.putExtra(CONNECT_INTENT_KEY_STATE, state);
+        intent.putExtra(CONNECT_INTENT_KEY_ADDRESS, address);
+        intent.putExtra(CONNECT_INTENT_KEY_PORT_NAME, deviceName);
+
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -5425,6 +5463,7 @@ public class AudioService extends IAudioService.Stub
             if (!isUsb && device != AudioSystem.DEVICE_IN_WIRED_HEADSET) {
                 sendDeviceConnectionIntent(device, state, address, deviceName);
             }
+            updateAudioRoutes(device, state);
         }
     }
 
@@ -5950,9 +5989,15 @@ public class AudioService extends IAudioService.Stub
     private int mMcc = 0;
     // mSafeMediaVolumeIndex is the cached value of config_safe_media_volume_index property
     private int mSafeMediaVolumeIndex;
+    // mSafeUsbMediaVolumeIndex is used for USB Headsets and is to the music volume
+    // UI index corresponding to a gain of -15 dBFS. This corresponds to a loudness of 85 dB SPL
+    // if the headset is compliant to EN 60950 with a max loudness of 100dB SPL.
+    private int mSafeUsbMediaVolumeIndex;
+    private static final float SAVE_VOLUME_GAIN_DBFS = -15;
     // mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced,
     private final int mSafeMediaVolumeDevices = AudioSystem.DEVICE_OUT_WIRED_HEADSET |
-                                                AudioSystem.DEVICE_OUT_WIRED_HEADPHONE;
+                                                AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
+                                                AudioSystem.DEVICE_OUT_USB_HEADSET;
     // mMusicActiveMs is the cumulative time of music activity since safe volume was disabled.
     // When this time reaches UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX, the safe media volume is re-enabled
     // automatically. mMusicActiveMs is rounded to a multiple of MUSIC_ACTIVE_POLL_PERIOD_MS.
@@ -5960,6 +6005,17 @@ public class AudioService extends IAudioService.Stub
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
     private static final int MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute polling interval
     private static final int SAFE_VOLUME_CONFIGURE_TIMEOUT_MS = 30000;  // 30s after boot completed
+
+    private int safeMediaVolumeIndex(int device) {
+        if ((device & mSafeMediaVolumeDevices) == 0) {
+            return MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC];
+        }
+        if (device == AudioSystem.DEVICE_OUT_USB_HEADSET) {
+            return mSafeUsbMediaVolumeIndex;
+        } else {
+            return mSafeMediaVolumeIndex;
+        }
+    }
 
     private void setSafeMediaVolumeEnabled(boolean on, String caller) {
         synchronized (mSafeMediaVolumeState) {
@@ -5995,8 +6051,8 @@ public class AudioService extends IAudioService.Stub
                 continue;
             }
             int index = streamState.getIndex(device);
-            if (index > mSafeMediaVolumeIndex) {
-                streamState.setIndex(mSafeMediaVolumeIndex, device, caller);
+            if (index > safeMediaVolumeIndex(device)) {
+                streamState.setIndex(safeMediaVolumeIndex(device), device, caller);
                 sendMsg(mAudioHandler,
                         MSG_SET_DEVICE_VOLUME,
                         SENDMSG_QUEUE,
@@ -6014,7 +6070,7 @@ public class AudioService extends IAudioService.Stub
             if ((mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) &&
                     (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
                     ((device & mSafeMediaVolumeDevices) != 0) &&
-                    (index > mSafeMediaVolumeIndex)) {
+                    (index > safeMediaVolumeIndex(device))) {
                 return false;
             }
             return true;
@@ -6240,6 +6296,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mSafeMediaVolumeState=");
         pw.println(safeMediaVolumeStateToString(mSafeMediaVolumeState));
         pw.print("  mSafeMediaVolumeIndex="); pw.println(mSafeMediaVolumeIndex);
+        pw.print("  mSafeUsbMediaVolumeIndex="); pw.println(mSafeUsbMediaVolumeIndex);
         pw.print("  sIndependentA11yVolume="); pw.println(sIndependentA11yVolume);
         pw.print("  mPendingVolumeCommand="); pw.println(mPendingVolumeCommand);
         pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
