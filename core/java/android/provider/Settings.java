@@ -10718,6 +10718,13 @@ public final class Settings {
          */
         public static final String ENABLE_CACHE_QUOTA_CALCULATION =
                 "enable_cache_quota_calculation";
+
+        /**
+         * Whether the Deletion Helper no threshold toggle is available.
+         * @hide
+         */
+        public static final String ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE =
+                "enable_deletion_helper_no_threshold_toggle";
     }
 
     /**
