@@ -26,9 +26,9 @@ import android.os.Bundle;
 /**
 * Build and return a valid AccessPoint.
 *
-* Only intended for testing the AccessPoint class;
-* AccessPoints were designed to only be populated
-* by the mechanisms of scan results and wifi configurations.
+* Only intended for testing the AccessPoint class or creating Access points to be used in testing
+* applications. AccessPoints were designed to only be populated by the mechanisms of scan results
+* and wifi configurations.
 */
 public class TestAccessPointBuilder {
     // match the private values in WifiManager
@@ -42,6 +42,7 @@ public class TestAccessPointBuilder {
     private NetworkInfo mNetworkInfo = null;
     private String mFqdn = null;
     private String mProviderFriendlyName = null;
+    private int mSecurity = AccessPoint.SECURITY_NONE;
     private WifiConfiguration mWifiConfig;
     private WifiInfo mWifiInfo;
 
@@ -67,6 +68,8 @@ public class TestAccessPointBuilder {
         if (mProviderFriendlyName != null) {
             bundle.putString(AccessPoint.KEY_PROVIDER_FRIENDLY_NAME, mProviderFriendlyName);
         }
+        bundle.putInt(AccessPoint.KEY_SECURITY, mSecurity);
+
         AccessPoint ap = new AccessPoint(mContext, bundle);
         ap.setRssi(mRssi);
         return ap;
@@ -138,6 +141,11 @@ public class TestAccessPointBuilder {
         } else {
              mNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
         }
+        return this;
+    }
+
+    public TestAccessPointBuilder setSecurity(int security) {
+        mSecurity = security;
         return this;
     }
 
