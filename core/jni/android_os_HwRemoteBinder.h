@@ -68,7 +68,6 @@ protected:
     virtual ~JHwRemoteBinder();
 
 private:
-    jclass mClass;
     jobject mObject;
 
     sp<hardware::IBinder> mBinder;
