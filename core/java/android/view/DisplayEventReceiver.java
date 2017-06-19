@@ -72,6 +72,15 @@ public abstract class DisplayEventReceiver {
      * Creates a display event receiver.
      *
      * @param looper The looper to use when invoking callbacks.
+     */
+    public DisplayEventReceiver(Looper looper) {
+        this(looper, VSYNC_SOURCE_APP);
+    }
+
+    /**
+     * Creates a display event receiver.
+     *
+     * @param looper The looper to use when invoking callbacks.
      * @param vsyncSource The source of the vsync tick. Must be on of the VSYNC_SOURCE_* values.
      */
     public DisplayEventReceiver(Looper looper, int vsyncSource) {
