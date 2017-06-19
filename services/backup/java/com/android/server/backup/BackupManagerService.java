@@ -2457,6 +2457,17 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             throw new IllegalArgumentException("No packages are provided for backup");
         }
 
+        if (!mEnabled || !mProvisioned) {
+            Slog.i(TAG, "Backup requested but e=" + mEnabled + " p=" +mProvisioned);
+            sendBackupFinished(observer, BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+            final int logTag = mProvisioned
+                    ? BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED
+                    : BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
+            monitor = monitorEvent(monitor, logTag, null,
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
+            return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
+        }
+
         IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
         if (transport == null) {
             sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
@@ -4843,7 +4854,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                                 + " provisioned=" + mProvisioned + "; ignoring");
                     }
                     int monitoringEvent;
-                    if (!mEnabled) {
+                    if (mProvisioned) {
                         monitoringEvent = BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED;
                     } else {
                         monitoringEvent = BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
