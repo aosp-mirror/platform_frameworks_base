@@ -22,6 +22,7 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.database.Cursor;
@@ -32,14 +33,15 @@ import android.os.ParcelFileDescriptor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @hide
  */
 public class MbmsTempFileProvider extends ContentProvider {
-    public static final String META_DATA_USE_EXTERNAL_STORAGE = "use-external-storage";
-    public static final String META_DATA_TEMP_FILE_DIRECTORY = "temp-file-path";
     public static final String DEFAULT_TOP_LEVEL_TEMP_DIRECTORY = "androidMbmsTempFileRoot";
+    public static final String TEMP_FILE_ROOT_PREF_FILE_NAME = "MbmsTempFileRootPrefs";
+    public static final String TEMP_FILE_ROOT_PREF_NAME = "mbms_temp_file_root";
 
     private String mAuthority;
     private Context mContext;
@@ -114,7 +116,7 @@ public class MbmsTempFileProvider extends ContentProvider {
 
         // Make sure the temp file is contained in the temp file directory as configured in the
         // manifest
-        File tempFileDir = getEmbmsTempFileDir(context, authority);
+        File tempFileDir = getEmbmsTempFileDir(context);
         if (!MbmsUtils.isContainedIn(tempFileDir, file)) {
             throw new IllegalArgumentException("File " + file + " is not contained in the temp " +
                     "file directory, which is " + tempFileDir);
@@ -147,13 +149,17 @@ public class MbmsTempFileProvider extends ContentProvider {
         if (!ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
             throw new IllegalArgumentException("Uri must have scheme content");
         }
+        if (!Objects.equals(authority, uri.getAuthority())) {
+            throw new IllegalArgumentException("Uri does not have a matching authority: " +
+                    authority + ", " + uri.getAuthority());
+        }
 
         String relPath = Uri.decode(uri.getEncodedPath());
         File file;
         File tempFileDir;
 
         try {
-            tempFileDir = getEmbmsTempFileDir(context, authority).getCanonicalFile();
+            tempFileDir = getEmbmsTempFileDir(context).getCanonicalFile();
             file = new File(tempFileDir, relPath).getCanonicalFile();
         } catch (IOException e) {
             throw new FileNotFoundException("Could not resolve paths");
@@ -169,25 +175,18 @@ public class MbmsTempFileProvider extends ContentProvider {
     /**
      * Returns a File for the directory used to store temp files for this app
      */
-    public static File getEmbmsTempFileDir(Context context, String authority) {
-        Bundle metadata = getMetadata(context, authority);
-        File parentDirectory;
-        if (metadata.getBoolean(META_DATA_USE_EXTERNAL_STORAGE, false)) {
-            parentDirectory = context.getExternalFilesDir(null);
-        } else {
-            parentDirectory = context.getFilesDir();
+    public static File getEmbmsTempFileDir(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(TEMP_FILE_ROOT_PREF_FILE_NAME, 0);
+        String storedTempFileRoot = prefs.getString(TEMP_FILE_ROOT_PREF_NAME, null);
+        try {
+            if (storedTempFileRoot != null) {
+                return new File(storedTempFileRoot).getCanonicalFile();
+            } else {
+                return new File(context.getFilesDir(), DEFAULT_TOP_LEVEL_TEMP_DIRECTORY)
+                        .getCanonicalFile();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to canonicalize temp file root path " + e);
         }
-
-        String tmpFilePath = metadata.getString(META_DATA_TEMP_FILE_DIRECTORY);
-        if (tmpFilePath == null) {
-            tmpFilePath = DEFAULT_TOP_LEVEL_TEMP_DIRECTORY;
-        }
-        return new File(parentDirectory, tmpFilePath);
-    }
-
-    private static Bundle getMetadata(Context context, String authority) {
-        final ProviderInfo info = context.getPackageManager()
-                .resolveContentProvider(authority, PackageManager.GET_META_DATA);
-        return info.metaData;
     }
 }
