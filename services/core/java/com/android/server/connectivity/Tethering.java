@@ -1268,10 +1268,10 @@ public class Tethering extends BaseNetworkObserver {
                         sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
                     }
                 }
-                setUpstreamByType(ns);
+                setUpstreamNetwork(ns);
             }
 
-            protected void setUpstreamByType(NetworkState ns) {
+            protected void setUpstreamNetwork(NetworkState ns) {
                 String iface = null;
                 if (ns != null && ns.linkProperties != null) {
                     // Find the interface with the default IPv4 route. It may be the
@@ -1790,7 +1790,9 @@ public class Tethering extends BaseNetworkObserver {
             }
         }
 
-        mLog.log(String.format("OBSERVED LinkProperties update iface=%s state=%s", iface, state));
+        mLog.log(String.format(
+                "OBSERVED LinkProperties update iface=%s state=%s lp=%s",
+                iface, IControlsTethering.getStateString(state), newLp));
         final int which = TetherMasterSM.EVENT_IFACE_UPDATE_LINKPROPERTIES;
         mTetherMasterSM.sendMessage(which, state, 0, newLp);
     }
