@@ -47,6 +47,7 @@ interface IMbmsDownloadService
      */
     int getFileServices(String appName, int subId, in List<String> serviceClasses);
 
+    int setTempFileRootDirectory(String appName, int subId, String rootDirectoryPath);
     /**
      * should move the params into a DownloadRequest parcelable
      */

@@ -31,29 +31,22 @@ public class FileInfo implements Parcelable {
      * This is used internally but is also one of the few pieces of data about the content that is
      * exposed and may be needed for disambiguation by the application.
      */
-    final Uri uri;
+    private final Uri uri;
 
     /**
      * The mime type of the content.
      */
-    final String mimeType;
+    private final String mimeType;
 
     /**
      * The size of the file in bytes.
      */
-    final long size;
+    private final long size;
 
     /**
      * The MD5 hash of the file.
      */
-    final byte md5Hash[];
-
-    /**
-     * Gets the parent service for this file.
-     */
-    public FileServiceInfo getFileServiceInfo() {
-        return null;
-    }
+    private final byte md5Hash[];
 
     public static final Parcelable.Creator<FileInfo> CREATOR =
             new Parcelable.Creator<FileInfo>() {
@@ -67,6 +60,13 @@ public class FileInfo implements Parcelable {
             return new FileInfo[size];
         }
     };
+
+    public FileInfo(Uri uri, String mimeType, long size, byte[] md5Hash) {
+        this.uri = uri;
+        this.mimeType = mimeType;
+        this.size = size;
+        this.md5Hash = md5Hash;
+    }
 
     private FileInfo(Parcel in) {
         uri = in.readParcelable(null);
@@ -89,5 +89,21 @@ public class FileInfo implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    public Uri getUri() {
+        return uri;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public byte[] getMd5Hash() {
+        return md5Hash;
     }
 }
