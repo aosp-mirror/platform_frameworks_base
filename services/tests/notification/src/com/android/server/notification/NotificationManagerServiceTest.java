@@ -51,6 +51,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
@@ -79,7 +80,6 @@ import com.android.server.lights.LightsManager;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class NotificationManagerServiceTest extends NotificationTestCase {
-    private static final long WAIT_FOR_IDLE_TIMEOUT = 2;
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private final int uid = Binder.getCallingUid();
     private NotificationManagerService mNotificationManagerService;
@@ -96,6 +96,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     private RankingHelper mRankingHelper;
     @Mock
     private NotificationUsageStats mUsageStats;
+    @Mock
+    private AudioManager mAudioManager;
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
     @Mock
@@ -144,16 +146,23 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 .thenReturn(applicationInfo);
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
 
         mListener = mNotificationListeners.new ManagedServiceInfo(
                 null, new ComponentName(PKG, "test_class"), uid, true, null, 0);
         when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
-        mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
-                mPackageManagerClient, mockLightsManager, mNotificationListeners, mCompanionMgr,
-                mSnoozeHelper, mUsageStats);
-
+        try {
+            mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
+                    mPackageManagerClient, mockLightsManager, mNotificationListeners,
+                    mCompanionMgr, mSnoozeHelper, mUsageStats);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+        mNotificationManagerService.setAudioManager(mAudioManager);
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
         mInternalService = mNotificationManagerService.getInternalService();

@@ -10670,7 +10670,7 @@ public final class Settings {
         /**
          * The maximum allowed notification enqueue rate in Hertz.
          *
-         * Should be a float, and includes both posts and updates.
+         * Should be a float, and includes updates only.
          * @hide
          */
         public static final String MAX_NOTIFICATION_ENQUEUE_RATE = "max_notification_enqueue_rate";
