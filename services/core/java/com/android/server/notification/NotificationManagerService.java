@@ -87,7 +87,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
@@ -110,7 +109,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -195,9 +197,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /** {@hide} */
@@ -319,7 +321,6 @@ public class NotificationManagerService extends SystemService {
     final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
-    final PolicyAccess mPolicyAccess = new PolicyAccess();
 
     // The last key in this list owns the hardware.
     ArrayList<String> mLights = new ArrayList<>();
@@ -404,14 +405,58 @@ public class NotificationManagerService extends SystemService {
 
     }
 
+    protected void readDefaultApprovedServices() {
+        final int userId = UserHandle.USER_SYSTEM;
+        String defaultListenerAccess = getContext().getResources().getString(
+                com.android.internal.R.string.config_defaultListenerAccessPackages);
+        if (defaultListenerAccess != null) {
+            for (String whitelisted :
+                    defaultListenerAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR)) {
+                // Gather all notification listener components for candidate pkgs.
+                Set<ComponentName> approvedListeners =
+                        mListeners.queryPackageForServices(whitelisted,
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                for (ComponentName cn : approvedListeners) {
+                    try {
+                        getBinderService().setNotificationListenerAccessGrantedForUser(cn,
+                                    userId, true);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        String defaultDndAccess = getContext().getResources().getString(
+                com.android.internal.R.string.config_defaultDndAccessPackages);
+        if (defaultListenerAccess != null) {
+            for (String whitelisted :
+                    defaultDndAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR)) {
+                try {
+                    getBinderService().setNotificationPolicyAccessGranted(whitelisted, true);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     private void readPolicyXml(InputStream stream, boolean forRestore)
             throws XmlPullParserException, NumberFormatException, IOException {
         final XmlPullParser parser = Xml.newPullParser();
         parser.setInput(stream, StandardCharsets.UTF_8.name());
 
+        boolean saveXml = false;
         while (parser.next() != END_DOCUMENT) {
             mZenModeHelper.readXml(parser, forRestore);
             mRankingHelper.readXml(parser, forRestore);
+            saveXml |= mListeners.readXml(parser);
+            saveXml |= mNotificationAssistants.readXml(parser);
+            saveXml |= mConditionProviders.readXml(parser);
+        }
+
+        if (saveXml) {
+            savePolicyFile();
         }
     }
 
@@ -425,6 +470,8 @@ public class NotificationManagerService extends SystemService {
                 readPolicyXml(infile, false /*forRestore*/);
             } catch (FileNotFoundException e) {
                 // No data yet
+                // Load default managed services approvals
+                readDefaultApprovedServices();
             } catch (IOException e) {
                 Log.wtf(TAG, "Unable to read notification policy", e);
             } catch (NumberFormatException e) {
@@ -472,6 +519,9 @@ public class NotificationManagerService extends SystemService {
         out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
         mZenModeHelper.writeXml(out, forBackup);
         mRankingHelper.writeXml(out, forBackup);
+        mListeners.writeXml(out, forBackup);
+        mNotificationAssistants.writeXml(out, forBackup);
+        mConditionProviders.writeXml(out, forBackup);
         out.endTag(null, TAG_NOTIFICATION_POLICY);
         out.endDocument();
     }
@@ -726,6 +776,22 @@ public class NotificationManagerService extends SystemService {
         updateLightsLocked();
     }
 
+    private final BroadcastReceiver mRestoreReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_SETTING_RESTORED.equals(intent.getAction())) {
+                try {
+                    String element = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
+                    String newValue = intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE);
+                    mListeners.onSettingRestored(element, newValue, getSendingUserId());
+                    mConditionProviders.onSettingRestored(element, newValue, getSendingUserId());
+                } catch (Exception e) {
+                    Slog.wtf(TAG, "Cannot restore managed services from settings", e);
+                }
+            }
+        }
+    };
+
     private final BroadcastReceiver mNotificationTimeoutReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -827,9 +893,9 @@ public class NotificationManagerService extends SystemService {
                         }
                     }
                 }
-                mListeners.onPackagesChanged(removingPackage, pkgList);
-                mNotificationAssistants.onPackagesChanged(removingPackage, pkgList);
-                mConditionProviders.onPackagesChanged(removingPackage, pkgList);
+                mListeners.onPackagesChanged(removingPackage, pkgList, uidList);
+                mNotificationAssistants.onPackagesChanged(removingPackage, pkgList, uidList);
+                mConditionProviders.onPackagesChanged(removingPackage, pkgList, uidList);
                 mRankingHelper.onPackagesChanged(removingPackage, changeUserId, pkgList, uidList);
                 savePolicyFile();
             }
@@ -1058,8 +1124,9 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void init(Looper looper, IPackageManager packageManager, PackageManager packageManagerClient,
             LightsManager lightsManager, NotificationListeners notificationListeners,
+            NotificationAssistants notificationAssistants, ConditionProviders conditionProviders,
             ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
-            NotificationUsageStats usageStats) {
+            NotificationUsageStats usageStats, AtomicFile policyFile) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1089,7 +1156,7 @@ public class NotificationManagerService extends SystemService {
                 mRankingHandler,
                 mUsageStats,
                 extractorNames);
-        mConditionProviders = new ConditionProviders(getContext(), mHandler, mUserProfiles);
+        mConditionProviders = conditionProviders;
         mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders);
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
             @Override
@@ -1145,16 +1212,14 @@ public class NotificationManagerService extends SystemService {
             }
         });
 
-        final File systemDir = new File(Environment.getDataDirectory(), "system");
-        mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
-
-        loadPolicyFile();
-
         // This is a ManagedServices object that keeps track of the listeners.
         mListeners = notificationListeners;
 
         // This is a MangedServices object that keeps track of the assistant.
-        mNotificationAssistants = new NotificationAssistants();
+        mNotificationAssistants = notificationAssistants;
+
+        mPolicyFile = policyFile;
+        loadPolicyFile();
 
         mStatusBar = getLocalService(StatusBarManagerInternal.class);
         if (mStatusBar != null) {
@@ -1222,6 +1287,9 @@ public class NotificationManagerService extends SystemService {
         timeoutFilter.addDataScheme(SCHEME_TIMEOUT);
         getContext().registerReceiver(mNotificationTimeoutReceiver, timeoutFilter);
 
+        IntentFilter settingsRestoredFilter = new IntentFilter(Intent.ACTION_SETTING_RESTORED);
+        getContext().registerReceiver(mRestoreReceiver, settingsRestoredFilter);
+
         mSettingsObserver = new SettingsObserver(mHandler);
 
         mArchive = new Archive(resources.getInteger(
@@ -1249,9 +1317,15 @@ public class NotificationManagerService extends SystemService {
             }
         }, mUserProfiles);
 
+        final File systemDir = new File(Environment.getDataDirectory(), "system");
+
         init(Looper.myLooper(), AppGlobals.getPackageManager(), getContext().getPackageManager(),
-                getLocalService(LightsManager.class), new NotificationListeners(),
-                null, snoozeHelper, new NotificationUsageStats(getContext()));
+                getLocalService(LightsManager.class),
+                new NotificationListeners(AppGlobals.getPackageManager()),
+                new NotificationAssistants(AppGlobals.getPackageManager()),
+                new ConditionProviders(getContext(), mUserProfiles, AppGlobals.getPackageManager()),
+                null, snoozeHelper, new NotificationUsageStats(getContext()),
+                new AtomicFile(new File(systemDir, "notification_policy.xml")));
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
@@ -1814,17 +1888,20 @@ public class NotificationManagerService extends SystemService {
             cancelAllNotificationsInt(MY_UID, MY_PID, packageName, null, 0, 0, true,
                     UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
 
+            final String[] packages = new String[] {packageName};
+            final int[] uids = new int[] {uid};
+
             // Listener & assistant
-            mListeners.onPackagesChanged(true, new String[] {packageName});
-            mNotificationAssistants.onPackagesChanged(true, new String[] {packageName});
+            mListeners.onPackagesChanged(true, packages, uids);
+            mNotificationAssistants.onPackagesChanged(true, packages, uids);
 
             // Zen
-            mConditionProviders.onPackagesChanged(true, new String[] {packageName});
+            mConditionProviders.onPackagesChanged(true, packages, uids);
 
             // Reset notification preferences
             if (!fromApp) {
-                mRankingHelper.onPackagesChanged(true, UserHandle.getCallingUserId(),
-                        new String[]{packageName}, new int[]{uid});
+                mRankingHelper.onPackagesChanged(
+                        true, UserHandle.getCallingUserId(), packages, uids);
             }
 
             savePolicyFile();
@@ -2468,7 +2545,8 @@ public class NotificationManagerService extends SystemService {
             String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
             final int packageCount = packages.length;
             for (int i = 0; i < packageCount; i++) {
-                if (checkPolicyAccess(packages[i])) {
+                if (mConditionProviders.isPackageOrComponentAllowed(
+                        packages[i], UserHandle.getUserId(uid))) {
                     accessAllowed = true;
                 }
             }
@@ -2491,7 +2569,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         private boolean checkPackagePolicyAccess(String pkg) {
-            return mPolicyAccess.isPackageGranted(pkg);
+            return mConditionProviders.isPackageOrComponentAllowed(
+                    pkg, getCallingUserHandle().getIdentifier());
         }
 
         private boolean checkPolicyAccess(String pkg) {
@@ -2602,29 +2681,19 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public String[] getPackagesRequestingNotificationPolicyAccess()
-                throws RemoteException {
-            enforceSystemOrSystemUI("request policy access packages");
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                return mPolicyAccess.getRequestingPackages();
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
         public void setNotificationPolicyAccessGranted(String pkg, boolean granted)
                 throws RemoteException {
-            enforceSystemOrSystemUI("grant notification policy access");
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mNotificationLock) {
-                    mPolicyAccess.put(pkg, granted);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            checkCallerIsSystemOrShell();
+            mConditionProviders.setPackageOrComponentEnabled(
+                    pkg, getCallingUserHandle().getIdentifier(), true, granted);
+
+            getContext().sendBroadcastAsUser(new Intent(NotificationManager
+                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                    .setPackage(pkg)
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                    getCallingUserHandle(), null);
+
+            savePolicyFile();
         }
 
         @Override
@@ -2647,6 +2716,93 @@ public class NotificationManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        @Override
+        public List<String> getEnabledNotificationListenerPackages() {
+            checkCallerIsSystem();
+            return mListeners.getAllowedPackages(getCallingUserHandle().getIdentifier());
+        }
+
+        @Override
+        public List<ComponentName> getEnabledNotificationListeners(int userId) {
+            checkCallerIsSystem();
+            return mListeners.getAllowedComponents(userId);
+        }
+
+        @Override
+        public boolean isNotificationListenerAccessGranted(ComponentName listener) {
+            Preconditions.checkNotNull(listener);
+            checkCallerIsSystemOrSameApp(listener.getPackageName());
+            return mListeners.isPackageOrComponentAllowed(listener.flattenToString(),
+                    getCallingUserHandle().getIdentifier());
+        }
+
+        @Override
+        public boolean isNotificationListenerAccessGrantedForUser(ComponentName listener,
+                int userId) {
+            Preconditions.checkNotNull(listener);
+            checkCallerIsSystem();
+            return mListeners.isPackageOrComponentAllowed(listener.flattenToString(),
+                    userId);
+        }
+
+        @Override
+        public boolean isNotificationAssistantAccessGranted(ComponentName assistant) {
+            Preconditions.checkNotNull(assistant);
+            checkCallerIsSystemOrSameApp(assistant.getPackageName());
+            return mNotificationAssistants.isPackageOrComponentAllowed(assistant.flattenToString(),
+                    getCallingUserHandle().getIdentifier());
+        }
+
+        @Override
+        public void setNotificationListenerAccessGranted(ComponentName listener,
+                boolean granted) throws RemoteException {
+            setNotificationListenerAccessGrantedForUser(
+                    listener, getCallingUserHandle().getIdentifier(), granted);
+        }
+
+        @Override
+        public void setNotificationAssistantAccessGranted(ComponentName assistant,
+                boolean granted) throws RemoteException {
+            setNotificationAssistantAccessGrantedForUser(
+                    assistant, getCallingUserHandle().getIdentifier(), granted);
+        }
+
+        @Override
+        public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
+                boolean granted) throws RemoteException {
+            Preconditions.checkNotNull(listener);
+            enforceSystemOrSystemUI("grant notification listener access");
+            mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
+                    userId, false, granted);
+            mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
+                    userId, true, granted);
+
+            getContext().sendBroadcastAsUser(new Intent(NotificationManager
+                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                    .setPackage(listener.getPackageName())
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), getCallingUserHandle(), null);
+
+            savePolicyFile();
+        }
+
+        @Override
+        public void setNotificationAssistantAccessGrantedForUser(ComponentName assistant,
+                int userId, boolean granted) throws RemoteException {
+            Preconditions.checkNotNull(assistant);
+            enforceSystemOrSystemUI("grant notification assistant access");
+            mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
+                    userId, false, granted);
+            mNotificationAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
+                    userId, true, granted);
+
+            getContext().sendBroadcastAsUser(new Intent(NotificationManager
+                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                    .setPackage(assistant.getPackageName())
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), getCallingUserHandle(), null);
+
+            savePolicyFile();
         }
 
         @Override
@@ -2764,6 +2920,13 @@ public class NotificationManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
             return uid;
+        }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                String[] args, ShellCallback callback, ResultReceiver resultReceiver)
+                throws RemoteException {
+            new ShellCmd().exec(this, in, out, err, args, callback, resultReceiver);
         }
     };
 
@@ -3073,9 +3236,6 @@ public class NotificationManagerService extends SystemService {
                 pw.println("\n  Zen Log:");
                 ZenLog.dump(pw, "    ");
             }
-
-            pw.println("\n  Policy access:");
-            pw.print("    mPolicyAccess: "); pw.println(mPolicyAccess);
 
             pw.println("\n  Condition providers:");
             mConditionProviders.dump(pw, filter);
@@ -4759,6 +4919,13 @@ public class NotificationManagerService extends SystemService {
         return isUidSystemOrPhone(Binder.getCallingUid());
     }
 
+    private void checkCallerIsSystemOrShell() {
+        if (Binder.getCallingUid() == Process.SHELL_UID) {
+            return;
+        }
+        checkCallerIsSystem();
+    }
+
     private void checkCallerIsSystem() {
         if (isCallerSystemOrPhone()) {
             return;
@@ -4964,9 +5131,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     public class NotificationAssistants extends ManagedServices {
+        static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
-        public NotificationAssistants() {
-            super(getContext(), mHandler, mNotificationLock, mUserProfiles);
+        public NotificationAssistants(IPackageManager pm) {
+            super(getContext(), mNotificationLock, mUserProfiles, pm);
         }
 
         @Override
@@ -4974,6 +5142,7 @@ public class NotificationManagerService extends SystemService {
             Config c = new Config();
             c.caption = "notification assistant service";
             c.serviceInterface = NotificationAssistantService.SERVICE_INTERFACE;
+            c.managedServiceTypeTag = TAG_ENABLED_NOTIFICATION_ASSISTANTS;
             c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT;
             c.bindPermission = Manifest.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE;
             c.settingsAction = Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS;
@@ -5071,11 +5240,13 @@ public class NotificationManagerService extends SystemService {
     }
 
     public class NotificationListeners extends ManagedServices {
+        static final String TAG_ENABLED_NOTIFICATION_LISTENERS = "enabled_listeners";
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
 
-        public NotificationListeners() {
-            super(getContext(), mHandler, mNotificationLock, mUserProfiles);
+        public NotificationListeners(IPackageManager pm) {
+            super(getContext(), mNotificationLock, mUserProfiles, pm);
+
         }
 
         @Override
@@ -5083,6 +5254,7 @@ public class NotificationManagerService extends SystemService {
             Config c = new Config();
             c.caption = "notification listener";
             c.serviceInterface = NotificationListenerService.SERVICE_INTERFACE;
+            c.managedServiceTypeTag = TAG_ENABLED_NOTIFICATION_LISTENERS;
             c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_LISTENERS;
             c.bindPermission = android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE;
             c.settingsAction = Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS;
@@ -5475,78 +5647,39 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private final class PolicyAccess {
-        private static final String SEPARATOR = ":";
-        private final String[] PERM = {
-            android.Manifest.permission.ACCESS_NOTIFICATION_POLICY
-        };
+    private class ShellCmd extends ShellCommand {
+        public static final String USAGE = "help\n"
+                + "allow_dnd PACKAGE\n"
+                + "disallow_dnd PACKAGE";
 
-        public boolean isPackageGranted(String pkg) {
-            return pkg != null && getGrantedPackages().contains(pkg);
-        }
-
-        public void put(String pkg, boolean granted) {
-            if (pkg == null) return;
-            final ArraySet<String> pkgs = getGrantedPackages();
-            boolean changed;
-            if (granted) {
-                changed = pkgs.add(pkg);
-            } else {
-                changed = pkgs.remove(pkg);
-            }
-            if (!changed) return;
-            final String setting = TextUtils.join(SEPARATOR, pkgs);
-            final int currentUser = ActivityManager.getCurrentUser();
-            Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                    setting,
-                    currentUser);
-            getContext().sendBroadcastAsUser(new Intent(NotificationManager
-                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                .setPackage(pkg)
-                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), new UserHandle(currentUser), null);
-        }
-
-        public ArraySet<String> getGrantedPackages() {
-            final ArraySet<String> pkgs = new ArraySet<>();
-
-            long identity = Binder.clearCallingIdentity();
+        @Override
+        public int onCommand(String cmd) {
             try {
-                final String setting = Settings.Secure.getStringForUser(
-                        getContext().getContentResolver(),
-                        Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                        ActivityManager.getCurrentUser());
-                if (setting != null) {
-                    final String[] tokens = setting.split(SEPARATOR);
-                    for (int i = 0; i < tokens.length; i++) {
-                        String token = tokens[i];
-                        if (token != null) {
-                            token = token.trim();
-                        }
-                        if (TextUtils.isEmpty(token)) {
-                            continue;
-                        }
-                        pkgs.add(token);
+                switch (cmd) {
+                    case "allow_dnd": {
+                        getBinderService().setNotificationPolicyAccessGranted(
+                                getNextArgRequired(), true);
                     }
+                    break;
+
+                    case "disallow_dnd": {
+                        getBinderService().setNotificationPolicyAccessGranted(
+                                getNextArgRequired(), false);
+                    }
+                    break;
+
+                    default:
+                        return handleDefaultCommands(cmd);
                 }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error running shell command", e);
             }
-            return pkgs;
+            return 0;
         }
 
-        public String[] getRequestingPackages() throws RemoteException {
-            final ParceledListSlice list = mPackageManager
-                    .getPackagesHoldingPermissions(PERM, 0 /*flags*/,
-                            ActivityManager.getCurrentUser());
-            final List<PackageInfo> pkgs = list.getList();
-            if (pkgs == null || pkgs.isEmpty()) return new String[0];
-            final int N = pkgs.size();
-            final String[] rt = new String[N];
-            for (int i = 0; i < N; i++) {
-                rt[i] = pkgs.get(i).packageName;
-            }
-            return rt;
+        @Override
+        public void onHelp() {
+            getOutPrintWriter().println(USAGE);
         }
     }
 }

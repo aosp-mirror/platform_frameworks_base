@@ -31,6 +31,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
@@ -6607,28 +6608,36 @@ public final class Settings {
         public static final String ASSIST_DISCLOSURE_ENABLED = "assist_disclosure_enabled";
 
         /**
-         * Name of the service components that the current user has explicitly allowed to
+         * Read only list of the service components that the current user has explicitly allowed to
          * see and assist with all of the user's notifications.
          *
+         * @deprecated Use
+         * {@link NotificationManager#isNotificationListenerAccessGranted(ComponentName)}.
          * @hide
          */
+        @Deprecated
         public static final String ENABLED_NOTIFICATION_ASSISTANT =
                 "enabled_notification_assistant";
 
         /**
-         * Names of the service components that the current user has explicitly allowed to
+         * Read only list of the service components that the current user has explicitly allowed to
          * see all of the user's notifications, separated by ':'.
          *
          * @hide
+         * @deprecated Use
+         * {@link NotificationManager#isNotificationAssistantAccessGranted(ComponentName)}.
          */
+        @Deprecated
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
         /**
-         * Names of the packages that the current user has explicitly allowed to
-         * manage notification policy configuration, separated by ':'.
+         * Read only list of the packages that the current user has explicitly allowed to
+         * manage do not disturb, separated by ':'.
          *
+         * @deprecated Use {@link NotificationManager#isNotificationPolicyAccessGranted()}.
          * @hide
          */
+        @Deprecated
         @TestApi
         public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES =
                 "enabled_notification_policy_access_packages";
@@ -7049,7 +7058,6 @@ public final class Settings {
             AUTOFILL_SERVICE,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
             ENABLED_ACCESSIBILITY_SERVICES,
-            ENABLED_NOTIFICATION_LISTENERS,
             ENABLED_VR_LISTENERS,
             ENABLED_INPUT_METHODS,
             TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
@@ -7128,6 +7136,9 @@ public final class Settings {
 
         /** @hide */
         public static final String[] LEGACY_RESTORE_SETTINGS = {
+                ENABLED_NOTIFICATION_LISTENERS,
+                ENABLED_NOTIFICATION_ASSISTANT,
+                ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES
         };
 
         /**

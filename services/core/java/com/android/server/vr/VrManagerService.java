@@ -21,6 +21,7 @@ import android.Manifest;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.INotificationManager;
 import android.app.Vr2dDisplayProperties;
 import android.app.NotificationManager;
 import android.annotation.NonNull;
@@ -42,6 +43,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -75,6 +77,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -142,6 +145,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private VrState mPendingState;
     private final ArrayDeque<VrState> mLoggingDeque = new ArrayDeque<>(EVENT_LOG_SIZE);
     private final NotificationAccessManager mNotifAccessManager = new NotificationAccessManager();
+    private INotificationManager mNotificationManager;
     /** Tracks the state of the screen and keyguard UI.*/
     private int mSystemSleepFlags = FLAG_AWAKE;
     /**
@@ -593,6 +597,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            mNotificationManager = INotificationManager.Stub.asInterface(
+                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
             synchronized (mLock) {
                 Looper looper = Looper.getMainLooper();
                 Handler handler = new Handler(looper);
@@ -836,50 +842,28 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     }
 
     private void grantNotificationListenerAccess(String pkg, int userId) {
+        NotificationManager nm = mContext.getSystemService(NotificationManager.class);
         PackageManager pm = mContext.getPackageManager();
         ArraySet<ComponentName> possibleServices = EnabledComponentsObserver.loadComponentNames(pm,
                 userId, NotificationListenerService.SERVICE_INTERFACE,
                 android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE);
-        ContentResolver resolver = mContext.getContentResolver();
-
-        ArraySet<String> current = getNotificationListeners(resolver, userId);
 
         for (ComponentName c : possibleServices) {
-            String flatName = c.flattenToString();
-            if (Objects.equals(c.getPackageName(), pkg)
-                    && !current.contains(flatName)) {
-                current.add(flatName);
+            if (Objects.equals(c.getPackageName(), pkg)) {
+                nm.setNotificationListenerAccessGrantedForUser(c, userId, true);
             }
-        }
-
-        if (current.size() > 0) {
-            String flatSettings = formatSettings(current);
-            Settings.Secure.putStringForUser(resolver,
-                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                    flatSettings, userId);
         }
     }
 
     private void revokeNotificationListenerAccess(String pkg, int userId) {
-        ContentResolver resolver = mContext.getContentResolver();
+        NotificationManager nm = mContext.getSystemService(NotificationManager.class);
+        List<ComponentName> current = nm.getEnabledNotificationListeners(userId);
 
-        ArraySet<String> current = getNotificationListeners(resolver, userId);
-
-        ArrayList<String> toRemove = new ArrayList<>();
-
-        for (String c : current) {
-            ComponentName component = ComponentName.unflattenFromString(c);
+        for (ComponentName component : current) {
             if (component != null && component.getPackageName().equals(pkg)) {
-                toRemove.add(c);
+                nm.setNotificationListenerAccessGrantedForUser(component, userId, false);
             }
         }
-
-        current.removeAll(toRemove);
-
-        String flatSettings = formatSettings(current);
-        Settings.Secure.putStringForUser(resolver,
-                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                flatSettings, userId);
     }
 
     private void grantCoarseLocationPermissionIfNeeded(String pkg, int userId) {

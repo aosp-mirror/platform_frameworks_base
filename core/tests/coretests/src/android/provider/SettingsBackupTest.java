@@ -17,23 +17,24 @@
 package android.provider;
 
 import static com.google.android.collect.Sets.newHashSet;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
-import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /** Tests that ensure appropriate settings are backed up. */
 @RunWith(AndroidJUnit4.class)
@@ -428,6 +429,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DOZE_ALWAYS_ON,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
+                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
                  Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
                  Settings.Secure.ENABLED_PRINT_SERVICES,
                  Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
