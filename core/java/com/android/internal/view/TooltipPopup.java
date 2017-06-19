@@ -91,10 +91,6 @@ public class TooltipPopup {
         return mContentView.getParent() != null;
     }
 
-    public void updateContent(CharSequence tooltipText) {
-        mMessageView.setText(tooltipText);
-    }
-
     private void computePosition(View anchorView, int anchorX, int anchorY, boolean fromTouch,
             WindowManager.LayoutParams outParams) {
         outParams.token = anchorView.getWindowToken();
