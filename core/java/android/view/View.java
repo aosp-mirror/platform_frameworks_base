@@ -26247,9 +26247,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mTooltipInfo.mHideTooltipRunnable = this::hideTooltip;
             }
             mTooltipInfo.mTooltipText = tooltipText;
-            if (mTooltipInfo.mTooltipPopup != null && mTooltipInfo.mTooltipPopup.isShowing()) {
-                mTooltipInfo.mTooltipPopup.updateContent(mTooltipInfo.mTooltipText);
-            }
         }
     }
 
