@@ -24,12 +24,17 @@ import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
 import android.content.Context;
+import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.Looper;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
 import com.android.systemui.R;
@@ -45,7 +50,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -141,6 +148,41 @@ public class NotificationInflaterTest extends SysuiTestCase {
         Assert.assertNull(mRow.getEntry().getRunningTask());
     }
 
+    @Test
+    public void testInflationIsRetriedIfAsyncFails() throws Exception {
+        NotificationInflater.InflationProgress result =
+                new NotificationInflater.InflationProgress();
+        result.packageContext = mContext;
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        NotificationInflater.applyRemoteView(result,
+                NotificationInflater.FLAG_REINFLATE_EXPANDED_VIEW, 0, mRow,
+                false /* redactAmbient */, true /* isNewView */, new RemoteViews.OnClickHandler(),
+                new NotificationInflater.InflationCallback() {
+                    @Override
+                    public void handleInflationException(StatusBarNotification notification,
+                            Exception e) {
+                        countDownLatch.countDown();
+                        throw new RuntimeException("No Exception expected");
+                    }
+
+                    @Override
+                    public void onAsyncInflationFinished(NotificationData.Entry entry) {
+                        countDownLatch.countDown();
+                    }
+                }, mRow.getEntry(), mRow.getPrivateLayout(), null, null, new HashMap<>(),
+                new NotificationInflater.ApplyCallback() {
+                    @Override
+                    public void setResultView(View v) {
+                    }
+
+                    @Override
+                    public RemoteViews getRemoteView() {
+                        return new AsyncFailRemoteView(mContext.getPackageName(),
+                                R.layout.custom_view_dark);
+                    }
+                });
+        countDownLatch.await();
+    }
 
     @Test
     public void testSupersedesExistingTask() throws Exception {
@@ -197,6 +239,32 @@ public class NotificationInflaterTest extends SysuiTestCase {
 
         public void setException(Exception exception) {
             mException = exception;
+        }
+    }
+
+    private class AsyncFailRemoteView extends RemoteViews {
+        Handler mHandler = new Handler(Looper.getMainLooper());
+
+        public AsyncFailRemoteView(String packageName, int layoutId) {
+            super(packageName, layoutId);
+        }
+
+        @Override
+        public View apply(Context context, ViewGroup parent) {
+            return super.apply(context, parent);
+        }
+
+        @Override
+        public CancellationSignal applyAsync(Context context, ViewGroup parent, Executor executor,
+                OnViewAppliedListener listener, OnClickHandler handler) {
+            mHandler.post(() -> listener.onError(new RuntimeException("Failed to inflate async")));
+            return new CancellationSignal();
+        }
+
+        @Override
+        public CancellationSignal applyAsync(Context context, ViewGroup parent, Executor executor,
+                OnViewAppliedListener listener) {
+            return applyAsync(context, parent, executor, listener, null);
         }
     }
 }
