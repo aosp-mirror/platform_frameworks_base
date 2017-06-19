@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <map>
 #include <memory>
 #include <utility>
 
@@ -56,15 +57,15 @@ using ::aapt::xml::XmlActionExecutorPolicy;
 using ::aapt::xml::XmlNodeAction;
 using ::android::base::ReadFileToString;
 
-const std::unordered_map<std::string, Abi> kAbiMap = {
-    {"armeabi", Abi::kArmeV6},
-    {"armeabi-v7a", Abi::kArmV7a},
-    {"arm64-v8a", Abi::kArm64V8a},
-    {"x86", Abi::kX86},
-    {"x86_64", Abi::kX86_64},
-    {"mips", Abi::kMips},
-    {"mips64", Abi::kMips64},
-    {"universal", Abi::kUniversal},
+const std::unordered_map<std::string, Abi> kStringToAbiMap = {
+    {"armeabi", Abi::kArmeV6}, {"armeabi-v7a", Abi::kArmV7a},  {"arm64-v8a", Abi::kArm64V8a},
+    {"x86", Abi::kX86},        {"x86_64", Abi::kX86_64},       {"mips", Abi::kMips},
+    {"mips64", Abi::kMips64},  {"universal", Abi::kUniversal},
+};
+const std::map<Abi, std::string> kAbiToStringMap = {
+    {Abi::kArmeV6, "armeabi"}, {Abi::kArmV7a, "armeabi-v7a"},  {Abi::kArm64V8a, "arm64-v8a"},
+    {Abi::kX86, "x86"},        {Abi::kX86_64, "x86_64"},       {Abi::kMips, "mips"},
+    {Abi::kMips64, "mips64"},  {Abi::kUniversal, "universal"},
 };
 
 constexpr const char* kAaptXmlNs = "http://schemas.android.com/tools/aapt";
@@ -102,7 +103,13 @@ class NamespaceVisitor : public xml::Visitor {
 
 }  // namespace
 
+namespace configuration {
 
+const std::string& AbiToString(Abi abi) {
+  return kAbiToStringMap.find(abi)->second;
+}
+
+}  // namespace configuration
 
 /** Returns a ConfigurationParser for the file located at the provided path. */
 Maybe<ConfigurationParser> ConfigurationParser::ForPath(const std::string& path) {
@@ -175,6 +182,9 @@ Maybe<Configuration> ConfigurationParser::Parse() {
     return {};
   }
 
+  // TODO: Validate all references in the configuration are valid. It should be safe to assume from
+  // this point on that any references from one section to another will be present.
+
   return {config};
 }
 
@@ -201,7 +211,7 @@ ConfigurationParser::ActionHandler ConfigurationParser::artifact_handler_ =
               DiagMessage() << "Unknown artifact attribute: " << attr.name << " = " << attr.value);
         }
       }
-      config->artifacts[artifact.name] = artifact;
+      config->artifacts.push_back(artifact);
       return true;
     };
 
@@ -236,7 +246,7 @@ ConfigurationParser::ActionHandler ConfigurationParser::abi_group_handler_ =
           for (auto& node : child->children) {
             xml::Text* t;
             if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-              group.push_back(kAbiMap.at(TrimWhitespace(t->text).to_string()));
+              group.push_back(kStringToAbiMap.at(TrimWhitespace(t->text).to_string()));
               break;
             }
           }

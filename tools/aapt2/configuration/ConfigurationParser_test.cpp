@@ -196,7 +196,7 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
 
   EXPECT_EQ(1ul, config.artifacts.size());
 
-  auto& artifact = config.artifacts.begin()->second;
+  auto& artifact = config.artifacts.front();
   EXPECT_EQ("", artifact.name); // TODO: make this fail.
   EXPECT_EQ("arm", artifact.abi_group.value());
   EXPECT_EQ("large", artifact.screen_density_group.value());
@@ -204,6 +204,21 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
   EXPECT_EQ("19", artifact.android_sdk_group.value());
   EXPECT_EQ("dxt1", artifact.gl_texture_group.value());
   EXPECT_EQ("low-latency", artifact.device_feature_group.value());
+
+  // Perform a second action to ensure we get 2 artifacts.
+  static constexpr const char* second = R"xml(
+    <artifact
+        abi-group="other"
+        screen-density-group="large"
+        locale-group="europe"
+        android-sdk-group="19"
+        gl-texture-group="dxt1"
+        device-feature-group="low-latency"/>)xml";
+  doc = test::BuildXmlDom(second);
+
+  ok = artifact_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_TRUE(ok);
+  EXPECT_EQ(2ul, config.artifacts.size());
 }
 
 TEST_F(ConfigurationParserTest, ArtifactFormatAction) {
