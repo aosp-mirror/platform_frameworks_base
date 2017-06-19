@@ -31,6 +31,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.print.PrinterInfoProto;
 import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
@@ -59,13 +60,13 @@ public final class PrinterInfo implements Parcelable {
     public @interface Status {
     }
     /** Printer status: the printer is idle and ready to print. */
-    public static final int STATUS_IDLE = 1;
+    public static final int STATUS_IDLE = PrinterInfoProto.STATUS_IDLE;
 
     /** Printer status: the printer is busy printing. */
-    public static final int STATUS_BUSY = 2;
+    public static final int STATUS_BUSY = PrinterInfoProto.STATUS_BUSY;
 
     /** Printer status: the printer is not available. */
-    public static final int STATUS_UNAVAILABLE = 3;
+    public static final int STATUS_UNAVAILABLE = PrinterInfoProto.STATUS_UNAVAILABLE;
 
     private final @NonNull PrinterId mId;
 

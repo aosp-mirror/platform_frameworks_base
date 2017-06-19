@@ -20,6 +20,12 @@ import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 
+import static com.android.internal.print.DumpUtils.writeComponentName;
+import static com.android.internal.print.DumpUtils.writePrintJobInfo;
+import static com.android.internal.print.DumpUtils.writePrinterId;
+import static com.android.internal.print.DumpUtils.writePrinterInfo;
+import static com.android.internal.print.DumpUtils.writeStringIfNotNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -58,6 +64,10 @@ import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.printservice.recommendation.RecommendationInfo;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
+import android.service.print.CachedPrintJobProto;
+import android.service.print.InstalledPrintServiceProto;
+import android.service.print.PrintUserStateProto;
+import android.service.print.PrinterDiscoverySessionProto;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArrayMap;
@@ -65,6 +75,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
@@ -803,55 +814,107 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         mDestroyed = true;
     }
 
+    public void dump(@NonNull ProtoOutputStream proto) {
+        synchronized (mLock) {
+            proto.write(PrintUserStateProto.USER_ID, mUserId);
+
+            final int installedServiceCount = mInstalledServices.size();
+            for (int i = 0; i < installedServiceCount; i++) {
+                long token = proto.start(PrintUserStateProto.INSTALLED_SERVICES);
+                PrintServiceInfo installedService = mInstalledServices.get(i);
+
+                ResolveInfo resolveInfo = installedService.getResolveInfo();
+                writeComponentName(proto, InstalledPrintServiceProto.COMPONENT_NAME,
+                        new ComponentName(resolveInfo.serviceInfo.packageName,
+                                resolveInfo.serviceInfo.name));
+
+                writeStringIfNotNull(proto, InstalledPrintServiceProto.SETTINGS_ACTIVITY,
+                        installedService.getSettingsActivityName());
+                writeStringIfNotNull(proto, InstalledPrintServiceProto.ADD_PRINTERS_ACTIVITY,
+                        installedService.getAddPrintersActivityName());
+                writeStringIfNotNull(proto, InstalledPrintServiceProto.ADVANCED_OPTIONS_ACTIVITY,
+                        installedService.getAdvancedOptionsActivityName());
+
+                proto.end(token);
+            }
+
+            for (ComponentName disabledService : mDisabledServices) {
+                writeComponentName(proto, PrintUserStateProto.DISABLED_SERVICES, disabledService);
+            }
+
+            final int activeServiceCount = mActiveServices.size();
+            for (int i = 0; i < activeServiceCount; i++) {
+                long token = proto.start(PrintUserStateProto.ACTIVE_SERVICES);
+                mActiveServices.valueAt(i).dump(proto);
+                proto.end(token);
+            }
+
+            mPrintJobForAppCache.dumpLocked(proto);
+
+            if (mPrinterDiscoverySession != null) {
+                long token = proto.start(PrintUserStateProto.DISCOVERY_SESSIONS);
+                mPrinterDiscoverySession.dumpLocked(proto);
+                proto.end(token);
+            }
+
+        }
+
+        long token = proto.start(PrintUserStateProto.PRINT_SPOOLER_STATE);
+        mSpooler.dump(proto);
+        proto.end(token);
+    }
+
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String prefix) {
         pw.append(prefix).append("user state ").append(String.valueOf(mUserId)).append(":");
         pw.println();
 
         String tab = "  ";
 
-        pw.append(prefix).append(tab).append("installed services:").println();
-        final int installedServiceCount = mInstalledServices.size();
-        for (int i = 0; i < installedServiceCount; i++) {
-            PrintServiceInfo installedService = mInstalledServices.get(i);
-            String installedServicePrefix = prefix + tab + tab;
-            pw.append(installedServicePrefix).append("service:").println();
-            ResolveInfo resolveInfo = installedService.getResolveInfo();
-            ComponentName componentName = new ComponentName(
-                    resolveInfo.serviceInfo.packageName,
-                    resolveInfo.serviceInfo.name);
-            pw.append(installedServicePrefix).append(tab).append("componentName=")
-                    .append(componentName.flattenToString()).println();
-            pw.append(installedServicePrefix).append(tab).append("settingsActivity=")
-                    .append(installedService.getSettingsActivityName()).println();
-            pw.append(installedServicePrefix).append(tab).append("addPrintersActivity=")
-                    .append(installedService.getAddPrintersActivityName()).println();
-            pw.append(installedServicePrefix).append(tab).append("avancedOptionsActivity=")
-                   .append(installedService.getAdvancedOptionsActivityName()).println();
-        }
+        synchronized (mLock) {
+            pw.append(prefix).append(tab).append("installed services:").println();
+            final int installedServiceCount = mInstalledServices.size();
+            for (int i = 0; i < installedServiceCount; i++) {
+                PrintServiceInfo installedService = mInstalledServices.get(i);
+                String installedServicePrefix = prefix + tab + tab;
+                pw.append(installedServicePrefix).append("service:").println();
+                ResolveInfo resolveInfo = installedService.getResolveInfo();
+                ComponentName componentName = new ComponentName(
+                        resolveInfo.serviceInfo.packageName,
+                        resolveInfo.serviceInfo.name);
+                pw.append(installedServicePrefix).append(tab).append("componentName=")
+                        .append(componentName.flattenToString()).println();
+                pw.append(installedServicePrefix).append(tab).append("settingsActivity=")
+                        .append(installedService.getSettingsActivityName()).println();
+                pw.append(installedServicePrefix).append(tab).append("addPrintersActivity=")
+                        .append(installedService.getAddPrintersActivityName()).println();
+                pw.append(installedServicePrefix).append(tab).append("avancedOptionsActivity=")
+                        .append(installedService.getAdvancedOptionsActivityName()).println();
+            }
 
-        pw.append(prefix).append(tab).append("disabled services:").println();
-        for (ComponentName disabledService : mDisabledServices) {
-            String disabledServicePrefix = prefix + tab + tab;
-            pw.append(disabledServicePrefix).append("service:").println();
-            pw.append(disabledServicePrefix).append(tab).append("componentName=")
-                    .append(disabledService.flattenToString());
-            pw.println();
-        }
+            pw.append(prefix).append(tab).append("disabled services:").println();
+            for (ComponentName disabledService : mDisabledServices) {
+                String disabledServicePrefix = prefix + tab + tab;
+                pw.append(disabledServicePrefix).append("service:").println();
+                pw.append(disabledServicePrefix).append(tab).append("componentName=")
+                        .append(disabledService.flattenToString());
+                pw.println();
+            }
 
-        pw.append(prefix).append(tab).append("active services:").println();
-        final int activeServiceCount = mActiveServices.size();
-        for (int i = 0; i < activeServiceCount; i++) {
-            RemotePrintService activeService = mActiveServices.valueAt(i);
-            activeService.dump(pw, prefix + tab + tab);
-            pw.println();
-        }
+            pw.append(prefix).append(tab).append("active services:").println();
+            final int activeServiceCount = mActiveServices.size();
+            for (int i = 0; i < activeServiceCount; i++) {
+                RemotePrintService activeService = mActiveServices.valueAt(i);
+                activeService.dump(pw, prefix + tab + tab);
+                pw.println();
+            }
 
-        pw.append(prefix).append(tab).append("cached print jobs:").println();
-        mPrintJobForAppCache.dump(pw, prefix + tab + tab);
+            pw.append(prefix).append(tab).append("cached print jobs:").println();
+            mPrintJobForAppCache.dumpLocked(pw, prefix + tab + tab);
 
-        pw.append(prefix).append(tab).append("discovery mediator:").println();
-        if (mPrinterDiscoverySession != null) {
-            mPrinterDiscoverySession.dump(pw, prefix + tab + tab);
+            pw.append(prefix).append(tab).append("discovery mediator:").println();
+            if (mPrinterDiscoverySession != null) {
+                mPrinterDiscoverySession.dumpLocked(pw, prefix + tab + tab);
+            }
         }
 
         pw.append(prefix).append(tab).append("print spooler:").println();
@@ -1611,7 +1674,40 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             }
         }
 
-        public void dump(PrintWriter pw, String prefix) {
+        public void dumpLocked(@NonNull ProtoOutputStream proto) {
+            proto.write(PrinterDiscoverySessionProto.IS_DESTROYED, mDestroyed);
+            proto.write(PrinterDiscoverySessionProto.IS_PRINTER_DISCOVERY_IN_PROGRESS,
+                    !mStartedPrinterDiscoveryTokens.isEmpty());
+
+            final int observerCount = mDiscoveryObservers.beginBroadcast();
+            for (int i = 0; i < observerCount; i++) {
+                IPrinterDiscoveryObserver observer = mDiscoveryObservers.getBroadcastItem(i);
+                proto.write(PrinterDiscoverySessionProto.PRINTER_DISCOVERY_OBSERVERS,
+                        observer.toString());
+            }
+            mDiscoveryObservers.finishBroadcast();
+
+            final int tokenCount = this.mStartedPrinterDiscoveryTokens.size();
+            for (int i = 0; i < tokenCount; i++) {
+                IBinder token = mStartedPrinterDiscoveryTokens.get(i);
+                proto.write(PrinterDiscoverySessionProto.DISCOVERY_REQUESTS, token.toString());
+            }
+
+            final int trackedPrinters = mStateTrackedPrinters.size();
+            for (int i = 0; i < trackedPrinters; i++) {
+                PrinterId printer = mStateTrackedPrinters.get(i);
+                writePrinterId(proto, PrinterDiscoverySessionProto.TRACKED_PRINTER_REQUESTS,
+                        printer);
+            }
+
+            final int printerCount = mPrinters.size();
+            for (int i = 0; i < printerCount; i++) {
+                PrinterInfo printer = mPrinters.valueAt(i);
+                writePrinterInfo(mContext, proto, PrinterDiscoverySessionProto.PRINTER, printer);
+            }
+        }
+
+        public void dumpLocked(PrintWriter pw, String prefix) {
             pw.append(prefix).append("destroyed=")
                     .append(String.valueOf(mDestroyed)).println();
 
@@ -1989,19 +2085,36 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             }
         }
 
-        public void dump(PrintWriter pw, String prefix) {
-            synchronized (mLock) {
-                String tab = "  ";
-                final int bucketCount = mPrintJobsForRunningApp.size();
-                for (int i = 0; i < bucketCount; i++) {
-                    final int appId = mPrintJobsForRunningApp.keyAt(i);
-                    pw.append(prefix).append("appId=" + appId).append(':').println();
-                    List<PrintJobInfo> bucket = mPrintJobsForRunningApp.valueAt(i);
-                    final int printJobCount = bucket.size();
-                    for (int j = 0; j < printJobCount; j++) {
-                        PrintJobInfo printJob = bucket.get(j);
-                        pw.append(prefix).append(tab).append(printJob.toString()).println();
-                    }
+        public void dumpLocked(PrintWriter pw, String prefix) {
+            String tab = "  ";
+            final int bucketCount = mPrintJobsForRunningApp.size();
+            for (int i = 0; i < bucketCount; i++) {
+                final int appId = mPrintJobsForRunningApp.keyAt(i);
+                pw.append(prefix).append("appId=" + appId).append(':').println();
+                List<PrintJobInfo> bucket = mPrintJobsForRunningApp.valueAt(i);
+                final int printJobCount = bucket.size();
+                for (int j = 0; j < printJobCount; j++) {
+                    PrintJobInfo printJob = bucket.get(j);
+                    pw.append(prefix).append(tab).append(printJob.toString()).println();
+                }
+            }
+        }
+
+        public void dumpLocked(@NonNull ProtoOutputStream proto) {
+            final int bucketCount = mPrintJobsForRunningApp.size();
+            for (int i = 0; i < bucketCount; i++) {
+                final int appId = mPrintJobsForRunningApp.keyAt(i);
+                List<PrintJobInfo> bucket = mPrintJobsForRunningApp.valueAt(i);
+                final int printJobCount = bucket.size();
+                for (int j = 0; j < printJobCount; j++) {
+                    long token = proto.start(PrintUserStateProto.CACHED_PRINT_JOBS);
+
+                    proto.write(CachedPrintJobProto.APP_ID, appId);
+
+                    writePrintJobInfo(mContext, proto, CachedPrintJobProto.PRINT_JOB,
+                            bucket.get(j));
+
+                    proto.end(token);
                 }
             }
         }

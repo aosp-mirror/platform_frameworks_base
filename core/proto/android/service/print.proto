@@ -1,0 +1,368 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package android.service.print;
+
+option java_multiple_files = true;
+option java_outer_classname = "PrintServiceProto";
+
+import "frameworks/base/core/proto/android/content/component_name.proto";
+
+message PrintServiceDumpProto {
+    // Each user has a separate printer state
+    repeated PrintUserStateProto userStates = 1;
+}
+
+message PrintUserStateProto {
+    // Should be 0, 10, 11, 12, etc. where 0 is the owner.
+    int32 user_id = 1;
+
+    // The installed print services
+    repeated InstalledPrintServiceProto installed_services = 2;
+
+    // The disabled print services
+    repeated android.content.ComponentNameProto disabled_services = 3;
+
+    // The active print services
+    repeated ActivePrintServiceProto active_services = 4;
+
+    // The cached print jobs
+    repeated CachedPrintJobProto cached_print_jobs = 5;
+
+    // The printer discovery sessions
+    repeated PrinterDiscoverySessionProto discovery_sessions = 6;
+
+    // The print spooler state
+    PrintSpoolerStateProto print_spooler_state = 7;
+}
+
+message PrintSpoolerStateProto {
+    // Is the print spooler destroyed?
+    bool is_destroyed = 1;
+
+    // Is the print spooler bound?
+    bool is_bound = 2;
+
+    // State internal to the print spooler
+    PrintSpoolerInternalStateProto internal_state = 3;
+}
+
+message PrintSpoolerInternalStateProto {
+    // Print jobs
+    repeated PrintJobInfoProto print_jobs = 1;
+
+    // Files used by these print jobs
+    repeated string print_job_files = 2;
+
+    // Approved print services
+    repeated android.content.ComponentNameProto approved_services = 3;
+}
+
+message PrinterCapabilitiesProto {
+    // Minimum margins of the printer
+    MarginsProto min_margins = 1;
+
+    // List of supported media sizes
+    repeated MediaSizeProto media_sizes = 2;
+
+    // List of supported resolutions
+    repeated ResolutionProto resolutions = 3;
+
+    // List of supported color modes
+    repeated PrintAttributesProto.ColorMode color_modes = 4;
+
+    // List of supported duplex modes
+    repeated PrintAttributesProto.DuplexMode duplex_modes = 5;
+}
+
+message PrinterInfoProto {
+    // The id of the printer
+    PrinterIdProto id = 1;
+
+    // The name of the printer
+    string name = 2;
+
+    enum Status {
+        // unused
+        __STATUS_UNUSED = 0;
+
+        // Printer is idle
+        STATUS_IDLE = 1;
+
+        // Printer is busy
+        STATUS_BUSY = 2;
+
+        // Printer is unavailable
+        STATUS_UNAVAILABLE = 3;
+    }
+    // The status of the printer
+    Status status = 3;
+
+    // The description of the printer
+    string description = 4;
+
+    // The capabilities of the printer
+    PrinterCapabilitiesProto capabilities = 5;
+}
+
+message PrinterDiscoverySessionProto {
+    // Is this session destroyed?
+    bool is_destroyed = 1;
+
+    // Is printer discovery in progress?
+    bool is_printer_discovery_in_progress = 2;
+
+    // List of printer discovery observers
+    repeated string printer_discovery_observers = 3;
+
+    // List of discovery request
+    repeated string discovery_requests = 4;
+
+    // List of ids of printers that are have tracking requests
+    repeated PrinterIdProto tracked_printer_requests = 5;
+
+    // List of printers found
+    repeated PrinterInfoProto printer = 6;
+}
+
+message InstalledPrintServiceProto {
+    // Component name of the service
+    android.content.ComponentNameProto component_name = 1;
+
+    // Settings activity for this service
+    string settings_activity = 2;
+
+    // Add printers activity for this service
+    string add_printers_activity = 3;
+
+    // Advances options activity for this service
+    string advanced_options_activity = 4;
+}
+
+message PrinterIdProto {
+    // Component name of the service that reported the printer
+    android.content.ComponentNameProto service_name = 1;
+
+    // Local id of the printer
+    string local_id = 2;
+}
+
+message ActivePrintServiceProto {
+    // Component name of the service
+    android.content.ComponentNameProto component_name = 1;
+
+    // Is the active service destroyed
+    bool is_destroyed = 2;
+
+    // Is the active service bound
+    bool is_bound = 3;
+
+    // Has the active service a discovery session
+    bool has_discovery_session = 4;
+
+    // Has the active service a active print jobs
+    bool has_active_print_jobs = 5;
+
+    // Is the active service discovering printers
+    bool is_discovering_printers = 6;
+
+    // The tracked printers of this active service
+    repeated PrinterIdProto tracked_printers = 7;
+}
+
+message MediaSizeProto {
+    // Id of this media size
+    string id = 1;
+
+    // Label of this media size
+    string label = 2;
+
+    // Height of the media
+    int32 height_mils = 3;
+
+    // Width of the media
+    int32 width_mils = 4;
+}
+
+message ResolutionProto {
+    // Id of this resolution
+    string id = 1;
+
+    // Label for this resoltion
+    string label = 2;
+
+    // Resolution in horizontal orientation
+    int32 horizontal_dpi = 3;
+
+    // Resolution in vertical orientation
+    int32 vertical_dpi = 4;
+}
+
+message MarginsProto {
+    // Space at the top
+    int32 top_mils = 1;
+
+    // Space at the left
+    int32 left_mils = 2;
+
+    // Space at the right
+    int32 right_mils = 3;
+
+    // Space at the bottom
+    int32 bottom_mils = 4;
+}
+
+message PrintAttributesProto {
+    // Media to use
+    ResolutionProto media_size = 1;
+
+    // Is the media in portrait mode?
+    bool is_portrait = 2;
+
+    // Resolution to use
+    ResolutionProto resolution = 3;
+
+    // Margins around the document
+    MarginsProto min_margins = 4;
+
+    enum ColorMode {
+        // unused
+        __COLOR_MODE_UNUSED = 0;
+
+        // Use black, white, gray
+        COLOR_MODE_MONOCHROME = 1;
+
+        // Use full color is available
+        COLOR_MODE_COLOR = 2;
+    }
+    // Color mode to use
+    ColorMode color_mode = 5;
+
+    enum DuplexMode {
+        // unused
+        __DUPLEX_MODE_UNUSED = 0;
+
+        // No duplex
+        DUPLEX_MODE_NONE = 1;
+
+        // Duplex where the long edge attached
+        DUPLEX_MODE_LONG_EDGE = 2;
+
+        // Duplex where the short edge attach
+        DUPLEX_MODE_SHORT_EDGE = 4;
+    }
+    // Duplex mode to use
+    DuplexMode duplex_mode = 6;
+}
+
+message PrintDocumentInfoProto {
+    // Name of the document to print
+    string name = 1;
+
+    // Number of pages in the doc
+    int32 page_count = 2;
+
+    // Type of content (see PrintDocumentInfo.ContentType)
+    int32 content_type = 3;
+
+    // The size of the the document
+    int64 data_size = 4;
+}
+
+message PageRangeProto {
+    // Start of the range
+    int32 start = 1;
+
+    // End of the range (included)
+    int32 end = 2;
+}
+
+message PrintJobInfoProto {
+    // Label of the job
+    string label = 1;
+
+    // Id of the job
+    string print_job_id = 2;
+
+    enum State {
+        // Unknown state
+        STATE_UNKNOWN = 0;
+
+        // The print job is being created but not yet ready to be printed
+        STATE_CREATED = 1;
+
+        // The print jobs is created, it is ready to be printed and should be processed
+        STATE_QUEUED = 2;
+
+        // The print job is being printed
+        STATE_STARTED = 3;
+
+        // The print job is blocked
+        STATE_BLOCKED = 4;
+
+        // The print job is successfully printed
+        STATE_COMPLETED = 5;
+
+        // The print job was printing but printing failed
+        STATE_FAILED = 6;
+
+        // The print job is canceled
+        STATE_CANCELED = 7;
+    }
+
+    // State of the job
+    State state = 3;
+
+    // Printer handling the job
+    PrinterIdProto printer = 4;
+
+    // Tag assigned to the job
+    string tag = 5;
+
+    // Time the job was created
+    int64 creation_time = 6;
+
+    // Attributes of the job
+    PrintAttributesProto attributes = 7;
+
+    // Document info of the job
+    PrintDocumentInfoProto document_info = 8;
+
+    // If the job current getting canceled
+    bool is_canceling = 9;
+
+    // The selected ranges of the job
+    repeated PageRangeProto pages = 10;
+
+    // Does the job have any advanced options
+    bool has_advanced_options = 11;
+
+    // Progress of the job
+    float progress = 12;
+
+    // The current service set state
+    string status = 13;
+}
+
+message CachedPrintJobProto {
+    // The id of the app the job belongs to
+    int32 app_id = 1;
+
+    // The print job
+    PrintJobInfoProto print_job = 2;
+}

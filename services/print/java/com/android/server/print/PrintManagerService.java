@@ -50,8 +50,10 @@ import android.printservice.PrintServiceInfo;
 import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.printservice.recommendation.RecommendationInfo;
 import android.provider.Settings;
+import android.service.print.PrintServiceDumpProto;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
@@ -638,22 +640,66 @@ public final class PrintManagerService extends SystemService {
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             fd = Preconditions.checkNotNull(fd);
-            pw = Preconditions.checkNotNull(pw);
 
             if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
+
+            int opti = 0;
+            boolean dumpAsProto = false;
+            int user = UserHandle.USER_ALL;
+            while (opti < args.length) {
+                String opt = args[opti];
+                if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                    break;
+                }
+                opti++;
+                if ("--proto".equals(opt)) {
+                    dumpAsProto = true;
+                } else {
+                    pw.println("Unknown argument: " + opt + "; use -h for help");
+                }
+            }
 
             synchronized (mLock) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    pw.println("PRINT MANAGER STATE (dumpsys print)");
-                    final int userStateCount = mUserStates.size();
-                    for (int i = 0; i < userStateCount; i++) {
-                        UserState userState = mUserStates.valueAt(i);
-                        userState.dump(fd, pw, "");
-                        pw.println();
+                    if (dumpAsProto) {
+                        dumpLocked(new ProtoOutputStream(fd), UserHandle.of(user));
+                    } else {
+                        dumpLocked(fd, pw, UserHandle.of(user));
                     }
                 } finally {
                     Binder.restoreCallingIdentity(identity);
+                }
+            }
+        }
+
+        private void dumpLocked(@NonNull ProtoOutputStream proto, @NonNull UserHandle user) {
+            final int userStateCount = mUserStates.size();
+            for (int i = 0; i < userStateCount; i++) {
+                UserState userState = mUserStates.valueAt(i);
+
+                if (user.equals(UserHandle.ALL) || mUserStates.keyAt(i) == user.getIdentifier()) {
+                    long token = proto.start(PrintServiceDumpProto.USER_STATES);
+                    userState.dump(proto);
+                    proto.end(token);
+                }
+            }
+
+            proto.flush();
+        }
+
+        private void dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
+                @NonNull UserHandle user) {
+            pw = Preconditions.checkNotNull(pw);
+
+            pw.println("PRINT MANAGER STATE (dumpsys print)");
+            final int userStateCount = mUserStates.size();
+            for (int i = 0; i < userStateCount; i++) {
+                UserState userState = mUserStates.valueAt(i);
+
+                if (user.equals(UserHandle.ALL) || mUserStates.keyAt(i) == user.getIdentifier()) {
+                    userState.dump(fd, pw, "");
+                    pw.println();
                 }
             }
         }

@@ -40,8 +40,10 @@ import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
 import android.printservice.PrintService;
+import android.service.print.PrintSpoolerStateProto;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.TransferPipe;
@@ -363,7 +365,7 @@ final class RemotePrintSpooler {
      *
      * @param printerId the id of the printer the icon belongs to
      * @param icon the icon that was loaded
-     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon
      */
     public final void onCustomPrinterIconLoaded(@NonNull PrinterId printerId,
             @Nullable Icon icon) {
@@ -396,7 +398,7 @@ final class RemotePrintSpooler {
      * @param printerId the id of the printer the icon should be loaded for
      * @return the custom icon to be used for the printer or null if the icon is
      *         not yet available
-     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon
      */
     public final @Nullable Icon getCustomPrinterIcon(@NonNull PrinterId printerId) {
         throwIfCalledOnMainThread();
@@ -553,6 +555,20 @@ final class RemotePrintSpooler {
             unbindLocked();
             mDestroyed = true;
             mCanUnbind = false;
+        }
+    }
+
+    public void dump(@NonNull ProtoOutputStream proto) {
+        synchronized (mLock) {
+            proto.write(PrintSpoolerStateProto.IS_DESTROYED, mDestroyed);
+            proto.write(PrintSpoolerStateProto.IS_BOUND, mRemoteInstance != null);
+        }
+
+        try {
+            proto.write(PrintSpoolerStateProto.INTERNAL_STATE,
+                    TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), "--proto"));
+        } catch (IOException | TimeoutException | RemoteException | InterruptedException e) {
+            Slog.e(LOG_TAG, "Failed to dump remote instance", e);
         }
     }
 
