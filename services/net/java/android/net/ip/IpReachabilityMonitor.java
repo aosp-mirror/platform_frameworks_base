@@ -205,44 +205,14 @@ public class IpReachabilityMonitor {
         final byte[] msg = RtNetlinkNeighborMessage.newNewNeighborMessage(
                 1, ip, StructNdMsg.NUD_PROBE, ifIndex, null);
 
-        int errno = -OsConstants.EPROTO;
-        try (NetlinkSocket nlSocket = new NetlinkSocket(OsConstants.NETLINK_ROUTE)) {
-            final long IO_TIMEOUT = 300L;
-            nlSocket.connectToKernel();
-            nlSocket.sendMessage(msg, 0, msg.length, IO_TIMEOUT);
-            final ByteBuffer bytes = nlSocket.recvMessage(IO_TIMEOUT);
-            // recvMessage() guaranteed to not return null if it did not throw.
-            final NetlinkMessage response = NetlinkMessage.parse(bytes);
-            if (response != null && response instanceof NetlinkErrorMessage &&
-                    (((NetlinkErrorMessage) response).getNlMsgError() != null)) {
-                errno = ((NetlinkErrorMessage) response).getNlMsgError().error;
-                if (errno != 0) {
-                    // TODO: consider ignoring EINVAL (-22), which appears to be
-                    // normal when probing a neighbor for which the kernel does
-                    // not already have / no longer has a link layer address.
-                    Log.e(TAG, "Error " + msgSnippet + ", errmsg=" + response.toString());
-                }
-            } else {
-                String errmsg;
-                if (response == null) {
-                    bytes.position(0);
-                    errmsg = "raw bytes: " + NetlinkConstants.hexify(bytes);
-                } else {
-                    errmsg = response.toString();
-                }
-                Log.e(TAG, "Error " + msgSnippet + ", errmsg=" + errmsg);
-            }
+        try {
+            NetlinkSocket.sendOneShotKernelMessage(OsConstants.NETLINK_ROUTE, msg);
         } catch (ErrnoException e) {
-            Log.e(TAG, "Error " + msgSnippet, e);
-            errno = -e.errno;
-        } catch (InterruptedIOException e) {
-            Log.e(TAG, "Error " + msgSnippet, e);
-            errno = -OsConstants.ETIMEDOUT;
-        } catch (SocketException e) {
-            Log.e(TAG, "Error " + msgSnippet, e);
-            errno = -OsConstants.EIO;
+            Log.e(TAG, "Error " + msgSnippet + ": " + e);
+            return -e.errno;
         }
-        return errno;
+
+        return 0;
     }
 
     public IpReachabilityMonitor(Context context, String ifName, SharedLog log, Callback callback) {
