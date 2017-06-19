@@ -227,7 +227,11 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public boolean hasControl() {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            // don't rely on mIsClosed, as tuner might get closed internally
+            return !mTuner.isClosed();
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 }
