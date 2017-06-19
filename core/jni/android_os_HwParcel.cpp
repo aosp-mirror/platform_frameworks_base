@@ -169,7 +169,6 @@ JHwParcel::JHwParcel(JNIEnv *env, jobject thiz)
     jclass clazz = env->GetObjectClass(thiz);
     CHECK(clazz != NULL);
 
-    mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
 }
 
@@ -182,9 +181,6 @@ JHwParcel::~JHwParcel() {
 
     env->DeleteWeakGlobalRef(mObject);
     mObject = NULL;
-
-    env->DeleteGlobalRef(mClass);
-    mClass = NULL;
 }
 
 hardware::Parcel *JHwParcel::getParcel() {
@@ -542,7 +538,7 @@ static void JHwParcel_native_writeStrongBinder(
                 env, FindClassOrDie(env, PACKAGE_PATH "/HwRemoteBinder"));
 
         if (env->IsInstanceOf(binderObj, hwBinderKlass.get())) {
-            binder = JHwBinder::GetNativeContext(env, binderObj);
+            binder = JHwBinder::GetNativeBinder(env, binderObj);
         } else if (env->IsInstanceOf(binderObj, hwRemoteBinderKlass.get())) {
             binder = JHwRemoteBinder::GetNativeContext(
                     env, binderObj)->getBinder();
