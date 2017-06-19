@@ -263,6 +263,8 @@ public final class PrintManagerService extends SystemService {
             Preconditions.checkFlagsArgument(selectionFlags,
                     PrintManager.DISABLED_SERVICES | PrintManager.ENABLED_SERVICES);
 
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_PRINT_SERVICES, null);
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
             final UserState userState;
             synchronized (mLock) {
@@ -316,6 +318,8 @@ public final class PrintManagerService extends SystemService {
 
         @Override
         public List<RecommendationInfo> getPrintServiceRecommendations(int userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_PRINT_SERVICE_RECOMMENDATIONS, null);
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
             final UserState userState;
             synchronized (mLock) {
@@ -538,6 +542,8 @@ public final class PrintManagerService extends SystemService {
                 int userId) throws RemoteException {
             listener = Preconditions.checkNotNull(listener);
 
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.READ_PRINT_SERVICES,
+                    null);
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
             final UserState userState;
             synchronized (mLock) {
@@ -560,6 +566,8 @@ public final class PrintManagerService extends SystemService {
                 int userId) {
             listener = Preconditions.checkNotNull(listener);
 
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.READ_PRINT_SERVICES,
+                    null);
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
             final UserState userState;
             synchronized (mLock) {
@@ -583,6 +591,8 @@ public final class PrintManagerService extends SystemService {
                 throws RemoteException {
             listener = Preconditions.checkNotNull(listener);
 
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_PRINT_SERVICE_RECOMMENDATIONS, null);
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
             final UserState userState;
             synchronized (mLock) {
@@ -605,6 +615,8 @@ public final class PrintManagerService extends SystemService {
                 IRecommendationsChangeListener listener, int userId) {
             listener = Preconditions.checkNotNull(listener);
 
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_PRINT_SERVICE_RECOMMENDATIONS, null);
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
             final UserState userState;
             synchronized (mLock) {
@@ -888,12 +900,12 @@ public final class PrintManagerService extends SystemService {
 
         private int resolveCallingAppEnforcingPermissions(int appId) {
             final int callingUid = Binder.getCallingUid();
-            if (callingUid == 0 || callingUid == Process.SYSTEM_UID
-                    || callingUid == Process.SHELL_UID) {
+            if (callingUid == 0) {
                 return appId;
             }
             final int callingAppId = UserHandle.getAppId(callingUid);
-            if (appId == callingAppId) {
+            if (appId == callingAppId || callingAppId == Process.SHELL_UID
+                    || callingAppId == Process.SYSTEM_UID) {
                 return appId;
             }
             if (mContext.checkCallingPermission(

@@ -2534,6 +2534,23 @@
     <permission android:name="android.permission.BIND_PRINT_RECOMMENDATION_SERVICE"
             android:protectionLevel="signature" />
 
+    <!-- Allows applications to get the installed and enabled print services.
+         @hide
+         @SystemApi
+         @TestApi
+         <p>Protection level: signature|preinstalled
+    -->
+    <permission android:name="android.permission.READ_PRINT_SERVICES"
+        android:protectionLevel="signature|preinstalled" />
+
+    <!-- Allows applications to get the currently recommended print services for printers.
+         @hide
+         @SystemApi
+         <p>Protection level: signature|preinstalled
+    -->
+    <permission android:name="android.permission.READ_PRINT_SERVICE_RECOMMENDATIONS"
+        android:protectionLevel="signature|preinstalled" />
+
     <!-- Must be required by a {@link android.nfc.cardemulation.HostApduService}
          or {@link android.nfc.cardemulation.OffHostApduService} to ensure that only
          the system can bind to it.

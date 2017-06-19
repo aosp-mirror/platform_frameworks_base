@@ -18,9 +18,9 @@ package android.print;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.ComponentName;
@@ -142,7 +142,6 @@ public final class PrintManager {
      * @see #getPrintServices
      * @hide
      */
-    @TestApi
     public static final int ALL_SERVICES = ENABLED_SERVICES | DISABLED_SERVICES;
 
     /**
@@ -554,6 +553,7 @@ public final class PrintManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRINT_SERVICES)
     public void addPrintServicesChangeListener(@NonNull PrintServicesChangeListener listener,
             @Nullable Handler handler) {
         Preconditions.checkNotNull(listener);
@@ -589,6 +589,7 @@ public final class PrintManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRINT_SERVICES)
     public void removePrintServicesChangeListener(@NonNull PrintServicesChangeListener listener) {
         Preconditions.checkNotNull(listener);
 
@@ -629,8 +630,8 @@ public final class PrintManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRINT_SERVICES)
     public @NonNull List<PrintServiceInfo> getPrintServices(int selectionFlags) {
         Preconditions.checkFlagsArgument(selectionFlags, ALL_SERVICES);
 
@@ -656,6 +657,7 @@ public final class PrintManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRINT_SERVICE_RECOMMENDATIONS)
     public void addPrintServiceRecommendationsChangeListener(
             @NonNull PrintServiceRecommendationsChangeListener listener,
             @Nullable Handler handler) {
@@ -692,6 +694,7 @@ public final class PrintManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRINT_SERVICE_RECOMMENDATIONS)
     public void removePrintServiceRecommendationsChangeListener(
             @NonNull PrintServiceRecommendationsChangeListener listener) {
         Preconditions.checkNotNull(listener);
@@ -731,6 +734,7 @@ public final class PrintManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRINT_SERVICE_RECOMMENDATIONS)
     public @NonNull List<RecommendationInfo> getPrintServiceRecommendations() {
         try {
             List<RecommendationInfo> recommendations =
