@@ -16,17 +16,9 @@
 
 package android.app;
 
-import android.graphics.Rect;
-import android.view.ViewRootImpl.ActivityConfigCallback;
-import android.view.autofill.AutofillManager;
-import android.view.autofill.AutofillPopupWindow;
-import android.view.autofill.IAutofillWindowPresenter;
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.app.ToolbarActionBar;
-import com.android.internal.app.WindowDecorActionBar;
-import com.android.internal.policy.DecorView;
-import com.android.internal.policy.PhoneWindow;
+import static android.os.Build.VERSION_CODES.O;
+
+import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
@@ -62,6 +54,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.session.MediaController;
@@ -114,14 +107,25 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewManager;
 import android.view.ViewRootImpl;
+import android.view.ViewRootImpl.ActivityConfigCallback;
 import android.view.Window;
 import android.view.Window.WindowControllerCallback;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillPopupWindow;
+import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.app.ToolbarActionBar;
+import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.policy.DecorView;
+import com.android.internal.policy.PhoneWindow;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -130,9 +134,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static android.os.Build.VERSION_CODES.O;
-import static java.lang.Character.MIN_VALUE;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -999,7 +1000,8 @@ public class Activity extends ContextThemeWrapper
         }
         if (savedInstanceState != null) {
             mAutoFillResetNeeded = savedInstanceState.getBoolean(AUTOFILL_RESET_NEEDED, false);
-            mLastAutofillId = savedInstanceState.getInt(LAST_AUTOFILL_ID, View.NO_ID);
+            mLastAutofillId = savedInstanceState.getInt(LAST_AUTOFILL_ID,
+                    View.LAST_APP_AUTOFILL_ID);
 
             if (mAutoFillResetNeeded) {
                 getAutofillManager().onCreate(savedInstanceState);
