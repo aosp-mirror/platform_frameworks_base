@@ -133,8 +133,7 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
         return CopyResult::DestinationInvalid;
     }
 
-    // TODO: Add support for RGBA_F16 destinations
-    if (bitmap->colorType() == kRGBA_F16_SkColorType) {
+    if (bitmap->colorType() == kRGBA_F16_SkColorType && !caches.extensions().hasFloatTextures()) {
         ALOGW("Can't copy surface into bitmap, RGBA_F16 config is not supported");
         return CopyResult::DestinationInvalid;
     }
@@ -148,24 +147,34 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
     GLuint texture;
 
     GLenum format;
+    GLenum internalFormat;
     GLenum type;
 
     switch (bitmap->colorType()) {
         case kAlpha_8_SkColorType:
             format = GL_ALPHA;
+            internalFormat = GL_ALPHA;
             type = GL_UNSIGNED_BYTE;
             break;
         case kRGB_565_SkColorType:
             format = GL_RGB;
+            internalFormat = GL_RGB;
             type = GL_UNSIGNED_SHORT_5_6_5;
             break;
         case kARGB_4444_SkColorType:
             format = GL_RGBA;
+            internalFormat = GL_RGBA;
             type = GL_UNSIGNED_SHORT_4_4_4_4;
+            break;
+        case kRGBA_F16_SkColorType:
+            format = GL_RGBA;
+            internalFormat = GL_RGBA16F;
+            type = GL_HALF_FLOAT;
             break;
         case kN32_SkColorType:
         default:
             format = GL_RGBA;
+            internalFormat = GL_RGBA;
             type = GL_UNSIGNED_BYTE;
             break;
     }
@@ -184,7 +193,7 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, destWidth, destHeight,
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, destWidth, destHeight,
             0, format, type, nullptr);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
             GL_TEXTURE_2D, texture, 0);
@@ -220,6 +229,7 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
         ortho.loadOrtho(destWidth, destHeight);
         renderState.render(glop, ortho);
 
+        // TODO: We should convert to linear space when the target is RGBA16F
         glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
                 type, bitmap->getPixels());
     }
