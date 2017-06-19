@@ -96,6 +96,9 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
         CaptureRequest.Builder singleTargetRequestBuilder = new CaptureRequest.Builder(
                 requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
 
+        // Carry over userTag, as native metadata doesn't have this field.
+        singleTargetRequestBuilder.setTag(request.getTag());
+
         // Overwrite the capture intent to make sure a good value is set.
         Iterator<Surface> iterator = outputSurfaces.iterator();
         Surface firstSurface = iterator.next();
@@ -118,6 +121,7 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
             requestMetadata = new CameraMetadataNative(request.getNativeCopy());
             doubleTargetRequestBuilder = new CaptureRequest.Builder(
                     requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
+            doubleTargetRequestBuilder.setTag(request.getTag());
             doubleTargetRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
                     CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
             doubleTargetRequestBuilder.addTarget(firstSurface);
