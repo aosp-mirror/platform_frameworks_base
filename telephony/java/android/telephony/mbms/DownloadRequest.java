@@ -35,9 +35,8 @@ public class DownloadRequest implements Parcelable {
         private FileServiceInfo serviceInfo;
         private Uri source;
         private Uri dest;
-        private int sub;
+        private int subscriptionId;
         private String appIntent;
-        private String appName;  // not the Android app Name, the embms app Name
 
         public Builder setId(int id) {
             this.id = id;
@@ -59,8 +58,8 @@ public class DownloadRequest implements Parcelable {
             return this;
         }
 
-        public Builder setSub(int sub) {
-            this.sub = sub;
+        public Builder setSubscriptionId(int sub) {
+            this.subscriptionId = sub;
             return this;
         }
 
@@ -70,7 +69,8 @@ public class DownloadRequest implements Parcelable {
         }
 
         public DownloadRequest build() {
-            return new DownloadRequest(id, serviceInfo, source, dest, sub, appIntent, appName);
+            return new DownloadRequest(id, serviceInfo, source, dest,
+                    subscriptionId, appIntent, null);
         }
     }
 
@@ -78,7 +78,7 @@ public class DownloadRequest implements Parcelable {
     private final FileServiceInfo fileServiceInfo;
     private final Uri sourceUri;
     private final Uri destinationUri;
-    private final int subId;
+    private final int subscriptionId;
     private final String serializedResultIntentForApp;
     private String appName; // not the Android app Name, the embms app name
 
@@ -89,7 +89,7 @@ public class DownloadRequest implements Parcelable {
         fileServiceInfo = serviceInfo;
         sourceUri = source;
         destinationUri = dest;
-        subId = sub;
+        subscriptionId = sub;
         serializedResultIntentForApp = appIntent;
         appName = name;
     }
@@ -103,7 +103,7 @@ public class DownloadRequest implements Parcelable {
         fileServiceInfo = dr.fileServiceInfo;
         sourceUri = dr.sourceUri;
         destinationUri = dr.destinationUri;
-        subId = dr.subId;
+        subscriptionId = dr.subscriptionId;
         serializedResultIntentForApp = dr.serializedResultIntentForApp;
         appName = dr.appName;
     }
@@ -113,7 +113,7 @@ public class DownloadRequest implements Parcelable {
         fileServiceInfo = in.readParcelable(getClass().getClassLoader());
         sourceUri = in.readParcelable(getClass().getClassLoader());
         destinationUri = in.readParcelable(getClass().getClassLoader());
-        subId = in.readInt();
+        subscriptionId = in.readInt();
         serializedResultIntentForApp = in.readString();
         appName = in.readString();
     }
@@ -127,7 +127,7 @@ public class DownloadRequest implements Parcelable {
         out.writeParcelable(fileServiceInfo, flags);
         out.writeParcelable(sourceUri, flags);
         out.writeParcelable(destinationUri, flags);
-        out.writeInt(subId);
+        out.writeInt(subscriptionId);
         out.writeString(serializedResultIntentForApp);
         out.writeString(appName);
     }
@@ -148,8 +148,8 @@ public class DownloadRequest implements Parcelable {
         return destinationUri;
     }
 
-    public int getSubId() {
-        return subId;
+    public int getSubscriptionId() {
+        return subscriptionId;
     }
 
     public Intent getIntentForApp() {

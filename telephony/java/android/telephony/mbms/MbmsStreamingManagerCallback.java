@@ -61,4 +61,17 @@ public class MbmsStreamingManagerCallback extends IMbmsStreamingManagerCallback.
     public void activeStreamingServicesUpdated(List<StreamingServiceInfo> services) {
         // default implementation empty
     }
+
+    /**
+     * Called to indicate that the middleware has been initialized and is ready.
+     *
+     * Before this method is called, calling any method on an instance of
+     * {@link android.telephony.MbmsStreamingManager} will result in an {@link MbmsException}
+     * being thrown with error code {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
+     * or {@link MbmsException#ERROR_MIDDLEWARE_NOT_YET_READY}
+     */
+    @Override
+    public void middlewareReady() {
+        // default implementation empty
+    }
 }

@@ -32,13 +32,19 @@ import java.util.List;
  */
 public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     @Override
-    public void initialize(String appName, int subId, IMbmsDownloadManagerCallback listener)
-            throws RemoteException {
+    public void initialize(String appName, int subscriptionId,
+            IMbmsDownloadManagerCallback listener) throws RemoteException {
     }
 
     @Override
-    public int getFileServices(String appName, int subId, List<String> serviceClasses) throws
-            RemoteException {
+    public int getFileServices(String appName, int subscriptionId, List<String> serviceClasses)
+            throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public int setTempFileRootDirectory(String appName, int subscriptionId,
+            String rootDirectoryPath) throws RemoteException {
         return 0;
     }
 
