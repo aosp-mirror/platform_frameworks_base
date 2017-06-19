@@ -58,6 +58,29 @@ static struct fields_t {
     jmethodID onTransactID;
 } gFields;
 
+struct JHwBinderHolder : public RefBase {
+    JHwBinderHolder() {}
+
+    sp<JHwBinder> get(JNIEnv *env, jobject obj) {
+        Mutex::Autolock autoLock(mLock);
+
+        sp<JHwBinder> binder = mBinder.promote();
+
+        if (binder == NULL) {
+            binder = new JHwBinder(env, obj);
+            mBinder = binder;
+        }
+
+        return binder;
+    }
+
+private:
+    Mutex mLock;
+    wp<JHwBinder> mBinder;
+
+    DISALLOW_COPY_AND_ASSIGN(JHwBinderHolder);
+};
+
 // static
 void JHwBinder::InitClass(JNIEnv *env) {
     ScopedLocalRef<jclass> clazz(
@@ -75,10 +98,10 @@ void JHwBinder::InitClass(JNIEnv *env) {
 }
 
 // static
-sp<JHwBinder> JHwBinder::SetNativeContext(
-        JNIEnv *env, jobject thiz, const sp<JHwBinder> &context) {
-    sp<JHwBinder> old =
-        (JHwBinder *)env->GetLongField(thiz, gFields.contextID);
+sp<JHwBinderHolder> JHwBinder::SetNativeContext(
+        JNIEnv *env, jobject thiz, const sp<JHwBinderHolder> &context) {
+    sp<JHwBinderHolder> old =
+        (JHwBinderHolder *)env->GetLongField(thiz, gFields.contextID);
 
     if (context != NULL) {
         context->incStrong(NULL /* id */);
@@ -94,27 +117,27 @@ sp<JHwBinder> JHwBinder::SetNativeContext(
 }
 
 // static
-sp<JHwBinder> JHwBinder::GetNativeContext(
+sp<JHwBinder> JHwBinder::GetNativeBinder(
         JNIEnv *env, jobject thiz) {
-    return (JHwBinder *)env->GetLongField(thiz, gFields.contextID);
+    JHwBinderHolder *holder =
+        reinterpret_cast<JHwBinderHolder *>(
+                env->GetLongField(thiz, gFields.contextID));
+
+    return holder->get(env, thiz);
 }
 
 JHwBinder::JHwBinder(JNIEnv *env, jobject thiz) {
     jclass clazz = env->GetObjectClass(thiz);
     CHECK(clazz != NULL);
 
-    mClass = (jclass)env->NewGlobalRef(clazz);
-    mObject = env->NewWeakGlobalRef(thiz);
+    mObject = env->NewGlobalRef(thiz);
 }
 
 JHwBinder::~JHwBinder() {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
-    env->DeleteWeakGlobalRef(mObject);
+    env->DeleteGlobalRef(mObject);
     mObject = NULL;
-
-    env->DeleteGlobalRef(mClass);
-    mClass = NULL;
 }
 
 status_t JHwBinder::onTransact(
@@ -203,10 +226,10 @@ status_t JHwBinder::onTransact(
 using namespace android;
 
 static void releaseNativeContext(void *nativeContext) {
-    sp<JHwBinder> binder = (JHwBinder *)nativeContext;
+    sp<JHwBinderHolder> context = static_cast<JHwBinderHolder *>(nativeContext);
 
-    if (binder != NULL) {
-        binder->decStrong(NULL /* id */);
+    if (context != NULL) {
+        context->decStrong(NULL /* id */);
     }
 }
 
@@ -217,8 +240,7 @@ static jlong JHwBinder_native_init(JNIEnv *env) {
 }
 
 static void JHwBinder_native_setup(JNIEnv *env, jobject thiz) {
-    sp<JHwBinder> context = new JHwBinder(env, thiz);
-
+    sp<JHwBinderHolder> context = new JHwBinderHolder;
     JHwBinder::SetNativeContext(env, thiz, context);
 }
 
@@ -246,7 +268,7 @@ static void JHwBinder_native_registerService(
         return;  // XXX exception already pending?
     }
 
-    sp<hardware::IBinder> binder = JHwBinder::GetNativeContext(env, thiz);
+    sp<hardware::IBinder> binder = JHwBinder::GetNativeBinder(env, thiz);
 
     /* TODO(b/33440494) this is not right */
     sp<hidl::base::V1_0::IBase> base = new hidl::base::V1_0::BpHwBase(binder);

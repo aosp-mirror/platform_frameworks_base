@@ -272,7 +272,6 @@ JHwRemoteBinder::JHwRemoteBinder(
     jclass clazz = env->GetObjectClass(thiz);
     CHECK(clazz != NULL);
 
-    mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
 }
 
@@ -281,9 +280,6 @@ JHwRemoteBinder::~JHwRemoteBinder() {
 
     env->DeleteWeakGlobalRef(mObject);
     mObject = NULL;
-
-    env->DeleteGlobalRef(mClass);
-    mClass = NULL;
 }
 
 sp<hardware::IBinder> JHwRemoteBinder::getBinder() const {

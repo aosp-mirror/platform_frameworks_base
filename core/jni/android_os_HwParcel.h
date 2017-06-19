@@ -53,7 +53,6 @@ protected:
     virtual ~JHwParcel();
 
 private:
-    jclass mClass;
     jobject mObject;
 
     hardware::Parcel *mParcel;
