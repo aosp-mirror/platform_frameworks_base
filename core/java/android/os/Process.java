@@ -767,7 +767,8 @@ public class Process {
     /**
      * Return the current priority of a thread, based on Linux priorities.
      * 
-     * @param tid The identifier of the thread/process to change.
+     * @param tid The identifier of the thread/process. If tid equals zero, the priority of the
+     * calling process/thread will be returned.
      * 
      * @return Returns the current priority, as a Linux priority level,
      * from -20 for highest scheduling priority to 19 for lowest scheduling
