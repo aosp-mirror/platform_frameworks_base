@@ -19,6 +19,7 @@ package android.telephony.mbms;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.*;
 import android.content.pm.ServiceInfo;
 import android.telephony.MbmsDownloadManager;
@@ -46,20 +47,6 @@ public class MbmsUtils {
         }
     }
 
-    public static void waitOnLatchWithTimeout(CountDownLatch l, long timeoutMs) {
-        long endTime = System.currentTimeMillis() + timeoutMs;
-        while (System.currentTimeMillis() < endTime) {
-            try {
-                l.await(timeoutMs, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                // keep waiting
-            }
-            if (l.getCount() <= 0) {
-                return;
-            }
-        }
-    }
-
     public static ComponentName toComponentName(ComponentInfo ci) {
         return new ComponentName(ci.packageName, ci.name);
     }
@@ -82,5 +69,20 @@ public class MbmsUtils {
             return null;
         }
         return downloadServices.get(0).serviceInfo;
+    }
+
+    public static void startBinding(Context context, String serviceAction,
+            ServiceConnection serviceConnection) throws MbmsException {
+        Intent bindIntent = new Intent();
+        ServiceInfo mbmsServiceInfo =
+                MbmsUtils.getMiddlewareServiceInfo(context, serviceAction);
+
+        if (mbmsServiceInfo == null) {
+            throw new MbmsException(MbmsException.ERROR_NO_SERVICE_INSTALLED);
+        }
+
+        bindIntent.setComponent(MbmsUtils.toComponentName(mbmsServiceInfo));
+
+        context.bindService(bindIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 }
