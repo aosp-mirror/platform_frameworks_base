@@ -42,31 +42,31 @@ public class AlertRateLimiterTest extends NotificationTestCase {
 
     @Test
     public void testFirstAlertAllowed() throws Exception {
-        assertFalse(mLimiter.isRateLimited(mTestStartTime));
+        assertFalse(mLimiter.shouldRateLimitAlert(mTestStartTime));
     }
 
     @Test
     public void testAllowedAfterSecond() throws Exception {
-        assertFalse(mLimiter.isRateLimited(mTestStartTime));
-        assertFalse(mLimiter.isRateLimited(mTestStartTime + ALLOWED_ALERT_INTERVAL));
+        assertFalse(mLimiter.shouldRateLimitAlert(mTestStartTime));
+        assertFalse(mLimiter.shouldRateLimitAlert(mTestStartTime + ALLOWED_ALERT_INTERVAL));
     }
 
     @Test
     public void testAllowedAfterSecondEvenWithBlockedEntries() throws Exception {
-        assertFalse(mLimiter.isRateLimited(mTestStartTime));
-        assertTrue(mLimiter.isRateLimited(mTestStartTime + ALLOWED_ALERT_INTERVAL - 1));
-        assertFalse(mLimiter.isRateLimited(mTestStartTime + ALLOWED_ALERT_INTERVAL));
+        assertFalse(mLimiter.shouldRateLimitAlert(mTestStartTime));
+        assertTrue(mLimiter.shouldRateLimitAlert(mTestStartTime + ALLOWED_ALERT_INTERVAL - 1));
+        assertFalse(mLimiter.shouldRateLimitAlert(mTestStartTime + ALLOWED_ALERT_INTERVAL));
     }
 
     @Test
     public void testAllowedDisallowedBeforeSecond() throws Exception {
-        assertFalse(mLimiter.isRateLimited(mTestStartTime));
-        assertTrue(mLimiter.isRateLimited(mTestStartTime + ALLOWED_ALERT_INTERVAL - 1));
+        assertFalse(mLimiter.shouldRateLimitAlert(mTestStartTime));
+        assertTrue(mLimiter.shouldRateLimitAlert(mTestStartTime + ALLOWED_ALERT_INTERVAL - 1));
     }
 
     @Test
     public void testDisallowedTimePast() throws Exception {
-        assertFalse(mLimiter.isRateLimited(mTestStartTime));
-        assertTrue(mLimiter.isRateLimited(mTestStartTime - ALLOWED_ALERT_INTERVAL));
+        assertFalse(mLimiter.shouldRateLimitAlert(mTestStartTime));
+        assertTrue(mLimiter.shouldRateLimitAlert(mTestStartTime - ALLOWED_ALERT_INTERVAL));
     }
 }

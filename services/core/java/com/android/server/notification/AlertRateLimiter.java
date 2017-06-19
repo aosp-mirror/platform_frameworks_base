@@ -24,7 +24,7 @@ public class AlertRateLimiter {
     static final long ALLOWED_ALERT_INTERVAL = 1000;
     private long mLastNotificationMillis = 0;
 
-    boolean isRateLimited(long now) {
+   boolean shouldRateLimitAlert(long now) {
         final long millisSinceLast = now - mLastNotificationMillis;
         if (millisSinceLast < 0 || millisSinceLast < ALLOWED_ALERT_INTERVAL) {
             return true;
