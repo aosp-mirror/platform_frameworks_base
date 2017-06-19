@@ -98,7 +98,6 @@ public class RadioService extends SystemService {
                 throw new IllegalArgumentException("Callback must not be empty");
             }
             synchronized (mLock) {
-                // TODO(b/36863239): add death monitoring for binder
                 return nativeOpenTuner(mNativeContext, moduleId, bandConfig, withAudio, callback);
             }
         }
