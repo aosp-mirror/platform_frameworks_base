@@ -407,6 +407,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if ((requestFlags & FLAG_MANUAL_REQUEST) != 0) {
                 getUiForShowing().showError(R.string.autofill_error_cannot_autofill, this);
             }
+            mService.resetLastResponse();
             // Nothing to be done, but need to notify client.
             notifyUnavailableToClient();
             removeSelf();
@@ -444,6 +445,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + id + " destroyed");
                 return;
             }
+            mService.resetLastResponse();
         }
         LogMaker log = (new LogMaker(MetricsEvent.AUTOFILL_REQUEST))
                 .setType(MetricsEvent.TYPE_FAILURE)
