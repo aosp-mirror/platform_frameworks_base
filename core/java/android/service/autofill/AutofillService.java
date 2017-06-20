@@ -25,7 +25,6 @@ import android.app.Activity;
 import android.app.Service;
 import android.app.assist.AssistStructure;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
@@ -34,9 +33,6 @@ import android.util.Log;
 import android.view.autofill.AutofillManager;
 
 import com.android.internal.os.SomeArgs;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Top-level service of the current autofill service for a given user.
@@ -191,6 +187,11 @@ public abstract class AutofillService extends Service {
      * <p>Service must call one of the {@link SaveCallback} methods (like
      * {@link SaveCallback#onSuccess()} or {@link SaveCallback#onFailure(CharSequence)})
      * to notify the result of the request.
+     *
+     * <p><b>NOTE: </b>to retrieve the actual value of the field, the service should call
+     * {@link android.app.assist.AssistStructure.ViewNode#getAutofillValue()}; if it calls
+     * {@link android.app.assist.AssistStructure.ViewNode#getText()} or other methods, there is no
+     * guarantee such method will return the most recent value of the field.
      *
      * @param request the {@link SaveRequest request} to handle.
      *        See {@link FillResponse} for examples of multiple-sections requests.
