@@ -72,6 +72,7 @@ import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.ShowIncompatibleAppOverlayEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
+import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
@@ -420,8 +421,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
         loader.loadTasks(this, loadPlan, loadOpts);
         TaskStack stack = loadPlan.getTaskStack();
-        mRecentsView.onReload(mIsVisible, stack.getTaskCount() == 0);
-        mRecentsView.updateStack(stack, true /* setStackViewTasks */);
+        mRecentsView.onReload(stack, mIsVisible);
 
         // Update the nav bar scrim, but defer the animation until the enter-window event
         boolean animateNavBarScrim = !launchState.launchedViaDockGesture;
@@ -753,6 +753,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Remove the task from activity manager
         SystemServicesProxy ssp = Recents.getSystemServices();
         ssp.removeTask(event.task.key.id);
+    }
+
+    public final void onBusEvent(TaskViewDismissedEvent event) {
+        mRecentsView.updateScrimOpacity();
     }
 
     public final void onBusEvent(AllTaskViewsDismissedEvent event) {
