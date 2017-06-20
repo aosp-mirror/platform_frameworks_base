@@ -235,32 +235,51 @@ public class TetheringTest {
         mIntents.remove(bcast);
     }
 
-    @Test
-    public void failingLocalOnlyHotspotLegacyApBroadcast() throws Exception {
+    public void failingLocalOnlyHotspotLegacyApBroadcast(
+            boolean emulateInterfaceStatusChanged) throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
 
         // Emulate externally-visible WifiManager effects, causing the
         // per-interface state machine to start up, and telling us that
         // hotspot mode is to be started.
-        mTethering.interfaceStatusChanged(mTestIfname, true);
+        if (emulateInterfaceStatusChanged) {
+            mTethering.interfaceStatusChanged(mTestIfname, true);
+        }
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED);
         mLooper.dispatchAll();
 
-        verify(mConnectivityManager, atLeastOnce()).isTetheringSupported();
-        verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
+        // If, and only if, Tethering received an interface status changed
+        // then it creates a TetherInterfaceStateMachine and sends out a
+        // broadcast indicating that the interface is "available".
+        if (emulateInterfaceStatusChanged) {
+            verify(mConnectivityManager, atLeastOnce()).isTetheringSupported();
+            verifyTetheringBroadcast(mTestIfname, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
+        }
         verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
         verifyNoMoreInteractions(mWifiManager);
     }
 
     @Test
-    public void workingLocalOnlyHotspotEnrichedApBroadcast() throws Exception {
+    public void failingLocalOnlyHotspotLegacyApBroadcastWithIfaceStatusChanged() throws Exception {
+        failingLocalOnlyHotspotLegacyApBroadcast(true);
+    }
+
+    @Test
+    public void failingLocalOnlyHotspotLegacyApBroadcastSansIfaceStatusChanged() throws Exception {
+        failingLocalOnlyHotspotLegacyApBroadcast(false);
+    }
+
+    public void workingLocalOnlyHotspotEnrichedApBroadcast(
+            boolean emulateInterfaceStatusChanged) throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
 
         // Emulate externally-visible WifiManager effects, causing the
         // per-interface state machine to start up, and telling us that
         // hotspot mode is to be started.
-        mTethering.interfaceStatusChanged(mTestIfname, true);
+        if (emulateInterfaceStatusChanged) {
+            mTethering.interfaceStatusChanged(mTestIfname, true);
+        }
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, mTestIfname, IFACE_IP_MODE_LOCAL_ONLY);
         mLooper.dispatchAll();
 
@@ -305,6 +324,17 @@ public class TetheringTest {
     }
 
     @Test
+    public void workingLocalOnlyHotspotEnrichedApBroadcastWithIfaceChanged() throws Exception {
+        workingLocalOnlyHotspotEnrichedApBroadcast(true);
+    }
+
+    @Test
+    public void workingLocalOnlyHotspotEnrichedApBroadcastSansIfaceChanged() throws Exception {
+        workingLocalOnlyHotspotEnrichedApBroadcast(false);
+    }
+
+    // TODO: Test with and without interfaceStatusChanged().
+    @Test
     public void failingWifiTetheringLegacyApBroadcast() throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
         when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
@@ -331,6 +361,7 @@ public class TetheringTest {
         verifyNoMoreInteractions(mWifiManager);
     }
 
+    // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void workingWifiTetheringEnrichedApBroadcast() throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
@@ -412,6 +443,7 @@ public class TetheringTest {
                 mTethering.getLastTetherError(mTestIfname));
     }
 
+    // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void failureEnablingIpForwarding() throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
