@@ -412,7 +412,7 @@ class AppErrors {
                                     task.mCallingPackage, task.intent,
                                     null, null, null, 0, 0,
                                     ActivityOptions.makeBasic().toBundle(),
-                                    task.userId, null, null);
+                                    task.userId, null, null, "AppErrors");
                         }
                     }
                 }
