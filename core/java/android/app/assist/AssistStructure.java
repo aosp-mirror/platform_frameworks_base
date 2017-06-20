@@ -1051,6 +1051,9 @@ public class AssistStructure implements Parcelable {
         public void updateAutofillValue(AutofillValue value) {
             mAutofillValue = value;
             if (value.isText()) {
+                if (mText == null) {
+                    mText = new ViewNodeText();
+                }
                 mText.mText = value.getTextValue();
             }
         }

@@ -2584,14 +2584,18 @@ public class Editor {
         if (offset == -1) {
             return;
         }
+
         stopTextActionModeWithPreservingSelection();
-        final boolean isOnSelection = mTextView.hasSelection()
-                && offset >= mTextView.getSelectionStart() && offset <= mTextView.getSelectionEnd();
-        if (!isOnSelection) {
-            // Right clicked position is not on the selection. Remove the selection and move the
-            // cursor to the right clicked position.
-            Selection.setSelection((Spannable) mTextView.getText(), offset);
-            stopTextActionMode();
+        if (mTextView.canSelectText()) {
+            final boolean isOnSelection = mTextView.hasSelection()
+                    && offset >= mTextView.getSelectionStart()
+                    && offset <= mTextView.getSelectionEnd();
+            if (!isOnSelection) {
+                // Right clicked position is not on the selection. Remove the selection and move the
+                // cursor to the right clicked position.
+                Selection.setSelection((Spannable) mTextView.getText(), offset);
+                stopTextActionMode();
+            }
         }
 
         if (shouldOfferToShowSuggestions()) {

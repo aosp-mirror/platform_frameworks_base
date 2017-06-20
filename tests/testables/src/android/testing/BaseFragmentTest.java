@@ -50,7 +50,7 @@ public abstract class BaseFragmentTest {
     private static final int VIEW_ID = 42;
     private final Class<? extends Fragment> mCls;
     private Handler mHandler;
-    private FrameLayout mView;
+    protected FrameLayout mView;
     protected FragmentController mFragments;
     protected Fragment mFragment;
 
@@ -61,9 +61,13 @@ public abstract class BaseFragmentTest {
         mCls = cls;
     }
 
+    protected void createRootView() {
+        mView = new FrameLayout(mContext);
+    }
+
     @Before
     public void setupFragment() throws Exception {
-        mView = new FrameLayout(mContext);
+        createRootView();
         mView.setId(VIEW_ID);
 
         assertNotNull("BaseFragmentTest must be tagged with @RunWithLooper",

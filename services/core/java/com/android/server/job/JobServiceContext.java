@@ -438,7 +438,21 @@ public final class JobServiceContext implements ServiceConnection {
             switch (message.what) {
                 case MSG_TIMEOUT:
                     synchronized (mLock) {
-                        handleOpTimeoutLocked();
+                        if (message.obj == mRunningCallback) {
+                            handleOpTimeoutLocked();
+                        } else {
+                            JobCallback jc = (JobCallback)message.obj;
+                            StringBuilder sb = new StringBuilder(128);
+                            sb.append("Ignoring timeout of no longer active job");
+                            if (jc.mStoppedReason != null) {
+                                sb.append(", stopped ");
+                                TimeUtils.formatDuration(SystemClock.elapsedRealtime()
+                                        - jc.mStoppedTime, sb);
+                                sb.append(" because: ");
+                                sb.append(jc.mStoppedReason);
+                            }
+                            Slog.w(TAG, sb.toString());
+                        }
                     }
                     break;
                 default:
@@ -621,7 +635,7 @@ public final class JobServiceContext implements ServiceConnection {
     private void handleOpTimeoutLocked() {
         switch (mVerb) {
             case VERB_BINDING:
-                Slog.e(TAG, "Time-out while trying to bind " + mRunningJob.toShortString() +
+                Slog.w(TAG, "Time-out while trying to bind " + mRunningJob.toShortString() +
                         ", dropping.");
                 closeAndCleanupJobLocked(false /* needsReschedule */, "timed out while binding");
                 break;
@@ -629,26 +643,28 @@ public final class JobServiceContext implements ServiceConnection {
                 // Client unresponsive - wedged or failed to respond in time. We don't really
                 // know what happened so let's log it and notify the JobScheduler
                 // FINISHED/NO-RETRY.
-                Slog.e(TAG, "No response from client for onStartJob '" +
-                        mRunningJob.toShortString());
+                Slog.w(TAG, "No response from client for onStartJob " +
+                        mRunningJob != null ? mRunningJob.toShortString() : "<null>");
                 closeAndCleanupJobLocked(false /* needsReschedule */, "timed out while starting");
                 break;
             case VERB_STOPPING:
                 // At least we got somewhere, so fail but ask the JobScheduler to reschedule.
-                Slog.e(TAG, "No response from client for onStopJob, '" +
-                        mRunningJob.toShortString());
+                Slog.w(TAG, "No response from client for onStopJob " +
+                        mRunningJob != null ? mRunningJob.toShortString() : "<null>");
                 closeAndCleanupJobLocked(true /* needsReschedule */, "timed out while stopping");
                 break;
             case VERB_EXECUTING:
                 // Not an error - client ran out of time.
-                Slog.i(TAG, "Client timed out while executing (no jobFinished received)." +
-                        " sending onStop. "  + mRunningJob.toShortString());
+                Slog.i(TAG, "Client timed out while executing (no jobFinished received), " +
+                        "sending onStop: "  +
+                        mRunningJob != null ? mRunningJob.toShortString() : "<null>");
                 mParams.setStopReason(JobParameters.REASON_TIMEOUT);
                 sendStopMessageLocked("timeout while executing");
                 break;
             default:
                 Slog.e(TAG, "Handling timeout for an invalid job state: " +
-                        mRunningJob.toShortString() + ", dropping.");
+                        mRunningJob != null ? mRunningJob.toShortString() : "<null>"
+                        + ", dropping.");
                 closeAndCleanupJobLocked(false /* needsReschedule */, "invalid timeout");
         }
     }
@@ -749,7 +765,7 @@ public final class JobServiceContext implements ServiceConnection {
                     mRunningJob.getServiceComponent().getShortClassName() + "' jId: " +
                     mParams.getJobId() + ", in " + (timeoutMillis / 1000) + " s");
         }
-        Message m = mCallbackHandler.obtainMessage(MSG_TIMEOUT);
+        Message m = mCallbackHandler.obtainMessage(MSG_TIMEOUT, mRunningCallback);
         mCallbackHandler.sendMessageDelayed(m, timeoutMillis);
         mTimeoutElapsed = SystemClock.elapsedRealtime() + timeoutMillis;
     }

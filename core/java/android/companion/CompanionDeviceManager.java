@@ -288,6 +288,7 @@ public final class CompanionDeviceManager {
 
         @Override
         public void onActivityDestroyed(Activity activity) {
+            if (activity != getActivity()) return;
             try {
                 mService.stopScan(mRequest, this, getCallingPackage());
             } catch (RemoteException e) {
