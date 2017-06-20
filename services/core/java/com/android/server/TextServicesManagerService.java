@@ -865,6 +865,17 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
         }
 
+        public void onServiceDisconnected() {
+            if (DBG) {
+                Slog.d(TAG, "onServiceDisconnected");
+            }
+
+            synchronized(mSpellCheckerMap) {
+                mSpellChecker = null;
+                mConnected = false;
+            }
+        }
+
         public void removeListener(ISpellCheckerSessionListener listener) {
             if (DBG) {
                 Slog.w(TAG, "remove listener: " + listener.hashCode());
@@ -1019,10 +1030,17 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             synchronized(mSpellCheckerMap) {
-                final SpellCheckerBindGroup group = mSpellCheckerBindGroups.get(mSciId);
-                if (group != null && this == group.mInternalConnection) {
-                    mSpellCheckerBindGroups.remove(mSciId);
-                }
+                onServiceDisconnectedInnerLocked(name);
+            }
+        }
+
+        private void onServiceDisconnectedInnerLocked(ComponentName name) {
+            if (DBG) {
+                Slog.w(TAG, "onServiceDisconnected: " + name);
+            }
+            final SpellCheckerBindGroup group = mSpellCheckerBindGroups.get(mSciId);
+            if (group != null && this == group.mInternalConnection) {
+                group.onServiceDisconnected();
             }
         }
     }
