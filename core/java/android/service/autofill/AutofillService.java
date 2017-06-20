@@ -23,7 +23,6 @@ import com.android.internal.os.HandlerCaller;
 import android.annotation.SdkConstant;
 import android.app.Activity;
 import android.app.Service;
-import android.app.assist.AssistStructure;
 import android.content.Intent;
 import android.os.CancellationSignal;
 import android.os.IBinder;
@@ -206,12 +205,6 @@ public abstract class AutofillService extends Service {
      * <p> At this point this service may no longer be an active {@link AutofillService}.
      */
     public void onDisconnected() {
-    }
-
-    /** @hide */
-    @Deprecated
-    public final void disableSelf() {
-        getSystemService(AutofillManager.class).disableOwnedAutofillServices();
     }
 
     /**
