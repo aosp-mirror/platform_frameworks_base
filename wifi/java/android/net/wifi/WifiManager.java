@@ -676,16 +676,28 @@ public class WifiManager {
     @SystemApi
     public static final int CHANGE_REASON_CONFIG_CHANGE = 2;
     /**
-     * An access point scan has completed, and results are available from the supplicant.
-     * Call {@link #getScanResults()} to obtain the results. {@link #EXTRA_RESULTS_UPDATED}
-     * indicates if the scan was completed successfully.
+     * An access point scan has completed, and results are available.
+     * Call {@link #getScanResults()} to obtain the results.
+     * The broadcast intent may contain an extra field with the key {@link #EXTRA_RESULTS_UPDATED}
+     * and a {@code boolean} value indicating if the scan was successful.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS";
 
     /**
-     * Lookup key for a {@code boolean} representing the result of previous {@link #startScan}
-     * operation, reported with {@link #SCAN_RESULTS_AVAILABLE_ACTION}.
+     * Lookup key for a {@code boolean} extra in intent {@link #SCAN_RESULTS_AVAILABLE_ACTION}
+     * representing if the scan was successful or not.
+     * Scans may fail for multiple reasons, these may include:
+     * <ol>
+     * <li>A non-privileged app requested too many scans in a certain period of time.
+     * This may lead to additional scan request rejections via "scan throttling".
+     * See
+     * <a href="https://developer.android.com/preview/features/background-location-limits.html">
+     * here</a> for details.
+     * </li>
+     * <li>The device is idle and scanning is disabled.</li>
+     * <li>Wifi hardware reported a scan failure.</li>
+     * </ol>
      * @return true scan was successful, results are updated
      * @return false scan was not successful, results haven't been updated since previous scan
      */
