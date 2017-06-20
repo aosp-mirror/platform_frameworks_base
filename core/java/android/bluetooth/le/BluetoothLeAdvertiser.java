@@ -208,6 +208,8 @@ public final class BluetoothLeAdvertiser {
             if (wrapper == null) return;
 
             stopAdvertisingSet(wrapper);
+
+            mLegacyAdvertisers.remove(callback);
         }
     }
 
