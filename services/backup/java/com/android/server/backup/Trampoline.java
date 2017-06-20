@@ -199,6 +199,15 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
+    public void initializeTransports(String[] transportNames, IBackupObserver observer)
+            throws RemoteException {
+        BackupManagerServiceInterface svc = mService;
+        if (svc != null) {
+            svc.initializeTransports(transportNames, observer);
+        }
+    }
+
+    @Override
     public void clearBackupData(String transportName, String packageName)
             throws RemoteException {
         BackupManagerServiceInterface svc = mService;
