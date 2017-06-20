@@ -19,6 +19,7 @@ package com.android.server;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.NetworkCapabilities.*;
@@ -111,6 +112,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 /**
  * Tests for {@link ConnectivityService}.
@@ -326,6 +328,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 case TRANSPORT_CELLULAR:
                     mScore = 50;
                     break;
+                case TRANSPORT_LOWPAN:
+                    mScore = 20;
+                    break;
                 default:
                     throw new UnsupportedOperationException("unimplemented network type");
             }
@@ -407,6 +412,15 @@ public class ConnectivityServiceTest extends AndroidTestCase {
          * @param validated Indicate if network should pretend to be validated.
          */
         public void connect(boolean validated) {
+            connect(validated, true);
+        }
+
+        /**
+         * Transition this NetworkAgent to CONNECTED state.
+         * @param validated Indicate if network should pretend to be validated.
+         * @param hasInternet Indicate if network should pretend to have NET_CAPABILITY_INTERNET.
+         */
+        public void connect(boolean validated, boolean hasInternet) {
             assertEquals("MockNetworkAgents can only be connected once",
                     mNetworkInfo.getDetailedState(), DetailedState.IDLE);
             assertFalse(mNetworkCapabilities.hasCapability(NET_CAPABILITY_INTERNET));
@@ -429,7 +443,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 };
                 mCm.registerNetworkCallback(request, callback);
             }
-            addCapability(NET_CAPABILITY_INTERNET);
+            if (hasInternet) {
+                addCapability(NET_CAPABILITY_INTERNET);
+            }
 
             connectWithoutInternet();
 
@@ -783,7 +799,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
      * Fails if TIMEOUT_MS goes by before {@code conditionVariable} opens.
      */
     static private void waitFor(ConditionVariable conditionVariable) {
-        assertTrue(conditionVariable.block(TIMEOUT_MS));
+        if (conditionVariable.block(TIMEOUT_MS)) {
+            return;
+        }
+        fail("ConditionVariable was blocked for more than " + TIMEOUT_MS + "ms");
     }
 
     @Override
@@ -838,7 +857,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             case TRANSPORT_CELLULAR:
                 return TYPE_MOBILE;
             default:
-                throw new IllegalStateException("Unknown transport " + transport);
+                return TYPE_NONE;
         }
     }
 
@@ -849,6 +868,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Test getActiveNetwork()
         assertNotNull(mCm.getActiveNetwork());
         assertEquals(mCm.getActiveNetwork(), mCm.getActiveNetworkForUid(Process.myUid()));
+        if (!NetworkCapabilities.isValidTransport(transport)) {
+            throw new IllegalStateException("Unknown transport " + transport);
+        }
         switch (transport) {
             case TRANSPORT_WIFI:
                 assertEquals(mCm.getActiveNetwork(), mWiFiNetworkAgent.getNetwork());
@@ -857,7 +879,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 assertEquals(mCm.getActiveNetwork(), mCellNetworkAgent.getNetwork());
                 break;
             default:
-                throw new IllegalStateException("Unknown transport" + transport);
+                break;
         }
         // Test getNetworkInfo(Network)
         assertNotNull(mCm.getNetworkInfo(mCm.getActiveNetwork()));
@@ -1277,7 +1299,26 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             return expectCallback(state, agent, TIMEOUT_MS);
         }
 
-        void expectAvailableCallbacks(MockNetworkAgent agent, boolean expectSuspended, int timeoutMs) {
+        CallbackInfo expectCallbackLike(Predicate<CallbackInfo> fn) {
+            return expectCallbackLike(fn, TIMEOUT_MS);
+        }
+
+        CallbackInfo expectCallbackLike(Predicate<CallbackInfo> fn, int timeoutMs) {
+            int timeLeft = timeoutMs;
+            while (timeLeft > 0) {
+                long start = SystemClock.elapsedRealtime();
+                CallbackInfo info = nextCallback(timeLeft);
+                if (fn.test(info)) {
+                    return info;
+                }
+                timeLeft -= (SystemClock.elapsedRealtime() - start);
+            }
+            fail("Did not receive expected callback after " + timeoutMs + "ms");
+            return null;
+        }
+
+        void expectAvailableCallbacks(
+                MockNetworkAgent agent, boolean expectSuspended, int timeoutMs) {
             expectCallback(CallbackState.AVAILABLE, agent, timeoutMs);
             if (expectSuspended) {
                 expectCallback(CallbackState.SUSPENDED, agent, timeoutMs);
@@ -1834,26 +1875,18 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     @SmallTest
     public void testNoMutableNetworkRequests() throws Exception {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, new Intent("a"), 0);
-        NetworkRequest.Builder builder = new NetworkRequest.Builder();
-        builder.addCapability(NET_CAPABILITY_VALIDATED);
-        try {
-            mCm.requestNetwork(builder.build(), new NetworkCallback());
-            fail();
-        } catch (IllegalArgumentException expected) {}
-        try {
-            mCm.requestNetwork(builder.build(), pendingIntent);
-            fail();
-        } catch (IllegalArgumentException expected) {}
-        builder = new NetworkRequest.Builder();
-        builder.addCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
-        try {
-            mCm.requestNetwork(builder.build(), new NetworkCallback());
-            fail();
-        } catch (IllegalArgumentException expected) {}
-        try {
-            mCm.requestNetwork(builder.build(), pendingIntent);
-            fail();
-        } catch (IllegalArgumentException expected) {}
+        NetworkRequest request1 = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_VALIDATED)
+                .build();
+        NetworkRequest request2 = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_CAPTIVE_PORTAL)
+                .build();
+
+        Class<IllegalArgumentException> expected = IllegalArgumentException.class;
+        assertException(() -> { mCm.requestNetwork(request1, new NetworkCallback()); }, expected);
+        assertException(() -> { mCm.requestNetwork(request1, pendingIntent); }, expected);
+        assertException(() -> { mCm.requestNetwork(request2, new NetworkCallback()); }, expected);
+        assertException(() -> { mCm.requestNetwork(request2, pendingIntent); }, expected);
     }
 
     @SmallTest
@@ -3252,6 +3285,79 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                     PendingIntent.getBroadcast(mContext, 0, new Intent("c" + i), 0);
             mCm.registerNetworkCallback(networkRequest, pendingIntent);
             mCm.unregisterNetworkCallback(pendingIntent);
+        }
+    }
+
+    @SmallTest
+    public void testNetworkInfoOfTypeNone() {
+        ConditionVariable broadcastCV = waitForConnectivityBroadcasts(1);
+
+        verifyNoNetwork();
+        MockNetworkAgent lowpanNetwork = new MockNetworkAgent(TRANSPORT_LOWPAN);
+        assertNull(mCm.getActiveNetworkInfo());
+
+        Network[] allNetworks = mCm.getAllNetworks();
+        assertEquals(1, allNetworks.length);
+        Network network = allNetworks[0];
+        NetworkCapabilities capabilities = mCm.getNetworkCapabilities(network);
+        assertTrue(capabilities.hasTransport(TRANSPORT_LOWPAN));
+
+        final NetworkRequest request =
+                new NetworkRequest.Builder().addTransportType(TRANSPORT_LOWPAN).build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        // Bring up lowpan.
+        lowpanNetwork.connect(false, false);
+        callback.expectAvailableCallbacks(lowpanNetwork);
+
+        assertNull(mCm.getActiveNetworkInfo());
+        assertNull(mCm.getActiveNetwork());
+        // TODO: getAllNetworkInfo is dirty and returns a non-empty array rght from the start
+        // of this test. Fix it and uncomment the assert below.
+        //assertEquals(0, mCm.getAllNetworkInfo().length);
+
+        // Disconnect lowpan.
+        lowpanNetwork.disconnect();
+        callback.expectCallback(CallbackState.LOST, lowpanNetwork);
+        mCm.unregisterNetworkCallback(callback);
+
+        verifyNoNetwork();
+        if (broadcastCV.block(10)) {
+            fail("expected no broadcast, but got CONNECTIVITY_ACTION broadcast");
+        }
+    }
+
+    @SmallTest
+    public void testDeprecatedAndUnsupportedOperations() throws Exception {
+        final int TYPE_NONE = ConnectivityManager.TYPE_NONE;
+        assertNull(mCm.getNetworkInfo(TYPE_NONE));
+        assertNull(mCm.getNetworkForType(TYPE_NONE));
+        assertNull(mCm.getLinkProperties(TYPE_NONE));
+        assertFalse(mCm.isNetworkSupported(TYPE_NONE));
+
+        assertException(() -> { mCm.networkCapabilitiesForType(TYPE_NONE); },
+                IllegalArgumentException.class);
+
+        Class<UnsupportedOperationException> unsupported = UnsupportedOperationException.class;
+        assertException(() -> { mCm.startUsingNetworkFeature(TYPE_WIFI, ""); }, unsupported);
+        assertException(() -> { mCm.stopUsingNetworkFeature(TYPE_WIFI, ""); }, unsupported);
+        // TODO: let test context have configuration application target sdk version
+        // and test that pre-M requesting for TYPE_NONE sends back APN_REQUEST_FAILED
+        assertException(() -> { mCm.startUsingNetworkFeature(TYPE_NONE, ""); }, unsupported);
+        assertException(() -> { mCm.stopUsingNetworkFeature(TYPE_NONE, ""); }, unsupported);
+        assertException(() -> { mCm.requestRouteToHostAddress(TYPE_NONE, null); }, unsupported);
+    }
+
+    private static <T> void assertException(Runnable block, Class<T> expected) {
+        try {
+            block.run();
+            fail("Expected exception of type " + expected);
+        } catch (Exception got) {
+            if (!got.getClass().equals(expected)) {
+                fail("Expected exception of type " + expected + " but got " + got);
+            }
+            return;
         }
     }
 
