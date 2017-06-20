@@ -641,7 +641,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                         mSurface.copyFrom(mSurfaceControl);
                     }
 
-                    if (getContext().getApplicationInfo().targetSdkVersion
+                    if (sizeChanged && getContext().getApplicationInfo().targetSdkVersion
                             < Build.VERSION_CODES.O) {
                         // Some legacy applications use the underlying native {@link Surface} object
                         // as a key to whether anything has changed. In these cases, updates to the
