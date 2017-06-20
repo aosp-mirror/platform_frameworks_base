@@ -388,21 +388,10 @@ public class MbmsDownloadManager {
             tempRootDirectory.mkdirs();
             setTempFileRootDirectory(tempRootDirectory);
         }
-
         request.setAppName(mDownloadAppName);
-        // Check if the request is a multipart download. If so, validate that the destination is
-        // a directory that exists.
-        // TODO: figure out what qualifies a request as a multipart download request.
-        if (request.getSourceUri().getLastPathSegment() != null &&
-                request.getSourceUri().getLastPathSegment().contains("*")) {
-            File toFile = new File(request.getDestinationUri().getSchemeSpecificPart());
-            if (!toFile.isDirectory()) {
-                throw new IllegalArgumentException("Multipart download must specify valid " +
-                        "destination directory.");
-            }
-        }
-        // TODO: check to make sure destination is clear
-        // TODO: write download request token
+
+        checkValidDownloadDestination(request);
+        writeDownloadRequestToken(request);
         try {
             downloadService.download(request, callback);
         } catch (RemoteException e) {
@@ -435,6 +424,7 @@ public class MbmsDownloadManager {
      * <li>ERROR_MSDC_UNKNOWN_REQUEST</li>
      */
     public int cancelDownload(DownloadRequest downloadRequest) {
+        // TODO: don't forget to delete the token
         return 0;
     }
 
@@ -516,6 +506,56 @@ public class MbmsDownloadManager {
         } catch (RemoteException e) {
             // Ignore
             Log.i(LOG_TAG, "Remote exception while disposing of service");
+        }
+    }
+
+    private void writeDownloadRequestToken(DownloadRequest request) {
+        // TODO: figure out when this token eventually gets deleted
+        File tempFileLocation = MbmsUtils.getEmbmsTempFileDirForRequest(mContext, request);
+        if (!tempFileLocation.exists()) {
+            tempFileLocation.mkdirs();
+        }
+        String downloadTokenFileName = request.getHash()
+                + MbmsDownloadReceiver.DOWNLOAD_TOKEN_SUFFIX;
+        File token = new File(tempFileLocation, downloadTokenFileName);
+        if (token.exists()) {
+            Log.w(LOG_TAG, "Download token " + downloadTokenFileName + " already exists");
+            return;
+        }
+        try {
+            if (!token.createNewFile()) {
+                throw new RuntimeException("Failed to create download token for request "
+                        + request);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create download token for request " + request
+                    + " due to IOException " + e);
+        }
+    }
+
+    /**
+     * Verifies the following:
+     * If a request is multi-part,
+     *     1. Destination Uri must exist and be a directory
+     *     2. Directory specified must contain no files.
+     * Otherwise
+     *     1. The file specified by the destination Uri must not exist.
+     */
+    private void checkValidDownloadDestination(DownloadRequest request) {
+        File toFile = new File(request.getDestinationUri().getSchemeSpecificPart());
+        if (request.isMultipartDownload()) {
+            if (!toFile.isDirectory()) {
+                throw new IllegalArgumentException("Multipart download must specify valid " +
+                        "destination directory.");
+            }
+            if (toFile.listFiles().length > 0) {
+                throw new IllegalArgumentException("Destination directory must be clear of all " +
+                        "files.");
+            }
+        } else {
+            if (toFile.exists()) {
+                throw new IllegalArgumentException("Destination file must not exist.");
+            }
         }
     }
 }

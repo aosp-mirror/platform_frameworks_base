@@ -20,15 +20,22 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Base64;
 
 import java.lang.IllegalStateException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * A Parcelable class describing a pending Cell-Broadcast download request
  * @hide
  */
 public class DownloadRequest implements Parcelable {
+    // Version code used to keep token calculation consistent.
+    private static final int CURRENT_VERSION = 1;
+
     /** @hide */
     public static class Builder {
         private int id;
@@ -37,6 +44,7 @@ public class DownloadRequest implements Parcelable {
         private Uri dest;
         private int subscriptionId;
         private String appIntent;
+        private int version = CURRENT_VERSION;
 
         public Builder setId(int id) {
             this.id = id;
@@ -68,9 +76,14 @@ public class DownloadRequest implements Parcelable {
             return this;
         }
 
+        public Builder setVersion(int version) {
+            this.version = version;
+            return this;
+        }
+
         public DownloadRequest build() {
             return new DownloadRequest(id, serviceInfo, source, dest,
-                    subscriptionId, appIntent, null);
+                    subscriptionId, appIntent, null, version);
         }
     }
 
@@ -80,11 +93,12 @@ public class DownloadRequest implements Parcelable {
     private final Uri destinationUri;
     private final int subscriptionId;
     private final String serializedResultIntentForApp;
+    private final int version;
     private String appName; // not the Android app Name, the embms app name
 
     private DownloadRequest(int id, FileServiceInfo serviceInfo,
             Uri source, Uri dest,
-            int sub, String appIntent, String name) {
+            int sub, String appIntent, String name, int version) {
         downloadId = id;
         fileServiceInfo = serviceInfo;
         sourceUri = source;
@@ -92,6 +106,7 @@ public class DownloadRequest implements Parcelable {
         subscriptionId = sub;
         serializedResultIntentForApp = appIntent;
         appName = name;
+        this.version = version;
     }
 
     public static DownloadRequest copy(DownloadRequest other) {
@@ -106,6 +121,7 @@ public class DownloadRequest implements Parcelable {
         subscriptionId = dr.subscriptionId;
         serializedResultIntentForApp = dr.serializedResultIntentForApp;
         appName = dr.appName;
+        version = dr.version;
     }
 
     private DownloadRequest(Parcel in) {
@@ -116,6 +132,7 @@ public class DownloadRequest implements Parcelable {
         subscriptionId = in.readInt();
         serializedResultIntentForApp = in.readString();
         appName = in.readString();
+        version = in.readInt();
     }
 
     public int describeContents() {
@@ -130,6 +147,7 @@ public class DownloadRequest implements Parcelable {
         out.writeInt(subscriptionId);
         out.writeString(serializedResultIntentForApp);
         out.writeString(appName);
+        out.writeInt(version);
     }
 
     public int getDownloadId() {
@@ -172,6 +190,10 @@ public class DownloadRequest implements Parcelable {
         return appName;
     }
 
+    public int getVersion() {
+        return version;
+    }
+
     public static final Parcelable.Creator<DownloadRequest> CREATOR =
             new Parcelable.Creator<DownloadRequest>() {
         public DownloadRequest createFromParcel(Parcel in) {
@@ -181,4 +203,35 @@ public class DownloadRequest implements Parcelable {
             return new DownloadRequest[size];
         }
     };
+
+    /**
+     * @hide
+     */
+    public boolean isMultipartDownload() {
+        // TODO: figure out what qualifies a request as a multipart download request.
+        return getSourceUri().getLastPathSegment() != null &&
+                getSourceUri().getLastPathSegment().contains("*");
+    }
+
+    /**
+     * Retrieves the hash string that should be used as the filename when storing a token for
+     * this DownloadRequest.
+     * @hide
+     */
+    public String getHash() {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Could not get sha256 hash object");
+        }
+        if (version >= 1) {
+            // Hash the source URI, destination URI, and the app intent
+            digest.update(sourceUri.toString().getBytes(StandardCharsets.UTF_8));
+            digest.update(destinationUri.toString().getBytes(StandardCharsets.UTF_8));
+            digest.update(serializedResultIntentForApp.getBytes(StandardCharsets.UTF_8));
+        }
+        // Add updates for future versions here
+        return Base64.encodeToString(digest.digest(), Base64.URL_SAFE | Base64.NO_WRAP);
+    }
 }
