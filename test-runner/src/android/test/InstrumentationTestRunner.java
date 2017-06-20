@@ -178,13 +178,13 @@ import junit.textui.ResultPrinter;
 public class InstrumentationTestRunner extends Instrumentation implements TestSuiteProvider {
 
     /** @hide */
-    public static final String ARGUMENT_TEST_CLASS = "class";
+    static final String ARGUMENT_TEST_CLASS = "class";
     /** @hide */
-    public static final String ARGUMENT_TEST_PACKAGE = "package";
+    private static final String ARGUMENT_TEST_PACKAGE = "package";
     /** @hide */
-    public static final String ARGUMENT_TEST_SIZE_PREDICATE = "size";
+    private static final String ARGUMENT_TEST_SIZE_PREDICATE = "size";
     /** @hide */
-    public static final String ARGUMENT_DELAY_MSEC = "delay_msec";
+    static final String ARGUMENT_DELAY_MSEC = "delay_msec";
 
     private static final String SMALL_SUITE = "small";
     private static final String MEDIUM_SUITE = "medium";
@@ -208,7 +208,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      */
     private static final float MEDIUM_SUITE_MAX_RUNTIME = 1000;
 
-    /**
+    /*
      * The following keys are used in the status bundle to provide structured reports to
      * an IInstrumentationWatcher.
      */
@@ -476,7 +476,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
    /**
     * Returns the test predicate object, corresponding to the annotation class value provided via
-    * the {@link ARGUMENT_ANNOTATION} argument.
+    * the {@link #ARGUMENT_ANNOTATION} argument.
     *
     * @return the predicate or <code>null</code>
     */
@@ -490,7 +490,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
     /**
      * Returns the negative test predicate object, corresponding to the annotation class value
-     * provided via the {@link ARGUMENT_NOT_ANNOTATION} argument.
+     * provided via the {@link #ARGUMENT_NOT_ANNOTATION} argument.
      *
      * @return the predicate or <code>null</code>
      */
