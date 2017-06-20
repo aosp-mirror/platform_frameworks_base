@@ -29,6 +29,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
 LOCAL_JACK_FLAGS := --multi-dex native
+LOCAL_DX_FLAGS := --multi-dex
 
 LOCAL_PACKAGE_NAME := FrameworksNotificationTests
 LOCAL_COMPATIBILITY_SUITE := device-tests
@@ -51,10 +52,5 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     libutils
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-
-# Code coverage puts us over the dex limit, so enable multi-dex for coverage-enabled builds
-ifeq (true,$(EMMA_INSTRUMENT))
-LOCAL_JACK_FLAGS := --multi-dex native
-endif # EMMA_INSTRUMENT_STATIC
 
 include $(BUILD_PACKAGE)
