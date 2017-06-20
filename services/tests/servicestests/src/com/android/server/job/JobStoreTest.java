@@ -206,7 +206,8 @@ public class JobStoreTest extends AndroidTestCase {
                 invalidLateRuntimeElapsedMillis - TWO_HOURS;  // Early is (late - period).
         final JobStatus js = new JobStatus(b.build(), SOME_UID, "somePackage",
                 0 /* sourceUserId */, "someTag",
-                invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis);
+                invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
+                0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */);
 
         mTaskStoreUnderTest.add(js);
         Thread.sleep(IO_WAIT);
