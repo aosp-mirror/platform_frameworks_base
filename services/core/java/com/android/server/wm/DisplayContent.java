@@ -1217,7 +1217,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 (displayInfo.isHdr()
                         ? Configuration.COLOR_MODE_HDR_YES
                         : Configuration.COLOR_MODE_HDR_NO)
-                        | (displayInfo.isWideColorGamut()
+                        | (displayInfo.isWideColorGamut() && mService.hasWideColorGamutSupport()
                         ? Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_YES
                         : Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_NO);
 

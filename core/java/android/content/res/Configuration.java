@@ -16,28 +16,25 @@
 
 package android.content.res;
 
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.DisplayInfo;
-import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.view.DisplayInfo;
 import android.view.View;
+
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -1818,9 +1815,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
-     * Return whether the screen has a wide color gamut.
+     * Return whether the screen has a wide color gamut and wide color gamut rendering
+     * is supported by this device.
      *
-     * @return true if the screen has a wide color gamut, false otherwise
+     * @return true if the screen has a wide color gamut and wide color gamut rendering
+     * is supported, false otherwise
      */
     public boolean isScreenWideColorGamut() {
         return (colorMode & COLOR_MODE_WIDE_COLOR_GAMUT_MASK) == COLOR_MODE_WIDE_COLOR_GAMUT_YES;
