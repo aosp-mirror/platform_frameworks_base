@@ -53,7 +53,7 @@
                     android:gravity="center"
                     android:layout_centerHorizontal="true"
                     android:layout_marginRight="72dp"
-                    androidprv:scaledTextSize="28"
+                    androidprv:scaledTextSize="@integer/scaled_password_text_size"
                     android:textColor="?attr/bgProtectTextColor"
                     android:contentDescription="@string/keyguard_accessibility_pin_area"
                     />
