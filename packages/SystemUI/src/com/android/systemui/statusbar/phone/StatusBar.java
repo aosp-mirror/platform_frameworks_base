@@ -48,6 +48,7 @@ import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.app.StatusBarManager;
 import android.app.TaskStackBuilder;
+import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -103,7 +104,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
@@ -139,6 +139,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -213,7 +214,6 @@ import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.RowInflaterTask;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -1301,10 +1301,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void onOverlayChanged() {
-        final boolean usingDarkTheme = isUsingDarkTheme();
-        if (DEBUG) {
-            Log.d(TAG, "Updating theme because overlay changed. Is theme dark? " + usingDarkTheme);
-        }
         reevaluateStyles();
 
         // Clock and bottom icons
@@ -2842,6 +2838,17 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onColorsChanged(ColorExtractor extractor, int which) {
         updateTheme();
+    }
+
+    public boolean isUsingDarkText() {
+        OverlayInfo themeInfo = null;
+        try {
+            themeInfo = mOverlayManager.getOverlayInfo("com.android.systemui.theme.lightwallpaper",
+                    mCurrentUserId);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return themeInfo != null && themeInfo.isEnabled();
     }
 
     public boolean isUsingDarkTheme() {
@@ -4531,30 +4538,49 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Switches theme from light to dark and vice-versa.
      */
     private void updateTheme() {
-        boolean useDarkTheme;
-        // Ignore visibility since we calculate the theme based on the real colors,
-        // not the current state.
+
+        int which;
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            useDarkTheme = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, true /* vis */)
-                    .supportsDarkText();
+            which = WallpaperManager.FLAG_LOCK;
         } else {
-            useDarkTheme = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM, true /* vis */)
-                    .supportsDarkText();
+            which = WallpaperManager.FLAG_SYSTEM;
         }
 
-        // Enable/Disable dark overlay
-        if (isUsingDarkTheme() != useDarkTheme) {
-            if (DEBUG) {
-                Log.d(TAG, "Switching theme to: " + (useDarkTheme ? "Dark" : "Light"));
+        // Gradient defines if text color should be light or dark.
+        final boolean useDarkText = mColorExtractor.getColors(which, true /* ignoreVisibility */)
+                .supportsDarkText();
+        // And wallpaper defines if QS should be light or dark.
+        boolean useDarkTheme = false;
+        final WallpaperManager wallpaperManager = mContext.getSystemService(WallpaperManager.class);
+        if (wallpaperManager != null) {
+            WallpaperColors wallpaperColors = wallpaperManager
+                    .getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
+            if (wallpaperColors != null) {
+                final int mainColor = wallpaperColors.getPrimaryColor().toArgb();
+                final float[] hsl = new float[3];
+                ColorUtils.colorToHSL(mainColor, hsl);
+                useDarkTheme = hsl[2] < 0.2f;
             }
+        }
+
+        // Enable/disable dark UI.
+        if (isUsingDarkTheme() != useDarkTheme) {
             try {
                 mOverlayManager.setEnabled("com.android.systemui.theme.dark",
                         useDarkTheme, mCurrentUserId);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't change theme", e);
-                return;
             }
-            mStatusBarWindowManager.setKeyguardDark(useDarkTheme);
+        }
+        // Enable/disable dark text overlay.
+        if (isUsingDarkText() != useDarkText) {
+            try {
+                mOverlayManager.setEnabled("com.android.systemui.theme.lightwallpaper",
+                        useDarkText, mCurrentUserId);
+                mStatusBarWindowManager.setKeyguardDark(useDarkText);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't change theme", e);
+            }
         }
     }
 
