@@ -877,6 +877,7 @@ public class Tethering extends BaseNetworkObserver {
         }
 
         if (!TextUtils.isEmpty(ifname)) {
+            maybeTrackNewInterfaceLocked(ifname, ConnectivityManager.TETHERING_WIFI);
             changeInterfaceState(ifname, ipServingMode);
         } else {
             tetherMatchingInterfaces(ipServingMode, ConnectivityManager.TETHERING_WIFI);
@@ -1800,7 +1801,10 @@ public class Tethering extends BaseNetworkObserver {
             mLog.log(iface + " is not a tetherable iface, ignoring");
             return;
         }
+        maybeTrackNewInterfaceLocked(iface, interfaceType);
+    }
 
+    private void maybeTrackNewInterfaceLocked(final String iface, int interfaceType) {
         // If we have already started a TISM for this interface, skip.
         if (mTetherStates.containsKey(iface)) {
             mLog.log("active iface (" + iface + ") reported as added, ignoring");
