@@ -3040,6 +3040,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return mPolicy.isKeyguardLocked();
     }
 
+    public boolean isKeyguardShowingAndNotOccluded() {
+        return mPolicy.isKeyguardShowingAndNotOccluded();
+    }
+
     @Override
     public boolean isKeyguardSecure() {
         int userId = UserHandle.getCallingUserId();
@@ -7288,6 +7292,11 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean isKeyguardGoingAway() {
             return WindowManagerService.this.mKeyguardGoingAway;
+        }
+
+        @Override
+        public boolean isKeyguardShowingAndNotOccluded() {
+            return WindowManagerService.this.isKeyguardShowingAndNotOccluded();
         }
 
         @Override

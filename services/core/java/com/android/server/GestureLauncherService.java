@@ -17,7 +17,6 @@
 package com.android.server;
 
 import android.app.ActivityManager;
-import android.app.KeyguardManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -41,10 +40,12 @@ import android.provider.Settings;
 import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.KeyEvent;
+import android.view.WindowManagerInternal;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 /**
@@ -56,6 +57,7 @@ import com.android.server.statusbar.StatusBarManagerInternal;
  */
 public class GestureLauncherService extends SystemService {
     private static final boolean DBG = false;
+    private static final boolean DBG_CAMERA_LIFT = true; // false once b/62623620 is fixed
     private static final String TAG = "GestureLauncherService";
 
     /**
@@ -82,7 +84,7 @@ public class GestureLauncherService extends SystemService {
     private Context mContext;
     private final MetricsLogger mMetricsLogger;
     private PowerManager mPowerManager;
-    private KeyguardManager mKeyguardManager;
+    private WindowManagerInternal mWindowManagerInternal;
 
     /** The wake lock held when a gesture is detected. */
     private WakeLock mWakeLock;
@@ -150,8 +152,7 @@ public class GestureLauncherService extends SystemService {
                 return;
             }
 
-            mKeyguardManager = (KeyguardManager) mContext.getSystemService(
-                    Context.KEYGUARD_SERVICE);
+            mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mPowerManager = (PowerManager) mContext.getSystemService(
                     Context.POWER_SERVICE);
             mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -517,33 +518,40 @@ public class GestureLauncherService extends SystemService {
     private final class CameraLiftTriggerEventListener extends TriggerEventListener {
         @Override
         public void onTrigger(TriggerEvent event) {
+            if (DBG_CAMERA_LIFT) Slog.d(TAG, String.format("onTrigger event - time: %d, name: %s",
+                    event.timestamp, event.sensor.getName()));
             if (!mCameraLiftRegistered) {
-              if (DBG) Slog.d(TAG, "Ignoring camera lift event because it's unregistered.");
+              if (DBG_CAMERA_LIFT) Slog.d(TAG, "Ignoring camera lift event because it's " +
+                      "unregistered.");
               return;
             }
             if (event.sensor == mCameraLiftTriggerSensor) {
                 Resources resources = mContext.getResources();
                 SensorManager sensorManager = (SensorManager) mContext.getSystemService(
                         Context.SENSOR_SERVICE);
-
-                if (DBG) {
+                boolean keyguardShowingAndNotOccluded =
+                        mWindowManagerInternal.isKeyguardShowingAndNotOccluded();
+                boolean interactive = mPowerManager.isInteractive();
+                if (DBG_CAMERA_LIFT) {
                     float[] values = event.values;
-                    Slog.d(TAG, String.format("Received a camera lift trigger event: " +
-                            "values=[%.4f].", values[0]));
+                    Slog.d(TAG, String.format("Received a camera lift trigger " +
+                            "event: values=[%.4f], keyguard showing: %b, interactive: %b", values[0],
+                            keyguardShowingAndNotOccluded, interactive));
                 }
-                if (mKeyguardManager.isKeyguardLocked() || !mPowerManager.isInteractive()) {
+                if (keyguardShowingAndNotOccluded || !interactive) {
                     if (handleCameraGesture(true /* useWakelock */,
                             StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER)) {
                         MetricsLogger.action(mContext, MetricsEvent.ACTION_CAMERA_LIFT_TRIGGER);
                     }
-                } else if (DBG) {
-                    Slog.d(TAG, "Ignoring lift event because device is awake");
+                } else {
+                    if (DBG_CAMERA_LIFT) Slog.d(TAG, "Ignoring lift event");
                 }
 
-                mCameraLiftRegistered = sensorManager.requestTriggerSensor(mCameraLiftTriggerListener,
-                        mCameraLiftTriggerSensor);
+                mCameraLiftRegistered = sensorManager.requestTriggerSensor(
+                        mCameraLiftTriggerListener, mCameraLiftTriggerSensor);
 
-                if (DBG) Slog.d(TAG, "Camera lift trigger sensor re-registered: " + mCameraLiftRegistered);
+                if (DBG_CAMERA_LIFT) Slog.d(TAG, "Camera lift trigger sensor re-registered: " +
+                        mCameraLiftRegistered);
                 return;
             }
         }
