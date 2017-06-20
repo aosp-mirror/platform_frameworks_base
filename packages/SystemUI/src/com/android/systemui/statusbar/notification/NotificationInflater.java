@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NotificationInflater {
 
+    public static final String TAG = "NotificationInflater";
     @VisibleForTesting
     static final int FLAG_REINFLATE_ALL = ~0;
     private static final int FLAG_REINFLATE_CONTENT_VIEW = 1<<0;
@@ -315,7 +316,8 @@ public class NotificationInflater {
         return cancellationSignal;
     }
 
-    private static void applyRemoteView(final InflationProgress result,
+    @VisibleForTesting
+    static void applyRemoteView(final InflationProgress result,
             final int reInflateFlags, int inflationId,
             final ExpandableNotificationRow row,
             final boolean redactAmbient, boolean isNewView,
@@ -325,6 +327,7 @@ public class NotificationInflater {
             NotificationViewWrapper existingWrapper,
             final HashMap<Integer, CancellationSignal> runningInflations,
             ApplyCallback applyCallback) {
+        RemoteViews newContentView = applyCallback.getRemoteView();
         RemoteViews.OnViewAppliedListener listener
                 = new RemoteViews.OnViewAppliedListener() {
 
@@ -343,12 +346,31 @@ public class NotificationInflater {
 
             @Override
             public void onError(Exception e) {
-                runningInflations.remove(inflationId);
-                handleInflationError(runningInflations, e, entry.notification, callback);
+                // Uh oh the async inflation failed. Due to some bugs (see b/38190555), this could
+                // actually also be a system issue, so let's try on the UI thread again to be safe.
+                try {
+                    View newView = existingView;
+                    if (isNewView) {
+                        newView = newContentView.apply(
+                                result.packageContext,
+                                parentLayout,
+                                remoteViewClickHandler);
+                    } else {
+                        newContentView.reapply(
+                                result.packageContext,
+                                existingView,
+                                remoteViewClickHandler);
+                    }
+                    Log.wtf(TAG, "Async Inflation failed but normal inflation finished normally.",
+                            e);
+                    onViewApplied(newView);
+                } catch (Exception anotherException) {
+                    runningInflations.remove(inflationId);
+                    handleInflationError(runningInflations, e, entry.notification, callback);
+                }
             }
         };
         CancellationSignal cancellationSignal;
-        RemoteViews newContentView = applyCallback.getRemoteView();
         if (isNewView) {
             cancellationSignal = newContentView.applyAsync(
                     result.packageContext,
@@ -620,14 +642,16 @@ public class NotificationInflater {
         }
     }
 
-    private static class InflationProgress {
+    @VisibleForTesting
+    static class InflationProgress {
         private RemoteViews newContentView;
         private RemoteViews newHeadsUpView;
         private RemoteViews newExpandedView;
         private RemoteViews newAmbientView;
         private RemoteViews newPublicView;
 
-        private Context packageContext;
+        @VisibleForTesting
+        Context packageContext;
 
         private View inflatedContentView;
         private View inflatedHeadsUpView;
@@ -636,7 +660,8 @@ public class NotificationInflater {
         private View inflatedPublicView;
     }
 
-    private abstract static class ApplyCallback {
+    @VisibleForTesting
+    abstract static class ApplyCallback {
         public abstract void setResultView(View v);
         public abstract RemoteViews getRemoteView();
     }
