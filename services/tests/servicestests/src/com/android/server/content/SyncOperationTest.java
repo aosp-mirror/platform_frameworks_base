@@ -17,24 +17,17 @@
 package com.android.server.content;
 
 import android.accounts.Account;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.os.SystemClock;
-import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 /**
- * You can run those tests with:
+ * Test for SyncOperation.
  *
- * adb shell am instrument
- * -e debug false
- * -w
- * -e class android.content.SyncOperationTest com.android.frameworks.coretests/android.test.InstrumentationTestRunner
+ * bit FrameworksServicesTests:com.android.server.content.SyncOperationTest
  */
-
+@SmallTest
 public class SyncOperationTest extends AndroidTestCase {
 
     Account mDummy;
