@@ -90,6 +90,20 @@ public final class SQLiteDatabaseConfiguration {
             new ArrayList<SQLiteCustomFunction>();
 
     /**
+     * The size in bytes of each lookaside slot
+     *
+     * <p>If negative, the default lookaside configuration will be used
+     */
+    public int lookasideSlotSize;
+
+    /**
+     * The total number of lookaside memory slots per database connection
+     *
+     * <p>If negative, the default lookaside configuration will be used
+     */
+    public int lookasideSlotCount;
+
+    /**
      * Creates a database configuration with the required parameters for opening a
      * database and default values for all other parameters.
      *
@@ -108,6 +122,8 @@ public final class SQLiteDatabaseConfiguration {
         // Set default values for optional parameters.
         maxSqlCacheSize = 25;
         locale = Locale.getDefault();
+        lookasideSlotSize = -1;
+        lookasideSlotCount = -1;
     }
 
     /**
@@ -146,6 +162,8 @@ public final class SQLiteDatabaseConfiguration {
         foreignKeyConstraintsEnabled = other.foreignKeyConstraintsEnabled;
         customFunctions.clear();
         customFunctions.addAll(other.customFunctions);
+        lookasideSlotSize = other.lookasideSlotSize;
+        lookasideSlotCount = other.lookasideSlotCount;
     }
 
     /**
