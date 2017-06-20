@@ -25,6 +25,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.IActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -116,7 +117,7 @@ public class PipTouchHandler {
             };
 
     // Behaviour states
-    private int mMenuState;
+    private int mMenuState = MENU_STATE_NONE;
     private boolean mIsMinimized;
     private boolean mIsImeShowing;
     private int mImeHeight;
@@ -212,14 +213,15 @@ public class PipTouchHandler {
     }
 
     public void onActivityPinned() {
-        // Reset some states once we are pinned
-        mMenuState = MENU_STATE_NONE;
-
-        if (mIsMinimized) {
-            setMinimizedStateInternal(false);
-        }
-        cleanUpDismissTarget();
+        cleanUp();
         mShowPipMenuOnAnimationEnd = true;
+    }
+
+    public void onActivityUnpinned(ComponentName topPipActivity) {
+        if (topPipActivity == null) {
+            // Clean up state after the last PiP activity is removed
+            cleanUp();
+        }
     }
 
     public void onPinnedStackAnimationEnded() {
@@ -727,6 +729,16 @@ public class PipTouchHandler {
     private void cleanUpDismissTarget() {
         mHandler.removeCallbacks(mShowDismissAffordance);
         mDismissViewController.destroyDismissTarget();
+    }
+
+    /**
+     * Resets some states related to the touch handling.
+     */
+    private void cleanUp() {
+        if (mIsMinimized) {
+            setMinimizedStateInternal(false);
+        }
+        cleanUpDismissTarget();
     }
 
     public void dump(PrintWriter pw, String prefix) {
