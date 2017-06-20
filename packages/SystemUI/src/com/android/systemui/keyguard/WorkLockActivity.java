@@ -38,6 +38,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.R;
 
 /**
  * Bouncer between work activities and the activity used to confirm credentials before unlocking
@@ -83,6 +84,7 @@ public class WorkLockActivity extends Activity {
         // Blank out the activity. When it is on-screen it will look like a Recents thumbnail with
         // redaction switched on.
         final View blankView = new View(this);
+        blankView.setContentDescription(getString(R.string.accessibility_desc_work_lock));
         blankView.setBackgroundColor(getPrimaryColor());
         setContentView(blankView);
     }
