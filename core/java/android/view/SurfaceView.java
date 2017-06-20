@@ -838,6 +838,8 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
                     System.identityHashCode(this), frameNumber));
         }
+        mRTLastReportedPosition.setEmpty();
+
         if (mSurfaceControl == null) {
             return;
         }
@@ -858,7 +860,6 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                     Log.e(TAG, "Exception configuring surface", ex);
                 }
             }
-            mRTLastReportedPosition.setEmpty();
         }
     }
 
