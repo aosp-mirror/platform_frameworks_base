@@ -703,6 +703,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 case WifiConfiguration.NetworkSelectionStatus.DISABLED_AUTHENTICATION_FAILURE:
                     summary.append(mContext.getString(R.string.wifi_disabled_password_failure));
                     break;
+                case WifiConfiguration.NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD:
+                    summary.append(mContext.getString(R.string.wifi_check_password_try_again));
+                    break;
                 case WifiConfiguration.NetworkSelectionStatus.DISABLED_DHCP_FAILURE:
                 case WifiConfiguration.NetworkSelectionStatus.DISABLED_DNS_FAILURE:
                     summary.append(mContext.getString(R.string.wifi_disabled_network_failure));
