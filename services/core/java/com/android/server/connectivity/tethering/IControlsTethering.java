@@ -33,6 +33,16 @@ public class IControlsTethering {
     public static final int STATE_TETHERED    = 2;
     public static final int STATE_LOCAL_ONLY  = 3;
 
+    public static String getStateString(int state) {
+        switch (state) {
+            case STATE_UNAVAILABLE: return "UNAVAILABLE";
+            case STATE_AVAILABLE:   return "AVAILABLE";
+            case STATE_TETHERED:    return "TETHERED";
+            case STATE_LOCAL_ONLY:  return "LOCAL_ONLY";
+        }
+        return "UNKNOWN: " + state;
+    }
+
     /**
      * Notify that |who| has changed its tethering state.
      *
