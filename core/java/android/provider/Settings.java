@@ -5216,6 +5216,15 @@ public final class Settings {
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
 
         /**
+         * Whether the current user has been set up via setup wizard (0 = false, 1 = true)
+         * This value differs from USER_SETUP_COMPLETE in that it can be reset back to 0
+         * in case SetupWizard has been re-enabled on TV devices.
+         *
+         * @hide
+         */
+        public static final String TV_USER_SETUP_COMPLETE = "tv_user_setup_complete";
+
+        /**
          * Prefix for category name that marks whether a suggested action from that category was
          * completed.
          * @hide
