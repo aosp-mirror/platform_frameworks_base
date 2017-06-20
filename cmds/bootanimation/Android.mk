@@ -8,10 +8,6 @@ bootanimation_CommonCFlags += -Wall -Werror -Wunused -Wunreachable-code
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= \
-    bootanimation_main.cpp \
-    audioplay.cpp \
-
 LOCAL_CFLAGS += ${bootanimation_CommonCFlags}
 
 LOCAL_SHARED_LIBRARIES := \
@@ -23,6 +19,29 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     liblog \
     libutils \
+
+LOCAL_SRC_FILES:= \
+    BootAnimationUtil.cpp \
+
+ifeq ($(PRODUCT_IOT),true)
+LOCAL_SRC_FILES += \
+    iot/iotbootanimation_main.cpp \
+    iot/BootAction.cpp
+
+LOCAL_SHARED_LIBRARIES += \
+    libandroidthings \
+    libbase \
+    libbinder
+
+LOCAL_STATIC_LIBRARIES += cpufeatures
+
+else
+
+LOCAL_SRC_FILES += \
+    bootanimation_main.cpp \
+    audioplay.cpp \
+
+endif  # PRODUCT_IOT
 
 LOCAL_MODULE:= bootanimation
 
@@ -44,6 +63,8 @@ LOCAL_CFLAGS += ${bootanimation_CommonCFlags}
 
 LOCAL_SRC_FILES:= \
     BootAnimation.cpp
+
+LOCAL_CFLAGS += ${bootanimation_CommonCFlags}
 
 LOCAL_C_INCLUDES += \
     external/tinyalsa/include \
