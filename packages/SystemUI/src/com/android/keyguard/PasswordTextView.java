@@ -135,7 +135,9 @@ public class PasswordTextView extends View {
         }
         mDrawPaint.setFlags(Paint.SUBPIXEL_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         mDrawPaint.setTextAlign(Paint.Align.CENTER);
-        mDrawPaint.setTypeface(Typeface.create("sans-serif-light", 0));
+        mDrawPaint.setTypeface(Typeface.create(
+                context.getString(com.android.internal.R.string.config_headlineFontFamilyLight),
+                0));
         mShowPassword = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.TEXT_SHOW_PASSWORD, 1) == 1;
         mAppearInterpolator = AnimationUtils.loadInterpolator(mContext,
