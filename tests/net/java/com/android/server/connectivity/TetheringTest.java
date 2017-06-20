@@ -264,13 +264,16 @@ public class TetheringTest {
         mIntents.remove(bcast);
     }
 
-    public void workingLocalOnlyHotspot(boolean enrichedApBroadcast) throws Exception {
+    public void workingLocalOnlyHotspot(
+            boolean withInterfaceStateChanged, boolean enrichedApBroadcast) throws Exception {
         when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
 
         // Emulate externally-visible WifiManager effects, causing the
         // per-interface state machine to start up, and telling us that
         // hotspot mode is to be started.
-        mTethering.interfaceStatusChanged(mTestIfname, true);
+        if (withInterfaceStateChanged) {
+            mTethering.interfaceStatusChanged(mTestIfname, true);
+        }
         if (enrichedApBroadcast) {
             sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, mTestIfname, IFACE_IP_MODE_LOCAL_ONLY);
         } else {
@@ -320,12 +323,17 @@ public class TetheringTest {
 
     @Test
     public void workingLocalOnlyHotspotLegacyApBroadcast() throws Exception {
-        workingLocalOnlyHotspot(false);
+        workingLocalOnlyHotspot(true, false);
     }
 
     @Test
     public void workingLocalOnlyHotspotEnrichedApBroadcast() throws Exception {
-        workingLocalOnlyHotspot(true);
+        workingLocalOnlyHotspot(true, true);
+    }
+
+    @Test
+    public void workingLocalOnlyHotspotEnrichedApBroadcastWithoutInterfaceUp() throws Exception {
+        workingLocalOnlyHotspot(false, true);
     }
 
     public void workingWifiTethering(boolean enrichedApBroadcast) throws Exception {
