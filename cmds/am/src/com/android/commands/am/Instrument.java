@@ -382,6 +382,7 @@ public class Instrument {
                 oldAnims = mWm.getAnimationScales();
                 mWm.setAnimationScale(0, 0.0f);
                 mWm.setAnimationScale(1, 0.0f);
+                mWm.setAnimationScale(2, 0.0f);
             }
 
             // Figure out which component we are tring to do.

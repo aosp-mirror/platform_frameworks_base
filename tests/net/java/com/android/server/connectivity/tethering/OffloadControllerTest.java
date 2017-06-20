@@ -62,7 +62,8 @@ public class OffloadControllerTest {
     @Mock private OffloadHardwareInterface mHardware;
     @Mock private ApplicationInfo mApplicationInfo;
     @Mock private Context mContext;
-    final ArgumentCaptor<ArrayList> mStringArrayCaptor = ArgumentCaptor.forClass(ArrayList.class);
+    private final ArgumentCaptor<ArrayList> mStringArrayCaptor =
+            ArgumentCaptor.forClass(ArrayList.class);
     private MockContentResolver mContentResolver;
 
     @Before public void setUp() throws Exception {

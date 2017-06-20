@@ -249,9 +249,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper.onTouchEvent(event)) {
             return true;
         }
-        if (mDeadZone != null && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-            mDeadZone.poke(event);
-        }
         return super.onTouchEvent(event);
     }
 
@@ -612,9 +609,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void reorient() {
         updateCurrentView();
 
-        getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
-
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
+        ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
         mDeadZone.setDisplayRotation(mCurrentRotation);
 
         // force the low profile & disabled states into compliance

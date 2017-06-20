@@ -16,13 +16,19 @@
 
 package com.android.keyguard;
 
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.euicc.EuiccManager;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 
@@ -31,7 +37,25 @@ import java.lang.ref.WeakReference;
  * the device with no cellular service.
  */
 class KeyguardEsimArea extends Button implements View.OnClickListener {
+    private static final String ACTION_DISABLE_ESIM = "com.android.keyguard.disable_esim";
+    private static final String TAG = "KeyguardEsimArea";
+    private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+
     private EuiccManager mEuiccManager;
+
+    private BroadcastReceiver mReceiver =
+        new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (ACTION_DISABLE_ESIM.equals(intent.getAction())) {
+                    int resultCode = getResultCode();
+                    if (resultCode != EuiccManager.EMBEDDED_SUBSCRIPTION_RESULT_OK) {
+                        // TODO (b/62680294): Surface more info. to the end users for this failure.
+                        Log.e(TAG, "Error disabling esim, result code = " + resultCode);
+                    }
+                }
+            }
+        };
 
     public KeyguardEsimArea(Context context) {
         this(context, null);
@@ -52,8 +76,10 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
     }
 
     @Override
-    public void onClick(View v) {
-        // STOPSHIP(b/37353596): use EuiccManager API to disable current carrier.
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_DISABLE_ESIM),
+                PERMISSION_SELF, null /* scheduler */);
     }
 
     public static boolean isEsimLocked(Context context, int subId) {
@@ -66,4 +92,23 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
         return  sub != null && sub.isEmbedded();
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        mContext.unregisterReceiver(mReceiver);
+        super.onDetachedFromWindow();
+    }
+
+    @Override
+    public void onClick(View v) {
+        Intent intent = new Intent(mContext, KeyguardEsimArea.class);
+        intent.setAction(ACTION_DISABLE_ESIM);
+        intent.setPackage(mContext.getPackageName());
+        PendingIntent callbackIntent = PendingIntent.getBroadcast(
+            mContext,
+            0 /* requestCode */,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT);
+        mEuiccManager
+                .switchToSubscription(SubscriptionManager.INVALID_SUBSCRIPTION_ID, callbackIntent);
+    }
 }
