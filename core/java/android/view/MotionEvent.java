@@ -224,6 +224,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Constant for {@link #getActionMasked}: A movement has happened outside of the
      * normal bounds of the UI element.  This does not provide a full gesture,
      * but only the initial location of the movement/touch.
+     * <p>
+     * Note: Because the location of any event will be outside the
+     * bounds of the view hierarchy, it will not get dispatched to
+     * any children of a ViewGroup by default. Therefore,
+     * movements with ACTION_OUTSIDE should be handled in either the
+     * root {@link View} or in the appropriate {@link Window.Callback}
+     * (e.g. {@link android.app.Activity} or {@link android.app.Dialog}).
+     * </p>
      */
     public static final int ACTION_OUTSIDE          = 4;
 
