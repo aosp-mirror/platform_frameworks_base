@@ -936,6 +936,11 @@ public final class StrictMode {
                 return this;
             }
 
+            Builder disable(int bit) {
+                mMask &= ~bit;
+                return this;
+            }
+
             /**
              * Construct the VmPolicy instance.
              *
@@ -1214,7 +1219,13 @@ public final class StrictMode {
         if (IS_USER_BUILD) {
             setCloseGuardEnabled(false);
         } else {
-            VmPolicy.Builder policyBuilder = new VmPolicy.Builder().detectAll().penaltyDropBox();
+            VmPolicy.Builder policyBuilder = new VmPolicy.Builder().detectAll();
+            if (!IS_ENG_BUILD) {
+                // Activity leak detection causes too much slowdown for userdebug because of the
+                // GCs.
+                policyBuilder = policyBuilder.disable(DETECT_VM_ACTIVITY_LEAKS);
+            }
+            policyBuilder = policyBuilder.penaltyDropBox();
             if (IS_ENG_BUILD) {
                 policyBuilder.penaltyLog();
             }
