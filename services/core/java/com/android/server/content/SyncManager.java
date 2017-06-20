@@ -74,7 +74,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.EventLog;
 import android.util.Log;
@@ -113,6 +112,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Implementation details:
@@ -1761,10 +1761,7 @@ public class SyncManager {
 
     protected void dump(FileDescriptor fd, PrintWriter pw) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-        dumpPendingSyncs(pw);
-        dumpPeriodicSyncs(pw);
         dumpSyncState(ipw);
-        dumpSyncHistory(ipw);
         dumpSyncAdapters(ipw);
     }
 
@@ -1774,9 +1771,58 @@ public class SyncManager {
         return tobj.format("%Y-%m-%d %H:%M:%S");
     }
 
+    private final static Comparator<SyncOperation> sOpDumpComparator = (op1, op2) -> {
+        int res = Integer.compare(op1.target.userId, op2.target.userId);
+        if (res != 0) return res;
+
+        final Comparator<String> stringComparator = String.CASE_INSENSITIVE_ORDER;
+
+        res = stringComparator.compare(op1.target.account.type, op2.target.account.type);
+        if (res != 0) return res;
+
+        res = stringComparator.compare(op1.target.account.name, op2.target.account.name);
+        if (res != 0) return res;
+
+        res = stringComparator.compare(op1.target.provider, op2.target.provider);
+        if (res != 0) return res;
+
+        res = Integer.compare(op1.reason, op2.reason);
+        if (res != 0) return res;
+
+        res = Long.compare(op1.periodMillis, op2.periodMillis);
+        if (res != 0) return res;
+
+        res = Long.compare(op1.expectedRuntime, op2.expectedRuntime);
+        if (res != 0) return res;
+
+        res = Long.compare(op1.jobId, op2.jobId);
+        if (res != 0) return res;
+
+        return 0;
+    };
+
+    private final static Comparator<SyncOperation> sOpRuntimeComparator = (op1, op2) -> {
+        int res = Long.compare(op1.expectedRuntime, op2.expectedRuntime);
+        if (res != 0) return res;
+
+        return sOpDumpComparator.compare(op1, op2);
+    };
+
+    private static <T> int countIf(Collection<T> col, Predicate<T> p) {
+        int ret = 0;
+        for (T item : col) {
+            if (p.test(item)) ret++;
+        }
+        return ret;
+    }
+
     protected void dumpPendingSyncs(PrintWriter pw) {
-        pw.println("Pending Syncs:");
         List<SyncOperation> pendingSyncs = getAllPendingSyncs();
+
+        pw.print("Pending Syncs: ");
+        pw.println(countIf(pendingSyncs, op -> !op.isPeriodic));
+
+        Collections.sort(pendingSyncs, sOpRuntimeComparator);
         int count = 0;
         for (SyncOperation op: pendingSyncs) {
             if (!op.isPeriodic) {
@@ -1784,13 +1830,16 @@ public class SyncManager {
                 count++;
             }
         }
-        pw.println("Total: " + count);
         pw.println();
     }
 
     protected void dumpPeriodicSyncs(PrintWriter pw) {
-        pw.println("Periodic Syncs:");
         List<SyncOperation> pendingSyncs = getAllPendingSyncs();
+
+        pw.print("Periodic Syncs: ");
+        pw.println(countIf(pendingSyncs, op -> op.isPeriodic));
+
+        Collections.sort(pendingSyncs, sOpDumpComparator);
         int count = 0;
         for (SyncOperation op: pendingSyncs) {
             if (op.isPeriodic) {
@@ -1798,11 +1847,62 @@ public class SyncManager {
                 count++;
             }
         }
-        pw.println("Total: " + count);
         pw.println();
     }
 
+    /**
+     * Similar to {@link android.util.TimeUtils#formatDuration}, but it's more suitable and concise
+     * for the sync manager dumpsys.  (Don't add the leading + sign, don't show milliseconds.)
+     */
+    public static StringBuilder formatDurationHMS(StringBuilder sb, long duration) {
+        duration /= 1000;
+        if (duration < 0) {
+            sb.append('-');
+            duration = -duration;
+        }
+        final long seconds = duration % 60;
+        duration /= 60;
+
+        final long minutes = duration % 60;
+        duration /= 60;
+
+        final long hours = duration % 24;
+        duration /= 24;
+
+        final long days = duration;
+
+        boolean print = false;
+        if (days > 0) {
+            sb.append(days);
+            sb.append('d');
+            print = true;
+        }
+        print = printTwoDigitNumber(sb, hours, 'h', print);
+        print = printTwoDigitNumber(sb, minutes, 'm', print);
+        print = printTwoDigitNumber(sb, seconds, 's', print);
+        if (!print) {
+            sb.append("0s");
+        }
+
+        return sb;
+    }
+
+    private static boolean printTwoDigitNumber(StringBuilder sb, long value, char unit,
+            boolean always) {
+        if (!always && (value == 0)) {
+            return false;
+        }
+        if (always && (value < 10)) {
+            sb.append('0');
+        }
+        sb.append(value);
+        sb.append(unit);
+        return true;
+    }
+
     protected void dumpSyncState(PrintWriter pw) {
+        final StringBuilder sb = new StringBuilder();
+
         pw.print("data connected: "); pw.println(mDataConnectionIsConnected);
         pw.print("auto sync: ");
         List<UserInfo> users = getAllUsers();
@@ -1828,13 +1928,16 @@ public class SyncManager {
         final long now = SystemClock.elapsedRealtime();
         pw.print("now: "); pw.print(now);
         pw.println(" (" + formatTime(System.currentTimeMillis()) + ")");
-        pw.println(" (HH:MM:SS)");
-        pw.print("uptime: "); pw.print(DateUtils.formatElapsedTime(now / 1000));
-        pw.println(" (HH:MM:SS)");
+
+        sb.setLength(0);
+        pw.print("uptime: "); pw.print(formatDurationHMS(sb, now));
+        pw.println();
         pw.print("time spent syncing: ");
-        pw.print(DateUtils.formatElapsedTime(
-                mSyncHandler.mSyncTimeTracker.timeSpentSyncing() / 1000));
-        pw.print(" (HH:MM:SS), sync ");
+
+        sb.setLength(0);
+        pw.print(formatDurationHMS(sb,
+                mSyncHandler.mSyncTimeTracker.timeSpentSyncing()));
+        pw.print(", sync ");
         pw.print(mSyncHandler.mSyncTimeTracker.mLastWasSyncing ? "" : "not ");
         pw.println("in progress");
 
@@ -1842,17 +1945,24 @@ public class SyncManager {
         pw.println("Active Syncs: " + mActiveSyncContexts.size());
         final PackageManager pm = mContext.getPackageManager();
         for (SyncManager.ActiveSyncContext activeSyncContext : mActiveSyncContexts) {
-            final long durationInSeconds = (now - activeSyncContext.mStartTime) / 1000;
+            final long durationInSeconds = (now - activeSyncContext.mStartTime);
             pw.print("  ");
-            pw.print(DateUtils.formatElapsedTime(durationInSeconds));
+            sb.setLength(0);
+            pw.print(formatDurationHMS(sb, durationInSeconds));
             pw.print(" - ");
             pw.print(activeSyncContext.mSyncOperation.dump(pm, false));
             pw.println();
         }
+        pw.println();
+
+        dumpPendingSyncs(pw);
+        dumpPeriodicSyncs(pw);
 
         // Join the installed sync adapter with the accounts list and emit for everything.
-        pw.println();
         pw.println("Sync Status");
+
+        final ArrayList<Pair<EndPoint, SyncStatusInfo>> statuses = new ArrayList<>();
+
         for (AccountAndUser account : accounts) {
             pw.printf("Account %s u%d %s\n",
                     account.account.name, account.userId, account.account.type);
@@ -1872,7 +1982,7 @@ public class SyncManager {
                     "Tot",       // 9
                     "Time",      // 10
                     "Last Sync", // 11
-                    "Etc"        // 12
+                    "Backoff"    // 12
             );
 
             final List<RegisteredServicesCache.ServiceInfo<SyncAdapterType>> sorted =
@@ -1899,11 +2009,14 @@ public class SyncManager {
                                         account.userId));
                 SyncStorageEngine.AuthorityInfo settings = syncAuthoritySyncStatus.first;
                 SyncStatusInfo status = syncAuthoritySyncStatus.second;
+                statuses.add(Pair.create(settings.target, status));
                 String authority = settings.target.provider;
                 if (authority.length() > 50) {
                     authority = authority.substring(authority.length() - 50);
                 }
                 table.set(row, 0, authority, settings.syncable, settings.enabled);
+
+                sb.setLength(0);
                 table.set(row, 4,
                         status.numSourceLocal,
                         status.numSourcePoll,
@@ -1911,7 +2024,7 @@ public class SyncManager {
                         status.numSourceServer,
                         status.numSourceUser,
                         status.numSyncs,
-                        DateUtils.formatElapsedTime(status.totalElapsedTime / 1000));
+                        formatDurationHMS(sb, status.totalElapsedTime));
 
                 int row1 = row;
                 if (settings.delayUntil > now) {
@@ -1937,6 +2050,34 @@ public class SyncManager {
                 }
             }
             table.writeTo(pw);
+        }
+
+        dumpSyncHistory(pw);
+
+        pw.println();
+        pw.println("Per Adapter History");
+
+        for (int i = 0; i < statuses.size(); i++) {
+            final Pair<EndPoint, SyncStatusInfo> event = statuses.get(i);
+
+            pw.print("  ");
+            pw.print(event.first.account.name);
+            pw.print('/');
+            pw.print(event.first.account.type);
+            pw.print(" u");
+            pw.print(event.first.userId);
+            pw.print(" [");
+            pw.print(event.first.provider);
+            pw.print("]");
+            pw.println();
+
+            for (int j = 0; j < event.second.getEventCount(); j++) {
+                pw.print("    ");
+                pw.print(formatTime(event.second.getEventTime(j)));
+                pw.print(' ');
+                pw.print(event.second.getEvent(j));
+                pw.println();
+            }
         }
     }
 
@@ -3403,7 +3544,7 @@ public class SyncManager {
     }
 
     static class PrintTable {
-        private ArrayList<Object[]> mTable = Lists.newArrayList();
+        private ArrayList<String[]> mTable = Lists.newArrayList();
         private final int mCols;
 
         PrintTable(int cols) {
@@ -3416,13 +3557,17 @@ public class SyncManager {
                         " columns. can't set " + values.length + " at column " + col);
             }
             for (int i = mTable.size(); i <= row; i++) {
-                final Object[] list = new Object[mCols];
+                final String[] list = new String[mCols];
                 mTable.add(list);
                 for (int j = 0; j < mCols; j++) {
                     list[j] = "";
                 }
             }
-            System.arraycopy(values, 0, mTable.get(row), col, values.length);
+            final String[] rowArray = mTable.get(row);
+            for (int i = 0; i < values.length; i++) {
+                final Object value = values[i];
+                rowArray[col + i] = (value == null) ? "" : value.toString();
+            }
         }
 
         void writeTo(PrintWriter out) {
