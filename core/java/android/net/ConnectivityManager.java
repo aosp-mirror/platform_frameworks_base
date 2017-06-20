@@ -602,6 +602,15 @@ public class ConnectivityManager {
     public final static int REQUEST_ID_UNSET = 0;
 
     /**
+     * Static unique request used as a tombstone for NetworkCallbacks that have been unregistered.
+     * This allows to distinguish when unregistering NetworkCallbacks those that were never
+     * registered and those that were already unregistered.
+     * @hide
+     */
+    private final static NetworkRequest ALREADY_UNREGISTERED =
+            new NetworkRequest.Builder().clearCapabilities().build();
+
+    /**
      * A NetID indicating no Network is selected.
      * Keep in sync with bionic/libc/dns/include/resolv_netid.h
      * @hide
@@ -2686,10 +2695,6 @@ public class ConnectivityManager {
         public void onNetworkResumed(Network network) {}
 
         private NetworkRequest networkRequest;
-
-        private boolean isRegistered() {
-            return (networkRequest != null) && (networkRequest.requestId != REQUEST_ID_UNSET);
-        }
     }
 
     /**
@@ -2856,7 +2861,8 @@ public class ConnectivityManager {
         final NetworkRequest request;
         try {
             synchronized(sCallbacks) {
-                if (callback.isRegistered()) {
+                if (callback.networkRequest != null
+                        && callback.networkRequest != ALREADY_UNREGISTERED) {
                     // TODO: throw exception instead and enforce 1:1 mapping of callbacks
                     // and requests (http://b/20701525).
                     Log.e(TAG, "NetworkCallback was already registered");
@@ -3302,8 +3308,10 @@ public class ConnectivityManager {
         // Find all requests associated to this callback and stop callback triggers immediately.
         // Callback is reusable immediately. http://b/20701525, http://b/35921499.
         synchronized (sCallbacks) {
-            Preconditions.checkArgument(
-                    networkCallback.isRegistered(), "NetworkCallback was not registered");
+            Preconditions.checkArgument(networkCallback.networkRequest != null,
+                    "NetworkCallback was not registered");
+            Preconditions.checkArgument(networkCallback.networkRequest != ALREADY_UNREGISTERED,
+                    "NetworkCallback was already unregistered");
             for (Map.Entry<NetworkRequest, NetworkCallback> e : sCallbacks.entrySet()) {
                 if (e.getValue() == networkCallback) {
                     reqs.add(e.getKey());
@@ -3319,7 +3327,7 @@ public class ConnectivityManager {
                 // Only remove mapping if rpc was successful.
                 sCallbacks.remove(r);
             }
-            networkCallback.networkRequest = null;
+            networkCallback.networkRequest = ALREADY_UNREGISTERED;
         }
     }
 
