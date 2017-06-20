@@ -17682,6 +17682,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 setAutofilled(baseState.mIsAutofilled);
             }
             if ((baseState.mSavedData & BaseSavedState.AUTOFILL_ID) != 0) {
+                // It can happen that views have the same view id and the restoration path will not
+                // be able to distinguish between them. The autofill id needs to be unique though.
+                // Hence prevent the same autofill view id from being restored multiple times.
+                ((BaseSavedState) state).mSavedData &= ~BaseSavedState.AUTOFILL_ID;
+
                 mAutofillViewId = baseState.mAutofillViewId;
             }
         }
