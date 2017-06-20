@@ -655,18 +655,6 @@
   <java-symbol type="string" name="display_manager_overlay_display_secure_suffix" />
   <java-symbol type="string" name="display_manager_overlay_display_title" />
   <java-symbol type="string" name="double_tap_toast" />
-  <java-symbol type="string" name="durationDays" />
-  <java-symbol type="string" name="durationDayHours" />
-  <java-symbol type="string" name="durationDayHour" />
-  <java-symbol type="string" name="durationHours" />
-  <java-symbol type="string" name="durationHourMinutes" />
-  <java-symbol type="string" name="durationHourMinute" />
-  <java-symbol type="string" name="durationMinutes" />
-  <java-symbol type="string" name="durationMinute" />
-  <java-symbol type="string" name="durationMinuteSeconds" />
-  <java-symbol type="string" name="durationMinuteSecond" />
-  <java-symbol type="string" name="durationSeconds" />
-  <java-symbol type="string" name="durationSecond" />
   <java-symbol type="string" name="elapsed_time_short_format_h_mm_ss" />
   <java-symbol type="string" name="elapsed_time_short_format_mm_ss" />
   <java-symbol type="string" name="emailTypeCustom" />
