@@ -58,7 +58,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED
             = new PathInterpolator(0.3f, 0f, 0.8f, 1f);
     // Default alpha value for most scrims, if unsure use this constant
-    public static final float GRADIENT_SCRIM_ALPHA = 0.60f;
+    public static final float GRADIENT_SCRIM_ALPHA = 0.45f;
     // A scrim varies its opacity based on a busyness factor, for example
     // how many notifications are currently visible.
     public static final float GRADIENT_SCRIM_ALPHA_BUSY = 0.90f;
