@@ -4184,7 +4184,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         public static String getString(int uid, long procStateSeq) {
-            return "UID=" + uid + " procStateSeq=" + procStateSeq;
+            return "UID=" + uid + " Seq=" + procStateSeq;
         }
 
         private int increaseNext(int next, int increment) {

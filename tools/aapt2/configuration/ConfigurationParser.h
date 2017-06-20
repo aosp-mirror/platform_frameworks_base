@@ -142,16 +142,14 @@ class Element;
  */
 class ConfigurationParser {
  public:
+
+  /** Returns a ConfigurationParser for the file located at the provided path. */
+  static Maybe<ConfigurationParser> ForPath(const std::string& path);
+
   /** Returns a ConfigurationParser for the configuration in the provided file contents. */
   static ConfigurationParser ForContents(const std::string& contents) {
     ConfigurationParser parser{contents};
     return parser;
-  }
-
-  /** Returns a ConfigurationParser for the file located at the provided path. */
-  static ConfigurationParser ForPath(const std::string& path) {
-    // TODO: Read XML file into memory.
-    return ForContents(path);
   }
 
   /** Sets the diagnostics context to use when parsing. */

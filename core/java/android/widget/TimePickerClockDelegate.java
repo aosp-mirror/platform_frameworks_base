@@ -41,6 +41,7 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.RadialTimePickerView.OnValueSelectedListener;
 import android.widget.TextInputTimePickerView.OnValueTypedListener;
 
@@ -262,6 +263,10 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
             mRadialTimePickerModeButton.setContentDescription(
                     mTextInputPickerModeEnabledDescription);
             updateTextInputPicker();
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
+            }
             mRadialPickerModeEnabled = true;
         }
     }

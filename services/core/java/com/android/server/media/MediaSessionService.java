@@ -16,10 +16,8 @@
 
 package com.android.server.media;
 
-import android.Manifest;
-import android.annotation.NonNull;
-import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.INotificationManager;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -57,13 +55,11 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.text.TextUtils;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -80,7 +76,6 @@ import com.android.server.Watchdog.Monitor;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -112,6 +107,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private AudioManagerInternal mAudioManagerInternal;
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
+    private INotificationManager mNotificationManager;
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -129,6 +125,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
         mLongPressTimeout = ViewConfiguration.getLongPressTimeout();
+        mNotificationManager = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
     }
 
     @Override
@@ -471,28 +469,11 @@ public class MediaSessionService extends SystemService implements Monitor {
             Log.d(TAG, "Checking if enabled notification listener " + compName);
         }
         if (compName != null) {
-            final String enabledNotifListeners = Settings.Secure.getStringForUser(mContentResolver,
-                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                    userId);
-            if (enabledNotifListeners != null) {
-                final String[] components = enabledNotifListeners.split(":");
-                for (int i = 0; i < components.length; i++) {
-                    final ComponentName component =
-                            ComponentName.unflattenFromString(components[i]);
-                    if (component != null) {
-                        if (compName.equals(component)) {
-                            if (DEBUG) {
-                                Log.d(TAG, "ok to get sessions. " + component +
-                                        " is authorized notification listener");
-                            }
-                            return true;
-                        }
-                    }
-                }
-            }
-            if (DEBUG) {
-                Log.d(TAG, "not ok to get sessions. " + compName +
-                        " is not in list of ENABLED_NOTIFICATION_LISTENERS for user " + userId);
+            try {
+                return mNotificationManager.isNotificationListenerAccessGrantedForUser(
+                        compName, userId);
+            } catch(RemoteException e) {
+                Log.w(TAG, "Dead NotificationManager in isEnabledNotificationListener", e);
             }
         }
         return false;

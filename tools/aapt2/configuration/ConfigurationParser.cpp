@@ -21,10 +21,13 @@
 #include <memory>
 #include <utility>
 
+#include <android-base/file.h>
 #include <android-base/logging.h>
 
 #include "ConfigDescription.h"
 #include "Diagnostics.h"
+#include "io/File.h"
+#include "io/FileSystem.h"
 #include "util/Util.h"
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
@@ -42,6 +45,8 @@ using ::aapt::configuration::Configuration;
 using ::aapt::configuration::GlTexture;
 using ::aapt::configuration::Group;
 using ::aapt::configuration::Locale;
+using ::aapt::io::IFile;
+using ::aapt::io::RegularFile;
 using ::aapt::util::TrimWhitespace;
 using ::aapt::xml::Element;
 using ::aapt::xml::FindRootElement;
@@ -49,6 +54,7 @@ using ::aapt::xml::NodeCast;
 using ::aapt::xml::XmlActionExecutor;
 using ::aapt::xml::XmlActionExecutorPolicy;
 using ::aapt::xml::XmlNodeAction;
+using ::android::base::ReadFileToString;
 
 const std::unordered_map<std::string, Abi> kAbiMap = {
     {"armeabi", Abi::kArmeV6},
@@ -95,6 +101,17 @@ class NamespaceVisitor : public xml::Visitor {
 };
 
 }  // namespace
+
+
+
+/** Returns a ConfigurationParser for the file located at the provided path. */
+Maybe<ConfigurationParser> ConfigurationParser::ForPath(const std::string& path) {
+  std::string contents;
+  if (!ReadFileToString(path, &contents, true)) {
+    return {};
+  }
+  return ConfigurationParser(contents);
+}
 
 ConfigurationParser::ConfigurationParser(std::string contents)
     : contents_(std::move(contents)),

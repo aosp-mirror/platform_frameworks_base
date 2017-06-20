@@ -22,7 +22,7 @@ public class MbmsException extends Exception {
     public static final int ERROR_NO_SERVICE_INSTALLED = 1;
     public static final int ERROR_MULTIPLE_SERVICES_INSTALLED = 2;
     public static final int ERROR_BIND_TIMEOUT_OR_FAILURE = 3;
-    public static final int ERROR_UNABLE_TO_INITIALIZE = 4;
+    public static final int ERROR_MIDDLEWARE_NOT_YET_READY = 4;
     public static final int ERROR_ALREADY_INITIALIZED = 5;
     public static final int ERROR_CONCURRENT_SERVICE_LIMIT_REACHED = 6;
     public static final int ERROR_MIDDLEWARE_NOT_BOUND = 7;
@@ -36,6 +36,7 @@ public class MbmsException extends Exception {
     public static final int ERROR_NOT_CONNECTED_TO_HOME_CARRIER_LTE = 15;
     public static final int ERROR_UNABLE_TO_READ_SIM = 16;
     public static final int ERROR_CARRIER_CHANGE_NOT_ALLOWED = 17;
+    public static final int ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT = 18;
 
     private final int mErrorCode;
 

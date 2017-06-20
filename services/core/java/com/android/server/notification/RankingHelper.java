@@ -169,7 +169,7 @@ public class RankingHelper implements RankingConfig {
             }
             if (type == XmlPullParser.START_TAG) {
                 if (TAG_PACKAGE.equals(tag)) {
-                    int uid = safeInt(parser, ATT_UID, Record.UNKNOWN_UID);
+                    int uid = XmlUtils.safeInt(parser, ATT_UID, Record.UNKNOWN_UID);
                     String name = parser.getAttributeValue(null, ATT_NAME);
                     if (!TextUtils.isEmpty(name)) {
                         if (forRestore) {
@@ -182,14 +182,14 @@ public class RankingHelper implements RankingConfig {
                         }
 
                         Record r = getOrCreateRecord(name, uid,
-                                safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
-                                safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY),
-                                safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
-                                safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
-                        r.importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-                        r.priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
-                        r.visibility = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
-                        r.showBadge = safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
+                                XmlUtils.safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
+                                XmlUtils.safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY),
+                                XmlUtils.safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
+                                XmlUtils.safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
+                        r.importance = XmlUtils.safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+                        r.priority = XmlUtils.safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
+                        r.visibility = XmlUtils.safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
+                        r.showBadge = XmlUtils.safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
 
                         final int innerDepth = parser.getDepth();
                         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -214,8 +214,8 @@ public class RankingHelper implements RankingConfig {
                             if (TAG_CHANNEL.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
                                 String channelName = parser.getAttributeValue(null, ATT_NAME);
-                                int channelImportance =
-                                        safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+                                int channelImportance = XmlUtils.safeInt(
+                                        parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                                 if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
                                     NotificationChannel channel = new NotificationChannel(id,
                                             channelName, channelImportance);
@@ -467,26 +467,6 @@ public class RankingHelper implements RankingConfig {
         return Collections.binarySearch(notificationList, target, mFinalComparator);
     }
 
-    private static boolean safeBool(XmlPullParser parser, String att, boolean defValue) {
-        final String value = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(value)) return defValue;
-        return Boolean.parseBoolean(value);
-    }
-
-    private static int safeInt(XmlPullParser parser, String att, int defValue) {
-        final String val = parser.getAttributeValue(null, att);
-        return tryParseInt(val, defValue);
-    }
-
-    private static int tryParseInt(String value, int defValue) {
-        if (TextUtils.isEmpty(value)) return defValue;
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return defValue;
-        }
-    }
-
     /**
      * Gets importance.
      */
@@ -525,12 +505,11 @@ public class RankingHelper implements RankingConfig {
         if (r == null) {
             throw new IllegalArgumentException("Invalid package");
         }
-        LogMaker lm = new LogMaker(MetricsProto.MetricsEvent.ACTION_NOTIFICATION_CHANNEL_GROUP)
-                .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
-                .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_GROUP_ID,
-                        group.getId())
-                .setPackageName(pkg);
-        MetricsLogger.action(lm);
+        final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
+        if (!group.equals(oldGroup)) {
+            // will log for new entries as well as name changes
+            MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
+        }
         r.groups.put(group.getId(), group);
         updateConfig();
     }
@@ -558,13 +537,16 @@ public class RankingHelper implements RankingConfig {
         if (existing != null && fromTargetApp) {
             if (existing.isDeleted()) {
                 existing.setDeleted(false);
+
+                // log a resurrected channel as if it's new again
+                MetricsLogger.action(getChannelLog(channel, pkg).setType(
+                        MetricsProto.MetricsEvent.TYPE_OPEN));
             }
 
             existing.setName(channel.getName().toString());
             existing.setDescription(channel.getDescription());
             existing.setBlockableSystem(channel.isBlockableSystem());
 
-            MetricsLogger.action(getChannelLog(channel, pkg));
             updateConfig();
             return;
         }
@@ -622,7 +604,10 @@ public class RankingHelper implements RankingConfig {
             r.showBadge = updatedChannel.canShowBadge();
         }
 
-        MetricsLogger.action(getChannelLog(updatedChannel, pkg));
+        if (!channel.equals(updatedChannel)) {
+            // only log if there are real changes
+            MetricsLogger.action(getChannelLog(updatedChannel, pkg));
+        }
         updateConfig();
     }
 
@@ -1139,6 +1124,14 @@ public class RankingHelper implements RankingConfig {
                         channel.getId())
                 .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE,
                         channel.getImportance());
+    }
+
+    private LogMaker getChannelGroupLog(String groupId, String pkg) {
+        return new LogMaker(MetricsProto.MetricsEvent.ACTION_NOTIFICATION_CHANNEL_GROUP)
+                .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CHANNEL_GROUP_ID,
+                        groupId)
+                .setPackageName(pkg);
     }
 
     public void updateBadgingEnabled() {

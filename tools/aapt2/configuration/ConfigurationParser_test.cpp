@@ -130,6 +130,11 @@ class ConfigurationParserTest : public ConfigurationParser, public ::testing::Te
   StdErrDiagnostics diag_;
 };
 
+TEST_F(ConfigurationParserTest, ForPath_NoFile) {
+  auto result = ConfigurationParser::ForPath("./does_not_exist.xml");
+  EXPECT_FALSE(result);
+}
+
 TEST_F(ConfigurationParserTest, ValidateFile) {
   auto parser = ConfigurationParser::ForContents(kValidConfig).WithDiagnostics(&diag_);
   auto result = parser.Parse();

@@ -24,30 +24,13 @@ import java.util.List;
  * The interface the clients top-level streaming listener will satisfy.
  * @hide
  */
-interface IMbmsStreamingManagerCallback
+oneway interface IMbmsStreamingManagerCallback
 {
     void error(int errorCode, String message);
 
-    /**
-     * Called to indicate published Streaming Services have changed.
-     *
-     * This will only be called after the application has requested
-     * a list of streaming services and specified a service class list
-     * of interest AND the results of a subsequent getStreamServices
-     * call with the same service class list would
-     * return different
-     * results.
-     */
     void streamingServicesUpdated(in List<StreamingServiceInfo> services);
 
-    /**
-     * Called to indicate the active Streaming Services have changed.
-     * 
-     * This will be caused whenever a new service starts streaming or whenever
-     * MbmsStreamServiceManager.getActiveStreamingServices is called.
-     *
-     * @param services a list of StreamingServiceInfos.  May be empty if
-     *                 there are no active StreamingServices
-     */
     void activeStreamingServicesUpdated(in List<StreamingServiceInfo> services);
+
+    void middlewareReady();
 }

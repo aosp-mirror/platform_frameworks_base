@@ -24,19 +24,11 @@ import java.util.List;
  * The interface the clients top-level file download listener will satisfy.
  * @hide
  */
-interface IMbmsDownloadManagerCallback
+oneway interface IMbmsDownloadManagerCallback
 {
     void error(int errorCode, String message);
 
-    /**
-     * Called to indicate published File Services have changed.
-     *
-     * This will only be called after the application has requested
-     * a list of file services and specified a service class list
-     * of interest AND the results of a subsequent getFileServices
-     * call with the same service class list would
-     * return different
-     * results.
-     */
     void fileServicesUpdated(in List<FileServiceInfo> services);
+
+    void middlewareReady();
 }
