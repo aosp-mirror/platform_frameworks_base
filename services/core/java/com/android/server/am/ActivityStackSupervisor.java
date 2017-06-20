@@ -2273,6 +2273,31 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return null;
     }
 
+    /**
+     * Get next valid stack for launching provided activity in the system. This will search across
+     * displays and stacks in last-focused order for a focusable and visible stack, except those
+     * that are on a currently focused display.
+     *
+     * @param r The activity that is being launched.
+     * @param currentFocus The display that previously had focus and thus needs to be ignored when
+     *                     searching for the next candidate.
+     * @return Next valid {@link ActivityStack}, null if not found.
+     */
+    ActivityStack getNextValidLaunchStackLocked(@NonNull ActivityRecord r, int currentFocus) {
+        mWindowManager.getDisplaysInFocusOrder(mTmpOrderedDisplayIds);
+        for (int i = mTmpOrderedDisplayIds.size() - 1; i >= 0; --i) {
+            final int displayId = mTmpOrderedDisplayIds.get(i);
+            if (displayId == currentFocus) {
+                continue;
+            }
+            final ActivityStack stack = getValidLaunchStackOnDisplay(displayId, r);
+            if (stack != null) {
+                return stack;
+            }
+        }
+        return null;
+    }
+
     ActivityRecord getHomeActivity() {
         return getHomeActivityForUser(mCurrentUser);
     }
