@@ -20,6 +20,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 import com.android.timezone.distro.DistroException;
 import com.android.timezone.distro.DistroVersion;
+import com.android.timezone.distro.TimeZoneDistro;
 import com.android.timezone.distro.StagedDistroOperation;
 
 import android.app.timezone.Callback;
@@ -224,7 +225,8 @@ public final class RulesManagerService extends IRulesManager.Stub {
             try {
                 byte[] distroBytes =
                         RulesManagerService.this.mFileDescriptorHelper.readFully(mTimeZoneDistro);
-                int installerResult = mInstaller.stageInstallWithErrorCode(distroBytes);
+                TimeZoneDistro distro = new TimeZoneDistro(distroBytes);
+                int installerResult = mInstaller.stageInstallWithErrorCode(distro);
                 int resultCode = mapInstallerResultToApiCode(installerResult);
                 sendFinishedStatus(mCallback, resultCode);
 
