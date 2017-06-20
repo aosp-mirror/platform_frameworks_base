@@ -251,5 +251,7 @@ int main(int argc, char** argv)
     if (mapbase != MAP_FAILED) {
         munmap((void *)mapbase, mapsize);
     }
-    return 0;
+
+    // b/36066697: Avoid running static destructors.
+    _exit(1);
 }
