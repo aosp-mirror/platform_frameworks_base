@@ -291,7 +291,6 @@ public class WifiP2pManager {
             "android.net.wifi.p2p.CALLING_PACKAGE";
 
     IWifiP2pManager mService;
-    private final Map<Channel, Binder> mBinders = new HashMap<>();
 
     private static final int BASE = Protocol.BASE_WIFI_P2P_MANAGER;
 
@@ -670,11 +669,12 @@ public class WifiP2pManager {
      * by doing a call on {@link #initialize}
      */
     public static class Channel {
-        Channel(Context context, Looper looper, ChannelListener l) {
+        Channel(Context context, Looper looper, ChannelListener l, Binder binder) {
             mAsyncChannel = new AsyncChannel();
             mHandler = new P2pHandler(looper);
             mChannelListener = l;
             mContext = context;
+            mBinder = binder;
         }
         private final static int INVALID_LISTENER_KEY = 0;
         private ChannelListener mChannelListener;
@@ -685,6 +685,8 @@ public class WifiP2pManager {
         private HashMap<Integer, Object> mListenerMap = new HashMap<Integer, Object>();
         private final Object mListenerMapLock = new Object();
         private int mListenerKey = 0;
+
+        /* package */ final Binder mBinder;
 
         private AsyncChannel mAsyncChannel;
         private P2pHandler mHandler;
@@ -892,8 +894,8 @@ public class WifiP2pManager {
      */
     public Channel initialize(Context srcContext, Looper srcLooper, ChannelListener listener) {
         Binder binder = new Binder();
-        Channel channel = initalizeChannel(srcContext, srcLooper, listener, getMessenger(binder));
-        mBinders.put(channel, binder);
+        Channel channel = initalizeChannel(srcContext, srcLooper, listener, getMessenger(binder),
+                binder);
         return channel;
     }
 
@@ -903,14 +905,15 @@ public class WifiP2pManager {
      */
     public Channel initializeInternal(Context srcContext, Looper srcLooper,
                                       ChannelListener listener) {
-        return initalizeChannel(srcContext, srcLooper, listener, getP2pStateMachineMessenger());
+        return initalizeChannel(srcContext, srcLooper, listener, getP2pStateMachineMessenger(),
+                null);
     }
 
     private Channel initalizeChannel(Context srcContext, Looper srcLooper, ChannelListener listener,
-                                     Messenger messenger) {
+                                     Messenger messenger, Binder binder) {
         if (messenger == null) return null;
 
-        Channel c = new Channel(srcContext, srcLooper, listener);
+        Channel c = new Channel(srcContext, srcLooper, listener, binder);
         if (c.mAsyncChannel.connectSync(srcContext, c.mHandler, messenger)
                 == AsyncChannel.STATUS_SUCCESSFUL) {
             return c;
@@ -1428,8 +1431,9 @@ public class WifiP2pManager {
      */
     public void close(Channel c) {
         try {
-            mService.close(mBinders.get(c));
-            mBinders.remove(c);
+            if (c != null) {
+                mService.close(c.mBinder);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
