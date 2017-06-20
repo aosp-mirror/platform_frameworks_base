@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -144,5 +145,14 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public Display getDefaultDisplay() {
         return mContext.getDisplay();
+    }
+
+    @Override
+    public Region getCurrentImeTouchRegion() {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().getCurrentImeTouchRegion();
+        } catch (RemoteException e) {
+        }
+        return null;
     }
 }
