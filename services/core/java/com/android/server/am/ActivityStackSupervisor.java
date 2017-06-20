@@ -5155,7 +5155,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
             userId = task.userId;
             int result = mService.startActivityInPackage(callingUid, callingPackage, intent, null,
-                    null, null, 0, 0, bOptions, userId, null, task);
+                    null, null, 0, 0, bOptions, userId, null, task, "startActivityFromRecents");
             if (launchStackId == DOCKED_STACK_ID) {
                 setResizingDuringAnimation(task);
             }
