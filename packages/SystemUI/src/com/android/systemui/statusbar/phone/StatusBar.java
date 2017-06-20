@@ -309,6 +309,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final boolean DEBUG_GESTURES = false;
     public static final boolean DEBUG_MEDIA = false;
     public static final boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
+    public static final boolean DEBUG_CAMERA_LIFT = true; // false once b/62623620 is fixed
 
     public static final boolean DEBUG_WINDOW_STATE = false;
 
@@ -5172,11 +5173,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onCameraLaunchGestureDetected(int source) {
         mLastCameraLaunchSource = source;
         if (mStartedGoingToSleep) {
+            if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Finish going to sleep before launching camera");
             mLaunchCameraOnFinishedGoingToSleep = true;
             return;
         }
         if (!mNotificationPanel.canCameraGestureBeLaunched(
                 mStatusBarKeyguardViewManager.isShowing() && mExpandedVisible)) {
+            if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Can't launch camera right now, mExpandedVisible: " +
+                    mExpandedVisible);
             return;
         }
         if (!mDeviceInteractive) {
@@ -5196,12 +5200,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mGestureWakeLock.acquire(LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
             }
             if (mScreenTurningOn || mStatusBarKeyguardViewManager.isScreenTurnedOn()) {
+                if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Launching camera");
                 mNotificationPanel.launchCamera(mDeviceInteractive /* animate */, source);
             } else {
                 // We need to defer the camera launch until the screen comes on, since otherwise
                 // we will dismiss us too early since we are waiting on an activity to be drawn and
                 // incorrectly get notified because of the screen on event (which resumes and pauses
                 // some activities)
+                if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Deferring until screen turns on");
                 mLaunchCameraOnScreenTurningOn = true;
             }
         }
