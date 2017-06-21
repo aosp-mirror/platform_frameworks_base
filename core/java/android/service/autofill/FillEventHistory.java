@@ -54,6 +54,11 @@ public final class FillEventHistory implements Parcelable {
      */
     private final int mServiceUid;
 
+    /**
+     * Not in parcel. The ID of the autofill session that created the {@link FillResponse}.
+     */
+    private final int mSessionId;
+
     @Nullable private final Bundle mClientState;
     @Nullable List<Event> mEvents;
 
@@ -66,6 +71,11 @@ public final class FillEventHistory implements Parcelable {
      */
     public int getServiceUid() {
         return mServiceUid;
+    }
+
+    /** @hide */
+    public int getSessionId() {
+        return mSessionId;
     }
 
     /**
@@ -102,9 +112,10 @@ public final class FillEventHistory implements Parcelable {
     /**
      * @hide
      */
-    public FillEventHistory(int serviceUid, @Nullable Bundle clientState) {
+    public FillEventHistory(int serviceUid, int sessionId, @Nullable Bundle clientState) {
         mClientState = clientState;
         mServiceUid = serviceUid;
+        mSessionId = sessionId;
     }
 
     @Override
@@ -205,7 +216,7 @@ public final class FillEventHistory implements Parcelable {
             new Parcelable.Creator<FillEventHistory>() {
                 @Override
                 public FillEventHistory createFromParcel(Parcel parcel) {
-                    FillEventHistory selection = new FillEventHistory(0, parcel.readBundle());
+                    FillEventHistory selection = new FillEventHistory(0, 0, parcel.readBundle());
 
                     int numEvents = parcel.readInt();
                     for (int i = 0; i < numEvents; i++) {
