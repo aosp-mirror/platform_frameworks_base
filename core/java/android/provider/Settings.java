@@ -408,6 +408,21 @@ public final class Settings {
             "android.settings.BLUETOOTH_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of Assist Gesture.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ASSIST_GESTURE_SETTINGS =
+            "android.settings.ASSIST_GESTURE_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of cast endpoints.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
