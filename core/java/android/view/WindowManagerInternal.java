@@ -229,6 +229,11 @@ public abstract class WindowManagerInternal {
     public abstract boolean isKeyguardGoingAway();
 
     /**
+    * @return Whether the keyguard is showing and not occluded.
+    */
+    public abstract boolean isKeyguardShowingAndNotOccluded();
+
+    /**
      * Gets the frame of a window given its token.
      *
      * @param token The token.

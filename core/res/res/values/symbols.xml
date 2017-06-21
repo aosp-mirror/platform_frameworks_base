@@ -273,6 +273,7 @@
   <java-symbol type="bool" name="config_syncstorageengine_masterSyncAutomatically" />
   <java-symbol type="bool" name="config_telephony_use_own_number_for_voicemail" />
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
+  <java-symbol type="bool" name="config_enableHapticTextHandle" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation" />
   <java-symbol type="bool" name="config_single_volume" />
   <java-symbol type="bool" name="config_voice_capable" />
@@ -1195,8 +1196,6 @@
   <java-symbol type="array" name="config_cdma_dun_supported_types" />
   <java-symbol type="array" name="config_disabledUntilUsedPreinstalledImes" />
   <java-symbol type="array" name="config_disabledUntilUsedPreinstalledCarrierApps" />
-  <java-symbol type="array" name="config_operatorConsideredNonRoaming" />
-  <java-symbol type="array" name="config_sameNamedOperatorConsideredRoaming" />
   <java-symbol type="array" name="config_callBarringMMI" />
   <java-symbol type="array" name="config_globalActionsList" />
   <java-symbol type="array" name="config_telephonyHardware" />
@@ -3043,6 +3042,7 @@
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
   <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
   <java-symbol type="string" name="config_headlineFontFamily" />
+  <java-symbol type="string" name="config_headlineFontFamilyLight" />
 
   <java-symbol type="drawable" name="stat_sys_vitals" />
 
