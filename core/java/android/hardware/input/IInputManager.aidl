@@ -34,6 +34,11 @@ interface IInputManager {
     InputDevice getInputDevice(int deviceId);
     int[] getInputDeviceIds();
 
+    // Enable/disable input device.
+    boolean isInputDeviceEnabled(int deviceId);
+    void enableInputDevice(int deviceId);
+    void disableInputDevice(int deviceId);
+
     // Reports whether the hardware supports the given keys; returns true if successful
     boolean hasKeys(int deviceId, int sourceMask, in int[] keyCodes, out boolean[] keyExists);
 
