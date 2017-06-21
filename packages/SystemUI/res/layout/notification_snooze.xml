@@ -20,12 +20,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:clickable="true"
     android:background="@color/notification_guts_bg_color"
     android:theme="@*android:style/Theme.DeviceDefault.Light">
 
     <RelativeLayout
-        android:layout_width="match_parent"
         android:id="@+id/notification_snooze"
+        android:layout_width="match_parent"
         android:layout_height="@dimen/snooze_snackbar_min_height">
 
         <TextView
