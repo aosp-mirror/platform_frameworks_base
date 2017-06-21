@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.format.Time;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -184,6 +185,17 @@ public final class JobStatus {
     public long madeActive;
 
     /**
+     * Last time a job finished successfully for a periodic job, in the currentTimeMillis time,
+     * for dumpsys.
+     */
+    private long mLastSuccessfulRunTime;
+
+    /**
+     * Last time a job finished unsuccessfully, in the currentTimeMillis time, for dumpsys.
+     */
+    private long mLastFailedRunTime;
+
+    /**
      * For use only by ContentObserverController: state it is maintaining about content URIs
      * being observed.
      */
@@ -196,7 +208,7 @@ public final class JobStatus {
 
     private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
             int sourceUserId, String tag, int numFailures, long earliestRunTimeElapsedMillis,
-            long latestRunTimeElapsedMillis) {
+            long latestRunTimeElapsedMillis, long lastSuccessfulRunTime, long lastFailedRunTime) {
         this.job = job;
         this.callingUid = callingUid;
 
@@ -263,6 +275,9 @@ public final class JobStatus {
             requiredConstraints |= CONSTRAINT_CONTENT_TRIGGER;
         }
         this.requiredConstraints = requiredConstraints;
+
+        mLastSuccessfulRunTime = lastSuccessfulRunTime;
+        mLastFailedRunTime = lastFailedRunTime;
     }
 
     /** Copy constructor. */
@@ -270,7 +285,8 @@ public final class JobStatus {
         this(jobStatus.getJob(), jobStatus.getUid(),
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(),
-                jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed());
+                jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
+                jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime());
     }
 
     /**
@@ -281,18 +297,22 @@ public final class JobStatus {
      * We consider a freshly loaded job to no longer be in back-off.
      */
     public JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId,
-            String sourceTag, long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis) {
+            String sourceTag, long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
+            long lastSuccessfulRunTime, long lastFailedRunTime) {
         this(job, callingUid, sourcePackageName, sourceUserId, sourceTag, 0,
-                earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis);
+                earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
+                lastSuccessfulRunTime, lastFailedRunTime);
     }
 
     /** Create a new job to be rescheduled with the provided parameters. */
     public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
-                      long newLatestRuntimeElapsedMillis, int backoffAttempt) {
+            long newLatestRuntimeElapsedMillis, int backoffAttempt,
+            long lastSuccessfulRunTime, long lastFailedRunTime) {
         this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
                 rescheduling.getSourceTag(), backoffAttempt, newEarliestRuntimeElapsedMillis,
-                newLatestRuntimeElapsedMillis);
+                newLatestRuntimeElapsedMillis,
+                lastSuccessfulRunTime, lastFailedRunTime);
     }
 
     /**
@@ -316,7 +336,8 @@ public final class JobStatus {
                     elapsedNow + job.getMaxExecutionDelayMillis() : NO_LATEST_RUNTIME;
         }
         return new JobStatus(job, callingUid, sourcePackageName, sourceUserId, tag, 0,
-                earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis);
+                earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
+                0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */);
     }
 
     public void enqueueWorkLocked(IActivityManager am, JobWorkItem work) {
@@ -667,6 +688,14 @@ public final class JobStatus {
 
     void setTrackingController(int which) {
         trackingControllers |= which;
+    }
+
+    public long getLastSuccessfulRunTime() {
+        return mLastSuccessfulRunTime;
+    }
+
+    public long getLastFailedRunTime() {
+        return mLastFailedRunTime;
     }
 
     public boolean shouldDump(int filterUid) {
@@ -1040,6 +1069,18 @@ public final class JobStatus {
         pw.println();
         if (numFailures != 0) {
             pw.print(prefix); pw.print("Num failures: "); pw.println(numFailures);
+        }
+        final Time t = new Time();
+        final String format = "%Y-%m-%d %H:%M:%S";
+        if (mLastSuccessfulRunTime != 0) {
+            pw.print(prefix); pw.print("Last successful run: ");
+            t.set(mLastSuccessfulRunTime);
+            pw.println(t.format(format));
+        }
+        if (mLastFailedRunTime != 0) {
+            pw.print(prefix); pw.print("Last failed run: ");
+            t.set(mLastFailedRunTime);
+            pw.println(t.format(format));
         }
     }
 }

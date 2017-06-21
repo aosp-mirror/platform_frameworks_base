@@ -1122,7 +1122,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         delayMillis =
                 Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
         JobStatus newJob = new JobStatus(failureToReschedule, elapsedNowMillis + delayMillis,
-                JobStatus.NO_LATEST_RUNTIME, backoffAttempts);
+                JobStatus.NO_LATEST_RUNTIME, backoffAttempts,
+                failureToReschedule.getLastSuccessfulRunTime(), System.currentTimeMillis());
         for (int ic=0; ic<mControllers.size(); ic++) {
             StateController controller = mControllers.get(ic);
             controller.rescheduleForFailureLocked(newJob, failureToReschedule);
@@ -1160,7 +1161,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     newEarliestRunTimeElapsed/1000 + ", " + newLatestRuntimeElapsed/1000 + "]s");
         }
         return new JobStatus(periodicToReschedule, newEarliestRunTimeElapsed,
-                newLatestRuntimeElapsed, 0 /* backoffAttempt */);
+                newLatestRuntimeElapsed, 0 /* backoffAttempt */,
+                System.currentTimeMillis() /* lastSuccessfulRunTime */,
+                periodicToReschedule.getLastFailedRunTime());
     }
 
     // JobCompletedListener implementations.
