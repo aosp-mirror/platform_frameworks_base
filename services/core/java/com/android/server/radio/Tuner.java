@@ -92,11 +92,16 @@ class Tuner extends ITuner.Stub {
     public void close() {
         synchronized (mLock) {
             if (mIsClosed) return;
+            mIsClosed = true;
             mTunerCallback.detach();
             mClientCallback.asBinder().unlinkToDeath(mDeathRecipient, 0);
             nativeClose(mNativeContext);
-            mIsClosed = true;
         }
+    }
+
+    @Override
+    public boolean isClosed() {
+        return mIsClosed;
     }
 
     private void checkNotClosedLocked() {
