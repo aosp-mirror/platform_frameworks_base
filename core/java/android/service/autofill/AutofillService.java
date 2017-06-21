@@ -208,12 +208,22 @@ public abstract class AutofillService extends Service {
     }
 
     /**
-     * Returns the {@link FillEventHistory.Event events} since the last {@link FillResponse} was
-     * returned.
+     * Gets the events that happened after the last
+     * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
+     * call.
      *
-     * <p>The history is not persisted over reboots.
+     * <p>This method is typically used to keep track of previous user actions to optimize further
+     * requests. For example, the service might return email addresses in alphabetical order by
+     * default, but change that order based on the address the user picked on previous requests.
      *
-     * @return The history or {@code null} if there are not events.
+     * <p>The history is not persisted over reboots, and it's cleared every time the service
+     * replies to a {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} by calling
+     * {@link FillCallback#onSuccess(FillResponse)} or {@link FillCallback#onFailure(CharSequence)}
+     * (if the service doesn't call any of these methods, the history will clear out after some
+     * pre-defined time). Hence, the service should call {@link #getFillEventHistory()} before
+     * finishing the {@link FillCallback}.
+     *
+     * @return The history or {@code null} if there are no events.
      */
     @Nullable public final FillEventHistory getFillEventHistory() {
         AutofillManager afm = getSystemService(AutofillManager.class);
