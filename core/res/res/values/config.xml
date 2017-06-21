@@ -2200,15 +2200,6 @@
          when alpha identifier is not provided by the UICC -->
     <bool name="config_stkNoAlphaUsrCnf">true</bool>
 
-    <!-- Don't use roaming icon for considered operators.
-         A match on config_sameNamedOperatorConsideredRoaming supersedes a match on this.
-         Can use mcc or mcc+mnc as item. For example, 302 or 21407.
-         If operators, 21404 and 21407, make roaming agreements, user of 21404 should not see
-         the roaming icon as using 21407 network.
-         To do this, add 21407 item to values-mcc214-mnc04/config.xml -->
-    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
-    </string-array>
-
     <!-- Threshold (in ms) under which a screen off / screen on will be considered a reset of the
          immersive mode confirmation prompt.-->
     <integer name="config_immersive_mode_confirmation_panic">5000</integer>
@@ -2216,17 +2207,6 @@
     <!-- For some operators, PDU has garbages. To fix it, need to use valid index -->
     <integer name="config_valid_wappush_index">-1</integer>
 
-    <!-- This is NOT just for same named operators unlike the name suggests (will blacklist regardless of name).
-         A match on this supersedes a match on config_operatorConsideredNonRoaming.
-         Uses "startsWith" so you can use a leading substring like the mcc or
-         use the complete mcc+mnc string.
-         For a given mcc/mcc-mnc, some operators may want to roam (even if
-         config_operatorConsideredNonRoaming has the mcc/mcc-mnc).
-         user of 40485 should see the roaming icon as using 40483 network
-         though same Reliance network.
-         To do this, add 40483 item to values-mcc404-mnc85/config.xml -->
-    <string-array translatable="false" name="config_sameNamedOperatorConsideredRoaming">
-    </string-array>
     <!-- call barring MMI code from TS 22.030 Annex B -->
     <string-array translatable="false" name="config_callBarringMMI">
         <item>33</item>
