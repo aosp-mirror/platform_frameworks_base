@@ -117,10 +117,8 @@ struct GlTexture {
   }
 };
 
-/**
- * AAPT2 XML configuration binary representation.
- */
-struct Configuration {
+/** AAPT2 XML configuration file binary representation. */
+struct PostProcessingConfiguration {
   // TODO: Support named artifacts?
   std::vector<Artifact> artifacts;
   Maybe<std::string> artifact_format;
@@ -166,7 +164,7 @@ class ConfigurationParser {
    * Parses the configuration file and returns the results. If the configuration could not be parsed
    * the result is empty and any errors will be displayed with the provided diagnostics context.
    */
-  Maybe<configuration::Configuration> Parse();
+  Maybe<configuration::PostProcessingConfiguration> Parse();
 
  protected:
   /**
@@ -185,9 +183,8 @@ class ConfigurationParser {
    * An ActionHandler for processing XML elements in the XmlActionExecutor. Returns true if the
    * element was successfully processed, otherwise returns false.
    */
-  using ActionHandler = std::function<bool(configuration::Configuration* config,
-                                           xml::Element* element,
-                                           IDiagnostics* diag)>;
+  using ActionHandler = std::function<bool(configuration::PostProcessingConfiguration* config,
+                                           xml::Element* element, IDiagnostics* diag)>;
 
   /** Handler for <artifact> tags. */
   static ActionHandler artifact_handler_;

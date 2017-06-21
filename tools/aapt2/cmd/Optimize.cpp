@@ -40,7 +40,7 @@
 
 using ::aapt::configuration::Abi;
 using ::aapt::configuration::Artifact;
-using ::aapt::configuration::Configuration;
+using ::aapt::configuration::PostProcessingConfiguration;
 using ::android::StringPiece;
 using ::android::base::StringPrintf;
 
@@ -66,8 +66,7 @@ struct OptimizeOptions {
 
   TableFlattenerOptions table_flattener_options;
 
-  // TODO: Come up with a better name for the Configuration struct.
-  Maybe<Configuration> configuration;
+  Maybe<PostProcessingConfiguration> configuration;
 };
 
 class OptimizeContext : public IAaptContext {
@@ -189,7 +188,7 @@ class OptimizeCommand {
     }
 
     if (options_.configuration && options_.output_dir) {
-      Configuration& config = options_.configuration.value();
+      PostProcessingConfiguration& config = options_.configuration.value();
 
       // For now, just write out the stripped APK since ABI splitting doesn't modify anything else.
       for (const Artifact& artifact : config.artifacts) {
