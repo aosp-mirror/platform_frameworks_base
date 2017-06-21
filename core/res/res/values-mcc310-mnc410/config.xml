@@ -20,28 +20,9 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
     <!-- Configure mobile network MTU. Carrier specific value is set here.
     -->
     <integer name="config_mobile_mtu">1410</integer>
-    <!-- Show roaming icon though same named operators. -->
-    <string-array translatable="false" name="config_sameNamedOperatorConsideredRoaming">
-        <item>310110</item>
-        <item>310140</item>
-        <item>310400</item>
-        <item>310470</item>
-        <item>311170</item>
-    </string-array>
-
-    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
-        <item>310</item>
-        <item>311</item>
-        <item>312</item>
-        <item>313</item>
-        <item>314</item>
-        <item>315</item>
-        <item>316</item>
-    </string-array>
     <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
     <string-array name="config_twoDigitNumberPattern">
         <item>"0"</item>
