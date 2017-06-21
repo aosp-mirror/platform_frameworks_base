@@ -452,6 +452,7 @@ public final class LoadedApk {
             for (String lib : sharedLibraries) {
                 if (!outZipPaths.contains(lib)) {
                     outZipPaths.add(0, lib);
+                    appendApkLibPathIfNeeded(lib, aInfo, outLibPaths);
                 }
             }
         }
@@ -460,7 +461,29 @@ public final class LoadedApk {
             for (String lib : instrumentationLibs) {
                 if (!outZipPaths.contains(lib)) {
                     outZipPaths.add(0, lib);
+                    appendApkLibPathIfNeeded(lib, aInfo, outLibPaths);
                 }
+            }
+        }
+    }
+
+    /**
+     * This method appends a path to the appropriate native library folder of a
+     * library if this library is hosted in an APK. This allows support for native
+     * shared libraries. The library API is determined based on the application
+     * ABI.
+     *
+     * @param path Path to the library.
+     * @param applicationInfo The application depending on the library.
+     * @param outLibPaths List to which to add the native lib path if needed.
+     */
+    private static void appendApkLibPathIfNeeded(@NonNull String path,
+            @NonNull ApplicationInfo applicationInfo, @Nullable List<String> outLibPaths) {
+        // Looking at the suffix is a little hacky but a safe and simple solution.
+        // We will be revisiting code in the next release and clean this up.
+        if (outLibPaths != null && applicationInfo.primaryCpuAbi != null && path.endsWith(".apk")) {
+            if (applicationInfo.targetSdkVersion >= Build.VERSION_CODES.O) {
+                outLibPaths.add(path + "!/lib/" + applicationInfo.primaryCpuAbi);
             }
         }
     }
