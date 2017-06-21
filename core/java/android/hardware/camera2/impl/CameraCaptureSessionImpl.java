@@ -158,7 +158,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
-    public synchronized int capture(CaptureRequest request, CaptureCallback callback,
+    public int capture(CaptureRequest request, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
         if (request == null) {
             throw new IllegalArgumentException("request must not be null");
@@ -169,21 +169,23 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             throw new IllegalArgumentException("capture request was created for another session");
         }
 
-        checkNotClosed();
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
 
-        handler = checkHandler(handler, callback);
+            handler = checkHandler(handler, callback);
 
-        if (DEBUG) {
-            Log.v(TAG, mIdString + "capture - request " + request + ", callback " + callback +
-                    " handler " + handler);
+            if (DEBUG) {
+                Log.v(TAG, mIdString + "capture - request " + request + ", callback " + callback +
+                        " handler " + handler);
+            }
+
+            return addPendingSequence(mDeviceImpl.capture(request,
+                    createCaptureCallbackProxy(handler, callback), mDeviceHandler));
         }
-
-        return addPendingSequence(mDeviceImpl.capture(request,
-                createCaptureCallbackProxy(handler, callback), mDeviceHandler));
     }
 
     @Override
-    public synchronized int captureBurst(List<CaptureRequest> requests, CaptureCallback callback,
+    public int captureBurst(List<CaptureRequest> requests, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
         if (requests == null) {
             throw new IllegalArgumentException("Requests must not be null");
@@ -203,22 +205,24 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             }
         }
 
-        checkNotClosed();
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
 
-        handler = checkHandler(handler, callback);
+            handler = checkHandler(handler, callback);
 
-        if (DEBUG) {
-            CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
-            Log.v(TAG, mIdString + "captureBurst - requests " + Arrays.toString(requestArray) +
-                    ", callback " + callback + " handler " + handler);
+            if (DEBUG) {
+                CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
+                Log.v(TAG, mIdString + "captureBurst - requests " + Arrays.toString(requestArray) +
+                        ", callback " + callback + " handler " + handler);
+            }
+
+            return addPendingSequence(mDeviceImpl.captureBurst(requests,
+                    createCaptureCallbackProxy(handler, callback), mDeviceHandler));
         }
-
-        return addPendingSequence(mDeviceImpl.captureBurst(requests,
-                createCaptureCallbackProxy(handler, callback), mDeviceHandler));
     }
 
     @Override
-    public synchronized int setRepeatingRequest(CaptureRequest request, CaptureCallback callback,
+    public int setRepeatingRequest(CaptureRequest request, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
         if (request == null) {
             throw new IllegalArgumentException("request must not be null");
@@ -226,21 +230,23 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             throw new IllegalArgumentException("repeating reprocess requests are not supported");
         }
 
-        checkNotClosed();
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
 
-        handler = checkHandler(handler, callback);
+            handler = checkHandler(handler, callback);
 
-        if (DEBUG) {
-            Log.v(TAG, mIdString + "setRepeatingRequest - request " + request + ", callback " +
-                    callback + " handler" + " " + handler);
+            if (DEBUG) {
+                Log.v(TAG, mIdString + "setRepeatingRequest - request " + request + ", callback " +
+                        callback + " handler" + " " + handler);
+            }
+
+            return addPendingSequence(mDeviceImpl.setRepeatingRequest(request,
+                    createCaptureCallbackProxy(handler, callback), mDeviceHandler));
         }
-
-        return addPendingSequence(mDeviceImpl.setRepeatingRequest(request,
-                createCaptureCallbackProxy(handler, callback), mDeviceHandler));
     }
 
     @Override
-    public synchronized int setRepeatingBurst(List<CaptureRequest> requests,
+    public int setRepeatingBurst(List<CaptureRequest> requests,
             CaptureCallback callback, Handler handler) throws CameraAccessException {
         if (requests == null) {
             throw new IllegalArgumentException("requests must not be null");
@@ -255,34 +261,39 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             }
         }
 
-        checkNotClosed();
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
 
-        handler = checkHandler(handler, callback);
+            handler = checkHandler(handler, callback);
 
-        if (DEBUG) {
-            CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
-            Log.v(TAG, mIdString + "setRepeatingBurst - requests " + Arrays.toString(requestArray) +
-                    ", callback " + callback + " handler" + "" + handler);
+            if (DEBUG) {
+                CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
+                Log.v(TAG, mIdString + "setRepeatingBurst - requests " +
+                        Arrays.toString(requestArray) + ", callback " + callback +
+                        " handler" + "" + handler);
+            }
+
+            return addPendingSequence(mDeviceImpl.setRepeatingBurst(requests,
+                    createCaptureCallbackProxy(handler, callback), mDeviceHandler));
         }
-
-        return addPendingSequence(mDeviceImpl.setRepeatingBurst(requests,
-                createCaptureCallbackProxy(handler, callback), mDeviceHandler));
     }
 
     @Override
-    public synchronized void stopRepeating() throws CameraAccessException {
-        checkNotClosed();
+    public void stopRepeating() throws CameraAccessException {
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
 
-        if (DEBUG) {
-            Log.v(TAG, mIdString + "stopRepeating");
+            if (DEBUG) {
+                Log.v(TAG, mIdString + "stopRepeating");
+            }
+
+            mDeviceImpl.stopRepeating();
         }
-
-        mDeviceImpl.stopRepeating();
     }
 
     @Override
     public void abortCaptures() throws CameraAccessException {
-        synchronized (this) {
+        synchronized (mDeviceImpl.mInterfaceLock) {
             checkNotClosed();
 
             if (DEBUG) {
@@ -296,13 +307,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
 
             mAborting = true;
             mAbortDrainer.taskStarted();
-        }
 
-        synchronized (mDeviceImpl.mInterfaceLock) {
-            synchronized (this) {
-                mDeviceImpl.flush();
-                // The next BUSY -> IDLE set of transitions will mark the end of the abort.
-            }
+            mDeviceImpl.flush();
+            // The next BUSY -> IDLE set of transitions will mark the end of the abort.
         }
     }
 
@@ -332,7 +339,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
      */
     @Override
     public void replaceSessionClose() {
-        synchronized (this) {
+        synchronized (mDeviceImpl.mInterfaceLock) {
             /*
              * In order for creating new sessions to be fast, the new session should be created
              * before the old session is closed.
@@ -357,13 +364,13 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             // configuration for the new session. If it was already called, then we don't care,
             // since it won't get called again.
             mSkipUnconfigure = true;
+            close();
         }
-        close();
     }
 
     @Override
     public void close() {
-        synchronized (this) {
+        synchronized (mDeviceImpl.mInterfaceLock) {
             if (mClosed) {
                 if (DEBUG) Log.v(TAG, mIdString + "close - reentering");
                 return;
@@ -372,42 +379,36 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             if (DEBUG) Log.v(TAG, mIdString + "close - first time");
 
             mClosed = true;
-        }
 
-        synchronized (mDeviceImpl.mInterfaceLock) {
-            synchronized (this) {
-                /*
-                 * Flush out any repeating request. Since camera is closed, no new requests
-                 * can be queued, and eventually the entire request queue will be drained.
-                 *
-                 * If the camera device was already closed, short circuit and do nothing; since
-                 * no more internal device callbacks will fire anyway.
-                 *
-                 * Otherwise, once stopRepeating is done, wait for camera to idle, then unconfigure
-                 * the camera. Once that's done, fire #onClosed.
-                 */
-                try {
-                    mDeviceImpl.stopRepeating();
-                } catch (IllegalStateException e) {
-                    // OK: Camera device may already be closed, nothing else to do
+            /*
+             * Flush out any repeating request. Since camera is closed, no new requests
+             * can be queued, and eventually the entire request queue will be drained.
+             *
+             * If the camera device was already closed, short circuit and do nothing; since
+             * no more internal device callbacks will fire anyway.
+             *
+             * Otherwise, once stopRepeating is done, wait for camera to idle, then unconfigure
+             * the camera. Once that's done, fire #onClosed.
+             */
+            try {
+                mDeviceImpl.stopRepeating();
+            } catch (IllegalStateException e) {
+                // OK: Camera device may already be closed, nothing else to do
 
-                    // TODO: Fire onClosed anytime we get the device onClosed or the ISE?
-                    // or just suppress the ISE only and rely onClosed.
-                    // Also skip any of the draining work if this is already closed.
+                // TODO: Fire onClosed anytime we get the device onClosed or the ISE?
+                // or just suppress the ISE only and rely onClosed.
+                // Also skip any of the draining work if this is already closed.
 
-                    // Short-circuit; queue callback immediately and return
-                    mStateCallback.onClosed(this);
-                    return;
-                } catch (CameraAccessException e) {
-                    // OK: close does not throw checked exceptions.
-                    Log.e(TAG, mIdString + "Exception while stopping repeating: ", e);
+                // Short-circuit; queue callback immediately and return
+                mStateCallback.onClosed(this);
+                return;
+            } catch (CameraAccessException e) {
+                // OK: close does not throw checked exceptions.
+                Log.e(TAG, mIdString + "Exception while stopping repeating: ", e);
 
-                    // TODO: call onError instead of onClosed if this happens
-                }
+                // TODO: call onError instead of onClosed if this happens
             }
-        }
 
-        synchronized (this) {
             // If no sequences are pending, fire #onClosed immediately
             mSequenceDrainer.beginDrain();
         }
@@ -552,6 +553,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     @Override
     public CameraDeviceImpl.StateCallbackKK getDeviceStateCallback() {
         final CameraCaptureSession session = this;
+        final Object interfaceLock = mDeviceImpl.mInterfaceLock;
+
 
         return new CameraDeviceImpl.StateCallbackKK() {
             private boolean mBusy = false;
@@ -588,7 +591,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                 boolean isAborting;
                 if (DEBUG) Log.v(TAG, mIdString + "onIdle");
 
-                synchronized (session) {
+                synchronized (interfaceLock) {
                     isAborting = mAborting;
                 }
 
@@ -606,7 +609,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                 if (mBusy && isAborting) {
                     mAbortDrainer.taskFinished();
 
-                    synchronized (session) {
+                    synchronized (interfaceLock) {
                         mAborting = false;
                     }
                 }
@@ -729,7 +732,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
         @Override
         public void onDrained() {
             if (DEBUG) Log.v(TAG, mIdString + "onAbortDrained");
-            synchronized (CameraCaptureSessionImpl.this) {
+            synchronized (mDeviceImpl.mInterfaceLock) {
                 /*
                  * Any queued aborts have now completed.
                  *
@@ -757,7 +760,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             // Take device lock before session lock so that we can call back into device
             // without causing a deadlock
             synchronized (mDeviceImpl.mInterfaceLock) {
-                synchronized (CameraCaptureSessionImpl.this) {
                 /*
                  * The device is now IDLE, and has settled. It will not transition to
                  * ACTIVE or BUSY again by itself.
@@ -766,33 +768,31 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                  *
                  * This operation is idempotent; a session will not be closed twice.
                  */
-                    if (DEBUG)
-                        Log.v(TAG, mIdString + "Session drain complete, skip unconfigure: " +
-                                mSkipUnconfigure);
+                if (DEBUG)
+                    Log.v(TAG, mIdString + "Session drain complete, skip unconfigure: " +
+                            mSkipUnconfigure);
 
-                    // Fast path: A new capture session has replaced this one; don't wait for idle
-                    // as we won't get state updates any more anyway.
-                    if (mSkipUnconfigure) {
-                        return;
-                    }
+                // Fast path: A new capture session has replaced this one; don't wait for idle
+                // as we won't get state updates any more anyway.
+                if (mSkipUnconfigure) {
+                    return;
+                }
 
-                    // Final slow path: unconfigure the camera, no session has replaced us and
-                    // everything is idle.
-                    try {
-                        // begin transition to unconfigured
-                        mDeviceImpl.configureStreamsChecked(/*inputConfig*/null, /*outputs*/null,
-                                /*operatingMode*/ ICameraDeviceUser.NORMAL_MODE);
-                    } catch (CameraAccessException e) {
-                        // OK: do not throw checked exceptions.
-                        Log.e(TAG, mIdString + "Exception while unconfiguring outputs: ", e);
+                // Final slow path: unconfigure the camera, no session has replaced us and
+                // everything is idle.
+                try {
+                    // begin transition to unconfigured
+                    mDeviceImpl.configureStreamsChecked(/*inputConfig*/null, /*outputs*/null,
+                            /*operatingMode*/ ICameraDeviceUser.NORMAL_MODE);
+                } catch (CameraAccessException e) {
+                    // OK: do not throw checked exceptions.
+                    Log.e(TAG, mIdString + "Exception while unconfiguring outputs: ", e);
 
-                        // TODO: call onError instead of onClosed if this happens
-                    } catch (IllegalStateException e) {
-                        // Camera is already closed, so nothing left to do
-                        if (DEBUG) Log.v(TAG, mIdString +
-                                "Camera was already closed or busy, skipping unconfigure");
-                    }
-
+                    // TODO: call onError instead of onClosed if this happens
+                } catch (IllegalStateException e) {
+                    // Camera is already closed, so nothing left to do
+                    if (DEBUG) Log.v(TAG, mIdString +
+                            "Camera was already closed or busy, skipping unconfigure");
                 }
             }
         }
