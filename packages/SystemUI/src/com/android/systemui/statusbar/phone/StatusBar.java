@@ -6071,11 +6071,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void setNotificationSnoozed(StatusBarNotification sbn, SnoozeOption snoozeOption) {
-        if (snoozeOption.criterion != null) {
-            mNotificationListener.snoozeNotification(sbn.getKey(), snoozeOption.criterion.getId());
+        if (snoozeOption.getSnoozeCriterion() != null) {
+            mNotificationListener.snoozeNotification(sbn.getKey(),
+                    snoozeOption.getSnoozeCriterion().getId());
         } else {
             mNotificationListener.snoozeNotification(sbn.getKey(),
-                    snoozeOption.snoozeForMinutes * 60 * 1000);
+                    snoozeOption.getMinutesToSnoozeFor() * 60 * 1000);
         }
     }
 
