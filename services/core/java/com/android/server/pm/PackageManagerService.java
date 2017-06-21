@@ -5060,9 +5060,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getPermissionControllerPackageName() {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            throw new SecurityException("Instant applications don't have access to this method");
-        }
         synchronized (mPackages) {
             return mRequiredInstallerPackage;
         }
