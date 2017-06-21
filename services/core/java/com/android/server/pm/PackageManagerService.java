@@ -1056,14 +1056,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         scheduleWriteSettingsLocked();
                     }
                 }
-                sendVerificationRequest(userId, verificationId, ivs);
+                sendVerificationRequest(verificationId, ivs);
             }
             mCurrentIntentFilterVerifications.clear();
         }
 
-        private void sendVerificationRequest(int userId, int verificationId,
-                IntentFilterVerificationState ivs) {
-
+        private void sendVerificationRequest(int verificationId, IntentFilterVerificationState ivs) {
             Intent verificationIntent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
             verificationIntent.putExtra(
                     PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_ID,
@@ -1083,10 +1081,9 @@ public class PackageManagerService extends IPackageManager.Stub
             DeviceIdleController.LocalService idleController = getDeviceIdleController();
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
                     mIntentFilterVerifierComponent.getPackageName(), getVerificationTimeout(),
-                    userId, false, "intent filter verifier");
+                    UserHandle.USER_SYSTEM, true, "intent filter verifier");
 
-            UserHandle user = new UserHandle(userId);
-            mContext.sendBroadcastAsUser(verificationIntent, user);
+            mContext.sendBroadcastAsUser(verificationIntent, UserHandle.SYSTEM);
             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
                     "Sending IntentFilter verification broadcast");
         }
