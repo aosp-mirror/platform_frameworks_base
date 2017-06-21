@@ -6009,6 +6009,10 @@ public class PackageParser {
             }
         }
 
+        public boolean isLibrary() {
+            return staticSharedLibName != null || !ArrayUtils.isEmpty(libraryNames);
+        }
+
         public List<String> getAllCodePaths() {
             ArrayList<String> paths = new ArrayList<>();
             paths.add(baseCodePath);
