@@ -32,8 +32,8 @@
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_horizontal|center_vertical</item>
         <item name="android:background">@null</item>
-        <item name="android:textSize">36sp</item>
-        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
         <item name="android:textColor">?attr/bgProtectTextColor</item>
         <item name="android:paddingBottom">-16dp</item>
     </style>
@@ -53,7 +53,7 @@
     </style>
     <style name="widget_big_thin">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
-        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
     </style>
 
     <style name="BouncerSecurityContainer">

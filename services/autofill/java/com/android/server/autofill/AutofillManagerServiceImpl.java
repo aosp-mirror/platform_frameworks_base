@@ -489,46 +489,78 @@ final class AutofillManagerServiceImpl {
      * Initializes the last fill selection after an autofill service returned a new
      * {@link FillResponse}.
      */
-    void setLastResponse(int serviceUid, @NonNull FillResponse response) {
+    void setLastResponse(int serviceUid, int sessionId, @NonNull FillResponse response) {
         synchronized (mLock) {
-            mEventHistory = new FillEventHistory(serviceUid, response.getClientState());
+            mEventHistory = new FillEventHistory(serviceUid, sessionId, response.getClientState());
         }
+    }
+
+    /**
+     * Resets the last fill selection.
+     */
+    void resetLastResponse() {
+        synchronized (mLock) {
+            mEventHistory = null;
+        }
+    }
+
+    private boolean isValidEventLocked(String method, int sessionId) {
+        if (mEventHistory == null) {
+            Slog.w(TAG, method + ": not logging event because history is null");
+            return false;
+        }
+        if (sessionId != mEventHistory.getSessionId()) {
+            if (sDebug) {
+                Slog.d(TAG, method + ": not logging event for session " + sessionId
+                        + " because tracked session is " + mEventHistory.getSessionId());
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
      * Updates the last fill selection when an authentication was selected.
      */
-    void setAuthenticationSelected() {
+    void setAuthenticationSelected(int sessionId) {
         synchronized (mLock) {
-            mEventHistory.addEvent(new Event(Event.TYPE_AUTHENTICATION_SELECTED, null));
+            if (isValidEventLocked("setAuthenticationSelected()", sessionId)) {
+                mEventHistory.addEvent(new Event(Event.TYPE_AUTHENTICATION_SELECTED, null));
+            }
         }
     }
 
     /**
      * Updates the last fill selection when an dataset authentication was selected.
      */
-    void setDatasetAuthenticationSelected(@Nullable String selectedDataset) {
+    void setDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId) {
         synchronized (mLock) {
-            mEventHistory.addEvent(
-                    new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset));
+            if (isValidEventLocked("setDatasetAuthenticationSelected()", sessionId)) {
+                mEventHistory.addEvent(
+                        new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset));
+            }
         }
     }
 
     /**
      * Updates the last fill selection when an save Ui is shown.
      */
-    void setSaveShown() {
+    void setSaveShown(int sessionId) {
         synchronized (mLock) {
-            mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null));
+            if (isValidEventLocked("setSaveShown()", sessionId)) {
+                mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null));
+            }
         }
     }
 
     /**
      * Updates the last fill response when a dataset was selected.
      */
-    void setDatasetSelected(@Nullable String selectedDataset) {
+    void setDatasetSelected(@Nullable String selectedDataset, int sessionId) {
         synchronized (mLock) {
-            mEventHistory.addEvent(new Event(Event.TYPE_DATASET_SELECTED, selectedDataset));
+            if (isValidEventLocked("setDatasetSelected()", sessionId)) {
+                mEventHistory.addEvent(new Event(Event.TYPE_DATASET_SELECTED, selectedDataset));
+            }
         }
     }
 

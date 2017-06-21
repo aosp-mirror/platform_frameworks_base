@@ -39,19 +39,23 @@ public final class JobPackageTracker {
     public static final int EVENT_NULL = 0;
     public static final int EVENT_START_JOB = 1;
     public static final int EVENT_STOP_JOB = 2;
+    public static final int EVENT_START_PERIODIC_JOB = 3;
+    public static final int EVENT_STOP_PERIODIC_JOB = 4;
 
     private final RingBufferIndices mEventIndices = new RingBufferIndices(EVENT_BUFFER_SIZE);
     private final int[] mEventCmds = new int[EVENT_BUFFER_SIZE];
     private final long[] mEventTimes = new long[EVENT_BUFFER_SIZE];
     private final int[] mEventUids = new int[EVENT_BUFFER_SIZE];
     private final String[] mEventTags = new String[EVENT_BUFFER_SIZE];
+    private final int[] mEventJobIds = new int[EVENT_BUFFER_SIZE];
 
-    public void addEvent(int cmd, int uid, String tag) {
+    public void addEvent(int cmd, int uid, String tag, int jobId) {
         int index = mEventIndices.add();
         mEventCmds[index] = cmd;
         mEventTimes[index] = SystemClock.elapsedRealtime();
         mEventUids[index] = uid;
         mEventTags[index] = tag;
+        mEventJobIds[index] = jobId;
     }
 
     DataSet mCurDataSet = new DataSet();
@@ -365,7 +369,8 @@ public final class JobPackageTracker {
         } else {
             mCurDataSet.incActive(job.getSourceUid(), job.getSourcePackageName(), now);
         }
-        addEvent(EVENT_START_JOB, job.getSourceUid(), job.getBatteryName());
+        addEvent(job.getJob().isPeriodic() ? EVENT_START_PERIODIC_JOB :  EVENT_START_JOB,
+                job.getSourceUid(), job.getBatteryName(), job.getJobId());
     }
 
     public void noteInactive(JobStatus job) {
@@ -376,7 +381,8 @@ public final class JobPackageTracker {
             mCurDataSet.decActive(job.getSourceUid(), job.getSourcePackageName(), now);
         }
         rebatchIfNeeded(now);
-        addEvent(EVENT_STOP_JOB, job.getSourceUid(), job.getBatteryName());
+        addEvent(job.getJob().isPeriodic() ? EVENT_STOP_JOB :  EVENT_STOP_PERIODIC_JOB,
+                job.getSourceUid(), job.getBatteryName(), job.getJobId());
     }
 
     public void noteConcurrency(int totalActive, int fgActive) {
@@ -448,16 +454,20 @@ public final class JobPackageTracker {
             }
             final String label;
             switch (mEventCmds[index]) {
-                case EVENT_START_JOB:           label = "START"; break;
-                case EVENT_STOP_JOB:            label = " STOP"; break;
-                default:                        label = "   ??"; break;
+                case EVENT_START_JOB:           label = "  START"; break;
+                case EVENT_STOP_JOB:            label = "   STOP"; break;
+                case EVENT_START_PERIODIC_JOB:  label = "START-P"; break;
+                case EVENT_STOP_PERIODIC_JOB:   label = " STOP-P"; break;
+                default:                        label = "     ??"; break;
             }
             pw.print(prefix);
             TimeUtils.formatDuration(mEventTimes[index]-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
             pw.print(" ");
             pw.print(label);
-            pw.print(": ");
+            pw.print(": #");
             UserHandle.formatUid(pw, uid);
+            pw.print("/");
+            pw.print(mEventJobIds[index]);
             pw.print(" ");
             pw.println(mEventTags[index]);
         }

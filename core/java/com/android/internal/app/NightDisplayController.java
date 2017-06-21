@@ -182,6 +182,10 @@ public final class NightDisplayController {
             throw new IllegalArgumentException("Invalid autoMode: " + autoMode);
         }
 
+        if (getAutoMode() != autoMode) {
+            Secure.putLongForUser(mContext.getContentResolver(),
+                    Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, -1L, mUserId);
+        }
         return Secure.putIntForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_AUTO_MODE, autoMode, mUserId);
     }

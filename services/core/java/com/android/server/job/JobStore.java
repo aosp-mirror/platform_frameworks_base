@@ -345,6 +345,11 @@ public final class JobStore {
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
             out.attribute(null, "priority", String.valueOf(jobStatus.getPriority()));
             out.attribute(null, "flags", String.valueOf(jobStatus.getFlags()));
+
+            out.attribute(null, "lastSuccessfulRunTime",
+                    String.valueOf(jobStatus.getLastSuccessfulRunTime()));
+            out.attribute(null, "lastFailedRunTime",
+                    String.valueOf(jobStatus.getLastFailedRunTime()));
         }
 
         private void writeBundleToXml(PersistableBundle extras, XmlSerializer out)
@@ -555,6 +560,8 @@ public final class JobStore {
                 IOException {
             JobInfo.Builder jobBuilder;
             int uid, sourceUserId;
+            long lastSuccessfulRunTime;
+            long lastFailedRunTime;
 
             // Read out job identifier attributes and priority.
             try {
@@ -572,6 +579,12 @@ public final class JobStore {
                 }
                 val = parser.getAttributeValue(null, "sourceUserId");
                 sourceUserId = val == null ? -1 : Integer.parseInt(val);
+
+                val = parser.getAttributeValue(null, "lastSuccessfulRunTime");
+                lastSuccessfulRunTime = val == null ? 0 : Long.parseLong(val);
+
+                val = parser.getAttributeValue(null, "lastFailedRunTime");
+                lastFailedRunTime = val == null ? 0 : Long.parseLong(val);
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Error parsing job's required fields, skipping");
                 return null;
@@ -708,7 +721,8 @@ public final class JobStore {
             // And now we're done
             JobStatus js = new JobStatus(
                     jobBuilder.build(), uid, sourcePackageName, sourceUserId, sourceTag,
-                    elapsedRuntimes.first, elapsedRuntimes.second);
+                    elapsedRuntimes.first, elapsedRuntimes.second,
+                    lastSuccessfulRunTime, lastFailedRunTime);
             return js;
         }
 
