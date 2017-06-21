@@ -66,6 +66,7 @@ static const char* const kAudioDeviceName = "Radio tuner source";
 struct TunerContext {
     TunerContext() {}
 
+    bool mIsClosed = false;
     HalRevision mHalRev;
     bool mWithAudio;
     sp<V1_0::ITuner> mHalTuner;
@@ -127,6 +128,12 @@ void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner, sp<V1_0::ITuner> h
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(env, jTuner);
 
+    if (ctx.mIsClosed) {
+        ALOGI("Tuner was closed during initialization");
+        // dropping the last reference will close HAL tuner
+        return;
+    }
+
     ctx.mHalTuner = halTuner;
     ctx.mHalTuner11 = V1_1::ITuner::castFrom(halTuner).withDefault(nullptr);
     ALOGW_IF(ctx.mHalRev >= HalRevision::V1_1 && ctx.mHalTuner11 == nullptr,
@@ -159,7 +166,13 @@ Region getRegion(JNIEnv *env, jobject obj) {
 static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
-    if (ctx.mHalTuner == nullptr) return;
+    if (ctx.mIsClosed) return;
+    ctx.mIsClosed = true;
+
+    if (ctx.mHalTuner == nullptr) {
+        ALOGI("Tuner closed during initialization");
+        return;
+    }
 
     ALOGI("Closing tuner %p", ctx.mHalTuner.get());
     notifyAudioService(ctx, false);

@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Slog;
 
 import java.util.List;
@@ -33,18 +35,28 @@ class Tuner extends ITuner.Stub {
      */
     private final long mNativeContext;
 
-    @NonNull private final TunerCallback mTunerCallback;
     private final Object mLock = new Object();
+    @NonNull private final TunerCallback mTunerCallback;
+    @NonNull private final ITunerCallback mClientCallback;
+    @NonNull private final IBinder.DeathRecipient mDeathRecipient;
+
     private boolean mIsClosed = false;
     private boolean mIsMuted = false;
     private int mRegion;  // TODO(b/62710330): find better solution to handle regions
     private final boolean mWithAudio;
 
     Tuner(@NonNull ITunerCallback clientCallback, int halRev, int region, boolean withAudio) {
+        mClientCallback = clientCallback;
         mTunerCallback = new TunerCallback(this, clientCallback, halRev);
         mRegion = region;
         mWithAudio = withAudio;
         mNativeContext = nativeInit(halRev, withAudio);
+        mDeathRecipient = this::close;
+        try {
+            mClientCallback.asBinder().linkToDeath(mDeathRecipient, 0);
+        } catch (RemoteException ex) {
+            close();
+        }
     }
 
     @Override
@@ -81,6 +93,7 @@ class Tuner extends ITuner.Stub {
         synchronized (mLock) {
             if (mIsClosed) return;
             mTunerCallback.detach();
+            mClientCallback.asBinder().unlinkToDeath(mDeathRecipient, 0);
             nativeClose(mNativeContext);
             mIsClosed = true;
         }
