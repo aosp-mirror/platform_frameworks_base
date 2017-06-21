@@ -132,7 +132,7 @@ public final class DisplayManagerService extends SystemService {
 
     private static final long WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT = 10000;
 
-    private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTER = 1;
+    private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;
     private static final int MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS = 2;
     private static final int MSG_DELIVER_DISPLAY_EVENT = 3;
     private static final int MSG_REQUEST_TRAVERSAL = 4;
@@ -266,7 +266,6 @@ public final class DisplayManagerService extends SystemService {
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
-
     }
 
     public void setupSchedulerPolicies() {
@@ -284,9 +283,9 @@ public final class DisplayManagerService extends SystemService {
         // We need to pre-load the persistent data store so it's ready before the default display
         // adapter is up so that we have it's configuration. We could load it lazily, but since
         // we're going to have to read it in eventually we may as well do it here rather than after
-        // we've waited for the diplay to register itself with us.
+        // we've waited for the display to register itself with us.
         mPersistentDataStore.loadIfNeeded();
-        mHandler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTER);
+        mHandler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS);
 
         publishBinderService(Context.DISPLAY_SERVICE, new BinderService(),
                 true /*allowIsolated*/);
@@ -298,12 +297,16 @@ public final class DisplayManagerService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_WAIT_FOR_DEFAULT_DISPLAY) {
             synchronized (mSyncRoot) {
-                long timeout = SystemClock.uptimeMillis() + WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;
-                while (mLogicalDisplays.get(Display.DEFAULT_DISPLAY) == null) {
+                long timeout = SystemClock.uptimeMillis()
+                        + mInjector.getDefaultDisplayDelayTimeout();
+                while (mLogicalDisplays.get(Display.DEFAULT_DISPLAY) == null ||
+                        mVirtualDisplayAdapter == null) {
                     long delay = timeout - SystemClock.uptimeMillis();
                     if (delay <= 0) {
                         throw new RuntimeException("Timeout waiting for default display "
-                                + "to be initialized.");
+                                + "to be initialized. DefaultDisplay="
+                                + mLogicalDisplays.get(Display.DEFAULT_DISPLAY)
+                                + ", mVirtualDisplayAdapter=" + mVirtualDisplayAdapter);
                     }
                     if (DEBUG) {
                         Slog.d(TAG, "waitForDefaultDisplay: waiting, timeout=" + delay);
@@ -685,11 +688,23 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void registerDefaultDisplayAdapter() {
-        // Register default display adapter.
+    private void registerDefaultDisplayAdapters() {
+        // Register default display adapters.
         synchronized (mSyncRoot) {
+            // main display adapter
             registerDisplayAdapterLocked(new LocalDisplayAdapter(
                     mSyncRoot, mContext, mHandler, mDisplayAdapterListener));
+
+            // Standalone VR devices rely on a virtual display as their primary display for
+            // 2D UI. We register virtual display adapter along side the main display adapter
+            // here so that it is ready by the time the system sends the home Intent for
+            // early apps like SetupWizard/Launcher. In particular, SUW is displayed using
+            // the virtual display inside VR before any VR-specific apps even run.
+            mVirtualDisplayAdapter = mInjector.getVirtualDisplayAdapter(mSyncRoot, mContext,
+                    mHandler, mDisplayAdapterListener);
+            if (mVirtualDisplayAdapter != null) {
+                registerDisplayAdapterLocked(mVirtualDisplayAdapter);
+            }
         }
     }
 
@@ -698,7 +713,6 @@ public final class DisplayManagerService extends SystemService {
             if (shouldRegisterNonEssentialDisplayAdaptersLocked()) {
                 registerOverlayDisplayAdapterLocked();
                 registerWifiDisplayAdapterLocked();
-                registerVirtualDisplayAdapterLocked();
             }
         }
     }
@@ -717,12 +731,6 @@ public final class DisplayManagerService extends SystemService {
                     mPersistentDataStore);
             registerDisplayAdapterLocked(mWifiDisplayAdapter);
         }
-    }
-
-    private void registerVirtualDisplayAdapterLocked() {
-        mVirtualDisplayAdapter = mInjector.getVirtualDisplayAdapter(mSyncRoot, mContext, mHandler,
-                mDisplayAdapterListener);
-        registerDisplayAdapterLocked(mVirtualDisplayAdapter);
     }
 
     private boolean shouldRegisterNonEssentialDisplayAdaptersLocked() {
@@ -1219,6 +1227,10 @@ public final class DisplayManagerService extends SystemService {
                 Handler handler, DisplayAdapter.Listener displayAdapterListener) {
             return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener);
         }
+
+        long getDefaultDisplayDelayTimeout() {
+            return WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;
+        }
     }
 
     @VisibleForTesting
@@ -1241,8 +1253,8 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_REGISTER_DEFAULT_DISPLAY_ADAPTER:
-                    registerDefaultDisplayAdapter();
+                case MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS:
+                    registerDefaultDisplayAdapters();
                     break;
 
                 case MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS:
