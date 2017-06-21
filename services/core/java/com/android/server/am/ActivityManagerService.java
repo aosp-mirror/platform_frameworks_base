@@ -24189,7 +24189,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 record.networkStateLock.wait(mWaitForNetworkTimeoutMs);
                 record.waitingForNetwork = false;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
-                if (totalTime >= mWaitForNetworkTimeoutMs) {
+                if (totalTime >= mWaitForNetworkTimeoutMs || DEBUG_NETWORK) {
                     Slog.wtf(TAG_NETWORK, "Total time waited for network rules to get updated: "
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
                             + procStateSeq + " UidRec: " + record

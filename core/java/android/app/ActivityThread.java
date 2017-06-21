@@ -2956,6 +2956,7 @@ public final class ActivityThread {
             r.activity.mTemporaryPause = true;
             mInstrumentation.callActivityOnPause(r.activity);
         }
+        checkAndBlockForNetworkAccess();
         deliverNewIntents(r, intents);
         if (resumed) {
             r.activity.performResume();
@@ -3585,6 +3586,7 @@ public final class ActivityThread {
             try {
                 r.activity.onStateNotSaved();
                 r.activity.mFragments.noteStateNotSaved();
+                checkAndBlockForNetworkAccess();
                 if (r.pendingIntents != null) {
                     deliverNewIntents(r, r.pendingIntents);
                     r.pendingIntents = null;
@@ -4340,6 +4342,7 @@ public final class ActivityThread {
                     }
                 }
             }
+            checkAndBlockForNetworkAccess();
             deliverResults(r, res.results);
             if (resumed) {
                 r.activity.performResume();
