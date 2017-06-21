@@ -131,6 +131,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.hardware.configstore.V1_0.ISurfaceFlingerConfigs;
+import android.hardware.configstore.V1_0.OptionalBool;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
@@ -714,6 +716,9 @@ public class WindowManagerService extends IWindowManager.Stub
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
     private final Display[] mDisplays;
+
+    // Indicates whether this device supports wide color gamut rendering
+    private boolean mHasWideColorGamutSupport;
 
     // Who is holding the screen on.
     private Session mHoldingScreenOn;
@@ -4726,6 +4731,20 @@ public class WindowManagerService extends IWindowManager.Stub
     public void systemReady() {
         mPolicy.systemReady();
         mTaskSnapshotController.systemReady();
+        mHasWideColorGamutSupport = queryWideColorGamutSupport();
+    }
+
+    private static boolean queryWideColorGamutSupport() {
+        try {
+            ISurfaceFlingerConfigs surfaceFlinger = ISurfaceFlingerConfigs.getService();
+            OptionalBool hasWideColor = surfaceFlinger.hasWideColorDisplay();
+            if (hasWideColor != null) {
+                return hasWideColor.value;
+            }
+        } catch (RemoteException e) {
+            // Ignore, we're in big trouble if we can't talk to SurfaceFlinger's config store
+        }
+        return false;
     }
 
     // -------------------------------------------------------------
@@ -7520,5 +7539,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 s.setShowingAlertWindowNotificationAllowed(mShowAlertWindowNotifications);
             }
         }
+    }
+
+    boolean hasWideColorGamutSupport() {
+        return mHasWideColorGamutSupport;
     }
 }
