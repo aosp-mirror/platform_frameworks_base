@@ -312,7 +312,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public boolean performClick() {
-        if (mWasActivatedOnDown || !mNeedsDimming) {
+        if (mWasActivatedOnDown || !mNeedsDimming || isTouchExplorationEnabled()) {
             return super.performClick();
         }
         return false;
