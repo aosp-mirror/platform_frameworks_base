@@ -33,13 +33,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Describes what happened after the latest call to {@link FillCallback#onSuccess(FillResponse)}.
+ * Describes what happened after the last
+ * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
+ * call.
+ *
+ * <p>This history is typically used to keep track of previous user actions to optimize further
+ * requests. For example, the service might return email addresses in alphabetical order by
+ * default, but change that order based on the address the user picked on previous requests.
+ *
+ * <p>The history is not persisted over reboots, and it's cleared every time the service
+ * replies to a
+ * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
+ * by calling {@link FillCallback#onSuccess(FillResponse)} or
+ * {@link FillCallback#onFailure(CharSequence)} (if the service doesn't call any of these methods,
+ * the history will clear out after some pre-defined time).
  */
 public final class FillEventHistory implements Parcelable {
     /**
      * Not in parcel. The UID of the {@link AutofillService} that created the {@link FillResponse}.
      */
     private final int mServiceUid;
+
+    /**
+     * Not in parcel. The ID of the autofill session that created the {@link FillResponse}.
+     */
+    private final int mSessionId;
 
     @Nullable private final Bundle mClientState;
     @Nullable List<Event> mEvents;
@@ -55,10 +73,17 @@ public final class FillEventHistory implements Parcelable {
         return mServiceUid;
     }
 
+    /** @hide */
+    public int getSessionId() {
+        return mSessionId;
+    }
+
     /**
-     * Returns the client state of the {@link FillResponse}.
+     * Returns the client state set in the previous {@link FillResponse}.
      *
-     * @return The client state set by the last {@link FillResponse}
+     * <p><b>NOTE: </b>the state is associated with the app that was autofilled in the previous
+     * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
+     * , which is not necessary the same app being autofilled now.
      */
     @Nullable public Bundle getClientState() {
         return mClientState;
@@ -87,9 +112,10 @@ public final class FillEventHistory implements Parcelable {
     /**
      * @hide
      */
-    public FillEventHistory(int serviceUid, @Nullable Bundle clientState) {
+    public FillEventHistory(int serviceUid, int sessionId, @Nullable Bundle clientState) {
         mClientState = clientState;
         mServiceUid = serviceUid;
+        mSessionId = sessionId;
     }
 
     @Override
@@ -190,7 +216,7 @@ public final class FillEventHistory implements Parcelable {
             new Parcelable.Creator<FillEventHistory>() {
                 @Override
                 public FillEventHistory createFromParcel(Parcel parcel) {
-                    FillEventHistory selection = new FillEventHistory(0, parcel.readBundle());
+                    FillEventHistory selection = new FillEventHistory(0, 0, parcel.readBundle());
 
                     int numEvents = parcel.readInt();
                     for (int i = 0; i < numEvents; i++) {
