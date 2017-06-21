@@ -785,7 +785,6 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.DISABLE_INPUT_DEVICE)
-    @TestApi
     public void enable() {
         InputManager.getInstance().enableInputDevice(mId);
     }
@@ -796,7 +795,6 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.DISABLE_INPUT_DEVICE)
-    @TestApi
     public void disable() {
         InputManager.getInstance().disableInputDevice(mId);
     }
