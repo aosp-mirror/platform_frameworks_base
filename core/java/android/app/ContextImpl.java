@@ -63,6 +63,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.system.ErrnoException;
@@ -370,13 +371,6 @@ class ContextImpl extends Context {
         return getSharedPreferences(file, mode);
     }
 
-    private boolean isBuggy() {
-        // STOPSHIP: fix buggy apps
-        if (SystemProperties.getBoolean("fw.ignore_buggy", false)) return false;
-        if ("com.google.android.tts".equals(getApplicationInfo().packageName)) return true;
-        return false;
-    }
-
     @Override
     public SharedPreferences getSharedPreferences(File file, int mode) {
         SharedPreferencesImpl sp;
@@ -387,9 +381,8 @@ class ContextImpl extends Context {
                 checkMode(mode);
                 if (getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.O) {
                     if (isCredentialProtectedStorage()
-                            && !getSystemService(StorageManager.class).isUserKeyUnlocked(
-                            UserHandle.myUserId())
-                            && !isBuggy()) {
+                            && !getSystemService(UserManager.class)
+                                    .isUserUnlockingOrUnlocked(UserHandle.myUserId())) {
                         throw new IllegalStateException("SharedPreferences in credential encrypted "
                                 + "storage are not available until after user is unlocked");
                     }

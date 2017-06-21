@@ -1490,6 +1490,9 @@ public abstract class PackageManager {
      */
     public static final int MOVE_FAILED_3RD_PARTY_NOT_ALLOWED_ON_INTERNAL = -9;
 
+    /** @hide */
+    public static final int MOVE_FAILED_LOCKED_USER = -10;
+
     /**
      * Flag parameter for {@link #movePackage} to indicate that
      * the package should be moved to internal storage if its
