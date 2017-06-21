@@ -417,7 +417,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     @Override
     public void onHeightUpdate() {
-        if (mParent == null || mMenuItems.size() == 0) {
+        if (mParent == null || mMenuItems.size() == 0 || mMenuContainer == null) {
             return;
         }
         int parentHeight = mParent.getCollapsedHeight();
@@ -477,7 +477,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     private void setMenuLocation() {
         boolean showOnLeft = mTranslation > 0;
-        if ((mIconsPlaced && showOnLeft == mOnLeft) || mSnapping
+        if ((mIconsPlaced && showOnLeft == mOnLeft) || mSnapping || mMenuContainer == null
                 || !mMenuContainer.isAttachedToWindow()) {
             // Do nothing
             return;
