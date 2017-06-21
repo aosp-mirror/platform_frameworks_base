@@ -58,6 +58,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE
 import static android.content.pm.PackageManager.INSTALL_FORWARD_LOCK;
 import static android.content.pm.PackageManager.INSTALL_INTERNAL;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
@@ -10488,8 +10489,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
             if ((scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
-                derivePackageAbi(
-                        pkg, scanFile, cpuAbiOverride, true /*extractLibs*/, mAppLib32InstallDir);
+                final boolean extractNativeLibs = !pkg.isLibrary();
+                derivePackageAbi(pkg, scanFile, cpuAbiOverride, extractNativeLibs,
+                        mAppLib32InstallDir);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
                 // Some system apps still use directory structure for native libraries
@@ -11517,6 +11519,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
 
+                // Shared library native code should be in the APK zip aligned
+                if (abi32 >= 0 && pkg.isLibrary() && extractLibs) {
+                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                            "Shared library native lib extraction not supported");
+                }
+
                 maybeThrowExceptionForMultiArchCopy(
                         "Error unpackaging 32 bit native libs for multiarch app.", abi32);
 
@@ -11537,6 +11545,11 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Error unpackaging 64 bit native libs for multiarch app.", abi64);
 
                 if (abi64 >= 0) {
+                    // Shared library native libs should be in the APK zip aligned
+                    if (extractLibs && pkg.isLibrary()) {
+                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                                "Shared library native lib extraction not supported");
+                    }
                     pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[abi64];
                 }
 
@@ -11553,7 +11566,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         pkg.applicationInfo.primaryCpuAbi = abi;
                     }
                 }
-
             } else {
                 String[] abiList = (cpuAbiOverride != null) ?
                         new String[] { cpuAbiOverride } : Build.SUPPORTED_ABIS;
@@ -11586,6 +11598,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 if (copyRet >= 0) {
+                    // Shared libraries that have native libs must be multi-architecture
+                    if (pkg.isLibrary()) {
+                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                                "Shared library with native libs must be multiarch");
+                    }
                     pkg.applicationInfo.primaryCpuAbi = abiList[copyRet];
                 } else if (copyRet == PackageManager.NO_NATIVE_LIBRARIES && cpuAbiOverride != null) {
                     pkg.applicationInfo.primaryCpuAbi = cpuAbiOverride;
@@ -18140,8 +18157,9 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 String abiOverride = (TextUtils.isEmpty(pkg.cpuAbiOverride) ?
                     args.abiOverride : pkg.cpuAbiOverride);
+                final boolean extractNativeLibs = !pkg.isLibrary();
                 derivePackageAbi(pkg, new File(pkg.codePath), abiOverride,
-                        true /*extractLibs*/, mAppLib32InstallDir);
+                        extractNativeLibs, mAppLib32InstallDir);
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
                 res.setError(INSTALL_FAILED_INTERNAL_ERROR, "Error deriving application ABI");
