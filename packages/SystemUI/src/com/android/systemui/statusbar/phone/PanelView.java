@@ -303,10 +303,10 @@ public abstract class PanelView extends FrameLayout {
                 trackMovement(event);
                 if (!mGestureWaitForTouchSlop || (mHeightAnimator != null && !mHintAnimationRunning)
                         || mPeekAnimator != null) {
-                    cancelHeightAnimator();
-                    cancelPeek();
                     mTouchSlopExceeded = (mHeightAnimator != null && !mHintAnimationRunning)
                             || mPeekAnimator != null;
+                    cancelHeightAnimator();
+                    cancelPeek();
                     onTrackingStarted();
                 }
                 if (isFullyCollapsed() && !mHeadsUpManager.hasPinnedHeadsUp()) {
@@ -611,6 +611,9 @@ public abstract class PanelView extends FrameLayout {
 
     protected void cancelHeightAnimator() {
         if (mHeightAnimator != null) {
+            if (mHeightAnimator.isRunning()) {
+                mPanelUpdateWhenAnimatorEnds = false;
+            }
             mHeightAnimator.cancel();
         }
         endClosing();
