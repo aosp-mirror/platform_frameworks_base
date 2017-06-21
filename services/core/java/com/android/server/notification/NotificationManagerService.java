@@ -265,6 +265,7 @@ public class NotificationManagerService extends SystemService {
     private static final String EXTRA_KEY = "key";
 
     private IActivityManager mAm;
+    private ActivityManager mActivityManager;
     private IPackageManager mPackageManager;
     private PackageManager mPackageManagerClient;
     AudioManager mAudioManager;
@@ -450,9 +451,12 @@ public class NotificationManagerService extends SystemService {
         while (parser.next() != END_DOCUMENT) {
             mZenModeHelper.readXml(parser, forRestore);
             mRankingHelper.readXml(parser, forRestore);
-            saveXml |= mListeners.readXml(parser);
-            saveXml |= mNotificationAssistants.readXml(parser);
-            saveXml |= mConditionProviders.readXml(parser);
+            // No non-system managed services are allowed on low ram devices
+            if (!ActivityManager.isLowRamDeviceStatic()) {
+                saveXml |= mListeners.readXml(parser);
+                saveXml |= mNotificationAssistants.readXml(parser);
+                saveXml |= mConditionProviders.readXml(parser);
+            }
         }
 
         if (saveXml) {
@@ -1131,7 +1135,8 @@ public class NotificationManagerService extends SystemService {
             LightsManager lightsManager, NotificationListeners notificationListeners,
             NotificationAssistants notificationAssistants, ConditionProviders conditionProviders,
             ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
-            NotificationUsageStats usageStats, AtomicFile policyFile) {
+            NotificationUsageStats usageStats, AtomicFile policyFile,
+            ActivityManager activityManager) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1145,6 +1150,7 @@ public class NotificationManagerService extends SystemService {
         mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
+        mActivityManager = activityManager;
 
         mHandler = new WorkerHandler(looper);
         mRankingThread.start();
@@ -1330,7 +1336,8 @@ public class NotificationManagerService extends SystemService {
                 new NotificationAssistants(AppGlobals.getPackageManager()),
                 new ConditionProviders(getContext(), mUserProfiles, AppGlobals.getPackageManager()),
                 null, snoozeHelper, new NotificationUsageStats(getContext()),
-                new AtomicFile(new File(systemDir, "notification_policy.xml")));
+                new AtomicFile(new File(systemDir, "notification_policy.xml")),
+                (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE));
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
@@ -2689,16 +2696,18 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationPolicyAccessGranted(String pkg, boolean granted)
                 throws RemoteException {
             checkCallerIsSystemOrShell();
-            mConditionProviders.setPackageOrComponentEnabled(
-                    pkg, getCallingUserHandle().getIdentifier(), true, granted);
+            if (!mActivityManager.isLowRamDevice()) {
+                mConditionProviders.setPackageOrComponentEnabled(
+                        pkg, getCallingUserHandle().getIdentifier(), true, granted);
 
-            getContext().sendBroadcastAsUser(new Intent(NotificationManager
-                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                    .setPackage(pkg)
-                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                    getCallingUserHandle(), null);
+                getContext().sendBroadcastAsUser(new Intent(
+                        NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                .setPackage(pkg)
+                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                        getCallingUserHandle(), null);
 
-            savePolicyFile();
+                savePolicyFile();
+            }
         }
 
         @Override
@@ -2779,17 +2788,20 @@ public class NotificationManagerService extends SystemService {
                 boolean granted) throws RemoteException {
             Preconditions.checkNotNull(listener);
             enforceSystemOrSystemUI("grant notification listener access");
-            mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
-                    userId, false, granted);
-            mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
-                    userId, true, granted);
+            if (!mActivityManager.isLowRamDevice()) {
+                mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
+                        userId, false, granted);
+                mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
+                        userId, true, granted);
 
-            getContext().sendBroadcastAsUser(new Intent(NotificationManager
-                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                    .setPackage(listener.getPackageName())
-                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), getCallingUserHandle(), null);
+                getContext().sendBroadcastAsUser(new Intent(
+                        NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                .setPackage(listener.getPackageName())
+                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                        getCallingUserHandle(), null);
 
-            savePolicyFile();
+                savePolicyFile();
+            }
         }
 
         @Override
@@ -2797,17 +2809,20 @@ public class NotificationManagerService extends SystemService {
                 int userId, boolean granted) throws RemoteException {
             Preconditions.checkNotNull(assistant);
             enforceSystemOrSystemUI("grant notification assistant access");
-            mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
-                    userId, false, granted);
-            mNotificationAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
-                    userId, true, granted);
+            if (!mActivityManager.isLowRamDevice()) {
+                mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
+                        userId, false, granted);
+                mNotificationAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
+                        userId, true, granted);
 
-            getContext().sendBroadcastAsUser(new Intent(NotificationManager
-                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                    .setPackage(assistant.getPackageName())
-                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), getCallingUserHandle(), null);
+                getContext().sendBroadcastAsUser(new Intent(
+                        NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                .setPackage(assistant.getPackageName())
+                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                        getCallingUserHandle(), null);
 
-            savePolicyFile();
+                savePolicyFile();
+            }
         }
 
         @Override

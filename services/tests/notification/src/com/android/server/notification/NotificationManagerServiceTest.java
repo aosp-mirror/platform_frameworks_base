@@ -37,6 +37,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -106,6 +107,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     private NotificationUsageStats mUsageStats;
     @Mock
     private AudioManager mAudioManager;
+    @Mock
+    ActivityManager mActivityManager;
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
     @Mock
@@ -172,7 +175,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
             mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
                     mPackageManagerClient, mockLightsManager, mNotificationListeners,
                     mNotificationAssistants, mConditionProviders, mCompanionMgr,
-                    mSnoozeHelper, mUsageStats, mPolicyFile);
+                    mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager);
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
@@ -1038,6 +1041,49 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         verify(mNotificationAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
         verify(mNotificationListeners, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetListenerAccess_doesNothingOnLowRam() throws Exception {
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        mBinderService.setNotificationListenerAccessGranted(c, true);
+
+        verify(mNotificationListeners, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mNotificationAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetAssistantAccess_doesNothingOnLowRam() throws Exception {
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        mBinderService.setNotificationAssistantAccessGranted(c, true);
+
+
+        verify(mNotificationListeners, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mNotificationAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetDndAccess_doesNothingOnLowRam() throws Exception {
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
+
+        verify(mNotificationListeners, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mNotificationAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
 }
