@@ -1852,6 +1852,17 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             throw new IllegalArgumentException("No packages are provided for backup");
         }
 
+        if (!mEnabled || !mProvisioned) {
+            Slog.i(TAG, "Backup requested but e=" + mEnabled + " p=" +mProvisioned);
+            BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+            final int logTag = mProvisioned
+                    ? BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED
+                    : BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
+            monitor = BackupManagerMonitorUtils.monitorEvent(monitor, logTag, null,
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
+            return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
+        }
+
         IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
         if (transport == null) {
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
