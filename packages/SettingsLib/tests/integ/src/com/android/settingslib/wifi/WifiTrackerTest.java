@@ -94,7 +94,7 @@ public class WifiTrackerTest {
             new NetworkKey(new WifiKey('"' + SSID_1 + '"', BSSID_1));
     private static final int RSSI_1 = -30;
     private static final byte SCORE_1 = 10;
-    private static final int BADGE_1 = AccessPoint.SPEED_MEDIUM;
+    private static final int BADGE_1 = AccessPoint.Speed.MODERATE;
 
     private static final String SSID_2 = "ssid2";
     private static final String BSSID_2 = "AA:AA:AA:AA:AA:AA";
@@ -102,7 +102,7 @@ public class WifiTrackerTest {
             new NetworkKey(new WifiKey('"' + SSID_2 + '"', BSSID_2));
     private static final int RSSI_2 = -30;
     private static final byte SCORE_2 = 15;
-    private static final int BADGE_2 = AccessPoint.SPEED_FAST;
+    private static final int BADGE_2 = AccessPoint.Speed.FAST;
 
     private static final int CONNECTED_NETWORK_ID = 123;
     private static final int CONNECTED_RSSI = -50;
@@ -559,9 +559,9 @@ public class WifiTrackerTest {
 
         for (AccessPoint ap : aps) {
             if (ap.getSsidStr().equals(SSID_1)) {
-                assertEquals(AccessPoint.SPEED_NONE, ap.getSpeed());
+                assertEquals(AccessPoint.Speed.NONE, ap.getSpeed());
             } else if (ap.getSsidStr().equals(SSID_2)) {
-                assertEquals(AccessPoint.SPEED_NONE, ap.getSpeed());
+                assertEquals(AccessPoint.Speed.NONE, ap.getSpeed());
             }
         }
     }
