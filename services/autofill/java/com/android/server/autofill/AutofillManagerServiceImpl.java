@@ -496,10 +496,23 @@ final class AutofillManagerServiceImpl {
     }
 
     /**
+     * Resets the last fill selection.
+     */
+    void resetLastResponse() {
+        synchronized (mLock) {
+            mEventHistory = null;
+        }
+    }
+
+    /**
      * Updates the last fill selection when an authentication was selected.
      */
     void setAuthenticationSelected() {
         synchronized (mLock) {
+            if (mEventHistory == null) {
+                Slog.w(TAG, "setAuthenticationSelected(): ignored when history is null");
+                return;
+            }
             mEventHistory.addEvent(new Event(Event.TYPE_AUTHENTICATION_SELECTED, null));
         }
     }
@@ -509,6 +522,10 @@ final class AutofillManagerServiceImpl {
      */
     void setDatasetAuthenticationSelected(@Nullable String selectedDataset) {
         synchronized (mLock) {
+            if (mEventHistory == null) {
+                Slog.w(TAG, "setDatasetAuthenticationSelected(): ignored when history is null");
+                return;
+            }
             mEventHistory.addEvent(
                     new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset));
         }
@@ -519,6 +536,10 @@ final class AutofillManagerServiceImpl {
      */
     void setSaveShown() {
         synchronized (mLock) {
+            if (mEventHistory == null) {
+                Slog.w(TAG, "setSaveShown(): ignored when history is null");
+                return;
+            }
             mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null));
         }
     }
@@ -528,6 +549,10 @@ final class AutofillManagerServiceImpl {
      */
     void setDatasetSelected(@Nullable String selectedDataset) {
         synchronized (mLock) {
+            if (mEventHistory == null) {
+                Slog.w(TAG, "setDatasetSelected(): ignored when history is null");
+                return;
+            }
             mEventHistory.addEvent(new Event(Event.TYPE_DATASET_SELECTED, selectedDataset));
         }
     }
