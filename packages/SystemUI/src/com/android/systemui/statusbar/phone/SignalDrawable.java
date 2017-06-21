@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
@@ -28,6 +29,7 @@ import android.graphics.Path.Direction;
 import android.graphics.Path.FillType;
 import android.graphics.Path.Op;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.LayoutDirection;
@@ -64,6 +66,7 @@ public class SignalDrawable extends Drawable {
     private static final int STATE_EMPTY = 1;
     private static final int STATE_CUT = 2;
     private static final int STATE_CARRIER_CHANGE = 3;
+    private static final int STATE_AIRPLANE = 4;
 
     private static final long DOT_DELAY = 1000;
 
@@ -82,6 +85,13 @@ public class SignalDrawable extends Drawable {
             {-1.9f / VIEWPORT, -1.9f / VIEWPORT},
     };
 
+    // The easiest way to understand this is as if we set Style.STROKE and draw the triangle,
+    // but that is only theoretically right. Instead, draw the triangle and clip out a smaller
+    // one inset by this amount.
+    private final float mEmptyStrokeWidth;
+    private static final float INV_TAN = 1f / (float) Math.tan(Math.PI / 8f);
+    private final float mEmptyDiagInset;  // == mEmptyStrokeWidth * INV_TAN
+
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mForegroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final int mDarkModeBackgroundColor;
@@ -91,6 +101,10 @@ public class SignalDrawable extends Drawable {
     private final Path mFullPath = new Path();
     private final Path mForegroundPath = new Path();
     private final Path mXPath = new Path();
+    // Cut out when STATE_EMPTY
+    private final Path mCutPath = new Path();
+    // Draws the slash when in airplane mode
+    private final SlashArtist mSlash = new SlashArtist();
     private final Handler mHandler;
     private float mOldDarkIntensity = -1;
     private float mNumLevels = 1;
@@ -111,6 +125,12 @@ public class SignalDrawable extends Drawable {
         mLightModeFillColor =
                 Utils.getDefaultColor(context, R.color.light_mode_icon_color_dual_tone_fill);
         mIntrinsicSize = context.getResources().getDimensionPixelSize(R.dimen.signal_icon_size);
+
+        // mCutPath parameters
+        mEmptyStrokeWidth = context.getResources()
+                .getDimensionPixelSize(R.dimen.mobile_signal_empty_strokewidth);
+        mEmptyDiagInset = mEmptyStrokeWidth * INV_TAN;
+
         mHandler = new Handler();
         setDarkIntensity(0);
     }
@@ -208,7 +228,7 @@ public class SignalDrawable extends Drawable {
         mFullPath.setFillType(FillType.WINDING);
         float width = getBounds().width();
         float height = getBounds().height();
-        float padding = (PAD * width);
+        float padding = Math.round(PAD * width);
         mFullPath.moveTo(width - padding, height - padding);
         mFullPath.lineTo(width - padding, padding);
         mFullPath.lineTo(padding, height - padding);
@@ -241,10 +261,27 @@ public class SignalDrawable extends Drawable {
             mFullPath.rLineTo(0, cut);
         }
 
-        mPaint.setStyle(mState == STATE_EMPTY ? Style.STROKE : Style.FILL);
-        mForegroundPaint.setStyle(mState == STATE_EMPTY ? Style.STROKE : Style.FILL);
+        if (mState == STATE_EMPTY) {
+            // Cut out a smaller triangle from the center of mFullPath
+            mCutPath.reset();
+            mCutPath.setFillType(FillType.WINDING);
+            mCutPath.moveTo(width - padding - mEmptyStrokeWidth,
+                    height - padding - mEmptyStrokeWidth);
+            mCutPath.lineTo(width - padding - mEmptyStrokeWidth, padding + mEmptyDiagInset);
+            mCutPath.lineTo(padding + mEmptyDiagInset, height - padding - mEmptyStrokeWidth);
+            mCutPath.lineTo(width - padding - mEmptyStrokeWidth,
+                    height - padding - mEmptyStrokeWidth);
 
-        if (mState != STATE_CARRIER_CHANGE) {
+            // In empty state, draw the full path as the foreground paint
+            mForegroundPath.set(mFullPath);
+            mFullPath.reset();
+            mForegroundPath.op(mCutPath, Path.Op.DIFFERENCE);
+        } else if (mState == STATE_AIRPLANE) {
+            // Airplane mode is slashed, full-signal
+            mForegroundPath.set(mFullPath);
+            mFullPath.reset();
+            mSlash.draw((int) height, (int) width, canvas, mForegroundPaint);
+        } else if (mState != STATE_CARRIER_CHANGE) {
             mForegroundPath.reset();
             int sigWidth = Math.round(calcFit(mLevel / (mNumLevels - 1)) * (width - 2 * padding));
             mForegroundPath.addRect(padding, padding, padding + sigWidth, height - padding,
@@ -353,5 +390,66 @@ public class SignalDrawable extends Drawable {
 
     public static int getEmptyState(int numLevels) {
         return (STATE_EMPTY << STATE_SHIFT) | (numLevels << NUM_LEVEL_SHIFT);
+    }
+
+    public static int getAirplaneModeState(int numLevels) {
+        return (STATE_AIRPLANE << STATE_SHIFT) | (numLevels << NUM_LEVEL_SHIFT);
+    }
+
+    private final class SlashArtist {
+        // These values are derived in un-rotated (vertical) orientation
+        private static final float SLASH_WIDTH = 1.8384776f;
+        private static final float SLASH_HEIGHT = 22f;
+        private static final float CENTER_X = 10.65f;
+        private static final float CENTER_Y = 15.869239f;
+        private static final float SCALE = 24f;
+
+        // Bottom is derived during animation
+        private static final float LEFT = (CENTER_X - (SLASH_WIDTH / 2)) / SCALE;
+        private static final float TOP = (CENTER_Y - (SLASH_HEIGHT / 2)) / SCALE;
+        private static final float RIGHT = (CENTER_X + (SLASH_WIDTH / 2)) / SCALE;
+        private static final float BOTTOM = (CENTER_Y + (SLASH_HEIGHT / 2)) / SCALE;
+        // Draw the slash washington-monument style; rotate to no-u-turn style
+        private static final float ROTATION = -45f;
+
+        private final Path mPath = new Path();
+        private final RectF mSlashRect = new RectF();
+
+        void draw(int height, int width, @NonNull Canvas canvas, Paint paint) {
+            Matrix m = new Matrix();
+            updateRect(
+                    scale(LEFT, width),
+                    scale(TOP, height),
+                    scale(RIGHT, width),
+                    scale(BOTTOM, height));
+
+            mPath.reset();
+            // Draw the slash vertically
+            mPath.addRect(mSlashRect, Direction.CW);
+            m.setRotate(ROTATION, width / 2, height / 2);
+            mPath.transform(m);
+            canvas.drawPath(mPath, paint);
+
+            // Rotate back to vertical, and draw the cut-out rect next to this one
+            m.setRotate(-ROTATION, width / 2, height / 2);
+            mPath.transform(m);
+            m.setTranslate(mSlashRect.width(), 0);
+            mPath.transform(m);
+            mPath.addRect(mSlashRect, Direction.CW);
+            m.setRotate(ROTATION, width / 2, height / 2);
+            mPath.transform(m);
+            canvas.clipOutPath(mPath);
+        }
+
+        void updateRect(float left, float top, float right, float bottom) {
+            mSlashRect.left = left;
+            mSlashRect.top = top;
+            mSlashRect.right = right;
+            mSlashRect.bottom = bottom;
+        }
+
+        private float scale(float frac, int width) {
+            return frac * width;
+        }
     }
 }
