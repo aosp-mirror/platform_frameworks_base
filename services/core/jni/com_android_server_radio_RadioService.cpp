@@ -199,10 +199,10 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
 
     HalRevision halRev;
     if (V1_1::IBroadcastRadio::castFrom(module).withDefault(nullptr) != nullptr) {
-        ALOGI("Opening tuner with broadcast radio HAL 1.1");
+        ALOGI("Opening tuner %d with broadcast radio HAL 1.1", moduleId);
         halRev = HalRevision::V1_1;
     } else {
-        ALOGI("Opening tuner with broadcast radio HAL 1.0");
+        ALOGI("Opening tuner %d with broadcast radio HAL 1.0", moduleId);
         halRev = HalRevision::V1_0;
     }
 
@@ -233,7 +233,7 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
     }
 
     Tuner::setHalTuner(env, tuner, halTuner);
-    ALOGI("Opened tuner %p", halTuner.get());
+    ALOGD("Opened tuner %p", halTuner.get());
     return tuner.release();
 }
 

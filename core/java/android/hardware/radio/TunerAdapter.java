@@ -43,7 +43,7 @@ class TunerAdapter extends RadioTuner {
     public void close() {
         synchronized (mTuner) {
             if (mIsClosed) {
-                Log.d(TAG, "Tuner is already closed");
+                Log.v(TAG, "Tuner is already closed");
                 return;
             }
             mIsClosed = true;

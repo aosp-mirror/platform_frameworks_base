@@ -24,16 +24,12 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.os.ParcelableException;
-import android.util.Slog;
 
 import com.android.server.SystemService;
 
 import java.util.List;
 
 public class RadioService extends SystemService {
-    // TODO(b/36863239): rename to RadioService when native service goes away
-    private static final String TAG = "RadioServiceJava";
-
     private final RadioServiceImpl mServiceImpl = new RadioServiceImpl();
 
     /**
@@ -63,7 +59,6 @@ public class RadioService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.RADIO_SERVICE, mServiceImpl);
-        Slog.v(TAG, "RadioService started");
     }
 
     private class RadioServiceImpl extends IRadioService.Stub {
