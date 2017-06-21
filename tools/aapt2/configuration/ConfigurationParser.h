@@ -62,6 +62,9 @@ enum class Abi {
   kUniversal
 };
 
+/** Helper method to convert an ABI to a string representing the path within the APK. */
+const std::string& AbiToString(Abi abi);
+
 /**
  * Represents an individual locale. When a locale is included, it must be
  * declared from least specific to most specific, as a region does not make
@@ -118,7 +121,8 @@ struct GlTexture {
  * AAPT2 XML configuration binary representation.
  */
 struct Configuration {
-  std::unordered_map<std::string, Artifact> artifacts;
+  // TODO: Support named artifacts?
+  std::vector<Artifact> artifacts;
   Maybe<std::string> artifact_format;
 
   Group<Abi> abi_groups;

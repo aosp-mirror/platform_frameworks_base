@@ -20,6 +20,7 @@
 #include "androidfw/StringPiece.h"
 
 #include "ResourceTable.h"
+#include "filter/Filter.h"
 #include "flatten/Archive.h"
 #include "flatten/TableFlattener.h"
 #include "io/ZipArchive.h"
@@ -48,6 +49,14 @@ class LoadedApk {
    */
   bool WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
                       IArchiveWriter* writer);
+
+  /**
+   * Writes the APK on disk at the given path, while also removing the resource
+   * files that are not referenced in the resource table. The provided filter
+   * chain is applied to each entry in the APK file.
+   */
+  bool WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
+                      FilterChain* filters, IArchiveWriter* writer);
 
   static std::unique_ptr<LoadedApk> LoadApkFromPath(IAaptContext* context,
                                                     const android::StringPiece& path);
