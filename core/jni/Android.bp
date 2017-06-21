@@ -207,7 +207,6 @@ cc_library_shared {
     static_libs: [
         "libseccomp_policy",
         "libselinux",
-        "libcrypto",
     ],
 
     shared_libs: [
