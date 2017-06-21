@@ -414,7 +414,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
-        mService.setLastResponse(serviceUid, response);
+        mService.setLastResponse(serviceUid, id, response);
 
         if ((response.getDatasets() == null || response.getDatasets().isEmpty())
                         && response.getAuthentication() == null) {
@@ -544,7 +544,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     getFillContextByRequestIdLocked(requestId).getStructure(), extras);
         }
 
-        mService.setAuthenticationSelected();
+        mService.setAuthenticationSelected(id);
 
         final int authenticationId = AutofillManager.makeAuthenticationId(requestId, datasetIndex);
         mHandlerCaller.getHandler().post(() -> startAuthentication(authenticationId,
@@ -833,7 +833,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             if (atLeastOneChanged) {
                 if (sDebug) Slog.d(TAG, "at least one field changed - showing save UI");
-                mService.setSaveShown();
+                mService.setSaveShown(id);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), saveInfo, mPackageName,
                         this);
 
@@ -1364,14 +1364,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             // Autofill it directly...
             if (dataset.getAuthentication() == null) {
-                mService.setDatasetSelected(dataset.getId());
+                mService.setDatasetSelected(dataset.getId(), id);
 
                 autoFillApp(dataset);
                 return;
             }
 
             // ...or handle authentication.
-            mService.setDatasetAuthenticationSelected(dataset.getId());
+            mService.setDatasetAuthenticationSelected(dataset.getId(), id);
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH, false);
             final Intent fillInIntent = createAuthFillInIntent(
                     getFillContextByRequestIdLocked(requestId).getStructure(), mClientState);
