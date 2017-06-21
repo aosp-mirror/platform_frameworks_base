@@ -454,7 +454,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     || row.getTranslationZ() > mAmbientState.getBaseZHeight()))) {
                 iconState.hidden = true;
             }
-            int shelfColor = icon.getStaticDrawableColor();
+            int backgroundColor = getBackgroundColorWithoutTint();
+            int shelfColor = icon.getContrastedStaticDrawableColor(backgroundColor);
             if (!noIcon && shelfColor != StatusBarIconView.NO_COLOR) {
                 int iconColor = row.getVisibleNotificationHeader().getOriginalIconColor();
                 shelfColor = NotificationUtils.interpolateColors(iconColor, shelfColor,
