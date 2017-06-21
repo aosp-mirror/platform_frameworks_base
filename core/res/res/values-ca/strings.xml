@@ -471,7 +471,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar Comunicació de camp proper (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet que l\'aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Comunicació de camp proper (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivació del bloqueig de pantalla"</string>
-    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet que l\'aplicació desactivi el bloqueig del teclat i qualsevol element de seguretat de contrasenyes associat. Per exemple, el telèfon desactiva el bloqueig del teclat en rebre una trucada telefònica entrant i, a continuació, reactiva el bloqueig del teclat quan finalitza la trucada."</string>
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet que l\'aplicació desactivi el bloqueig del teclat i qualsevol element de seguretat de contrasenyes associat. Per exemple, el telèfon desactiva el bloqueig del teclat en rebre una trucada entrant i, a continuació, reactiva el bloqueig del teclat quan finalitza la trucada."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Gestionar el maquinari d\'empremtes digitals"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Permet que l\'aplicació invoqui mètodes per afegir i suprimir plantilles d\'empremtes digitals que es puguin fer servir."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"Utilitzar el maquinari d\'empremtes digitals"</string>
@@ -788,13 +788,13 @@
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Ha finalitzat la reorganització del widget."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"S\'ha suprimit el widget de <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Desplega l\'àrea de desbloqueig."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Desbloqueig lliscant el dit"</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Desbloqueig lliscant"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueig mitjançant patró"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueig facial"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueig mitjançant PIN"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueig mitjançant contrasenya"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Àrea de patró"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Àrea per lliscar el dit"</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Àrea per lliscar"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1075,7 +1075,7 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de memòria"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"S\'ha recopilat un procés \"heap dump\"; toca per compartir-lo"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Vols compartir el \"heap dump\"?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"El procés <xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de <xliff:g id="SIZE">%2$s</xliff:g> de memòria del procés. Hi ha un procés \"heap dump\" disponible perquè el comparteixis amb el desenvolupador. Vés amb compte: aquest \"heap dump\" pot contenir les dades personals a les quals l\'aplicació tingui accés."</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"El procés <xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de <xliff:g id="SIZE">%2$s</xliff:g> de memòria del procés. Hi ha un procés \"heap dump\" disponible perquè el comparteixis amb el desenvolupador. Ves amb compte: aquest \"heap dump\" pot contenir les dades personals a les quals l\'aplicació tingui accés."</string>
     <string name="sendText" msgid="5209874571959469142">"Tria una acció per al text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volum del timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volum de multimèdia"</string>
@@ -1259,7 +1259,7 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Permet que una aplicació demani permís per ignorar les optimitzacions de bateria per a l\'aplicació."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Piqueu dos cops per controlar el zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No s\'ha pogut afegir el widget."</string>
-    <string name="ime_action_go" msgid="8320845651737369027">"Vés"</string>
+    <string name="ime_action_go" msgid="8320845651737369027">"Ves"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Cerca"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Envia"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Següent"</string>
