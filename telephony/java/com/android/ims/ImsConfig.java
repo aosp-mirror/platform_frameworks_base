@@ -697,4 +697,11 @@ public class ImsConfig {
                     ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
         }
     }
+
+    /**
+     * @return true if the binder connection is alive, false otherwise.
+     */
+    public boolean isBinderAlive() {
+        return miConfig.asBinder().isBinderAlive();
+    }
 }
