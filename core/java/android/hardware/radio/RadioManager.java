@@ -1486,7 +1486,7 @@ public class RadioManager {
             return nativeListModules(modules);
         }
 
-        Log.v(TAG, "Listing available tuners...");
+        Log.d(TAG, "Listing available tuners...");
         List<ModuleProperties> returnedList;
         try {
             returnedList = mService.listModules();
@@ -1527,7 +1527,7 @@ public class RadioManager {
         }
 
         if (mService != null) {
-            Log.d(TAG, "Opening tuner...");
+            Log.d(TAG, "Opening tuner " + moduleId + "...");
 
             ITuner tuner;
             ITunerCallback halCallback = new TunerCallbackAdapter(callback, handler);

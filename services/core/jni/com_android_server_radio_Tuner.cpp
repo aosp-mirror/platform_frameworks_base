@@ -150,7 +150,7 @@ void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner, sp<V1_0::ITuner> h
     auto& ctx = getNativeContext(env, jTuner);
 
     if (ctx.mIsClosed) {
-        ALOGI("Tuner was closed during initialization");
+        ALOGD("Tuner was closed during initialization");
         // dropping the last reference will close HAL tuner
         return;
     }

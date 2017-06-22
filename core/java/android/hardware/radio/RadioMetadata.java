@@ -15,21 +15,16 @@
  */
 package android.hardware.radio;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -540,7 +535,6 @@ public final class RadioMetadata implements Parcelable {
     }
 
     int putClockFromNative(int nativeKey, long utcEpochSeconds, int timezoneOffsetInMinutes) {
-        Log.d(TAG, "putClockFromNative()");
         String key = getKeyFromNativeKey(nativeKey);
         if (!METADATA_KEYS_TYPE.containsKey(key) ||
                 METADATA_KEYS_TYPE.get(key) != METADATA_TYPE_CLOCK) {
