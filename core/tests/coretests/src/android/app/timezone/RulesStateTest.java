@@ -107,7 +107,7 @@ public class RulesStateTest {
                 "2016a", formatVersion(1, 1), true /* operationInProgress */,
                 RulesState.STAGED_OPERATION_UNKNOWN, null /* stagedDistroRulesVersion */,
                 RulesState.DISTRO_STATUS_UNKNOWN, null /* installedDistroRulesVersion */);
-        checkParcelableRoundTrip(rulesStateWithNulls);
+        checkParcelableRoundTrip(rulesStateWithUnknowns);
     }
 
     private static void checkParcelableRoundTrip(RulesState rulesState) {
@@ -121,55 +121,14 @@ public class RulesStateTest {
     }
 
     @Test
-    public void isSystemVersionOlderThan() {
+    public void isSystemVersionNewerThan() {
         RulesState rulesState = new RulesState(
                 "2016b", formatVersion(1, 1), false /* operationInProgress */,
                 RulesState.STAGED_OPERATION_NONE, null /* stagedDistroRulesVersion */,
                 RulesState.DISTRO_STATUS_INSTALLED, rulesVersion("2016b", 3));
-        assertFalse(rulesState.isSystemVersionOlderThan(rulesVersion("2016a", 1)));
-        assertFalse(rulesState.isSystemVersionOlderThan(rulesVersion("2016b", 1)));
-        assertTrue(rulesState.isSystemVersionOlderThan(rulesVersion("2016c", 1)));
-    }
-
-    @Test
-    public void isInstalledDistroOlderThan() {
-        RulesState operationInProgress = new RulesState(
-                "2016b", formatVersion(1, 1), true /* operationInProgress */,
-                RulesState.STAGED_OPERATION_UNKNOWN, null /* stagedDistroRulesVersion */,
-                RulesState.STAGED_OPERATION_UNKNOWN, null /* installedDistroRulesVersion */);
-        try {
-            operationInProgress.isInstalledDistroOlderThan(rulesVersion("2016b", 1));
-            fail();
-        } catch (IllegalStateException expected) {
-        }
-
-        RulesState nothingInstalled = new RulesState(
-                "2016b", formatVersion(1, 1), false /* operationInProgress */,
-                RulesState.STAGED_OPERATION_NONE, null /* stagedDistroRulesVersion */,
-                RulesState.DISTRO_STATUS_NONE, null /* installedDistroRulesVersion */);
-        try {
-            nothingInstalled.isInstalledDistroOlderThan(rulesVersion("2016b", 1));
-            fail();
-        } catch (IllegalStateException expected) {
-        }
-
-        DistroRulesVersion installedVersion = rulesVersion("2016b", 3);
-        RulesState rulesStateWithInstalledVersion = new RulesState(
-                "2016b", formatVersion(1, 1), false /* operationInProgress */,
-                RulesState.STAGED_OPERATION_NONE, null /* stagedDistroRulesVersion */,
-                RulesState.DISTRO_STATUS_INSTALLED, installedVersion);
-
-        DistroRulesVersion olderRules = rulesVersion("2016a", 1);
-        assertEquals(installedVersion.isOlderThan(olderRules),
-                rulesStateWithInstalledVersion.isInstalledDistroOlderThan(olderRules));
-
-        DistroRulesVersion sameRules = rulesVersion("2016b", 1);
-        assertEquals(installedVersion.isOlderThan(sameRules),
-                rulesStateWithInstalledVersion.isInstalledDistroOlderThan(sameRules));
-
-        DistroRulesVersion newerRules = rulesVersion("2016c", 1);
-        assertEquals(installedVersion.isOlderThan(newerRules),
-                rulesStateWithInstalledVersion.isInstalledDistroOlderThan(newerRules));
+        assertTrue(rulesState.isSystemVersionNewerThan(rulesVersion("2016a", 1)));
+        assertFalse(rulesState.isSystemVersionNewerThan(rulesVersion("2016b", 1)));
+        assertFalse(rulesState.isSystemVersionNewerThan(rulesVersion("2016c", 1)));
     }
 
     private static void assertEqualsContract(RulesState one, RulesState two) {
