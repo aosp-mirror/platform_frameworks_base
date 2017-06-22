@@ -721,7 +721,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
             summary.append(mContext.getString(R.string.wifi_not_in_range));
         } else { // In range, not disabled.
             if (config != null) { // Is saved network
-                summary.append(mContext.getString(R.string.wifi_remembered));
+                // Last attempt to connect to this failed. Show reason why
+                switch (config.recentFailure.getAssociationStatus()) {
+                    case WifiConfiguration.RecentFailure.STATUS_AP_UNABLE_TO_HANDLE_NEW_STA:
+                        summary.append(mContext.getString(
+                                R.string.wifi_ap_unable_to_handle_new_sta));
+                        break;
+                    default:
+                        // "Saved"
+                        summary.append(mContext.getString(R.string.wifi_remembered));
+                        break;
+                }
             }
         }
 
