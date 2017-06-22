@@ -93,6 +93,7 @@ public class PipManager implements BasePipManager {
             ComponentName topPipActivity = PipUtils.getTopPinnedActivity(mContext,
                     mActivityManager);
             mMenuController.hideMenu();
+            mTouchHandler.onActivityUnpinned(topPipActivity);
             mNotificationController.onActivityUnpinned(topPipActivity);
 
             SystemServicesProxy.getInstance(mContext).setPipVisibility(topPipActivity != null);
