@@ -243,21 +243,11 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         // See NetlinkHandler.cpp:71.
         if (VDBG) Log.d(TAG, "interfaceStatusChanged " + iface + ", " + up);
         synchronized (mPublicSync) {
-            int interfaceType = ifaceNameToType(iface);
-            if (interfaceType == ConnectivityManager.TETHERING_INVALID) {
-                return;
-            }
-
-            TetherState tetherState = mTetherStates.get(iface);
             if (up) {
-                if (tetherState == null) {
-                    trackNewTetherableInterface(iface, interfaceType);
-                }
+                maybeTrackNewInterfaceLocked(iface);
             } else {
-                if (interfaceType == ConnectivityManager.TETHERING_BLUETOOTH) {
-                    tetherState.stateMachine.sendMessage(
-                            TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
-                    mTetherStates.remove(iface);
+                if (ifaceNameToType(iface) == ConnectivityManager.TETHERING_BLUETOOTH) {
+                    stopTrackingInterfaceLocked(iface);
                 } else {
                     // Ignore usb0 down after enabling RNDIS.
                     // We will handle disconnect in interfaceRemoved.
@@ -291,18 +281,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     public void interfaceAdded(String iface) {
         if (VDBG) Log.d(TAG, "interfaceAdded " + iface);
         synchronized (mPublicSync) {
-            int interfaceType = ifaceNameToType(iface);
-            if (interfaceType == ConnectivityManager.TETHERING_INVALID) {
-                if (VDBG) Log.d(TAG, iface + " is not a tetherable iface, ignoring");
-                return;
-            }
-
-            TetherState tetherState = mTetherStates.get(iface);
-            if (tetherState == null) {
-                trackNewTetherableInterface(iface, interfaceType);
-            } else {
-                if (VDBG) Log.d(TAG, "active iface (" + iface + ") reported as added, ignoring");
-            }
+            maybeTrackNewInterfaceLocked(iface);
         }
     }
 
@@ -310,15 +289,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     public void interfaceRemoved(String iface) {
         if (VDBG) Log.d(TAG, "interfaceRemoved " + iface);
         synchronized (mPublicSync) {
-            TetherState tetherState = mTetherStates.get(iface);
-            if (tetherState == null) {
-                if (VDBG) {
-                    Log.e(TAG, "attempting to remove unknown iface (" + iface + "), ignoring");
-                }
-                return;
-            }
-            tetherState.stateMachine.sendMessage(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
-            mTetherStates.remove(iface);
+            stopTrackingInterfaceLocked(iface);
         }
     }
 
@@ -1887,13 +1858,38 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         sendTetherStateChangedBroadcast();
     }
 
-    private void trackNewTetherableInterface(String iface, int interfaceType) {
-        TetherState tetherState;
-        tetherState = new TetherState(new TetherInterfaceStateMachine(iface, mLooper,
-                interfaceType, mLog, mNMService, mStatsService, this,
-                new IPv6TetheringInterfaceServices(iface, mNMService, mLog)));
+    private void maybeTrackNewInterfaceLocked(final String iface) {
+        // If we don't care about this type of interface, ignore.
+        final int interfaceType = ifaceNameToType(iface);
+        if (interfaceType == ConnectivityManager.TETHERING_INVALID) {
+            mLog.log(iface + " is not a tetherable iface, ignoring");
+            return;
+        }
+
+        // If we have already started a TISM for this interface, skip.
+        if (mTetherStates.containsKey(iface)) {
+            mLog.log("active iface (" + iface + ") reported as added, ignoring");
+            return;
+        }
+
+        mLog.log("adding TetheringInterfaceStateMachine for: " + iface);
+        final TetherState tetherState = new TetherState(
+                new TetherInterfaceStateMachine(
+                    iface, mLooper, interfaceType, mLog, mNMService, mStatsService, this,
+                    new IPv6TetheringInterfaceServices(iface, mNMService, mLog)));
         mTetherStates.put(iface, tetherState);
         tetherState.stateMachine.start();
+    }
+
+    private void stopTrackingInterfaceLocked(final String iface) {
+        final TetherState tetherState = mTetherStates.get(iface);
+        if (tetherState == null) {
+            mLog.log("attempting to remove unknown iface (" + iface + "), ignoring");
+            return;
+        }
+        tetherState.stateMachine.sendMessage(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
+        mLog.log("removing TetheringInterfaceStateMachine for: " + iface);
+        mTetherStates.remove(iface);
     }
 
     private static String[] copy(String[] strarray) {
