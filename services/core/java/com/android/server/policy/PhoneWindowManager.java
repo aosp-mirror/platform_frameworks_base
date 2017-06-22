@@ -23,6 +23,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.AppOpsManager.OP_TOAST_WINDOW;
+import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.content.Context.DISPLAY_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
@@ -2823,7 +2824,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             if (theme != context.getThemeResId() || labelRes != 0) {
                 try {
-                    context = context.createPackageContext(packageName, 0);
+                    context = context.createPackageContext(packageName, CONTEXT_RESTRICTED);
                     context.setTheme(theme);
                 } catch (PackageManager.NameNotFoundException e) {
                     // Ignore
