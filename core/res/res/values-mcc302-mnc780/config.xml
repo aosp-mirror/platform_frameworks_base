@@ -20,12 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
-    <!-- Don't use roaming icon for considered operators -->
-    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
-        <item>302</item>
-    </string-array>
-
     <!-- Configure mobile network MTU. Carrier specific value is set here.
     -->
     <integer name="config_mobile_mtu">1358</integer>

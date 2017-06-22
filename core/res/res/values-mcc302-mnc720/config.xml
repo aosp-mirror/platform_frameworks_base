@@ -37,14 +37,6 @@
     -->
     <integer name="config_mobile_mtu">1430</integer>
 
-    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
-        <item>302220</item>
-        <item>302370</item>
-        <item>302610</item>
-        <item>302660</item>
-        <item>302780</item>
-    </string-array>
-
     <!-- Values for GPS configuration (Rogers) -->
     <string-array translatable="false" name="config_gpsParameters">
         <item>SUPL_HOST=supl.google.com</item>
