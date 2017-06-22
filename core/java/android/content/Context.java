@@ -3913,7 +3913,7 @@ public abstract class Context {
      * @see #getSystemService
      * @hide
      */
-    public static final String RADIO_SERVICE = "radio";
+    public static final String RADIO_SERVICE = "broadcastradio";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
