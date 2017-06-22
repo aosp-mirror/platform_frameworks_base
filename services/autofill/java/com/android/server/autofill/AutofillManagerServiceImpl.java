@@ -360,8 +360,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void disableOwnedAutofillServicesLocked(int uid) {
-        if (mInfo == null || mInfo.getServiceInfo().applicationInfo.uid
-                != UserHandle.getAppId(uid)) {
+        if (mInfo == null || mInfo.getServiceInfo().applicationInfo.uid != uid) {
             return;
         }
         final long identity = Binder.clearCallingIdentity();
