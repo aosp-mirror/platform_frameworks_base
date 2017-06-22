@@ -22,6 +22,7 @@ import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 @ProvidesInterface(version = NotificationSwipeActionHelper.VERSION)
 @DependsOn(target = SnoozeOption.class)
@@ -56,19 +57,17 @@ public interface NotificationSwipeActionHelper {
     public boolean swipedFastEnough(float translation, float velocity);
 
     @ProvidesInterface(version = SnoozeOption.VERSION)
-    public static class SnoozeOption {
-        public static final int VERSION = 1;
-        public int snoozeForMinutes;
-        public SnoozeCriterion criterion;
-        public CharSequence description;
-        public CharSequence confirmation;
+    public interface SnoozeOption {
+        public static final int VERSION = 2;
 
-        public SnoozeOption(SnoozeCriterion crit, int minsToSnoozeFor, CharSequence desc,
-                CharSequence confirm) {
-            criterion = crit;
-            snoozeForMinutes = minsToSnoozeFor;
-            description = desc;
-            confirmation = confirm;
-        }
+        public SnoozeCriterion getSnoozeCriterion();
+
+        public CharSequence getDescription();
+
+        public CharSequence getConfirmation();
+
+        public int getMinutesToSnoozeFor();
+
+        public AccessibilityAction getAccessibilityAction();
     }
 }

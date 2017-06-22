@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
@@ -37,6 +38,8 @@ import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
+
+import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -133,5 +136,62 @@ public class TetheringConfigurationTest {
         // Check that we have not added new cellular interface types
         assertFalse(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE));
         assertFalse(cfg.preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_HIPRI));
+    }
+
+    @Test
+    public void testNoDefinedUpstreamTypesAddsEthernet() {
+        when(mResources.getIntArray(com.android.internal.R.array.config_tether_upstream_types))
+                .thenReturn(new int[]{});
+        mHasTelephonyManager = false;
+        when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_UNSPECIFIED);
+
+        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final Iterator<Integer> upstreamIterator = cfg.preferredUpstreamIfaceTypes.iterator();
+        assertTrue(upstreamIterator.hasNext());
+        assertEquals(TYPE_ETHERNET, upstreamIterator.next().intValue());
+        // The following is because the code always adds some kind of mobile
+        // upstream, be it DUN or, in this case where we use DUN_UNSPECIFIED,
+        // both vanilla and hipri mobile types.
+        assertTrue(upstreamIterator.hasNext());
+        assertEquals(TYPE_MOBILE, upstreamIterator.next().intValue());
+        assertTrue(upstreamIterator.hasNext());
+        assertEquals(TYPE_MOBILE_HIPRI, upstreamIterator.next().intValue());
+        assertFalse(upstreamIterator.hasNext());
+    }
+
+    @Test
+    public void testDefinedUpstreamTypesSansEthernetAddsEthernet() {
+        when(mResources.getIntArray(com.android.internal.R.array.config_tether_upstream_types))
+                .thenReturn(new int[]{TYPE_WIFI, TYPE_MOBILE_HIPRI});
+        mHasTelephonyManager = false;
+        when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_UNSPECIFIED);
+
+        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final Iterator<Integer> upstreamIterator = cfg.preferredUpstreamIfaceTypes.iterator();
+        assertTrue(upstreamIterator.hasNext());
+        assertEquals(TYPE_ETHERNET, upstreamIterator.next().intValue());
+        assertTrue(upstreamIterator.hasNext());
+        assertEquals(TYPE_WIFI, upstreamIterator.next().intValue());
+        assertTrue(upstreamIterator.hasNext());
+        assertEquals(TYPE_MOBILE_HIPRI, upstreamIterator.next().intValue());
+        assertFalse(upstreamIterator.hasNext());
+    }
+
+    @Test
+    public void testDefinedUpstreamTypesWithEthernetDoesNotAddEthernet() {
+        when(mResources.getIntArray(com.android.internal.R.array.config_tether_upstream_types))
+                .thenReturn(new int[]{TYPE_WIFI, TYPE_ETHERNET, TYPE_MOBILE_HIPRI});
+        mHasTelephonyManager = false;
+        when(mTelephonyManager.getTetherApnRequired()).thenReturn(DUN_UNSPECIFIED);
+
+        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
+        final Iterator<Integer> upstreamIterator = cfg.preferredUpstreamIfaceTypes.iterator();
+        assertTrue(upstreamIterator.hasNext());
+        assertEquals(TYPE_WIFI, upstreamIterator.next().intValue());
+        assertTrue(upstreamIterator.hasNext());
+        assertEquals(TYPE_ETHERNET, upstreamIterator.next().intValue());
+        assertTrue(upstreamIterator.hasNext());
+        assertEquals(TYPE_MOBILE_HIPRI, upstreamIterator.next().intValue());
+        assertFalse(upstreamIterator.hasNext());
     }
 }

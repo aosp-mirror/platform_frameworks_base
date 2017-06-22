@@ -194,6 +194,12 @@ public final class AudioAttributes implements Parcelable {
      * @see #SUPPRESSIBLE_USAGES
      */
     public final static int SUPPRESSIBLE_CALL = 2;
+    /**
+     * @hide
+     * Denotes a usage that is never going to be muted, even in Total Silence.
+     * @see #SUPPRESSIBLE_USAGES
+     */
+    public final static int SUPPRESSIBLE_NEVER = 3;
 
     /**
      * @hide
@@ -211,6 +217,7 @@ public final class AudioAttributes implements Parcelable {
         SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_COMMUNICATION_INSTANT,SUPPRESSIBLE_NOTIFICATION);
         SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_COMMUNICATION_DELAYED,SUPPRESSIBLE_NOTIFICATION);
         SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_EVENT,                SUPPRESSIBLE_NOTIFICATION);
+        SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_ACCESSIBILITY,          SUPPRESSIBLE_NEVER);
     }
 
     /**
