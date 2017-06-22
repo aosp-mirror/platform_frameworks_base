@@ -31,8 +31,10 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.support.annotation.VisibleForTesting;
 
 import com.android.systemui.R;
+import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,7 +143,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     /**
      * Returns true if there currently exist active high power location requests.
      */
-    private boolean areActiveHighPowerLocationRequests() {
+    @VisibleForTesting
+    protected boolean areActiveHighPowerLocationRequests() {
         List<AppOpsManager.PackageOps> packages
             = mAppOpsManager.getPackagesForOps(mHighPowerRequestAppOpArray);
         // AppOpsManager can return null when there is no requested data.
@@ -205,16 +208,14 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         }
 
         private void locationActiveChanged() {
-            for (LocationChangeCallback cb : mSettingsChangeCallbacks) {
-                cb.onLocationActiveChanged(mAreActiveLocationRequests);
-            }
+            Utils.safeForeach(mSettingsChangeCallbacks,
+                    cb -> cb.onLocationActiveChanged(mAreActiveLocationRequests));
         }
 
         private void locationSettingsChanged() {
             boolean isEnabled = isLocationEnabled();
-            for (LocationChangeCallback cb : mSettingsChangeCallbacks) {
-                cb.onLocationSettingsChanged(isEnabled);
-            }
+            Utils.safeForeach(mSettingsChangeCallbacks,
+                    cb -> cb.onLocationSettingsChanged(isEnabled));
         }
     }
 }
