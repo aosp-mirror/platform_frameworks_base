@@ -160,6 +160,8 @@ public class WrapperInit {
             argv = removedArgs;
         }
 
+        // Perform the same initialization that would happen after the Zygote forks.
+        Zygote.nativePreApplicationInit();
         RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
     }
 
