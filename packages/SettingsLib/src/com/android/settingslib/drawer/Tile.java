@@ -51,6 +51,12 @@ public class Tile implements Parcelable {
     public Icon icon;
 
     /**
+     * Whether the icon can be tinted. This should be set to true for monochrome (single-color)
+     * icons that can be tinted to match the design.
+     */
+    public boolean isIconTintable;
+
+    /**
      * Intent to launch when the preference is selected.
      */
     public Intent intent;
@@ -126,6 +132,7 @@ public class Tile implements Parcelable {
         dest.writeBundle(metaData);
         dest.writeString(key);
         dest.writeParcelable(remoteViews, flags);
+        dest.writeBoolean(isIconTintable);
     }
 
     public void readFromParcel(Parcel in) {
@@ -147,6 +154,7 @@ public class Tile implements Parcelable {
         metaData = in.readBundle();
         key = in.readString();
         remoteViews = in.readParcelable(RemoteViews.class.getClassLoader());
+        isIconTintable = in.readBoolean();
     }
 
     Tile(Parcel in) {

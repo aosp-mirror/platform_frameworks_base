@@ -208,7 +208,7 @@ public class SuggestionParser {
             intent.setPackage(category.pkg);
         }
         TileUtils.getTilesForIntent(mContext, new UserHandle(UserHandle.myUserId()), intent,
-                mAddCache, null, suggestions, true, false);
+                mAddCache, null, suggestions, true, false, false);
         filterSuggestions(suggestions, countBefore, isSmartSuggestionEnabled);
         if (!category.multiple && suggestions.size() > (countBefore + 1)) {
             // If there are too many, remove them all and only re-add the one with the highest
