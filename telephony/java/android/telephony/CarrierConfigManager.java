@@ -1471,6 +1471,30 @@ public class CarrierConfigManager {
     public static final String IMSI_KEY_EXPIRATION_DAYS_TIME_INT =
             "imsi_key_expiration_days_time_int";
 
+    /**
+     * List of operators considered non-roaming which won't show roaming icon.
+     * <p>
+     * Can use mcc or mcc+mnc as item. For example, 302 or 21407.
+     * If operators, 21404 and 21407, make roaming agreements, users of 21404 should not see
+     * the roaming icon as using 21407 network.
+     * @hide
+     */
+    public static final String KEY_NON_ROAMING_OPERATOR_STRING_ARRAY =
+            "non_roaming_operator_string_array";
+
+    /**
+     * List of operators considered roaming with the roaming icon.
+     * <p>
+     * Can use mcc or mcc+mnc as item. For example, 302 or 21407.
+     * If operators, 21404 and 21407, make roaming agreements, users of 21404 should see
+     * the roaming icon as using 21407 network.
+     * <p>
+     * A match on this supersedes a match on {@link #KEY_NON_ROAMING_OPERATOR_STRING_ARRAY}.
+     * @hide
+     */
+    public static final String KEY_ROAMING_OPERATOR_STRING_ARRAY =
+            "roaming_operator_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1721,6 +1745,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL, false);
         sDefaults.putInt(IMSI_KEY_EXPIRATION_DAYS_TIME_INT, IMSI_ENCRYPTION_DAYS_TIME_DISABLED);
         sDefaults.putString(IMSI_KEY_DOWNLOAD_URL_STRING, null);
+	sDefaults.putStringArray(KEY_NON_ROAMING_OPERATOR_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_ROAMING_OPERATOR_STRING_ARRAY, null);
     }
 
     /**
