@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -532,8 +533,14 @@ public class ListPopupWindow implements ShowableListMenu {
     public void setHeight(int height) {
         if (height < 0 && ViewGroup.LayoutParams.WRAP_CONTENT != height
                 && ViewGroup.LayoutParams.MATCH_PARENT != height) {
-            throw new IllegalArgumentException(
-                   "Invalid height. Must be a positive value, MATCH_PARENT, or WRAP_CONTENT.");
+            if (mContext.getApplicationInfo().targetSdkVersion
+                    < Build.VERSION_CODES.O) {
+                Log.e(TAG, "Negative value " + height + " passed to ListPopupWindow#setHeight"
+                        + " produces undefined results");
+            } else {
+                throw new IllegalArgumentException(
+                        "Invalid height. Must be a positive value, MATCH_PARENT, or WRAP_CONTENT.");
+            }
         }
         mDropDownHeight = height;
     }
