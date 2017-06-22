@@ -215,7 +215,6 @@ cc_library_shared {
         "libgif",
         "libseccomp_policy",
         "libselinux",
-        "libcrypto",
         "libgrallocusage",
     ],
 
@@ -224,6 +223,7 @@ cc_library_shared {
         "libandroidfw",
         "libappfuse",
         "libbase",
+        "libcrypto",
         "libnativehelper",
         "liblog",
         "libcutils",
