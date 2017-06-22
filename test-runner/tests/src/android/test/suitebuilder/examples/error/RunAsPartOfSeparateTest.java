@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.test.suitebuilder.examples.error;
 
-import junit.framework.TestCase;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@RunAsPartOfSeparateTest
-public class FailingTest extends TestCase {
-
-    public void testFailOne() throws Exception {
-        fail("Expected");
-    }
-
-    public void testFailTwo() throws Exception {
-        fail("Expected");
-    }
+/**
+ * Annotation that marks tests that should only be run as part of a separate test and not on their
+ * own.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface RunAsPartOfSeparateTest {
 }
