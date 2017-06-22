@@ -1058,6 +1058,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
+    public void setIPv6AddrGenMode(String iface, int mode) throws ServiceSpecificException {
+        try {
+            mNetdService.setIPv6AddrGenMode(iface, mode);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public void disableIpv6(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
