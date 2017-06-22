@@ -762,7 +762,9 @@ public class ZenModeHelper {
 
         for (int usage : AudioAttributes.SDK_USAGES) {
             final int suppressionBehavior = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage);
-            if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_NOTIFICATION) {
+            if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_NEVER) {
+                applyRestrictions(false /*mute*/, usage);
+            } else if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_NOTIFICATION) {
                 applyRestrictions(muteNotifications || muteEverything, usage);
             } else if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_CALL) {
                 applyRestrictions(muteCalls || muteEverything, usage);
