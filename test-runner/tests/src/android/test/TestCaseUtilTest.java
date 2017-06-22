@@ -29,9 +29,7 @@ public class TestCaseUtilTest extends TestCase {
 
         List<String> testCaseNames = TestCaseUtil.getTestCaseNames(testSuite, false);
 
-        assertEquals(2, testCaseNames.size());
-        assertTrue(testCaseNames.get(0).endsWith("OneTestTestCase"));
-        assertTrue(testCaseNames.get(1).endsWith("OneTestTestSuite"));
+        assertEquals(0, testCaseNames.size());
     }
     
     public void testGetTestCaseNamesForTestCaseWithSuiteMethod() throws Exception {
