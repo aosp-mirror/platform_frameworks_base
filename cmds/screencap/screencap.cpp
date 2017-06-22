@@ -253,5 +253,5 @@ int main(int argc, char** argv)
     }
 
     // b/36066697: Avoid running static destructors.
-    _exit(1);
+    _exit(0);
 }
