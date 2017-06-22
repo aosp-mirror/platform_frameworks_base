@@ -49,6 +49,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -797,12 +798,13 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     pw.println(
                             "        " + "mScLocale=" + req.mLocale + " mUid=" + req.mUserId);
                 }
-                final int N = grp.mListeners.size();
+                final int N = grp.mListeners.getRegisteredCallbackCount();
                 for (int i = 0; i < N; i++) {
-                    final InternalDeathRecipient listener = grp.mListeners.get(i);
+                    final ISpellCheckerSessionListener mScListener =
+                            grp.mListeners.getRegisteredCallbackItem(i);
                     pw.println("      " + "Listener #" + i + ":");
-                    pw.println("        " + "mScListener=" + listener.mScListener);
-                    pw.println("        " + "mGroup=" + listener.mGroup);
+                    pw.println("        " + "mScListener=" + mScListener);
+                    pw.println("        " + "mGroup=" + grp);
                 }
             }
             pw.println("");
@@ -840,7 +842,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private final class SpellCheckerBindGroup {
         private final String TAG = SpellCheckerBindGroup.class.getSimpleName();
         private final InternalServiceConnection mInternalConnection;
-        private final ArrayList<InternalDeathRecipient> mListeners = new ArrayList<>();
+        private final InternalDeathRecipients mListeners;
         private boolean mUnbindCalled;
         private ISpellCheckerService mSpellChecker;
         private boolean mConnected;
@@ -849,6 +851,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         public SpellCheckerBindGroup(InternalServiceConnection connection) {
             mInternalConnection = connection;
+            mListeners = new InternalDeathRecipients(this);
         }
 
         public void onServiceConnected(ISpellCheckerService spellChecker) {
@@ -881,26 +884,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 Slog.w(TAG, "remove listener: " + listener.hashCode());
             }
             synchronized(mSpellCheckerMap) {
-                final int size = mListeners.size();
-                final ArrayList<InternalDeathRecipient> removeList = new ArrayList<>();
-                for (int i = 0; i < size; ++i) {
-                    final InternalDeathRecipient tempRecipient = mListeners.get(i);
-                    if(tempRecipient.hasSpellCheckerListener(listener)) {
-                        if (DBG) {
-                            Slog.w(TAG, "found existing listener.");
-                        }
-                        removeList.add(tempRecipient);
-                    }
-                }
-                final int removeSize = removeList.size();
-                for (int i = 0; i < removeSize; ++i) {
-                    if (DBG) {
-                        Slog.w(TAG, "Remove " + removeList.get(i));
-                    }
-                    final InternalDeathRecipient idr = removeList.get(i);
-                    idr.mScListener.asBinder().unlinkToDeath(idr, 0);
-                    mListeners.remove(idr);
-                }
+                mListeners.unregister(listener);
                 cleanLocked();
             }
         }
@@ -914,7 +898,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 return;
             }
             // If there are no more active listeners, clean up.  Only do this once.
-            if (!mListeners.isEmpty()) {
+            if (mListeners.getRegisteredCallbackCount() > 0) {
                 return;
             }
             if (!mPendingSessionRequests.isEmpty()) {
@@ -938,12 +922,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         public void removeAll() {
             Slog.e(TAG, "Remove the spell checker bind unexpectedly.");
             synchronized(mSpellCheckerMap) {
-                final int size = mListeners.size();
+                final int size = mListeners.getRegisteredCallbackCount();
                 for (int i = 0; i < size; ++i) {
-                    final InternalDeathRecipient idr = mListeners.get(i);
-                    idr.mScListener.asBinder().unlinkToDeath(idr, 0);
+                    mListeners.unregister(mListeners.getRegisteredCallbackItem(i));
                 }
-                mListeners.clear();
                 mPendingSessionRequests.clear();
                 mOnGoingSessionRequests.clear();
                 cleanLocked();
@@ -984,12 +966,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     return;
                 }
                 if (mOnGoingSessionRequests.remove(request)) {
-                    final InternalDeathRecipient recipient =
-                            new InternalDeathRecipient(this, request.mScListener);
                     try {
                         request.mTsListener.onServiceConnected(newSession);
-                        request.mScListener.asBinder().linkToDeath(recipient, 0);
-                        mListeners.add(recipient);
+                        mListeners.register(request.mScListener);
                     } catch (RemoteException e) {
                         // Technically this can happen if the spell checker client app is already
                         // dead.  We can just forget about this request; the request is already
@@ -1045,24 +1024,21 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    private static final class InternalDeathRecipient implements IBinder.DeathRecipient {
-        public final ISpellCheckerSessionListener mScListener;
+    private final class InternalDeathRecipients extends
+            RemoteCallbackList<ISpellCheckerSessionListener> {
         private final SpellCheckerBindGroup mGroup;
 
-        public InternalDeathRecipient(SpellCheckerBindGroup group,
-                ISpellCheckerSessionListener scListener) {
-            mScListener = scListener;
+        public InternalDeathRecipients(SpellCheckerBindGroup group) {
             mGroup = group;
         }
 
-        public boolean hasSpellCheckerListener(ISpellCheckerSessionListener listener) {
-            return listener.asBinder().equals(mScListener.asBinder());
+        @Override
+        public void onCallbackDied(ISpellCheckerSessionListener listener) {
+            synchronized(mSpellCheckerMap) {
+                mGroup.removeListener(listener);
+            }
         }
 
-        @Override
-        public void binderDied() {
-            mGroup.removeListener(mScListener);
-        }
     }
 
     private static final class ISpellCheckerServiceCallbackBinder
