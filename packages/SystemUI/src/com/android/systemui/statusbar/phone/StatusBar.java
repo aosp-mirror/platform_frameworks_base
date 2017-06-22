@@ -3456,7 +3456,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         pw.println(Settings.Global.zenModeToString(mZenMode));
         pw.print("  mUseHeadsUp=");
         pw.println(mUseHeadsUp);
-        dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
+        if (mStatusBarView != null) {
+            dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
+        }
 
         pw.print("  mMediaSessionManager=");
         pw.println(mMediaSessionManager);
@@ -3522,7 +3524,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             pw.println("  mGroupManager: null");
         }
 
-        mLightBarController.dump(fd, pw, args);
+        if (mLightBarController != null) {
+            mLightBarController.dump(fd, pw, args);
+        }
 
         if (KeyguardUpdateMonitor.getInstance(mContext) != null) {
             KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
