@@ -4681,6 +4681,12 @@ public abstract class Context {
     public abstract boolean isCredentialProtectedStorage();
 
     /**
+     * Returns true if the context can load unsafe resources, e.g. fonts.
+     * @hide
+     */
+    public abstract boolean canLoadUnsafeResources();
+
+    /**
      * @hide
      */
     public IBinder getActivityToken() {
