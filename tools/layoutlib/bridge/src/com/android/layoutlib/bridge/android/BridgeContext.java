@@ -2008,6 +2008,11 @@ public class BridgeContext extends Context {
         return false;
     }
 
+    @Override
+    public boolean canLoadUnsafeResources() {
+        return false;
+    }
+
     /**
      * The cached value depends on
      * <ol>
