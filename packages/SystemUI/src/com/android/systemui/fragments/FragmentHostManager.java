@@ -266,16 +266,14 @@ public class FragmentHostManager {
     class ExtensionFragmentManager {
         private final ArrayMap<String, Context> mExtensionLookup = new ArrayMap<>();
 
-        public void setCurrentExtension(@NonNull  String tag, @Nullable String oldClass,
+        public void setCurrentExtension(int id, @NonNull  String tag, @Nullable String oldClass,
                 @NonNull String currentClass, @Nullable Context context) {
-            Fragment fragment = getFragmentManager().findFragmentByTag(tag);
             if (oldClass != null) {
                 mExtensionLookup.remove(oldClass);
             }
             mExtensionLookup.put(currentClass, context);
             getFragmentManager().beginTransaction()
-                    .replace(((View) fragment.getView().getParent()).getId(),
-                            instantiate(context, currentClass, null), tag)
+                    .replace(id, instantiate(context, currentClass, null), tag)
                     .commit();
             reloadFragments();
         }
