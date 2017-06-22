@@ -25,22 +25,16 @@
 namespace aapt {
 namespace {
 
-TEST(FilterChainTest, EmptyChain) {
+TEST(FilterTest, FilterChain) {
   FilterChain chain;
   ASSERT_TRUE(chain.Keep("some/random/path"));
-}
 
-TEST(FilterChainTest, SingleFilter) {
-  FilterChain chain;
   chain.AddFilter(util::make_unique<PrefixFilter>("keep/"));
 
   ASSERT_FALSE(chain.Keep("removed/path"));
   ASSERT_TRUE(chain.Keep("keep/path/1"));
   ASSERT_TRUE(chain.Keep("keep/path/2"));
-}
 
-TEST(FilterChainTest, MultipleFilters) {
-  FilterChain chain;
   chain.AddFilter(util::make_unique<PrefixFilter>("keep/"));
   chain.AddFilter(util::make_unique<PrefixFilter>("keep/really/"));
 

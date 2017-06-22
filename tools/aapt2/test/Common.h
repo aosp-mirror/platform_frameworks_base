@@ -41,7 +41,7 @@ IDiagnostics* GetDiagnostics();
 
 inline ResourceName ParseNameOrDie(const android::StringPiece& str) {
   ResourceNameRef ref;
-  CHECK(ResourceUtils::ParseResourceName(str, &ref)) << "invalid resource name";
+  CHECK(ResourceUtils::ParseResourceName(str, &ref)) << "invalid resource name: " << str;
   return ref.ToResourceName();
 }
 

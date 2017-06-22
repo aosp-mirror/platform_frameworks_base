@@ -212,5 +212,63 @@ std::unique_ptr<xml::XmlResource> BuildXmlDomForPackageName(IAaptContext* contex
   return doc;
 }
 
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetAbiGroup(
+    const std::string& name, const std::vector<configuration::Abi>& abis) {
+  config_.abi_groups[name] = abis;
+  return *this;
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetLocaleGroup(
+    const std::string& name, const std::vector<std::string>& locales) {
+  auto& group = config_.locale_groups[name];
+  for (const auto& locale : locales) {
+    group.push_back(ParseConfigOrDie(locale));
+  }
+  return *this;
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::SetDensityGroup(
+    const std::string& name, const std::vector<std::string>& densities) {
+  auto& group = config_.screen_density_groups[name];
+  for (const auto& density : densities) {
+    group.push_back(ParseConfigOrDie(density));
+  }
+  return *this;
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddArtifact(
+    const configuration::Artifact& artifact) {
+  config_.artifacts.push_back(artifact);
+  return *this;
+}
+
+configuration::PostProcessingConfiguration PostProcessingConfigurationBuilder::Build() {
+  return config_;
+}
+
+ArtifactBuilder& ArtifactBuilder::SetName(const std::string& name) {
+  artifact_.name = {name};
+  return *this;
+}
+
+ArtifactBuilder& ArtifactBuilder::SetAbiGroup(const std::string& name) {
+  artifact_.abi_group = {name};
+  return *this;
+}
+
+ArtifactBuilder& ArtifactBuilder::SetDensityGroup(const std::string& name) {
+  artifact_.screen_density_group = {name};
+  return *this;
+}
+
+ArtifactBuilder& ArtifactBuilder::SetLocaleGroup(const std::string& name) {
+  artifact_.locale_group = {name};
+  return *this;
+}
+
+configuration::Artifact ArtifactBuilder::Build() {
+  return artifact_;
+}
+
 }  // namespace test
 }  // namespace aapt
