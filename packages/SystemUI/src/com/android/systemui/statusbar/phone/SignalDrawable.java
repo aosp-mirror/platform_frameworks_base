@@ -27,6 +27,7 @@ import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.Path.FillType;
 import android.graphics.Path.Op;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -105,11 +106,10 @@ public class SignalDrawable extends Drawable {
     private final float mEmptyStrokeWidth;
     private static final float INV_TAN = 1f / (float) Math.tan(Math.PI / 8f);
     private final float mEmptyDiagInset;  // == mEmptyStrokeWidth * INV_TAN
-    //TODO: This is needed because drawing the triangle is paramterized on the rounded edges.
-    // We get rounded corners by placing circles at arbitrary points along the legs of the triangle,
-    // but that means we lose the notion of a triangle being strictly half of its containing square.
-    // As a result, here's a value to tweak the insets of the cutout for the no-signal icon.
-    private final float mCutExtraOffset;
+
+    // Where the top and left points of the triangle would be if not for rounding
+    private final PointF mVirtualTop  = new PointF();
+    private final PointF mVirtualLeft = new PointF();
 
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mForegroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -155,7 +155,6 @@ public class SignalDrawable extends Drawable {
 
         mAppliedCornerInset = context.getResources()
                 .getDimensionPixelSize(R.dimen.stat_sys_mobile_signal_circle_inset);
-        mCutExtraOffset = mAppliedCornerInset / 2f;
     }
 
     public void setIntrinsicSize(int size) {
@@ -319,14 +318,22 @@ public class SignalDrawable extends Drawable {
         }
 
         if (mState == STATE_EMPTY) {
+            // Where the corners would be if this were a real triangle
+            mVirtualTop.set(
+                    width - padding,
+                    (padding + cornerRadius + mAppliedCornerInset) - (INV_TAN * cornerRadius));
+            mVirtualLeft.set(
+                    (padding + cornerRadius + mAppliedCornerInset) - (INV_TAN * cornerRadius),
+                    height - padding);
+
             // Cut out a smaller triangle from the center of mFullPath
             mCutPath.reset();
             mCutPath.setFillType(FillType.WINDING);
             mCutPath.moveTo(width - padding - mEmptyStrokeWidth,
                     height - padding - mEmptyStrokeWidth);
             mCutPath.lineTo(width - padding - mEmptyStrokeWidth,
-                    padding + mEmptyDiagInset - mCutExtraOffset);
-            mCutPath.lineTo(padding + mEmptyDiagInset - mCutExtraOffset,
+                    mVirtualTop.y + mEmptyDiagInset);
+            mCutPath.lineTo(mVirtualLeft.x + mEmptyDiagInset,
                     height - padding - mEmptyStrokeWidth);
             mCutPath.lineTo(width - padding - mEmptyStrokeWidth,
                     height - padding - mEmptyStrokeWidth);
