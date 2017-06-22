@@ -169,6 +169,21 @@ public class AccessPointTest {
     }
 
     @Test
+    public void testCompareTo_GivesSsidCasePrecendenceAfterAlphabetical() {
+
+        final String firstName = "aaAaaa";
+        final String secondName = "aaaaaa";
+        final String thirdName = "BBBBBB";
+
+        AccessPoint firstAp = new TestAccessPointBuilder(mContext).setSsid(firstName).build();
+        AccessPoint secondAp = new TestAccessPointBuilder(mContext).setSsid(secondName).build();
+        AccessPoint thirdAp = new TestAccessPointBuilder(mContext).setSsid(thirdName).build();
+
+        assertSortingWorks(firstAp, secondAp);
+        assertSortingWorks(secondAp, thirdAp);
+    }
+
+    @Test
     public void testCompareTo_AllSortingRulesCombined() {
 
         AccessPoint active = new TestAccessPointBuilder(mContext).setActive(true).build();
