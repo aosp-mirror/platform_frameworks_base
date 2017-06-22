@@ -18,6 +18,7 @@ package android.text;
 
 import android.annotation.Nullable;
 import android.graphics.Paint;
+import android.os.LocaleList;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
@@ -333,6 +334,16 @@ public class StaticLayout extends Layout {
             return this;
         }
 
+        private long[] getHyphenators(LocaleList locales) {
+            final int length = locales.size();
+            final long[] result = new long[length];
+            for (int i = 0; i < length; i++) {
+                final Locale locale = locales.get(i);
+                result[i] = Hyphenator.get(locale).getNativePtr();
+            }
+            return result;
+        }
+
         /**
          * Measurement and break iteration is done in native code. The protocol for using
          * the native code is as follows.
@@ -342,7 +353,7 @@ public class StaticLayout extends Layout {
          * future).
          *
          * Then, for each run within the paragraph:
-         *  - setLocale (this must be done at least for the first run, optional afterwards)
+         *  - setLocales (this must be done at least for the first run, optional afterwards)
          *  - one of the following, depending on the type of run:
          *    + addStyleRun (a text run, to be measured in native code)
          *    + addMeasuredRun (a run already measured in Java, passed into native code)
@@ -354,15 +365,15 @@ public class StaticLayout extends Layout {
          * After all paragraphs, call finish() to release expensive buffers.
          */
 
-        private void setLocale(Locale locale) {
-            if (!locale.equals(mLocale)) {
-                nSetLocale(mNativePtr, locale.toLanguageTag(),
-                        Hyphenator.get(locale).getNativePtr());
-                mLocale = locale;
+        private void setLocales(LocaleList locales) {
+            if (!locales.equals(mLocales)) {
+                nSetLocales(mNativePtr, locales.toLanguageTags(), getHyphenators(locales));
+                mLocales = locales;
             }
         }
 
         /* package */ float addStyleRun(TextPaint paint, int start, int end, boolean isRtl) {
+            setLocales(paint.getTextLocales());
             return nAddStyleRun(mNativePtr, paint.getNativeInstance(), paint.mNativeTypeface,
                     start, end, isRtl);
         }
@@ -425,7 +436,7 @@ public class StaticLayout extends Layout {
         // This will go away and be subsumed by native builder code
         MeasuredText mMeasuredText;
 
-        Locale mLocale;
+        LocaleList mLocales;
 
         private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<Builder>(3);
     }
@@ -594,7 +605,7 @@ public class StaticLayout extends Layout {
         // store fontMetrics per span range
         // must be a multiple of 4 (and > 0) (store top, bottom, ascent, and descent per range)
         int[] fmCache = new int[4 * 4];
-        b.setLocale(paint.getTextLocale());  // TODO: also respect LocaleSpan within the text
+        b.setLocales(paint.getTextLocales());
 
         mLineCount = 0;
 
@@ -1308,7 +1319,8 @@ public class StaticLayout extends Layout {
     /* package */ static native long nLoadHyphenator(ByteBuffer buf, int offset,
             int minPrefix, int minSuffix);
 
-    private static native void nSetLocale(long nativePtr, String locale, long nativeHyphenator);
+    private static native void nSetLocales(long nativePtr, String locales,
+            long[] nativeHyphenators);
 
     private static native void nSetIndents(long nativePtr, int[] indents);
 
