@@ -925,6 +925,12 @@ public class ContextWrapper extends Context {
         return mBase.isCredentialProtectedStorage();
     }
 
+    /** {@hide} */
+    @Override
+    public boolean canLoadUnsafeResources() {
+        return mBase.canLoadUnsafeResources();
+    }
+
     /**
      * @hide
      */
