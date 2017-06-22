@@ -12,6 +12,8 @@ import com.android.systemui.qs.QSPanel.TileRecord;
 
 import java.util.ArrayList;
 
+import lineageos.providers.LineageSettings;
+
 public class TileLayout extends ViewGroup implements QSTileLayout {
 
     private static final float TILE_ASPECT = 1.2f;
@@ -82,7 +84,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public boolean updateResources() {
         final Resources res = mContext.getResources();
-        final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
+        final int columns = LineageSettings.System.getInt(getContext().getContentResolver(),
+                LineageSettings.System.STATUS_BAR_QS_TILE_COLUMNS,
+                Math.max(1, res.getInteger(R.integer.quick_settings_num_columns)));
         mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
