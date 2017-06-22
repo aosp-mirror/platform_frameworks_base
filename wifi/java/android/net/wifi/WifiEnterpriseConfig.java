@@ -156,9 +156,20 @@ public class WifiEnterpriseConfig implements Parcelable {
 
     }
 
-    /** Copy constructor */
-    public WifiEnterpriseConfig(WifiEnterpriseConfig source) {
+    /**
+     * Copy over the contents of the source WifiEnterpriseConfig object over to this object.
+     *
+     * @param source Source WifiEnterpriseConfig object.
+     * @param ignoreMaskedPassword Set to true to ignore masked password field, false otherwise.
+     * @param mask if |ignoreMaskedPassword| is set, check if the incoming password field is set
+     *             to this value.
+     */
+    private void copyFrom(WifiEnterpriseConfig source, boolean ignoreMaskedPassword, String mask) {
         for (String key : source.mFields.keySet()) {
+            if (ignoreMaskedPassword && key.equals(PASSWORD_KEY)
+                    && TextUtils.equals(source.mFields.get(key), mask)) {
+                continue;
+            }
             mFields.put(key, source.mFields.get(key));
         }
         if (source.mCaCerts != null) {
@@ -176,6 +187,29 @@ public class WifiEnterpriseConfig implements Parcelable {
         }
         mEapMethod = source.mEapMethod;
         mPhase2Method = source.mPhase2Method;
+    }
+
+    /**
+     * Copy constructor.
+     * This copies over all the fields verbatim (does not ignore masked password fields).
+     *
+     * @param source Source WifiEnterpriseConfig object.
+     */
+    public WifiEnterpriseConfig(WifiEnterpriseConfig source) {
+        copyFrom(source, false, "");
+    }
+
+    /**
+     * Copy fields from the provided external WifiEnterpriseConfig.
+     * This is needed to handle the WifiEnterpriseConfig objects which were sent by apps with the
+     * password field masked.
+     *
+     * @param externalConfig External WifiEnterpriseConfig object.
+     * @param mask String mask to compare against.
+     * @hide
+     */
+    public void copyFromExternal(WifiEnterpriseConfig externalConfig, String mask) {
+        copyFrom(externalConfig, true, convertToQuotedString(mask));
     }
 
     @Override
