@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import com.android.internal.util.DumpUtils;
 import com.android.server.Watchdog;
+import com.android.server.media.AudioPlaybackMonitor.OnAudioPlayerActiveStateChangedListener;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -26,7 +27,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
+import android.media.IAudioRoutesObserver;
+import android.media.IAudioService;
 import android.media.IMediaRouterClient;
 import android.media.IMediaRouterService;
 import android.media.MediaRouter;
@@ -39,9 +43,12 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -89,10 +96,54 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private final ArrayMap<IBinder, ClientRecord> mAllClientRecords =
             new ArrayMap<IBinder, ClientRecord>();
     private int mCurrentUserId = -1;
+    private boolean mHasBluetoothRoute = false;
+    private final IAudioService mAudioService;
+    private final AudioPlaybackMonitor mAudioPlaybackMonitor;
 
     public MediaRouterService(Context context) {
         mContext = context;
         Watchdog.getInstance().addMonitor(this);
+
+        mAudioService = IAudioService.Stub.asInterface(
+                ServiceManager.getService(Context.AUDIO_SERVICE));
+
+        mAudioPlaybackMonitor = AudioPlaybackMonitor.getInstance(context, mAudioService);
+        mAudioPlaybackMonitor.registerOnAudioPlayerActiveStateChangedListener(
+                new AudioPlaybackMonitor.OnAudioPlayerActiveStateChangedListener() {
+            @Override
+            public void onAudioPlayerActiveStateChanged(int uid, boolean active) {
+                if (active) {
+                    restoreRoute(uid);
+                } else {
+                    IntArray sortedAudioPlaybackClientUids =
+                            mAudioPlaybackMonitor.getSortedAudioPlaybackClientUids();
+                    boolean restored = false;
+                    for (int i = 0; i < sortedAudioPlaybackClientUids.size(); i++) {
+                        if (mAudioPlaybackMonitor.isPlaybackActive(
+                                sortedAudioPlaybackClientUids.get(i))) {
+                            restoreRoute(sortedAudioPlaybackClientUids.get(i));
+                            restored = true;
+                            break;
+                        }
+                    }
+                    if (!restored) {
+                        restoreBluetoothA2dp();
+                    }
+                }
+            }
+        });
+        AudioRoutesInfo audioRoutes = null;
+        try {
+            audioRoutes = mAudioService.startWatchingRoutes(new IAudioRoutesObserver.Stub() {
+                @Override
+                public void dispatchAudioRoutesChanged(final AudioRoutesInfo newRoutes) {
+                    mHasBluetoothRoute = newRoutes.bluetoothName != null;
+                }
+            });
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException in the audio service.");
+        }
+        mHasBluetoothRoute = (audioRoutes != null && audioRoutes.bluetoothName != null);
     }
 
     public void systemRunning() {
@@ -135,7 +186,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                registerClientLocked(client, pid, packageName, resolvedUserId, trusted);
+                registerClientLocked(client, uid, pid, packageName, resolvedUserId, trusted);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -170,6 +221,23 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         try {
             synchronized (mLock) {
                 return getStateLocked(client);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    // Binder call
+    @Override
+    public boolean isPlaybackActive(IMediaRouterClient client) {
+        if (client == null) {
+            throw new IllegalArgumentException("client must not be null");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                return isPlaybackActiveLocked(client);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -276,6 +344,36 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    void restoreBluetoothA2dp() {
+        try {
+            mAudioService.setBluetoothA2dpOn(mHasBluetoothRoute);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException while calling setBluetoothA2dpOn.");
+        }
+    }
+
+    void restoreRoute(int uid) {
+        ClientRecord clientRecord = null;
+        UserRecord userRecord = mUserRecords.get(UserHandle.getUserId(uid));
+        if (userRecord.mClientRecords != null) {
+            for (ClientRecord cr : userRecord.mClientRecords) {
+                if (validatePackageName(uid, cr.mPackageName)) {
+                    clientRecord = cr;
+                    break;
+                }
+            }
+        }
+        if (clientRecord != null) {
+            try {
+                clientRecord.mClient.onRestoreRoute();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to call onRestoreRoute. Client probably died.");
+            }
+        } else {
+            restoreBluetoothA2dp();
+        }
+    }
+
     void switchUser() {
         synchronized (mLock) {
             int userId = ActivityManager.getCurrentUser();
@@ -304,7 +402,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     }
 
     private void registerClientLocked(IMediaRouterClient client,
-            int pid, String packageName, int userId, boolean trusted) {
+            int uid, int pid, String packageName, int userId, boolean trusted) {
         final IBinder binder = client.asBinder();
         ClientRecord clientRecord = mAllClientRecords.get(binder);
         if (clientRecord == null) {
@@ -314,7 +412,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 userRecord = new UserRecord(userId);
                 newUser = true;
             }
-            clientRecord = new ClientRecord(userRecord, client, pid, packageName, trusted);
+            clientRecord = new ClientRecord(userRecord, client, uid, pid, packageName, trusted);
             try {
                 binder.linkToDeath(clientRecord, 0);
             } catch (RemoteException ex) {
@@ -348,6 +446,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             return clientRecord.getState();
         }
         return null;
+    }
+
+    private boolean isPlaybackActiveLocked(IMediaRouterClient client) {
+        ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
+        if (clientRecord != null) {
+            return mAudioPlaybackMonitor.isPlaybackActive(clientRecord.mUid);
+        }
+        return false;
     }
 
     private void setDiscoveryRequestLocked(IMediaRouterClient client,
@@ -489,6 +595,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     final class ClientRecord implements DeathRecipient {
         public final UserRecord mUserRecord;
         public final IMediaRouterClient mClient;
+        public final int mUid;
         public final int mPid;
         public final String mPackageName;
         public final boolean mTrusted;
@@ -498,9 +605,10 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         public String mSelectedRouteId;
 
         public ClientRecord(UserRecord userRecord, IMediaRouterClient client,
-                int pid, String packageName, boolean trusted) {
+                int uid, int pid, String packageName, boolean trusted) {
             mUserRecord = userRecord;
             mClient = client;
+            mUid = uid;
             mPid = pid;
             mPackageName = packageName;
             mTrusted = trusted;
@@ -997,7 +1105,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                     try {
                         mTempClients.get(i).onStateChanged();
                     } catch (RemoteException ex) {
-                        // ignore errors, client probably died
+                        Slog.w(TAG, "Failed to call onStateChanged. Client probably died.");
                     }
                 }
             } finally {
