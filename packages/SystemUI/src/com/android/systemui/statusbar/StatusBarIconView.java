@@ -35,6 +35,7 @@ import android.graphics.drawable.Icon;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -46,6 +47,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
@@ -127,6 +129,8 @@ public class StatusBarIconView extends AnimatedImageView {
         setColorInternal(newColor);
     };
     private final NotificationIconDozeHelper mDozer;
+    private int mContrastedDrawableColor;
+    private int mCachedContrastBackgroundColor = NO_COLOR;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -528,6 +532,7 @@ public class StatusBarIconView extends AnimatedImageView {
     public void setStaticDrawableColor(int color) {
         mDrawableColor = color;
         setColorInternal(color);
+        updateContrastedStaticColor();
         mIconColor = color;
         mDozer.setColor(color);
     }
@@ -578,6 +583,42 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public int getStaticDrawableColor() {
         return mDrawableColor;
+    }
+
+    /**
+     * A drawable color that passes GAR on a specific background.
+     * This value is cached.
+     *
+     * @param backgroundColor Background to test against.
+     * @return GAR safe version of {@link StatusBarIconView#getStaticDrawableColor()}.
+     */
+    int getContrastedStaticDrawableColor(int backgroundColor) {
+        if (mCachedContrastBackgroundColor != backgroundColor) {
+            mCachedContrastBackgroundColor = backgroundColor;
+            updateContrastedStaticColor();
+        }
+        return mContrastedDrawableColor;
+    }
+
+    private void updateContrastedStaticColor() {
+        if (mCachedContrastBackgroundColor == NO_COLOR) {
+            return;
+        }
+        // We'll modify the color if it doesn't pass GAR
+        int contrastedColor = mDrawableColor;
+        if (!NotificationColorUtil.satisfiesTextContrast(mCachedContrastBackgroundColor,
+                contrastedColor)) {
+            float[] hsl = new float[3];
+            ColorUtils.colorToHSL(mDrawableColor, hsl);
+            // This is basically a light grey, pushing the color will only distort it.
+            // Best thing to do in here is to fallback to the default color.
+            if (hsl[1] < 0.2f) {
+                contrastedColor = Notification.COLOR_DEFAULT;
+            }
+            contrastedColor = NotificationColorUtil.resolveContrastColor(mContext,
+                    contrastedColor, mCachedContrastBackgroundColor);
+        }
+        mContrastedDrawableColor = contrastedColor;
     }
 
     public void setVisibleState(int state) {
