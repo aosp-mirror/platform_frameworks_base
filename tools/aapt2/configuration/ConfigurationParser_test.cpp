@@ -32,6 +32,7 @@ namespace {
 using android::ResTable_config;
 using configuration::Abi;
 using configuration::AndroidSdk;
+using configuration::Artifact;
 using configuration::PostProcessingConfiguration;
 using configuration::DeviceFeature;
 using configuration::GlTexture;
@@ -415,6 +416,56 @@ TEST_F(ConfigurationParserTest, DeviceFeatureGroupAction) {
   DeviceFeature low_latency = "android.hardware.audio.low_latency";
   DeviceFeature pro = "android.hardware.audio.pro";
   ASSERT_THAT(out, ElementsAre(low_latency, pro));
+}
+
+TEST(ArtifactTest, Simple) {
+  StdErrDiagnostics diag;
+  Artifact x86;
+  x86.abi_group = {"x86"};
+
+  auto x86_result = x86.ToArtifactName("something.{abi}.apk", &diag);
+  ASSERT_TRUE(x86_result);
+  EXPECT_EQ(x86_result.value(), "something.x86.apk");
+
+  Artifact arm;
+  arm.abi_group = {"armeabi-v7a"};
+
+  auto arm_result = arm.ToArtifactName("app.{abi}.apk", &diag);
+  ASSERT_TRUE(arm_result);
+  EXPECT_EQ(arm_result.value(), "app.armeabi-v7a.apk");
+}
+
+TEST(ArtifactTest, Complex) {
+  StdErrDiagnostics diag;
+  Artifact artifact;
+  artifact.abi_group = {"mips64"};
+  artifact.screen_density_group = {"ldpi"};
+  artifact.device_feature_group = {"df1"};
+  artifact.gl_texture_group = {"glx1"};
+  artifact.locale_group = {"en-AU"};
+  artifact.android_sdk_group = {"26"};
+
+  auto result =
+      artifact.ToArtifactName("app.{density}_{locale}_{feature}_{gl}.sdk{sdk}.{abi}.apk", &diag);
+  ASSERT_TRUE(result);
+  EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+}
+
+TEST(ArtifactTest, Missing) {
+  StdErrDiagnostics diag;
+  Artifact x86;
+  x86.abi_group = {"x86"};
+
+  EXPECT_FALSE(x86.ToArtifactName("something.{density}.apk", &diag));
+  EXPECT_FALSE(x86.ToArtifactName("something.apk", &diag));
+}
+
+TEST(ArtifactTest, Empty) {
+  StdErrDiagnostics diag;
+  Artifact artifact;
+
+  EXPECT_FALSE(artifact.ToArtifactName("something.{density}.apk", &diag));
+  EXPECT_TRUE(artifact.ToArtifactName("something.apk", &diag));
 }
 
 }  // namespace

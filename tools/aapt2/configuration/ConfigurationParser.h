@@ -20,8 +20,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <ConfigDescription.h>
 
+#include "ConfigDescription.h"
+#include "Diagnostics.h"
 #include "util/Maybe.h"
 
 namespace aapt {
@@ -48,6 +49,9 @@ struct Artifact {
   Maybe<std::string> device_feature_group;
   /** If present, uses the OpenGL texture group with this name. */
   Maybe<std::string> gl_texture_group;
+
+  /** Convert an artifact name template into a name string based on configuration contents. */
+  Maybe<std::string> ToArtifactName(const std::string& format, IDiagnostics* diag) const;
 };
 
 /** Enumeration of currently supported ABIs. */
@@ -212,4 +216,4 @@ class ConfigurationParser {
 
 }  // namespace aapt
 
-#endif //AAPT2_CONFIGURATION_H
+#endif  // AAPT2_CONFIGURATION_H
