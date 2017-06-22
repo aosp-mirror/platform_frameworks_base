@@ -127,6 +127,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     public int lastError() { return mLastError; }
 
+    public void stop() { sendMessage(CMD_INTERFACE_DOWN); }
+
+    public void unwanted() { sendMessage(CMD_TETHER_UNREQUESTED); }
+
     // configured when we start tethering and unconfig'd on error or conclusion
     private boolean configureIfaceIp(boolean enabled) {
         if (VDBG) Log.d(TAG, "configureIfaceIp(" + enabled + ")");
