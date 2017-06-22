@@ -221,6 +221,14 @@ static void SetRLimits(JNIEnv* env, jobjectArray javaRlimits) {
 // The debug malloc library needs to know whether it's the zygote or a child.
 extern "C" int gMallocLeakZygoteChild;
 
+static void PreApplicationInit() {
+  // The child process sets this to indicate it's not the zygote.
+  gMallocLeakZygoteChild = 1;
+
+  // Set the jemalloc decay time to 1.
+  mallopt(M_DECAY_TIME, 1);
+}
+
 static void EnableKeepCapabilities(JNIEnv* env) {
   int rc = prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0);
   if (rc == -1) {
@@ -517,11 +525,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   pid_t pid = fork();
 
   if (pid == 0) {
-    // The child process.
-    gMallocLeakZygoteChild = 1;
-
-    // Set the jemalloc decay time to 1.
-    mallopt(M_DECAY_TIME, 1);
+    PreApplicationInit();
 
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fdsToClose);
@@ -678,6 +682,10 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
 namespace android {
 
+static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jclass) {
+  PreApplicationInit();
+}
+
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
         jint debug_flags, jobjectArray rlimits,
@@ -807,7 +815,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeAllowFileAcrossFork", "(Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeAllowFileAcrossFork },
     { "nativeUnmountStorageOnInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit }
+      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit },
+    { "nativePreApplicationInit", "()V",
+      (void *) com_android_internal_os_Zygote_nativePreApplicationInit }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
