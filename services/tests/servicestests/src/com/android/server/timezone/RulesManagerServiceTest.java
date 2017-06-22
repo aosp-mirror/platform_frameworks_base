@@ -30,6 +30,8 @@ import android.app.timezone.RulesManager;
 import android.app.timezone.RulesState;
 import android.os.ParcelFileDescriptor;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
@@ -61,7 +63,6 @@ public class RulesManagerServiceTest {
 
     private FakeExecutor mFakeExecutor;
     private PermissionHelper mMockPermissionHelper;
-    private FileDescriptorHelper mMockFileDescriptorHelper;
     private PackageTracker mMockPackageTracker;
     private TimeZoneDistroInstaller mMockTimeZoneDistroInstaller;
 
@@ -69,7 +70,6 @@ public class RulesManagerServiceTest {
     public void setUp() {
         mFakeExecutor = new FakeExecutor();
 
-        mMockFileDescriptorHelper = mock(FileDescriptorHelper.class);
         mMockPackageTracker = mock(PackageTracker.class);
         mMockPermissionHelper = mock(PermissionHelper.class);
         mMockTimeZoneDistroInstaller = mock(TimeZoneDistroInstaller.class);
@@ -77,7 +77,6 @@ public class RulesManagerServiceTest {
         mRulesManagerService = new RulesManagerService(
                 mMockPermissionHelper,
                 mFakeExecutor,
-                mMockFileDescriptorHelper,
                 mMockPackageTracker,
                 mMockTimeZoneDistroInstaller);
     }
@@ -273,9 +272,8 @@ public class RulesManagerServiceTest {
                 revision);
         configureInstalledDistroVersion(installedDistroVersion);
 
-        byte[] expectedContent = createArbitraryBytes(1000);
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         // Start an async operation so there is one in progress. The mFakeExecutor won't actually
         // execute it.
@@ -298,24 +296,27 @@ public class RulesManagerServiceTest {
     public void requestInstall_operationInProgress() throws Exception {
         configureCallerHasPermission();
 
-        byte[] expectedContent = createArbitraryBytes(1000);
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor1 =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         byte[] tokenBytes = createArbitraryTokenBytes();
         ICallback callback = new StubbedCallback();
 
         // First request should succeed.
         assertEquals(RulesManager.SUCCESS,
-                mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback));
+                mRulesManagerService.requestInstall(parcelFileDescriptor1, tokenBytes, callback));
 
         // Something async should be enqueued. Clear it but do not execute it so we can detect the
         // second request does nothing.
         mFakeExecutor.getAndResetLastCommand();
 
         // Second request should fail.
+        ParcelFileDescriptor parcelFileDescriptor2 =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
         assertEquals(RulesManager.ERROR_OPERATION_IN_PROGRESS,
-                mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback));
+                mRulesManagerService.requestInstall(parcelFileDescriptor2, tokenBytes, callback));
+
+        assertClosed(parcelFileDescriptor2);
 
         // Assert nothing async was enqueued.
         mFakeExecutor.assertNothingQueued();
@@ -327,9 +328,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_badToken() throws Exception {
         configureCallerHasPermission();
 
-        byte[] expectedContent = createArbitraryBytes(1000);
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         byte[] badTokenBytes = new byte[2];
         ICallback callback = new StubbedCallback();
@@ -339,6 +339,8 @@ public class RulesManagerServiceTest {
             fail();
         } catch (IllegalArgumentException expected) {
         }
+
+        assertClosed(parcelFileDescriptor);
 
         // Assert nothing async was enqueued.
         mFakeExecutor.assertNothingQueued();
@@ -369,7 +371,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_nullCallback() throws Exception {
         configureCallerHasPermission();
 
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
         byte[] tokenBytes = createArbitraryTokenBytes();
         ICallback callback = null;
 
@@ -377,6 +380,8 @@ public class RulesManagerServiceTest {
             mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback);
             fail();
         } catch (NullPointerException expected) {}
+
+        assertClosed(parcelFileDescriptor);
 
         // Assert nothing async was enqueued.
         mFakeExecutor.assertNothingQueued();
@@ -388,9 +393,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_asyncSuccess() throws Exception {
         configureCallerHasPermission();
 
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        byte[] expectedContent = createArbitraryBytes(1000);
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         CheckToken token = createArbitraryToken();
         byte[] tokenBytes = token.toByteArray();
@@ -406,13 +410,13 @@ public class RulesManagerServiceTest {
         verifyNoInstallerCallsMade();
         verifyNoPackageTrackerCallsMade();
 
-        TimeZoneDistro expectedDistro = new TimeZoneDistro(expectedContent);
-
         // Set up the installer.
         configureStageInstallExpectation(TimeZoneDistroInstaller.INSTALL_SUCCESS);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
+
+        assertClosed(parcelFileDescriptor);
 
         // Verify the expected calls were made to other components.
         verifyStageInstallCalled();
@@ -426,9 +430,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_nullTokenBytes() throws Exception {
         configureCallerHasPermission();
 
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        byte[] expectedContent = createArbitraryBytes(1000);
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         TestCallback callback = new TestCallback();
 
@@ -447,6 +450,8 @@ public class RulesManagerServiceTest {
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
 
+        assertClosed(parcelFileDescriptor);
+
         // Verify the expected calls were made to other components.
         verifyStageInstallCalled();
         verifyPackageTrackerCalled(null /* expectedToken */, true /* success */);
@@ -459,9 +464,8 @@ public class RulesManagerServiceTest {
     public void requestInstall_asyncInstallFail() throws Exception {
         configureCallerHasPermission();
 
-        byte[] expectedContent = createArbitraryBytes(1000);
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadSuccess(parcelFileDescriptor, expectedContent);
+        ParcelFileDescriptor parcelFileDescriptor =
+                createParcelFileDescriptor(createArbitraryBytes(1000));
 
         CheckToken token = createArbitraryToken();
         byte[] tokenBytes = token.toByteArray();
@@ -482,6 +486,8 @@ public class RulesManagerServiceTest {
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
 
+        assertClosed(parcelFileDescriptor);
+
         // Verify the expected calls were made to other components.
         verifyStageInstallCalled();
 
@@ -491,38 +497,6 @@ public class RulesManagerServiceTest {
 
         // Check the callback was received.
         callback.assertResultReceived(Callback.ERROR_INSTALL_VALIDATION_ERROR);
-    }
-
-    @Test
-    public void requestInstall_asyncParcelFileDescriptorReadFail() throws Exception {
-        configureCallerHasPermission();
-
-        ParcelFileDescriptor parcelFileDescriptor = createFakeParcelFileDescriptor();
-        configureParcelFileDescriptorReadFailure(parcelFileDescriptor);
-
-        CheckToken token = createArbitraryToken();
-        byte[] tokenBytes = token.toByteArray();
-
-        TestCallback callback = new TestCallback();
-
-        // Request the install.
-        assertEquals(RulesManager.SUCCESS,
-                mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback));
-
-        // Simulate the async execution.
-        mFakeExecutor.simulateAsyncExecutionOfLastCommand();
-
-        // Verify nothing else happened.
-        verifyNoInstallerCallsMade();
-
-        // A failure to read the ParcelFileDescriptor is treated as a failure. It might be the
-        // result of a file system error. This is a fairly arbitrary choice.
-        verifyPackageTrackerCalled(token, false /* success */);
-
-        verifyNoPackageTrackerCallsMade();
-
-        // Check the callback was received.
-        callback.assertResultReceived(Callback.ERROR_UNKNOWN_FAILURE);
     }
 
     @Test
@@ -773,17 +747,6 @@ public class RulesManagerServiceTest {
                 .enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
     }
 
-    private void configureParcelFileDescriptorReadSuccess(ParcelFileDescriptor parcelFileDescriptor,
-            byte[] content) throws Exception {
-        when(mMockFileDescriptorHelper.readFully(parcelFileDescriptor)).thenReturn(content);
-    }
-
-    private void configureParcelFileDescriptorReadFailure(ParcelFileDescriptor parcelFileDescriptor)
-            throws Exception {
-        when(mMockFileDescriptorHelper.readFully(parcelFileDescriptor))
-                .thenThrow(new IOException("Simulated failure"));
-    }
-
     private void configureStageInstallExpectation(int resultCode)
             throws Exception {
         when(mMockTimeZoneDistroInstaller.stageInstallWithErrorCode(any(TimeZoneDistro.class)))
@@ -827,10 +790,6 @@ public class RulesManagerServiceTest {
         return new CheckToken(1, new PackageVersions(1, 1));
     }
 
-    private ParcelFileDescriptor createFakeParcelFileDescriptor() {
-        return new ParcelFileDescriptor((ParcelFileDescriptor) null);
-    }
-
     private void configureDeviceSystemRulesVersion(String systemRulesVersion) throws Exception {
         when(mMockTimeZoneDistroInstaller.getSystemRulesVersion()).thenReturn(systemRulesVersion);
     }
@@ -868,6 +827,10 @@ public class RulesManagerServiceTest {
     private void configureDeviceCannotReadInstalledDistroVersion() throws Exception {
         when(mMockTimeZoneDistroInstaller.getInstalledDistroVersion())
                 .thenThrow(new IOException("Simulated failure"));
+    }
+
+    private static void assertClosed(ParcelFileDescriptor parcelFileDescriptor) {
+        assertFalse(parcelFileDescriptor.getFileDescriptor().valid());
     }
 
     private static class FakeExecutor implements Executor {
@@ -925,5 +888,18 @@ public class RulesManagerServiceTest {
         public void onFinished(int error) {
             fail("Unexpected call");
         }
+    }
+
+    private static ParcelFileDescriptor createParcelFileDescriptor(byte[] bytes)
+            throws IOException {
+        File file = File.createTempFile("pfd", null);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(bytes);
+        }
+        ParcelFileDescriptor pfd =
+                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+        // This should now be safe to delete. The ParcelFileDescriptor has an open fd.
+        file.delete();
+        return pfd;
     }
 }
