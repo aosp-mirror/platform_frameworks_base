@@ -287,6 +287,7 @@ public class AudioSystem
         /**
          * Callback for recording activity notifications events
          * @param event
+         * @param uid uid of the client app performing the recording
          * @param session
          * @param source
          * @param recordingFormat an array of ints containing respectively the client and device
@@ -298,9 +299,10 @@ public class AudioSystem
          *          4: device channel mask
          *          5: device sample rate
          *          6: patch handle
+         * @param packName package name of the client app performing the recording. NOT SUPPORTED
          */
-        void onRecordingConfigurationChanged(int event, int session, int source,
-                int[] recordingFormat);
+        void onRecordingConfigurationChanged(int event, int uid, int session, int source,
+                int[] recordingFormat, String packName);
     }
 
     private static AudioRecordingCallback sRecordingCallback;
@@ -318,17 +320,18 @@ public class AudioSystem
      * @param session
      * @param source
      * @param recordingFormat see
-     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int[])} for
-     *     the description of the record format.
+     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int, int[])}
+     *     for the description of the record format.
      */
-    private static void recordingCallbackFromNative(int event, int session, int source,
+    private static void recordingCallbackFromNative(int event, int uid, int session, int source,
             int[] recordingFormat) {
         AudioRecordingCallback cb = null;
         synchronized (AudioSystem.class) {
             cb = sRecordingCallback;
         }
         if (cb != null) {
-            cb.onRecordingConfigurationChanged(event, session, source, recordingFormat);
+            // TODO receive package name from native
+            cb.onRecordingConfigurationChanged(event, uid, session, source, recordingFormat, "");
         }
     }
 

@@ -16,8 +16,11 @@
 
 package com.android.server.audio;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioSystem;
 import android.media.IRecordingConfigDispatcher;
@@ -26,7 +29,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,31 +45,47 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
     public final static String TAG = "AudioService.RecordingActivityMonitor";
 
     private ArrayList<RecMonitorClient> mClients = new ArrayList<RecMonitorClient>();
+    // a public client is one that needs an anonymized version of the playback configurations, we
+    // keep track of whether there is at least one to know when we need to create the list of
+    // playback configurations that do not contain uid/package name information.
+    private boolean mHasPublicClients = false;
 
     private HashMap<Integer, AudioRecordingConfiguration> mRecordConfigs =
             new HashMap<Integer, AudioRecordingConfiguration>();
 
-    RecordingActivityMonitor() {
+    private final PackageManager mPackMan;
+
+    RecordingActivityMonitor(Context ctxt) {
         RecMonitorClient.sMonitor = this;
+        mPackMan = ctxt.getPackageManager();
     }
 
     /**
      * Implementation of android.media.AudioSystem.AudioRecordingCallback
      */
-    public void onRecordingConfigurationChanged(int event, int session, int source,
-            int[] recordingInfo) {
+    public void onRecordingConfigurationChanged(int event, int uid, int session, int source,
+            int[] recordingInfo, String packName) {
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
             return;
         }
-        final List<AudioRecordingConfiguration> configs =
-                updateSnapshot(event, session, source, recordingInfo);
-        if (configs != null){
-            synchronized(mClients) {
+        final List<AudioRecordingConfiguration> configsSystem =
+                updateSnapshot(event, uid, session, source, recordingInfo);
+        if (configsSystem != null){
+            synchronized (mClients) {
+                // list of recording configurations for "public consumption". It is only computed if
+                // there are non-system recording activity listeners.
+                final List<AudioRecordingConfiguration> configsPublic = mHasPublicClients ?
+                        anonymizeForPublicConsumption(configsSystem) :
+                            new ArrayList<AudioRecordingConfiguration>();
                 final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
                 while (clientIterator.hasNext()) {
+                    final RecMonitorClient rmc = clientIterator.next();
                     try {
-                        clientIterator.next().mDispatcherCb.dispatchRecordingConfigChange(
-                                configs);
+                        if (rmc.mIsPrivileged) {
+                            rmc.mDispatcherCb.dispatchRecordingConfigChange(configsSystem);
+                        } else {
+                            rmc.mDispatcherCb.dispatchRecordingConfigChange(configsPublic);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "Could not call dispatchRecordingConfigChange() on client", e);
                     }
@@ -72,17 +94,42 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         }
     }
 
+    protected void dump(PrintWriter pw) {
+        // players
+        pw.println("\nRecordActivityMonitor dump time: "
+                + DateFormat.getTimeInstance().format(new Date()));
+        synchronized(mRecordConfigs) {
+            for (AudioRecordingConfiguration conf : mRecordConfigs.values()) {
+                conf.dump(pw);
+            }
+        }
+    }
+
+    private ArrayList<AudioRecordingConfiguration> anonymizeForPublicConsumption(
+            List<AudioRecordingConfiguration> sysConfigs) {
+        ArrayList<AudioRecordingConfiguration> publicConfigs =
+                new ArrayList<AudioRecordingConfiguration>();
+        // only add active anonymized configurations,
+        for (AudioRecordingConfiguration config : sysConfigs) {
+            publicConfigs.add(AudioRecordingConfiguration.anonymizedCopy(config));
+        }
+        return publicConfigs;
+    }
+
     void initMonitor() {
         AudioSystem.setRecordingCallback(this);
     }
 
-    void registerRecordingCallback(IRecordingConfigDispatcher rcdb) {
+    void registerRecordingCallback(IRecordingConfigDispatcher rcdb, boolean isPrivileged) {
         if (rcdb == null) {
             return;
         }
-        synchronized(mClients) {
-            final RecMonitorClient rmc = new RecMonitorClient(rcdb);
+        synchronized (mClients) {
+            final RecMonitorClient rmc = new RecMonitorClient(rcdb, isPrivileged);
             if (rmc.init()) {
+                if (!isPrivileged) {
+                    mHasPublicClients = true;
+                }
                 mClients.add(rmc);
             }
         }
@@ -92,22 +139,34 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         if (rcdb == null) {
             return;
         }
-        synchronized(mClients) {
+        synchronized (mClients) {
             final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
+            boolean hasPublicClients = false;
             while (clientIterator.hasNext()) {
                 RecMonitorClient rmc = clientIterator.next();
                 if (rcdb.equals(rmc.mDispatcherCb)) {
                     rmc.release();
                     clientIterator.remove();
-                    break;
+                } else {
+                    if (!rmc.mIsPrivileged) {
+                        hasPublicClients = true;
+                    }
                 }
             }
+            mHasPublicClients = hasPublicClients;
         }
     }
 
-    List<AudioRecordingConfiguration> getActiveRecordingConfigurations() {
+    List<AudioRecordingConfiguration> getActiveRecordingConfigurations(boolean isPrivileged) {
         synchronized(mRecordConfigs) {
-            return new ArrayList<AudioRecordingConfiguration>(mRecordConfigs.values());
+            if (isPrivileged) {
+                return new ArrayList<AudioRecordingConfiguration>(mRecordConfigs.values());
+            } else {
+                final List<AudioRecordingConfiguration> configsPublic =
+                        anonymizeForPublicConsumption(
+                            new ArrayList<AudioRecordingConfiguration>(mRecordConfigs.values()));
+                return configsPublic;
+            }
         }
     }
 
@@ -122,8 +181,8 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      * @return null if the list of active recording sessions has not been modified, a list
      *     with the current active configurations otherwise.
      */
-    private List<AudioRecordingConfiguration> updateSnapshot(int event, int session, int source,
-            int[] recordingInfo) {
+    private List<AudioRecordingConfiguration> updateSnapshot(int event, int uid, int session,
+            int source, int[] recordingInfo) {
         final boolean configChanged;
         final ArrayList<AudioRecordingConfiguration> configs;
         synchronized(mRecordConfigs) {
@@ -147,10 +206,19 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                         .build();
                 final int patchHandle = recordingInfo[6];
                 final Integer sessionKey = new Integer(session);
+
+                final String[] packages = mPackMan.getPackagesForUid(uid);
+                final String packageName;
+                if (packages != null && packages.length > 0) {
+                    packageName = packages[0];
+                } else {
+                    packageName = "";
+                }
+                final AudioRecordingConfiguration updatedConfig =
+                        new AudioRecordingConfiguration(uid, session, source,
+                                clientFormat, deviceFormat, patchHandle, packageName);
+
                 if (mRecordConfigs.containsKey(sessionKey)) {
-                    final AudioRecordingConfiguration updatedConfig =
-                            new AudioRecordingConfiguration(session, source,
-                                    clientFormat, deviceFormat, patchHandle);
                     if (updatedConfig.equals(mRecordConfigs.get(sessionKey))) {
                         configChanged = false;
                     } else {
@@ -160,9 +228,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                         configChanged = true;
                     }
                 } else {
-                    mRecordConfigs.put(sessionKey,
-                            new AudioRecordingConfiguration(session, source,
-                                    clientFormat, deviceFormat, patchHandle));
+                    mRecordConfigs.put(sessionKey, updatedConfig);
                     configChanged = true;
                 }
                 break;
@@ -189,9 +255,11 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         static RecordingActivityMonitor sMonitor;
 
         final IRecordingConfigDispatcher mDispatcherCb;
+        final boolean mIsPrivileged;
 
-        RecMonitorClient(IRecordingConfigDispatcher rcdb) {
+        RecMonitorClient(IRecordingConfigDispatcher rcdb, boolean isPrivileged) {
             mDispatcherCb = rcdb;
+            mIsPrivileged = isPrivileged;
         }
 
         public void binderDied() {
