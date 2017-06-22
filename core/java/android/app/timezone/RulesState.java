@@ -174,29 +174,14 @@ public final class RulesState implements Parcelable {
     }
 
     /**
-     * Returns true if the distro IANA rules version supplied is newer or the same as the version in
-     * the system image data files.
+     * Returns true if the system image data files contain IANA rules data that are newer than the
+     * distro IANA rules version supplied, i.e. true when the version specified would be "worse"
+     * than the one that is in the system image. Returns false if the system image version is the
+     * same or older, i.e. false when the version specified would be "better" than the one that is
+     * in the system image.
      */
-    public boolean isSystemVersionOlderThan(DistroRulesVersion distroRulesVersion) {
-        return mSystemRulesVersion.compareTo(distroRulesVersion.getRulesVersion()) < 0;
-    }
-
-    public boolean isDistroInstalled() {
-        return mDistroStatus == DISTRO_STATUS_INSTALLED;
-    }
-
-    /**
-     * Returns true if the rules version supplied is newer than the one currently installed. If
-     * there is no installed distro this method throws IllegalStateException.
-     */
-    public boolean isInstalledDistroOlderThan(DistroRulesVersion distroRulesVersion) {
-        if (mOperationInProgress) {
-            throw new IllegalStateException("Distro state not known: operation in progress.");
-        }
-        if (!isDistroInstalled()) {
-            throw new IllegalStateException("No distro installed.");
-        }
-        return mInstalledDistroRulesVersion.isOlderThan(distroRulesVersion);
+    public boolean isSystemVersionNewerThan(DistroRulesVersion distroRulesVersion) {
+        return mSystemRulesVersion.compareTo(distroRulesVersion.getRulesVersion()) > 0;
     }
 
     public static final Parcelable.Creator<RulesState> CREATOR =
