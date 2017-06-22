@@ -464,6 +464,7 @@ public final class AutofillManagerService extends SystemService {
     private void updateCachedServiceLocked(int userId, boolean disabled) {
         AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
         if (service != null) {
+            service.destroySessionsLocked();
             service.updateLocked(disabled);
             if (!service.isEnabled()) {
                 removeCachedServiceLocked(userId);
