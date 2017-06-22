@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.service.autofill.SaveInfo;
+import android.service.autofill.ValueFinder;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
@@ -242,7 +243,8 @@ public final class AutoFillUI {
      * Shows the UI asking the user to save for autofill.
      */
     public void showSaveUi(@NonNull CharSequence providerLabel, @NonNull SaveInfo info,
-            @NonNull String packageName, @NonNull AutoFillUiCallback callback) {
+            @NonNull ValueFinder valueFinder, @NonNull String packageName,
+            @NonNull AutoFillUiCallback callback) {
         if (sVerbose) Slog.v(TAG, "showSaveUi() for " + packageName + ": " + info);
         int numIds = 0;
         numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
@@ -257,8 +259,8 @@ public final class AutoFillUI {
                 return;
             }
             hideAllUiThread(callback);
-            mSaveUi = new SaveUi(mContext, providerLabel, info,
-                    mOverlayControl, new SaveUi.OnSaveListener() {
+            mSaveUi = new SaveUi(mContext, providerLabel, info, valueFinder, mOverlayControl,
+                    new SaveUi.OnSaveListener() {
                 @Override
                 public void onSave() {
                     log.setType(MetricsProto.MetricsEvent.TYPE_ACTION);
