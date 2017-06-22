@@ -3003,6 +3003,21 @@
         <item quantity="other">Open Wi-Fi networks available</item>
     </plurals>
 
+    <!-- Notification title for a nearby open wireless network.-->
+    <string name="wifi_available_title">Connect to open Wi\u2011Fi network</string>
+    <!-- Notification title when the system is connecting to the specified open network. The network name is specified in the notification content. -->
+    <string name="wifi_available_title_connecting">Connecting to open Wi\u2011Fi network</string>
+    <!-- Notification title when the system has connected to the open network. The network name is specified in the notification content. -->
+    <string name="wifi_available_title_connected">Connected to Wi\u2011Fi network</string>
+    <!-- Notification title when the system failed to connect to the specified open network. -->
+    <string name="wifi_available_title_failed_to_connect">Could not connect to Wi\u2011Fi network</string>
+    <!-- Notification content when the system failed to connect to the specified open network. This informs the user that tapping on this notification will open the wifi picker. -->
+    <string name="wifi_available_content_failed_to_connect">Tap to see all networks</string>
+    <!-- Notification action name for connecting to the network specified in the notification body. -->
+    <string name="wifi_available_action_connect">Connect</string>
+    <!-- Notification action name for opening the wifi picker, showing the user all the nearby networks. -->
+    <string name="wifi_available_action_all_networks">All Networks</string>
+
     <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
     <string name="wifi_available_sign_in">Sign in to Wi-Fi network</string>
 
