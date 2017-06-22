@@ -121,6 +121,11 @@ public final class Zygote {
           int[] fdsToIgnore, String instructionSet, String appDataDir);
 
     /**
+     * Called to do any initialization before starting an application.
+     */
+    native static void nativePreApplicationInit();
+
+    /**
      * Special method to start the system server process. In addition to the
      * common actions performed in forkAndSpecialize, the pid of the child
      * process is recorded such that the death of the child process will cause
