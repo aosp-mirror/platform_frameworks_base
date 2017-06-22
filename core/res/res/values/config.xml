@@ -2975,4 +2975,7 @@
     <!-- Decide whether to display 'No service' on status bar instead of 'Emergency calls only'
          when SIM is unready. -->
     <bool name="config_display_no_service_when_sim_unready">false</bool>
+
+    <!-- Show area update info settings in CellBroadcastReceiver and information in SIM status in Settings app -->
+    <bool name="config_showAreaUpdateInfoSettings">false</bool>
 </resources>
