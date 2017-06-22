@@ -4124,6 +4124,16 @@ message MetricsEvent {
     // OS: O DR
     ACTION_PSD_LOADER = 1019;
 
+    // ACTION: Background check action on an app
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_APP_BACKGROUND_CHECK = 1020;
+
+    // ACTION: Location check action on an app
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    ACTION_APP_LOCATION_CHECK = 1021;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
