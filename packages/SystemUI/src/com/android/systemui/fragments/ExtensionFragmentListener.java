@@ -34,12 +34,14 @@ public class ExtensionFragmentListener<T extends FragmentBase> implements Consum
     private final FragmentHostManager mFragmentHostManager;
     private final String mTag;
     private final Extension<T> mExtension;
+    private final int mId;
     private String mOldClass;
 
     private ExtensionFragmentListener(View view, String tag, int id, Extension<T> extension) {
         mTag = tag;
         mFragmentHostManager = FragmentHostManager.get(view);
         mExtension = extension;
+        mId = id;
         mFragmentHostManager.getFragmentManager().beginTransaction()
                 .replace(id, (Fragment) mExtension.get(), mTag)
                 .commit();
@@ -49,7 +51,7 @@ public class ExtensionFragmentListener<T extends FragmentBase> implements Consum
     public void accept(T extension) {
         try {
             Fragment.class.cast(extension);
-            mFragmentHostManager.getExtensionManager().setCurrentExtension(mTag,
+            mFragmentHostManager.getExtensionManager().setCurrentExtension(mId, mTag,
                     mOldClass, extension.getClass().getName(), mExtension.getContext());
             mOldClass = extension.getClass().getName();
         } catch (ClassCastException e) {
