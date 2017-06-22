@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package android.test.suitebuilder.annotation;
+package android.test.suitebuilder;
 
-import android.test.suitebuilder.TestMethod;
+import com.android.internal.util.Predicate;
 import junit.framework.TestCase;
 
 import java.lang.annotation.ElementType;
@@ -25,7 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
-public class HasAnnotationTest extends TestCase {
+public class TestPredicatesTest extends TestCase {
 
     public void testThatMethodWithAnnotationIsReportedAsBeingAnnotated() throws Exception {
         assertTrue(hasExampleAnnotation(ClassWithAnnotation.class, "testWithAnnotation"));
@@ -45,7 +45,7 @@ public class HasAnnotationTest extends TestCase {
             throws NoSuchMethodException {
         Method method = aClass.getMethod(methodName);
         TestMethod testMethod = new TestMethod(method, aClass);
-        return new HasAnnotation(Example.class).apply(testMethod);
+        return TestPredicates.hasAnnotation(Example.class).apply(testMethod);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -72,5 +72,22 @@ public class HasAnnotationTest extends TestCase {
 
         public void testWithoutAnnotation() {
         }
+    }
+
+    private static final Predicate<Object> TRUE = new Predicate<Object>() {
+        public boolean apply(Object o) {
+            return true;
+        }
+    };
+
+    private static final Predicate<Object> FALSE = new Predicate<Object>() {
+        public boolean apply(Object o) {
+            return false;
+        }
+    };
+
+    public void testNotPredicate() throws Exception {
+        assertTrue(TestPredicates.not(FALSE).apply(null));
+        assertFalse(TestPredicates.not(TRUE).apply(null));
     }
 }
