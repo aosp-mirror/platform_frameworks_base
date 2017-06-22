@@ -16,16 +16,19 @@
 
 package android.app;
 
-import java.util.ArrayList;
-
 import android.annotation.CallSuper;
+import android.app.backup.BackupAgent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+
+import java.util.ArrayList;
 
 /**
  * Base class for maintaining global application state. You can provide your own
@@ -288,5 +291,74 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
                 ((OnProvideAssistDataListener)callbacks[i]).onProvideAssistData(activity, data);
             }
         }
+    }
+
+    /**
+     * Allows application to override the creation of activities. This can be used to
+     * perform things such as dependency injection or class loader changes to these
+     * classes. Return null to use the default creation flow.
+     * @param cl The default classloader to use for instantiation.
+     * @param className The class to be instantiated.
+     * @param intent Intent creating the class.
+     */
+    public Activity instantiateActivity(ClassLoader cl, String className, Intent intent) {
+        return null;
+    }
+
+    /**
+     * Allows application to override the creation of receivers. This can be used to
+     * perform things such as dependency injection or class loader changes to these
+     * classes. Return null to use the default creation flow.
+     * @param cl The default classloader to use for instantiation.
+     * @param className The class to be instantiated.
+     * @param intent Intent creating the class.
+     */
+    public BroadcastReceiver instantiateReceiver(ClassLoader cl, String className, Intent intent) {
+        return null;
+    }
+
+    /**
+     * Allows application to override the creation of services. This can be used to
+     * perform things such as dependency injection or class loader changes to these
+     * classes. Return null to use the default creation flow.
+     * @param cl The default classloader to use for instantiation.
+     * @param className The class to be instantiated.
+     * @param intent Intent creating the class.
+     */
+    public Service instantiateService(ClassLoader cl, String className, Intent intent) {
+        return null;
+    }
+
+    /**
+     * Allows application to override the creation of providers. This can be used to
+     * perform things such as dependency injection or class loader changes to these
+     * classes. Return null to use the default creation flow.
+     * @param cl The default classloader to use for instantiation.
+     * @param className The class to be instantiated.
+     */
+    public ContentProvider instantiateProvider(ClassLoader cl, String className) {
+        return null;
+    }
+
+    /**
+     * Allows application to override the creation of backup agents. This can be used to
+     * perform things such as dependency injection or class loader changes to these
+     * classes. Return null to use the default creation flow.
+     * @param cl The default classloader to use for instantiation.
+     * @param className The class to be instantiated.
+     */
+    public BackupAgent instantiateBackupAgent(ClassLoader cl, String className) {
+        return null;
+    }
+
+    /**
+     * Allows application to override the creation of instrumentation. This can be used to
+     * perform things such as dependency injection or class loader changes to these
+     * classes. Return null to use the default creation flow.
+     * @param cl The default classloader to use for instantiation.
+     * @param className The class to be instantiated.
+     */
+    public Instrumentation instantiateInstrumentation(ClassLoader cl, String className) {
+        return null;
     }
 }
