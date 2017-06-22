@@ -1866,6 +1866,13 @@
   <java-symbol type="layout" name="app_error_dialog" />
   <java-symbol type="plurals" name="wifi_available" />
   <java-symbol type="plurals" name="wifi_available_detailed" />
+  <java-symbol type="string" name="wifi_available_title" />
+  <java-symbol type="string" name="wifi_available_title_connecting" />
+  <java-symbol type="string" name="wifi_available_title_connected" />
+  <java-symbol type="string" name="wifi_available_title_failed_to_connect" />
+  <java-symbol type="string" name="wifi_available_content_failed_to_connect" />
+  <java-symbol type="string" name="wifi_available_action_connect" />
+  <java-symbol type="string" name="wifi_available_action_all_networks" />
   <java-symbol type="string" name="accessibility_binding_label" />
   <java-symbol type="string" name="adb_active_notification_message" />
   <java-symbol type="string" name="adb_active_notification_title" />
