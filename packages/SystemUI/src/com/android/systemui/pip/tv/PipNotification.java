@@ -174,7 +174,7 @@ public class PipNotification {
     void onConfigurationChanged(Context context) {
         Resources res = context.getResources();
         mDefaultTitle = res.getString(R.string.pip_notification_unknown_title);
-        mDefaultIconResId = R.drawable.pip_expand;
+        mDefaultIconResId = R.drawable.pip_icon;
         if (mNotified) {
             // update notification
             notifyPipNotification();
