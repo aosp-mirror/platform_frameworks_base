@@ -228,31 +228,31 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * <ul>
      *   <li> {@link #EXTRA_HF_INDICATORS_IND_ID} - The Assigned number of headset Indicator which
      *              is supported by the headset ( as indicated by AT+BIND command in the SLC
-     *              sequence).or whose value is changed (indicated by AT+BIEV command) </li>
-     *   <li> {@link #EXTRA_HF_INDICATORS_IND_VALUE}- The updated value of headset indicator. </li>
-     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     *              sequence) or whose value is changed (indicated by AT+BIEV command) </li>
+     *   <li> {@link #EXTRA_HF_INDICATORS_IND_VALUE} - Updated value of headset indicator. </li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - Remote device. </li>
      * </ul>
-     * <p>{@link #EXTRA_HF_INDICATORS_IND_ID} is defined by Bluetooth SIG and each of the indicators are
-     * given an assigned number. Below shows the assigned number of Indicator added so far
-     * - Enhanced Safety - 1
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
-     * receive.
+     * <p>{@link #EXTRA_HF_INDICATORS_IND_ID} is defined by Bluetooth SIG and each of the indicators
+     *     are given an assigned number. Below shows the assigned number of Indicator added so far
+     * - Enhanced Safety - 1, Valid Values: 0 - Disabled, 1 - Enabled
+     * - Battery Level - 2, Valid Values: 0~100 - Remaining level of Battery
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to receive.
      * @hide
      */
     public static final String ACTION_HF_INDICATORS_VALUE_CHANGED =
             "android.bluetooth.headset.action.HF_INDICATORS_VALUE_CHANGED";
 
     /**
-     * A String extra field in {@link #ACTION_HF_INDICATORS_VALUE_CHANGED}
-     * intents that contains the UUID of the headset  indicator (as defined by Bluetooth SIG)
-     * that is being sent.
+     * A int extra field in {@link #ACTION_HF_INDICATORS_VALUE_CHANGED}
+     * intents that contains the assigned number of the headset indicator as defined by
+     * Bluetooth SIG that is being sent. Value range is 0-65535 as defined in HFP 1.7
      * @hide
      */
     public static final String EXTRA_HF_INDICATORS_IND_ID =
             "android.bluetooth.headset.extra.HF_INDICATORS_IND_ID";
 
     /**
-     * A int  extra field in {@link #ACTION_HF_INDICATORS_VALUE_CHANGED}
+     * A int extra field in {@link #ACTION_HF_INDICATORS_VALUE_CHANGED}
      * intents that contains the value of the Headset indicator that is being sent.
      * @hide
      */
