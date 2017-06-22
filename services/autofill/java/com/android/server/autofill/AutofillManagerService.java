@@ -270,6 +270,12 @@ public final class AutofillManagerService extends SystemService {
     }
 
     @Override
+    public void onSwitchUser(int userHandle) {
+        if (sDebug) Slog.d(TAG, "Hiding UI when user switched");
+        mUi.hideAll(null);
+    }
+
+    @Override
     public void onCleanupUser(int userId) {
         synchronized (mLock) {
             removeCachedServiceLocked(userId);
