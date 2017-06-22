@@ -235,6 +235,9 @@ public class MobileSignalController extends SignalController<
     }
 
     private int getNumLevels() {
+        if (mConfig.inflateSignalStrengths) {
+            return SignalStrength.NUM_SIGNAL_STRENGTH_BINS + 1;
+        }
         return SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
     }
 
@@ -243,7 +246,11 @@ public class MobileSignalController extends SignalController<
         if (mCurrentState.iconGroup == TelephonyIcons.CARRIER_NETWORK_CHANGE) {
             return SignalDrawable.getCarrierChangeState(getNumLevels());
         } else if (mCurrentState.connected) {
-            return SignalDrawable.getState(mCurrentState.level, getNumLevels(),
+            int level = mCurrentState.level;
+            if (mConfig.inflateSignalStrengths) {
+                level++;
+            }
+            return SignalDrawable.getState(level, getNumLevels(),
                     mCurrentState.inetCondition == 0);
         } else if (mCurrentState.enabled) {
             return SignalDrawable.getEmptyState(getNumLevels());
