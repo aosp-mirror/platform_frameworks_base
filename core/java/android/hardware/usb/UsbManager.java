@@ -654,6 +654,7 @@ public class UsbManager {
         Preconditions.checkNotNull(port, "port must not be null");
         UsbPort.checkRoles(powerRole, dataRole);
 
+        Log.d(TAG, "setPortRoles Package:" + mContext.getPackageName());
         try {
             mService.setPortRoles(port.getId(), powerRole, dataRole);
         } catch (RemoteException e) {
