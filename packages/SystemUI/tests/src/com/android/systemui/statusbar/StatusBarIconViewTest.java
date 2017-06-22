@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -33,12 +35,14 @@ import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
@@ -99,5 +103,18 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         mStatusBarIcon.icon = Icon.createWithResource("mockPackage", R.drawable.ic_android);
 
         assertFalse(mIconView.set(mStatusBarIcon));
+    }
+
+    @Test
+    public void testGetContrastedStaticDrawableColor() {
+        mIconView.setStaticDrawableColor(Color.DKGRAY);
+        int color = mIconView.getContrastedStaticDrawableColor(Color.WHITE);
+        assertEquals("Color should not change when we have enough contrast",
+                Color.DKGRAY, color);
+
+        mIconView.setStaticDrawableColor(Color.WHITE);
+        color = mIconView.getContrastedStaticDrawableColor(Color.WHITE);
+        assertTrue("Similar colors should be shifted to satisfy contrast",
+                NotificationColorUtil.satisfiesTextContrast(Color.WHITE, color));
     }
 }
