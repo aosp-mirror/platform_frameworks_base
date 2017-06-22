@@ -878,7 +878,8 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
             // Recents doesn't care about the wallpaper being visible or not, it always
             // wants to scrim with wallpaper colors
             mBackgroundScrim.setColors(
-                    mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM, true));
+                    mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
+                            ColorExtractor.TYPE_DARK, true));
         }
     }
 
@@ -886,7 +887,7 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
         mColorExtractor.addOnColorsChangedListener(this);
         // Getting system scrim colors ignoring wallpaper visibility since it should never be grey.
         ColorExtractor.GradientColors systemColors = mColorExtractor.getColors(
-                WallpaperManager.FLAG_SYSTEM, true);
+                ColorExtractor.TYPE_DARK, WallpaperManager.FLAG_SYSTEM, true);
         // We don't want to interpolate colors because we're defining the initial state.
         // Gradient should be set/ready when you open "Recents".
         mBackgroundScrim.setColors(systemColors, false);
