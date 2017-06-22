@@ -23,7 +23,9 @@
 #include "com_android_server_radio_TunerCallback.h"
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
+#include <binder/IPCThreadState.h>
 #include <core_jni_helpers.h>
+#include <media/AudioSystem.h>
 #include <utils/Log.h>
 #include <JNIHelp.h>
 
@@ -33,6 +35,7 @@ namespace radio {
 namespace Tuner {
 
 using hardware::Return;
+using hardware::hidl_death_recipient;
 using hardware::hidl_vec;
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
@@ -59,12 +62,26 @@ static struct {
     } Tuner;
 } gjni;
 
+static const char* const kAudioDeviceName = "Radio tuner source";
+
+class HalDeathRecipient : public hidl_death_recipient {
+    wp<V1_1::ITunerCallback> mTunerCallback;
+
+public:
+    HalDeathRecipient(wp<V1_1::ITunerCallback> tunerCallback):mTunerCallback(tunerCallback) {}
+
+    virtual void serviceDied(uint64_t cookie, const wp<hidl::base::V1_0::IBase>& who);
+};
+
 struct TunerContext {
     TunerContext() {}
 
+    bool mIsClosed = false;
     HalRevision mHalRev;
+    bool mWithAudio;
     sp<V1_0::ITuner> mHalTuner;
     sp<V1_1::ITuner> mHalTuner11;
+    sp<HalDeathRecipient> mHalDeathRecipient;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(TunerContext);
@@ -83,12 +100,13 @@ static TunerContext& getNativeContext(JNIEnv *env, JavaRef<jobject> const &jTune
     return getNativeContext(env->GetLongField(jTuner.get(), gjni.Tuner.nativeContext));
 }
 
-static jlong nativeInit(JNIEnv *env, jobject obj, jint halRev) {
+static jlong nativeInit(JNIEnv *env, jobject obj, jint halRev, bool withAudio) {
     ALOGV("nativeInit()");
     AutoMutex _l(gContextMutex);
 
     auto ctx = new TunerContext();
     ctx->mHalRev = static_cast<HalRevision>(halRev);
+    ctx->mWithAudio = withAudio;
 
     static_assert(sizeof(jlong) >= sizeof(ctx), "jlong is smaller than a pointer");
     return reinterpret_cast<jlong>(ctx);
@@ -102,6 +120,28 @@ static void nativeFinalize(JNIEnv *env, jobject obj, jlong nativeContext) {
     delete ctx;
 }
 
+void HalDeathRecipient::serviceDied(uint64_t cookie __unused,
+        const wp<hidl::base::V1_0::IBase>& who __unused) {
+    ALOGW("HAL Tuner died unexpectedly");
+
+    auto tunerCallback = mTunerCallback.promote();
+    if (tunerCallback == nullptr) return;
+
+    tunerCallback->hardwareFailure();
+}
+
+// TODO(b/62713378): implement support for multiple tuners open at the same time
+static void notifyAudioService(TunerContext& ctx, bool connected) {
+    if (!ctx.mWithAudio) return;
+
+    ALOGD("Notifying AudioService about new state: %d", connected);
+    auto token = IPCThreadState::self()->clearCallingIdentity();
+    AudioSystem::setDeviceConnectionState(AUDIO_DEVICE_IN_FM_TUNER,
+            connected ? AUDIO_POLICY_DEVICE_STATE_AVAILABLE : AUDIO_POLICY_DEVICE_STATE_UNAVAILABLE,
+            nullptr, kAudioDeviceName);
+    IPCThreadState::self()->restoreCallingIdentity(token);
+}
+
 void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner, sp<V1_0::ITuner> halTuner) {
     ALOGV("setHalTuner(%p)", halTuner.get());
     ALOGE_IF(halTuner == nullptr, "HAL tuner is a nullptr");
@@ -109,10 +149,25 @@ void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner, sp<V1_0::ITuner> h
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(env, jTuner);
 
+    if (ctx.mIsClosed) {
+        ALOGI("Tuner was closed during initialization");
+        // dropping the last reference will close HAL tuner
+        return;
+    }
+    if (ctx.mHalTuner != nullptr) {
+        ALOGE("HAL tuner is already set.");
+        return;
+    }
+
     ctx.mHalTuner = halTuner;
     ctx.mHalTuner11 = V1_1::ITuner::castFrom(halTuner).withDefault(nullptr);
     ALOGW_IF(ctx.mHalRev >= HalRevision::V1_1 && ctx.mHalTuner11 == nullptr,
             "Provided tuner does not implement 1.1 HAL");
+
+    ctx.mHalDeathRecipient = new HalDeathRecipient(getNativeCallback(env, jTuner));
+    halTuner->linkToDeath(ctx.mHalDeathRecipient, 0);
+
+    notifyAudioService(ctx, true);
 }
 
 sp<V1_0::ITuner> getHalTuner(jlong nativeContext) {
@@ -139,8 +194,21 @@ Region getRegion(JNIEnv *env, jobject obj) {
 static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
     AutoMutex _l(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
-    if (ctx.mHalTuner == nullptr) return;
+    if (ctx.mIsClosed) return;
+    ctx.mIsClosed = true;
+
+    if (ctx.mHalTuner == nullptr) {
+        ALOGI("Tuner closed during initialization");
+        return;
+    }
+
     ALOGI("Closing tuner %p", ctx.mHalTuner.get());
+
+    notifyAudioService(ctx, false);
+
+    ctx.mHalTuner->unlinkToDeath(ctx.mHalDeathRecipient);
+    ctx.mHalDeathRecipient = nullptr;
+
     ctx.mHalTuner11 = nullptr;
     ctx.mHalTuner = nullptr;
 }
@@ -334,7 +402,7 @@ static bool nativeIsAntennaConnected(JNIEnv *env, jobject obj, jlong nativeConte
 }
 
 static const JNINativeMethod gTunerMethods[] = {
-    { "nativeInit", "(I)J", (void*)nativeInit },
+    { "nativeInit", "(IZ)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
     { "nativeClose", "(J)V", (void*)nativeClose },
     { "nativeSetConfiguration", "(JLandroid/hardware/radio/RadioManager$BandConfig;)V",

@@ -526,6 +526,13 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
      */
     @Override
     public CharSequence[] getAutofillOptions() {
+        // First check if app developer explicitly set them.
+        final CharSequence[] explicitOptions = super.getAutofillOptions();
+        if (explicitOptions != null) {
+            return explicitOptions;
+        }
+
+        // Otherwise, only return options that came from static resources.
         if (!mObjectsFromResources || mObjects == null || mObjects.isEmpty()) {
             return null;
         }

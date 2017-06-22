@@ -22,6 +22,8 @@ import android.hardware.radio.RadioManager;
 interface ITuner {
     void close();
 
+    boolean isClosed();
+
     /**
      * @throws IllegalArgumentException if config is not valid or null
      */

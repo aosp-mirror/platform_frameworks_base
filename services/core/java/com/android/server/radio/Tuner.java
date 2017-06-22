@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Slog;
 
 import java.util.List;
@@ -33,18 +35,28 @@ class Tuner extends ITuner.Stub {
      */
     private final long mNativeContext;
 
-    @NonNull private final TunerCallback mTunerCallback;
     private final Object mLock = new Object();
+    @NonNull private final TunerCallback mTunerCallback;
+    @NonNull private final ITunerCallback mClientCallback;
+    @NonNull private final IBinder.DeathRecipient mDeathRecipient;
+
     private boolean mIsClosed = false;
     private boolean mIsMuted = false;
     private int mRegion;  // TODO(b/62710330): find better solution to handle regions
     private final boolean mWithAudio;
 
     Tuner(@NonNull ITunerCallback clientCallback, int halRev, int region, boolean withAudio) {
+        mClientCallback = clientCallback;
         mTunerCallback = new TunerCallback(this, clientCallback, halRev);
         mRegion = region;
         mWithAudio = withAudio;
-        mNativeContext = nativeInit(halRev);
+        mNativeContext = nativeInit(halRev, withAudio);
+        mDeathRecipient = this::close;
+        try {
+            mClientCallback.asBinder().linkToDeath(mDeathRecipient, 0);
+        } catch (RemoteException ex) {
+            close();
+        }
     }
 
     @Override
@@ -53,7 +65,7 @@ class Tuner extends ITuner.Stub {
         super.finalize();
     }
 
-    private native long nativeInit(int halRev);
+    private native long nativeInit(int halRev, boolean withAudio);
     private native void nativeFinalize(long nativeContext);
     private native void nativeClose(long nativeContext);
 
@@ -80,10 +92,16 @@ class Tuner extends ITuner.Stub {
     public void close() {
         synchronized (mLock) {
             if (mIsClosed) return;
-            mTunerCallback.detach();
-            nativeClose(mNativeContext);
             mIsClosed = true;
+            mTunerCallback.detach();
+            mClientCallback.asBinder().unlinkToDeath(mDeathRecipient, 0);
+            nativeClose(mNativeContext);
         }
+    }
+
+    @Override
+    public boolean isClosed() {
+        return mIsClosed;
     }
 
     private void checkNotClosedLocked() {
@@ -122,7 +140,7 @@ class Tuner extends ITuner.Stub {
             if (mIsMuted == mute) return;
             mIsMuted = mute;
 
-            // TODO(b/34348946): notifify audio policy manager of media activity on radio audio
+            // TODO(b/62713378): notifify audio policy manager of media activity on radio audio
             // device. This task is pulled directly from previous implementation of native service.
         }
     }

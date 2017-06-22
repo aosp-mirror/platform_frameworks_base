@@ -157,8 +157,10 @@ static void nativeReleaseSuspendBlocker(JNIEnv *env, jclass /* clazz */, jstring
 static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
     std::lock_guard<std::mutex> lock(gPowerHalMutex);
     if (getPowerHal()) {
-        String8 err("Excessive delay in setInteractive(%s) while turning screen %s");
-        ALOGD_IF_SLOW(20, String8::format(err, enable ? "true" : "false", enable ? "on" : "off"));
+        String8 err = String8::format(
+                "Excessive delay in setInteractive(%s) while turning screen %s",
+                enable ? "true" : "false", enable ? "on" : "off");
+        ALOGD_IF_SLOW(20, err);
         Return<void> ret = gPowerHal->setInteractive(enable);
         processReturn(ret, "setInteractive");
     }

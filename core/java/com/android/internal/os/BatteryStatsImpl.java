@@ -3987,14 +3987,6 @@ public class BatteryStatsImpl extends BatteryStats {
         return 0;
     }
 
-    public void reportExcessiveWakeLocked(int uid, String proc, long overTime, long usedTime) {
-        uid = mapUid(uid);
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.reportExcessiveWakeLocked(proc, overTime, usedTime);
-        }
-    }
-
     public void reportExcessiveCpuLocked(int uid, String proc, long overTime, long usedTime) {
         uid = mapUid(uid);
         Uid u = mUidStats.get(uid);
@@ -7745,17 +7737,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 return null;
             }
 
-            public void addExcessiveWake(long overTime, long usedTime) {
-                if (mExcessivePower == null) {
-                    mExcessivePower = new ArrayList<ExcessivePower>();
-                }
-                ExcessivePower ew = new ExcessivePower();
-                ew.type = ExcessivePower.TYPE_WAKE;
-                ew.overTime = overTime;
-                ew.usedTime = usedTime;
-                mExcessivePower.add(ew);
-            }
-
             public void addExcessiveCpu(long overTime, long usedTime) {
                 if (mExcessivePower == null) {
                     mExcessivePower = new ArrayList<ExcessivePower>();
@@ -8567,13 +8548,6 @@ public class BatteryStatsImpl extends BatteryStats {
                         }
                     }
                 }
-            }
-        }
-
-        public void reportExcessiveWakeLocked(String proc, long overTime, long usedTime) {
-            Proc p = getProcessStatsLocked(proc);
-            if (p != null) {
-                p.addExcessiveWake(overTime, usedTime);
             }
         }
 

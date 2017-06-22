@@ -44,8 +44,7 @@ import java.util.Collections;
 @Deprecated
 public class TestSuiteBuilder {
 
-    private Context context;
-    private final TestGrouping testGrouping = new TestGrouping(SORT_BY_FULLY_QUALIFIED_NAME);
+    private final TestGrouping testGrouping;
     private final Set<Predicate<TestMethod>> predicates = new HashSet<Predicate<TestMethod>>();
     private List<TestCase> testCases;
     private TestSuite rootSuite;
@@ -67,7 +66,7 @@ public class TestSuiteBuilder {
 
     public TestSuiteBuilder(String name, ClassLoader classLoader) {
         this.suiteName = name;
-        this.testGrouping.setClassLoader(classLoader);
+        this.testGrouping = new TestGrouping(SORT_BY_FULLY_QUALIFIED_NAME, classLoader);
         this.testCases = new ArrayList<>();
         addRequirements(REJECT_SUPPRESSED);
     }
@@ -242,15 +241,6 @@ public class TestSuiteBuilder {
         public void testSuiteConstructionFailed() {
             throw new RuntimeException("Exception during suite construction", exception);
         }
-    }
-
-    /**
-     * @return the test package that represents the packages that were included for our test suite.
-     *
-     * {@hide} Not needed for 1.0 SDK.
-     */
-    protected TestGrouping getTestGrouping() {
-        return testGrouping;
     }
 
     private boolean satisfiesAllPredicates(TestMethod test) {

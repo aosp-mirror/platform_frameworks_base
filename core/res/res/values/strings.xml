@@ -204,7 +204,7 @@
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach network</string>
     <!-- Displayed to tell the user that they should switch their network preference. -->
-    <string name="NetworkPreferenceSwitchSummary">To improve reception, try changing the type selected at System &gt; Network &amp; Internet &gt; Mobile networks &gt; Preferred network type."</string>
+    <string name="NetworkPreferenceSwitchSummary">To improve reception, try changing the type selected at Settings &gt; Network &amp; Internet &gt; Mobile networks &gt; Preferred network type."</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>

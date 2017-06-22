@@ -32,7 +32,7 @@ namespace {
 using android::ResTable_config;
 using configuration::Abi;
 using configuration::AndroidSdk;
-using configuration::Configuration;
+using configuration::PostProcessingConfiguration;
 using configuration::DeviceFeature;
 using configuration::GlTexture;
 using configuration::Locale;
@@ -139,7 +139,7 @@ TEST_F(ConfigurationParserTest, ValidateFile) {
   auto parser = ConfigurationParser::ForContents(kValidConfig).WithDiagnostics(&diag_);
   auto result = parser.Parse();
   ASSERT_TRUE(result);
-  Configuration& value = result.value();
+  PostProcessingConfiguration& value = result.value();
   EXPECT_EQ(2ul, value.artifacts.size());
   ASSERT_TRUE(value.artifact_format);
   EXPECT_EQ(
@@ -190,13 +190,13 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = artifact_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
   EXPECT_EQ(1ul, config.artifacts.size());
 
-  auto& artifact = config.artifacts.begin()->second;
+  auto& artifact = config.artifacts.front();
   EXPECT_EQ("", artifact.name); // TODO: make this fail.
   EXPECT_EQ("arm", artifact.abi_group.value());
   EXPECT_EQ("large", artifact.screen_density_group.value());
@@ -204,6 +204,21 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
   EXPECT_EQ("19", artifact.android_sdk_group.value());
   EXPECT_EQ("dxt1", artifact.gl_texture_group.value());
   EXPECT_EQ("low-latency", artifact.device_feature_group.value());
+
+  // Perform a second action to ensure we get 2 artifacts.
+  static constexpr const char* second = R"xml(
+    <artifact
+        abi-group="other"
+        screen-density-group="large"
+        locale-group="europe"
+        android-sdk-group="19"
+        gl-texture-group="dxt1"
+        device-feature-group="low-latency"/>)xml";
+  doc = test::BuildXmlDom(second);
+
+  ok = artifact_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_TRUE(ok);
+  EXPECT_EQ(2ul, config.artifacts.size());
 }
 
 TEST_F(ConfigurationParserTest, ArtifactFormatAction) {
@@ -214,7 +229,7 @@ TEST_F(ConfigurationParserTest, ArtifactFormatAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = artifact_format_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
   ASSERT_TRUE(config.artifact_format);
@@ -237,7 +252,7 @@ TEST_F(ConfigurationParserTest, AbiGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = abi_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
@@ -260,7 +275,7 @@ TEST_F(ConfigurationParserTest, ScreenDensityGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok =
       screen_density_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
@@ -290,7 +305,7 @@ TEST_F(ConfigurationParserTest, LocaleGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = locale_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
@@ -326,7 +341,7 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = android_sdk_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
@@ -358,7 +373,7 @@ TEST_F(ConfigurationParserTest, GlTextureGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = gl_texture_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
@@ -387,7 +402,7 @@ TEST_F(ConfigurationParserTest, DeviceFeatureGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok
       = device_feature_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);

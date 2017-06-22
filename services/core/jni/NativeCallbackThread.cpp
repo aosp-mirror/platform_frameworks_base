@@ -107,10 +107,15 @@ void NativeCallbackThread::stop() {
         mQueueCond.signal();
     }
 
-    auto ret = pthread_join(mThread, nullptr);
-    ALOGE_IF(ret != 0, "Couldn't join thread: %d", ret);
+    if (pthread_self() == mThread) {
+        // you can't self-join a thread, but it's ok when calling from our sub-task
+        ALOGD("About to stop native callback thread %p", this);
+    } else {
+        auto ret = pthread_join(mThread, nullptr);
+        ALOGE_IF(ret != 0, "Couldn't join thread: %d", ret);
 
-    ALOGD("Stopped native callback thread %p", this);
+        ALOGD("Stopped native callback thread %p", this);
+    }
 }
 
 } // namespace android

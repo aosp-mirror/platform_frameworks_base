@@ -57,6 +57,12 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
 
 bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
                                IArchiveWriter* writer) {
+  FilterChain empty;
+  return WriteToArchive(context, options, &empty, writer);
+}
+
+bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
+                               FilterChain* filters, IArchiveWriter* writer) {
   std::set<std::string> referenced_resources;
   // List the files being referenced in the resource table.
   for (auto& pkg : table_->packages) {
@@ -85,6 +91,13 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOption
       if (context->IsVerbose()) {
         context->GetDiagnostics()->Note(DiagMessage()
                                         << "Removing resource '" << path << "' from APK.");
+      }
+      continue;
+    }
+
+    if (!filters->Keep(path)) {
+      if (context->IsVerbose()) {
+        context->GetDiagnostics()->Note(DiagMessage() << "Filtered '" << path << "' from APK.");
       }
       continue;
     }
