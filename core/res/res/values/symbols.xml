@@ -1669,7 +1669,6 @@
   <java-symbol type="array" name="config_notificationFallbackVibePattern" />
   <java-symbol type="array" name="config_onlySingleDcAllowed" />
   <java-symbol type="bool" name="config_useNewSensorSamplesForDoze" />
-  <java-symbol type="bool" name="config_allowAutoBrightnessActiveDozeLightSensor" />
   <java-symbol type="bool" name="config_useAttentionLight" />
   <java-symbol type="bool" name="config_animateScreenLights" />
   <java-symbol type="bool" name="config_automatic_brightness_available" />
