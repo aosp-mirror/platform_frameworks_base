@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
 import com.android.internal.util.Preconditions;
 
@@ -32,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents a request to an {@link AutofillService autofill provider}
+ * This class represents a request to an autofill service
  * to interpret the screen and provide information to the system which views are
  * interesting for saving and what are the possible ways to fill the inputs on
  * the screen if applicable.
@@ -40,8 +41,29 @@ import java.util.List;
  * @see AutofillService#onFillRequest(FillRequest, CancellationSignal, FillCallback)
  */
 public final class FillRequest implements Parcelable {
+
     /**
      * Indicates autofill was explicitly requested by the user.
+     *
+     * <p>Users typically make an explicit request to autofill a screen in two situations:
+     * <ul>
+     *   <li>The app disabled autofill (using {@link View#setImportantForAutofill(int)}.
+     *   <li>The service could not figure out how to autofill a screen (but the user knows the
+     *       service has data for that app).
+     * </ul>
+     *
+     * <p>This flag is particularly useful for the second case. For example, the service could offer
+     * a complex UI where the user can map which screen views belong to each user data, or it could
+     * offer a simpler UI where the user picks the data for just the view used to trigger the
+     * request (that would be the view whose
+     * {@link android.app.assist.AssistStructure.ViewNode#isFocused()} method returns {@code true}).
+     *
+     * <p>An explicit autofill request is triggered when the
+     * {@link android.view.autofill.AutofillManager#requestAutofill(View)} or
+     * {@link android.view.autofill.AutofillManager#requestAutofill(View, int, android.graphics.Rect)}
+     * is called. For example, standard {@link android.widget.TextView} views that use
+     * an {@link android.widget.Editor} shows an {@code AUTOFILL} option in the overflow menu that
+     * triggers such request.
      */
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
@@ -79,14 +101,14 @@ public final class FillRequest implements Parcelable {
     }
 
     /**
-     * @return The unique id of this request.
+     * Gets the unique id of this request.
      */
     public int getId() {
         return mId;
     }
 
     /**
-     * @return The flags associated with this request.
+     * Gets the flags associated with this request.
      *
      * @see #FLAG_MANUAL_REQUEST
      */
@@ -95,7 +117,7 @@ public final class FillRequest implements Parcelable {
     }
 
     /**
-     * @return The contexts associated with each previous fill request.
+     * Gets the contexts associated with each previous fill request.
      */
     public @NonNull List<FillContext> getFillContexts() {
         return mContexts;
@@ -104,10 +126,10 @@ public final class FillRequest implements Parcelable {
     /**
      * Gets the extra client state returned from the last {@link
      * AutofillService#onFillRequest(FillRequest, CancellationSignal, FillCallback)
-     * fill request}.
-     * <p>
-     * Once a {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)
-     * save request} is made the client state is cleared.
+     * fill request}, so the service can use it for state management.
+     *
+     * <p>Once a {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)
+     * save request} is made, the client state is cleared.
      *
      * @return The client state.
      */
