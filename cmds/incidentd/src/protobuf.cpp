@@ -16,7 +16,7 @@
 
 #include "protobuf.h"
 
-uint8_t*
+uint8_t* 
 write_raw_varint(uint8_t* buf, uint32_t val)
 {
     uint8_t* p = buf;
@@ -31,7 +31,7 @@ write_raw_varint(uint8_t* buf, uint32_t val)
     }
 }
 
-uint8_t*
+uint8_t* 
 write_length_delimited_tag_header(uint8_t* buf, uint32_t fieldId, size_t size)
 {
     buf = write_raw_varint(buf, (fieldId << 3) | 2);

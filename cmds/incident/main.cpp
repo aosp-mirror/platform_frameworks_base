@@ -94,6 +94,33 @@ StatusListener::onReportFailed()
 }
 
 // ================================================================================
+static void section_list(FILE* out) {
+    IncidentSection sections[INCIDENT_SECTION_COUNT];
+    int i = 0;
+    int j = 0;
+    // sort the sections based on id
+    while (i < INCIDENT_SECTION_COUNT) {
+        IncidentSection curr = INCIDENT_SECTIONS[i];
+        for (int k = 0; k < j; k++) {
+            if (curr.id > sections[k].id) {
+                continue;
+            }
+            IncidentSection tmp = curr;
+            curr = sections[k];
+            sections[k] = tmp;
+        }
+        sections[j] = curr;
+        i++;
+        j++;
+    }
+
+    fprintf(out, "available sections:\n");
+    for (int i = 0; i < INCIDENT_SECTION_COUNT; ++i) {
+        fprintf(out, "id: %4d, name: %s\n", sections[i].id, sections[i].name);
+    }
+}
+
+// ================================================================================
 static IncidentSection const*
 find_section(const char* name)
 {
@@ -127,6 +154,7 @@ usage(FILE* out)
     fprintf(out, "OPTIONS\n");
     fprintf(out, "  -b           (default) print the report to stdout (in proto format)\n");
     fprintf(out, "  -d           send the report into dropbox\n");
+    fprintf(out, "  -l           list available sections\n");
     fprintf(out, "\n");
     fprintf(out, "  SECTION     the field numbers of the incident report fields to include\n");
     fprintf(out, "\n");
@@ -141,14 +169,17 @@ main(int argc, char** argv)
 
     // Parse the args
     int opt;
-    while ((opt = getopt(argc, argv, "bhd")) != -1) {
+    while ((opt = getopt(argc, argv, "bhdl")) != -1) {
         switch (opt) {
-            case 'b':
-                destination = DEST_STDOUT;
-                break;
             case 'h':
                 usage(stdout);
                 return 0;
+            case 'l':
+                section_list(stdout);
+                return 0;
+            case 'b':
+                destination = DEST_STDOUT;
+                break;
             case 'd':
                 destination = DEST_DROPBOX;
                 break;

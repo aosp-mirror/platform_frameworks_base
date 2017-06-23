@@ -16,14 +16,14 @@
 
 #include "section_list.h"
 
-//using namespace android::util;
-
 /**
  * This is the mapping of section IDs to the commands that are run to get those commands.
  */
 const Section* SECTION_LIST[] = {
-    new DumpsysSection(3000,
-            "fingerprint", "--proto", "--incident", NULL),
+    // Linux Services
+    new FileSection(2002, "/d/wakeup_sources"),
+
+    // System Services
+    new DumpsysSection(3000, "fingerprint", "--proto", "--incident", NULL),
     NULL
 };
-

@@ -29,6 +29,7 @@ import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/power.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
+import "frameworks/base/core/proto/android/os/kernelwake.proto";
 
 package android.os;
 
@@ -53,7 +54,7 @@ message IncidentProto {
     // Linux services
     //Procrank procrank = 2000;
     //PageTypeInfo page_type_info = 2001;
-    //KernelWakeSources kernel_wake_sources = 2002;
+    KernelWakeSources kernel_wake_sources = 2002;
 
     // System Services
     android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000;

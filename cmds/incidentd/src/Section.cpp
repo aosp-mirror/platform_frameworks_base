@@ -21,10 +21,19 @@
 
 #include <binder/IServiceManager.h>
 #include <mutex>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <wait.h>
+#include <unistd.h>
 
 using namespace std;
 
 const int64_t REMOTE_CALL_TIMEOUT_MS = 10 * 1000; // 10 seconds
+const int64_t INCIDENT_HELPER_TIMEOUT_MS = 5 * 1000;  // 5 seconds
+const char* INCIDENT_HELPER = "/system/bin/incident_helper";
+const uid_t IH_UID = 9999;  // run incident_helper as nobody
+const gid_t IH_GID = 9999;
 
 // ================================================================================
 Section::Section(int i)
@@ -43,6 +52,115 @@ Section::WriteHeader(ReportRequestSet* requests, size_t size) const
     uint8_t buf[20];
     uint8_t* p = write_length_delimited_tag_header(buf, this->id, size);
     return requests->write(buf, p-buf);
+}
+
+// ================================================================================
+FileSection::FileSection(int id, const char* filename)
+        : Section(id), mFilename(filename) {
+    name = "cat ";
+    name += filename;
+}
+
+FileSection::~FileSection() {}
+
+status_t FileSection::Execute(ReportRequestSet* requests) const {
+    Fpipe p2cPipe;
+    Fpipe c2pPipe;
+    FdBuffer buffer;
+
+    // initiate pipes to pass data to/from incident_helper
+    if (p2cPipe.init() == -1) {
+        return -errno;
+    }
+    if (c2pPipe.init() == -1) {
+        return -errno;
+    }
+
+    // fork a child process
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        ALOGW("FileSection '%s' failed to fork", this->name.string());
+        return -errno;
+    }
+
+    // child process
+    if (pid == 0) {
+        if (setgid(IH_GID) == -1) {
+            ALOGW("FileSection '%s' can't change gid: %s", this->name.string(), strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        if (setuid(IH_UID) == -1) {
+            ALOGW("FileSection '%s' can't change uid: %s", this->name.string(), strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+
+        if (dup2(p2cPipe.readFd(), STDIN_FILENO) != 0 || !p2cPipe.close()) {
+            ALOGW("FileSection '%s' failed to set up stdin: %s", this->name.string(), strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        if (dup2(c2pPipe.writeFd(), STDOUT_FILENO) != 1 || !c2pPipe.close()) {
+            ALOGW("FileSection '%s' failed to set up stdout: %s", this->name.string(), strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+
+        // execute incident_helper to parse raw file data and generate protobuf
+        char sectionID[8];  // section id is expected to be smaller than 8 digits
+        sprintf(sectionID, "%d", this->id);
+        const char* args[]{INCIDENT_HELPER, "-s", sectionID, NULL};
+        execv(INCIDENT_HELPER, const_cast<char**>(args));
+
+        ALOGW("FileSection '%s' failed in child process: %s", this->name.string(), strerror(errno));
+        return -1;
+    }
+
+    // parent process
+
+    // close fds used in child process
+    close(p2cPipe.readFd());
+    close(c2pPipe.writeFd());
+
+    // read from mFilename and pump buffer to incident_helper
+    status_t err = NO_ERROR;
+    int fd = open(mFilename, O_RDONLY, 0444);
+    if (fd == -1) {
+       ALOGW("FileSection '%s' failed to open file", this->name.string());
+       return -errno;
+    }
+
+    err = buffer.readProcessedDataInStream(fd,
+        p2cPipe.writeFd(), c2pPipe.readFd(), INCIDENT_HELPER_TIMEOUT_MS);
+    if (err != NO_ERROR) {
+        ALOGW("FileSection '%s' failed to read data from incident helper: %s",
+            this->name.string(), strerror(-err));
+        kill(pid, SIGKILL); // kill child process if meets error
+        return err;
+    }
+
+    if (buffer.timedOut()) {
+        ALOGW("FileSection '%s' timed out reading from incident helper!", this->name.string());
+        kill(pid, SIGKILL); // kill the child process if timed out
+    }
+
+    // has to block here to reap child process
+    int status;
+    int w = waitpid(pid, &status, 0);
+    if (w < 0 || status == -1) {
+        ALOGW("FileSection '%s' abnormal child process: %s", this->name.string(), strerror(-err));
+        return -errno;
+    }
+
+    // write parsed data to reporter
+    ALOGD("section '%s' wrote %zd bytes in %d ms", this->name.string(), buffer.size(),
+            (int)buffer.durationMs());
+    WriteHeader(requests, buffer.size());
+    err = buffer.write(requests);
+    if (err != NO_ERROR) {
+        ALOGW("FileSection '%s' failed writing: %s", this->name.string(), strerror(-err));
+        return err;
+    }
+
+    return NO_ERROR;
 }
 
 // ================================================================================
@@ -223,7 +341,7 @@ CommandSection::CommandSection(int id, const char* first, ...)
     name += " ";
     va_start(args, first);
     for (int i=0; i<count; i++) {
-        const char* arg = va_arg(args, const char*); 
+        const char* arg = va_arg(args, const char*);
         mCommand[i+1] = arg;
         if (arg != NULL) {
             name += va_arg(args, const char*);
@@ -254,7 +372,7 @@ DumpsysSection::DumpsysSection(int id, const char* service, ...)
     va_list args;
     va_start(args, service);
     while (true) {
-        const char* arg = va_arg(args, const char*); 
+        const char* arg = va_arg(args, const char*);
         if (arg == NULL) {
             break;
         }
@@ -274,7 +392,7 @@ DumpsysSection::BlockingCall(int pipeWriteFd) const
 {
     // checkService won't wait for the service to show up like getService will.
     sp<IBinder> service = defaultServiceManager()->checkService(mService);
-    
+
     if (service == NULL) {
         // Returning an error interrupts the entire incident report, so just
         // log the failure.

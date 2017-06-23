@@ -1,0 +1,50 @@
+cc_defaults {
+    name: "incident_helper_defaults",
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-g",
+        "-O0"
+    ],
+
+    srcs: [
+        "IncidentHelper.cpp",
+        "strutil.cpp",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libprotobuf-cpp-full",
+        "libutils",
+    ],
+
+    static_libs: [
+        "libplatformprotos",
+    ],
+}
+
+cc_binary {
+    name: "incident_helper",
+    defaults: ["incident_helper_defaults"],
+    srcs: ["main.cpp"],
+}
+
+
+cc_test {
+    name: "incident_helper_test",
+    defaults: ["incident_helper_defaults"],
+
+    srcs: [
+        "tests/IncidentHelper_test.cpp",
+    ],
+
+    data: [
+        "testdata/*",
+    ],
+
+    static_libs: [
+        "libgmock",
+    ],
+}

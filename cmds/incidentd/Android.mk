@@ -13,6 +13,11 @@
 # limitations under the License.
 
 LOCAL_PATH:= $(call my-dir)
+
+# ========= #
+# incidentd #
+# ========= #
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := incidentd
@@ -25,7 +30,7 @@ LOCAL_SRC_FILES := \
         src/main.cpp \
         src/protobuf.cpp \
         src/report_directory.cpp \
-        src/section_list.cpp
+        src/section_list.cpp \
 
 LOCAL_CFLAGS += \
         -Wall -Werror -Wno-missing-field-initializers -Wno-unused-variable -Wunused-parameter
@@ -54,3 +59,50 @@ LOCAL_INIT_RC := incidentd.rc
 endif
 
 include $(BUILD_EXECUTABLE)
+
+# ============== #
+# incidentd_test #
+# ============== #
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := incidentd_test
+LOCAL_COMPATIBILITY_SUITE := device-tests
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_CFLAGS := -Werror -Wall -Wno-unused-variable -Wunused-parameter
+
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src
+
+LOCAL_SRC_FILES := \
+    src/FdBuffer.cpp \
+    src/Reporter.cpp \
+    src/Section.cpp \
+    src/protobuf.cpp \
+    tests/FdBuffer_test.cpp \
+    tests/Section_test.cpp \
+
+LOCAL_STATIC_LIBRARIES := \
+    libgmock \
+
+LOCAL_SHARED_LIBRARIES := \
+    libbase \
+    libbinder \
+    libcutils \
+    libincident \
+    liblog \
+    libselinux \
+    libservices \
+    libutils \
+
+relative_path_prefix := nativetest64/incidentd_test
+testdata_files := $(call find-subdir-files, testdata/*)
+
+GEN := $(addprefix $(TARGET_OUT_DATA)/$(relative_path_prefix)/, $(testdata_files))
+$(GEN): PRIVATE_PATH := $(LOCAL_PATH)
+$(GEN): PRIVATE_CUSTOM_TOOL = cp $< $@
+$(GEN): $(TARGET_OUT_DATA)/$(relative_path_prefix)/testdata/% : $(LOCAL_PATH)/testdata/%
+	$(transform-generated-source)
+LOCAL_GENERATED_SOURCES += $(GEN)
+
+include $(BUILD_NATIVE_TEST)
