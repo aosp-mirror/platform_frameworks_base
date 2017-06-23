@@ -30,7 +30,6 @@ import android.util.ArrayMap;
 import android.util.SparseIntArray;
 import android.view.autofill.AutofillId;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
