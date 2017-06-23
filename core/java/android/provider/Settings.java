@@ -10144,8 +10144,8 @@ public final class Settings {
          *
          * @hide
          */
-        public static final String EUICC_WIPING_TIMEOUT_MILLIS =
-                "euicc_wiping_timeout_millis";
+        public static final String EUICC_FACTORY_RESET_TIMEOUT_MILLIS =
+                "euicc_factory_reset_timeout_millis";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

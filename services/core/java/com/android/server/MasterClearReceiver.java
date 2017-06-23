@@ -38,24 +38,11 @@ import java.util.concurrent.TimeUnit;
 
 public class MasterClearReceiver extends BroadcastReceiver {
     private static final String TAG = "MasterClear";
-    private static final String ACTION_WIPE_EUICC_DATA =
-            "com.android.internal.action.wipe_euicc_data";
-    private static final long DEFAULT_EUICC_WIPING_TIMEOUT_MILLIS = 30000L; // 30 s
     private boolean mWipeExternalStorage;
     private boolean mWipeEsims;
-    private static CountDownLatch mEuiccFactoryResetLatch;
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        if (ACTION_WIPE_EUICC_DATA.equals(intent.getAction())) {
-            if (getResultCode() != EuiccManager.EMBEDDED_SUBSCRIPTION_RESULT_OK) {
-                int detailedCode = intent.getIntExtra(
-                    EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE, 0);
-                Slog.e(TAG, "Error wiping euicc data, Detailed code = " + detailedCode);
-            }
-            mEuiccFactoryResetLatch.countDown();
-            return;
-        }
         if (intent.getAction().equals(Intent.ACTION_REMOTE_INTENT)) {
             if (!"google.com".equals(intent.getStringExtra("from"))) {
                 Slog.w(TAG, "Ignoring master clear request -- not from trusted server.");
@@ -84,7 +71,8 @@ public class MasterClearReceiver extends BroadcastReceiver {
             @Override
             public void run() {
                 try {
-                    RecoverySystem.rebootWipeUserData(context, shutdown, reason, forceWipe);
+                    RecoverySystem
+                            .rebootWipeUserData(context, shutdown, reason, forceWipe, mWipeEsims);
                     Log.wtf(TAG, "Still running after master clear?!");
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't perform master clear/factory reset", e);
@@ -128,32 +116,6 @@ public class MasterClearReceiver extends BroadcastReceiver {
                 StorageManager sm = (StorageManager) mContext.getSystemService(
                         Context.STORAGE_SERVICE);
                 sm.wipeAdoptableDisks();
-            }
-            if (mWipeEsims) {
-                EuiccManager euiccManager = (EuiccManager) mContext.getSystemService(
-                        Context.EUICC_SERVICE);
-                Intent intent = new Intent(mContext, MasterClearReceiver.class);
-                intent.setAction(ACTION_WIPE_EUICC_DATA);
-                PendingIntent callbackIntent = PendingIntent.getBroadcast(
-                        mContext,
-                        0 /* requestCode */,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
-                mEuiccFactoryResetLatch = new CountDownLatch(1);
-                euiccManager.eraseSubscriptions(callbackIntent);
-                try {
-                    long waitingTime = Settings.Global.getLong(
-                            mContext.getContentResolver(),
-                            Settings.Global.EUICC_WIPING_TIMEOUT_MILLIS,
-                            DEFAULT_EUICC_WIPING_TIMEOUT_MILLIS);
-
-                    if (!mEuiccFactoryResetLatch.await(waitingTime, TimeUnit.MILLISECONDS)) {
-                        Slog.e(TAG, "Timeout wiping eUICC data.");
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    Slog.e(TAG, "Wiping eUICC data interrupted", e);
-                }
             }
             return null;
         }
