@@ -33,10 +33,7 @@ import java.util.List;
  * Use {@link android.content.Context#getSystemService(java.lang.String)}
  * with {@link Context#BLUETOOTH_SERVICE} to create an {@link BluetoothManager},
  * then call {@link #getAdapter} to obtain the {@link BluetoothAdapter}.
- * <p>
- * Alternately, you can just call the static helper
- * {@link BluetoothAdapter#getDefaultAdapter()}.
- *
+ * </p>
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>
