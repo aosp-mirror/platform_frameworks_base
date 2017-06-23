@@ -379,69 +379,36 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     /**
      * We can easily extract colors from an ImageWallpaper since it's only a bitmap.
-     * In this case, using the crop is more than enough.
-     *
-     * In case of a live wallpaper, the best we can do is to extract colors from its
-     * preview image. Anyway, the live wallpaper can also implement the wallpaper colors API
-     * to report when colors change.
+     * In this case, using the crop is more than enough. Live wallpapers are just ignored.
      *
      * @param wallpaper a wallpaper representation
      */
     private void extractColors(WallpaperData wallpaper) {
         String cropFile = null;
-        Drawable thumbnail = null;
-        // This represents a maximum pixel count in an image.
-        // It prevents color extraction on big bitmaps.
-        int wallpaperId = -1;
+        int wallpaperId;
 
-        boolean imageWallpaper = false;
         synchronized (mLock) {
-            imageWallpaper = mImageWallpaper.equals(wallpaper.wallpaperComponent)
+            // Not having a wallpaperComponent means it's a lock screen wallpaper.
+            final boolean imageWallpaper = mImageWallpaper.equals(wallpaper.wallpaperComponent)
                     || wallpaper.wallpaperComponent == null;
-            if (imageWallpaper) {
-                if (wallpaper.cropFile != null && wallpaper.cropFile.exists()) {
-                    cropFile = wallpaper.cropFile.getAbsolutePath();
-                }
-            } else {
-                if (wallpaper.connection == null) {
-                    Slog.w(TAG, "Can't extract colors, wallpaper not connected. " +
-                            wallpaper.wallpaperId);
-                    return;
-                }
-                WallpaperInfo info = wallpaper.connection.mInfo;
-                if (info == null) {
-                    Slog.w(TAG, "Something is really wrong, live wallpaper doesn't have " +
-                           "a WallpaperInfo object! " + wallpaper.wallpaperId);
-                    return;
-                }
-                thumbnail = info.loadThumbnail(mContext.getPackageManager());
+            if (imageWallpaper && wallpaper.cropFile != null && wallpaper.cropFile.exists()) {
+                cropFile = wallpaper.cropFile.getAbsolutePath();
             }
-
             wallpaperId = wallpaper.wallpaperId;
         }
 
         WallpaperColors colors = null;
         if (cropFile != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(cropFile);
-            colors = WallpaperColors.fromBitmap(bitmap);
-            bitmap.recycle();
-        } else if (thumbnail != null) {
-            colors = WallpaperColors.fromDrawable(thumbnail);
+            if (bitmap != null) {
+                colors = WallpaperColors.fromBitmap(bitmap);
+                bitmap.recycle();
+            }
         }
 
         if (colors == null) {
             Slog.w(TAG, "Cannot extract colors because wallpaper could not be read.");
             return;
-        }
-
-        // Even though we can extract colors from live wallpaper thumbnails,
-        // it's risky to assume that it might support dark text on top of it:
-        //    • Thumbnail might not be accurate.
-        //    • Colors might change over time.
-        if (!imageWallpaper) {
-            int colorHints = colors.getColorHints();
-            colorHints &= ~WallpaperColors.HINT_SUPPORTS_DARK_TEXT;
-            colors.setColorHints(colorHints);
         }
 
         synchronized (mLock) {
