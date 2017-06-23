@@ -2972,4 +2972,7 @@
     <!-- Flag indicating that the actions buttons for a notification should be tinted with by the
          color supplied by the Notification.Builder if present. -->
     <bool name="config_tintNotificationActionButtons">true</bool>
+
+    <!-- Show area update info settings in CellBroadcastReceiver and information in SIM status in Settings app -->
+    <bool name="config_showAreaUpdateInfoSettings">false</bool>
 </resources>
