@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
@@ -37,6 +38,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -85,6 +87,7 @@ public class Session extends IWindowSession.Stub
     private boolean mClientDead = false;
     private float mLastReportedAnimatorScale;
     private String mPackageName;
+    private String mRelayoutTag;
 
     public Session(WindowManagerService service, IWindowSessionCallback callback,
             IInputMethodClient client, IInputContext inputContext) {
@@ -221,10 +224,12 @@ public class Session extends IWindowSession.Stub
             MergedConfiguration mergedConfiguration, Surface outSurface) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, seq, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags,
                 outFrame, outOverscanInsets, outContentInsets, outVisibleInsets,
                 outStableInsets, outsets, outBackdropFrame, mergedConfiguration, outSurface);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
         return res;
@@ -550,6 +555,7 @@ public class Session extends IWindowSession.Stub
 
     void windowAddedLocked(String packageName) {
         mPackageName = packageName;
+        mRelayoutTag = "relayoutWindow: " + mPackageName;
         if (mSurfaceSession == null) {
             if (WindowManagerService.localLOGV) Slog.v(
                 TAG_WM, "First window added to " + this + ", creating SurfaceSession");
@@ -673,6 +679,7 @@ public class Session extends IWindowSession.Stub
                 pw.print(" mAlertWindowSurfaces="); pw.print(mAlertWindowSurfaces);
                 pw.print(" mClientDead="); pw.print(mClientDead);
                 pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
+        pw.print(prefix); pw.print("mPackageName="); pw.println(mPackageName);
     }
 
     @Override
