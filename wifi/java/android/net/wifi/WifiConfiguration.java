@@ -891,9 +891,13 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int DISABLED_DUE_TO_USER_SWITCH = 11;
         /**
+         * This network is disabled due to wrong password
+         */
+        public static final int DISABLED_BY_WRONG_PASSWORD = 12;
+        /**
          * This Maximum disable reason value
          */
-        public static final int NETWORK_SELECTION_DISABLED_MAX = 12;
+        public static final int NETWORK_SELECTION_DISABLED_MAX = 13;
 
         /**
          * Quality network selection disable reason String (for debug purpose)
@@ -910,7 +914,8 @@ public class WifiConfiguration implements Parcelable {
                 "NETWORK_SELECTION_DISABLED_AUTHENTICATION_NO_CREDENTIALS",
                 "NETWORK_SELECTION_DISABLED_NO_INTERNET",
                 "NETWORK_SELECTION_DISABLED_BY_WIFI_MANAGER",
-                "NETWORK_SELECTION_DISABLED_BY_USER_SWITCH"
+                "NETWORK_SELECTION_DISABLED_BY_USER_SWITCH",
+                "NETWORK_SELECTION_DISABLED_BY_WRONG_PASSWORD"
         };
 
         /**

@@ -417,6 +417,19 @@ public class AccessPointTest {
         assertThat(ap.getSummary()).isEqualTo(expectedString);
     }
 
+    @Test
+    public void testSummaryString_showsWrongPasswordLabel() {
+        WifiConfiguration configuration = createWifiConfiguration();
+        configuration.getNetworkSelectionStatus().setNetworkSelectionStatus(
+                WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_PERMANENTLY_DISABLED);
+        configuration.getNetworkSelectionStatus().setNetworkSelectionDisableReason(
+                WifiConfiguration.NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD);
+        AccessPoint ap = new AccessPoint(mContext, configuration);
+
+        assertThat(ap.getSummary()).isEqualTo(mContext.getString(
+                R.string.wifi_check_password_try_again));
+    }
+
     private ScoredNetwork buildScoredNetworkWithMockBadgeCurve() {
         Bundle attr1 = new Bundle();
         attr1.putParcelable(ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE, mockBadgeCurve);
