@@ -95,7 +95,8 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ဖုန်း/အရေးပေါ် ဝန်ဆောင်မှုများမရရှိနိုင်ပါ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"သင်၏ ဒေသတွင် မိုဘိုင်းကွန်ရက် ယာယီမရရှိနိုင်ပါ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ကွန်ရက်ကို ချိတ်ဆက်၍မရပါ"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"လိုင်းဖမ်းယူမှု ကောင်းမွန်စေရန် စနစ် &gt; ကွန်ရက်နှင့် အင်တာနက် &gt; မိုဘိုင်းကွန်ရက်များ &gt; အသုံးပြုလိုသည့် ကွန်ရက်အမျိုးအစားတွင် ရွေးချယ်ထားသည့် အမျိုးအစားကို ပြောင်းကြည့်ပါ။"</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (1203771446683319957) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"သတိပေးချက်များ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"အဝင်ခေါ်ဆိုမှုအား ထပ်ဆင့်ပို့ခြင်း"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"အရေးပေါ် ပြန်လည်ခေါ်ဆိုနိုင်သောမုဒ်"</string>

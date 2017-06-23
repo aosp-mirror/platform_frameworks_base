@@ -95,7 +95,8 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Sin servicio de emergencia ni de voz"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"La red móvil disponible en tu ubicación no ofrece esta opción de forma temporal"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No se puede establecer conexión con la red"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para mejorar la recepción, prueba a cambiar el tipo de red seleccionado en Sistema &gt; Red e Internet &gt; Redes móviles &gt; Tipo de red preferido."</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (1203771446683319957) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de llamada"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de llamada de emergencia"</string>
