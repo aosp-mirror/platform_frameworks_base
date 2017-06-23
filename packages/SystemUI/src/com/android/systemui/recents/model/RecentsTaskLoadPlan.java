@@ -71,6 +71,7 @@ public class RecentsTaskLoadPlan {
 
     Context mContext;
 
+    int mPreloadedUserId;
     List<ActivityManager.RecentTaskInfo> mRawTasks;
     TaskStack mStack;
     ArraySet<Integer> mCurrentQuietProfiles = new ArraySet<Integer>();
@@ -83,9 +84,6 @@ public class RecentsTaskLoadPlan {
     private void updateCurrentQuietProfilesCache(int currentUserId) {
         mCurrentQuietProfiles.clear();
 
-        if (currentUserId == UserHandle.USER_CURRENT) {
-            currentUserId = SystemServicesProxy.getInstance(mContext).getCurrentUser();
-        }
         UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         List<UserInfo> profiles = userManager.getProfiles(currentUserId);
         if (profiles != null) {
@@ -105,9 +103,10 @@ public class RecentsTaskLoadPlan {
      * Note: Do not lock, callers should synchronize on the loader before making this call.
      */
     void preloadRawTasks(boolean includeFrontMostExcludedTask) {
-        int currentUserId = UserHandle.USER_CURRENT;
-        updateCurrentQuietProfilesCache(currentUserId);
         SystemServicesProxy ssp = Recents.getSystemServices();
+        int currentUserId = ssp.getCurrentUser();
+        updateCurrentQuietProfilesCache(currentUserId);
+        mPreloadedUserId = currentUserId;
         mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
                 currentUserId, includeFrontMostExcludedTask, mCurrentQuietProfiles);
 
@@ -135,7 +134,6 @@ public class RecentsTaskLoadPlan {
             preloadRawTasks(includeFrontMostExcludedTask);
         }
 
-        SystemServicesProxy ssp = SystemServicesProxy.getInstance(mContext);
         SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();
         SparseIntArray affiliatedTaskCounts = new SparseIntArray();
         SparseBooleanArray lockedUsers = new SparseBooleanArray();
@@ -143,7 +141,7 @@ public class RecentsTaskLoadPlan {
                 R.string.accessibility_recents_item_will_be_dismissed);
         String appInfoDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_open_app_info);
-        int currentUserId = ssp.getCurrentUser();
+        int currentUserId = mPreloadedUserId;
         long legacyLastStackActiveTime = migrateLegacyLastStackActiveTime(currentUserId);
         long lastStackActiveTime = Settings.Secure.getLongForUser(mContext.getContentResolver(),
                 Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, legacyLastStackActiveTime, currentUserId);
