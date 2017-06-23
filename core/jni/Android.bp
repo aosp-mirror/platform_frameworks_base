@@ -215,7 +215,6 @@ cc_library_shared {
         "libgif",
         "libseccomp_policy",
         "libselinux",
-        "libcrypto",
         "libgrallocusage",
     ],
 
