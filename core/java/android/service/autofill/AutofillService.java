@@ -19,24 +19,230 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.provider.Settings;
+
 import com.android.internal.os.HandlerCaller;
 import android.annotation.SdkConstant;
-import android.app.Activity;
-import android.app.Service;
-import android.content.Intent;
+import android.app.Service;import android.content.Intent;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewStructure;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 
 import com.android.internal.os.SomeArgs;
 
 /**
- * Top-level service of the current autofill service for a given user.
+ * An {@code AutofillService} is a service used to automatically fill the contents of the screen
+ * on behalf of a given user - for more information about autofill, read
+ * <a href="{@docRoot}preview/features/autofill.html">Autofill Framework</a>.
  *
- * <p>Apps providing autofill capabilities must extend this service.
+ * <p>An {@code AutofillService} is only bound to the Android System for autofill purposes if:
+ * <ol>
+ *   <li>It requires the {@code android.permission.BIND_AUTOFILL_SERVICE} permission in its
+ *       manifest.
+ *   <li>The user explicitly enables it using Android Settings (the
+ *       {@link Settings#ACTION_REQUEST_SET_AUTOFILL_SERVICE} intent can be used to launch such
+ *       Settings screen).
+ * </ol>
+ *
+ * <h3>Basic usage</h3>
+ *
+ * <p>The basic autofill process is defined by the workflow below:
+ * <ol>
+ *   <li>User focus an editable {@link View}.
+ *   <li>View calls {@link AutofillManager#notifyViewEntered(android.view.View)}.
+ *   <li>A {@link ViewStructure} representing all views in the screen is created.
+ *   <li>The Android System binds to the service and calls {@link #onConnected()}.
+ *   <li>The service receives the view structure through the
+ *       {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)}.
+ *   <li>The service replies through {@link FillCallback#onSuccess(FillResponse)}.
+ *   <li>The Android System calls {@link #onDisconnected()} and unbinds from the
+ *       {@code AutofillService}.
+ *   <li>The Android System displays an UI affordance with the options sent by the service.
+ *   <li>The user picks an option.
+ *   <li>The proper views are autofilled.
+ * </ol>
+ *
+ * <p>This workflow was designed to minimize the time the Android System is bound to the service;
+ * for each call, it: binds to service, waits for the reply, and unbinds right away. Furthermore,
+ * those calls are considered stateless: if the service needs to keep state between calls, it must
+ * do its own state management (keeping in mind that the service's process might be killed by the
+ * Android System when unbound; for example, if the device is running low in memory).
+ *
+ * <p>Typically, the
+ * {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} will:
+ * <ol>
+ *   <li>Parse the view structure looking for autofillable views (for example, using
+ *       {@link android.app.assist.AssistStructure.ViewNode#getAutofillHints()}.
+ *   <li>Match the autofillable views with the user's data.
+ *   <li>Create a {@link Dataset} for each set of user's data that match those fields.
+ *   <li>Fill the dataset(s) with the proper {@link AutofillId}s and {@link AutofillValue}s.
+ *   <li>Add the dataset(s) to the {@link FillResponse} passed to
+ *       {@link FillCallback#onSuccess(FillResponse)}.
+ * </ol>
+ *
+ * <p>For example, for a login screen with username and password views where the user only has one
+ * account in the service, the response could be:
+ *
+ * <pre class="prettyprint">
+ * new FillResponse.Builder()
+ *     .addDataset(new Dataset.Builder()
+ *         .setValue(id1, AutofillValue.forText("homer"), createPresentation("homer"))
+ *         .setValue(id2, AutofillValue.forText("D'OH!"), createPresentation("password for homer"))
+ *         .build())
+ *     .build();
+ * </pre>
+ *
+ * <p>But if the user had 2 accounts instead, the response could be:
+ *
+ * <pre class="prettyprint">
+ * new FillResponse.Builder()
+ *     .addDataset(new Dataset.Builder()
+ *         .setValue(id1, AutofillValue.forText("homer"), createPresentation("homer"))
+ *         .setValue(id2, AutofillValue.forText("D'OH!"), createPresentation("password for homer"))
+ *         .build())
+ *     .addDataset(new Dataset.Builder()
+ *         .setValue(id1, AutofillValue.forText("flanders"), createPresentation("flanders"))
+ *         .setValue(id2, AutofillValue.forText("OkelyDokelyDo"), createPresentation("password for flanders"))
+ *         .build())
+ *     .build();
+ * </pre>
+ *
+ * <p>If the service does not find any autofillable view in the view structure, it should pass
+ * {@code null} to {@link FillCallback#onSuccess(FillResponse)}; if the service encountered an error
+ * processing the request, it should call {@link FillCallback#onFailure(CharSequence)}. For
+ * performance reasons, it's paramount that the service calls either
+ * {@link FillCallback#onSuccess(FillResponse)} or {@link FillCallback#onFailure(CharSequence)} for
+ * each {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} received - if it
+ * doesn't, the request will eventually time out and be discarded by the Android System.
+ *
+ * <h3>Saving user data</h3>
+ *
+ * <p>If the service is also interested on saving the data filled by the user, it must set a
+ * {@link SaveInfo} object in the {@link FillResponse}. See {@link SaveInfo} for more details and
+ * examples.
+ *
+ * <h3>User authentication</h3>
+ *
+ * <p>The service can provide an extra degree of security by requiring the user to authenticate
+ * before an app can be autofilled. The authentication is typically required in 2 scenarios:
+ * <ul>
+ *   <li>To unlock the user data (for example, using a master password or fingerprint
+ *       authentication) - see
+ * {@link FillResponse.Builder#setAuthentication(AutofillId[], android.content.IntentSender, android.widget.RemoteViews)}.
+ *   <li>To unlock a specific dataset (for example, by providing a CVC for a credit card) - see
+ *       {@link Dataset.Builder#setAuthentication(android.content.IntentSender)}.
+ * </ul>
+ *
+ * <p>When using authentication, it is recommended to encrypt only the sensitive data and leave
+ * labels unencrypted, so they can be used on presentation views. For example, if the user has a
+ * home and a work address, the {@code Home} and {@code Work} labels should be stored unencrypted
+ * (since they don't have any sensitive data) while the address data per se could be stored in an
+ * encrypted storage. Then when the user chooses the {@code Home} dataset, the platform starts
+ * the authentication flow, and the service can decrypt the sensitive data.
+ *
+ * <p>The authentication mechanism can also be used in scenarios where the service needs multiple
+ * steps to determine the datasets that can fill a screen. For example, when autofilling a financial
+ * app where the user has accounts for multiple banks, the workflow could be:
+ *
+ * <ol>
+ *   <li>The first {@link FillResponse} contains datasets with the credentials for the financial
+ *       app, plus a "fake" dataset whose presentation says "Tap here for banking apps credentials".
+ *   <li>When the user selects the fake dataset, the service displays a dialog with available
+ *       banking apps.
+ *   <li>When the user select a banking app, the service replies with a new {@link FillResponse}
+ *       containing the datasets for that bank.
+ * </ol>
+ *
+ * <p>Another example of multiple-steps dataset selection is when the service stores the user
+ * credentials in "vaults": the first response would contain fake datasets with the vault names,
+ * and the subsequent response would contain the app credentials stored in that vault.
+ *
+ * <h3>Data partitioning</h3>
+ *
+ * <p>The autofillable views in a screen should be grouped in logical groups called "partitions".
+ * Typical partitions are:
+ * <ul>
+ *   <li>Credentials (username/email address, password).
+ *   <li>Address (street, city, state, zip code, etc).
+ *   <li>Payment info (credit card number, expiration date, and verification code).
+ * </ul>
+ * <p>For security reasons, when a screen has more than one partition, it's paramount that the
+ * contents of a dataset do not spawn multiple partitions, specially when one of the partitions
+ * contains data that is not specific to the application being autofilled. For example, a dataset
+ * should not contain fields for username, password, and credit card information. The reason for
+ * this rule is that a malicious app could draft a view structure where the credit card fields
+ * are not visible, so when the user selects a dataset from the username UI, the credit card info is
+ * released to the application without the user knowledge. Similar, it's recommended to always
+ * protect a dataset that contains sensitive information by requiring dataset authentication
+ * (see {@link Dataset.Builder#setAuthentication(android.content.IntentSender)}).
+ *
+ * <p>When the service detects that a screen have multiple partitions, it should return a
+ * {@link FillResponse} with just the datasets for the partition that originated the request (i.e.,
+ * the partition that has the {@link android.app.assist.AssistStructure.ViewNode} whose
+ * {@link android.app.assist.AssistStructure.ViewNode#isFocused()} returns {@code true}); then if
+ * the user selects a field from a different partition, the Android System will make another
+ * {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} call for that partition,
+ * and so on.
+ *
+ * <p>Notice that when the user autofill a partition with the data provided by the service and the
+ * user did not change these fields, the autofilled value is sent back to the service in the
+ * subsequent calls (and can be obtained by calling
+ * {@link android.app.assist.AssistStructure.ViewNode#getAutofillValue()}). This is useful in the
+ * cases where the service must create datasets for a partition based on the choice made in a
+ * previous partition. For example, the 1st response for a screen that have credentials and address
+ * partitions could be:
+ *
+ * <pre class="prettyprint">
+ * new FillResponse.Builder()
+ *     .addDataset(new Dataset.Builder() // partition 1 (credentials)
+ *         .setValue(id1, AutofillValue.forText("homer"), createPresentation("homer"))
+ *         .setValue(id2, AutofillValue.forText("D'OH!"), createPresentation("password for homer"))
+ *         .build())
+ *     .addDataset(new Dataset.Builder() // partition 1 (credentials)
+ *         .setValue(id1, AutofillValue.forText("flanders"), createPresentation("flanders"))
+ *         .setValue(id2, AutofillValue.forText("OkelyDokelyDo"), createPresentation("password for flanders"))
+ *         .build())
+ *     .setSaveInfo(new SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_PASSWORD,
+ *         new AutofillId[] { id1, id2 })
+ *             .build())
+ *     .build();
+ * </pre>
+ *
+ * <p>Then if the user selected {@code flanders}, the service would get a new
+ * {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} call, with the values of
+ * the fields {@code id1} and {@code id2} prepopulated, so the service could then fetch the address
+ * for the Flanders account and return the following {@link FillResponse} for the address partition:
+ *
+ * <pre class="prettyprint">
+ * new FillResponse.Builder()
+ *     .addDataset(new Dataset.Builder() // partition 2 (address)
+ *         .setValue(id3, AutofillValue.forText("744 Evergreen Terrace"), createPresentation("744 Evergreen Terrace")) // street
+ *         .setValue(id4, AutofillValue.forText("Springfield"), createPresentation("Springfield")) // city
+ *         .build())
+ *     .setSaveInfo(new SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_PASSWORD | SaveInfo.SAVE_DATA_TYPE_ADDRESS,
+ *         new AutofillId[] { id1, id2 }) // username and password
+ *              .setOptionalIds(new AutofillId[] { id3, id4 }) // state and zipcode
+ *             .build())
+ *     .build();
+ * </pre>
+ *
+ * <p>When the service returns multiple {@link FillResponse}, the last one overrides the previous;
+ * that's why the {@link SaveInfo} in the 2nd request above has the info for both partitions.
+ *
+ * <h3>Ignoring views</h3>
+ *
+ * <p>If the service find views that cannot be autofilled (for example, a text field representing
+ * the response to a Captcha challenge), it should mark those views as ignored by
+ * calling {@link FillResponse.Builder#setIgnoredIds(AutofillId...)} so the system does not trigger
+ * a new {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} when these views are
+ * focused.
  */
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
@@ -132,11 +338,6 @@ public abstract class AutofillService extends Service {
 
     private HandlerCaller mHandlerCaller;
 
-    /**
-     * {@inheritDoc}
-     *
-     * <strong>NOTE: </strong>if overridden, it must call {@code super.onCreate()}.
-     */
     @CallSuper
     @Override
     public void onCreate() {
@@ -162,8 +363,7 @@ public abstract class AutofillService extends Service {
     }
 
     /**
-     * Called by the Android system do decide if an {@link Activity} can be autofilled by the
-     * service.
+     * Called by the Android system do decide if a screen can be autofilled by the service.
      *
      * <p>Service must call one of the {@link FillCallback} methods (like
      * {@link FillCallback#onSuccess(FillResponse)}
@@ -181,7 +381,7 @@ public abstract class AutofillService extends Service {
             @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback);
 
     /**
-     * Called when user requests service to save the fields of an {@link Activity}.
+     * Called when user requests service to save the fields of a screen.
      *
      * <p>Service must call one of the {@link SaveCallback} methods (like
      * {@link SaveCallback#onSuccess()} or {@link SaveCallback#onFailure(CharSequence)})
@@ -226,7 +426,7 @@ public abstract class AutofillService extends Service {
      * @return The history or {@code null} if there are no events.
      */
     @Nullable public final FillEventHistory getFillEventHistory() {
-        AutofillManager afm = getSystemService(AutofillManager.class);
+        final AutofillManager afm = getSystemService(AutofillManager.class);
 
         if (afm == null) {
             return null;
