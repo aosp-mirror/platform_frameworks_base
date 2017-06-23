@@ -266,7 +266,7 @@
     <string name="wfcRegErrorTitle">Wi-Fi Calling</string>
     <!-- WFC Operator Error Messages showed as alerts -->
     <string-array name="wfcOperatorErrorAlertMessages">
-        <item>To make calls and send messages over Wi-Fi, first ask your carrier to set up this service. Then turn on Wi-Fi calling again from Settings.</item>
+        <item>To make calls and send messages over Wi-Fi, first ask your carrier to set up this service. Then turn on Wi-Fi calling again from Settings. (Error code: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g>)</item>
     </string-array>
     <!-- WFC Operator Error Messages showed as notifications -->
     <string-array name="wfcOperatorErrorNotificationMessages">
