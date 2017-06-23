@@ -70,9 +70,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * devices, and start a scan for Bluetooth LE devices.
  *
  * <p>To get a {@link BluetoothAdapter} representing the local Bluetooth
- * adapter, when running on JELLY_BEAN_MR1 and below, call the
- * static {@link #getDefaultAdapter} method; when running on JELLY_BEAN_MR2 and
- * higher, call {@link BluetoothManager#getAdapter}.
+ * adapter, call the {@link BluetoothManager#getAdapter} function on {@link BluetoothManager}.
+ * On JELLY_BEAN_MR1 and below you will need to use the static {@link #getDefaultAdapter}
+ * method instead.
+ * </p><p>
  * Fundamentally, this is your starting point for all
  * Bluetooth actions. Once you have the local adapter, you can get a set of
  * {@link BluetoothDevice} objects representing all paired devices with
@@ -81,14 +82,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * listen for incoming connection requests with
  * {@link #listenUsingRfcommWithServiceRecord(String,UUID)}; or start a scan for
  * Bluetooth LE devices with {@link #startLeScan(LeScanCallback callback)}.
- *
- * <p>This class is thread safe.
- *
+ * </p>
+ * <p>This class is thread safe.</p>
  * <p class="note"><strong>Note:</strong>
  * Most methods require the {@link android.Manifest.permission#BLUETOOTH}
  * permission and some also require the
  * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
- *
+ * </p>
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>
@@ -565,6 +565,7 @@ public final class BluetoothAdapter {
      * <p>Currently Android only supports one Bluetooth adapter, but the API
      * could be extended to support more. This will always return the default
      * adapter.
+     * </p>
      * @return the default local adapter, or null if Bluetooth is not supported
      *         on this hardware platform
      */
