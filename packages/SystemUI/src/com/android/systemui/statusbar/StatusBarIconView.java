@@ -601,7 +601,8 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     private void updateContrastedStaticColor() {
-        if (mCachedContrastBackgroundColor == NO_COLOR) {
+        if (Color.alpha(mCachedContrastBackgroundColor) != 255) {
+            mContrastedDrawableColor = mDrawableColor;
             return;
         }
         // We'll modify the color if it doesn't pass GAR

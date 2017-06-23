@@ -116,5 +116,10 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         color = mIconView.getContrastedStaticDrawableColor(Color.WHITE);
         assertTrue("Similar colors should be shifted to satisfy contrast",
                 NotificationColorUtil.satisfiesTextContrast(Color.WHITE, color));
+
+        mIconView.setStaticDrawableColor(Color.GREEN);
+        color = mIconView.getContrastedStaticDrawableColor(0xcc000000);
+        assertEquals("Transparent backgrounds should fallback to drawable color",
+                color, mIconView.getStaticDrawableColor());
     }
 }
