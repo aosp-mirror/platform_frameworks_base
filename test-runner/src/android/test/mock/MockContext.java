@@ -810,6 +810,12 @@ public class MockContext extends Context {
 
     /** {@hide} */
     @Override
+    public boolean canLoadUnsafeResources() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
     public IBinder getActivityToken() {
         throw new UnsupportedOperationException();
     }

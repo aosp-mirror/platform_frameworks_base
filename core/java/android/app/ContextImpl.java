@@ -2138,6 +2138,14 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public boolean canLoadUnsafeResources() {
+        if (getPackageName().equals(getOpPackageName())) {
+            return true;
+        }
+        return (mFlags & Context.CONTEXT_IGNORE_SECURITY) != 0;
+    }
+
+    @Override
     public Display getDisplay() {
         if (mDisplay == null) {
             return mResourcesManager.getAdjustedDisplay(Display.DEFAULT_DISPLAY,
