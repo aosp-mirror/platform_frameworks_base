@@ -55,7 +55,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.Directory;
-import android.provider.Settings;
 import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
@@ -6417,34 +6416,35 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners to update {@link Settings.Global} settings. Validation that the value
-     * of the setting is in the correct form for the setting type should be performed by the caller.
+     * Called by device owners to update {@link android.provider.Settings.Global} settings.
+     * Validation that the value of the setting is in the correct form for the setting type should
+     * be performed by the caller.
      * <p>
      * The settings that can be updated with this method are:
      * <ul>
-     * <li>{@link Settings.Global#ADB_ENABLED}</li>
-     * <li>{@link Settings.Global#AUTO_TIME}</li>
-     * <li>{@link Settings.Global#AUTO_TIME_ZONE}</li>
-     * <li>{@link Settings.Global#DATA_ROAMING}</li>
-     * <li>{@link Settings.Global#USB_MASS_STORAGE_ENABLED}</li>
-     * <li>{@link Settings.Global#WIFI_SLEEP_POLICY}</li>
-     * <li>{@link Settings.Global#STAY_ON_WHILE_PLUGGED_IN} This setting is only available from
-     * {@link android.os.Build.VERSION_CODES#M} onwards and can only be set if
+     * <li>{@link android.provider.Settings.Global#ADB_ENABLED}</li>
+     * <li>{@link android.provider.Settings.Global#AUTO_TIME}</li>
+     * <li>{@link android.provider.Settings.Global#AUTO_TIME_ZONE}</li>
+     * <li>{@link android.provider.Settings.Global#DATA_ROAMING}</li>
+     * <li>{@link android.provider.Settings.Global#USB_MASS_STORAGE_ENABLED}</li>
+     * <li>{@link android.provider.Settings.Global#WIFI_SLEEP_POLICY}</li>
+     * <li>{@link android.provider.Settings.Global#STAY_ON_WHILE_PLUGGED_IN} This setting is only
+     * available from {@link android.os.Build.VERSION_CODES#M} onwards and can only be set if
      * {@link #setMaximumTimeToLock} is not used to set a timeout.</li>
-     * <li>{@link Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li> This setting is only
-     * available from {@link android.os.Build.VERSION_CODES#M} onwards.</li>
+     * <li>{@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li> This
+     * setting is only available from {@link android.os.Build.VERSION_CODES#M} onwards.</li>
      * </ul>
      * <p>
      * Changing the following settings has no effect as of {@link android.os.Build.VERSION_CODES#M}:
      * <ul>
-     * <li>{@link Settings.Global#BLUETOOTH_ON}. Use
+     * <li>{@link android.provider.Settings.Global#BLUETOOTH_ON}. Use
      * {@link android.bluetooth.BluetoothAdapter#enable()} and
      * {@link android.bluetooth.BluetoothAdapter#disable()} instead.</li>
-     * <li>{@link Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}</li>
-     * <li>{@link Settings.Global#MODE_RINGER}. Use
+     * <li>{@link android.provider.Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}</li>
+     * <li>{@link android.provider.Settings.Global#MODE_RINGER}. Use
      * {@link android.media.AudioManager#setRingerMode(int)} instead.</li>
-     * <li>{@link Settings.Global#NETWORK_PREFERENCE}</li>
-     * <li>{@link Settings.Global#WIFI_ON}. Use
+     * <li>{@link android.provider.Settings.Global#NETWORK_PREFERENCE}</li>
+     * <li>{@link android.provider.Settings.Global#WIFI_ON}. Use
      * {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)} instead.</li>
      * </ul>
      *
@@ -6465,19 +6465,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to update {@link Settings.Secure} settings. Validation
-     * that the value of the setting is in the correct form for the setting type should be performed
-     * by the caller.
+     * Called by profile or device owners to update {@link android.provider.Settings.Secure}
+     * settings. Validation that the value of the setting is in the correct form for the setting
+     * type should be performed by the caller.
      * <p>
      * The settings that can be updated by a profile or device owner with this method are:
      * <ul>
-     * <li>{@link Settings.Secure#DEFAULT_INPUT_METHOD}</li>
-     * <li>{@link Settings.Secure#SKIP_FIRST_USE_HINTS}</li>
+     * <li>{@link android.provider.Settings.Secure#DEFAULT_INPUT_METHOD}</li>
+     * <li>{@link android.provider.Settings.Secure#SKIP_FIRST_USE_HINTS}</li>
      * </ul>
      * <p>
      * A device owner can additionally update the following settings:
      * <ul>
-     * <li>{@link Settings.Secure#LOCATION_MODE}</li>
+     * <li>{@link android.provider.Settings.Secure#LOCATION_MODE}</li>
      * </ul>
      *
      * <strong>Note: Starting from Android O, apps should no longer call this method with the
