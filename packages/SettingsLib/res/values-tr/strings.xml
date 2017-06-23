@@ -41,7 +41,7 @@
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Bağlantı kesiliyor…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Bağlanıyor…"</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Bağlandı"</string>
-    <string name="bluetooth_pairing" msgid="1426882272690346242">"Eşleştiriliyor…"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Eşleniyor…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Bağlandı (telefon yok)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Bağlandı (medya yok)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Bağlı (mesaj erişimi yok)"</string>
@@ -74,14 +74,14 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Telefon sesi için kullan"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Dosya aktarımı için kullan"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Giriş için kullan"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Eşleştir"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"EŞLEŞTİR"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Eşle"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"EŞLE"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"İptal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Eşleme işlemi, bağlantı kurulduğunda kişilerinize ve çağrı geçmişine erişim izni verir."</string>
-    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşleştirilemedi."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşleştirilemedi"</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile iletişim kurulamıyor."</string>
-    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Eşleştirme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tarafından reddedildi."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Eşleme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tarafından reddedildi."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Kablosuz kapalı."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Kablosuz bağlantı kesildi."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Kablosuz sinyal gücü tek çubuk."</string>
