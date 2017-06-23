@@ -90,7 +90,7 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"A szolgáltatás nincs biztosítva."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nem tudja módosítani a hívó fél azonosítója beállítást."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Adatszolgáltatás letiltva"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Nincs vészhívás"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Nincs segélyhívás"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Hangszolgáltatás letiltva"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Hang- és segélyszolgáltatás letiltva"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Az Ön tartózkodási helyén ideiglenesen nem áll rendelkezésre a mobilhálózaton"</string>
@@ -223,7 +223,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonbeállítások"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Képernyő lezárása"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Kikapcsolás"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Vészhívás"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Segélyhívás"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Programhiba bejelentése"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Hibajelentés készítése"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ezzel információt fog gyűjteni az eszköz jelenlegi állapotáról, amelyet a rendszer e-mailben fog elküldeni. Kérjük, legyen türelemmel, amíg a hibajelentés elkészül, és küldhető állapotba kerül."</string>
@@ -714,7 +714,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"A feloldáshoz vagy segélyhívás kezdeményezéséhez nyomja meg a Menü gombot."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"A feloldáshoz nyomja meg a Menü gombot."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Rajzolja le a mintát a feloldáshoz"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Vészhívás"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Segélyhívás"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Hívás folytatása"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Helyes!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Próbálja újra"</string>
