@@ -20,12 +20,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 /**
  * A representation of an activity that can belong to this user or a managed
@@ -173,12 +171,6 @@ public class LauncherActivityInfo {
     public Drawable getBadgedIcon(int density) {
         Drawable originalIcon = getIcon(density);
 
-        if (originalIcon instanceof BitmapDrawable) {
-            // TODO: Go through LauncherAppsService
-            return mPm.getUserBadgedIcon(originalIcon, mUser);
-        } else {
-            Log.e(TAG, "Unable to create badged icon for " + mActivityInfo);
-        }
-        return originalIcon;
+        return mPm.getUserBadgedIcon(originalIcon, mUser);
     }
 }
