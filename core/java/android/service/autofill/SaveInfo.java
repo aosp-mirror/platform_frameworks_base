@@ -21,6 +21,7 @@ import static android.view.autofill.Helper.sDebug;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.content.IntentSender;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -45,70 +46,91 @@ import java.util.Arrays;
  * two pieces of information:
  *
  * <ol>
- *   <li>The type of user data that would be saved (like passoword or credit card info).
+ *   <li>The type(s) of user data (like password or credit card info) that would be saved.
  *   <li>The minimum set of views (represented by their {@link AutofillId}) that need to be changed
  *       to trigger a save request.
  * </ol>
  *
- *  Typically, the {@link SaveInfo} contains the same {@code id}s as the {@link Dataset}:
+ * <p>Typically, the {@link SaveInfo} contains the same {@code id}s as the {@link Dataset}:
  *
  * <pre class="prettyprint">
- *  new FillResponse.Builder()
- *      .add(new Dataset.Builder(createPresentation())
- *          .setValue(id1, AutofillValue.forText("homer"))
- *          .setValue(id2, AutofillValue.forText("D'OH!"))
- *          .build())
- *      .setSaveInfo(new SaveInfo.Builder(SaveInfo.SAVE_INFO_TYPE_PASSWORD, new int[] {id1, id2})
- *                  .build())
- *      .build();
+ *   new FillResponse.Builder()
+ *       .addDataset(new Dataset.Builder()
+ *           .setValue(id1, AutofillValue.forText("homer"), createPresentation("homer")) // username
+ *           .setValue(id2, AutofillValue.forText("D'OH!"), createPresentation("password for homer")) // password
+ *           .build())
+ *       .setSaveInfo(new SaveInfo.Builder(
+ *           SaveInfo.SAVE_DATA_TYPE_USERNAME | SaveInfo.SAVE_DATA_TYPE_PASSWORD,
+ *           new AutofillId[] { id1, id2 }).build())
+ *       .build();
  * </pre>
  *
- * There might be cases where the {@link AutofillService} knows how to fill the
- * {@link android.app.Activity}, but the user has no data for it. In that case, the
- * {@link FillResponse} should contain just the {@link SaveInfo}, but no {@link Dataset}s:
+ * <p>The save type flags are used to display the appropriate strings in the save UI affordance.
+ * You can pass multiple values, but try to keep it short if possible. In the above example, just
+ * {@code SaveInfo.SAVE_DATA_TYPE_PASSWORD} would be enough.
+ *
+ * <p>There might be cases where the {@link AutofillService} knows how to fill the screen,
+ * but the user has no data for it. In that case, the {@link FillResponse} should contain just the
+ * {@link SaveInfo}, but no {@link Dataset Datasets}:
  *
  * <pre class="prettyprint">
- *  new FillResponse.Builder()
- *      .setSaveInfo(new SaveInfo.Builder(SaveInfo.SAVE_INFO_TYPE_PASSWORD, new int[] {id1, id2})
- *                  .build())
- *      .build();
+ *   new FillResponse.Builder()
+ *       .setSaveInfo(new SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_PASSWORD,
+ *           new AutofillId[] { id1, id2 }).build())
+ *       .build();
  * </pre>
  *
  * <p>There might be cases where the user data in the {@link AutofillService} is enough
  * to populate some fields but not all, and the service would still be interested on saving the
- * other fields. In this scenario, the service could set the
+ * other fields. In that case, the service could set the
  * {@link SaveInfo.Builder#setOptionalIds(AutofillId[])} as well:
  *
  * <pre class="prettyprint">
  *   new FillResponse.Builder()
- *       .add(new Dataset.Builder(createPresentation())
- *          .setValue(id1, AutofillValue.forText("742 Evergreen Terrace"))  // street
- *          .setValue(id2, AutofillValue.forText("Springfield"))            // city
- *          .build())
- *       .setSaveInfo(new SaveInfo.Builder(SaveInfo.SAVE_INFO_TYPE_ADDRESS, new int[] {id1, id2})
- *                   .setOptionalIds(new int[] {id3, id4}) // state and zipcode
- *                   .build())
+ *       .addDataset(new Dataset.Builder()
+ *           .setValue(id1, AutofillValue.forText("742 Evergreen Terrace"),
+ *               createPresentation("742 Evergreen Terrace")) // street
+ *           .setValue(id2, AutofillValue.forText("Springfield"),
+ *               createPresentation("Springfield")) // city
+ *           .build())
+ *       .setSaveInfo(new SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_ADDRESS,
+ *           new AutofillId[] { id1, id2 }) // street and  city
+ *           .setOptionalIds(new AutofillId[] { id3, id4 }) // state and zipcode
+ *           .build())
  *       .build();
  * </pre>
  *
- * The
- * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}
- * is triggered after a call to {@link AutofillManager#commit()}, but only when all conditions
- * below are met:
+ * <p>The {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} can be triggered after
+ * any of the following events:
+ * <ul>
+ *   <li>The {@link Activity} finishes.
+ *   <li>The app explicitly called {@link AutofillManager#commit()}.
+ *   <li>All required views became invisible (if the {@link SaveInfo} was created with the
+ *       {@link #FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE} flag).
+ * </ul>
  *
- * <ol>
+ * <p>But it is only triggered when all conditions below are met:
+ * <ul>
  *   <li>The {@link SaveInfo} associated with the {@link FillResponse} is not {@code null}.
- *   <li>The {@link AutofillValue} of all required views (as set by the {@code requiredIds} passed
- *       to {@link SaveInfo.Builder} constructor are not empty.
+ *   <li>The {@link AutofillValue}s of all required views (as set by the {@code requiredIds} passed
+ *       to the {@link SaveInfo.Builder} constructor are not empty.
  *   <li>The {@link AutofillValue} of at least one view (be it required or optional) has changed
- *       (i.e., it's not the same value passed in a {@link Dataset}).
- *   <li>The user explicitly tapped the affordance asking to save data for autofill.
- * </ol>
+ *       (i.e., it's neither the same value passed in a {@link Dataset}, nor the initial value
+ *       presented in the view).
+ *   <li>The user explicitly tapped the UI affordance asking to save data for autofill.
+ * </ul>
+ *
+ * <p>The service can also customize some aspects of the save UI affordance:
+ * <ul>
+ *   <li>Add a subtitle by calling {@link Builder#setDescription(CharSequence)}.
+ *   <li>Customize the button used to reject the save request by calling
+ *       {@link Builder#setNegativeAction(int, IntentSender)}.
+ * </ul>
  */
 public final class SaveInfo implements Parcelable {
 
     /**
-     * Type used on when the service can save the contents of an activity, but cannot describe what
+     * Type used when the service can save the contents of a screen, but cannot describe what
      * the content is for.
      */
     public static final int SAVE_DATA_TYPE_GENERIC = 0x0;
@@ -181,8 +203,8 @@ public final class SaveInfo implements Parcelable {
 
     /**
      * Usually {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}
-     * is called once the activity finishes. If this flag is set it is called once all saved views
-     * become invisible.
+     * is called once the {@link Activity} finishes. If this flag is set it is called once all
+     * saved views become invisible.
      */
     public static final int FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE = 0x1;
 
@@ -294,9 +316,9 @@ public final class SaveInfo implements Parcelable {
         }
 
         /**
-         * Set flags changing the save behavior.
+         * Sets flags changing the save behavior.
          *
-         * @param flags {@link #FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE} or 0.
+         * @param flags {@link #FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE} or {@code 0}.
          * @return This builder.
          */
         public @NonNull Builder setFlags(@SaveInfoFlags int flags) {
