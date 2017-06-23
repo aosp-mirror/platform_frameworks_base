@@ -1066,6 +1066,13 @@ public class CarrierConfigManager {
             "carrier_app_no_wake_signal_config";
 
     /**
+     * Default value for {@link Settings.Global#DATA_ROAMING}
+     * @hide
+     */
+    public static final String KEY_CARRIER_DEFAULT_DATA_ROAMING_ENABLED_BOOL =
+            "carrier_default_data_roaming_enabled_bool";
+
+    /**
      * Determines whether the carrier supports making non-emergency phone calls while the phone is
      * in emergency callback mode.  Default value is {@code true}, meaning that non-emergency calls
      * are allowed in emergency callback mode.
@@ -1621,6 +1628,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_DEFAULT_DATA_ROAMING_ENABLED_BOOL, false);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
