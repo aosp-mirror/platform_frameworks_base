@@ -3134,6 +3134,14 @@ public class DevicePolicyManager {
     public static final int WIPE_RESET_PROTECTION_DATA = 0x0002;
 
     /**
+     * Flag for {@link #wipeData(int)}: also erase the device's eUICC data.
+     *
+     * TODO(b/35851809): make this public.
+     * @hide
+     */
+    public static final int WIPE_EUICC = 0x0004;
+
+    /**
      * Ask that all user data be wiped. If called as a secondary user, the user will be removed and
      * other users will remain unaffected. Calling from the primary user will cause the device to
      * reboot, erasing all device data - including all the secondary users and their data - while
