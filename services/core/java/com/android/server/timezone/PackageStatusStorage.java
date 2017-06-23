@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.io.PrintWriter;
 
 import static com.android.server.timezone.PackageStatus.CHECK_COMPLETED_FAILURE;
 import static com.android.server.timezone.PackageStatus.CHECK_COMPLETED_SUCCESS;
@@ -374,5 +375,9 @@ final class PackageStatusStorage {
             throw new ParseException("Missing attribute " + attributeName, 0);
         }
         return value;
+    }
+
+    public void dump(PrintWriter printWriter) {
+        printWriter.println("Package status: " + getPackageStatus());
     }
 }

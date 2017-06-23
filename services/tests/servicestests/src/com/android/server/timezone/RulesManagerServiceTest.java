@@ -32,10 +32,14 @@ import android.app.timezone.RulesState;
 import android.os.ParcelFileDescriptor;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
+
+import libcore.io.IoUtils;
 
 import static com.android.server.timezone.RulesManagerService.REQUIRED_UPDATER_PERMISSION;
 import static org.junit.Assert.assertEquals;
@@ -52,6 +56,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -722,6 +727,97 @@ public class RulesManagerServiceTest {
         // Assert everything required was done.
         verifyNoInstallerCallsMade();
         verifyPackageTrackerCalled(null /* token */, true /* success */);
+    }
+
+    @Test
+    public void dump_noPermission() throws Exception {
+        when(mMockPermissionHelper.checkDumpPermission(any(String.class), any(PrintWriter.class)))
+                .thenReturn(false);
+
+        doDumpCallAndCapture(mRulesManagerService, null);
+        verifyZeroInteractions(mMockPackageTracker, mMockTimeZoneDistroInstaller);
+    }
+
+    @Test
+    public void dump_emptyArgs() throws Exception {
+        doSuccessfulDumpCall(mRulesManagerService, new String[0]);
+
+        // Verify the package tracker was consulted.
+        verify(mMockPackageTracker).dump(any(PrintWriter.class));
+    }
+
+    @Test
+    public void dump_nullArgs() throws Exception {
+        doSuccessfulDumpCall(mRulesManagerService, null);
+        // Verify the package tracker was consulted.
+        verify(mMockPackageTracker).dump(any(PrintWriter.class));
+    }
+
+    @Test
+    public void dump_unknownArgs() throws Exception {
+        String dumpedTextUnknownArgs = doSuccessfulDumpCall(
+                mRulesManagerService, new String[] { "foo", "bar"});
+
+        // Verify the package tracker was consulted.
+        verify(mMockPackageTracker).dump(any(PrintWriter.class));
+
+        String dumpedTextZeroArgs = doSuccessfulDumpCall(mRulesManagerService, null);
+        assertEquals(dumpedTextZeroArgs, dumpedTextUnknownArgs);
+    }
+
+    @Test
+    public void dump_formatState() throws Exception {
+        // Just expect these to not throw exceptions, not return nothing, and not interact with the
+        // package tracker.
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("p"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("s"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("c"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("i"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("o"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("t"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("a"));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("z" /* Unknown */));
+        doSuccessfulDumpCall(mRulesManagerService, dumpFormatArgs("piscotz"));
+
+        verifyZeroInteractions(mMockPackageTracker);
+    }
+
+    private static String[] dumpFormatArgs(String argsString) {
+        return new String[] { "-format_state", argsString};
+    }
+
+    private String doSuccessfulDumpCall(RulesManagerService rulesManagerService, String[] args)
+            throws Exception {
+        when(mMockPermissionHelper.checkDumpPermission(any(String.class), any(PrintWriter.class)))
+                .thenReturn(true);
+
+        // Set up the mocks to return (arbitrary) information about the current device state.
+        when(mMockTimeZoneDistroInstaller.getSystemRulesVersion()).thenReturn("2017a");
+        when(mMockTimeZoneDistroInstaller.getInstalledDistroVersion()).thenReturn(
+                new DistroVersion(2, 3, "2017b", 4));
+        when(mMockTimeZoneDistroInstaller.getStagedDistroOperation()).thenReturn(
+                StagedDistroOperation.install(new DistroVersion(5, 6, "2017c", 7)));
+
+        // Do the dump call.
+        String dumpedOutput = doDumpCallAndCapture(rulesManagerService, args);
+
+        assertFalse(dumpedOutput.isEmpty());
+
+        return dumpedOutput;
+    }
+
+    private static String doDumpCallAndCapture(
+            RulesManagerService rulesManagerService, String[] args) throws IOException {
+        File file = File.createTempFile("dump", null);
+        try {
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                FileDescriptor fd = fos.getFD();
+                rulesManagerService.dump(fd, args);
+            }
+            return IoUtils.readFileAsString(file.getAbsolutePath());
+        } finally {
+            file.delete();
+        }
     }
 
     private void verifyNoPackageTrackerCallsMade() {
