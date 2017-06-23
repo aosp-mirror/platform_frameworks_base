@@ -623,7 +623,7 @@ public class Binder implements IBinder {
     
     protected void finalize() throws Throwable {
         try {
-            destroy();
+            destroyBinder();
         } finally {
             super.finalize();
         }
@@ -653,7 +653,7 @@ public class Binder implements IBinder {
     }
 
     private native final void init();
-    private native final void destroy();
+    private native final void destroyBinder();
 
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
