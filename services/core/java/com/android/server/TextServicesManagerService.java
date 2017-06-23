@@ -1024,7 +1024,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    private final class InternalDeathRecipients extends
+    private static final class InternalDeathRecipients extends
             RemoteCallbackList<ISpellCheckerSessionListener> {
         private final SpellCheckerBindGroup mGroup;
 
@@ -1034,11 +1034,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         @Override
         public void onCallbackDied(ISpellCheckerSessionListener listener) {
-            synchronized(mSpellCheckerMap) {
-                mGroup.removeListener(listener);
-            }
+            mGroup.removeListener(listener);
         }
-
     }
 
     private static final class ISpellCheckerServiceCallbackBinder
