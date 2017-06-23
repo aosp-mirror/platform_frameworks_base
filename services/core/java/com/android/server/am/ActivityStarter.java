@@ -2308,6 +2308,7 @@ class ActivityStarter {
         pw.println(prefix + "ActivityStarter:");
         prefix = prefix + "  ";
 
+        pw.println(prefix + "mCurrentUser=" + mSupervisor.mCurrentUser);
         pw.println(prefix + "mLastStartReason=" + mLastStartReason);
         pw.println(prefix + "mLastStartActivityTimeMs="
                 + DateFormat.getDateTimeInstance().format(new Date(mLastStartActivityTimeMs)));
