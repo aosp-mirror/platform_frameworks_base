@@ -17,7 +17,6 @@
 package android.hardware.radio;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -27,7 +26,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
-import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -1482,10 +1480,6 @@ public class RadioManager {
             return STATUS_BAD_VALUE;
         }
 
-        if (mService == null) {
-            return nativeListModules(modules);
-        }
-
         Log.d(TAG, "Listing available tuners...");
         List<ModuleProperties> returnedList;
         try {
@@ -1526,45 +1520,32 @@ public class RadioManager {
             throw new IllegalArgumentException("callback must not be empty");
         }
 
-        if (mService != null) {
-            Log.d(TAG, "Opening tuner " + moduleId + "...");
+        Log.d(TAG, "Opening tuner " + moduleId + "...");
 
-            ITuner tuner;
-            ITunerCallback halCallback = new TunerCallbackAdapter(callback, handler);
-            try {
-                tuner = mService.openTuner(moduleId, config, withAudio, halCallback);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to open tuner", e);
-                return null;
-            }
-            if (tuner == null) {
-                Log.e(TAG, "Failed to open tuner");
-                return null;
-            }
-            return new TunerAdapter(tuner);
+        ITuner tuner;
+        ITunerCallback halCallback = new TunerCallbackAdapter(callback, handler);
+        try {
+            tuner = mService.openTuner(moduleId, config, withAudio, halCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to open tuner", e);
+            return null;
         }
-
-        RadioModule module = new RadioModule(moduleId, config, withAudio, callback, handler);
-        if (!module.initCheck()) {
+        if (tuner == null) {
             Log.e(TAG, "Failed to open tuner");
-            module = null;
+            return null;
         }
-
-        return (RadioTuner)module;
+        return new TunerAdapter(tuner);
     }
 
     @NonNull private final Context mContext;
-    // TODO(b/36863239): NonNull when transitioned from native service
-    @Nullable private final IRadioService mService;
+    @NonNull private final IRadioService mService;
 
     /**
      * @hide
      */
     public RadioManager(@NonNull Context context) throws ServiceNotFoundException {
         mContext = context;
-
-        boolean isServiceJava = SystemProperties.getBoolean("config.enable_java_radio", false);
-        mService = isServiceJava ? IRadioService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.RADIO_SERVICE)) : null;
+        mService = IRadioService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.RADIO_SERVICE));
     }
 }
