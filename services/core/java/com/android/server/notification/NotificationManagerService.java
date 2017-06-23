@@ -5679,11 +5679,14 @@ public class NotificationManagerService extends SystemService {
 
     private class ShellCmd extends ShellCommand {
         public static final String USAGE = "help\n"
+                + "allow_listener COMPONENT\n"
+                + "disallow_listener COMPONENT\n"
                 + "allow_dnd PACKAGE\n"
                 + "disallow_dnd PACKAGE";
 
         @Override
         public int onCommand(String cmd) {
+            final PrintWriter pw = getOutPrintWriter();
             try {
                 switch (cmd) {
                     case "allow_dnd": {
@@ -5697,11 +5700,30 @@ public class NotificationManagerService extends SystemService {
                                 getNextArgRequired(), false);
                     }
                     break;
+                    case "allow_listener": {
+                        ComponentName cn = ComponentName.unflattenFromString(getNextArgRequired());
+                        if (cn == null) {
+                            pw.println("Invalid listener - must be a ComponentName");
+                            return -1;
+                        }
+                        getBinderService().setNotificationListenerAccessGranted(cn, true);
+                    }
+                    break;
+                    case "disallow_listener": {
+                        ComponentName cn = ComponentName.unflattenFromString(getNextArgRequired());
+                        if (cn == null) {
+                            pw.println("Invalid listener - must be a ComponentName");
+                            return -1;
+                        }
+                        getBinderService().setNotificationListenerAccessGranted(cn, false);
+                    }
+                    break;
 
                     default:
                         return handleDefaultCommands(cmd);
                 }
-            } catch (RemoteException e) {
+            } catch (Exception e) {
+                pw.println("Error occurred. Check logcat for details. " + e.getMessage());
                 Slog.e(TAG, "Error running shell command", e);
             }
             return 0;
