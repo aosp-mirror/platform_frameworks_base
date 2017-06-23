@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
@@ -34,6 +35,7 @@ import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Slog;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -111,22 +113,28 @@ class KeyguardController {
      *              etc.
      */
     void keyguardGoingAway(int flags) {
-        if (mKeyguardShowing) {
-            mWindowManager.deferSurfaceLayout();
-            try {
-                setKeyguardGoingAway(true);
-                mWindowManager.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
-                        false /* alwaysKeepCurrent */, convertTransitFlags(flags),
-                        false /* forceOverride */);
-                mService.updateSleepIfNeededLocked();
+        if (!mKeyguardShowing) {
+            return;
+        }
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "keyguardGoingAway");
+        mWindowManager.deferSurfaceLayout();
+        try {
+            setKeyguardGoingAway(true);
+            mWindowManager.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
+                    false /* alwaysKeepCurrent */, convertTransitFlags(flags),
+                    false /* forceOverride */);
+            mService.updateSleepIfNeededLocked();
 
-                // Some stack visibility might change (e.g. docked stack)
-                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                mStackSupervisor.addStartingWindowsForVisibleActivities(true /* taskSwitch */);
-                mWindowManager.executeAppTransition();
-            } finally {
-                mWindowManager.continueSurfaceLayout();
-            }
+            // Some stack visibility might change (e.g. docked stack)
+            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+            mStackSupervisor.addStartingWindowsForVisibleActivities(true /* taskSwitch */);
+            mWindowManager.executeAppTransition();
+        } finally {
+            Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "keyguardGoingAway: surfaceLayout");
+            mWindowManager.continueSurfaceLayout();
+            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+
+            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
