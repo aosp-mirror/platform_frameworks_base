@@ -55,7 +55,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.Directory;
-import android.provider.Settings;
 import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
@@ -3132,6 +3131,14 @@ public class DevicePolicyManager {
      * other admins a {@link SecurityException} will be thrown.
      */
     public static final int WIPE_RESET_PROTECTION_DATA = 0x0002;
+
+    /**
+     * Flag for {@link #wipeData(int)}: also erase the device's eUICC data.
+     *
+     * TODO(b/35851809): make this public.
+     * @hide
+     */
+    public static final int WIPE_EUICC = 0x0004;
 
     /**
      * Ask that all user data be wiped. If called as a secondary user, the user will be removed and

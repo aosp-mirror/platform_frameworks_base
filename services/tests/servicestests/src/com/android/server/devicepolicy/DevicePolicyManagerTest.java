@@ -17,6 +17,7 @@ package com.android.server.devicepolicy;
 
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
+import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.os.UserManagerInternal.CAMERA_DISABLED_GLOBALLY;
 import static android.os.UserManagerInternal.CAMERA_DISABLED_LOCALLY;
 import static android.os.UserManagerInternal.CAMERA_NOT_DISABLED;
@@ -3451,7 +3452,21 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         dpm.wipeData(0);
         verify(getServices().recoverySystem).rebootWipeUserData(
-                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true));
+                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true),
+                /*wipeEuicc=*/ eq(false));
+    }
+
+    public void testWipeEuiccDataEnabled() throws Exception {
+        setDeviceOwner();
+        when(getServices().userManager.getUserRestrictionSource(
+            UserManager.DISALLOW_FACTORY_RESET,
+            UserHandle.SYSTEM))
+            .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
+
+        dpm.wipeData(WIPE_EUICC);
+        verify(getServices().recoverySystem).rebootWipeUserData(
+                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true),
+                /*wipeEuicc=*/ eq(true));
     }
 
     public void testWipeDataDeviceOwnerDisallowed() throws Exception {
@@ -3549,7 +3564,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // The device should be wiped even if DISALLOW_FACTORY_RESET is enabled, because both the
         // user restriction and the policy were set by the DO.
         verify(getServices().recoverySystem).rebootWipeUserData(
-                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true));
+                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true),
+                /*wipeEuicc=*/ eq(false));
     }
 
     public void testMaximumFailedPasswordAttemptsReachedDeviceOwnerDisallowed() throws Exception {
