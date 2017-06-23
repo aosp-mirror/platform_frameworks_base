@@ -50,6 +50,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
@@ -103,6 +104,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     File mFile;
     @Mock
     private NotificationUsageStats mUsageStats;
+    @Mock
+    private AudioManager mAudioManager;
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
     @Mock
@@ -153,6 +156,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 .thenReturn(applicationInfo);
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
 
@@ -174,6 +178,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 throw e;
             }
         }
+        mNotificationManagerService.setAudioManager(mAudioManager);
 
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
