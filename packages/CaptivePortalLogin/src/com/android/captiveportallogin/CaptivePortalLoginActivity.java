@@ -378,6 +378,9 @@ public class CaptivePortalLoginActivity extends Activity {
                 return;
             } else if (mPagesLoaded == 2) {
                 // Prevent going back to empty first page.
+                // Fix for missing focus, see b/62449959 for details. Remove it once we get a
+                // newer version of WebView (60.x.y).
+                view.requestFocus();
                 view.clearHistory();
             }
             testForCaptivePortal();
