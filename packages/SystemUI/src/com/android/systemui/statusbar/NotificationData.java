@@ -568,8 +568,6 @@ public class NotificationData {
                 mTmpRanking.getImportance());
         pw.print(indent);
         pw.println("      notification=" + n.getNotification());
-        pw.print(indent);
-        pw.println("      tickerText=\"" + n.getNotification().tickerText + "\"");
     }
 
     private static boolean isSystemNotification(StatusBarNotification sbn) {
