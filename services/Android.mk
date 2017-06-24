@@ -34,7 +34,6 @@ services := \
     net \
     print \
     restrictions \
-    retaildemo \
     usage \
     usb \
     voiceinteraction
