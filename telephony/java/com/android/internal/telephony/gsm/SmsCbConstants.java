@@ -30,10 +30,6 @@ public class SmsCbConstants {
     /** Private constructor for utility class. */
     private SmsCbConstants() { }
 
-    /** Channel 50 required by Brazil. ID 0~999 is allocated by GSMA */
-    public static final int MESSAGE_ID_GSMA_ALLOCATED_CHANNEL_50
-            = 0x0032;
-
     /** Start of PWS Message Identifier range (includes ETWS and CMAS). */
     public static final int MESSAGE_ID_PWS_FIRST_IDENTIFIER
             = 0x1100; // 4352
