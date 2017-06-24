@@ -10080,22 +10080,6 @@ public final class Settings {
         public static final String DEVICE_DEMO_MODE = "device_demo_mode";
 
         /**
-         * Retail mode specific settings. This is encoded as a key=value list, separated by commas.
-         * Ex: "user_inactivity_timeout_ms=30000,warning_dialog_timeout_ms=10000". The following
-         * keys are supported:
-         *
-         * <pre>
-         * user_inactivity_timeout_ms  (long)
-         * warning_dialog_timeout_ms   (long)
-         * </pre>
-         * <p>
-         * Type: string
-         *
-         * @hide
-         */
-        public static final String RETAIL_DEMO_MODE_CONSTANTS = "retail_demo_mode_constants";
-
-        /**
          * Indicates the maximum time that an app is blocked for the network rules to get updated.
          *
          * Type: long
