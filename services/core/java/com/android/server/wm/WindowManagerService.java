@@ -2948,9 +2948,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void setKeyguardGoingAway(boolean keyguardGoingAway) {
-        synchronized (mWindowMap) {
-            mKeyguardGoingAway = keyguardGoingAway;
-        }
+// TODO: Use of this can be removed. Revert ag/I8369723d6a77f2c602f1ef080371fa7cd9ee094e
+//        synchronized (mWindowMap) {
+//            mKeyguardGoingAway = keyguardGoingAway;
+//        }
     }
 
     // -------------------------------------------------------------
