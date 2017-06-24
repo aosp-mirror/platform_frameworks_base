@@ -33,9 +33,8 @@ import java.util.Vector;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SharedLogTest {
-    private static final String TIMESTAMP_PATTERN =
-            "^[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9]";
-    private static final String TIMESTAMP = "mm-dd HH:MM:SS.xxx";
+    private static final String TIMESTAMP_PATTERN = "\\d{2}:\\d{2}:\\d{2}\\.\\d{3}";
+    private static final String TIMESTAMP = "HH:MM:SS.xxx";
 
     @Test
     public void testBasicOperation() {
@@ -53,12 +52,12 @@ public class SharedLogTest {
         logLevel2a.mark("ok: last post");
 
         final String[] expected = {
-            TIMESTAMP + " - MARK first post!",
-            TIMESTAMP + " - [twoB] ERROR 2b or not 2b",
-            TIMESTAMP + " - [twoA] WARN second post?",
-            TIMESTAMP + " - still logging",
-            TIMESTAMP + " - [twoA.three] 3 >> 2",
-            TIMESTAMP + " - [twoA] MARK ok: last post",
+            " - MARK first post!",
+            " - [twoB] ERROR 2b or not 2b",
+            " - [twoA] WARN second post?",
+            " - still logging",
+            " - [twoA.three] 3 >> 2",
+            " - [twoA] MARK ok: last post",
         };
         // Verify the logs are all there and in the correct order.
         verifyLogLines(expected, logTop);
@@ -82,13 +81,12 @@ public class SharedLogTest {
         final String[] lines = dumpOutput.split("\n");
         assertEquals(expected.length, lines.length);
 
-        for (int i = 0; i < lines.length; i++) {
-            // Fix up the timestamps.
-            lines[i] = lines[i].replaceAll(TIMESTAMP_PATTERN, TIMESTAMP);
-        }
-
         for (int i = 0; i < expected.length; i++) {
-            assertEquals(expected[i], lines[i]);
+            String got = lines[i];
+            String want = expected[i];
+            assertTrue(String.format("'%s' did not contain '%s'", got, want), got.endsWith(want));
+            assertTrue(String.format("'%s' did not contain a HH:MM:SS.xxx timestamp", got),
+                    got.replaceFirst(TIMESTAMP_PATTERN, TIMESTAMP).contains(TIMESTAMP));
         }
     }
 }
