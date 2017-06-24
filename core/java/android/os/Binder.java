@@ -298,7 +298,7 @@ public class Binder implements IBinder {
         long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
-            action.run();
+            action.runOrThrow();
         } catch (Throwable throwable) {
             throwableToPropagate = throwable;
         } finally {
@@ -322,7 +322,7 @@ public class Binder implements IBinder {
         long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
-            return action.get();
+            return action.getOrThrow();
         } catch (Throwable throwable) {
             throwableToPropagate = throwable;
             return null; // overridden by throwing in finally block
