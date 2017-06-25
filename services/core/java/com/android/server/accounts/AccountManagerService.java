@@ -162,7 +162,8 @@ public class AccountManagerService
 
         @Override
         public void onStopUser(int userHandle) {
-            mService.onStopUser(userHandle);
+            Slog.i(TAG, "onStopUser " + userHandle);
+            mService.purgeUserData(userHandle);
         }
     }
 
@@ -313,6 +314,21 @@ public class AccountManagerService
         }, intentFilter);
 
         injector.addLocalService(new AccountManagerInternalImpl());
+
+        IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                    int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId < 1) return;
+                    Slog.i(TAG, "User " + userId + " removed");
+                    purgeUserData(userId);
+                }
+            }
+        }, UserHandle.ALL, userFilter, null, null);
 
         // Need to cancel account request notifications if the update/install can access the account
         new PackageMonitor() {
@@ -1360,9 +1376,7 @@ public class AccountManagerService
         }
     }
 
-
-    private void onStopUser(int userId) {
-        Log.i(TAG, "onStopUser " + userId);
+    private void purgeUserData(int userId) {
         UserAccounts accounts;
         synchronized (mUsers) {
             accounts = mUsers.get(userId);

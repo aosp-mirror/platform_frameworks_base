@@ -324,6 +324,40 @@ public class MediaRecorder
         }
     }
 
+    /** @hide */
+    public static final String toLogFriendlyAudioSource(int source) {
+        switch(source) {
+        case AudioSource.DEFAULT:
+            return "DEFAULT";
+        case AudioSource.MIC:
+            return "MIC";
+        case AudioSource.VOICE_UPLINK:
+            return "VOICE_UPLINK";
+        case AudioSource.VOICE_DOWNLINK:
+            return "VOICE_DOWNLINK";
+        case AudioSource.VOICE_CALL:
+            return "VOICE_CALL";
+        case AudioSource.CAMCORDER:
+            return "CAMCORDER";
+        case AudioSource.VOICE_RECOGNITION:
+            return "VOICE_RECOGNITION";
+        case AudioSource.VOICE_COMMUNICATION:
+            return "VOICE_COMMUNICATION";
+        case AudioSource.REMOTE_SUBMIX:
+            return "REMOTE_SUBMIX";
+        case AudioSource.UNPROCESSED:
+            return "UNPROCESSED";
+        case AudioSource.RADIO_TUNER:
+            return "RADIO_TUNER";
+        case AudioSource.HOTWORD:
+            return "HOTWORD";
+        case AudioSource.AUDIO_SOURCE_INVALID:
+            return "AUDIO_SOURCE_INVALID";
+        default:
+            return "unknown source " + source;
+        }
+    }
+
     /**
      * Defines the video source. These constants are used with
      * {@link MediaRecorder#setVideoSource(int)}.

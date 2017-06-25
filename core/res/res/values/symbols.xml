@@ -656,18 +656,6 @@
   <java-symbol type="string" name="display_manager_overlay_display_secure_suffix" />
   <java-symbol type="string" name="display_manager_overlay_display_title" />
   <java-symbol type="string" name="double_tap_toast" />
-  <java-symbol type="string" name="durationDays" />
-  <java-symbol type="string" name="durationDayHours" />
-  <java-symbol type="string" name="durationDayHour" />
-  <java-symbol type="string" name="durationHours" />
-  <java-symbol type="string" name="durationHourMinutes" />
-  <java-symbol type="string" name="durationHourMinute" />
-  <java-symbol type="string" name="durationMinutes" />
-  <java-symbol type="string" name="durationMinute" />
-  <java-symbol type="string" name="durationMinuteSeconds" />
-  <java-symbol type="string" name="durationMinuteSecond" />
-  <java-symbol type="string" name="durationSeconds" />
-  <java-symbol type="string" name="durationSecond" />
   <java-symbol type="string" name="elapsed_time_short_format_h_mm_ss" />
   <java-symbol type="string" name="elapsed_time_short_format_mm_ss" />
   <java-symbol type="string" name="emailTypeCustom" />
@@ -1869,6 +1857,13 @@
   <java-symbol type="layout" name="app_error_dialog" />
   <java-symbol type="plurals" name="wifi_available" />
   <java-symbol type="plurals" name="wifi_available_detailed" />
+  <java-symbol type="string" name="wifi_available_title" />
+  <java-symbol type="string" name="wifi_available_title_connecting" />
+  <java-symbol type="string" name="wifi_available_title_connected" />
+  <java-symbol type="string" name="wifi_available_title_failed_to_connect" />
+  <java-symbol type="string" name="wifi_available_content_failed_to_connect" />
+  <java-symbol type="string" name="wifi_available_action_connect" />
+  <java-symbol type="string" name="wifi_available_action_all_networks" />
   <java-symbol type="string" name="accessibility_binding_label" />
   <java-symbol type="string" name="adb_active_notification_message" />
   <java-symbol type="string" name="adb_active_notification_title" />
@@ -3050,4 +3045,5 @@
   <java-symbol type="array" name="config_batteryPackageTypeService" />
 
   <java-symbol type="string" name="popup_window_default_title" />
+  <java-symbol type="bool" name="config_showAreaUpdateInfoSettings" />
 </resources>

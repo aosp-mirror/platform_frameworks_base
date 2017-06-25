@@ -706,6 +706,8 @@ public class AudioService extends IAudioService.Stub
 
         mMediaFocusControl = new MediaFocusControl(mContext, mPlaybackMonitor);
 
+        mRecordMonitor = new RecordingActivityMonitor(mContext);
+
         readAndSetLowRamDevice();
 
         // Call setRingerModeInt() to apply correct mute
@@ -6309,6 +6311,8 @@ public class AudioService extends IAudioService.Stub
         dumpAudioPolicies(pw);
 
         mPlaybackMonitor.dump(pw);
+
+        mRecordMonitor.dump(pw);
     }
 
     private static String safeMediaVolumeStateToString(Integer state) {
@@ -6730,10 +6734,13 @@ public class AudioService extends IAudioService.Stub
     //======================
     // Audio policy callbacks from AudioSystem for recording configuration updates
     //======================
-    private final RecordingActivityMonitor mRecordMonitor = new RecordingActivityMonitor();
+    private final RecordingActivityMonitor mRecordMonitor;
 
     public void registerRecordingCallback(IRecordingConfigDispatcher rcdb) {
-        mRecordMonitor.registerRecordingCallback(rcdb);
+        final boolean isPrivileged =
+                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
+                        android.Manifest.permission.MODIFY_AUDIO_ROUTING));
+        mRecordMonitor.registerRecordingCallback(rcdb, isPrivileged);
     }
 
     public void unregisterRecordingCallback(IRecordingConfigDispatcher rcdb) {
@@ -6741,7 +6748,10 @@ public class AudioService extends IAudioService.Stub
     }
 
     public List<AudioRecordingConfiguration> getActiveRecordingConfigurations() {
-        return mRecordMonitor.getActiveRecordingConfigurations();
+        final boolean isPrivileged =
+                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
+                        android.Manifest.permission.MODIFY_AUDIO_ROUTING));
+        return mRecordMonitor.getActiveRecordingConfigurations(isPrivileged);
     }
 
     public void disableRingtoneSync(final int userId) {

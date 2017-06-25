@@ -27,8 +27,7 @@ import android.util.Slog;
 import java.util.List;
 
 class Tuner extends ITuner.Stub {
-    // TODO(b/36863239): rename to RadioService.Tuner when native service goes away
-    private static final String TAG = "RadioServiceJava.Tuner";
+    private static final String TAG = "RadioService.Tuner";
 
     /**
      * This field is used by native code, do not access or modify.

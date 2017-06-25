@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -33,6 +34,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Debug;
+import android.os.Trace;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -101,8 +103,10 @@ class WindowSurfaceController {
             mSurfaceControl = new SurfaceTrace(
                     s, name, w, h, format, flags, windowType, ownerUid);
         } else {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
             mSurfaceControl = new SurfaceControl(
                     s, name, w, h, format, flags, windowType, ownerUid);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         if (mService.mRoot.mSurfaceTraceEnabled) {

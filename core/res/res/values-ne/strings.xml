@@ -95,7 +95,8 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"कुनै पनि भ्वाइस/आपतकालीन सेवा उपलब्ध छैन"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"तपाईंको स्थानमा सञ्चालन भइरहेको मोबाइल नेटवर्कले अस्थायी रूपमा यो सुविधा प्रदान गर्दैन"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कमाथि पहुँच राख्न सकिँदैन"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"रिसेप्सनमा सुधार गर्न, प्रणाली &gt; नेटवर्क र इन्टरनेट &gt; मोबाइल नेटवर्कहरू &gt; रुचाइएको नेटवर्कको प्रकार मा गएर चयन गरिएको प्रकार परिवर्तन गरी हेर्नुहोस्।"</string>
+    <!-- no translation found for NetworkPreferenceSwitchSummary (1203771446683319957) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"अलर्टहरू"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"कल फर्वार्ड गर्ने सेवा"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"आपतकालीन कलब्याक मोड"</string>

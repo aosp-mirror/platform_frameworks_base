@@ -599,7 +599,7 @@ public class ConnectivityManager {
     /**
      * @hide
      */
-    public final static int REQUEST_ID_UNSET = 0;
+    public static final int REQUEST_ID_UNSET = 0;
 
     /**
      * Static unique request used as a tombstone for NetworkCallbacks that have been unregistered.
@@ -607,7 +607,7 @@ public class ConnectivityManager {
      * registered and those that were already unregistered.
      * @hide
      */
-    private final static NetworkRequest ALREADY_UNREGISTERED =
+    private static final NetworkRequest ALREADY_UNREGISTERED =
             new NetworkRequest.Builder().clearCapabilities().build();
 
     /**

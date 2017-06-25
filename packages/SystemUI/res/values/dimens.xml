@@ -216,6 +216,8 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
+    <dimen name="volume_dialog_panel_width">@dimen/standard_notification_panel_width</dimen>
+
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
 
@@ -800,7 +802,6 @@
 
     <dimen name="hwui_edge_margin">16dp</dimen>
 
-    <dimen name="volume_dialog_panel_width">315dp</dimen>
     <dimen name="global_actions_panel_width">125dp</dimen>
 
     <dimen name="global_actions_top_padding">100dp</dimen>
@@ -819,11 +820,14 @@
     <dimen name="edge_margin">16dp</dimen>
 
     <dimen name="rounded_corner_radius">0dp</dimen>
-    <dimen name="rounded_corner_content_padding">0dp</dimen>
+    <dimen name="rounded_corner_content_padding">8dp</dimen>
 
     <!-- Intended corner radius when drawing the mobile signal -->
     <dimen name="stat_sys_mobile_signal_corner_radius">0.75dp</dimen>
     <!-- How far to inset the rounded edges -->
     <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
+
+    <!-- Width of the hollow triangle for empty signal state -->
+    <dimen name="mobile_signal_empty_strokewidth">2dp</dimen>
 
 </resources>

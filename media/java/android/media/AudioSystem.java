@@ -287,6 +287,7 @@ public class AudioSystem
         /**
          * Callback for recording activity notifications events
          * @param event
+         * @param uid uid of the client app performing the recording
          * @param session
          * @param source
          * @param recordingFormat an array of ints containing respectively the client and device
@@ -298,9 +299,10 @@ public class AudioSystem
          *          4: device channel mask
          *          5: device sample rate
          *          6: patch handle
+         * @param packName package name of the client app performing the recording. NOT SUPPORTED
          */
-        void onRecordingConfigurationChanged(int event, int session, int source,
-                int[] recordingFormat);
+        void onRecordingConfigurationChanged(int event, int uid, int session, int source,
+                int[] recordingFormat, String packName);
     }
 
     private static AudioRecordingCallback sRecordingCallback;
@@ -318,17 +320,18 @@ public class AudioSystem
      * @param session
      * @param source
      * @param recordingFormat see
-     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int[])} for
-     *     the description of the record format.
+     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int, int[])}
+     *     for the description of the record format.
      */
-    private static void recordingCallbackFromNative(int event, int session, int source,
+    private static void recordingCallbackFromNative(int event, int uid, int session, int source,
             int[] recordingFormat) {
         AudioRecordingCallback cb = null;
         synchronized (AudioSystem.class) {
             cb = sRecordingCallback;
         }
         if (cb != null) {
-            cb.onRecordingConfigurationChanged(event, session, source, recordingFormat);
+            // TODO receive package name from native
+            cb.onRecordingConfigurationChanged(event, uid, session, source, recordingFormat, "");
         }
     }
 
@@ -424,7 +427,8 @@ public class AudioSystem
                                                   DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
                                                   DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
     public static final int DEVICE_OUT_ALL_USB = (DEVICE_OUT_USB_ACCESSORY |
-                                                  DEVICE_OUT_USB_DEVICE);
+                                                  DEVICE_OUT_USB_DEVICE |
+                                                  DEVICE_OUT_USB_HEADSET);
     public static final int DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO = (DEVICE_OUT_AUX_LINE |
                                                                 DEVICE_OUT_HDMI_ARC |
                                                                 DEVICE_OUT_SPDIF);
@@ -486,7 +490,8 @@ public class AudioSystem
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
     public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
-                                                 DEVICE_IN_USB_DEVICE);
+                                                 DEVICE_IN_USB_DEVICE |
+                                                 DEVICE_IN_USB_HEADSET);
 
     // device states, must match AudioSystem::device_connection_state
     public static final int DEVICE_STATE_UNAVAILABLE = 0;

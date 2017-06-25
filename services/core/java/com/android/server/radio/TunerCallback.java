@@ -27,8 +27,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 class TunerCallback implements ITunerCallback {
-    // TODO(b/36863239): rename to RadioService.TunerCallback when native service goes away
-    private static final String TAG = "RadioServiceJava.TunerCallback";
+    private static final String TAG = "RadioService.TunerCallback";
 
     /**
      * This field is used by native code, do not access or modify.

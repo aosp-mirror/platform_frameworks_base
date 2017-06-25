@@ -81,9 +81,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     private final SysuiColorExtractor mColorExtractor;
     private ColorExtractor.GradientColors mLockColors;
-    private ColorExtractor.GradientColors mLockColorsDark;
     private ColorExtractor.GradientColors mSystemColors;
-    private ColorExtractor.GradientColors mSystemColorsDark;
     private boolean mNeedsDrawableColorUpdate;
 
     protected float mScrimBehindAlpha;
@@ -135,13 +133,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
         mLockColors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
-                ColorExtractor.TYPE_NORMAL, true /* ignoreVisibility */);
-        mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
-                ColorExtractor.TYPE_NORMAL, true /* ignoreVisibility */);
-        // Darker gradient for the top scrim (mScrimInFront)
-        mLockColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
                 ColorExtractor.TYPE_DARK, true /* ignoreVisibility */);
-        mSystemColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
+        mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
                 ColorExtractor.TYPE_DARK, true /* ignoreVisibility */);
         mNeedsDrawableColorUpdate = true;
 
@@ -311,13 +304,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mNeedsDrawableColorUpdate = false;
             if (mKeyguardShowing) {
                 // Always animate color changes if we're seeing the keyguard
-                mScrimInFront.setColors(mLockColorsDark);
+                mScrimInFront.setColors(mLockColors);
                 mScrimBehind.setColors(mLockColors);
             } else {
                 // Only animate scrim color if the scrim view is actually visible
                 boolean animateScrimInFront = mScrimInFront.getViewAlpha() != 0;
                 boolean animateScrimBehind = mScrimBehind.getViewAlpha() != 0;
-                mScrimInFront.setColors(mSystemColorsDark, animateScrimInFront);
+                mScrimInFront.setColors(mSystemColors, animateScrimInFront);
                 mScrimBehind.setColors(mSystemColors, animateScrimBehind);
             }
         }
@@ -663,16 +656,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public void onColorsChanged(ColorExtractor colorExtractor, int which) {
         if ((which & WallpaperManager.FLAG_LOCK) != 0) {
             mLockColors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
-                    ColorExtractor.TYPE_NORMAL, true /* ignoreVisibility */);
-            mLockColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
                     ColorExtractor.TYPE_DARK, true /* ignoreVisibility */);
             mNeedsDrawableColorUpdate = true;
             scheduleUpdate();
         }
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
             mSystemColors = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
-                    ColorExtractor.TYPE_NORMAL, mKeyguardShowing);
-            mSystemColorsDark = mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
                     ColorExtractor.TYPE_DARK, mKeyguardShowing);
             mNeedsDrawableColorUpdate = true;
             scheduleUpdate();

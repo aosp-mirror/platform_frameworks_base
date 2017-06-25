@@ -265,6 +265,7 @@ public class NotificationManagerService extends SystemService {
     private static final String EXTRA_KEY = "key";
 
     private IActivityManager mAm;
+    private ActivityManager mActivityManager;
     private IPackageManager mPackageManager;
     private PackageManager mPackageManagerClient;
     AudioManager mAudioManager;
@@ -450,9 +451,12 @@ public class NotificationManagerService extends SystemService {
         while (parser.next() != END_DOCUMENT) {
             mZenModeHelper.readXml(parser, forRestore);
             mRankingHelper.readXml(parser, forRestore);
-            saveXml |= mListeners.readXml(parser);
-            saveXml |= mNotificationAssistants.readXml(parser);
-            saveXml |= mConditionProviders.readXml(parser);
+            // No non-system managed services are allowed on low ram devices
+            if (!ActivityManager.isLowRamDeviceStatic()) {
+                saveXml |= mListeners.readXml(parser);
+                saveXml |= mNotificationAssistants.readXml(parser);
+                saveXml |= mConditionProviders.readXml(parser);
+            }
         }
 
         if (saveXml) {
@@ -1120,13 +1124,19 @@ public class NotificationManagerService extends SystemService {
         mIsTelevision = isTelevision;
     }
 
+    @VisibleForTesting
+    void setUsageStats(NotificationUsageStats us) {
+        mUsageStats = us;
+    }
+
     // TODO: Tests should call onStart instead once the methods above are removed.
     @VisibleForTesting
     void init(Looper looper, IPackageManager packageManager, PackageManager packageManagerClient,
             LightsManager lightsManager, NotificationListeners notificationListeners,
             NotificationAssistants notificationAssistants, ConditionProviders conditionProviders,
             ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
-            NotificationUsageStats usageStats, AtomicFile policyFile) {
+            NotificationUsageStats usageStats, AtomicFile policyFile,
+            ActivityManager activityManager) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1140,6 +1150,7 @@ public class NotificationManagerService extends SystemService {
         mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
+        mActivityManager = activityManager;
 
         mHandler = new WorkerHandler(looper);
         mRankingThread.start();
@@ -1325,7 +1336,8 @@ public class NotificationManagerService extends SystemService {
                 new NotificationAssistants(AppGlobals.getPackageManager()),
                 new ConditionProviders(getContext(), mUserProfiles, AppGlobals.getPackageManager()),
                 null, snoozeHelper, new NotificationUsageStats(getContext()),
-                new AtomicFile(new File(systemDir, "notification_policy.xml")));
+                new AtomicFile(new File(systemDir, "notification_policy.xml")),
+                (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE));
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
@@ -2684,16 +2696,18 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationPolicyAccessGranted(String pkg, boolean granted)
                 throws RemoteException {
             checkCallerIsSystemOrShell();
-            mConditionProviders.setPackageOrComponentEnabled(
-                    pkg, getCallingUserHandle().getIdentifier(), true, granted);
+            if (!mActivityManager.isLowRamDevice()) {
+                mConditionProviders.setPackageOrComponentEnabled(
+                        pkg, getCallingUserHandle().getIdentifier(), true, granted);
 
-            getContext().sendBroadcastAsUser(new Intent(NotificationManager
-                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                    .setPackage(pkg)
-                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                    getCallingUserHandle(), null);
+                getContext().sendBroadcastAsUser(new Intent(
+                        NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                .setPackage(pkg)
+                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                        getCallingUserHandle(), null);
 
-            savePolicyFile();
+                savePolicyFile();
+            }
         }
 
         @Override
@@ -2774,17 +2788,20 @@ public class NotificationManagerService extends SystemService {
                 boolean granted) throws RemoteException {
             Preconditions.checkNotNull(listener);
             enforceSystemOrSystemUI("grant notification listener access");
-            mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
-                    userId, false, granted);
-            mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
-                    userId, true, granted);
+            if (!mActivityManager.isLowRamDevice()) {
+                mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
+                        userId, false, granted);
+                mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
+                        userId, true, granted);
 
-            getContext().sendBroadcastAsUser(new Intent(NotificationManager
-                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                    .setPackage(listener.getPackageName())
-                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), getCallingUserHandle(), null);
+                getContext().sendBroadcastAsUser(new Intent(
+                        NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                .setPackage(listener.getPackageName())
+                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                        getCallingUserHandle(), null);
 
-            savePolicyFile();
+                savePolicyFile();
+            }
         }
 
         @Override
@@ -2792,17 +2809,20 @@ public class NotificationManagerService extends SystemService {
                 int userId, boolean granted) throws RemoteException {
             Preconditions.checkNotNull(assistant);
             enforceSystemOrSystemUI("grant notification assistant access");
-            mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
-                    userId, false, granted);
-            mNotificationAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
-                    userId, true, granted);
+            if (!mActivityManager.isLowRamDevice()) {
+                mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
+                        userId, false, granted);
+                mNotificationAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
+                        userId, true, granted);
 
-            getContext().sendBroadcastAsUser(new Intent(NotificationManager
-                    .ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                    .setPackage(assistant.getPackageName())
-                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), getCallingUserHandle(), null);
+                getContext().sendBroadcastAsUser(new Intent(
+                        NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                .setPackage(assistant.getPackageName())
+                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                        getCallingUserHandle(), null);
 
-            savePolicyFile();
+                savePolicyFile();
+            }
         }
 
         @Override
@@ -3838,18 +3858,6 @@ public class NotificationManagerService extends SystemService {
         // Should this notification make noise, vibe, or use the LED?
         final boolean aboveThreshold =
                 record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT;
-        final boolean canInterrupt = aboveThreshold && !record.isIntercepted();
-        if (DBG)
-            Slog.v(TAG,
-                    "pkg=" + record.sbn.getPackageName() + " canInterrupt=" + canInterrupt +
-                            " intercept=" + record.isIntercepted()
-            );
-
-        // If we're not supposed to beep, vibrate, etc. then don't.
-        final String disableEffects = disableNotificationEffects(record);
-        if (disableEffects != null) {
-            ZenLog.traceDisableEffects(record, disableEffects);
-        }
 
         // Remember if this notification already owns the notification channels.
         boolean wasBeep = key != null && key.equals(mSoundNotificationKey);
@@ -3858,20 +3866,16 @@ public class NotificationManagerService extends SystemService {
         boolean hasValidVibrate = false;
         boolean hasValidSound = false;
 
-        if (isNotificationForCurrentUser(record)) {
+        if (aboveThreshold && isNotificationForCurrentUser(record)) {
             // If the notification will appear in the status bar, it should send an accessibility
             // event
             if (!record.isUpdate && record.getImportance() > IMPORTANCE_MIN) {
                 sendAccessibilityEvent(notification, record.sbn.getPackageName());
             }
-
-            if (disableEffects == null
-                    && canInterrupt
-                    && mSystemReady
-                    && mAudioManager != null) {
-                if (DBG) Slog.v(TAG, "Interrupting!");
+            if (mSystemReady && mAudioManager != null) {
                 Uri soundUri = record.getSound();
                 hasValidSound = soundUri != null && !Uri.EMPTY.equals(soundUri);
+
                 long[] vibration = record.getVibration();
                 // Demote sound to vibration if vibration missing & phone in vibration mode.
                 if (vibration == null
@@ -3882,7 +3886,10 @@ public class NotificationManagerService extends SystemService {
                 }
                 hasValidVibrate = vibration != null;
 
-                if (!shouldMuteNotificationLocked(record)) {
+                boolean hasAudibleAlert = hasValidSound || hasValidVibrate;
+
+                if (hasAudibleAlert && !shouldMuteNotificationLocked(record)) {
+                    if (DBG) Slog.v(TAG, "Interrupting!");
                     if (hasValidSound) {
                         mSoundNotificationKey = key;
                         if (mInCall) {
@@ -3939,14 +3946,37 @@ public class NotificationManagerService extends SystemService {
 
     @GuardedBy("mNotificationLock")
     boolean shouldMuteNotificationLocked(final NotificationRecord record) {
+        // Suppressed because it's a silent update
         final Notification notification = record.getNotification();
         if(record.isUpdate
                 && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0) {
             return true;
         }
+
+        // Suppressed for being too recently noisy
+        final String pkg = record.sbn.getPackageName();
+        if (mUsageStats.isAlertRateLimited(pkg)) {
+            Slog.e(TAG, "Muting recently noisy " + record.getKey());
+            return true;
+        }
+
+        // muted by listener
+        final String disableEffects = disableNotificationEffects(record);
+        if (disableEffects != null) {
+            ZenLog.traceDisableEffects(record, disableEffects);
+            return true;
+        }
+
+        // suppressed due to DND
+        if (record.isIntercepted()) {
+            return true;
+        }
+
+        // Suppressed because another notification in its group handles alerting
         if (record.sbn.isGroup()) {
             return notification.suppressAlertingDueToGrouping();
         }
+
         return false;
     }
 

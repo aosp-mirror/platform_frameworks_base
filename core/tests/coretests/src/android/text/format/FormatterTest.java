@@ -26,11 +26,12 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.format.Formatter.BytesResult;
 
-import java.util.Locale;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Locale;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -54,7 +55,7 @@ public class FormatterTest {
 
     @Test
     public void testFormatBytes() {
-        setLocale(Locale.ENGLISH);
+        setLocale(Locale.US);
 
         checkFormatBytes(0, true, "0", 0);
         checkFormatBytes(0, false, "0", 0);
@@ -97,6 +98,95 @@ public class FormatterTest {
         // Make sure it works on different locales.
         setLocale(new Locale("es", "ES"));
         checkFormatBytes(9123000, false, "9,12", 9120000);
+    }
+
+    private static final long SECOND = 1000;
+    private static final long MINUTE = 60 * SECOND;
+    private static final long HOUR = 60 * MINUTE;
+    private static final long DAY = 24 * HOUR;
+
+    @Test
+    public void testFormatShortElapsedTime() {
+        setLocale(Locale.US);
+        assertEquals("3 days", Formatter.formatShortElapsedTime(mContext, 2 * DAY + 12 * HOUR));
+        assertEquals("2 days", Formatter.formatShortElapsedTime(mContext, 2 * DAY + 11 * HOUR));
+        assertEquals("2 days", Formatter.formatShortElapsedTime(mContext, 2 * DAY));
+        assertEquals("1 day, 23 hr",
+                Formatter.formatShortElapsedTime(mContext, 1 * DAY + 23 * HOUR + 59 * MINUTE));
+        assertEquals("1 day, 0 hr",
+                Formatter.formatShortElapsedTime(mContext, 1 * DAY + 59 * MINUTE));
+        assertEquals("1 day, 0 hr", Formatter.formatShortElapsedTime(mContext, 1 * DAY));
+        assertEquals("24 hr", Formatter.formatShortElapsedTime(mContext, 23 * HOUR + 30 * MINUTE));
+        assertEquals("3 hr", Formatter.formatShortElapsedTime(mContext, 2 * HOUR + 30 * MINUTE));
+        assertEquals("2 hr", Formatter.formatShortElapsedTime(mContext, 2 * HOUR));
+        assertEquals("1 hr, 0 min", Formatter.formatShortElapsedTime(mContext, 1 * HOUR));
+        assertEquals("60 min",
+                Formatter.formatShortElapsedTime(mContext, 59 * MINUTE + 30 * SECOND));
+        assertEquals("59 min",
+                Formatter.formatShortElapsedTime(mContext, 59 * MINUTE));
+        assertEquals("3 min", Formatter.formatShortElapsedTime(mContext, 2 * MINUTE + 30 * SECOND));
+        assertEquals("2 min", Formatter.formatShortElapsedTime(mContext, 2 * MINUTE));
+        assertEquals("1 min, 59 sec",
+                Formatter.formatShortElapsedTime(mContext, 1 * MINUTE + 59 * SECOND + 999));
+        assertEquals("1 min, 0 sec", Formatter.formatShortElapsedTime(mContext, 1 * MINUTE));
+        assertEquals("59 sec", Formatter.formatShortElapsedTime(mContext, 59 * SECOND + 999));
+        assertEquals("1 sec", Formatter.formatShortElapsedTime(mContext, 1 * SECOND));
+        assertEquals("0 sec", Formatter.formatShortElapsedTime(mContext, 1));
+        assertEquals("0 sec", Formatter.formatShortElapsedTime(mContext, 0));
+
+        // Make sure it works on different locales.
+        setLocale(Locale.FRANCE);
+        assertEquals("2 j", Formatter.formatShortElapsedTime(mContext, 2 * DAY));
+    }
+
+    @Test
+    public void testFormatShortElapsedTimeRoundingUpToMinutes() {
+        setLocale(Locale.US);
+        assertEquals("3 days", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 2 * DAY + 12 * HOUR));
+        assertEquals("2 days", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 2 * DAY + 11 * HOUR));
+        assertEquals("2 days", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 2 * DAY));
+        assertEquals("1 day, 23 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 1 * DAY + 23 * HOUR + 59 * MINUTE));
+        assertEquals("1 day, 0 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 1 * DAY + 59 * MINUTE));
+        assertEquals("1 day, 0 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 1 * DAY));
+        assertEquals("24 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 23 * HOUR + 30 * MINUTE));
+        assertEquals("3 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 2 * HOUR + 30 * MINUTE));
+        assertEquals("2 hr", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 2 * HOUR));
+        assertEquals("1 hr, 0 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 1 * HOUR));
+        assertEquals("1 hr, 0 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 59 * MINUTE + 30 * SECOND));
+        assertEquals("59 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 59 * MINUTE));
+        assertEquals("3 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 2 * MINUTE + 30 * SECOND));
+        assertEquals("2 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 2 * MINUTE));
+        assertEquals("2 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 1 * MINUTE + 59 * SECOND + 999));
+        assertEquals("1 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 1 * MINUTE));
+        assertEquals("1 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 59 * SECOND + 999));
+        assertEquals("1 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 1 * SECOND));
+        assertEquals("1 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 1));
+        assertEquals("0 min", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 0));
+
+        // Make sure it works on different locales.
+        setLocale(new Locale("ru", "RU"));
+        assertEquals("1 мин", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+                mContext, 1 * SECOND));
     }
 
     private void checkFormatBytes(long bytes, boolean useShort,

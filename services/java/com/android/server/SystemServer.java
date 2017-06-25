@@ -703,8 +703,6 @@ public final class SystemServer {
         boolean disableVrManager = SystemProperties.getBoolean("config.disable_vrmanager", false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
-        // TODO(b/36863239): Remove when transitioned from native service.
-        boolean enableRadioService = SystemProperties.getBoolean("config.enable_java_radio", false);
         boolean enableLeftyService = SystemProperties.getBoolean("config.enable_lefty", false);
 
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
@@ -1206,8 +1204,7 @@ public final class SystemServer {
             mSystemServiceManager.startService(AudioService.Lifecycle.class);
             traceEnd();
 
-            if (enableRadioService &&
-                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_RADIO)) {
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_RADIO)) {
                 traceBeginAndSlog("StartRadioService");
                 mSystemServiceManager.startService(RadioService.class);
                 traceEnd();

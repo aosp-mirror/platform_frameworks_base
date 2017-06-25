@@ -3913,7 +3913,7 @@ public abstract class Context {
      * @see #getSystemService
      * @hide
      */
-    public static final String RADIO_SERVICE = "radio";
+    public static final String RADIO_SERVICE = "broadcastradio";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
@@ -4679,6 +4679,12 @@ public abstract class Context {
      */
     @SystemApi
     public abstract boolean isCredentialProtectedStorage();
+
+    /**
+     * Returns true if the context can load unsafe resources, e.g. fonts.
+     * @hide
+     */
+    public abstract boolean canLoadUnsafeResources();
 
     /**
      * @hide
