@@ -398,4 +398,8 @@
          it has been expanded to reveal its children. -->
     <bool name="config_showGroupNotificationBgWhenExpanded">false</bool>
 
+    <!-- Whether to artificially interpret all signal strengths as
+         one bar higher than they actually are -->
+    <bool name="config_inflateSignalStrength">false</bool>
+
 </resources>

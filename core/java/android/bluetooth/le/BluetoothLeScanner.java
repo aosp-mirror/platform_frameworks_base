@@ -136,6 +136,11 @@ public final class BluetoothLeScanner {
      * Start Bluetooth LE scan using a {@link PendingIntent}. The scan results will be delivered via
      * the PendingIntent. Use this method of scanning if your process is not always running and it
      * should be started when scan results are available.
+     * <p>
+     * When the PendingIntent is delivered, the Intent passed to the receiver or activity
+     * will contain one or more of the extras {@link #EXTRA_CALLBACK_TYPE},
+     * {@link #EXTRA_ERROR_CODE} and {@link #EXTRA_LIST_SCAN_RESULT} to indicate the result of
+     * the scan.
      *
      * @param filters Optional list of ScanFilters for finding exact BLE devices.
      * @param settings Optional settings for the scan.

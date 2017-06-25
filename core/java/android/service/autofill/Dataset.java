@@ -31,17 +31,23 @@ import com.android.internal.util.Preconditions;
 import java.util.ArrayList;
 
 /**
- * A set of data that can be used to autofill an {@link android.app.Activity}.
+ * A dataset object represents a group of key/value pairs used to autofill parts of a screen.
  *
- * <p>It contains:
+ * <p>In its simplest form, a dataset contains one or more key / value pairs (comprised of
+ * {@link AutofillId} and {@link AutofillValue} respectively); and one or more
+ * {@link RemoteViews presentation} for these pairs (a pair could have its own
+ * {@link RemoteViews presentation}, or use the default {@link RemoteViews presentation} associated
+ * with the whole dataset). When an autofill service returns datasets in a {@link FillResponse}
+ * and the screen input is focused in a view that is present in at least one of these datasets,
+ * the Android System displays a UI affordance containing the {@link RemoteViews presentation} of
+ * all datasets pairs that have that view's {@link AutofillId}. Then, when the user selects a
+ * dataset from the affordance, all views in that dataset are autofilled.
  *
- * <ol>
- *   <li>A list of values for input fields.
- *   <li>A presentation view to visualize.
- *   <li>An optional intent to authenticate.
- * </ol>
+ * <p>In a more sophisticated form, the dataset value can be protected until the user authenticates
+ * the dataset - see {@link Dataset.Builder#setAuthentication(IntentSender)}.
  *
- * @see android.service.autofill.FillResponse for examples.
+ * @see android.service.autofill.AutofillService for more information and examples about the
+ * role of datasets in the autofill workflow.
  */
 public final class Dataset implements Parcelable {
 
@@ -113,7 +119,7 @@ public final class Dataset implements Parcelable {
     }
 
     /**
-     * A builder for {@link Dataset} objects. You must to provide at least
+     * A builder for {@link Dataset} objects. You must provide at least
      * one value for a field or set an authentication intent.
      */
     public static final class Builder {
@@ -175,9 +181,9 @@ public final class Dataset implements Parcelable {
          * credit card information without the CVV for the data set in the {@link FillResponse
          * response} then the returned data set should contain the CVV entry.
          *
-         * <p></><strong>Note:</strong> Do not make the provided pending intent
+         * <p><b>NOTE:</b> Do not make the provided pending intent
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
-         * platform needs to fill in the authentication arguments.</p>
+         * platform needs to fill in the authentication arguments.
          *
          * @param authentication Intent to an activity with your authentication flow.
          * @return This builder.
@@ -191,7 +197,7 @@ public final class Dataset implements Parcelable {
         }
 
         /**
-         * Sets the id for the dataset.
+         * Sets the id for the dataset so its usage history can be retrieved later.
          *
          * <p>The id of the last selected dataset can be read from
          * {@link AutofillService#getFillEventHistory()}. If the id is not set it will not be clear
@@ -214,13 +220,12 @@ public final class Dataset implements Parcelable {
          *
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
-         * @param value value to be auto filled. Pass {@code null} if you do not have the value
+         * @param value value to be autofilled. Pass {@code null} if you do not have the value
          *        but the target view is a logical part of the dataset. For example, if
          *        the dataset needs an authentication and you have no access to the value.
-         *        Filtering matches any user typed string to {@code null} values.
          * @return This builder.
-         * @throws IllegalStateException if the builder was constructed without a presentation
-         * ({@link RemoteViews}).
+         * @throws IllegalStateException if the builder was constructed without a
+         * {@link RemoteViews presentation}.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value) {
             throwIfDestroyed();
@@ -232,7 +237,8 @@ public final class Dataset implements Parcelable {
         }
 
         /**
-         * Sets the value of a field, using a custom presentation to visualize it.
+         * Sets the value of a field, using a custom {@link RemoteViews presentation} to
+         * visualize it.
          *
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
@@ -272,10 +278,12 @@ public final class Dataset implements Parcelable {
         }
 
         /**
-         * Creates a new {@link Dataset} instance. You should not interact
-         * with this builder once this method is called. It is required
-         * that you specified at least one field. Also it is mandatory to
-         * provide a presentation view to visualize the data set in the UI.
+         * Creates a new {@link Dataset} instance.
+         *
+         * <p>You should not interact with this builder once this method is called.
+         *
+         * <p>It is required that you specify at least one field before calling this method. It's
+         * also mandatory to provide a presentation view to visualize the data set in the UI.
          *
          * @return The built dataset.
          */

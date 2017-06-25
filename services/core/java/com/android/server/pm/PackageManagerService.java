@@ -7177,16 +7177,13 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private List<ResolveInfo> applyPostResolutionFilter(List<ResolveInfo> resolveInfos,
             String ephemeralPkgName) {
-        // TODO: When adding on-demand split support for non-instant apps, remove this check
-        // and always apply post filtering
-        if (ephemeralPkgName == null) {
-            return resolveInfos;
-        }
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
             final boolean isEphemeralApp = info.activityInfo.applicationInfo.isInstantApp();
+            // TODO: When adding on-demand split support for non-instant apps, remove this check
+            // and always apply post filtering
             // allow activities that are defined in the provided package
-            if (isEphemeralApp && ephemeralPkgName.equals(info.activityInfo.packageName)) {
+            if (isEphemeralApp) {
                 if (info.activityInfo.splitName != null
                         && !ArrayUtils.contains(info.activityInfo.applicationInfo.splitNames,
                                 info.activityInfo.splitName)) {
@@ -7209,6 +7206,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     installerInfo.resolvePackageName = info.getComponentInfo().packageName;
                     resolveInfos.set(i, installerInfo);
                 }
+                continue;
+            }
+            // caller is a full app, don't need to apply any other filtering
+            if (ephemeralPkgName == null) {
                 continue;
             }
             // allow activities that have been explicitly exposed to ephemeral apps

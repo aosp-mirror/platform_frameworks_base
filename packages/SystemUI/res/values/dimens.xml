@@ -820,11 +820,14 @@
     <dimen name="edge_margin">16dp</dimen>
 
     <dimen name="rounded_corner_radius">0dp</dimen>
-    <dimen name="rounded_corner_content_padding">0dp</dimen>
+    <dimen name="rounded_corner_content_padding">8dp</dimen>
 
     <!-- Intended corner radius when drawing the mobile signal -->
     <dimen name="stat_sys_mobile_signal_corner_radius">0.75dp</dimen>
     <!-- How far to inset the rounded edges -->
     <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
+
+    <!-- Width of the hollow triangle for empty signal state -->
+    <dimen name="mobile_signal_empty_strokewidth">2dp</dimen>
 
 </resources>

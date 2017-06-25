@@ -22,20 +22,26 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.UserManager;
+import android.provider.Settings;
+import android.telephony.euicc.EuiccManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.android.internal.logging.MetricsLogger;
+
 import libcore.io.Streams;
 
-import java.io.ByteArrayInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -46,21 +52,18 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
-
-import com.android.internal.logging.MetricsLogger;
 
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.SignerInfo;
@@ -84,11 +87,19 @@ public class RecoverySystem {
     /** Send progress to listeners no more often than this (in ms). */
     private static final long PUBLISH_PROGRESS_INTERVAL_MS = 500;
 
+    private static final long DEFAULT_EUICC_WIPING_TIMEOUT_MILLIS = 30000L; // 30 s
+
+    private static final long MIN_EUICC_WIPING_TIMEOUT_MILLIS = 5000L; // 5 s
+
+    private static final long MAX_EUICC_WIPING_TIMEOUT_MILLIS = 60000L; // 60 s
+
     /** Used to communicate with recovery.  See bootable/recovery/recovery.cpp. */
     private static final File RECOVERY_DIR = new File("/cache/recovery");
     private static final File LOG_FILE = new File(RECOVERY_DIR, "log");
     private static final File LAST_INSTALL_FILE = new File(RECOVERY_DIR, "last_install");
     private static final String LAST_PREFIX = "last_";
+    private static final String ACTION_WIPE_EUICC_DATA =
+            "com.android.internal.action.WIPE_EUICC_DATA";
 
     /**
      * The recovery image uses this file to identify the location (i.e. blocks)
@@ -673,18 +684,26 @@ public class RecoverySystem {
      */
     public static void rebootWipeUserData(Context context) throws IOException {
         rebootWipeUserData(context, false /* shutdown */, context.getPackageName(),
-                false /* force */);
+                false /* force */, false /* wipeEuicc */);
     }
 
     /** {@hide} */
     public static void rebootWipeUserData(Context context, String reason) throws IOException {
-        rebootWipeUserData(context, false /* shutdown */, reason, false /* force */);
+        rebootWipeUserData(context, false /* shutdown */, reason, false /* force */,
+                false /* wipeEuicc */);
     }
 
     /** {@hide} */
     public static void rebootWipeUserData(Context context, boolean shutdown)
             throws IOException {
-        rebootWipeUserData(context, shutdown, context.getPackageName(), false /* force */);
+        rebootWipeUserData(context, shutdown, context.getPackageName(), false /* force */,
+                false /* wipeEuicc */);
+    }
+
+    /** {@hide} */
+    public static void rebootWipeUserData(Context context, boolean shutdown, String reason,
+            boolean force) throws IOException {
+        rebootWipeUserData(context, shutdown, reason, force, false /* wipeEuicc */);
     }
 
     /**
@@ -701,6 +720,7 @@ public class RecoverySystem {
      * @param reason    the reason for the wipe that is visible in the logs
      * @param force     whether the {@link UserManager.DISALLOW_FACTORY_RESET} user restriction
      *                  should be ignored
+     * @param wipeEuicc whether wipe the euicc data
      *
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
@@ -709,7 +729,7 @@ public class RecoverySystem {
      * @hide
      */
     public static void rebootWipeUserData(Context context, boolean shutdown, String reason,
-            boolean force) throws IOException {
+            boolean force, boolean wipeEuicc) throws IOException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         if (!force && um.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)) {
             throw new SecurityException("Wiping data is not allowed for this user.");
@@ -731,6 +751,10 @@ public class RecoverySystem {
         // Block until the ordered broadcast has completed.
         condition.block();
 
+        if (wipeEuicc) {
+            wipeEuiccData(context);
+        }
+
         String shutdownArg = null;
         if (shutdown) {
             shutdownArg = "--shutdown_after";
@@ -743,6 +767,61 @@ public class RecoverySystem {
 
         final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;
         bootCommand(context, shutdownArg, "--wipe_data", reasonArg, localeArg);
+    }
+
+    private static void wipeEuiccData(Context context) {
+        EuiccManager euiccManager = (EuiccManager) context.getSystemService(
+                Context.EUICC_SERVICE);
+        if (euiccManager != null && euiccManager.isEnabled()) {
+            CountDownLatch euiccFactoryResetLatch = new CountDownLatch(1);
+
+            BroadcastReceiver euiccWipeFinishReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (ACTION_WIPE_EUICC_DATA.equals(intent.getAction())) {
+                        if (getResultCode() != EuiccManager.EMBEDDED_SUBSCRIPTION_RESULT_OK) {
+                            int detailedCode = intent.getIntExtra(
+                                    EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE, 0);
+                            Log.e(TAG, "Error wiping euicc data, Detailed code = "
+                                    + detailedCode);
+                        } else {
+                            Log.d(TAG, "Successfully wiped euicc data.");
+                        }
+                        euiccFactoryResetLatch.countDown();
+                    }
+                }
+            };
+
+            Intent intent = new Intent(ACTION_WIPE_EUICC_DATA);
+            intent.setPackage("android");
+            PendingIntent callbackIntent = PendingIntent.getBroadcastAsUser(
+                    context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT, UserHandle.SYSTEM);
+            IntentFilter filterConsent = new IntentFilter();
+            filterConsent.addAction(ACTION_WIPE_EUICC_DATA);
+            HandlerThread euiccHandlerThread = new HandlerThread("euiccWipeFinishReceiverThread");
+            euiccHandlerThread.start();
+            Handler euiccHandler = new Handler(euiccHandlerThread.getLooper());
+            context.registerReceiver(euiccWipeFinishReceiver, filterConsent, null, euiccHandler);
+            euiccManager.eraseSubscriptions(callbackIntent);
+            try {
+                long waitingTimeMillis = Settings.Global.getLong(
+                        context.getContentResolver(),
+                        Settings.Global.EUICC_WIPING_TIMEOUT_MILLIS,
+                        DEFAULT_EUICC_WIPING_TIMEOUT_MILLIS);
+                if (waitingTimeMillis < MIN_EUICC_WIPING_TIMEOUT_MILLIS) {
+                    waitingTimeMillis = MIN_EUICC_WIPING_TIMEOUT_MILLIS;
+                } else if (waitingTimeMillis > MAX_EUICC_WIPING_TIMEOUT_MILLIS) {
+                    waitingTimeMillis = MAX_EUICC_WIPING_TIMEOUT_MILLIS;
+                }
+                if (!euiccFactoryResetLatch.await(waitingTimeMillis, TimeUnit.MILLISECONDS)) {
+                    Log.e(TAG, "Timeout wiping eUICC data.");
+                }
+                context.unregisterReceiver(euiccWipeFinishReceiver);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.e(TAG, "Wiping eUICC data interrupted", e);
+            }
+        }
     }
 
     /** {@hide} */

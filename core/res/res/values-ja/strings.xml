@@ -1106,6 +1106,20 @@
       <item quantity="other">複数のWi-Fiオープンネットワークが利用できます</item>
       <item quantity="one">Wi-Fiオープンネットワークが利用できます</item>
     </plurals>
+    <!-- no translation found for wifi_available_title (3817100557900599505) -->
+    <skip />
+    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
+    <skip />
+    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
+    <skip />
+    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
+    <skip />
+    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
+    <skip />
+    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
+    <skip />
+    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
+    <skip />
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fiネットワークにログイン"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ネットワークにログインしてください"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

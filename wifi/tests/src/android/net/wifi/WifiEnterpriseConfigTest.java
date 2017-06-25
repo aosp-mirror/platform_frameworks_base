@@ -20,6 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -316,15 +317,37 @@ public class WifiEnterpriseConfigTest {
         assertEquals("\"auth=AKA'\"", getSupplicantPhase2Method());
     }
 
-    /** Verfies that the copy constructor preseves the inner method information. */
+    /**
+     * Verifies that the copy constructor preseves both the masked password and inner method
+     * information.
+     */
     @Test
     public void copyConstructor() {
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setPassword("*");
         enterpriseConfig.setEapMethod(Eap.TTLS);
         enterpriseConfig.setPhase2Method(Phase2.GTC);
         mEnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
         assertEquals("TTLS", getSupplicantEapMethod());
         assertEquals("\"autheap=GTC\"", getSupplicantPhase2Method());
+        assertEquals("*", mEnterpriseConfig.getPassword());
+    }
+
+    /**
+     * Verifies that the copy from external ignores masked passwords and preserves the
+     * inner method information.
+     */
+    @Test
+    public void copyFromExternal() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setPassword("*");
+        enterpriseConfig.setEapMethod(Eap.TTLS);
+        enterpriseConfig.setPhase2Method(Phase2.GTC);
+        mEnterpriseConfig = new WifiEnterpriseConfig();
+        mEnterpriseConfig.copyFromExternal(enterpriseConfig, "*");
+        assertEquals("TTLS", getSupplicantEapMethod());
+        assertEquals("\"autheap=GTC\"", getSupplicantPhase2Method());
+        assertNotEquals("*", mEnterpriseConfig.getPassword());
     }
 
     /** Verfies that parceling a WifiEnterpriseConfig preseves method information. */

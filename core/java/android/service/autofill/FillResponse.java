@@ -21,6 +21,7 @@ import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -36,100 +37,7 @@ import java.util.Arrays;
  * Response for a {@link
  * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}.
  *
- * <p>The response typically contains one or more {@link Dataset}s, each representing a set of
- * fields that can be autofilled together, and the Android system displays a dataset picker UI
- * affordance that the user must use before the {@link android.app.Activity} is filled with
- * the dataset.
- *
- * <p>For example, for a login page with username/password where the user only has one account in
- * the response could be:
- *
- * <pre class="prettyprint">
- *  new FillResponse.Builder()
- *      .add(new Dataset.Builder(createPresentation())
- *          .setValue(id1, AutofillValue.forText("homer"))
- *          .setValue(id2, AutofillValue.forText("D'OH!"))
- *          .build())
- *      .build();
- * </pre>
- *
- * <p>If the user had 2 accounts, each with its own user-provided names, the response could be:
- *
- * <pre class="prettyprint">
- *  new FillResponse.Builder()
- *      .add(new Dataset.Builder(createFirstPresentation())
- *          .setValue(id1, AutofillValue.forText("homer"))
- *          .setValue(id2, AutofillValue.forText("D'OH!"))
- *          .build())
- *      .add(new Dataset.Builder(createSecondPresentation())
- *          .setValue(id1, AutofillValue.forText("elbarto")
- *          .setValue(id2, AutofillValue.forText("cowabonga")
- *          .build())
- *      .build();
- * </pre>
- *
- * If the service is interested on saving the user-edited data back, it must set a {@link SaveInfo}
- * in the {@link FillResponse}. Typically, the {@link SaveInfo} contains the same ids as the
- * {@link Dataset}, but other combinations are possible - see {@link SaveInfo} for more details
- *
- * <p>If the service has multiple {@link Dataset}s for different sections of the activity,
- * for example, a user section for which there are two datasets followed by an address
- * section for which there are two datasets for each user user, then it should "partition"
- * the activity in sections and populate the response with just a subset of the data that would
- * fulfill the first section (the name in our example); then once the user fills the first
- * section and taps a field from the next section (the address in our example), the Android
- * system would issue another request for that section, and so on. Note that if the user
- * chooses to populate the first section with a service provided dataset, the subsequent request
- * would contain the populated values so you don't try to provide suggestions for the first
- * section but ony for the second one based on the context of what was already filled. For
- * example, the first response could be:
- *
- * <pre class="prettyprint">
- *  new FillResponse.Builder()
- *      .add(new Dataset.Builder(createFirstPresentation())
- *          .setValue(id1, AutofillValue.forText("Homer"))
- *          .setValue(id2, AutofillValue.forText("Simpson"))
- *          .build())
- *      .add(new Dataset.Builder(createSecondPresentation())
- *          .setValue(id1, AutofillValue.forText("Bart"))
- *          .setValue(id2, AutofillValue.forText("Simpson"))
- *          .build())
- *      .build();
- * </pre>
- *
- * <p>Then after the user picks the second dataset and taps the street field to
- * trigger another autofill request, the second response could be:
- *
- * <pre class="prettyprint">
- *  new FillResponse.Builder()
- *      .add(new Dataset.Builder(createThirdPresentation())
- *          .setValue(id3, AutofillValue.forText("742 Evergreen Terrace"))
- *          .setValue(id4, AutofillValue.forText("Springfield"))
- *          .build())
- *      .add(new Dataset.Builder(createFourthPresentation())
- *          .setValue(id3, AutofillValue.forText("Springfield Power Plant"))
- *          .setValue(id4, AutofillValue.forText("Springfield"))
- *          .build())
- *      .build();
- * </pre>
- *
- * <p>The service could require user authentication at the {@link FillResponse} or the
- * {@link Dataset} level, prior to autofilling an activity - see
- * {@link FillResponse.Builder#setAuthentication(AutofillId[], IntentSender, RemoteViews)} and
- * {@link Dataset.Builder#setAuthentication(IntentSender)}.
- *
- * <p>It is recommended that you encrypt only the sensitive data but leave the labels unencrypted
- * which would allow you to provide a dataset presentation views with labels and if the user
- * chooses one of them challenge the user to authenticate. For example, if the user has a
- * home and a work address the Home and Work labels could be stored unencrypted as they don't
- * have any sensitive data while the address data is in an encrypted storage. If the user
- * chooses Home, then the platform will start your authentication flow. If you encrypt all
- * data and require auth at the response level the user will have to interact with the fill
- * UI to trigger a request for the datasets (as they don't see the presentation views for the
- * possible options) which will start your auth flow and after successfully authenticating
- * the user will be presented with the Home and Work options to pick one. Hence, you have
- * flexibility how to implement your auth while storing labels non-encrypted and data
- * encrypted provides a better user experience.
+ * <p>See the main {@link AutofillService} documentation for more details and examples.
  */
 public final class FillResponse implements Parcelable {
 
@@ -221,7 +129,7 @@ public final class FillResponse implements Parcelable {
         private boolean mDestroyed;
 
         /**
-         * Requires a fill response authentication before autofilling the activity with
+         * Requires a fill response authentication before autofilling the screen with
          * any data set in this response.
          *
          * <p>This is typically useful when a user interaction is required to unlock their
@@ -230,16 +138,16 @@ public final class FillResponse implements Parcelable {
          * auth on the data set level leading to a better user experience. Note that if you
          * use sensitive data as a label, for example an email address, then it should also
          * be encrypted. The provided {@link android.app.PendingIntent intent} must be an
-         * activity which implements your authentication flow. Also if you provide an auth
+         * {@link Activity} which implements your authentication flow. Also if you provide an auth
          * intent you also need to specify the presentation view to be shown in the fill UI
          * for the user to trigger your authentication flow.
          *
          * <p>When a user triggers autofill, the system launches the provided intent
          * whose extras will have the {@link AutofillManager#EXTRA_ASSIST_STRUCTURE screen
          * content} and your {@link android.view.autofill.AutofillManager#EXTRA_CLIENT_STATE
-         * client state}. Once you complete your authentication flow you should set the activity
-         * result to {@link android.app.Activity#RESULT_OK} and provide the fully populated
-         * {@link FillResponse response} by setting it to the {@link
+         * client state}. Once you complete your authentication flow you should set the
+         * {@link Activity} result to {@link android.app.Activity#RESULT_OK} and provide the fully
+         * populated {@link FillResponse response} by setting it to the {@link
          * AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra.
          * For example, if you provided an empty {@link FillResponse resppnse} because the
          * user's data was locked and marked that the response needs an authentication then
@@ -286,8 +194,8 @@ public final class FillResponse implements Parcelable {
          * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
          * FillCallback)} requests.
          *
-         * <p>This is typically used when the service cannot autofill the view; for example, an
-         * {@code EditText} representing a captcha.
+         * <p>This is typically used when the service cannot autofill the view; for example, a
+         * text field representing the result of a Captcha challenge.
          */
         public Builder setIgnoredIds(AutofillId...ids) {
             mIgnoredIds = ids;
@@ -316,8 +224,6 @@ public final class FillResponse implements Parcelable {
         /**
          * Sets the {@link SaveInfo} associated with this response.
          *
-         * <p>See {@link FillResponse} for more info.
-         *
          * @return This builder.
          */
         public @NonNull Builder setSaveInfo(@NonNull SaveInfo saveInfo) {
@@ -335,7 +241,7 @@ public final class FillResponse implements Parcelable {
          * fill requests and the subsequent save request.
          *
          * <p>If this method is called on multiple {@link FillResponse} objects for the same
-         * activity, just the latest bundle is passed back to the service.
+         * screen, just the latest bundle is passed back to the service.
          *
          * <p>Once a {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)
          * save request} is made the client state is cleared.
@@ -350,9 +256,10 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
-         * Builds a new {@link FillResponse} instance. You must provide at least
-         * one dataset or some savable ids or an authentication with a presentation
-         * view.
+         * Builds a new {@link FillResponse} instance.
+         *
+         * <p>You must provide at least one dataset or some savable ids or an authentication with a
+         * presentation view.
          *
          * @return A built response.
          */

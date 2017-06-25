@@ -43,6 +43,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
@@ -1691,9 +1692,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mContext.getSystemService(PowerManager.class).reboot(reason);
         }
 
-        void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force)
-                throws IOException {
-            RecoverySystem.rebootWipeUserData(mContext, shutdown, reason, force);
+        void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
+                boolean wipeEuicc) throws IOException {
+            RecoverySystem.rebootWipeUserData(mContext, shutdown, reason, force, wipeEuicc);
         }
 
         boolean systemPropertiesGetBoolean(String key, boolean def) {
@@ -5302,7 +5303,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason) {
+    private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason, boolean wipeEuicc) {
         wtfIfInLock();
 
         if (wipeExtRequested) {
@@ -5312,7 +5313,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         try {
             mInjector.recoverySystemRebootWipeUserData(
-                    /*shutdown=*/ false, reason, /*force=*/ true);
+                    /*shutdown=*/ false, reason, /*force=*/ true, /*wipeEuicc=*/ wipeEuicc);
         } catch (IOException | SecurityException e) {
             Slog.w(LOG_TAG, "Failed requesting data wipe", e);
         }
@@ -5389,7 +5390,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // removes that user (but still clears FRP...)
             if (userId == UserHandle.USER_SYSTEM) {
                 forceWipeDeviceNoLock(/*wipeExtRequested=*/ (flags & WIPE_EXTERNAL_STORAGE) != 0,
-                        reason);
+                        reason, /*wipeEuicc=*/ (flags & WIPE_EUICC) != 0);
             } else {
                 forceWipeUser(userId);
             }

@@ -37,6 +37,7 @@
     <uses-permission android:name="android.permission.REQUEST_NETWORK_SCORES" />
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.GET_APP_OPS_STATS" />
 
     <application>
         <uses-library android:name="android.test.runner" />

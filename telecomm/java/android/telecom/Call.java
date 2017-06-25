@@ -189,6 +189,19 @@ public final class Call {
      */
     public static final String EVENT_HANDOVER_COMPLETE =
             "android.telecom.event.HANDOVER_COMPLETE";
+
+    /**
+     * Call event sent from Telecom to the handover destination {@link ConnectionService} via
+     * {@link Connection#onCallEvent(String, Bundle)} to inform the handover destination that the
+     * source connection has disconnected.  The {@link Bundle} parameter for the call event will be
+     * {@code null}.
+     * <p>
+     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_SOURCE_DISCONNECTED =
+            "android.telecom.event.HANDOVER_SOURCE_DISCONNECTED";
+
     /**
      * Call event sent from Telecom to the handover {@link ConnectionService} via
      * {@link Connection#onCallEvent(String, Bundle)} to inform a {@link Connection} that a handover

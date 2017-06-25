@@ -38,6 +38,8 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
+import android.app.trust.TrustManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -55,6 +57,7 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
+import android.view.ViewGroup.LayoutParams;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -75,6 +78,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 @SmallTest
@@ -99,6 +104,8 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
+        mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
+        mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
         mStatusBarKeyguardViewManager = mock(StatusBarKeyguardViewManager.class);
         mUnlockMethodCache = mock(UnlockMethodCache.class);
         mKeyguardIndicationController = mock(KeyguardIndicationController.class);
@@ -108,6 +115,7 @@ public class StatusBarTest extends SysuiTestCase {
         mNotificationData = mock(NotificationData.class);
         mSystemServicesProxy = mock(SystemServicesProxy.class);
         mNotificationPanelView = mock(NotificationPanelView.class);
+        when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         mNotificationList = mock(ArrayList.class);
         IPowerManager powerManagerService = mock(IPowerManager.class);
         HandlerThread handlerThread = new HandlerThread("TestThread");
@@ -122,6 +130,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
                 mNotificationData, mPowerManager, mSystemServicesProxy, mNotificationPanelView,
                 mBarService);
+        mStatusBar.mContext = mContext;
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
             onDismissAction.onDismiss();
@@ -383,6 +392,11 @@ public class StatusBarTest extends SysuiTestCase {
             fail();
         }
         TestableLooper.get(this).processAllMessages();
+    }
+
+    @Test
+    public void testDump_DoesNotCrash() {
+        mStatusBar.dump(null, new PrintWriter(new ByteArrayOutputStream()), null);
     }
 
     static class TestableStatusBar extends StatusBar {
