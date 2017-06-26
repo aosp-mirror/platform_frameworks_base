@@ -1136,7 +1136,7 @@ public class NotificationManagerService extends SystemService {
             NotificationAssistants notificationAssistants, ConditionProviders conditionProviders,
             ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
             NotificationUsageStats usageStats, AtomicFile policyFile,
-            ActivityManager activityManager) {
+            ActivityManager activityManager, GroupHelper groupHelper) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1193,35 +1193,7 @@ public class NotificationManagerService extends SystemService {
             }
         });
         mSnoozeHelper = snoozeHelper;
-        mGroupHelper = new GroupHelper(new GroupHelper.Callback() {
-            @Override
-            public void addAutoGroup(String key) {
-                synchronized (mNotificationLock) {
-                    addAutogroupKeyLocked(key);
-                }
-                mRankingHandler.requestSort(false);
-            }
-
-            @Override
-            public void removeAutoGroup(String key) {
-                synchronized (mNotificationLock) {
-                    removeAutogroupKeyLocked(key);
-                }
-                mRankingHandler.requestSort(false);
-            }
-
-            @Override
-            public void addAutoGroupSummary(int userId, String pkg, String triggeringKey) {
-                createAutoGroupSummary(userId, pkg, triggeringKey);
-            }
-
-            @Override
-            public void removeAutoGroupSummary(int userId, String pkg) {
-                synchronized (mNotificationLock) {
-                    clearAutogroupSummaryLocked(userId, pkg);
-                }
-            }
-        });
+        mGroupHelper = groupHelper;
 
         // This is a ManagedServices object that keeps track of the listeners.
         mListeners = notificationListeners;
@@ -1337,9 +1309,42 @@ public class NotificationManagerService extends SystemService {
                 new ConditionProviders(getContext(), mUserProfiles, AppGlobals.getPackageManager()),
                 null, snoozeHelper, new NotificationUsageStats(getContext()),
                 new AtomicFile(new File(systemDir, "notification_policy.xml")),
-                (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE));
+                (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE),
+                getGroupHelper());
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
+    }
+
+    private GroupHelper getGroupHelper() {
+        return new GroupHelper(new GroupHelper.Callback() {
+            @Override
+            public void addAutoGroup(String key) {
+                synchronized (mNotificationLock) {
+                    addAutogroupKeyLocked(key);
+                }
+                mRankingHandler.requestSort(false);
+            }
+
+            @Override
+            public void removeAutoGroup(String key) {
+                synchronized (mNotificationLock) {
+                    removeAutogroupKeyLocked(key);
+                }
+                mRankingHandler.requestSort(false);
+            }
+
+            @Override
+            public void addAutoGroupSummary(int userId, String pkg, String triggeringKey) {
+                createAutoGroupSummary(userId, pkg, triggeringKey);
+            }
+
+            @Override
+            public void removeAutoGroupSummary(int userId, String pkg) {
+                synchronized (mNotificationLock) {
+                    clearAutogroupSummaryLocked(userId, pkg);
+                }
+            }
+        });
     }
 
     private void sendRegisteredOnlyBroadcast(String action) {
@@ -3323,7 +3328,6 @@ public class NotificationManagerService extends SystemService {
                     (r.mOriginalFlags & ~Notification.FLAG_FOREGROUND_SERVICE);
             mRankingHelper.sort(mNotificationList);
             mListeners.notifyPostedLocked(sbn, sbn /* oldSbn */);
-            mGroupHelper.onNotificationPosted(sbn);
         }
     };
 
@@ -3740,12 +3744,14 @@ public class NotificationManagerService extends SystemService {
                     if (notification.getSmallIcon() != null) {
                         StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
                         mListeners.notifyPostedLocked(n, oldSbn);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mGroupHelper.onNotificationPosted(n);
-                            }
-                        });
+                        if (oldSbn == null || !Objects.equals(oldSbn.getGroup(), n.getGroup())) {
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mGroupHelper.onNotificationPosted(n);
+                                }
+                            });
+                        }
                     } else {
                         Slog.e(TAG, "Not posting notification without small icon: " + notification);
                         if (old != null && !old.isCanceled) {
