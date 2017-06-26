@@ -714,7 +714,6 @@ public class IpManager extends StateMachine {
         return shouldLog;
     }
 
-    // TODO: Migrate all Log.e(...) to logError(...).
     private void logError(String fmt, Object... args) {
         final String msg = "ERROR " + String.format(fmt, args);
         Log.e(mTag, msg);
@@ -1035,7 +1034,7 @@ public class IpManager extends StateMachine {
     }
 
     private void doImmediateProvisioningFailure(int failureType) {
-        if (DBG) { Log.e(mTag, "onProvisioningFailure(): " + failureType); }
+        logError("onProvisioningFailure(): %s", failureType);
         recordMetric(failureType);
         mCallback.onProvisioningFailure(new LinkProperties(mLinkProperties));
     }
@@ -1170,7 +1169,7 @@ public class IpManager extends StateMachine {
 
                 case DhcpClient.CMD_ON_QUIT:
                     // Everything is already stopped.
-                    Log.e(mTag, "Unexpected CMD_ON_QUIT (already stopped).");
+                    logError("Unexpected CMD_ON_QUIT (already stopped).");
                     break;
 
                 default:
@@ -1376,7 +1375,7 @@ public class IpManager extends StateMachine {
                     break;
 
                 case CMD_START:
-                    Log.e(mTag, "ALERT: START received in StartedState. Please fix caller.");
+                    logError("ALERT: START received in StartedState. Please fix caller.");
                     break;
 
                 case CMD_CONFIRM:
@@ -1475,13 +1474,13 @@ public class IpManager extends StateMachine {
                             handleIPv4Failure();
                             break;
                         default:
-                            Log.e(mTag, "Unknown CMD_POST_DHCP_ACTION status:" + msg.arg1);
+                            logError("Unknown CMD_POST_DHCP_ACTION status: %s", msg.arg1);
                     }
                     break;
 
                 case DhcpClient.CMD_ON_QUIT:
                     // DHCPv4 quit early for some reason.
-                    Log.e(mTag, "Unexpected CMD_ON_QUIT.");
+                    logError("Unexpected CMD_ON_QUIT.");
                     mDhcpClient = null;
                     break;
 
