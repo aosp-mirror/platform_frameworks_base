@@ -51,8 +51,6 @@ TEST(SkiaBehavior, CreateBitmapShader1x1) {
     SkShader::TileMode xy[2];
     ASSERT_TRUE(s->isABitmap(&bitmap, nullptr, xy))
         << "1x1 bitmap shader must query as bitmap shader";
-    EXPECT_EQ(SkShader::kClamp_TileMode, xy[0]);
-    EXPECT_EQ(SkShader::kRepeat_TileMode, xy[1]);
     EXPECT_EQ(origBitmap.pixelRef(), bitmap.pixelRef());
 }
 
