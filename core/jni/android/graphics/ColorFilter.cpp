@@ -30,9 +30,12 @@ using namespace uirenderer;
 
 class SkColorFilterGlue {
 public:
-    static void SafeUnref(JNIEnv* env, jobject clazz, jlong skFilterHandle) {
-        SkColorFilter* filter = reinterpret_cast<SkColorFilter *>(skFilterHandle);
-        SkSafeUnref(filter);
+    static void SafeUnref(SkShader* shader) {
+        SkSafeUnref(shader);
+    }
+
+    static jlong GetNativeFinalizer(JNIEnv*, jobject) {
+        return static_cast<jlong>(reinterpret_cast<uintptr_t>(&SafeUnref));
     }
 
     static jlong CreatePorterDuffFilter(JNIEnv* env, jobject, jint srcColor, jint modeHandle) {
@@ -57,7 +60,7 @@ public:
 };
 
 static const JNINativeMethod colorfilter_methods[] = {
-    {"nSafeUnref", "(J)V", (void*) SkColorFilterGlue::SafeUnref}
+    {"nativeGetFinalizer", "()J", (void*) SkColorFilterGlue::GetNativeFinalizer }
 };
 
 static const JNINativeMethod porterduff_methods[] = {
