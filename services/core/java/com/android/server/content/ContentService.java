@@ -60,6 +60,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
@@ -166,6 +167,8 @@ public final class ContentService extends IContentService.Stub {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw_)) return;
         final IndentingPrintWriter pw = new IndentingPrintWriter(pw_, "  ");
 
+        final boolean dumpAll = ArrayUtils.contains(args, "-a");
+
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         final long identityToken = clearCallingIdentity();
@@ -173,7 +176,7 @@ public final class ContentService extends IContentService.Stub {
             if (mSyncManager == null) {
                 pw.println("No SyncManager created!  (Disk full?)");
             } else {
-                mSyncManager.dump(fd, pw);
+                mSyncManager.dump(fd, pw, dumpAll);
             }
             pw.println();
             pw.println("Observer tree:");
@@ -603,7 +606,7 @@ public final class ContentService extends IContentService.Stub {
                 SyncStorageEngine.EndPoint info;
                 info = new SyncStorageEngine.EndPoint(account, authority, userId);
                 syncManager.clearScheduledSyncOperations(info);
-                syncManager.cancelActiveSync(info, null /* all syncs for this adapter */);
+                syncManager.cancelActiveSync(info, null /* all syncs for this adapter */, "API");
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -631,7 +634,7 @@ public final class ContentService extends IContentService.Stub {
             }
             // Cancel active syncs and clear pending syncs from the queue.
             syncManager.cancelScheduledSyncOperation(info, extras);
-            syncManager.cancelActiveSync(info, extras);
+            syncManager.cancelActiveSync(info, extras, "API");
         } finally {
             restoreCallingIdentity(identityToken);
         }
