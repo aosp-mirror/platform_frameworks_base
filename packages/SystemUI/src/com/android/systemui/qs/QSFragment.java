@@ -256,7 +256,8 @@ public class QSFragment extends Fragment implements QS {
         }
         mHeader.setExpansion(mKeyguardShowing ? 1 : expansion);
         mFooter.setExpansion(mKeyguardShowing ? 1 : expansion);
-        int heightDiff = mQSPanel.getBottom() - mHeader.getBottom() + mHeader.getPaddingBottom();
+        int heightDiff = mQSPanel.getBottom() - mHeader.getBottom() + mHeader.getPaddingBottom()
+                + mFooter.getHeight();
         mQSPanel.setTranslationY(translationScaleY * heightDiff);
         mQSDetail.setFullyExpanded(expansion == 1);
 
@@ -265,7 +266,7 @@ public class QSFragment extends Fragment implements QS {
         }
 
         // Set bounds on the QS panel so it doesn't run over the header.
-        mQsBounds.top = (int) (mQSPanel.getHeight() * (1 - expansion));
+        mQsBounds.top = (int) -mQSPanel.getTranslationY();
         mQsBounds.right = mQSPanel.getWidth();
         mQsBounds.bottom = mQSPanel.getHeight();
         mQSPanel.setClipBounds(mQsBounds);
