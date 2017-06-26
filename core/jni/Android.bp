@@ -223,6 +223,7 @@ cc_library_shared {
         "libandroidfw",
         "libappfuse",
         "libbase",
+        "libcrypto",
         "libnativehelper",
         "liblog",
         "libcutils",
