@@ -161,7 +161,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
         QSTileLayout tileLayout = mQsPanel.getTileLayout();
         mAllViews.add((View) tileLayout);
-        int heightDiff = mQsPanel.getBottom() - mQs.getHeader().getBottom()
+        int height = mQs.getView() != null ? mQs.getView().getMeasuredHeight() : 0;
+        int heightDiff = height - mQs.getHeader().getBottom()
                 + mQs.getHeader().getPaddingBottom();
         firstPageBuilder.addFloat(tileLayout, "translationY", heightDiff, 0);
 
