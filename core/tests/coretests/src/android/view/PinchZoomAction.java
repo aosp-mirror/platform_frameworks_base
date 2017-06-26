@@ -16,23 +16,23 @@
 
 package android.view;
 
-import static android.support.test.espresso.core.deps.guava.base.Preconditions.checkNotNull;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import static org.hamcrest.Matchers.allOf;
 
 import android.os.SystemClock;
 import android.support.test.espresso.InjectEventSecurityException;
 import android.support.test.espresso.PerformException;
-import android.support.test.espresso.ViewAction;
-import android.support.test.espresso.action.MotionEvents;
-import android.support.test.espresso.action.Swiper;
 import android.support.test.espresso.UiController;
+import android.support.test.espresso.ViewAction;
+import android.support.test.espresso.action.Swiper;
 import android.support.test.espresso.util.HumanReadables;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
-import javax.annotation.Nullable;
+
 import org.hamcrest.Matcher;
 
 /**
