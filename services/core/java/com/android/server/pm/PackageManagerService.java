@@ -58,7 +58,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE
 import static android.content.pm.PackageManager.INSTALL_FORWARD_LOCK;
 import static android.content.pm.PackageManager.INSTALL_INTERNAL;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
@@ -78,6 +77,7 @@ import static android.content.pm.PackageManager.MOVE_FAILED_3RD_PARTY_NOT_ALLOWE
 import static android.content.pm.PackageManager.MOVE_FAILED_DEVICE_ADMIN;
 import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
+import static android.content.pm.PackageManager.MOVE_FAILED_LOCKED_USER;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
@@ -87,6 +87,7 @@ import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
+
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
@@ -102,6 +103,7 @@ import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefa
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
+
 import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
 
 import android.Manifest;
@@ -130,6 +132,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.ChangedPackages;
+import android.content.pm.ComponentInfo;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
@@ -723,6 +726,9 @@ public class PackageManagerService extends IPackageManager.Stub
     final ArraySet<String> mFrozenPackages = new ArraySet<>();
 
     final ProtectedPackages mProtectedPackages;
+
+    @GuardedBy("mLoadedVolumes")
+    final ArraySet<String> mLoadedVolumes = new ArraySet<>();
 
     boolean mFirstBoot;
 
@@ -21673,6 +21679,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public static final int DUMP_DEXOPT = 1 << 20;
         public static final int DUMP_COMPILER_STATS = 1 << 21;
         public static final int DUMP_CHANGES = 1 << 22;
+        public static final int DUMP_VOLUMES = 1 << 23;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -21912,6 +21919,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpState.setDump(DumpState.DUMP_INSTALLS);
             } else if ("frozen".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_FROZEN);
+            } else if ("volumes".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_VOLUMES);
             } else if ("dexopt".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_DEXOPT);
             } else if ("compiler-stats".equals(cmd)) {
@@ -22291,6 +22300,23 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 } else {
                     for (int i = 0; i < mFrozenPackages.size(); i++) {
                         ipw.println(mFrozenPackages.valueAt(i));
+                    }
+                }
+                ipw.decreaseIndent();
+            }
+
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_VOLUMES) && packageName == null) {
+                if (dumpState.onTitlePrinted()) pw.println();
+
+                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+                ipw.println();
+                ipw.println("Loaded volumes:");
+                ipw.increaseIndent();
+                if (mLoadedVolumes.size() == 0) {
+                    ipw.println("(none)");
+                } else {
+                    for (int i = 0; i < mLoadedVolumes.size(); i++) {
+                        ipw.println(mLoadedVolumes.valueAt(i));
                     }
                 }
                 ipw.decreaseIndent();
@@ -23012,6 +23038,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Loaded packages " + loaded);
         sendResourcesChangedBroadcast(true, false, loaded, null);
+        mLoadedVolumes.add(vol.getId());
     }
 
     private void unloadPrivatePackages(final VolumeInfo vol) {
@@ -23063,6 +23090,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
         sendResourcesChangedBroadcast(false, false, unloaded, null);
+        mLoadedVolumes.remove(vol.getId());
 
         // Try very hard to release any references to this path so we don't risk
         // the system server being killed due to open FDs
@@ -23606,8 +23634,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     movePackageInternal(packageName, volumeUuid, moveId, callingUid, user);
                 } catch (PackageManagerException e) {
                     Slog.w(TAG, "Failed to move " + packageName, e);
-                    mMoveCallbacks.notifyStatusChanged(moveId,
-                            PackageManager.MOVE_FAILED_INTERNAL_ERROR);
+                    mMoveCallbacks.notifyStatusChanged(moveId, e.error);
                 }
             }
         });
@@ -23728,6 +23755,17 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             installFlags = INSTALL_INTERNAL;
             moveCompleteApp = true;
             measurePath = Environment.getDataAppDirectory(volumeUuid);
+        }
+
+        // If we're moving app data around, we need all the users unlocked
+        if (moveCompleteApp) {
+            for (int userId : installedUserIds) {
+                if (StorageManager.isFileEncryptedNativeOrEmulated()
+                        && !StorageManager.isUserKeyUnlocked(userId)) {
+                    throw new PackageManagerException(MOVE_FAILED_LOCKED_USER,
+                            "User " + userId + " must be unlocked");
+                }
+            }
         }
 
         final PackageStats stats = new PackageStats(null, -1);
