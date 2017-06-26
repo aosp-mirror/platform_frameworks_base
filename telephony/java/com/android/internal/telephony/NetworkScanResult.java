@@ -36,10 +36,10 @@ import java.util.Objects;
 public final class NetworkScanResult implements Parcelable {
 
     // Contains only part of the scan result and more are coming.
-    public static final int SCAN_STATUS_PARTIAL = 0;
+    public static final int SCAN_STATUS_PARTIAL = 1;
 
     // Contains the last part of the scan result and the scan is now complete.
-    public static final int SCAN_STATUS_COMPLETE = 1;
+    public static final int SCAN_STATUS_COMPLETE = 2;
 
     // The status of the scan, only valid when scanError = SUCCESS.
     public int scanStatus;
