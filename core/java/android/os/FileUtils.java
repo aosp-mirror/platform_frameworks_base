@@ -369,11 +369,11 @@ public class FileUtils {
      * constraints remain.
      *
      * @param minCount Always keep at least this many files.
-     * @param minAge Always keep files younger than this age.
+     * @param minAgeMs Always keep files younger than this age, in milliseconds.
      * @return if any files were deleted.
      */
-    public static boolean deleteOlderFiles(File dir, int minCount, long minAge) {
-        if (minCount < 0 || minAge < 0) {
+    public static boolean deleteOlderFiles(File dir, int minCount, long minAgeMs) {
+        if (minCount < 0 || minAgeMs < 0) {
             throw new IllegalArgumentException("Constraints must be positive or 0");
         }
 
@@ -393,9 +393,9 @@ public class FileUtils {
         for (int i = minCount; i < files.length; i++) {
             final File file = files[i];
 
-            // Keep files newer than minAge
+            // Keep files newer than minAgeMs
             final long age = System.currentTimeMillis() - file.lastModified();
-            if (age > minAge) {
+            if (age > minAgeMs) {
                 if (file.delete()) {
                     Log.d(TAG, "Deleted old file " + file);
                     deleted = true;

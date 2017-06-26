@@ -237,6 +237,9 @@ public class SyncOperation {
      * contain a valid sync operation.
      */
     static SyncOperation maybeCreateFromJobExtras(PersistableBundle jobExtras) {
+        if (jobExtras == null) {
+            return null;
+        }
         String accountName, accountType;
         String provider;
         int userId, owningUid;
@@ -445,11 +448,21 @@ public class SyncOperation {
     }
 
     static void extrasToStringBuilder(Bundle bundle, StringBuilder sb) {
+        if (bundle == null) {
+            sb.append("null");
+            return;
+        }
         sb.append("[");
         for (String key : bundle.keySet()) {
             sb.append(key).append("=").append(bundle.get(key)).append(" ");
         }
         sb.append("]");
+    }
+
+    static String extrasToString(Bundle bundle) {
+        final StringBuilder sb = new StringBuilder();
+        extrasToStringBuilder(bundle, sb);
+        return sb.toString();
     }
 
     String wakeLockName() {
