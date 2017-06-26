@@ -26,8 +26,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.BootTimingsTraceLog;
 import android.util.Log;
 
 import com.android.systemui.fragments.FragmentService;
@@ -190,11 +192,17 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
 
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
+        BootTimingsTraceLog log = new BootTimingsTraceLog("SystemUIBootTiming",
+                Trace.TRACE_TAG_APP);
+        log.traceBegin("StartServices");
         final int N = services.length;
         for (int i = 0; i < N; i++) {
             Class<?> cl = services[i];
             if (DEBUG) Log.d(TAG, "loading: " + cl);
+            log.traceBegin("StartServices" + cl.getSimpleName());
+            long ti = System.currentTimeMillis();
             try {
+
                 Object newService = SystemUIFactory.getInstance().createInstance(cl);
                 mServices[i] = (SystemUI) ((newService == null) ? cl.newInstance() : newService);
             } catch (IllegalAccessException ex) {
@@ -207,11 +215,18 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             mServices[i].mComponents = mComponents;
             if (DEBUG) Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
+            log.traceEnd();
 
+            // Warn if initialization of component takes too long
+            ti = System.currentTimeMillis() - ti;
+            if (ti > 1000) {
+                Log.w(TAG, "Initialization of " + cl.getName() + " took " + ti + " ms");
+            }
             if (mBootCompleted) {
                 mServices[i].onBootCompleted();
             }
         }
+        log.traceEnd();
         Dependency.get(PluginManager.class).addPluginListener(
                 new PluginListener<OverlayPlugin>() {
                     private ArraySet<OverlayPlugin> mOverlays;
