@@ -117,7 +117,6 @@ import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.util.EventLog;
-import android.util.Printer;
 import android.util.Slog;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
@@ -130,7 +129,6 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Controller for interpreting how and then launching activities.
@@ -248,42 +246,12 @@ class ActivityStarter {
         mUsingVr2dDisplay = false;
     }
 
-    // TODO(b/38121026): Remove once issue has been resolved.
-    private class ActivityInfoAssignment {
-        final ActivityInfo info;
-        final String description;
-        final long timestamp;
-
-        public ActivityInfoAssignment(ActivityInfo info, String description) {
-            timestamp = System.currentTimeMillis();
-            this.info = info;
-            this.description = description;
-        }
-
-        void dump(PrintWriter pw, String prefix) {
-            pw.println(prefix + " " + timestamp + ":" + description + ":" + describeInfo());
-        }
-
-        private String describeInfo() {
-            return "ActivityInfo[obj:" + info + " userId:"
-                    + (info != null ? UserHandle.getUserId(info.applicationInfo.uid) : 0) + "]";
-        }
-    }
-
-    private List<ActivityInfoAssignment> mLastStartActivityInfoAssignments = new ArrayList<>();
-
-    private void addActivityInfoAssignment(ActivityInfo info, String description) {
-        mLastStartActivityInfoAssignments.add(new ActivityInfoAssignment(info, description));
-    }
-
     ActivityStarter(ActivityManagerService service, ActivityStackSupervisor supervisor) {
         mService = service;
         mSupervisor = supervisor;
         mInterceptor = new ActivityStartInterceptor(mService, mSupervisor);
         mUsingVr2dDisplay = false;
     }
-
-
 
     int startActivityLocked(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
             String resolvedType, ActivityInfo aInfo, ResolveInfo rInfo,
@@ -293,8 +261,6 @@ class ActivityStarter {
             ActivityOptions options, boolean ignoreTargetSecurity, boolean componentSpecified,
             ActivityRecord[] outActivity, ActivityStackSupervisor.ActivityContainer container,
             TaskRecord inTask, String reason) {
-        mLastStartActivityInfoAssignments.clear();
-        addActivityInfoAssignment(aInfo, "startActivityLocked::initial");
 
         if (TextUtils.isEmpty(reason)) {
             throw new IllegalArgumentException("Need to specify a reason.");
@@ -486,7 +452,6 @@ class ActivityStarter {
         intent = mInterceptor.mIntent;
         rInfo = mInterceptor.mRInfo;
         aInfo = mInterceptor.mAInfo;
-        addActivityInfoAssignment(aInfo, "startActivity::mInterceptor.mAInfo");
         resolvedType = mInterceptor.mResolvedType;
         inTask = mInterceptor.mInTask;
         callingPid = mInterceptor.mCallingPid;
@@ -533,7 +498,6 @@ class ActivityStarter {
                 rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId);
                 aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
                         null /*profilerInfo*/);
-                addActivityInfoAssignment(aInfo, "startActivity::isPermissionReviewRequired");
 
                 if (DEBUG_PERMISSIONS_REVIEW) {
                     Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true,
@@ -558,14 +522,12 @@ class ActivityStarter {
             callingPid = realCallingPid;
 
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
-            addActivityInfoAssignment(aInfo, "startActivity::auxiliaryInfo != null");
         }
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid, callingUid,
                 callingPackage, intent, resolvedType, aInfo, mService.getGlobalConfiguration(),
                 resultRecord, resultWho, requestCode, componentSpecified, voiceSession != null,
                 mSupervisor, container, options, sourceRecord);
-        addActivityInfoAssignment(aInfo, "startActivity:: value used to create new activity");
         if (outActivity != null) {
             outActivity[0] = r;
         }
@@ -2366,16 +2328,6 @@ class ActivityStarter {
             pw.println(prefix + "mStartActivity:");
             mStartActivity.dump(pw, prefix + " ");
         }
-
-        if (!mLastStartActivityInfoAssignments.isEmpty()) {
-            pw.println(prefix + "mLastStartActivityInfoAssignments:");
-            for (ActivityInfoAssignment assignment : mLastStartActivityInfoAssignments) {
-                assignment.dump(pw, prefix);
-                /*pw.println(prefix + prefix + assignment.description + "@" + p
-                        +  ":" + assignment.info);*/
-            }
-        }
-
         if (mIntent != null) {
             pw.println(prefix + "mIntent=" + mIntent);
         }
