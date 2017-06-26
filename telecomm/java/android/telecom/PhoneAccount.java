@@ -127,6 +127,8 @@ public final class PhoneAccount implements Parcelable {
     /**
      * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
      * indicates whether a Self-Managed {@link PhoneAccount} should log its calls to the call log.
+     * Self-Managed {@link PhoneAccount}s are responsible for their own notifications, so the system
+     * will not create a notification when a missed call is logged.
      * <p>
      * By default, Self-Managed {@link PhoneAccount}s do not log their calls to the call log.
      * Setting this extra to {@code true} provides a means for them to log their calls.
