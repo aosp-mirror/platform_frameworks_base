@@ -20,9 +20,9 @@ import com.android.internal.util.Predicate;
 
 class AssignableFrom implements Predicate<TestMethod> {
 
-    private final Class root;
+    private final Class<?> root;
 
-    AssignableFrom(Class root) {
+    AssignableFrom(Class<?> root) {
         this.root = root;
     }
 
