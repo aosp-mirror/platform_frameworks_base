@@ -1495,6 +1495,23 @@ public class CarrierConfigManager {
     public static final String KEY_ROAMING_OPERATOR_STRING_ARRAY =
             "roaming_operator_string_array";
 
+    /**
+     * URL from which the proto containing the public key of the Carrier used for
+     * IMSI encryption will be downloaded.
+     * @hide
+     */
+    public static final String IMSI_KEY_DOWNLOAD_URL_STRING = "imsi_key_download_url_string";
+
+    /**
+     * Time in days, after which the key will expire, and a new key will need to be downloaded.
+     * default value is {@link IMSI_ENCRYPTION_DAYS_TIME_DISABLED}, and indicates that IMSI
+     * encryption is not enabled by default for a carrier. Value of 0 indicates that the key
+     * does not expire.
+     * @hide
+     */
+    public static final String IMSI_KEY_EXPIRATION_DAYS_TIME_INT =
+            "imsi_key_expiration_days_time_int";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1747,6 +1764,8 @@ public class CarrierConfigManager {
         sDefaults.putString(IMSI_KEY_DOWNLOAD_URL_STRING, null);
 	sDefaults.putStringArray(KEY_NON_ROAMING_OPERATOR_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_ROAMING_OPERATOR_STRING_ARRAY, null);
+        sDefaults.putInt(IMSI_KEY_EXPIRATION_DAYS_TIME_INT, IMSI_ENCRYPTION_DAYS_TIME_DISABLED);
+        sDefaults.putString(IMSI_KEY_DOWNLOAD_URL_STRING, null);
     }
 
     /**
