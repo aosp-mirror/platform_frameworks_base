@@ -3145,9 +3145,7 @@
     <permission android:name="android.permission.MANAGE_FALLBACK_SUBSCRIPTION_PLANS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows an application to account its network traffic against other UIDs. Used
-         by system services like download manager and media server. Not for use by
-         third party apps. @hide -->
+    <!-- @SystemApi @hide @deprecated use UPDATE_DEVICE_STATS instead -->
     <permission android:name="android.permission.MODIFY_NETWORK_ACCOUNTING"
         android:protectionLevel="signature|privileged" />
 

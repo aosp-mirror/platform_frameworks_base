@@ -93,7 +93,7 @@
     </permission>
 
     <!-- Group that can modify how network statistics are accounted -->
-    <permission name="android.permission.MODIFY_NETWORK_ACCOUNTING">
+    <permission name="android.permission.UPDATE_DEVICE_STATS">
         <group gid="net_bw_acct" />
     </permission>
 
