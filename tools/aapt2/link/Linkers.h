@@ -23,6 +23,7 @@
 #include "android-base/macros.h"
 
 #include "Resource.h"
+#include "ResourceTable.h"
 #include "SdkConstants.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
@@ -41,16 +42,18 @@ struct CallSite {
   ResourceNameRef resource;
 };
 
-/**
- * Determines whether a versioned resource should be created. If a versioned
- * resource already exists, it takes precedence.
- */
+// Determines whether a versioned resource should be created. If a versioned resource already
+// exists, it takes precedence.
 bool ShouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDescription& config,
                                      const ApiVersion sdk_version_to_generate);
 
-// Finds the next largest ApiVersion of the config which is identical to the given config except
-// for sdkVersion.
+// Finds the next largest ApiVersion of `config` for values defined for `entry`.
 ApiVersion FindNextApiVersionForConfig(const ResourceEntry* entry, const ConfigDescription& config);
+
+// Finds the next largest ApiVersion of the config pointed to by the iterator `start`.
+ApiVersion FindNextApiVersionForConfigInSortedVector(
+    std::vector<std::unique_ptr<ResourceConfigValue>>::const_iterator start,
+    std::vector<std::unique_ptr<ResourceConfigValue>>::const_iterator end);
 
 class AutoVersioner : public IResourceTableConsumer {
  public:
