@@ -2813,19 +2813,17 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
-        final int requestTimeoutMs = 100;
+        final int requestTimeoutMs = 50;
         mCm.requestNetwork(nr, networkCallback, requestTimeoutMs);
 
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
-        final int assertTimeoutMs = 150;
+        final int assertTimeoutMs = 100;
         networkCallback.expectAvailableCallbacks(mWiFiNetworkAgent, false, assertTimeoutMs);
-        sleepFor(20);
         mWiFiNetworkAgent.disconnect();
         networkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
 
-        // pass timeout and validate that UNAVAILABLE is not called
-        sleepFor(100);
+        // Validate that UNAVAILABLE is not called
         networkCallback.assertNoCallback();
     }
 
@@ -2852,24 +2850,20 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     /**
-     * Validate that when a network request is unregistered (cancelled) the time-out for that
-     * request doesn't trigger the onUnavailable() callback.
+     * Validate that when a network request is unregistered (cancelled), no posterior event can
+     * trigger the callback.
      */
     @SmallTest
-    public void testTimedoutAfterUnregisteredNetworkRequest() {
+    public void testNoCallbackAfterUnregisteredNetworkRequest() {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
         final int timeoutMs = 10;
+
         mCm.requestNetwork(nr, networkCallback, timeoutMs);
-
-        // remove request
         mCm.unregisterNetworkCallback(networkCallback);
-
-        // pass timeout and validate that no callbacks
-        // Note: doesn't validate that nothing called from CS since even if called the CM already
-        // unregisters the callback and won't pass it through!
-        sleepFor(15);
+        // Regardless of the timeout, unregistering the callback in ConnectivityManager ensures
+        // that this callback will not be called.
         networkCallback.assertNoCallback();
 
         // create a network satisfying request - validate that request not triggered
@@ -3370,14 +3364,5 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         int length = got.length;
         assertEquals(String.format("expected array of length %s, but length was %s for %s",
                 expected, length, Arrays.toString(got)), expected, length);
-    }
-
-    /* test utilities */
-    // TODO: eliminate all usages of sleepFor and replace by proper timeouts/waitForIdle.
-    static private void sleepFor(int ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-        }
     }
 }
