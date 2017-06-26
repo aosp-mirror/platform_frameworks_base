@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.org.bouncycastle.util.encoders.Base64;
@@ -44,7 +45,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import static android.system.OsConstants.SEEK_CUR;
 
 /**
  * Backup transport for stashing stuff into a known location on disk, and
@@ -70,9 +70,8 @@ public class LocalTransport extends BackupTransport {
     // The currently-active restore set always has the same (nonzero!) token
     private static final long CURRENT_SET_TOKEN = 1;
 
-    // Full backup size quota is set to reasonable value.
+    // Size quotas at reasonable values, similar to the current cloud-storage limits
     private static final long FULL_BACKUP_SIZE_QUOTA = 25 * 1024 * 1024;
-
     private static final long KEY_VALUE_BACKUP_SIZE_QUOTA = 5 * 1024 * 1024;
 
     private Context mContext;
@@ -157,6 +156,17 @@ public class LocalTransport extends BackupTransport {
         return TRANSPORT_OK;
     }
 
+    // Encapsulation of a single k/v element change
+    private class KVOperation {
+        final String key;     // Element filename, not the raw key, for efficiency
+        final byte[] value;   // null when this is a deletion operation
+
+        KVOperation(String k, byte[] v) {
+            key = k;
+            value = v;
+        }
+    }
+
     @Override
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data) {
         if (DEBUG) {
@@ -175,62 +185,135 @@ public class LocalTransport extends BackupTransport {
 
         // Each 'record' in the restore set is kept in its own file, named by
         // the record key.  Wind through the data file, extracting individual
-        // record operations and building a set of all the updates to apply
+        // record operations and building a list of all the updates to apply
         // in this update.
-        BackupDataInput changeSet = new BackupDataInput(data.getFileDescriptor());
+        final ArrayList<KVOperation> changeOps;
         try {
-            int bufSize = 512;
-            byte[] buf = new byte[bufSize];
-            while (changeSet.readNextHeader()) {
-                String key = changeSet.getKey();
-                String base64Key = new String(Base64.encode(key.getBytes()));
-                File entityFile = new File(packageDir, base64Key);
-
-                int dataSize = changeSet.getDataSize();
-
-                if (DEBUG) Log.v(TAG, "Got change set key=" + key + " size=" + dataSize
-                        + " key64=" + base64Key);
-
-                if (dataSize >= 0) {
-                    if (entityFile.exists()) {
-                        entityFile.delete();
-                    }
-                    FileOutputStream entity = new FileOutputStream(entityFile);
-
-                    if (dataSize > bufSize) {
-                        bufSize = dataSize;
-                        buf = new byte[bufSize];
-                    }
-                    changeSet.readEntityData(buf, 0, dataSize);
-                    if (DEBUG) {
-                        try {
-                            long cur = Os.lseek(data.getFileDescriptor(), 0, SEEK_CUR);
-                            Log.v(TAG, "  read entity data; new pos=" + cur);
-                        }
-                        catch (ErrnoException e) {
-                            Log.w(TAG, "Unable to stat input file in performBackup() on "
-                                    + packageInfo.packageName);
-                        }
-                    }
-
-                    try {
-                        entity.write(buf, 0, dataSize);
-                    } catch (IOException e) {
-                        Log.e(TAG, "Unable to update key file " + entityFile.getAbsolutePath());
-                        return TRANSPORT_ERROR;
-                    } finally {
-                        entity.close();
-                    }
-                } else {
-                    entityFile.delete();
-                }
-            }
-            return TRANSPORT_OK;
+            changeOps = parseBackupStream(data);
         } catch (IOException e) {
             // oops, something went wrong.  abort the operation and return error.
-            Log.v(TAG, "Exception reading backup input:", e);
+            Log.v(TAG, "Exception reading backup input", e);
             return TRANSPORT_ERROR;
         }
+
+        // Okay, now we've parsed out the delta's individual operations.  We need to measure
+        // the effect against what we already have in the datastore to detect quota overrun.
+        // So, we first need to tally up the current in-datastore size per key.
+        final ArrayMap<String, Integer> datastore = new ArrayMap<>();
+        int totalSize = parseKeySizes(packageDir, datastore);
+
+        // ... and now figure out the datastore size that will result from applying the
+        // sequence of delta operations
+        if (DEBUG) {
+            if (changeOps.size() > 0) {
+                Log.v(TAG, "Calculating delta size impact");
+            } else {
+                Log.v(TAG, "No operations in backup stream, so no size change");
+            }
+        }
+        int updatedSize = totalSize;
+        for (KVOperation op : changeOps) {
+            // Deduct the size of the key we're about to replace, if any
+            final Integer curSize = datastore.get(op.key);
+            if (curSize != null) {
+                updatedSize -= curSize.intValue();
+                if (DEBUG && op.value == null) {
+                    Log.v(TAG, "  delete " + op.key + ", updated total " + updatedSize);
+                }
+            }
+
+            // And add back the size of the value we're about to store, if any
+            if (op.value != null) {
+                updatedSize += op.value.length;
+                if (DEBUG) {
+                    Log.v(TAG, ((curSize == null) ? "  new " : "  replace ")
+                            +  op.key + ", updated total " + updatedSize);
+                }
+            }
+        }
+
+        // If our final size is over quota, report the failure
+        if (updatedSize > KEY_VALUE_BACKUP_SIZE_QUOTA) {
+            if (DEBUG) {
+                Log.i(TAG, "New datastore size " + updatedSize
+                        + " exceeds quota " + KEY_VALUE_BACKUP_SIZE_QUOTA);
+            }
+            return TRANSPORT_QUOTA_EXCEEDED;
+        }
+
+        // No problem with storage size, so go ahead and apply the delta operations
+        // (in the order that the app provided them)
+        for (KVOperation op : changeOps) {
+            File element = new File(packageDir, op.key);
+
+            // this is either a deletion or a rewrite-from-zero, so we can just remove
+            // the existing file and proceed in either case.
+            element.delete();
+
+            // if this wasn't a deletion, put the new data in place
+            if (op.value != null) {
+                try (FileOutputStream out = new FileOutputStream(element)) {
+                    out.write(op.value, 0, op.value.length);
+                } catch (IOException e) {
+                    Log.e(TAG, "Unable to update key file " + element);
+                    return TRANSPORT_ERROR;
+                }
+            }
+        }
+        return TRANSPORT_OK;
+    }
+
+    // Parses a backup stream into individual key/value operations
+    private ArrayList<KVOperation> parseBackupStream(ParcelFileDescriptor data)
+            throws IOException {
+        ArrayList<KVOperation> changeOps = new ArrayList<>();
+        BackupDataInput changeSet = new BackupDataInput(data.getFileDescriptor());
+        while (changeSet.readNextHeader()) {
+            String key = changeSet.getKey();
+            String base64Key = new String(Base64.encode(key.getBytes()));
+            int dataSize = changeSet.getDataSize();
+            if (DEBUG) {
+                Log.v(TAG, "  Delta operation key " + key + "   size " + dataSize
+                        + "   key64 " + base64Key);
+            }
+
+            byte[] buf = (dataSize >= 0) ? new byte[dataSize] : null;
+            if (dataSize >= 0) {
+                changeSet.readEntityData(buf, 0, dataSize);
+            }
+            changeOps.add(new KVOperation(base64Key, buf));
+        }
+        return changeOps;
+    }
+
+    // Reads the given datastore directory, building a table of the value size of each
+    // keyed element, and returning the summed total.
+    private int parseKeySizes(File packageDir, ArrayMap<String, Integer> datastore) {
+        int totalSize = 0;
+        final String[] elements = packageDir.list();
+        if (elements != null) {
+            if (DEBUG) {
+                Log.v(TAG, "Existing datastore contents:");
+            }
+            for (String file : elements) {
+                File element = new File(packageDir, file);
+                String key = file;  // filename
+                int size = (int) element.length();
+                totalSize += size;
+                if (DEBUG) {
+                    Log.v(TAG, "  key " + key + "   size " + size);
+                }
+                datastore.put(key, size);
+            }
+            if (DEBUG) {
+                Log.v(TAG, "  TOTAL: " + totalSize);
+            }
+        } else {
+            if (DEBUG) {
+                Log.v(TAG, "No existing data for this package");
+            }
+        }
+        return totalSize;
     }
 
     // Deletes the contents but not the given directory
