@@ -3,6 +3,7 @@ package com.android.settingslib.graph;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -67,5 +68,37 @@ public class BatteryMeterDrawableBaseTest {
                 }
             }
         }
+    }
+
+    @Test
+    public void testPadding_returnsCorrectValues() {
+        // different pads on each side to differentiate
+        final int left = 1;
+        final int top = 2;
+        final int right = 3;
+        final int bottom = 4;
+
+        final Rect expected = new Rect(left, top, right, bottom);
+        final Rect padding = new Rect();
+
+        mBatteryDrawable.setPadding(left, top, right, bottom);
+
+        assertThat(mBatteryDrawable.getPadding(padding)).isEqualTo(true);
+        assertThat(padding).isEqualTo(expected);
+    }
+
+    @Test
+    public void testPadding_falseIfUnsetOrZero() {
+        final Rect padding = new Rect();
+        assertThat(mBatteryDrawable.getPadding(padding)).isEqualTo(false);
+        assertThat(isRectZero(padding)).isEqualTo(true);
+
+        mBatteryDrawable.setPadding(0, 0, 0, 0);
+        assertThat(mBatteryDrawable.getPadding(padding)).isEqualTo(false);
+        assertThat(isRectZero(padding)).isEqualTo(true);
+    }
+
+    private boolean isRectZero(Rect r) {
+        return r.left == 0 && r.top == 0 && r.right == 0 && r.bottom == 0;
     }
 }
