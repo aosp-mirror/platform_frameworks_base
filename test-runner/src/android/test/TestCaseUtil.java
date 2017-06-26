@@ -40,16 +40,6 @@ public class TestCaseUtil {
     private TestCaseUtil() {
     }
 
-    @SuppressWarnings("unchecked")
-    public static List<String> getTestCaseNames(Test test, boolean flatten) {
-        List<Test> tests = (List<Test>) getTests(test, flatten);
-        List<String> testCaseNames = new ArrayList<>();
-        for (Test aTest : tests) {
-            testCaseNames.add(getTestName(aTest));
-        }
-        return testCaseNames;
-    }
-
     public static List<? extends Test> getTests(Test test, boolean flatten) {
         return getTests(test, flatten, new HashSet<Class<?>>());
     }
@@ -92,7 +82,7 @@ public class TestCaseUtil {
         return testCases;
     }
 
-    private static Test invokeSuiteMethodIfPossible(Class testClass,
+    static Test invokeSuiteMethodIfPossible(Class testClass,
             Set<Class<?>> seen) {
         try {
             Method suiteMethod = testClass.getMethod(
@@ -120,7 +110,7 @@ public class TestCaseUtil {
         return null;
     }
 
-    public static String getTestName(Test test) {
+    static String getTestName(Test test) {
         if (test instanceof TestCase) {
             TestCase testCase = (TestCase) test;
             return testCase.getName();
@@ -137,35 +127,5 @@ public class TestCaseUtil {
             }
         }
         return "";
-    }
-
-    public static Test getTestAtIndex(TestSuite testSuite, int position) {
-        int index = 0;
-        Enumeration enumeration = testSuite.tests();
-        while (enumeration.hasMoreElements()) {
-            Test test = (Test) enumeration.nextElement();
-            if (index == position) {
-                return test;
-            }
-            index++;
-        }
-        return null;
-    }
-
-    public static TestSuite createTestSuite(Class<? extends Test> testClass)
-            throws InstantiationException, IllegalAccessException {
-
-        Test test = invokeSuiteMethodIfPossible(testClass,
-                new HashSet<Class<?>>());
-        if (test == null) {
-            return new TestSuite(testClass);
-
-        } else if (TestCase.class.isAssignableFrom(test.getClass())) {
-            TestSuite testSuite = new TestSuite(test.getClass().getName());
-            testSuite.addTest(test);
-            return testSuite;
-        }
-
-        return (TestSuite) test;
     }
 }
