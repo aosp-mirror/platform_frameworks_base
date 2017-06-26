@@ -1455,23 +1455,6 @@ public class CarrierConfigManager {
             "disable_voice_barring_notification_bool";
 
     /**
-     * URL from which the proto containing the public key of the Carrier used for
-     * IMSI encryption will be downloaded.
-     * @hide
-     */
-    public static final String IMSI_KEY_DOWNLOAD_URL_STRING = "imsi_key_download_url_string";
-
-    /**
-     * Time in days, after which the key will expire, and a new key will need to be downloaded.
-     * default value is {@link IMSI_ENCRYPTION_DAYS_TIME_DISABLED}, and indicates that IMSI
-     * encryption is not enabled by default for a carrier. Value of 0 indicates that the key
-     * does not expire.
-     * @hide
-     */
-    public static final String IMSI_KEY_EXPIRATION_DAYS_TIME_INT =
-            "imsi_key_expiration_days_time_int";
-
-    /**
      * List of operators considered non-roaming which won't show roaming icon.
      * <p>
      * Can use mcc or mcc+mnc as item. For example, 302 or 21407.
