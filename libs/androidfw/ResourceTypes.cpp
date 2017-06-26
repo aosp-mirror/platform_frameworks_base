@@ -3313,13 +3313,14 @@ struct ResTable::PackageGroup
         clearBagCache();
         const size_t numTypes = types.size();
         for (size_t i = 0; i < numTypes; i++) {
-            const TypeList& typeList = types[i];
+            TypeList& typeList = types.editItemAt(i);
             const size_t numInnerTypes = typeList.size();
             for (size_t j = 0; j < numInnerTypes; j++) {
                 if (typeList[j]->package->owner == owner) {
                     delete typeList[j];
                 }
             }
+            typeList.clear();
         }
 
         const size_t N = packages.size();
