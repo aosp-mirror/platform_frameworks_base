@@ -17,6 +17,7 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layoutDirection="ltr"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -30,6 +31,7 @@
 
         <LinearLayout
             android:id="@+id/time_layout"
+            android:layoutDirection="ltr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/timepicker_radial_picker_top_margin"

@@ -614,8 +614,8 @@ public class AppWindowContainerController
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
             return snapshot == null ? STARTING_WINDOW_TYPE_NONE
-                    : snapshotFillsWidth(snapshot) || fromRecents ? STARTING_WINDOW_TYPE_SNAPSHOT
-                    : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+                    : snapshotOrientationSameAsDisplay(snapshot) || fromRecents
+                            ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else {
             return STARTING_WINDOW_TYPE_NONE;
         }
@@ -640,7 +640,7 @@ public class AppWindowContainerController
         return true;
     }
 
-    private boolean snapshotFillsWidth(TaskSnapshot snapshot) {
+    private boolean snapshotOrientationSameAsDisplay(TaskSnapshot snapshot) {
         if (snapshot == null) {
             return false;
         }
@@ -655,7 +655,9 @@ public class AppWindowContainerController
         mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
                 stableInsets);
         displayBounds.inset(stableInsets);
-        return rect.width() >= displayBounds.width();
+        final boolean snapshotInLandscape = rect.width() >= rect.height();
+        final boolean displayInLandscape = displayBounds.width() >= displayBounds.height();
+        return snapshotInLandscape == displayInLandscape;
     }
 
     public void removeStartingWindow() {
