@@ -225,7 +225,7 @@ class UsbProfileGroupSettingsManager {
                 } else if ("serial-number".equals(name)) {
                     serialNumber = value;
                 } else {
-                    int intValue = -1;
+                    int intValue;
                     int radix = 10;
                     if (value != null && value.length() > 2 && value.charAt(0) == '0' &&
                         (value.charAt(1) == 'x' || value.charAt(1) == 'X')) {
@@ -388,9 +388,9 @@ class UsbProfileGroupSettingsManager {
                      (filter.mSerialNumber != null &&
                         mSerialNumber != null &&
                         !mSerialNumber.equals(filter.mSerialNumber))) {
-                    return(false);
+                    return false;
                 }
-                return(true);
+                return true;
             }
             if (obj instanceof UsbDevice) {
                 UsbDevice device = (UsbDevice)obj;
@@ -415,7 +415,7 @@ class UsbProfileGroupSettingsManager {
                             !mProductName.equals(device.getProductName())) ||
                         (device.getSerialNumber() != null &&
                             !mSerialNumber.equals(device.getSerialNumber()))) {
-                    return(false);
+                    return false;
                 }
                 return true;
             }
@@ -501,8 +501,7 @@ class UsbProfileGroupSettingsManager {
         public boolean matches(UsbAccessory acc) {
             if (mManufacturer != null && !acc.getManufacturer().equals(mManufacturer)) return false;
             if (mModel != null && !acc.getModel().equals(mModel)) return false;
-            if (mVersion != null && !acc.getVersion().equals(mVersion)) return false;
-            return true;
+            return !(mVersion != null && !acc.getVersion().equals(mVersion));
         }
 
         /**
@@ -517,8 +516,7 @@ class UsbProfileGroupSettingsManager {
                 return false;
             }
             if (mModel != null && !Objects.equals(accessory.mModel, mModel)) return false;
-            if (mVersion != null && !Objects.equals(accessory.mVersion, mVersion)) return false;
-            return true;
+            return !(mVersion != null && !Objects.equals(accessory.mVersion, mVersion));
         }
 
         @Override
@@ -624,13 +622,8 @@ class UsbProfileGroupSettingsManager {
         mPackageMonitor.register(context, null, UserHandle.ALL, true);
         mMtpNotificationManager = new MtpNotificationManager(
                 parentUserContext,
-                new MtpNotificationManager.OnOpenInAppListener() {
-                    @Override
-                    public void onOpenInApp(UsbDevice device) {
-                        resolveActivity(createDeviceAttachedIntent(device),
-                                device, false /* showMtpNotification */);
-                    }
-                });
+                device -> resolveActivity(createDeviceAttachedIntent(device),
+                        device, false /* showMtpNotification */));
     }
 
     /**
@@ -727,9 +720,7 @@ class UsbProfileGroupSettingsManager {
                         XmlUtils.nextElement(parser);
                     }
                 }
-            } catch (IOException e) {
-                Log.wtf(TAG, "Failed to read single-user settings", e);
-            } catch (XmlPullParserException e) {
+            } catch (IOException | XmlPullParserException e) {
                 Log.wtf(TAG, "Failed to read single-user settings", e);
             } finally {
                 IoUtils.closeQuietly(fis);
@@ -1015,8 +1006,8 @@ class UsbProfileGroupSettingsManager {
         }
     }
 
-    private final ArrayList<ResolveInfo> getDeviceMatchesLocked(UsbDevice device, Intent intent) {
-        ArrayList<ResolveInfo> matches = new ArrayList<ResolveInfo>();
+    private ArrayList<ResolveInfo> getDeviceMatchesLocked(UsbDevice device, Intent intent) {
+        ArrayList<ResolveInfo> matches = new ArrayList<>();
         List<ResolveInfo> resolveInfos = queryIntentActivitiesForAllProfiles(intent);
         int count = resolveInfos.size();
         for (int i = 0; i < count; i++) {
@@ -1029,9 +1020,9 @@ class UsbProfileGroupSettingsManager {
         return removeForwardIntentIfNotNeeded(preferHighPriority(matches));
     }
 
-    private final ArrayList<ResolveInfo> getAccessoryMatchesLocked(
+    private ArrayList<ResolveInfo> getAccessoryMatchesLocked(
             UsbAccessory accessory, Intent intent) {
-        ArrayList<ResolveInfo> matches = new ArrayList<ResolveInfo>();
+        ArrayList<ResolveInfo> matches = new ArrayList<>();
         List<ResolveInfo> resolveInfos = queryIntentActivitiesForAllProfiles(intent);
         int count = resolveInfos.size();
         for (int i = 0; i < count; i++) {
@@ -1402,7 +1393,7 @@ class UsbProfileGroupSettingsManager {
     void setDevicePackage(@NonNull UsbDevice device, @Nullable String packageName,
             @NonNull UserHandle user) {
         DeviceFilter filter = new DeviceFilter(device);
-        boolean changed = false;
+        boolean changed;
         synchronized (mLock) {
             if (packageName == null) {
                 changed = (mDevicePreferenceMap.remove(filter) != null);
@@ -1430,7 +1421,7 @@ class UsbProfileGroupSettingsManager {
     void setAccessoryPackage(@NonNull UsbAccessory accessory, @Nullable String packageName,
             @NonNull UserHandle user) {
         AccessoryFilter filter = new AccessoryFilter(accessory);
-        boolean changed = false;
+        boolean changed;
         synchronized (mLock) {
             if (packageName == null) {
                 changed = (mAccessoryPreferenceMap.remove(filter) != null);
@@ -1460,8 +1451,7 @@ class UsbProfileGroupSettingsManager {
         UserPackage userPackage = new UserPackage(packageName, user);
         synchronized (mLock) {
             if (mDevicePreferenceMap.values().contains(userPackage)) return true;
-            if (mAccessoryPreferenceMap.values().contains(userPackage)) return true;
-            return false;
+            return mAccessoryPreferenceMap.values().contains(userPackage);
         }
     }
 
@@ -1493,9 +1483,9 @@ class UsbProfileGroupSettingsManager {
         synchronized (mLock) {
             if (mDevicePreferenceMap.containsValue(userPackage)) {
                 // make a copy of the key set to avoid ConcurrentModificationException
-                Object[] keys = mDevicePreferenceMap.keySet().toArray();
+                DeviceFilter[] keys = mDevicePreferenceMap.keySet().toArray(new DeviceFilter[0]);
                 for (int i = 0; i < keys.length; i++) {
-                    Object key = keys[i];
+                    DeviceFilter key = keys[i];
                     if (userPackage.equals(mDevicePreferenceMap.get(key))) {
                         mDevicePreferenceMap.remove(key);
                         cleared = true;
@@ -1504,9 +1494,10 @@ class UsbProfileGroupSettingsManager {
             }
             if (mAccessoryPreferenceMap.containsValue(userPackage)) {
                 // make a copy of the key set to avoid ConcurrentModificationException
-                Object[] keys = mAccessoryPreferenceMap.keySet().toArray();
+                AccessoryFilter[] keys =
+                        mAccessoryPreferenceMap.keySet().toArray(new AccessoryFilter[0]);
                 for (int i = 0; i < keys.length; i++) {
-                    Object key = keys[i];
+                    AccessoryFilter key = keys[i];
                     if (userPackage.equals(mAccessoryPreferenceMap.get(key))) {
                         mAccessoryPreferenceMap.remove(key);
                         cleared = true;

@@ -87,9 +87,6 @@ public class UsbPortManager {
     // Mostly due a command sent by the remote Usb device.
     private HALCallback mHALCallback = new HALCallback(null, this);
 
-    // Notification object used to listen to the start of the usb daemon.
-    private final ServiceNotification mServiceNotification = new ServiceNotification();
-
     // Cookie sent for usb hal death notification.
     private static final int USB_HAL_DEATH_COOKIE = 1000;
 
@@ -107,18 +104,20 @@ public class UsbPortManager {
     // Ports may temporarily have different dispositions as they are added or removed
     // but the class invariant is that this list will only contain ports with DISPOSITION_READY
     // except while updatePortsLocked() is in progress.
-    private final ArrayMap<String, PortInfo> mPorts = new ArrayMap<String, PortInfo>();
+    private final ArrayMap<String, PortInfo> mPorts = new ArrayMap<>();
 
     // List of all simulated ports, indexed by id.
     private final ArrayMap<String, RawPortInfo> mSimulatedPorts =
-            new ArrayMap<String, RawPortInfo>();
+            new ArrayMap<>();
 
     public UsbPortManager(Context context) {
         mContext = context;
         try {
+            ServiceNotification serviceNotification = new ServiceNotification();
+
             boolean ret = IServiceManager.getService()
                     .registerForNotifications("android.hardware.usb@1.0::IUsb",
-                            "", mServiceNotification);
+                            "", serviceNotification);
             if (!ret) {
                 logAndPrint(Log.ERROR, null,
                         "Failed to register service start notification");
@@ -258,7 +257,6 @@ public class UsbPortManager {
                         logAndPrintException(pw, "Failed to set the USB port mode: "
                                 + "portId=" + portId
                                 + ", newMode=" + UsbPort.modeToString(newRole.role), e);
-                        return;
                     }
                 } else {
                     // Change power and data role independently as needed.
@@ -289,7 +287,6 @@ public class UsbPortManager {
                                             + ", newDataRole=" + UsbPort.dataRoleToString(newRole
                                             .role),
                                     e);
-                            return;
                         }
                     }
                 }
@@ -415,10 +412,6 @@ public class UsbPortManager {
         public IndentingPrintWriter pw;
         public UsbPortManager portManager;
 
-        HALCallback() {
-            super();
-        }
-
         HALCallback(IndentingPrintWriter pw, UsbPortManager portManager) {
             this.pw = pw;
             this.portManager = portManager;
@@ -434,7 +427,7 @@ public class UsbPortManager {
                 return;
             }
 
-            ArrayList<RawPortInfo> newPortInfo = new ArrayList<RawPortInfo>();
+            ArrayList<RawPortInfo> newPortInfo = new ArrayList<>();
 
             for (PortStatus current : currentPortStatus) {
                 RawPortInfo temp = new RawPortInfo(current.portName,
@@ -452,7 +445,6 @@ public class UsbPortManager {
             message.what = MSG_UPDATE_PORTS;
             message.setData(bundle);
             portManager.mHandler.sendMessage(message);
-            return;
         }
 
 
@@ -467,7 +459,7 @@ public class UsbPortManager {
                 return;
             }
 
-            ArrayList<RawPortInfo> newPortInfo = new ArrayList<RawPortInfo>();
+            ArrayList<RawPortInfo> newPortInfo = new ArrayList<>();
 
             for (PortStatus_1_1 current : currentPortStatus) {
                 RawPortInfo temp = new RawPortInfo(current.status.portName,
@@ -485,7 +477,6 @@ public class UsbPortManager {
             message.what = MSG_UPDATE_PORTS;
             message.setData(bundle);
             portManager.mHandler.sendMessage(message);
-            return;
         }
 
         public void notifyRoleSwitchStatus(String portName, PortRole role, int retval) {
@@ -495,7 +486,7 @@ public class UsbPortManager {
                 logAndPrint(Log.ERROR, pw, portName + " role switch failed");
             }
         }
-    };
+    }
 
     final class DeathRecipient implements HwBinder.DeathRecipient {
         public IndentingPrintWriter pw;
@@ -701,12 +692,7 @@ public class UsbPortManager {
 
         // Guard against possible reentrance by posting the broadcast from the handler
         // instead of from within the critical section.
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            }
-        });
+        mHandler.post(() -> mContext.sendBroadcastAsUser(intent, UserHandle.ALL));
     }
 
     private static void logAndPrint(int priority, IndentingPrintWriter pw, String msg) {
