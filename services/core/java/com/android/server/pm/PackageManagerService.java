@@ -19960,7 +19960,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
-                final PackageSetting ps = (PackageSetting) pkg.mExtras;
+                final PackageSetting ps = pkg == null ? null : (PackageSetting) pkg.mExtras;
                 boolean doClearData = true;
                 if (ps != null) {
                     final boolean targetIsInstantApp =
