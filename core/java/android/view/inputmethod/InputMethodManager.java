@@ -97,7 +97,7 @@ import java.util.concurrent.TimeUnit;
  * that manages the interaction across all processes.
  * <li> An <strong>input method (IME)</strong> implements a particular
  * interaction model allowing the user to generate text.  The system binds
- * to the current input method that is use, causing it to be created and run,
+ * to the current input method that is in use, causing it to be created and run,
  * and tells it when to hide and show its UI.  Only one IME is running at a time.
  * <li> Multiple <strong>client applications</strong> arbitrate with the input
  * method manager for input focus and control over the state of the IME.  Only
