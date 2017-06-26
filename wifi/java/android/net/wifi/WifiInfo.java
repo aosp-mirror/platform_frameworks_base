@@ -142,8 +142,9 @@ public class WifiInfo implements Parcelable {
     /**
      * This factor is used to adjust the rate output under the new algorithm
      * such that the result is comparable to the previous algorithm.
+     * This actually converts from unit 'packets per second' to 'packets per 5 seconds'.
      */
-    private static final long OUTPUT_SCALE_FACTOR = 5000;
+    private static final long OUTPUT_SCALE_FACTOR = 5;
     private long mLastPacketCountUpdateTimeStamp;
 
     /**
@@ -189,16 +190,16 @@ public class WifiInfo implements Parcelable {
                     double currentSampleWeight = 1.0 - lastSampleWeight;
 
                     txBadRate = txBadRate * lastSampleWeight
-                        + (txbad - txBad) * OUTPUT_SCALE_FACTOR / timeDelta
+                        + (txbad - txBad) * OUTPUT_SCALE_FACTOR * 1000 / timeDelta
                         * currentSampleWeight;
                     txSuccessRate = txSuccessRate * lastSampleWeight
-                        + (txgood - txSuccess) * OUTPUT_SCALE_FACTOR / timeDelta
+                        + (txgood - txSuccess) * OUTPUT_SCALE_FACTOR * 1000 / timeDelta
                         * currentSampleWeight;
                     rxSuccessRate = rxSuccessRate * lastSampleWeight
-                        + (rxgood - rxSuccess) * OUTPUT_SCALE_FACTOR / timeDelta
+                        + (rxgood - rxSuccess) * OUTPUT_SCALE_FACTOR * 1000 / timeDelta
                         * currentSampleWeight;
                     txRetriesRate = txRetriesRate * lastSampleWeight
-                        + (txretries - txRetries) * OUTPUT_SCALE_FACTOR / timeDelta
+                        + (txretries - txRetries) * OUTPUT_SCALE_FACTOR * 1000/ timeDelta
                         * currentSampleWeight;
             } else {
                 txBadRate = 0;
@@ -435,6 +436,22 @@ public class WifiInfo implements Parcelable {
      */
     public boolean is5GHz() {
         return ScanResult.is5GHz(mFrequency);
+    }
+
+    /**
+     * @hide
+     * This returns txSuccessRate in packets per second.
+     */
+    public double getTxSuccessRatePps() {
+        return txSuccessRate / OUTPUT_SCALE_FACTOR;
+    }
+
+    /**
+     * @hide
+     * This returns rxSuccessRate in packets per second.
+     */
+    public double getRxSuccessRatePps() {
+        return rxSuccessRate / OUTPUT_SCALE_FACTOR;
     }
 
     /**
