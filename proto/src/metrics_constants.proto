@@ -3546,7 +3546,7 @@ message MetricsEvent {
     STORAGE_FILES = 841;
 
     // FIELD - Rank of the clicked Settings search result
-    FIELD_SETTINGS_SERACH_RESULT_RANK = 842;
+    FIELD_SETTINGS_SEARCH_RESULT_RANK = 842;
 
     // OPEN: Settings > Apps > Default Apps > Assist >  Default assist
     DEFAULT_ASSIST_PICKER = 843;
@@ -4039,10 +4039,10 @@ message MetricsEvent {
     ACTION_SETTINGS_UPDATE_DEFAULT_APP = 1000;
 
     // FIELD - Query length when Settings search result is clicked
-    FIELD_SETTINGS_SERACH_QUERY_LENGTH = 1001;
+    FIELD_SETTINGS_SEARCH_QUERY_LENGTH = 1001;
 
     // FIELD - Number of results when Settings search result is clicked
-    FIELD_SETTINGS_SERACH_RESULT_COUNT = 1002;
+    FIELD_SETTINGS_SEARCH_RESULT_COUNT = 1002;
 
     // OPEN: Settings > Display > Ambient Display
     // CATEGORY: SETTINGS
