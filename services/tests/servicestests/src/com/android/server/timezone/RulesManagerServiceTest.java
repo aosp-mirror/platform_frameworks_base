@@ -17,8 +17,8 @@
 package com.android.server.timezone;
 
 import com.android.timezone.distro.DistroVersion;
-import com.android.timezone.distro.TimeZoneDistro;
 import com.android.timezone.distro.StagedDistroOperation;
+import com.android.timezone.distro.TimeZoneDistro;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +42,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -284,12 +284,14 @@ public class RulesManagerServiceTest {
 
         mRulesManagerService.requestInstall(parcelFileDescriptor, tokenBytes, callback);
 
+        // Request the rules state while the async operation is "happening".
+        RulesState actualRulesState = mRulesManagerService.getRulesState();
         RulesState expectedRuleState = new RulesState(
                 systemRulesVersion, RulesManagerService.DISTRO_FORMAT_VERSION_SUPPORTED,
                 true /* operationInProgress */,
                 RulesState.STAGED_OPERATION_UNKNOWN, null /* stagedDistroRulesVersion */,
                 RulesState.DISTRO_STATUS_UNKNOWN, null /* installedDistroRulesVersion */);
-        assertEquals(expectedRuleState, mRulesManagerService.getRulesState());
+        assertEquals(expectedRuleState, actualRulesState);
     }
 
     @Test
@@ -407,13 +409,13 @@ public class RulesManagerServiceTest {
         TimeZoneDistro expectedDistro = new TimeZoneDistro(expectedContent);
 
         // Set up the installer.
-        configureStageInstallExpectation(expectedDistro, TimeZoneDistroInstaller.INSTALL_SUCCESS);
+        configureStageInstallExpectation(TimeZoneDistroInstaller.INSTALL_SUCCESS);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
 
         // Verify the expected calls were made to other components.
-        verifyStageInstallCalled(expectedDistro);
+        verifyStageInstallCalled();
         verifyPackageTrackerCalled(token, true /* success */);
 
         // Check the callback was called.
@@ -439,16 +441,14 @@ public class RulesManagerServiceTest {
         verifyNoInstallerCallsMade();
         callback.assertNoResultReceived();
 
-        TimeZoneDistro expectedDistro = new TimeZoneDistro(expectedContent);
-
         // Set up the installer.
-        configureStageInstallExpectation(expectedDistro, TimeZoneDistroInstaller.INSTALL_SUCCESS);
+        configureStageInstallExpectation(TimeZoneDistroInstaller.INSTALL_SUCCESS);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
 
         // Verify the expected calls were made to other components.
-        verifyStageInstallCalled(expectedDistro);
+        verifyStageInstallCalled();
         verifyPackageTrackerCalled(null /* expectedToken */, true /* success */);
 
         // Check the callback was received.
@@ -476,17 +476,14 @@ public class RulesManagerServiceTest {
         verifyNoInstallerCallsMade();
         callback.assertNoResultReceived();
 
-        TimeZoneDistro expectedDistro = new TimeZoneDistro(expectedContent);
-
         // Set up the installer.
-        configureStageInstallExpectation(
-                expectedDistro, TimeZoneDistroInstaller.INSTALL_FAIL_VALIDATION_ERROR);
+        configureStageInstallExpectation(TimeZoneDistroInstaller.INSTALL_FAIL_VALIDATION_ERROR);
 
         // Simulate the async execution.
         mFakeExecutor.simulateAsyncExecutionOfLastCommand();
 
         // Verify the expected calls were made to other components.
-        verifyStageInstallCalled(expectedDistro);
+        verifyStageInstallCalled();
 
         // Validation failure is treated like a successful check: repeating it won't improve things.
         boolean expectedSuccess = true;
@@ -787,9 +784,9 @@ public class RulesManagerServiceTest {
                 .thenThrow(new IOException("Simulated failure"));
     }
 
-    private void configureStageInstallExpectation(TimeZoneDistro expected, int resultCode)
+    private void configureStageInstallExpectation(int resultCode)
             throws Exception {
-        when(mMockTimeZoneDistroInstaller.stageInstallWithErrorCode(eq(expected)))
+        when(mMockTimeZoneDistroInstaller.stageInstallWithErrorCode(any(TimeZoneDistro.class)))
                 .thenReturn(resultCode);
     }
 
@@ -797,8 +794,8 @@ public class RulesManagerServiceTest {
         doReturn(success).when(mMockTimeZoneDistroInstaller).stageUninstall();
     }
 
-    private void verifyStageInstallCalled(TimeZoneDistro expected) throws Exception {
-        verify(mMockTimeZoneDistroInstaller).stageInstallWithErrorCode(eq(expected));
+    private void verifyStageInstallCalled() throws Exception {
+        verify(mMockTimeZoneDistroInstaller).stageInstallWithErrorCode(any(TimeZoneDistro.class));
         verifyNoMoreInteractions(mMockTimeZoneDistroInstaller);
         reset(mMockTimeZoneDistroInstaller);
     }
