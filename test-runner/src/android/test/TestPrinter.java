@@ -21,7 +21,6 @@ import junit.framework.Test;
 import junit.framework.TestListener;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -34,52 +33,37 @@ import java.util.Set;
  * {@hide} Not needed for 1.0 SDK.
  */
 @Deprecated
-public class TestPrinter implements TestRunner.Listener, TestListener {
+class TestPrinter implements TestListener {
 
     private String mTag;
     private boolean mOnlyFailures;
     private Set<String> mFailedTests = new HashSet<String>();
 
 
-    public TestPrinter(String tag, boolean onlyFailures) {
+    TestPrinter(String tag, boolean onlyFailures) {
         mTag = tag;
         mOnlyFailures = onlyFailures;
     }
 
-    public void started(String className) {
+    private void started(String className) {
         if (!mOnlyFailures) {
             Log.i(mTag, "started: " + className);
         }
     }
 
-    public void finished(String className) {
+    private void finished(String className) {
         if (!mOnlyFailures) {
             Log.i(mTag, "finished: " + className);
         }
     }
 
-    public void performance(String className,
-            long itemTimeNS, int iterations,
-            List<TestRunner.IntermediateTime> intermediates) {
-        Log.i(mTag, "perf: " + className + " = " + itemTimeNS + "ns/op (done "
-                + iterations + " times)");
-        if (intermediates != null && intermediates.size() > 0) {
-            int N = intermediates.size();
-            for (int i = 0; i < N; i++) {
-                TestRunner.IntermediateTime time = intermediates.get(i);
-                Log.i(mTag, "  intermediate: " + time.name + " = "
-                        + time.timeInNS + "ns");
-            }
-        }
-    }
-
-    public void passed(String className) {
+    private void passed(String className) {
         if (!mOnlyFailures) {
             Log.i(mTag, "passed: " + className);
         }
     }
 
-    public void failed(String className, Throwable exception) {
+    private void failed(String className, Throwable exception) {
         Log.i(mTag, "failed: " + className);
         Log.i(mTag, "----- begin exception -----");
         Log.i(mTag, "", exception);
