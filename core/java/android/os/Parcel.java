@@ -27,6 +27,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
+import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 import dalvik.system.VMRuntime;
 
@@ -260,24 +261,24 @@ public final class Parcel {
     // see libbinder's binder/Status.h
     private static final int EX_TRANSACTION_FAILED = -129;
 
-    @FastNative
+    @CriticalNative
     private static native int nativeDataSize(long nativePtr);
-    @FastNative
+    @CriticalNative
     private static native int nativeDataAvail(long nativePtr);
-    @FastNative
+    @CriticalNative
     private static native int nativeDataPosition(long nativePtr);
-    @FastNative
+    @CriticalNative
     private static native int nativeDataCapacity(long nativePtr);
     @FastNative
     private static native long nativeSetDataSize(long nativePtr, int size);
-    @FastNative
+    @CriticalNative
     private static native void nativeSetDataPosition(long nativePtr, int pos);
     @FastNative
     private static native void nativeSetDataCapacity(long nativePtr, int size);
 
-    @FastNative
+    @CriticalNative
     private static native boolean nativePushAllowFds(long nativePtr, boolean allowFds);
-    @FastNative
+    @CriticalNative
     private static native void nativeRestoreAllowFds(long nativePtr, boolean lastValue);
 
     private static native void nativeWriteByteArray(long nativePtr, byte[] b, int offset, int len);
@@ -297,13 +298,13 @@ public final class Parcel {
     private static native byte[] nativeCreateByteArray(long nativePtr);
     private static native boolean nativeReadByteArray(long nativePtr, byte[] dest, int destLen);
     private static native byte[] nativeReadBlob(long nativePtr);
-    @FastNative
+    @CriticalNative
     private static native int nativeReadInt(long nativePtr);
-    @FastNative
+    @CriticalNative
     private static native long nativeReadLong(long nativePtr);
-    @FastNative
+    @CriticalNative
     private static native float nativeReadFloat(long nativePtr);
-    @FastNative
+    @CriticalNative
     private static native double nativeReadDouble(long nativePtr);
     private static native String nativeReadString(long nativePtr);
     private static native IBinder nativeReadStrongBinder(long nativePtr);
@@ -319,11 +320,12 @@ public final class Parcel {
     private static native int nativeCompareData(long thisNativePtr, long otherNativePtr);
     private static native long nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int offset, int length);
-    @FastNative
+    @CriticalNative
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
 
+    @CriticalNative
     private static native long nativeGetBlobAshmemSize(long nativePtr);
 
     public final static Parcelable.Creator<String> STRING_CREATOR
