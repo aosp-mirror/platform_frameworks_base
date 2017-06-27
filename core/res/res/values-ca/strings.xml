@@ -1615,9 +1615,9 @@
     <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"No es pot deixar de fixar aquesta aplicació"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixació de la pantalla anul·lada"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Sol·licita el codi PIN per anul·lar"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sol·licita el patró de desbloqueig per anul·lar"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya per anul·lar"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Sol·licita el codi PIN per deixar de fixar"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sol·licita el patró de desbloqueig per deixar de fixar"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya per deixar de fixar"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instal·lat per l\'administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Suprimit per l\'administrador"</string>
