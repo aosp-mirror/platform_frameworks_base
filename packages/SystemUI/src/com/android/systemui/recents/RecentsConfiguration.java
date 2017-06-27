@@ -16,12 +16,14 @@
 
 package com.android.systemui.recents;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 
 import android.os.SystemProperties;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.TaskStack;
@@ -84,6 +86,13 @@ public class RecentsConfiguration {
     // Recents will layout task views in a grid mode when there's enough space in the screen.
     public boolean isGridEnabled;
 
+    // Support for Android Recents for low ram devices. If this field is set to true, then Recents
+    // will use the alternative layout.
+    public boolean isLowRamDevice;
+
+    // Enable drag and drop split from Recents. Disabled for low ram devices.
+    public boolean dragToSplitEnabled;
+
     private final Context mAppContext;
 
     public RecentsConfiguration(Context context) {
@@ -95,6 +104,8 @@ public class RecentsConfiguration {
         fakeShadows = res.getBoolean(R.bool.config_recents_fake_shadows);
         svelteLevel = res.getInteger(R.integer.recents_svelte_level);
         isGridEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
+        isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
+        dragToSplitEnabled = !isLowRamDevice;
 
         float screenDensity = context.getResources().getDisplayMetrics().density;
         smallestWidth = ssp.getDeviceSmallestWidth();

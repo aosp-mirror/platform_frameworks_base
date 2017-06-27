@@ -2343,6 +2343,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final Rect displayFrame = new Rect(0, 0,
                     displayInfo.logicalWidth, displayInfo.logicalHeight);
             final Rect insets = new Rect();
+            final Rect stableInsets = new Rect();
             Rect surfaceInsets = null;
             final boolean freeform = win != null && win.inFreeformWorkspace();
             if (win != null) {
@@ -2357,6 +2358,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 surfaceInsets = win.getAttrs().surfaceInsets;
                 insets.set(win.mContentInsets);
+                stableInsets.set(win.mStableInsets);
             }
 
             if (atoken.mLaunchTaskBehind) {
@@ -2371,7 +2373,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final Configuration displayConfig = displayContent.getConfiguration();
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, displayConfig.uiMode,
                     displayConfig.orientation, frame, displayFrame, insets, surfaceInsets,
-                    isVoiceInteraction, freeform, atoken.getTask().mTaskId);
+                    stableInsets, isVoiceInteraction, freeform, atoken.getTask().mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
                 final int containingWidth = frame.width();
