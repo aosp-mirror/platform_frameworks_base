@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"ຊອກຫາບໍລິການ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ການ​ໂທ Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"ເພື່ອ​ໂທ ແລະ​ສົ່ງ​ຂໍ້​ຄວາມ​ຢູ່​ເທິງ Wi-Fi, ກ່ອນ​ອື່ນ​ໝົດ​ໃຫ້​ຖ້າມ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ ເພື່ອ​ຕັ້ງ​ການ​ບໍ​ລິ​ການ​ນີ້. ຈາກນັ້ນ​ເປີດການ​ໂທ Wi-Fi ອີກ​ຈາກ​ການ​ຕັ້ງ​ຄ່າ."</item>
+    <item msgid="3910386316304772394">"ເພື່ອໂທ ແລະ ສົ່ງຂໍ້ຄວາມຜ່ານ Wi-Fi, ໃຫ້ແຈ້ງໃຫ້ຜູ້ໃຫ້ບໍລິການຂອງທ່ານຕັ້ງບໍລິການນີ້. ຈາກນັ້ນເປີດໃຊ້ການໂທ Wi-Fi ອີກຄັ້ງຈາກການຕັ້ງຄ່າ. (ລະຫັດຂໍ້ຜິດພາດ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"ລົງ​ທະ​ບຽນ​ກັບ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">ເປີດເຄືອຂ່າຍ Wi-Fi  ທີ່ມີໃຫ້</item>
       <item quantity="one">ເປີດເຄືອຂ່າຍ Wi-Fi  ທີ່ມີໃຫ້</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"ເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi ແບບເປີດ"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ກຳລັງເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"ເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi ແລ້ວ"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi ໄດ້"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ແຕະເພື່ອເບິ່ງເຄືອຂ່າຍທັງໝົດ"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"ເຊື່ອມ​ຕໍ່"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"ເຄືອຂ່າຍທັງໝົດ"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ເຂົ້າສູ່ລະບົບເຄືອຂ່າຍ Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ລົງຊື່ເຂົ້າເຄືອຂ່າຍ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

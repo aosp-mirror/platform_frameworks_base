@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवा शोधत आहे"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"वाय-फाय कॉलिंग"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"वाय-फायवरून कॉल करण्यासाठी आणि संदेश पाठविण्यासाठी, प्रथम आपल्या वाहकास ही सेवा सेट करण्यास सांगा. नंतर सेटिंग्जमधून पुन्हा वाय-फाय कॉलिंग चालू करा."</item>
+    <item msgid="3910386316304772394">"वाय-फायवरून कॉल करण्यासाठी आणि संदेश पाठवण्यासाठी आधी तुमच्या कॅरियरला ही सेवा सेट अप करण्यास सांगा. नंतर सेटिंग्जमधून वाय-फाय वापरून कॉल करणे पुन्हा चालू करा. (एरर कोड <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"आपल्या वाहकासह नोंदणी करा"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="one">खुले वाय-फाय नेटवर्क उपलब्ध</item>
       <item quantity="other">खुले वाय-फाय नेटवर्क उपलब्ध</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"खुल्या वाय-फाय नेटवर्कशी कनेक्ट करा"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"खुल्या वाय-फाय नेटवर्कशी कनेक्ट करत आहे"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"वाय-फाय नेटवर्कशी कनेक्ट केले"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"वाय-फाय नेटवर्कशी कनेक्ट करू शकत नाही"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"सर्व नेटवर्क पाहण्यासाठी टॅप करा"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"कनेक्ट करा"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"सर्व नेटवर्क"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"वाय-फाय नेटवर्कमध्‍ये साइन इन करा"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"नेटवर्कवर साइन इन करा"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

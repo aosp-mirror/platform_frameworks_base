@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Service zoeken"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Bellen via wifi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Als je wilt bellen en berichten wilt verzenden via wifi, moet je eerst je provider vragen deze service in te stellen. Schakel bellen via wifi vervolgens opnieuw in via \'Instellingen\'."</item>
+    <item msgid="3910386316304772394">"Als je wilt bellen en berichten wilt verzenden via wifi, moet je eerst je provider vragen deze service in te stellen. Schakel bellen via wifi vervolgens opnieuw in via Instellingen. (Foutcode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Registreren bij je provider"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Open wifi-netwerken beschikbaar</item>
       <item quantity="one">Open wifi-netwerk beschikbaar</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Verbinding maken met een open wifi-netwerk"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Verbinding maken met een open wifi-netwerk…"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Verbonden met een wifi-netwerk"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Kan geen verbinding maken met het wifi-netwerk"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tik om alle netwerken te bekijken"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinding maken"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Alle netwerken"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Inloggen bij wifi-netwerk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Inloggen bij netwerk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

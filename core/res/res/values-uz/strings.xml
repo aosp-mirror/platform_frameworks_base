@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Xizmatlar qidirilmoqda"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi qo‘ng‘iroq"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Wi-Fi orqali qo‘ng‘iroqlarni amalga oshirish va xabarlar bilan almashinish uchun uyali aloqa operatoringizdan ushbu xizmatni yoqib qo‘yishni so‘rashingiz lozim. Keyin sozlamalarda Wi-Fi qo‘ng‘irog‘i imkoniyatini yoqib olishingiz mumkin."</item>
+    <item msgid="3910386316304772394">"Wi-Fi orqali qo‘ng‘iroqlarni amalga oshirish va xabarlar bilan almashinish uchun uyali aloqa operatoringizdan ushbu xizmatni yoqib qo‘yishni so‘rashingiz lozim. Keyin sozlamalarda Wi-Fi qo‘ng‘irog‘i imkoniyatini yoqib olishingiz mumkin. (Xato kodi: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Mobil operatoringiz yordamida ro‘yxatdan o‘ting"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Ochiq Wi-Fi tarmoqlari aniqlandi</item>
       <item quantity="one">Ochiq Wi-Fi tarmog‘i aniqlandi</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Ochiq Wi‑Fi tarmoqqa ulaning"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Ochiq Wi‑Fi tarmoqqa ulanilmoqda"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi tarmoqqa ulanildi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi-Fi tarmoqqa ulanib bo‘lmadi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Barcha tarmoqlarni ko‘rish uchun bosing"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Ulanish"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Barcha tarmoqlar"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi tarmoqqa kirish"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Tarmoqqa kirish"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1454,7 +1447,7 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", xavfsiz"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Grafik kalit esimdan chiqdi"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Grafik kalit noto‘g‘ri"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Grafik kalit xato"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Parol noto‘g‘ri"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-kod noto‘g‘ri"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>

@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Recherche des services disponibles"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Appels Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Pour effectuer des appels et envoyer des messages via le Wi-Fi, demandez tout d\'abord à votre opérateur de configurer ce service. Réactivez ensuite les appels Wi-Fi dans les paramètres."</item>
+    <item msgid="3910386316304772394">"Pour passer des appels et envoyer des messages via le Wi-Fi, demandez d\'abord à votre opérateur de configurer ce service. Ensuite, réactivez les appels Wi-Fi dans les paramètres. (Code d\'erreur : <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Inscrivez-vous auprès de votre opérateur."</item>
@@ -1106,20 +1106,13 @@
       <item quantity="one">Réseau Wi-Fi ouvert disponible</item>
       <item quantity="other">Réseaux Wi-Fi ouverts disponibles</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Se connecter pour ouvrir le réseau Wi-Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Connexion pour ouvrir un réseau Wi-Fi…"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Connecté au réseau Wi-Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Impossible de se connecter au réseau Wi-Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Appuyer pour afficher tous les réseaux"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Se connecter"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Tous les réseaux"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Connectez-vous au réseau Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Se connecter au réseau"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

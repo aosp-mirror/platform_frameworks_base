@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"​ស្វែង​រក​សេវាកម្ម"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ការហៅតាម Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"ដើម្បីធ្វើការហៅ និងផ្ញើសារតាម Wi-Fi ដំបូងឡើយអ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនរបស់អ្នកដំឡើងសេវាកម្មនេះសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតចេញពីការកំណត់។"</item>
+    <item msgid="3910386316304772394">"ដើម្បីធ្វើការហៅ និងផ្ញើសារតាម Wi-Fi អ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនបម្រើសេវាទូរសព្ទរបស់អ្នកដំឡើងសេវាកម្មនេះជាមុនសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតនៅក្នុងការកំណត់។ (លេខកូដបញ្ហា៖ <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"ចុះឈ្មោះជាមួយក្រុមហ៊ុនរបស់អ្នក"</item>
@@ -1108,20 +1108,13 @@
       <item quantity="other">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
       <item quantity="one">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"ភ្ជាប់ទៅបណ្តាញ Wi‑Fi ចំហ"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"កំពុងភ្ជាប់ទៅបណ្តាញ Wi‑Fi ចំហ"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"បានភ្ជាប់ទៅបណ្តាញ Wi‑Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"មិនអាចភ្ជាប់ទៅបណ្តាញ Wi‑Fi បានទេ"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ចុចដើម្បីមើលបណ្តាញទាំងអស់"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"ភ្ជាប់"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"បណ្តាញទាំងអស់"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ចូល​បណ្ដាញ​វ៉ាយហ្វាយ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ចូលទៅបណ្តាញ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

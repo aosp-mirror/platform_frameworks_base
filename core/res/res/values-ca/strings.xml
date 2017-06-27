@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"S\'està cercant el servei"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Trucades per Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Per fer trucades i enviar missatges per Wi-Fi, primer has de demanar a l\'operador de telefonia mòbil que configuri aquest servei. Després, torna a activar les trucades per Wi-Fi des de Configuració."</item>
+    <item msgid="3910386316304772394">"Per fer trucades i enviar missatges per Wi-Fi, primer has de demanar a l\'operador de telefonia mòbil que configuri aquest servei. Després, torna a activar les trucades per Wi-Fi a Configuració. (Codi d\'error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Registra\'t amb el teu operador de telefonia mòbil"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Xarxes Wi-Fi obertes disponibles</item>
       <item quantity="one">Xarxa Wi-Fi oberta disponible</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Connecta\'t a una xarxa Wi-Fi oberta"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"S\'està connectant a una xarxa Wi-Fi oberta"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"S\'ha connectat a la xarxa Wi-Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"No s\'ha pogut connectar a una xarxa Wi-Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toca per veure totes les xarxes"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connecta"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Totes les xarxes"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Inicia la sessió a la xarxa Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Inicia la sessió a la xarxa"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1631,9 +1624,9 @@
     <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"No es pot deixar de fixar aquesta aplicació"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixació de la pantalla anul·lada"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Sol·licita el codi PIN per anul·lar"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sol·licita el patró de desbloqueig per anul·lar"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya per anul·lar"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Sol·licita el codi PIN per deixar de fixar"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sol·licita el patró de desbloqueig per deixar de fixar"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya per deixar de fixar"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instal·lat per l\'administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Suprimit per l\'administrador"</string>

@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"సేవ కోసం శోధిస్తోంది"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi కాలింగ్"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Wi-Fiలో కాల్‌లు చేయడం మరియు సందేశాలు పంపడం కోసం ముందుగా ఈ సేవను సెటప్ చేయడానికి మీ క్యారియర్‌ను అడగండి. ఆపై సెట్టింగ్‌ల నుండి మళ్లీ Wi-Fi కాలింగ్‌ను ఆన్ చేయండి."</item>
+    <item msgid="3910386316304772394">"Wi-Fiతో కాల్‌లను చేయడానికి మరియు సందేశాలను పంపించడానికి, మొదట ఈ సేవను సెటప్ చేయాల్సిందిగా మీ క్యారియర్‌‌కి చెప్పండి. ఆ తర్వాత సెట్టింగ్‌ల నుండి Wi-Fi కాలింగ్‌ని మళ్లీ ఆన్ చేయండి. (లోపం కోడ్: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"మీ క్యారియర్‌తో నమోదు చేయండి"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">ఓపెన్ Wi-Fi నెట్‌వర్క్‌లు అందుబాటులో ఉన్నాయి</item>
       <item quantity="one">ఓపెన్ Wi-Fi నెట్‌వర్క్ అందుబాటులో ఉంది</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"బహిరంగ Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయండి"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"బహిరంగ Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేస్తోంది"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయబడింది"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయడం సాధ్యపడలేదు"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"అన్ని నెట్‌వర్క్‌లు చూడటానికి నొక్కండి"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"కనెక్ట్ చేయి"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"అన్ని నెట్‌వర్క్‌లు"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

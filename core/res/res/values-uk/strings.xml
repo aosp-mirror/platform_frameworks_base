@@ -133,7 +133,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Пошук служби"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Дзвінок через Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Щоб телефонувати або надсилати повідомлення через Wi-Fi, спочатку попросіть свого оператора налаштувати цю послугу. Після цього ввімкніть дзвінки через Wi-Fi у налаштуваннях."</item>
+    <item msgid="3910386316304772394">"Щоб телефонувати або надсилати повідомлення через Wi-Fi, спершу попросіть свого оператора налаштувати цю послугу. Після цього знову ввімкніть дзвінки через Wi-Fi у налаштуваннях. (Код помилки: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Зареєструйтеся в оператора"</item>
@@ -1150,20 +1150,13 @@
       <item quantity="many">Відкриті мережі Wi-Fi доступні</item>
       <item quantity="other">Відкриті мережі Wi-Fi доступні</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Під’єднайтеся до відкритої мережі Wi-Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Під’єднання до відкритої мережі Wi-Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Під’єднано до мережі Wi-Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не вдалося під’єднатися до мережі Wi-Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Торкніться, щоб побачити всі мережі"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Під’єднатися"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Усі мережі"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Вхід у мережу Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Вхід у мережу"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

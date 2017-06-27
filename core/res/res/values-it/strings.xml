@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Ricerca servizio"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Chiamate Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Per effettuare chiamate e inviare messaggi tramite Wi-Fi, è necessario prima chiedere all\'operatore telefonico di attivare il servizio. Successivamente, riattiva le chiamate Wi-Fi dalle Impostazioni."</item>
+    <item msgid="3910386316304772394">"Per effettuare chiamate e inviare messaggi tramite Wi-Fi, chiedi prima al tuo operatore di impostare questo servizio. Dopodiché, attiva di nuovo la funzione Chiamate Wi-Fi nelle impostazioni. (Codice di errore: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Registrati con il tuo operatore"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Apri reti Wi-Fi disponibili</item>
       <item quantity="one">Apri rete Wi-Fi disponibile</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Stabilisci la connessione per aprire la rete Wi‑Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Connessione per aprire la rete Wi‑Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Connessione alla rete Wi-Fi stabilita"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Impossibile connettersi alla rete Wi-Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tocca per vedere tutte le reti"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connetti"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Tutte le reti"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Accedi a rete Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Accedi alla rete"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1383,7 +1376,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Altre opzioni"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Archivio condiviso interno"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Memoria condivisa interna"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Scheda SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"Scheda SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Unità USB"</string>

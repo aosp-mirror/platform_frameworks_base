@@ -135,7 +135,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"البحث عن خدمة"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏الاتصال عبر Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"‏لإجراء مكالمات وإرسال رسائل عبر Wi-Fi، اطلب من مشغّل شبكة الجوّال أولاً إعداد هذا الجهاز، ثم شغّل الاتصال عبر Wi-Fi مرة أخرى من خلال الإعدادات."</item>
+    <item msgid="3910386316304772394">"‏لإجراء مكالمات وإرسال رسائل عبر Wi-Fi، اطلب من مشغّل شبكة الجوّال أولاً إعداد هذه الخدمة، ثم شغّل الاتصال عبر Wi-Fi مرة أخرى من خلال الإعدادات. (رمز الخطأ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"التسجيل لدى مشغّل شبكة الجوّال"</item>
@@ -1194,20 +1194,13 @@
       <item quantity="other">‏تتوفر شبكات Wi-Fi مفتوحة</item>
       <item quantity="one">‏تتوفر شبكة Wi-Fi واحدة مفتوحة</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"‏الاتصال بشبكة Wi-Fi المفتوحة"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"‏جارٍ الاتصال بشبكة Wi-Fi المفتوحة"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"‏تم الاتصال بشبكة Wi-Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"‏تعذَّر الاتصال بشبكة Wi‑Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"انقر للاطلاع على جميع الشبكات"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"جميع الشبكات"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏تسجيل الدخول إلى شبكة Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"تسجيل الدخول إلى الشبكة"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
