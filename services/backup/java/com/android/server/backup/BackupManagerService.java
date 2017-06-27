@@ -5688,13 +5688,15 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 PerformFullTransportBackupTask pftbt = null;
                 synchronized (mQueueLock) {
                     if (mRunningFullBackupTask != null) {
-                        if (DEBUG_SCHEDULING) {
-                            Slog.i(TAG, "Telling running backup to stop");
-                        }
                         pftbt = mRunningFullBackupTask;
                     }
                 }
-                pftbt.handleCancel(true);
+                if (pftbt != null) {
+                    if (DEBUG_SCHEDULING) {
+                        Slog.i(TAG, "Telling running backup to stop");
+                    }
+                    pftbt.handleCancel(true);
+                }
             }
         };
         new Thread(endFullBackupRunnable, "end-full-backup").start();
