@@ -27,18 +27,6 @@
     <string name="terabyteShort" msgid="231613018159186962">"តេរ៉ាបៃ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> ថ្ងៃ"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> ថ្ងៃ <xliff:g id="HOURS">%2$d</xliff:g> ម៉ោង"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> ថ្ងៃ <xliff:g id="HOURS">%2$d</xliff:g> ម៉ោង"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> ម៉ោង"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ម៉ោង <xliff:g id="MINUTES">%2$d</xliff:g> នាទី"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ម៉ោង <xliff:g id="MINUTES">%2$d</xliff:g> នាទី"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> នាទី"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> នាទី"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g>នាទី <xliff:g id="SECONDS">%2$d</xliff:g>វិនាទី"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g>នាទី <xliff:g id="SECONDS">%2$d</xliff:g>វិនាទី"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> វិនាទី"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> វិនាទី"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;គ្មាន​ចំណង​ជើង&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(គ្មាន​លេខ​ទូរស័ព្ទ)"</string>
     <string name="unknownName" msgid="6867811765370350269">"មិន​ស្គាល់"</string>
@@ -95,8 +83,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"គ្មាន​សេវាកម្ម​សំឡេង/សង្រ្គោះបន្ទាន់​ទេ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"​មិន​បាន​ផ្តល់​ជូន​ដោយ​បណ្តាញចល័តនៅ​ទីកន្លែងរបស់អ្នកជា​បណ្តោះ​អាសន្ន"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
-    <!-- no translation found for NetworkPreferenceSwitchSummary (1203771446683319957) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ដើម្បី​ធ្វើ​ឲ្យ​ការ​ទទួល​​រលក​សញ្ញា​​ប្រសើរ​ជាងមុន សូមសាកល្បងប្តូរប្រភេទដែលបានជ្រើសរើសនៅ ការកំណត់ &gt; បណ្តាញ និងអ៊ីនធឺណិត &gt; បណ្តាញទូរសព្ទចល័ត &gt; ប្រភេទបណ្តាញដែលចង់ប្រើ។"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ការជូនដំណឹង"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"មុខងារ​ហៅត្រឡប់​វិញ​បន្ទាន់"</string>
@@ -132,7 +119,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"​ស្វែង​រក​សេវាកម្ម"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ការហៅតាម Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"ដើម្បីធ្វើការហៅ និងផ្ញើសារតាម Wi-Fi ដំបូងឡើយអ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនរបស់អ្នកដំឡើងសេវាកម្មនេះសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតចេញពីការកំណត់។"</item>
+    <item msgid="3910386316304772394">"ដើម្បីធ្វើការហៅ និងផ្ញើសារតាម Wi-Fi អ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនបម្រើសេវាទូរសព្ទរបស់អ្នកដំឡើងសេវាកម្មនេះជាមុនសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតនៅក្នុងការកំណត់។ (លេខកូដបញ្ហា៖ <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"ចុះឈ្មោះជាមួយក្រុមហ៊ុនរបស់អ្នក"</item>
@@ -1109,6 +1096,13 @@
       <item quantity="other">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
       <item quantity="one">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"ភ្ជាប់ទៅបណ្តាញ Wi‑Fi ចំហ"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"កំពុងភ្ជាប់ទៅបណ្តាញ Wi‑Fi ចំហ"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"បានភ្ជាប់ទៅបណ្តាញ Wi‑Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"មិនអាចភ្ជាប់ទៅបណ្តាញ Wi‑Fi បានទេ"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ចុចដើម្បីមើលបណ្តាញទាំងអស់"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"ភ្ជាប់"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"បណ្តាញទាំងអស់"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ចូល​បណ្ដាញ​វ៉ាយហ្វាយ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ចូលទៅបណ្តាញ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

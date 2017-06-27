@@ -27,18 +27,6 @@
     <string name="terabyteShort" msgid="231613018159186962">"TБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> күн"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> сағ."</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> сағ."</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> сағ."</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> сағ. <xliff:g id="MINUTES">%2$d</xliff:g> м."</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> сағ. <xliff:g id="MINUTES">%2$d</xliff:g> м."</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> мин."</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> мин"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> мин. <xliff:g id="SECONDS">%2$d</xliff:g> с."</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> мин. <xliff:g id="SECONDS">%2$d</xliff:g> с."</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> сек."</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> сек."</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Атаусыз&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Телефон нөмірі жоқ)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Белгісіз"</string>
@@ -95,8 +83,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Дауыстық/жедел қызметке қоңыраулар қызметі жоқ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Орналасқан аймағыңызда мобильдік желі уақытша ұсынбады"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Желіге қосылу мүмкін емес"</string>
-    <!-- no translation found for NetworkPreferenceSwitchSummary (1203771446683319957) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Қабылдауды жақсарту үшін \"Параметрлер &gt; Желі және интернет &gt; Мобильді желілер және қалаулы желі түрі\" тармағынан түрді өзгертіп көріңіз."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Дабылдар"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Қоңырауды басқа нөмірге бағыттау"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Шұғыл кері қоңырау шалу режимі"</string>
@@ -132,7 +119,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Қызметті іздеу"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi қоңыраулары"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Wi-Fi арқылы қоңырау шалу және хабарларды жіберу үшін алдымен жабдықтаушыңыздан осы қызметті орнатуды сұраңыз. Содан кейін Параметрлерден Wi-Fi қоңырау шалуын іске қосыңыз."</item>
+    <item msgid="3910386316304772394">"Wi-Fi арқылы қоңырау шалу немесе хабарлар жіберу үшін, алдымен операторыңыздан құрылғыны реттеуді сұраңыз. Содан кейін \"Параметрлер\" бөлімінен Wi-Fi қоңырауларын қайта қосыңыз. (Қате коды: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Жабдықтаушыңыз арқылы тіркелу"</item>
@@ -1107,6 +1094,13 @@
       <item quantity="other">Ашық Wi-Fi желілері қол жетімді</item>
       <item quantity="one">Ашық Wi-Fi желісі қол жетімді</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Ашық Wi‑Fi желісіне қосылу"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Ашық Wi‑Fi желісіне қосылуда"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi желісіне қосылды"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi желісіне қосылмады"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Барлық желілерді көру үшін түртіңіз"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Қосылу"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Барлық желілер"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi желісіне кіру"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Желіге кіру"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

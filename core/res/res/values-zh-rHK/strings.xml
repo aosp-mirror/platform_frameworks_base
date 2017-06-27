@@ -27,18 +27,6 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> 天"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> 天 <xliff:g id="HOURS">%2$d</xliff:g> 小時"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> 天 <xliff:g id="HOURS">%2$d</xliff:g> 小時"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> 小時"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> 小時 <xliff:g id="MINUTES">%2$d</xliff:g> 分鐘"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> 小時 <xliff:g id="MINUTES">%2$d</xliff:g> 分鐘"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> 分鐘"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> 分鐘"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> 分鐘 <xliff:g id="SECONDS">%2$d</xliff:g> 秒"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> 分鐘 <xliff:g id="SECONDS">%2$d</xliff:g> 秒"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> 秒"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> 秒"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;未命名&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(沒有電話號碼)"</string>
     <string name="unknownName" msgid="6867811765370350269">"不明"</string>
@@ -95,8 +83,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"沒有語音/緊急服務"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"您所在位置的流動網絡暫不提供這項服務"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連接網絡"</string>
-    <!-- no translation found for NetworkPreferenceSwitchSummary (1203771446683319957) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"如要改善接收品質，請前往 [設定] &gt; [網絡與互聯網] &gt; [流動網絡] &gt; [偏好的網絡類型]，然後選取其他網路類型。"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"通知"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"來電轉駁"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"緊急回撥模式"</string>
@@ -132,7 +119,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜尋服務"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi 通話"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"如要透過 Wi-Fi 撥打電話及傳送訊息，請先向您的流動網絡供應商要求設定此服務。然後再次在「設定」中開啟 Wi-Fi 通話。"</item>
+    <item msgid="3910386316304772394">"如要透過 Wi-Fi 撥打電話和傳送訊息，請先向流動網絡供應商要求設定此服務，然後再次在「設定」中開啟「Wi-Fi 通話」。(錯誤代碼：<xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"向您的流動網絡供應商註冊"</item>
@@ -1107,6 +1094,13 @@
       <item quantity="other">有可用的公開 Wi-Fi 網絡</item>
       <item quantity="one">有可用的公開 Wi-Fi 網絡</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"連線至開放的 Wi-Fi 網絡"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"正在連線至開放的 Wi-Fi 網絡"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"已連線至 Wi-Fi 網絡"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"無法連線至 Wi-Fi 網絡"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"輕按即可查看所有網絡"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"連線"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"所有網絡"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"登入 Wi-Fi 網絡"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"登入網絡"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
