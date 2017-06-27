@@ -27,6 +27,7 @@ import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -443,8 +444,24 @@ public class PackageInstaller {
      * @param statusReceiver Where to deliver the result.
      */
     public void uninstall(@NonNull String packageName, @NonNull IntentSender statusReceiver) {
-       uninstall(new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
-               statusReceiver);
+        uninstall(packageName, 0 /*flags*/, statusReceiver);
+    }
+
+    /**
+     * Uninstall the given package, removing it completely from the device. This
+     * method is only available to the current "installer of record" for the
+     * package.
+     *
+     * @param packageName The package to uninstall.
+     * @param flags Flags for uninstall.
+     * @param statusReceiver Where to deliver the result.
+     *
+     * @hide
+     */
+    public void uninstall(@NonNull String packageName, @DeleteFlags int flags,
+            @NonNull IntentSender statusReceiver) {
+        uninstall(new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                flags, statusReceiver);
     }
 
     /**
@@ -458,15 +475,34 @@ public class PackageInstaller {
      * @param versionedPackage The versioned package to uninstall.
      * @param statusReceiver Where to deliver the result.
      */
+    public void uninstall(@NonNull VersionedPackage versionedPackage,
+            @NonNull IntentSender statusReceiver) {
+        uninstall(versionedPackage, 0 /*flags*/, statusReceiver);
+    }
+
+    /**
+     * Uninstall the given package with a specific version code, removing it
+     * completely from the device. This method is only available to the current
+     * "installer of record" for the package. If the version code of the package
+     * does not match the one passed in the versioned package argument this
+     * method is a no-op. Use {@link PackageManager#VERSION_CODE_HIGHEST} to
+     * uninstall the latest version of the package.
+     *
+     * @param versionedPackage The versioned package to uninstall.
+     * @param flags Flags for uninstall.
+     * @param statusReceiver Where to deliver the result.
+     *
+     * @hide
+     */
     @RequiresPermission(anyOf = {
             Manifest.permission.DELETE_PACKAGES,
             Manifest.permission.REQUEST_DELETE_PACKAGES})
-    public void uninstall(@NonNull VersionedPackage versionedPackage,
+    public void uninstall(@NonNull VersionedPackage versionedPackage, @DeleteFlags int flags,
             @NonNull IntentSender statusReceiver) {
         Preconditions.checkNotNull(versionedPackage, "versionedPackage cannot be null");
         try {
             mInstaller.uninstall(versionedPackage, mInstallerPackageName,
-                    0, statusReceiver, mUserId);
+                    flags, statusReceiver, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
