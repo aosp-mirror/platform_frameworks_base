@@ -496,6 +496,79 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
               DEFAULT_ICON /* typeIcon */);
     }
 
+    @Test
+    public void testCarrierNetworkChange_roamingBeforeNetworkChange() {
+      int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
+
+      setupDefaultSignal();
+      setLevel(strength);
+      setGsmRoaming(true);
+
+      // Verify baseline
+      verifyLastMobileDataIndicators(true /* visible */,
+              strength /* strengthIcon */,
+              DEFAULT_ICON /* typeIcon */,
+              true /* roaming */);
+
+      // API call is made
+      setCarrierNetworkChange(true /* enabled */);
+
+      // Carrier network change is true, show special indicator, no roaming.
+      verifyLastMobileDataIndicators(true /* visible */,
+              SignalDrawable.getCarrierChangeState(SignalStrength.NUM_SIGNAL_STRENGTH_BINS),
+              0 /* typeIcon */,
+              false /* roaming */);
+
+      // Revert back
+      setCarrierNetworkChange(false /* enabled */);
+
+      // Verify back in previous state
+      verifyLastMobileDataIndicators(true /* visible */,
+              strength /* strengthIcon */,
+              DEFAULT_ICON /* typeIcon */,
+              true /* roaming */);
+    }
+
+    @Test
+    public void testCarrierNetworkChange_roamingAfterNetworkChange() {
+      int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
+
+      setupDefaultSignal();
+      setLevel(strength);
+
+      // Verify baseline
+      verifyLastMobileDataIndicators(true /* visible */,
+              strength /* strengthIcon */,
+              DEFAULT_ICON /* typeIcon */,
+              false /* roaming */);
+
+      // API call is made
+      setCarrierNetworkChange(true /* enabled */);
+
+      // Carrier network change is true, show special indicator, no roaming.
+      verifyLastMobileDataIndicators(true /* visible */,
+              SignalDrawable.getCarrierChangeState(SignalStrength.NUM_SIGNAL_STRENGTH_BINS),
+              0 /* typeIcon */,
+              false /* roaming */);
+
+      setGsmRoaming(true);
+
+      // Roaming should not show.
+      verifyLastMobileDataIndicators(true /* visible */,
+              SignalDrawable.getCarrierChangeState(SignalStrength.NUM_SIGNAL_STRENGTH_BINS),
+              0 /* typeIcon */,
+              false /* roaming */);
+
+      // Revert back
+      setCarrierNetworkChange(false /* enabled */);
+
+      // Verify back in previous state
+      verifyLastMobileDataIndicators(true /* visible */,
+              strength /* strengthIcon */,
+              DEFAULT_ICON /* typeIcon */,
+              true /* roaming */);
+    }
+
     private void verifyEmergencyOnly(boolean isEmergencyOnly) {
         ArgumentCaptor<Boolean> emergencyOnly = ArgumentCaptor.forClass(Boolean.class);
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setEmergencyCallsOnly(
