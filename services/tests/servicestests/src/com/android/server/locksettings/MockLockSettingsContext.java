@@ -18,8 +18,10 @@ package com.android.server.locksettings;
 
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 
@@ -29,15 +31,17 @@ public class MockLockSettingsContext extends ContextWrapper {
     private NotificationManager mNotificationManager;
     private DevicePolicyManager mDevicePolicyManager;
     private StorageManager mStorageManager;
+    private TrustManager mTrustManager;
 
     public MockLockSettingsContext(Context base, UserManager userManager,
             NotificationManager notificationManager, DevicePolicyManager devicePolicyManager,
-            StorageManager storageManager) {
+            StorageManager storageManager, TrustManager trustManager) {
         super(base);
         mUserManager = userManager;
         mNotificationManager = notificationManager;
         mDevicePolicyManager = devicePolicyManager;
         mStorageManager = storageManager;
+        mTrustManager = trustManager;
     }
 
     @Override
@@ -50,6 +54,8 @@ public class MockLockSettingsContext extends ContextWrapper {
             return mDevicePolicyManager;
         } else if (STORAGE_SERVICE.equals(name)) {
             return mStorageManager;
+        } else if (TRUST_SERVICE.equals(name)) {
+            return mTrustManager;
         } else {
             throw new RuntimeException("System service not mocked: " + name);
         }
@@ -60,4 +66,8 @@ public class MockLockSettingsContext extends ContextWrapper {
         // Skip permission checks for unit tests.
     }
 
+    @Override
+    public int checkCallingOrSelfPermission(String permission) {
+        return PackageManager.PERMISSION_GRANTED;
+    }
 }

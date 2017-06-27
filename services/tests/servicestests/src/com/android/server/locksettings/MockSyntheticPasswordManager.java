@@ -32,11 +32,11 @@ import javax.crypto.spec.PBEKeySpec;
 
 public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
 
-    private MockGateKeeperService mGateKeeper;
+    private FakeGateKeeperService mGateKeeper;
     private IWeaver mWeaverService;
 
     public MockSyntheticPasswordManager(LockSettingsStorage storage,
-            MockGateKeeperService gatekeeper, UserManager userManager) {
+            FakeGateKeeperService gatekeeper, UserManager userManager) {
         super(storage, userManager);
         mGateKeeper = gatekeeper;
     }
@@ -88,7 +88,7 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
 
     @Override
     protected long sidFromPasswordHandle(byte[] handle) {
-        return new MockGateKeeperService.VerifyHandle(handle).sid;
+        return new FakeGateKeeperService.VerifyHandle(handle).sid;
     }
 
     @Override

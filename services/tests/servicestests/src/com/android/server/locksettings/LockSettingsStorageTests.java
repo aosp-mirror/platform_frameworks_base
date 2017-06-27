@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 import android.content.pm.UserInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.FileUtils;
@@ -74,7 +75,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
 
         MockLockSettingsContext context = new MockLockSettingsContext(getContext(), mockUserManager,
                 mock(NotificationManager.class), mock(DevicePolicyManager.class),
-                mock(StorageManager.class));
+                mock(StorageManager.class), mock(TrustManager.class));
         mStorage = new LockSettingsStorageTestable(context,
                 new File(getContext().getFilesDir(), "locksettings"));
         mStorage.setDatabaseOnCreateCallback(new LockSettingsStorage.Callback() {

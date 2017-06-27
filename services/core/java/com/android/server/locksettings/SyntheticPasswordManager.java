@@ -127,6 +127,7 @@ public class SyntheticPasswordManager {
     static class AuthenticationResult {
         public AuthenticationToken authToken;
         public VerifyCredentialResponse gkResponse;
+        public int credentialType;
     }
 
     static class AuthenticationToken {
@@ -754,6 +755,8 @@ public class SyntheticPasswordManager {
      * Decrypt a synthetic password by supplying the user credential and corresponding password
      * blob handle generated previously. If the decryption is successful, initiate a GateKeeper
      * verification to referesh the SID & Auth token maintained by the system.
+     * Note: the credential type is not validated here since there are call sites where the type is
+     * unknown. Caller might choose to validate it by examining AuthenticationResult.credentialType
      */
     public AuthenticationResult unwrapPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
             long handle, String credential, int userId) throws RemoteException {
@@ -762,6 +765,7 @@ public class SyntheticPasswordManager {
         }
         AuthenticationResult result = new AuthenticationResult();
         PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, handle, userId));
+        result.credentialType = pwd.passwordType;
         byte[] pwdToken = computePasswordToken(credential, pwd);
 
         final byte[] applicationId;
