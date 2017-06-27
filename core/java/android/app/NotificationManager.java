@@ -307,7 +307,9 @@ public class NotificationManager {
             }
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
-        final Notification copy = Builder.maybeCloneStrippedForDelivery(notification);
+        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        boolean isLowRam = am.isLowRamDevice();
+        final Notification copy = Builder.maybeCloneStrippedForDelivery(notification, isLowRam);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
                     copy, user.getIdentifier());
