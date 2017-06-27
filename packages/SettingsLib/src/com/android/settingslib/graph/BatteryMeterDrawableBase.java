@@ -281,6 +281,7 @@ public class BatteryMeterDrawableBase extends Drawable {
         mIconTint = fillColor;
         mFramePaint.setColor(backgroundColor);
         mBoltPaint.setColor(fillColor);
+        mPlusPaint.setColor(fillColor);
         mChargeColor = fillColor;
         invalidateSelf();
     }
