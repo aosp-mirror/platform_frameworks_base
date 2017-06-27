@@ -1221,6 +1221,18 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    @VisibleForTesting
+    DisplayDeviceInfo getDisplayDeviceInfoInternal(int displayId) {
+        synchronized (mSyncRoot) {
+            LogicalDisplay display = mLogicalDisplays.get(displayId);
+            if (display != null) {
+                DisplayDevice displayDevice = display.getPrimaryDisplayDeviceLocked();
+                return displayDevice.getDisplayDeviceInfoLocked();
+            }
+            return null;
+        }
+    }
+
     private final class DisplayManagerHandler extends Handler {
         public DisplayManagerHandler(Looper looper) {
             super(looper, null, true /*async*/);
