@@ -16,9 +16,7 @@
 
 package android.test.suitebuilder;
 
-import android.test.ClassPathPackageInfo;
 import android.test.ClassPathPackageInfoSource;
-import android.test.PackageInfoSources;
 import android.util.Log;
 import com.android.internal.util.Predicate;
 import junit.framework.TestCase;
@@ -131,10 +129,9 @@ class TestGrouping {
     }
 
     private List<Class<? extends TestCase>> testCaseClassesInPackage(String packageName) {
-        ClassPathPackageInfoSource source = PackageInfoSources.forClassPath(classLoader);
-        ClassPathPackageInfo packageInfo = source.getPackageInfo(packageName);
+        ClassPathPackageInfoSource source = ClassPathPackageInfoSource.forClassPath(classLoader);
 
-        return selectTestClasses(packageInfo.getTopLevelClassesRecursive());
+        return selectTestClasses(source.getTopLevelClassesRecursive(packageName));
     }
 
     @SuppressWarnings("unchecked")
