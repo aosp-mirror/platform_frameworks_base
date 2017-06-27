@@ -21,15 +21,12 @@ import dalvik.system.DexFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * Generate {@link ClassPathPackageInfo}s by scanning apk paths.
@@ -39,10 +36,12 @@ import java.util.zip.ZipFile;
 @Deprecated
 public class ClassPathPackageInfoSource {
 
-    private static final String CLASS_EXTENSION = ".class";
-
     private static final ClassLoader CLASS_LOADER
             = ClassPathPackageInfoSource.class.getClassLoader();
+
+    private static String[] apkPaths;
+
+    private static ClassPathPackageInfoSource classPathSource;
 
     private final SimpleCache<String, ClassPathPackageInfo> cache =
             new SimpleCache<String, ClassPathPackageInfo>() {
@@ -54,23 +53,28 @@ public class ClassPathPackageInfoSource {
 
     // The class path of the running application
     private final String[] classPath;
-    private static String[] apkPaths;
 
-    // A cache of jar file contents
-    private final Map<File, Set<String>> jarFiles = new HashMap<>();
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
-    ClassPathPackageInfoSource() {
+    private ClassPathPackageInfoSource(ClassLoader classLoader) {
+        this.classLoader = classLoader;
         classPath = getClassPath();
     }
 
-
-    public static void setApkPaths(String[] apkPaths) {
+    static void setApkPaths(String[] apkPaths) {
         ClassPathPackageInfoSource.apkPaths = apkPaths;
     }
 
-    public ClassPathPackageInfo getPackageInfo(String pkgName) {
-        return cache.get(pkgName);
+    public static ClassPathPackageInfoSource forClassPath(ClassLoader classLoader) {
+        if (classPathSource == null) {
+            classPathSource = new ClassPathPackageInfoSource(classLoader);
+        }
+        return classPathSource;
+    }
+
+    public Set<Class<?>> getTopLevelClassesRecursive(String packageName) {
+        ClassPathPackageInfo packageInfo = cache.get(packageName);
+        return packageInfo.getTopLevelClassesRecursive();
     }
 
     private ClassPathPackageInfo createPackageInfo(String packageName) {
@@ -96,7 +100,7 @@ public class ClassPathPackageInfoSource {
                         + "'. Message: " + e.getMessage(), e);
             }
         }
-        return new ClassPathPackageInfo(this, packageName, subpackageNames,
+        return new ClassPathPackageInfo(packageName, subpackageNames,
                 topLevelClasses);
     }
 
@@ -107,9 +111,6 @@ public class ClassPathPackageInfoSource {
      */
     private void findClasses(String packageName, Set<String> classNames,
             Set<String> subpackageNames) {
-        String packagePrefix = packageName + '.';
-        String pathPrefix = packagePrefix.replace('.', '/');
-
         for (String entryName : classPath) {
             File classPathEntry = new File(entryName);
 
@@ -143,58 +144,6 @@ public class ClassPathPackageInfoSource {
             if (files != null) {
                 for (File file : files) {
                     scanForApkFiles(file, packageName, classNames, subpackageNames);
-                }
-            }
-        }
-    }
-
-    /**
-     * Finds all classes and sub packages that are below the packageName and
-     * add them to the respective sets. Searches the package in a class directory.
-     */
-    private void findClassesInDirectory(File classDir,
-            String packagePrefix, String pathPrefix, Set<String> classNames,
-            Set<String> subpackageNames)
-            throws IOException {
-        File directory = new File(classDir, pathPrefix);
-
-        if (directory.exists()) {
-            for (File f : directory.listFiles()) {
-                String name = f.getName();
-                if (name.endsWith(CLASS_EXTENSION) && isToplevelClass(name)) {
-                    classNames.add(packagePrefix + getClassName(name));
-                } else if (f.isDirectory()) {
-                    subpackageNames.add(packagePrefix + name);
-                }
-            }
-        }
-    }
-
-    /**
-     * Finds all classes and sub packages that are below the packageName and
-     * add them to the respective sets. Searches the package in a single jar file.
-     */
-    private void findClassesInJar(File jarFile, String pathPrefix,
-            Set<String> classNames, Set<String> subpackageNames)
-            throws IOException {
-        Set<String> entryNames = getJarEntries(jarFile);
-        // check if the Jar contains the package.
-        if (!entryNames.contains(pathPrefix)) {
-            return;
-        }
-        int prefixLength = pathPrefix.length();
-        for (String entryName : entryNames) {
-            if (entryName.startsWith(pathPrefix)) {
-                if (entryName.endsWith(CLASS_EXTENSION)) {
-                    // check if the class is in the package itself or in one of its
-                    // subpackages.
-                    int index = entryName.indexOf('/', prefixLength);
-                    if (index >= 0) {
-                        String p = entryName.substring(0, index).replace('/', '.');
-                        subpackageNames.add(p);
-                    } else if (isToplevelClass(entryName)) {
-                        classNames.add(getClassName(entryName).replace('/', '.'));
-                    }
                 }
             }
         }
@@ -242,59 +191,10 @@ public class ClassPathPackageInfoSource {
     }
 
     /**
-     * Gets the class and package entries from a Jar.
-     */
-    private Set<String> getJarEntries(File jarFile)
-            throws IOException {
-        Set<String> entryNames = jarFiles.get(jarFile);
-        if (entryNames == null) {
-            entryNames = new HashSet<>();
-            ZipFile zipFile = new ZipFile(jarFile);
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                String entryName = entries.nextElement().getName();
-                if (entryName.endsWith(CLASS_EXTENSION)) {
-                    // add the entry name of the class
-                    entryNames.add(entryName);
-
-                    // add the entry name of the classes package, i.e. the entry name of
-                    // the directory that the class is in. Used to quickly skip jar files
-                    // if they do not contain a certain package.
-                    //
-                    // Also add parent packages so that a JAR that contains
-                    // pkg1/pkg2/Foo.class will be marked as containing pkg1/ in addition
-                    // to pkg1/pkg2/ and pkg1/pkg2/Foo.class.  We're still interested in
-                    // JAR files that contains subpackages of a given package, even if
-                    // an intermediate package contains no direct classes.
-                    //
-                    // Classes in the default package will cause a single package named
-                    // "" to be added instead.
-                    int lastIndex = entryName.lastIndexOf('/');
-                    do {
-                        String packageName = entryName.substring(0, lastIndex + 1);
-                        entryNames.add(packageName);
-                        lastIndex = entryName.lastIndexOf('/', lastIndex - 1);
-                    } while (lastIndex > 0);
-                }
-            }
-            jarFiles.put(jarFile, entryNames);
-        }
-        return entryNames;
-    }
-
-    /**
      * Checks if a given file name represents a toplevel class.
      */
     private static boolean isToplevelClass(String fileName) {
         return fileName.indexOf('$') < 0;
-    }
-
-    /**
-     * Given the absolute path of a class file, return the class name.
-     */
-    private static String getClassName(String className) {
-        int classNameEnd = className.length() - CLASS_EXTENSION.length();
-        return className.substring(0, classNameEnd);
     }
 
     /**
@@ -307,7 +207,56 @@ public class ClassPathPackageInfoSource {
         return classPath.split(Pattern.quote(separator));
     }
 
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
+    /**
+     * The Package object doesn't allow you to iterate over the contained
+     * classes and subpackages of that package.  This is a version that does.
+     */
+    private class ClassPathPackageInfo {
+
+        private final String packageName;
+        private final Set<String> subpackageNames;
+        private final Set<Class<?>> topLevelClasses;
+
+        private ClassPathPackageInfo(String packageName,
+                Set<String> subpackageNames, Set<Class<?>> topLevelClasses) {
+            this.packageName = packageName;
+            this.subpackageNames = Collections.unmodifiableSet(subpackageNames);
+            this.topLevelClasses = Collections.unmodifiableSet(topLevelClasses);
+        }
+
+        private Set<ClassPathPackageInfo> getSubpackages() {
+            Set<ClassPathPackageInfo> info = new HashSet<>();
+            for (String name : subpackageNames) {
+                info.add(cache.get(name));
+            }
+            return info;
+        }
+
+        private Set<Class<?>> getTopLevelClassesRecursive() {
+            Set<Class<?>> set = new HashSet<>();
+            addTopLevelClassesTo(set);
+            return set;
+        }
+
+        private void addTopLevelClassesTo(Set<Class<?>> set) {
+            set.addAll(topLevelClasses);
+            for (ClassPathPackageInfo info : getSubpackages()) {
+                info.addTopLevelClassesTo(set);
+            }
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ClassPathPackageInfo) {
+                ClassPathPackageInfo that = (ClassPathPackageInfo) obj;
+                return (this.packageName).equals(that.packageName);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return packageName.hashCode();
+        }
     }
 }
