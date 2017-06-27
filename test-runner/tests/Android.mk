@@ -18,7 +18,7 @@ include $(CLEAR_VARS)
 # We only want this apk build for tests.
 #
 # Run the tests using the following commands:
-#   adb -r install ${ANDROID_PRODUCT_OUT}/data/app/FrameworkTestRunnerTests/FrameworkTestRunnerTests.apk
+#   adb install -r ${ANDROID_PRODUCT_OUT}/data/app/FrameworkTestRunnerTests/FrameworkTestRunnerTests.apk
 #   adb shell am instrument \
         -e notAnnotation android.test.suitebuilder.examples.error.RunAsPartOfSeparateTest \
         -w com.android.frameworks.testrunner.tests/android.test.InstrumentationTestRunner
