@@ -26,8 +26,9 @@ import android.telephony.euicc.EuiccInfo;
 interface IEuiccController {
     oneway void continueOperation(in Intent resolutionIntent, in Bundle resolutionExtras);
     oneway void getDownloadableSubscriptionMetadata(in DownloadableSubscription subscription,
-        in PendingIntent callbackIntent);
-    oneway void getDefaultDownloadableSubscriptionList(in PendingIntent callbackIntent);
+        String callingPackage, in PendingIntent callbackIntent);
+    oneway void getDefaultDownloadableSubscriptionList(
+        String callingPackage, in PendingIntent callbackIntent);
     String getEid();
     oneway void downloadSubscription(in DownloadableSubscription subscription,
         boolean switchAfterDownload, String callingPackage, in PendingIntent callbackIntent);
