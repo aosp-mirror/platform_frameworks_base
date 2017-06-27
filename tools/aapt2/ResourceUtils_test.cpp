@@ -36,6 +36,8 @@ TEST(ResourceUtilsTest, ParseBool) {
   EXPECT_THAT(ResourceUtils::ParseBool("false"), Eq(Maybe<bool>(false)));
   EXPECT_THAT(ResourceUtils::ParseBool("FALSE"), Eq(Maybe<bool>(false)));
   EXPECT_THAT(ResourceUtils::ParseBool("False"), Eq(Maybe<bool>(false)));
+
+  EXPECT_THAT(ResourceUtils::ParseBool(" False\n "), Eq(Maybe<bool>(false)));
 }
 
 TEST(ResourceUtilsTest, ParseResourceName) {
@@ -197,6 +199,18 @@ TEST(ResourceUtilsTest, NullIsEmptyReference) {
 TEST(ResourceUtilsTest, EmptyIsBinaryPrimitive) {
   ASSERT_THAT(ResourceUtils::MakeEmpty(), Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_NULL, Res_value::DATA_NULL_EMPTY))));
   ASSERT_THAT(ResourceUtils::TryParseNullOrEmpty("@empty"), Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_NULL, Res_value::DATA_NULL_EMPTY))));
+}
+
+TEST(ResourceUtilsTest, ItemsWithWhitespaceAreParsedCorrectly) {
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(" 12\n   ", ResTable_map::TYPE_INTEGER),
+              Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_INT_DEC, 12u))));
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(" true\n   ", ResTable_map::TYPE_BOOLEAN),
+              Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_INT_BOOLEAN, 0xffffffffu))));
+
+  const float expected_float = 12.0f;
+  const uint32_t expected_float_flattened = *(uint32_t*)&expected_float;
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(" 12.0\n   ", ResTable_map::TYPE_FLOAT),
+              Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, expected_float_flattened))));
 }
 
 }  // namespace aapt
