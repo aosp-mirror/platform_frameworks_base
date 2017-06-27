@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.Activity.RESULT_CANCELED;
+import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CANCELED;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
@@ -279,7 +280,9 @@ class ActivityStarter {
             // mLastStartActivityRecord[0] is set in the call to startActivity above.
             outActivity[0] = mLastStartActivityRecord[0];
         }
-        return mLastStartActivityResult;
+
+        // Aborted results are treated as successes externally, but we must track them internally.
+        return mLastStartActivityResult != START_ABORTED ? mLastStartActivityResult : START_SUCCESS;
     }
 
     /** DO NOT call this method directly. Use {@link #startActivityLocked} instead. */
@@ -465,7 +468,7 @@ class ActivityStarter {
             // We pretend to the caller that it was really started, but
             // they will just get a cancel result.
             ActivityOptions.abort(options);
-            return START_SUCCESS;
+            return START_ABORTED;
         }
 
         // If permissions need a review before any of the app components can run, we

@@ -360,6 +360,13 @@ public class ActivityManager {
             FIRST_START_NON_FATAL_ERROR_CODE + 1;
 
     /**
+     * Result for IActivityManaqer.startActivity: a new activity start was aborted. Never returned
+     * externally.
+     * @hide
+     */
+    public static final int START_ABORTED = FIRST_START_NON_FATAL_ERROR_CODE + 2;
+
+    /**
      * Flag for IActivityManaqer.startActivity: do special start mode where
      * a new activity is launched only if it is needed.
      * @hide
