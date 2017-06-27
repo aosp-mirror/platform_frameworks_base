@@ -448,6 +448,8 @@ public class SettingsBackupTest {
                  Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH,
                  Settings.Secure.MULTI_PRESS_TIMEOUT,
                  Settings.Secure.NFC_PAYMENT_FOREGROUND,
+                 Settings.Secure.NIGHT_DISPLAY_ACTIVATED,
+                 Settings.Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
                  Settings.Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME,
                  Settings.Secure.PACKAGE_VERIFIER_STATE,
                  Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
