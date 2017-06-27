@@ -16,8 +16,9 @@
 
 package android.test;
 
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import com.android.internal.util.Predicate;
-import com.android.internal.util.Predicates;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -27,7 +28,6 @@ import android.os.Looper;
 import android.test.suitebuilder.TestMethod;
 import android.test.suitebuilder.TestPredicates;
 import android.test.suitebuilder.TestSuiteBuilder;
-import android.test.suitebuilder.annotation.HasAnnotation;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
@@ -48,6 +48,8 @@ import junit.framework.TestResult;
 import junit.framework.TestSuite;
 import junit.runner.BaseTestRunner;
 import junit.textui.ResultPrinter;
+
+import static android.test.suitebuilder.TestPredicates.hasAnnotation;
 
 /**
  * An {@link Instrumentation} that runs various types of {@link junit.framework.TestCase}s against
@@ -192,6 +194,12 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     static final String ARGUMENT_ANNOTATION = "annotation";
     /** @hide */
     static final String ARGUMENT_NOT_ANNOTATION = "notAnnotation";
+
+    private static final Predicate<TestMethod> SELECT_SMALL = hasAnnotation(SmallTest.class);
+
+    private static final Predicate<TestMethod> SELECT_MEDIUM = hasAnnotation(MediumTest.class);
+
+    private static final Predicate<TestMethod> SELECT_LARGE = hasAnnotation(LargeTest.class);
 
     /**
      * This constant defines the maximum allowed runtime (in ms) for a test included in the "small"
@@ -460,11 +468,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     private Predicate<TestMethod> getSizePredicateFromArg(String sizeArg) {
 
         if (SMALL_SUITE.equals(sizeArg)) {
-            return TestPredicates.SELECT_SMALL;
+            return SELECT_SMALL;
         } else if (MEDIUM_SUITE.equals(sizeArg)) {
-            return TestPredicates.SELECT_MEDIUM;
+            return SELECT_MEDIUM;
         } else if (LARGE_SUITE.equals(sizeArg)) {
-            return TestPredicates.SELECT_LARGE;
+            return SELECT_LARGE;
         } else {
             return null;
         }
@@ -479,7 +487,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     private Predicate<TestMethod> getAnnotationPredicate(String annotationClassName) {
         Class<? extends Annotation> annotationClass = getAnnotationClass(annotationClassName);
         if (annotationClass != null) {
-            return new HasAnnotation(annotationClass);
+            return hasAnnotation(annotationClass);
         }
         return null;
     }
@@ -493,7 +501,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      private Predicate<TestMethod> getNotAnnotationPredicate(String annotationClassName) {
          Class<? extends Annotation> annotationClass = getAnnotationClass(annotationClassName);
          if (annotationClass != null) {
-             return Predicates.not(new HasAnnotation(annotationClass));
+             return TestPredicates.not(hasAnnotation(annotationClass));
          }
          return null;
      }

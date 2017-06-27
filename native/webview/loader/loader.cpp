@@ -167,16 +167,14 @@ jboolean CreateRelroFile(JNIEnv* env, jclass, jstring lib32, jstring lib64,
   return ret;
 }
 
-jint LoadWithRelroFile(JNIEnv* env, jclass, jstring lib32, jstring lib64,
-                       jstring relro32, jstring relro64, jobject clazzLoader) {
+jint LoadWithRelroFile(JNIEnv* env, jclass, jstring lib, jstring relro32,
+                       jstring relro64, jobject clazzLoader) {
 #ifdef __LP64__
-  jstring lib = lib64;
   jstring relro = relro64;
-  (void)lib32; (void)relro32;
+  (void)relro32;
 #else
-  jstring lib = lib32;
   jstring relro = relro32;
-  (void)lib64; (void)relro64;
+  (void)relro64;
 #endif
   jint ret = LIBLOAD_FAILED_JNI_CALL;
   const char* lib_utf8 = env->GetStringUTFChars(lib, NULL);
@@ -201,7 +199,7 @@ const JNINativeMethod kJniMethods[] = {
       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z",
       reinterpret_cast<void*>(CreateRelroFile) },
   { "nativeLoadWithRelroFile",
-      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)I",
+      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)I",
       reinterpret_cast<void*>(LoadWithRelroFile) },
 };
 

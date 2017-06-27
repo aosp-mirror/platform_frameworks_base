@@ -215,12 +215,10 @@ class WebViewLibraryLoader {
             return WebViewFactory.LIBLOAD_ADDRESS_SPACE_NOT_RESERVED;
         }
 
-        String[] args = getWebViewNativeLibraryPaths(packageInfo);
-        int result = nativeLoadWithRelroFile(args[0] /* path32 */,
-                                             args[1] /* path64 */,
-                                             CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
-                                             CHROMIUM_WEBVIEW_NATIVE_RELRO_64,
-                                             clazzLoader);
+        final String libraryFileName =
+                WebViewFactory.getWebViewLibrary(packageInfo.applicationInfo);
+        int result = nativeLoadWithRelroFile(libraryFileName, CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
+                                             CHROMIUM_WEBVIEW_NATIVE_RELRO_64, clazzLoader);
         if (result != WebViewFactory.LIBLOAD_SUCCESS) {
             Log.w(LOGTAG, "failed to load with relro file, proceeding without");
         } else if (DEBUG) {
@@ -317,7 +315,6 @@ class WebViewLibraryLoader {
     static native boolean nativeReserveAddressSpace(long addressSpaceToReserve);
     static native boolean nativeCreateRelroFile(String lib32, String lib64,
                                                         String relro32, String relro64);
-    static native int nativeLoadWithRelroFile(String lib32, String lib64,
-                                                      String relro32, String relro64,
+    static native int nativeLoadWithRelroFile(String lib, String relro32, String relro64,
                                                       ClassLoader clazzLoader);
 }

@@ -699,6 +699,7 @@ public final class Debug
             dest.writeInt(dalvikPrivateClean);
             dest.writeInt(dalvikSharedClean);
             dest.writeInt(dalvikSwappedOut);
+            dest.writeInt(dalvikSwappedOutPss);
             dest.writeInt(nativePss);
             dest.writeInt(nativeSwappablePss);
             dest.writeInt(nativePrivateDirty);
@@ -706,6 +707,7 @@ public final class Debug
             dest.writeInt(nativePrivateClean);
             dest.writeInt(nativeSharedClean);
             dest.writeInt(nativeSwappedOut);
+            dest.writeInt(nativeSwappedOutPss);
             dest.writeInt(otherPss);
             dest.writeInt(otherSwappablePss);
             dest.writeInt(otherPrivateDirty);
@@ -726,6 +728,7 @@ public final class Debug
             dalvikPrivateClean = source.readInt();
             dalvikSharedClean = source.readInt();
             dalvikSwappedOut = source.readInt();
+            dalvikSwappedOutPss = source.readInt();
             nativePss = source.readInt();
             nativeSwappablePss = source.readInt();
             nativePrivateDirty = source.readInt();
@@ -733,6 +736,7 @@ public final class Debug
             nativePrivateClean = source.readInt();
             nativeSharedClean = source.readInt();
             nativeSwappedOut = source.readInt();
+            nativeSwappedOutPss = source.readInt();
             otherPss = source.readInt();
             otherSwappablePss = source.readInt();
             otherPrivateDirty = source.readInt();

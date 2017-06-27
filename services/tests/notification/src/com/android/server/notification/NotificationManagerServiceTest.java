@@ -118,6 +118,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     private ManagedServices.ManagedServiceInfo mListener;
     @Mock private ICompanionDeviceManager mCompanionMgr;
     @Mock SnoozeHelper mSnoozeHelper;
+    @Mock GroupHelper mGroupHelper;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -175,7 +176,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
             mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
                     mPackageManagerClient, mockLightsManager, mNotificationListeners,
                     mNotificationAssistants, mConditionProviders, mCompanionMgr,
-                    mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager);
+                    mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper);
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
@@ -1085,5 +1086,48 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 c.flattenToString(), 0, false, true);
         verify(mNotificationAssistants, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testOnlyAutogroupIfGroupChanged_noPriorNoti_autogroups() throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
+        mNotificationManagerService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mNotificationManagerService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationPosted(any());
+    }
+
+    @Test
+    public void testOnlyAutogroupIfGroupChanged_groupChanged_autogroups()
+            throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "group", false);
+        mNotificationManagerService.addNotification(r);
+
+        r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
+        mNotificationManagerService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mNotificationManagerService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationPosted(any());
+    }
+
+    @Test
+    public void testOnlyAutogroupIfGroupChanged_noGroupChanged_autogroups()
+            throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "group", false);
+        mNotificationManagerService.addNotification(r);
+        mNotificationManagerService.addEnqueuedNotification(r);
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mNotificationManagerService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, never()).onNotificationPosted(any());
     }
 }

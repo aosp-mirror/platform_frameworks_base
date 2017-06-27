@@ -320,7 +320,8 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.getDownloadableSubscriptionMetadata(subscription, callbackIntent);
+            mController.getDownloadableSubscriptionMetadata(
+                    subscription, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -349,7 +350,8 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.getDefaultDownloadableSubscriptionList(callbackIntent);
+            mController.getDefaultDownloadableSubscriptionList(
+                    mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

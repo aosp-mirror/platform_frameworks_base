@@ -29,6 +29,7 @@ import android.util.Range;
 
 import com.google.android.colorextraction.ColorExtractor.GradientColors;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -311,6 +312,12 @@ public class Tonal implements ExtractionType {
         final float maxHue;
 
         TonalPalette(float[] h, float[] s, float[] l) {
+            if (h.length != s.length || s.length != l.length) {
+                throw new IllegalArgumentException("All arrays should have the same size. h: "
+                        + Arrays.toString(h) + " s: " + Arrays.toString(s) + " l: "
+                        + Arrays.toString(l));
+            }
+
             this.h = h;
             this.s = s;
             this.l = l;
@@ -388,7 +395,7 @@ public class Tonal implements ExtractionType {
                     new float[] {0.70f, 0.72f, 0.69f, 0.6703296703296703f, 0.728813559322034f,
                             0.5657142857142856f, 0.5076923076923077f, 0.3944223107569721f,
                             0.6206896551724138f, 0.8931297709923666f, 1f, 1f, 1f},
-                    new float[] {0.05f, 0.08f, 0.1784313725490196f, 0.23137254901960785f,
+                    new float[] {0.05f, 0.08f, 0.14f, 0.1784313725490196f, 0.23137254901960785f,
                             0.3431372549019608f, 0.38235294117647056f, 0.49215686274509807f,
                             0.6588235294117647f, 0.7431372549019608f, 0.8176470588235294f,
                             0.8784313725490196f, 0.9294117647058824f}
@@ -442,7 +449,7 @@ public class Tonal implements ExtractionType {
                             0.8285256410256411f, 0.821522309711286f, 0.8083333333333333f,
                             0.8046594982078853f, 0.8005822416302766f, 0.7842377260981912f,
                             0.7771084337349398f, 0.7747747747747749f},
-                    new float[] {1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f,
+                    new float[] {1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f,
                             0.737142857142857f, 0.6434108527131781f, 0.46835443037974644f},
                     new float[] {0.05f, 0.08f, 0.12745098039215685f, 0.15490196078431373f,
                             0.20392156862745098f, 0.24901960784313726f, 0.3137254901960784f,
