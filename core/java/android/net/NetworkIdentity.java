@@ -157,7 +157,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
      * Scrub given IMSI on production builds.
      */
     public static String scrubSubscriberId(String subscriberId) {
-        if ("eng".equals(Build.TYPE)) {
+        if (Build.IS_ENG) {
             return subscriberId;
         } else if (subscriberId != null) {
             // TODO: parse this as MCC+MNC instead of hard-coding

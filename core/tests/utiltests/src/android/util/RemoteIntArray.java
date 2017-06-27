@@ -32,7 +32,7 @@ import java.util.concurrent.TimeoutException;
 
 final class RemoteIntArray implements ServiceConnection, Closeable {
     private static final long BIND_REMOTE_SERVICE_TIMEOUT =
-            ("eng".equals(Build.TYPE)) ? 120000 : 10000;
+            Build.IS_ENG ? 120000 : 10000;
 
     private final Object mLock = new Object();
 

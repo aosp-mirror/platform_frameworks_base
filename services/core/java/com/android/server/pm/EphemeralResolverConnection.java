@@ -56,9 +56,9 @@ final class EphemeralResolverConnection implements DeathRecipient {
     private static final String TAG = "PackageManager";
     // This is running in a critical section and the timeout must be sufficiently low
     private static final long BIND_SERVICE_TIMEOUT_MS =
-            ("eng".equals(Build.TYPE)) ? 500 : 300;
+            Build.IS_ENG ? 500 : 300;
     private static final long CALL_SERVICE_TIMEOUT_MS =
-            ("eng".equals(Build.TYPE)) ? 200 : 100;
+            Build.IS_ENG ? 200 : 100;
     private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
 
     private final Object mLock = new Object();

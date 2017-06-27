@@ -91,7 +91,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_THUMBNAIL
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.IS_USER_BUILD;
 import static com.android.server.am.ActivityManagerService.TAKE_FULLSCREEN_SCREENSHOTS;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
@@ -1801,7 +1800,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void startLaunchTickingLocked() {
-        if (IS_USER_BUILD) {
+        if (Build.IS_USER) {
             return;
         }
         if (launchTickTime == 0) {

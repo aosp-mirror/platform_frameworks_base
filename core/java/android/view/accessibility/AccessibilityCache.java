@@ -40,7 +40,7 @@ public final class AccessibilityCache {
 
     private static final boolean DEBUG = false;
 
-    private static final boolean CHECK_INTEGRITY = "eng".equals(Build.TYPE);
+    private static final boolean CHECK_INTEGRITY = Build.IS_ENG;
 
     /**
      * {@link AccessibilityEvent} types that are critical for the cache to stay up to date

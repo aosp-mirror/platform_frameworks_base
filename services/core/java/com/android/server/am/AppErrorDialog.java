@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,8 +32,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
-import static com.android.server.am.ActivityManagerService.IS_USER_BUILD;
 
 final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListener {
 
@@ -124,7 +123,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         close.setVisibility(!hasRestart ? View.VISIBLE : View.GONE);
         close.setOnClickListener(this);
 
-        boolean showMute = !IS_USER_BUILD && Settings.Global.getInt(context.getContentResolver(),
+        boolean showMute = !Build.IS_USER && Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
         final TextView mute = findViewById(com.android.internal.R.id.aerr_mute);
         mute.setOnClickListener(this);

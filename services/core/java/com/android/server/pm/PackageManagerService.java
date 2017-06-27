@@ -3050,7 +3050,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Disable package parsing on eng builds to allow for faster incremental development.
-        if ("eng".equals(Build.TYPE)) {
+        if (Build.IS_ENG) {
             return null;
         }
 
@@ -3085,7 +3085,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // NOTE: When no BUILD_NUMBER is set by the build system, it defaults to a build
         // that starts with "eng." to signify that this is an engineering build and not
         // destined for release.
-        if ("userdebug".equals(Build.TYPE) && Build.VERSION.INCREMENTAL.startsWith("eng.")) {
+        if (Build.IS_USERDEBUG && Build.VERSION.INCREMENTAL.startsWith("eng.")) {
             Slog.w(TAG, "Wiping cache directory because the system partition changed.");
 
             // Heuristic: If the /system directory has been modified recently due to an "adb sync"
@@ -5533,7 +5533,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (eventIdIndex == -1) {
             if (AppOpsManager.permissionToOpCode(name) == AppOpsManager.OP_NONE
-                    || "user".equals(Build.TYPE)) {
+                    || Build.IS_USER) {
                 Log.i(TAG, "Unknown permission " + name);
 
                 return MetricsEvent.ACTION_PERMISSION_REQUEST_UNKNOWN;
