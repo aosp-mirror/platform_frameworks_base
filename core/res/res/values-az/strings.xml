@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Xidmət axtarılır"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi zəngi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Wi-Fi üzərindən zəng etmək və mesaj göndərmək üçün ilk öncə operatordan bu xidməti ayarlamağı tələb edin. Sonra Ayarlardan Wi-Fi çağrısını aktivləşdirin."</item>
+    <item msgid="3910386316304772394">"Zəng etmək və Wi-Fi üzərindən mesaj göndərmək üçün əvvəlcə operatordan bu cihazı quraşdırmağı tələb edin. Sonra Ayarlardan Wi-Fi zəngini deaktiv edin. (Xəta kodu: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Operatorla qeydiyyatdan keçin"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Əlçatan açıq Wi-Fi şəbəkələri</item>
       <item quantity="one">Əlçatan açıq Wi-Fi şəbəkəsi</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Açıq Wi‑Fi şəbəkəsinə qoşulun"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Açıq Wi‑Fi şəbəkəsinə qoşulur"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi şəbəkəsinə qoşuldu"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi şəbəkəsinə qoşulmaq mümkün deyil"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Bütün şəbəkələri görmək üçün klikləyin"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Qoşulun"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Bütün Şəbəkələr"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi şəbəkəsinə daxil ol"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Şəbəkəyə daxil olun"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

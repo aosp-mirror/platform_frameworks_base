@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"กำลังค้นหาบริการ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"การโทรผ่าน Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"หากต้องการโทรออกและส่งข้อความผ่าน Wi-Fi โปรดสอบถามผู้ให้บริการของคุณก่อนเพื่อตั้งค่าบริการนี้ แล้วเปิดการโทรผ่าน Wi-Fi อีกครั้งจากการตั้งค่า"</item>
+    <item msgid="3910386316304772394">"หากต้องการโทรออกและส่งข้อความผ่าน Wi-Fi โปรดสอบถามผู้ให้บริการของคุณก่อนเพื่อตั้งค่าบริการนี้ แล้วเปิดการโทรผ่าน Wi-Fi อีกครั้งจากการตั้งค่า (รหัสข้อผิดพลาด: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"ลงทะเบียนกับผู้ให้บริการ"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">มีหลายเครือข่าย Wi-Fi สาธารณะที่ใช้งานได้</item>
       <item quantity="one">มี 1 เครือข่าย Wi-Fi สาธารณะที่ใช้งานได้</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"เชื่อมต่อเครือข่าย Wi‑Fi แบบเปิด"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"กำลังเชื่อมต่อเครือข่าย Wi‑Fi แบบเปิด"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"เชื่อมต่อเครือข่าย Wi-Fi แล้ว"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ไม่สามารถเชื่อมต่อเครือข่าย Wi‑Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"แตะเพื่อดูเครือข่ายทั้งหมด"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"เชื่อมต่อ"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"เครือข่ายทั้งหมด"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ลงชื่อเข้าใช้เครือข่าย WiFi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ลงชื่อเข้าใช้เครือข่าย"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

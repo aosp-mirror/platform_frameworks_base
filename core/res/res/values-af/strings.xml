@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Soek vir diens"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-oproepe"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Om oproepe te maak en boodskappe oor Wi-Fi te stuur, vra jou diensverskaffer eers om hierdie diens op te stel. Skakel Wi-Fi-oproepe dan weer in Instellings aan."</item>
+    <item msgid="3910386316304772394">"Om oproepe te maak en boodskappe oor Wi-Fi te stuur, vra eers jou diensverskaffer om hierdie diens op te stel. Skakel Wi-Fi-oproepe dan weer in Instellings aan. (Foutkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Registreer by jou diensverskaffer"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Oop Wi-Fi-netwerke beskikbaar</item>
       <item quantity="one">Oop Wi-Fi-netwerk beskikbaar</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Koppel aan oop Wi-Fi-netwerk"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Koppel tans aan oop Wi‑Fi-netwerk"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Aan Wi-Fi-netwerk gekoppel"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Kon nie aan Wi-Fi-netwerk koppel nie"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tik om alle netwerke te sien"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Koppel"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Alle netwerke"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Meld aan by Wi-Fi-netwerk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Meld by netwerk aan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

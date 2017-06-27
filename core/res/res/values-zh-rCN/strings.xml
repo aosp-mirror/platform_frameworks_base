@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜索服务"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"WLAN 通话"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"要通过 WLAN 打电话和发信息，请先让您的运营商开通此服务，然后再到“设置”中重新开启 WLAN 通话功能。"</item>
+    <item msgid="3910386316304772394">"要通过 WLAN 打电话和发信息，请先让您的运营商开通此服务，然后再到“设置”中重新开启 WLAN 通话功能（错误代码：<xliff:g id="CODE">%1$s</xliff:g>）。"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"向您的运营商注册"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">有可用的开放 WLAN 网络</item>
       <item quantity="one">有可用的开放 WLAN 网络</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"连接到开放的 WLAN 网络"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"正在连接到开放的 WLAN 网络"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"已连接到 WLAN 网络"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"无法连接到 WLAN 网络"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"点按即可查看所有网络"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"连接"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"所有网络"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"登录到WLAN网络"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"登录到网络"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

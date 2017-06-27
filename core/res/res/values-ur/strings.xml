@@ -130,9 +130,7 @@
     <string name="roamingText12" msgid="1189071119992726320">"رومنگ بینر آف"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"سروس کی تلاش کر رہا ہے"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏Wi-Fi کالنگ"</string>
-  <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"‏Wi-Fi سے کالز کرنے اور پیغامات بھیجنے کیلئے، پہلے اپنے کیریئر سے اس سروس کو ترتیب دینے کیلئے کہیں۔ پھر ترتیبات سے دوبارہ Wi-Fi کالنگ آن کریں۔"</item>
-  </string-array>
+    <!-- no translation found for wfcOperatorErrorAlertMessages:0 (3910386316304772394) -->
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"اپنے کیریئر کے ساتھ رجسٹر کریں"</item>
   </string-array>
@@ -1106,20 +1104,13 @@
       <item quantity="other">‏عوامی Wi-Fi نیٹ ورکس دستیاب ہیں</item>
       <item quantity="one">‏عوامی Wi-Fi نیٹ ورک دستیاب ہے</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"‏عوامی Wi‑Fi نیٹ ورک سے منسلک ہوں"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"‏عوامی Wi‑Fi نیٹ ورک سے منسلک ہو رہا ہے"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"‏عوامی Wi‑Fi نیٹ ورک سے منسلک ہو گيا"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"‏Wi‑Fi نیٹ ورک سے منسلک نہیں ہو سکا"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"تمام نیٹ ورکس دیکھنے کیلئے تھپتھپائيں"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"منسلک کریں"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"تمام نیٹ ورکس"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏Wi-Fi نیٹ ورک میں سائن ان کریں"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"نیٹ ورک میں سائن ان کریں"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
