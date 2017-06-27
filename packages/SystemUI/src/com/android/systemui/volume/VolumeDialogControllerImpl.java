@@ -43,6 +43,7 @@ import android.provider.Settings;
 import android.service.notification.Condition;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.Dumpable;
@@ -122,6 +123,12 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mReceiver.init();
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator != null && mVibrator.hasVibrator();
+
+        boolean accessibilityVolumeStreamActive = context.getSystemService(
+                AccessibilityManager.class).isAccessibilityVolumeStreamActive();
+        mVolumeController.setA11yMode(accessibilityVolumeStreamActive ?
+                    VolumePolicy.A11Y_MODE_INDEPENDENT_A11Y_VOLUME :
+                        VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME);
     }
 
     public AudioManager getAudioManager() {
@@ -210,6 +217,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     public void addCallback(Callbacks callback, Handler handler) {
         mCallbacks.add(callback, handler);
+        callback.onAccessibilityModeChanged(mShowA11yStream);
     }
 
     public void setUserActivityListener(UserActivityListener listener) {
