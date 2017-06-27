@@ -134,24 +134,24 @@ public class UsbService extends IUsbManager.Stub {
 
         onSwitchUser(UserHandle.USER_SYSTEM);
 
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
+                        .equals(action)) {
+                    if (mDeviceManager != null) {
+                        mDeviceManager.updateUserRestrictions();
+                    }
+                }
+            }
+        };
+
         final IntentFilter filter = new IntentFilter();
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        mContext.registerReceiver(mReceiver, filter, null, null);
+        mContext.registerReceiver(receiver, filter, null, null);
     }
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
-                    .equals(action)) {
-                if (mDeviceManager != null) {
-                    mDeviceManager.updateUserRestrictions();
-                }
-            }
-        }
-    };
 
     /**
      * Set new {@link #mCurrentUserId} and propagate it to other modules.
@@ -681,7 +681,7 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
-    private static final String removeLastChar(String value) {
+    private static String removeLastChar(String value) {
         return value.substring(0, value.length() - 1);
     }
 }

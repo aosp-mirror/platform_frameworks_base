@@ -32,6 +32,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.HashMap;
@@ -48,10 +49,10 @@ class UsbUserSettingsManager {
 
     // Temporary mapping USB device name to list of UIDs with permissions for the device
     private final HashMap<String, SparseBooleanArray> mDevicePermissionMap =
-            new HashMap<String, SparseBooleanArray>();
+            new HashMap<>();
     // Temporary mapping UsbAccessory to list of UIDs with permissions for the accessory
     private final HashMap<UsbAccessory, SparseBooleanArray> mAccessoryPermissionMap =
-            new HashMap<UsbAccessory, SparseBooleanArray>();
+            new HashMap<>();
 
     private final Object mLock = new Object();
 
