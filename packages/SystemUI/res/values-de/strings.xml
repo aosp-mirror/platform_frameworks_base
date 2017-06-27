@@ -356,10 +356,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Suche"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach oben schieben"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach links schieben"</string>
-    <string name="zen_priority_introduction" msgid="1149025108714420281">"Klingeltöne und die Vibration werden deaktiviert, außer für Weckrufe, Erinnerungen, Termine sowie Anrufe von zuvor von dir festgelegten Personen. Du hörst jedoch weiterhin Sound, wenn du Musik und Videos wiedergibst oder Spiele spielst."</string>
-    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Klingeltöne und die Vibration werden deaktiviert, außer für Weckrufe. Du hörst jedoch weiterhin Sound, wenn du Musik und Videos wiedergibst oder Spiele spielst."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Klingeltöne und die Vibration werden deaktiviert, außer für Weckrufe, Erinnerungen, Termine sowie Anrufe von zuvor von dir festgelegten Personen. Du hörst jedoch weiterhin Sound, wenn du dir Musik anhörst, Videos ansiehst oder Spiele spielst."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Klingeltöne und die Vibration werden deaktiviert, außer für Weckrufe. Du hörst jedoch weiterhin Sound, wenn du dir Musik anhörst, Videos ansiehst oder Spiele spielst."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Anpassen"</string>
-    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Hierdurch werden ALLE Klingeltöne und die Vibration deaktiviert, auch für Weckrufe, Musik, Videos und Spiele. Anrufe kannst du jedoch weiterhin tätigen."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Hierdurch werden ALLE Klingeltöne und die Vibration deaktiviert, auch für Weckrufe, Musik, Videos und Spiele. Du kannst aber weiterhin selbst anrufen."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Hierdurch werden alle Klingeltöne und Vibrationsalarme stummgeschaltet, auch für Weckrufe, Musik, Videos und Spiele."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Weniger dringende Benachrichtigungen unten"</string>
