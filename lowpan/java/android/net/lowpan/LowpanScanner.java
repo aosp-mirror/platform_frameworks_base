@@ -226,8 +226,12 @@ public class LowpanScanner {
 
         try {
             mBinder.startNetScan(map, binderListener);
-        } catch (ServiceSpecificException | RemoteException x) {
-            LowpanException.throwAsPublicException(x);
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
+            throw LowpanException.rethrowAsLowpanException(x);
         }
     }
 
@@ -239,8 +243,11 @@ public class LowpanScanner {
     public void stopNetScan() {
         try {
             mBinder.stopNetScan();
+
         } catch (RemoteException x) {
-            // Catch and ignore all binder exceptions
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
             Log.e(TAG, x.toString());
         }
     }
@@ -303,10 +310,12 @@ public class LowpanScanner {
 
         try {
             mBinder.startEnergyScan(map, binderListener);
+
         } catch (RemoteException x) {
-            LowpanException.throwAsPublicException(x);
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
-            LowpanException.throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
     }
 
@@ -318,8 +327,11 @@ public class LowpanScanner {
     public void stopEnergyScan() {
         try {
             mBinder.stopEnergyScan();
+
         } catch (RemoteException x) {
-            // Catch and ignore all binder exceptions
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
             Log.e(TAG, x.toString());
         }
     }

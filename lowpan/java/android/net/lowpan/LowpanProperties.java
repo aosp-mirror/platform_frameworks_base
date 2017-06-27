@@ -16,9 +16,8 @@
 
 package android.net.lowpan;
 
+import android.net.IpPrefix;
 import android.net.LinkAddress;
-import android.net.RouteInfo;
-import java.util.List;
 
 /** {@hide} */
 public final class LowpanProperties {
@@ -76,14 +75,6 @@ public final class LowpanProperties {
 
     public static final LowpanProperty<String> KEY_NCP_VERSION =
             new LowpanStandardProperty("android.net.lowpan.property.NCP_VERSION", String.class);
-
-    public static final LowpanProperty<List<LinkAddress>> KEY_LINK_ADDRESS_ARRAY =
-            new LowpanStandardProperty(
-                    "android.net.lowpan.property.LINK_ADDRESS_ARRAY", LinkAddress[].class);
-
-    public static final LowpanProperty<List<RouteInfo>> KEY_ROUTE_INFO_ARRAY =
-            new LowpanStandardProperty(
-                    "android.net.lowpan.property.ROUTE_INFO_ARRAY", RouteInfo[].class);
 
     /** @hide */
     public static final LowpanProperty<byte[]> KEY_EXTENDED_ADDRESS =

@@ -53,7 +53,7 @@ public class LowpanIdentity {
         }
 
         public Builder setXpanid(byte x[]) {
-            identity.mXpanid = x.clone();
+            identity.mXpanid = (x != null ? x.clone() : null);
             return this;
         }
 
@@ -115,7 +115,7 @@ public class LowpanIdentity {
     }
 
     public byte[] getXpanid() {
-        return mXpanid.clone();
+        return mXpanid != null ? mXpanid.clone() : null;
     }
 
     public int getPanid() {
