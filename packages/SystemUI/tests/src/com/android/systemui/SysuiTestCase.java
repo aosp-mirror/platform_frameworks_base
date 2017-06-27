@@ -31,6 +31,8 @@ import android.util.Log;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -56,10 +58,14 @@ public abstract class SysuiTestCase {
 
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);
-        when(inst.getContext()).thenThrow(new RuntimeException(
-                "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext"));
-        when(inst.getTargetContext()).thenThrow(new RuntimeException(
-                "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext"));
+        when(inst.getContext()).thenAnswer(invocation -> {
+            throw new RuntimeException(
+                    "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext");
+        });
+        when(inst.getTargetContext()).thenAnswer(invocation -> {
+            throw new RuntimeException(
+                    "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext");
+        });
         InstrumentationRegistry.registerInstance(inst, InstrumentationRegistry.getArguments());
     }
 
