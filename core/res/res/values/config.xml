@@ -1110,28 +1110,18 @@
          If this flag is false, then the ambient light level estimate will be adjusted more
          gradually in the same manner that normally happens when the screen is on according to the
          brightening or dimming debounce thresholds.  As a result, it may take somewhat longer to
-         adapt to the environment.  This mode may be better suited for watches. -->
+         adapt to the environment. This mode may be better suited for watches. -->
     <bool name="config_autoBrightnessResetAmbientLuxAfterWarmUp">true</bool>
 
     <!-- Period of time in which to consider light samples in milliseconds. -->
     <integer name="config_autoBrightnessAmbientLightHorizon">10000</integer>
 
-    <!-- This flag enables light sensor sampling while dozing. A single sample is taken upon
-         entering doze mode, and another sample is taken every time the display enters STATE_DOZE
-         or STATE_DOZE_SUSPEND. It is recommended that config_dozeSensorLuxLevels and
-         config_dozeBrightnessBacklightValues have entries so that the doze mode brightness can be
-         determined dynamically.
-     -->
-    <bool name="config_allowAutoBrightnessActiveDozeLightSensor">false</bool>
-
-    <!-- This flag should be used with config_allowAutoBrightnessActiveDozeLightSensor set to true.
-
-         The screen brightness of a device is based off of a ring buffer of the last n seconds of
+    <!-- The screen brightness of a device is based off of a ring buffer of the last n seconds of
          ambient light sensor sample readings.
 
-         If this flag is true, then this buffer is cleared every time a new sample is taken in doze
-         mode and the screen brightness is based off the new reading. This mode may be better suited
-         for watches.
+         If this flag is true, then this buffer is cleared and the screen brightness is based off of
+         ambient light sensor readings that are obtained while the device is dozing.  This mode may
+         be better suited for watches.
 
          If this flag is false, then this buffer is untouched. -->
     <bool name="config_useNewSensorSamplesForDoze">false</bool>
