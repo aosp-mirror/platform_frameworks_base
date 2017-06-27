@@ -29,6 +29,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -66,6 +68,12 @@ public final class PlaybackActivityMonitor
             new VolumeShaper.Operation.Builder(VolumeShaper.Operation.PLAY)
                     .createIfNeeded()
                     .build();
+
+    // TODO support VolumeShaper on those players
+    private static final int[] UNDUCKABLE_PLAYER_TYPES = {
+            AudioPlaybackConfiguration.PLAYER_TYPE_AAUDIO,
+            AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL,
+    };
 
     // like a PLAY_CREATE_IF_NEEDED operation but with a skip to the end of the ramp
     private static final VolumeShaper.Operation PLAY_SKIP_RAMP =
@@ -298,12 +306,12 @@ public final class PlaybackActivityMonitor
                                 + " uid:" + apc.getClientUid() + " pid:" + apc.getClientPid()
                                 + " - SPEECH");
                         return false;
-                    } else if (apc.getPlayerType()
-                            == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
-                        // TODO support ducking of SoundPool players
+                    } else if (ArrayUtils.contains(UNDUCKABLE_PLAYER_TYPES, apc.getPlayerType())) {
                         Log.v(TAG, "not ducking player " + apc.getPlayerInterfaceId()
                                 + " uid:" + apc.getClientUid() + " pid:" + apc.getClientPid()
-                                + " - SoundPool");
+                                + " due to type:"
+                                + AudioPlaybackConfiguration.toLogFriendlyPlayerType(
+                                        apc.getPlayerType()));
                         return false;
                     }
                     apcsToDuck.add(apc);
