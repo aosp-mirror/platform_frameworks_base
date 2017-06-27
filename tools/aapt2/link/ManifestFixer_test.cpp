@@ -18,7 +18,8 @@
 
 #include "test/Test.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
+using ::testing::NotNull;
 
 namespace aapt {
 
@@ -418,6 +419,24 @@ TEST_F(ManifestFixerTest, DoNotIgnoreNonNamespacedElements) {
         <tag whoo="true" />
       </manifest>)EOF";
   EXPECT_EQ(nullptr, Verify(input));
+}
+
+TEST_F(ManifestFixerTest, SupportKeySets) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <key-sets>
+          <key-set android:name="old-set">
+            <public-key android:name="old-key" android:value="some+old+key" />
+          </key-set>
+          <key-set android:name="new-set">
+            <public-key android:name="new-key" android:value="some+new+key" />
+          </key-set>
+          <upgrade-key-set android:name="old-set" />
+          <upgrade-key-set android:name="new-set" />
+        </key-sets>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
 }
 
 }  // namespace aapt
