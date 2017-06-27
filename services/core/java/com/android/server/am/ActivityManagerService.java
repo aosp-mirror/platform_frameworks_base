@@ -6907,12 +6907,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             ProfilerInfo profilerInfo = null;
+            String agent = null;
             if (mProfileApp != null && mProfileApp.equals(processName)) {
                 mProfileProc = app;
                 profilerInfo = (mProfilerInfo != null && mProfilerInfo.profileFile != null) ?
                         new ProfilerInfo(mProfilerInfo) : null;
+                agent = profilerInfo.agent;
             } else if (app.instr != null && app.instr.mProfileFile != null) {
-                profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false);
+                profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
+                        null);
             }
 
             boolean enableTrackAllocation = false;
@@ -6979,6 +6982,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                 }
+            }
+
+            // If we were asked to attach an agent on startup, do so now, before we're binding
+            // application code.
+            if (agent != null) {
+                thread.attachAgent(agent);
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");

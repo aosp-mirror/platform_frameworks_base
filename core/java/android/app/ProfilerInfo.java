@@ -49,13 +49,19 @@ public class ProfilerInfo implements Parcelable {
      */
     public final boolean streamingOutput;
 
+    /**
+     * Denotes an agent (and its parameters) to attach for profiling.
+     */
+    public final String agent;
+
     public ProfilerInfo(String filename, ParcelFileDescriptor fd, int interval, boolean autoStop,
-            boolean streaming) {
+            boolean streaming, String agent) {
         profileFile = filename;
         profileFd = fd;
         samplingInterval = interval;
         autoStopProfiler = autoStop;
         streamingOutput = streaming;
+        this.agent = agent;
     }
 
     public ProfilerInfo(ProfilerInfo in) {
@@ -64,6 +70,7 @@ public class ProfilerInfo implements Parcelable {
         samplingInterval = in.samplingInterval;
         autoStopProfiler = in.autoStopProfiler;
         streamingOutput = in.streamingOutput;
+        agent = in.agent;
     }
 
     /**
@@ -101,6 +108,7 @@ public class ProfilerInfo implements Parcelable {
         out.writeInt(samplingInterval);
         out.writeInt(autoStopProfiler ? 1 : 0);
         out.writeInt(streamingOutput ? 1 : 0);
+        out.writeString(agent);
     }
 
     public static final Parcelable.Creator<ProfilerInfo> CREATOR =
@@ -122,5 +130,6 @@ public class ProfilerInfo implements Parcelable {
         samplingInterval = in.readInt();
         autoStopProfiler = in.readInt() != 0;
         streamingOutput = in.readInt() != 0;
+        agent = in.readString();
     }
 }
