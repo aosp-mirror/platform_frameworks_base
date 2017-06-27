@@ -3765,7 +3765,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.iccOpenLogicalChannel(subId, AID, p2);
+                return telephony.iccOpenLogicalChannel(subId, getOpPackageName(), AID, p2);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -6762,4 +6762,3 @@ public class TelephonyManager {
         return null;
     }
 }
-
