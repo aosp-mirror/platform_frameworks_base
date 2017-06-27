@@ -20,8 +20,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 import com.android.timezone.distro.DistroException;
 import com.android.timezone.distro.DistroVersion;
-import com.android.timezone.distro.TimeZoneDistro;
 import com.android.timezone.distro.StagedDistroOperation;
+import com.android.timezone.distro.TimeZoneDistro;
 
 import android.app.timezone.Callback;
 import android.app.timezone.DistroFormatVersion;
@@ -36,7 +36,9 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,26 +85,22 @@ public final class RulesManagerService extends IRulesManager.Stub {
     private final PackageTracker mPackageTracker;
     private final Executor mExecutor;
     private final TimeZoneDistroInstaller mInstaller;
-    private final FileDescriptorHelper mFileDescriptorHelper;
 
     private static RulesManagerService create(Context context) {
         RulesManagerServiceHelperImpl helper = new RulesManagerServiceHelperImpl(context);
         return new RulesManagerService(
                 helper /* permissionHelper */,
                 helper /* executor */,
-                helper /* fileDescriptorHelper */,
                 PackageTracker.create(context),
                 new TimeZoneDistroInstaller(TAG, SYSTEM_TZ_DATA_FILE, TZ_DATA_DIR));
     }
 
     // A constructor that can be used by tests to supply mocked / faked dependencies.
     RulesManagerService(PermissionHelper permissionHelper,
-            Executor executor,
-            FileDescriptorHelper fileDescriptorHelper, PackageTracker packageTracker,
+            Executor executor, PackageTracker packageTracker,
             TimeZoneDistroInstaller timeZoneDistroInstaller) {
         mPermissionHelper = permissionHelper;
         mExecutor = executor;
-        mFileDescriptorHelper = fileDescriptorHelper;
         mPackageTracker = packageTracker;
         mInstaller = timeZoneDistroInstaller;
     }
@@ -177,55 +175,78 @@ public final class RulesManagerService extends IRulesManager.Stub {
     }
 
     @Override
-    public int requestInstall(
-            ParcelFileDescriptor timeZoneDistro, byte[] checkTokenBytes, ICallback callback) {
-        mPermissionHelper.enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
+    public int requestInstall(ParcelFileDescriptor distroParcelFileDescriptor,
+            byte[] checkTokenBytes, ICallback callback) {
 
-        CheckToken checkToken = null;
-        if (checkTokenBytes != null) {
-            checkToken = createCheckTokenOrThrow(checkTokenBytes);
-        }
-        synchronized (this) {
-            if (timeZoneDistro == null) {
-                throw new NullPointerException("timeZoneDistro == null");
-            }
-            if (callback == null) {
-                throw new NullPointerException("observer == null");
-            }
-            if (mOperationInProgress.get()) {
-                return RulesManager.ERROR_OPERATION_IN_PROGRESS;
-            }
-            mOperationInProgress.set(true);
+        boolean closeParcelFileDescriptorOnExit = true;
+        try {
+            mPermissionHelper.enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
 
-            // Execute the install asynchronously.
-            mExecutor.execute(new InstallRunnable(timeZoneDistro, checkToken, callback));
+            CheckToken checkToken = null;
+            if (checkTokenBytes != null) {
+                checkToken = createCheckTokenOrThrow(checkTokenBytes);
+            }
 
-            return RulesManager.SUCCESS;
+            synchronized (this) {
+                if (distroParcelFileDescriptor == null) {
+                    throw new NullPointerException("distroParcelFileDescriptor == null");
+                }
+                if (callback == null) {
+                    throw new NullPointerException("observer == null");
+                }
+                if (mOperationInProgress.get()) {
+                    return RulesManager.ERROR_OPERATION_IN_PROGRESS;
+                }
+                mOperationInProgress.set(true);
+
+                // Execute the install asynchronously.
+                mExecutor.execute(
+                        new InstallRunnable(distroParcelFileDescriptor, checkToken, callback));
+
+                // The InstallRunnable now owns the ParcelFileDescriptor, so it will close it after
+                // it executes (and we do not have to).
+                closeParcelFileDescriptorOnExit = false;
+
+                return RulesManager.SUCCESS;
+            }
+        } finally {
+            // We should close() the local ParcelFileDescriptor we were passed if it hasn't been
+            // passed to another thread to handle.
+            if (distroParcelFileDescriptor != null && closeParcelFileDescriptorOnExit) {
+                try {
+                    distroParcelFileDescriptor.close();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failed to close distroParcelFileDescriptor", e);
+                }
+            }
         }
     }
 
     private class InstallRunnable implements Runnable {
 
-        private final ParcelFileDescriptor mTimeZoneDistro;
+        private final ParcelFileDescriptor mDistroParcelFileDescriptor;
         private final CheckToken mCheckToken;
         private final ICallback mCallback;
 
-        InstallRunnable(
-                ParcelFileDescriptor timeZoneDistro, CheckToken checkToken, ICallback callback) {
-            mTimeZoneDistro = timeZoneDistro;
+        InstallRunnable(ParcelFileDescriptor distroParcelFileDescriptor, CheckToken checkToken,
+                ICallback callback) {
+            mDistroParcelFileDescriptor = distroParcelFileDescriptor;
             mCheckToken = checkToken;
             mCallback = callback;
         }
 
         @Override
         public void run() {
+            boolean success = false;
             // Adopt the ParcelFileDescriptor into this try-with-resources so it is closed
             // when we are done.
-            boolean success = false;
-            try {
-                byte[] distroBytes =
-                        RulesManagerService.this.mFileDescriptorHelper.readFully(mTimeZoneDistro);
-                TimeZoneDistro distro = new TimeZoneDistro(distroBytes);
+            try (ParcelFileDescriptor pfd = mDistroParcelFileDescriptor) {
+                // The ParcelFileDescriptor owns the underlying FileDescriptor and we'll close
+                // it at the end of the try-with-resources.
+                final boolean isFdOwner = false;
+                InputStream is = new FileInputStream(pfd.getFileDescriptor(), isFdOwner);
+
+                TimeZoneDistro distro = new TimeZoneDistro(is);
                 int installerResult = mInstaller.stageInstallWithErrorCode(distro);
                 int resultCode = mapInstallerResultToApiCode(installerResult);
                 sendFinishedStatus(mCallback, resultCode);
