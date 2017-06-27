@@ -3041,6 +3041,8 @@
 
   <java-symbol type="drawable" name="stat_sys_vitals" />
 
+  <java-symbol type="color" name="text_color_primary" />
+
   <java-symbol type="array" name="config_batteryPackageTypeSystem" />
   <java-symbol type="array" name="config_batteryPackageTypeService" />
 
