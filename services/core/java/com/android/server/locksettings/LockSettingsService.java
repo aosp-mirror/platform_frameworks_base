@@ -142,6 +142,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final int SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT = 1;
 
     // Order of holding lock: mSeparateChallengeLock -> mSpManager -> this
+    // Do not call into ActivityManager while holding mSpManager lock.
     private final Object mSeparateChallengeLock = new Object();
 
     private final DeviceProvisionedObserver mDeviceProvisionedObserver =
@@ -1434,16 +1435,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.e(TAG, "FRP credential can only be verified prior to provisioning.");
             return VerifyCredentialResponse.ERROR;
         }
-        synchronized (mSpManager) {
-            if (isSyntheticPasswordBasedCredentialLocked(userId)) {
-                VerifyCredentialResponse response = spBasedDoVerifyCredentialLocked(credential,
-                        credentialType, hasChallenge, challenge, userId, progressCallback);
-                if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-                    mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
-                }
-                return response;
-            }
+        VerifyCredentialResponse response = null;
+        response = spBasedDoVerifyCredential(credential, credentialType, hasChallenge, challenge,
+                userId, progressCallback);
+        // The user employs synthetic password based credential.
+        if (response != null) {
+            return response;
         }
+
         final CredentialHash storedHash;
         if (userId == USER_FRP) {
             PersistentData data = mStorage.readPersistentDataBlock();
@@ -1472,7 +1471,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             credentialToVerify = credential;
         }
 
-        VerifyCredentialResponse response = verifyCredential(userId, storedHash, credentialToVerify,
+        response = verifyCredential(userId, storedHash, credentialToVerify,
                 hasChallenge, challenge, progressCallback);
 
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
@@ -1995,33 +1994,46 @@ public class LockSettingsService extends ILockSettings.Stub {
         setLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 1, UserHandle.USER_SYSTEM);
     }
 
-    private VerifyCredentialResponse spBasedDoVerifyCredentialLocked(String userCredential, int
+    private VerifyCredentialResponse spBasedDoVerifyCredential(String userCredential, int
             credentialType, boolean hasChallenge, long challenge, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
-        if (DEBUG) Slog.d(TAG, "spBasedDoVerifyCredentialLocked: user=" + userId);
+        if (DEBUG) Slog.d(TAG, "spBasedDoVerifyCredential: user=" + userId);
         if (credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             userCredential = null;
         }
-        if (userId == USER_FRP) {
-            return mSpManager.verifyFrpCredential(getGateKeeperService(),
-                    userCredential, credentialType, progressCallback);
+
+        final AuthenticationResult authResult;
+        VerifyCredentialResponse response;
+        synchronized (mSpManager) {
+            if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
+                return null;
+            }
+            if (userId == USER_FRP) {
+                return mSpManager.verifyFrpCredential(getGateKeeperService(),
+                        userCredential, credentialType, progressCallback);
+            }
+
+            long handle = getSyntheticPasswordHandleLocked(userId);
+            authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
+                    getGateKeeperService(), handle, userCredential, userId);
+
+            response = authResult.gkResponse;
+            // credential has matched
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                // perform verifyChallenge with synthetic password which generates the real GK auth
+                // token and response for the current user
+                response = mSpManager.verifyChallenge(getGateKeeperService(), authResult.authToken,
+                        challenge, userId);
+                if (response.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
+                    // This shouldn't really happen: the unwrapping of SP succeeds, but SP doesn't
+                    // match the recorded GK password handle.
+                    Slog.wtf(TAG, "verifyChallenge with SP failed.");
+                    return VerifyCredentialResponse.ERROR;
+                }
+            }
         }
 
-        long handle = getSyntheticPasswordHandleLocked(userId);
-        AuthenticationResult authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
-                getGateKeeperService(), handle, userCredential, userId);
-
-        VerifyCredentialResponse response = authResult.gkResponse;
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-            // credential has matched
-            // perform verifyChallenge with synthetic password which generates the real auth
-            // token for the current user
-            response = mSpManager.verifyChallenge(getGateKeeperService(), authResult.authToken,
-                    challenge, userId);
-            if (response.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
-                Slog.wtf(TAG, "verifyChallenge with SP failed.");
-                return VerifyCredentialResponse.ERROR;
-            }
             if (progressCallback != null) {
                 progressCallback.onCredentialVerified();
             }
@@ -2032,12 +2044,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.i(TAG, "Unlocking user " + userId + " with secret only, length " + secret.length);
             unlockUser(userId, null, secret);
 
+            activateEscrowTokens(authResult.authToken, userId);
+
             if (isManagedProfileWithSeparatedLock(userId)) {
                 TrustManager trustManager =
                         (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
                 trustManager.setDeviceLockedForUser(userId, false);
             }
-            activateEscrowTokens(authResult.authToken, userId);
+            mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
         } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
             if (response.getTimeout() > 0) {
                 requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT, userId);
@@ -2184,8 +2198,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void activateEscrowTokens(AuthenticationToken auth, int userId) throws RemoteException {
         if (DEBUG) Slog.d(TAG, "activateEscrowTokens: user=" + userId);
-        disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
         synchronized (mSpManager) {
+            disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
             for (long handle : mSpManager.getPendingTokensForUser(userId)) {
                 Slog.i(TAG, String.format("activateEscrowTokens: %x %d ", handle, userId));
                 mSpManager.activateTokenBasedSyntheticPassword(handle, auth, userId);
