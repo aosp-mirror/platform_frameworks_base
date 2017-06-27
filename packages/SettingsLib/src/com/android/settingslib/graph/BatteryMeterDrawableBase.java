@@ -28,6 +28,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.Path.FillType;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -82,6 +83,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     private final float[] mPlusPoints;
     private final Path mPlusPath = new Path();
 
+    private final Rect mPadding = new Rect();
     private final RectF mFrame = new RectF();
     private final RectF mButtonFrame = new RectF();
     private final RectF mBoltFrame = new RectF();
@@ -219,10 +221,38 @@ public class BatteryMeterDrawableBase extends Drawable {
     @Override
     public void setBounds(int left, int top, int right, int bottom) {
         super.setBounds(left, top, right, bottom);
-        mHeight = bottom - top;
-        mWidth = right - left;
+        updateSize();
+    }
+
+    private void updateSize() {
+        final Rect bounds = getBounds();
+
+        mHeight = (bounds.bottom - mPadding.bottom) - (bounds.top + mPadding.top);
+        mWidth = (bounds.right - mPadding.right) - (bounds.left + mPadding.left);
         mWarningTextPaint.setTextSize(mHeight * 0.75f);
         mWarningTextHeight = -mWarningTextPaint.getFontMetrics().ascent;
+    }
+
+    @Override
+    public boolean getPadding(Rect padding) {
+        if (mPadding.left == 0
+            && mPadding.top == 0
+            && mPadding.right == 0
+            && mPadding.bottom == 0) {
+            return super.getPadding(padding);
+        }
+
+        padding.set(mPadding);
+        return true;
+    }
+
+    public void setPadding(int left, int top, int right, int bottom) {
+        mPadding.left = left;
+        mPadding.top = top;
+        mPadding.right = right;
+        mPadding.bottom = bottom;
+
+        updateSize();
     }
 
     private int getColorForLevel(int percent) {
@@ -255,6 +285,10 @@ public class BatteryMeterDrawableBase extends Drawable {
         invalidateSelf();
     }
 
+    protected int batteryColorForLevel(int level) {
+        return mCharging ? mChargeColor : getColorForLevel(level);
+    }
+
     @Override
     public void draw(Canvas c) {
         final int level = mLevel;
@@ -264,11 +298,10 @@ public class BatteryMeterDrawableBase extends Drawable {
         float drawFrac = (float) level / 100f;
         final int height = mHeight;
         final int width = (int) (ASPECT_RATIO * mHeight);
-        int px = (mWidth - width) / 2;
-
+        final int px = (mWidth - width) / 2;
         final int buttonHeight = Math.round(height * mButtonHeightFraction);
 
-        mFrame.set(0, 0, width, height);
+        mFrame.set(mPadding.left, mPadding.top, width + mPadding.left, height + mPadding.top);
         mFrame.offset(px, 0);
 
         // button-frame: area above the battery body
@@ -282,7 +315,7 @@ public class BatteryMeterDrawableBase extends Drawable {
         mFrame.top += buttonHeight;
 
         // set the battery charging color
-        mBatteryPaint.setColor(mCharging ? mChargeColor : getColorForLevel(level));
+        mBatteryPaint.setColor(batteryColorForLevel(level));
 
         if (level >= FULL) {
             drawFrac = 1f;
