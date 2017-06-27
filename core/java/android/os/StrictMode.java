@@ -16,6 +16,7 @@
 package android.os;
 
 import android.animation.ValueAnimator;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
@@ -343,6 +344,7 @@ public final class StrictMode {
     private static volatile VmPolicy sVmPolicy = VmPolicy.LAX;
 
     /** {@hide} */
+    @TestApi
     public interface ViolationListener {
         public void onViolation(String message);
     }
@@ -350,6 +352,7 @@ public final class StrictMode {
     private static volatile ViolationListener sListener;
 
     /** {@hide} */
+    @TestApi
     public static void setViolationListener(ViolationListener listener) {
         sListener = listener;
     }
