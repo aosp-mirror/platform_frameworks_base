@@ -29,6 +29,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManagerInternal;
 
 import com.android.server.LocalServices;
+import com.android.server.display.DisplayDeviceInfo;
 import com.android.server.display.DisplayManagerService.SyncRoot;
 import com.android.server.display.VirtualDisplayAdapter.SurfaceControlDisplayFactory;
 
@@ -114,5 +115,31 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
         assertEquals(width, dv.deviceWidth);
         assertEquals(uniqueIdPrefix + uniqueId, dv.uniqueId);
         assertEquals(displayId, dv.displayId);
+    }
+
+    public void testCreateVirtualDisplayRotatesWithContent() throws Exception {
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService bs = mDisplayManager.new BinderService();
+
+        String uniqueId = "uniqueId --- Rotates With Content Test";
+        int width = 600;
+        int height = 800;
+        int dpi = 320;
+        int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
+
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        int displayId = bs.createVirtualDisplay(mMockAppToken /* callback */,
+                null /* projection */, "com.android.frameworks.servicestests",
+                "Test Virtual Display", width, height, dpi, null /* surface */, flags /* flags */,
+                uniqueId);
+
+        mDisplayManager.performTraversalInTransactionFromWindowManagerInternal();
+
+        // flush the handler
+        mHandler.runWithScissors(() -> {}, 0 /* now */);
+
+        DisplayDeviceInfo ddi = mDisplayManager.getDisplayDeviceInfoInternal(displayId);
+        assertNotNull(ddi);
+        assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0);
     }
 }

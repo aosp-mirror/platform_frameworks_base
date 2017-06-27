@@ -256,6 +256,15 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 1 << 6;
 
+    /**
+     * Virtual display flag: Indicates that the orientation of this display device is coupled to
+     * the rotation of its associated logical display.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT = 1 << 7;
+
     /** @hide */
     public DisplayManager(Context context) {
         mContext = context;

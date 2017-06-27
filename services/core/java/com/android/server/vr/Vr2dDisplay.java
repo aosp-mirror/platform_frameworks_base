@@ -266,6 +266,7 @@ class Vr2dDisplay {
             }
 
             int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
             mVirtualDisplay = mDisplayManager.createVirtualDisplay(null /* projection */,
                     DISPLAY_NAME, mVirtualDisplayWidth, mVirtualDisplayHeight, mVirtualDisplayDpi,
                     null /* surface */, flags, null /* callback */, null /* handler */,
