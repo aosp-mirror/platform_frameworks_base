@@ -1499,8 +1499,7 @@ final class UserController {
             }
         }
 
-        // One way or another, we're running!
-        return true;
+        return state.state != UserState.STATE_STOPPING && state.state != UserState.STATE_SHUTDOWN;
     }
 
     UserInfo getCurrentUser() {
