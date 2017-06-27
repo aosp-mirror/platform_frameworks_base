@@ -37,10 +37,12 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Slog;
 
 import java.util.Locale;
 
 public class SettingsHelper {
+    private static final String TAG = "SettingsHelper";
     private static final String SILENT_RINGTONE = "_silent";
     private Context mContext;
     private AudioManager mAudioManager;
@@ -324,11 +326,17 @@ public class SettingsHelper {
      */
     void setLocaleData(byte[] data, int size) {
         // Check if locale was set by the user:
-        Configuration conf = mContext.getResources().getConfiguration();
-        // TODO: The following is not working as intended because the network is forcing a locale
-        // change after registering. Need to find some other way to detect if the user manually
-        // changed the locale
-        if (conf.userSetLocale) return; // Don't change if user set it in the SetupWizard
+        final ContentResolver cr = mContext.getContentResolver();
+        final boolean userSetLocale = mContext.getResources().getConfiguration().userSetLocale;
+        final boolean provisioned = Settings.Global.getInt(cr,
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        if (userSetLocale || provisioned) {
+            // Don't change if user set it in the SetupWizard, or if this is a post-setup
+            // deferred restore operation
+            Slog.i(TAG, "Not applying restored locale; "
+                    + (userSetLocale ? "user already specified" : "device already provisioned"));
+            return;
+        }
 
         final String[] availableLocales = mContext.getAssets().getLocales();
         // Replace "_" with "-" to deal with older backups.
