@@ -7205,11 +7205,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     // load resources from the correct package
                     installerInfo.resolvePackageName = info.getComponentInfo().packageName;
                     resolveInfos.set(i, installerInfo);
+                    continue;
                 }
-                continue;
             }
             // caller is a full app, don't need to apply any other filtering
             if (ephemeralPkgName == null) {
+                continue;
+            } else if (ephemeralPkgName.equals(info.activityInfo.packageName)) {
+                // caller is same app; don't need to apply any other filtering
                 continue;
             }
             // allow activities that have been explicitly exposed to ephemeral apps
@@ -20029,7 +20032,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
-                final PackageSetting ps = (PackageSetting) pkg.mExtras;
+                final PackageSetting ps = pkg == null ? null : (PackageSetting) pkg.mExtras;
                 boolean doClearData = true;
                 if (ps != null) {
                     final boolean targetIsInstantApp =

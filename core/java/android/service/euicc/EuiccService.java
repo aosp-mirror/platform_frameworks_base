@@ -97,6 +97,10 @@ public abstract class EuiccService extends Service {
     public static final String ACTION_RESOLVE_NO_PRIVILEGES =
             "android.service.euicc.action.RESOLVE_NO_PRIVILEGES";
 
+    /** Intent extra set for resolution requests containing the package name of the calling app. */
+    public static final String EXTRA_RESOLUTION_CALLING_PACKAGE =
+            "android.service.euicc.extra.RESOLUTION_CALLING_PACKAGE";
+
     /** Result code for a successful operation. */
     public static final int RESULT_OK = 0;
     /** Result code indicating that an active SIM must be deactivated to perform the operation. */

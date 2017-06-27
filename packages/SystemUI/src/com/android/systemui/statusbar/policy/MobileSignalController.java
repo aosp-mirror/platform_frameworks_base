@@ -341,6 +341,10 @@ public class MobileSignalController extends SignalController<
     }
 
     private boolean isRoaming() {
+        // During a carrier change, roaming indications need to be supressed.
+        if (isCarrierNetworkChangeActive()) {
+            return false;
+        }
         if (isCdma()) {
             final int iconMode = mServiceState.getCdmaEriIconMode();
             return mServiceState.getCdmaEriIconIndex() != EriInfo.ROAMING_INDICATOR_OFF

@@ -20,8 +20,6 @@
 
 #include "SoundPoolThread.h"
 
-static const int kMaxWorkers = 3;
-
 namespace android {
 
 void SoundPoolThread::write(SoundPoolMsg msg) {
@@ -33,21 +31,14 @@ void SoundPoolThread::write(SoundPoolMsg msg) {
     // if thread is quitting, don't add to queue
     if (mRunning) {
         mMsgQueue.push(msg);
-        if (mNumWorkers < kMaxWorkers) {
-            if (createThreadEtc(beginThread, this, "SoundPoolThread")) {
-                mNumWorkers++;
-                ALOGV("created worker thread");
-            }
-        }
+        mCondition.signal();
     }
 }
 
 const SoundPoolMsg SoundPoolThread::read() {
     Mutex::Autolock lock(&mLock);
-    if (mMsgQueue.size() == 0) {
-        mNumWorkers--;
-        mCondition.signal();
-        return SoundPoolMsg(SoundPoolMsg::KILL, 0);
+    while (mMsgQueue.size() == 0) {
+        mCondition.wait(mLock);
     }
     SoundPoolMsg msg = mMsgQueue[0];
     mMsgQueue.removeAt(0);
@@ -60,20 +51,20 @@ void SoundPoolThread::quit() {
     if (mRunning) {
         mRunning = false;
         mMsgQueue.clear();
-        mCondition.broadcast(); // wake up any blocked writers
-        while (mNumWorkers > 0) {
-            mCondition.wait(mLock);
-        }
+        mMsgQueue.push(SoundPoolMsg(SoundPoolMsg::KILL, 0));
+        mCondition.signal();
+        mCondition.wait(mLock);
     }
     ALOGV("return from quit");
 }
 
 SoundPoolThread::SoundPoolThread(SoundPool* soundPool) :
-    mSoundPool(soundPool),
-    mNumWorkers(0),
-    mRunning(true)
+    mSoundPool(soundPool)
 {
     mMsgQueue.setCapacity(maxMessages);
+    if (createThreadEtc(beginThread, this, "SoundPoolThread")) {
+        mRunning = true;
+    }
 }
 
 SoundPoolThread::~SoundPoolThread()

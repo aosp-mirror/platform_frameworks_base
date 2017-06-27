@@ -107,4 +107,20 @@ public class AppUtils {
         return false;
     }
 
+    /** Returns the label for a given package. */
+    public static CharSequence getApplicationLabel(
+            PackageManager packageManager, String packageName) {
+        try {
+            final ApplicationInfo appInfo =
+                    packageManager.getApplicationInfo(
+                            packageName,
+                            PackageManager.MATCH_DISABLED_COMPONENTS
+                                    | PackageManager.MATCH_ANY_USER);
+            return appInfo.loadLabel(packageManager);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Unable to find info for package: " + packageName);
+        }
+        return null;
+    }
+
 }
