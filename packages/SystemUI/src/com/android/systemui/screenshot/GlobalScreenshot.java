@@ -46,6 +46,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.MediaStore;
@@ -61,6 +62,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
@@ -678,6 +680,13 @@ class GlobalScreenshot {
      */
     private void startAnimation(final Runnable finisher, int w, int h, boolean statusBarVisible,
             boolean navBarVisible) {
+        // If power save is on, show a toast so there is some visual indication that a screenshot
+        // has been taken.
+        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        if (powerManager.isPowerSaveMode()) {
+            Toast.makeText(mContext, R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show();
+        }
+
         // Add the view for the animation
         mScreenshotView.setImageBitmap(mScreenBitmap);
         mScreenshotLayout.requestFocus();
