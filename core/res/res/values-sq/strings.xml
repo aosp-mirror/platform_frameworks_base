@@ -27,18 +27,6 @@
     <string name="terabyteShort" msgid="231613018159186962">"terabajt"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"petabajt"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> ditë"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> ditë e <xliff:g id="HOURS">%2$d</xliff:g> orë"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> ditë e <xliff:g id="HOURS">%2$d</xliff:g> orë"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> orë"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> orë e <xliff:g id="MINUTES">%2$d</xliff:g> minuta"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> orë e <xliff:g id="MINUTES">%2$d</xliff:g> minuta"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minuta"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> minuta"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> minuta e <xliff:g id="SECONDS">%2$d</xliff:g> sekonda"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> minuta e <xliff:g id="SECONDS">%2$d</xliff:g> sekonda"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sekonda"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sekonda"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Pa titull&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nuk ka numër telefoni)"</string>
     <string name="unknownName" msgid="6867811765370350269">"E panjohur"</string>
@@ -95,8 +83,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nuk ka shërbim zanor/urgjence"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Përkohësisht nuk ofrohet nga rrjeti celular në vendndodhjen tënde"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Rrjeti i paarritshëm"</string>
-    <!-- no translation found for NetworkPreferenceSwitchSummary (1203771446683319957) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Për të përmirësuar marrjen e sinjalit, provo të ndryshosh llojin e zgjedhur te Cilësimet &gt; Rrjeti dhe interneti &gt; Lloji i preferuar i rrjetit."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Sinjalizimet"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Transferimi i telefonatave"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modaliteti i \"Kthimit të telefonatës së urgjencës\""</string>
@@ -132,7 +119,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Po kërkon për shërbim"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Telefonatë me Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Për të bërë telefonata dhe për të dërguar mesazhe me Wi-Fi, në fillim kërkoji operatorit celular ta konfigurojë këtë shërbim. Më pas aktivizo përsëri telefonatat me Wi-Fi, nga Cilësimet."</item>
+    <item msgid="3910386316304772394">"Për të bërë telefonata dhe për të dërguar mesazhe nëpërmjet Wi-Fi, në fillim kërkoji operatorit celular të konfigurojë këtë shërbim. Më pas aktivizo përsëri telefonatat me Wi-Fi nga \"Cilësimet\". (Kodi i gabimit: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Regjistrohu me operatorin tënd celular"</item>
@@ -1107,6 +1094,13 @@
       <item quantity="other">Rrjete të hapura Wi-Fi në përdorim</item>
       <item quantity="one">Rrjet i hapur Wi-Fi në përdorim</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Lidhu me rrjetin e hapur Wi‑Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Po lidhet me rrjetin e hapur Wi‑Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Lidhur me rrjetin e hapur Wi‑Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Nuk mund të lidhet me rrjetin Wi‑Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Trokit për të parë të gjitha rrjetet"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Lidhu"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Të gjitha rrjetet"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Identifikohu në rrjetin Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Identifikohu në rrjet"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
