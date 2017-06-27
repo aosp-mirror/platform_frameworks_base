@@ -507,8 +507,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
-    static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
-
     // Amount of time after a call to stopAppSwitches() during which we will
     // prevent further untrusted switches from happening.
     static final long APP_SWITCH_DELAY_TIME = 5*1000;
@@ -5730,7 +5728,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     final void logAppTooSlow(ProcessRecord app, long startTime, String msg) {
-        if (true || IS_USER_BUILD) {
+        if (true || Build.IS_USER) {
             return;
         }
         String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
@@ -14540,7 +14538,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final ProcessRecord r = handleApplicationWtfInner(callingUid, callingPid, app, tag,
                 crashInfo);
 
-        final boolean isFatal = "eng".equals(Build.TYPE) || Settings.Global
+        final boolean isFatal = Build.IS_ENG || Settings.Global
                 .getInt(mContext.getContentResolver(), Settings.Global.WTF_IS_FATAL, 0) != 0;
         final boolean isSystem = (r == null) || r.persistent;
 
@@ -20587,7 +20585,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                    && config.navigation == Configuration.NAVIGATION_NONAV);
         int modeType = config.uiMode & Configuration.UI_MODE_TYPE_MASK;
         final boolean uiModeSupportsDialogs = (modeType != Configuration.UI_MODE_TYPE_CAR
-                && !(modeType == Configuration.UI_MODE_TYPE_WATCH && "user".equals(Build.TYPE))
+                && !(modeType == Configuration.UI_MODE_TYPE_WATCH && Build.IS_USER)
                 && modeType != Configuration.UI_MODE_TYPE_TELEVISION
                 && modeType != Configuration.UI_MODE_TYPE_VR_HEADSET);
         return inputMethodExists && uiModeSupportsDialogs;

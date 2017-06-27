@@ -30,7 +30,7 @@ import android.util.Log;
  * @hide
  */
 public final class InputEventConsistencyVerifier {
-    private static final boolean IS_ENG_BUILD = "eng".equals(Build.TYPE);
+    private static final boolean IS_ENG_BUILD = Build.IS_ENG;
 
     private static final String EVENT_TYPE_KEY = "KeyEvent";
     private static final String EVENT_TYPE_TRACKBALL = "TrackballEvent";

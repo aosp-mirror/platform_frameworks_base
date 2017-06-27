@@ -125,9 +125,6 @@ public final class StrictMode {
     private static final String TAG = "StrictMode";
     private static final boolean LOG_V = Log.isLoggable(TAG, Log.VERBOSE);
 
-    private static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
-    private static final boolean IS_ENG_BUILD = "eng".equals(Build.TYPE);
-
     /**
      * Boolean system property to disable strict mode checks outright.
      * Set this to 'true' to force disable; 'false' has no effect on other
@@ -1191,7 +1188,7 @@ public final class StrictMode {
 
         // For debug builds, log event loop stalls to dropbox for analysis.
         // Similar logic also appears in ActivityThread.java for system apps.
-        if (!doFlashes && (IS_USER_BUILD || suppress)) {
+        if (!doFlashes && (Build.IS_USER || suppress)) {
             setCloseGuardEnabled(false);
             return false;
         }
@@ -1199,7 +1196,7 @@ public final class StrictMode {
         // Eng builds have flashes on all the time.  The suppression property
         // overrides this, so we force the behavior only after the short-circuit
         // check above.
-        if (IS_ENG_BUILD) {
+        if (Build.IS_ENG) {
             doFlashes = true;
         }
 
@@ -1208,7 +1205,7 @@ public final class StrictMode {
                 StrictMode.DETECT_DISK_READ |
                 StrictMode.DETECT_NETWORK;
 
-        if (!IS_USER_BUILD) {
+        if (!Build.IS_USER) {
             threadPolicyMask |= StrictMode.PENALTY_DROPBOX;
         }
         if (doFlashes) {
@@ -1219,23 +1216,25 @@ public final class StrictMode {
 
         // VM Policy controls CloseGuard, detection of Activity leaks,
         // and instance counting.
-        if (IS_USER_BUILD) {
+        if (Build.IS_USER) {
             setCloseGuardEnabled(false);
         } else {
             VmPolicy.Builder policyBuilder = new VmPolicy.Builder().detectAll();
-            if (!IS_ENG_BUILD) {
+            if (!Build.IS_ENG) {
                 // Activity leak detection causes too much slowdown for userdebug because of the
                 // GCs.
                 policyBuilder = policyBuilder.disable(DETECT_VM_ACTIVITY_LEAKS);
             }
             policyBuilder = policyBuilder.penaltyDropBox();
-            if (IS_ENG_BUILD) {
+            if (Build.IS_ENG) {
                 policyBuilder.penaltyLog();
             }
             // All core system components need to tag their sockets to aid
             // system health investigations
             if (android.os.Process.myUid() < android.os.Process.FIRST_APPLICATION_UID) {
-                policyBuilder.detectUntaggedSockets();
+                policyBuilder.enable(DETECT_VM_UNTAGGED_SOCKET);
+            } else {
+                policyBuilder.disable(DETECT_VM_UNTAGGED_SOCKET);
             }
             setVmPolicy(policyBuilder.build());
             setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
@@ -2294,7 +2293,7 @@ public final class StrictMode {
      * @hide
      */
     public static Span enterCriticalSpan(String name) {
-        if (IS_USER_BUILD) {
+        if (Build.IS_USER) {
             return NO_OP_SPAN;
         }
         if (name == null || name.isEmpty()) {
