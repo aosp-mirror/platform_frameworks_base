@@ -208,9 +208,6 @@ public class PopupWindow {
 
     private int mGravity = Gravity.NO_GRAVITY;
 
-    // Title provided to accessibility services
-    private CharSequence mAccessibilityTitle;
-
     private static final int[] ABOVE_ANCHOR_STATE_SET = new int[] {
             com.android.internal.R.attr.state_above_anchor
     };
@@ -1134,31 +1131,6 @@ public class PopupWindow {
         return mIsShowing;
     }
 
-    /**
-     * Set the title for this window to be reported to accessibility services. If no title is set,
-     * a generic default will be reported.
-     *
-     * @param accessibilityTitle The new title, or {@code null} to specify that the default should
-     * be used.
-     * @hide
-     */
-    public void setAccessibilityTitle(@Nullable CharSequence accessibilityTitle) {
-        mAccessibilityTitle = accessibilityTitle;
-    }
-
-    /**
-     * Get the title for this window to be reported to accessibility services.
-     *
-     * @return The current title.
-     * @hide
-     */
-    public @NonNull CharSequence getAccessibilityTitle() {
-        if (mAccessibilityTitle == null) {
-            mAccessibilityTitle = mContext.getString(R.string.popup_window_default_title);
-        }
-        return mAccessibilityTitle;
-    }
-
     /** @hide */
     protected final void setShowing(boolean isShowing) {
         mIsShowing = isShowing;
@@ -1362,6 +1334,10 @@ public class PopupWindow {
                     + "calling setContentView() before attempting to show the popup.");
         }
 
+        if (p.accessibilityTitle == null) {
+            p.accessibilityTitle = mContext.getString(R.string.popup_window_default_title);
+        }
+
         // The old decor view may be transitioning out. Make sure it finishes
         // and cleans up before we try to create another one.
         if (mDecorView != null) {
@@ -1524,7 +1500,6 @@ public class PopupWindow {
 
         // Used for debugging.
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));
-        p.accessibilityTitle = getAccessibilityTitle();
 
         return p;
     }
