@@ -123,10 +123,11 @@ public class RadioTest {
         // find FM band and build its config
         mModule = mModules.get(0);
         for (RadioManager.BandDescriptor band : mModule.getBands()) {
-            if (band.getType() == RadioManager.BAND_AM) {
+            int bandType = band.getType();
+            if (bandType == RadioManager.BAND_AM || bandType == RadioManager.BAND_AM_HD) {
                 mAmBandDescriptor = (RadioManager.AmBandDescriptor)band;
             }
-            if (band.getType() == RadioManager.BAND_FM) {
+            if (bandType == RadioManager.BAND_FM || bandType == RadioManager.BAND_FM_HD) {
                 mFmBandDescriptor = (RadioManager.FmBandDescriptor)band;
             }
         }
