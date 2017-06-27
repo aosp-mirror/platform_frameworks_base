@@ -6416,17 +6416,7 @@ public class Activity extends ContextThemeWrapper
      */
     @Deprecated
     public boolean requestVisibleBehind(boolean visible) {
-        if (!mResumed) {
-            // Do not permit paused or stopped activities to do this.
-            visible = false;
-        }
-        try {
-            mVisibleBehind = ActivityManager.getService()
-                    .requestVisibleBehind(mToken, visible) && visible;
-        } catch (RemoteException e) {
-            mVisibleBehind = false;
-        }
-        return mVisibleBehind;
+        return false;
     }
 
     /**
