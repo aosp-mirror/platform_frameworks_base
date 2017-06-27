@@ -25,8 +25,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.LongSparseArray;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -60,16 +60,21 @@ final class NetworkLoggingHandler extends Handler {
     /** Delay after which older batches get discarded after a retrieval. */
     private static final long RETRIEVED_BATCH_DISCARD_DELAY_MS = 5 * 60 * 1000; // 5m
 
+    /** Do not call into mDpm with locks held */
     private final DevicePolicyManagerService mDpm;
     private final AlarmManager mAlarmManager;
 
     private final OnAlarmListener mBatchTimeoutAlarmListener = new OnAlarmListener() {
         @Override
         public void onAlarm() {
-            Log.d(TAG, "Received a batch finalization timeout alarm, finalizing "
+            Slog.d(TAG, "Received a batch finalization timeout alarm, finalizing "
                     + mNetworkEvents.size() + " pending events.");
+            Bundle notificationExtras = null;
             synchronized (NetworkLoggingHandler.this) {
-                finalizeBatchAndNotifyDeviceOwnerLocked();
+                notificationExtras = finalizeBatchAndBuildDeviceOwnerMessageLocked();
+            }
+            if (notificationExtras != null) {
+                notifyDeviceOwner(notificationExtras);
             }
         }
     };
@@ -110,17 +115,21 @@ final class NetworkLoggingHandler extends Handler {
             case LOG_NETWORK_EVENT_MSG: {
                 final NetworkEvent networkEvent = msg.getData().getParcelable(NETWORK_EVENT_KEY);
                 if (networkEvent != null) {
+                    Bundle notificationExtras = null;
                     synchronized (NetworkLoggingHandler.this) {
                         mNetworkEvents.add(networkEvent);
                         if (mNetworkEvents.size() >= MAX_EVENTS_PER_BATCH) {
-                            finalizeBatchAndNotifyDeviceOwnerLocked();
+                            notificationExtras = finalizeBatchAndBuildDeviceOwnerMessageLocked();
                         }
+                    }
+                    if (notificationExtras != null) {
+                        notifyDeviceOwner(notificationExtras);
                     }
                 }
                 break;
             }
             default: {
-                Log.d(TAG, "NetworkLoggingHandler received an unknown of message.");
+                Slog.d(TAG, "NetworkLoggingHandler received an unknown of message.");
                 break;
             }
         }
@@ -133,40 +142,48 @@ final class NetworkLoggingHandler extends Handler {
         mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP, when,
                 BATCH_FINALIZATION_TIMEOUT_ALARM_INTERVAL_MS, NETWORK_LOGGING_TIMEOUT_ALARM_TAG,
                 mBatchTimeoutAlarmListener, this);
-        Log.d(TAG, "Scheduled a new batch finalization alarm " + BATCH_FINALIZATION_TIMEOUT_MS
+        Slog.d(TAG, "Scheduled a new batch finalization alarm " + BATCH_FINALIZATION_TIMEOUT_MS
                 + "ms from now.");
     }
 
     synchronized void pause() {
-        Log.d(TAG, "Paused network logging");
+        Slog.d(TAG, "Paused network logging");
         mPaused = true;
     }
 
-    synchronized void resume() {
-        if (!mPaused) {
-            Log.d(TAG, "Attempted to resume network logging, but logging is not paused.");
-            return;
+    void resume() {
+        Bundle notificationExtras = null;
+        synchronized (this) {
+            if (!mPaused) {
+                Slog.d(TAG, "Attempted to resume network logging, but logging is not paused.");
+                return;
+            }
+
+            Slog.d(TAG, "Resumed network logging. Current batch=" + mCurrentBatchToken
+                    + ", LastRetrievedBatch=" + mLastRetrievedBatchToken);
+            mPaused = false;
+
+            // If there is a batch ready that the device owner hasn't been notified about, do it now.
+            if (mBatches.size() > 0 && mLastRetrievedBatchToken != mCurrentBatchToken) {
+                scheduleBatchFinalization();
+                notificationExtras = buildDeviceOwnerMessageLocked();
+            }
         }
-
-        Log.d(TAG, "Resumed network logging. Current batch=" + mCurrentBatchToken
-                + ", LastRetrievedBatch=" + mLastRetrievedBatchToken);
-        mPaused = false;
-
-        // If there is a batch ready that the device owner hasn't been notified about, do it now.
-        if (mBatches.size() > 0 && mLastRetrievedBatchToken != mCurrentBatchToken) {
-            scheduleBatchFinalization();
-            notifyDeviceOwnerLocked();
+        if (notificationExtras != null) {
+            notifyDeviceOwner(notificationExtras);
         }
     }
 
     synchronized void discardLogs() {
         mBatches.clear();
         mNetworkEvents = new ArrayList<>();
-        Log.d(TAG, "Discarded all network logs");
+        Slog.d(TAG, "Discarded all network logs");
     }
 
     @GuardedBy("this")
-    private void finalizeBatchAndNotifyDeviceOwnerLocked() {
+    /** @returns extras if a message should be sent to the device owner */
+    private Bundle finalizeBatchAndBuildDeviceOwnerMessageLocked() {
+        Bundle notificationExtras = null;
         if (mNetworkEvents.size() > 0) {
             // Finalize the batch and start a new one from scratch.
             if (mBatches.size() >= MAX_BATCHES) {
@@ -177,27 +194,39 @@ final class NetworkLoggingHandler extends Handler {
             mBatches.append(mCurrentBatchToken, mNetworkEvents);
             mNetworkEvents = new ArrayList<>();
             if (!mPaused) {
-                notifyDeviceOwnerLocked();
+                notificationExtras = buildDeviceOwnerMessageLocked();
             }
         } else {
             // Don't notify the DO, since there are no events; DPC can still retrieve
             // the last full batch if not paused.
-            Log.d(TAG, "Was about to finalize the batch, but there were no events to send to"
+            Slog.d(TAG, "Was about to finalize the batch, but there were no events to send to"
                     + " the DPC, the batchToken of last available batch: " + mCurrentBatchToken);
         }
         // Regardless of whether the batch was non-empty schedule a new finalization after timeout.
         scheduleBatchFinalization();
+        return notificationExtras;
     }
 
-    /** Sends a notification to the DO. Should only be called when there is a batch available. */
     @GuardedBy("this")
-    private void notifyDeviceOwnerLocked() {
+    /** Build extras notification to the DO. Should only be called when there
+        is a batch available. */
+    private Bundle buildDeviceOwnerMessageLocked() {
         final Bundle extras = new Bundle();
         final int lastBatchSize = mBatches.valueAt(mBatches.size() - 1).size();
         extras.putLong(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN, mCurrentBatchToken);
         extras.putInt(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_COUNT, lastBatchSize);
-        Log.d(TAG, "Sending network logging batch broadcast to device owner, batchToken: "
-                + mCurrentBatchToken);
+        return extras;
+    }
+
+    /** Sends a notification to the DO. Should not hold locks as DevicePolicyManagerService may
+        call into NetworkLoggingHandler. */
+    private void notifyDeviceOwner(Bundle extras) {
+        Slog.d(TAG, "Sending network logging batch broadcast to device owner, batchToken: "
+                + extras.getLong(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN, -1));
+        if (Thread.holdsLock(this)) {
+            Slog.wtfStack(TAG, "Shouldn't be called with NetworkLoggingHandler lock held");
+            return;
+        }
         mDpm.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE, extras);
     }
 
