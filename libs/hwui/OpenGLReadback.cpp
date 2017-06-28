@@ -191,6 +191,7 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
             GL_TEXTURE_2D, texture, 0);
 
     {
+        bool requiresFilter;
         // Draw & readback
         renderState.setViewport(destWidth, destHeight);
         renderState.scissor().setEnabled(false);
@@ -208,12 +209,17 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
             croppedTexTransform.scale(srcRect.getWidth() / sourceTexture.width(),
                     srcRect.getHeight() / sourceTexture.height(), 1);
             croppedTexTransform.multiply(sFlipV);
+            requiresFilter = srcRect.getWidth() != (float) destWidth
+                    || srcRect.getHeight() != (float) destHeight;
+        } else {
+            requiresFilter = sourceTexture.width() != (uint32_t) destWidth
+                    || sourceTexture.height() != (uint32_t) destHeight;
         }
         Glop glop;
         GlopBuilder(renderState, caches, &glop)
                 .setRoundRectClipState(nullptr)
                 .setMeshTexturedUnitQuad(nullptr)
-                .setFillExternalTexture(sourceTexture, croppedTexTransform)
+                .setFillExternalTexture(sourceTexture, croppedTexTransform, requiresFilter)
                 .setTransform(Matrix4::identity(), TransformFlags::None)
                 .setModelViewMapUnitToRect(Rect(destWidth, destHeight))
                 .build();
