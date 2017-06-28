@@ -776,7 +776,4 @@
 
     <dimen name="qs_gutter_height">6dp</dimen>
 
-    <!-- Width of the hollow triangle for empty signal state -->
-    <dimen name="mobile_signal_empty_strokewidth">2dp</dimen>
-
 </resources>
