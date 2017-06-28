@@ -431,6 +431,25 @@ public class RadioManager {
         public int getType() {
             return mType;
         }
+
+        /**
+         * Checks if the band is either AM or AM_HD.
+         *
+         * @return {@code true}, if band is AM or AM_HD.
+         */
+        public boolean isAmBand() {
+            return mType == BAND_AM || mType == BAND_AM_HD;
+        }
+
+        /**
+         * Checks if the band is either FM or FM_HD.
+         *
+         * @return {@code true}, if band is FM or FM_HD.
+         */
+        public boolean isFmBand() {
+            return mType == BAND_FM || mType == BAND_FM_HD;
+        }
+
         /** Lower band limit expressed in units according to band type.
          * Currently all defined band types express channels as frequency in kHz
          * @return the lower band limit.
