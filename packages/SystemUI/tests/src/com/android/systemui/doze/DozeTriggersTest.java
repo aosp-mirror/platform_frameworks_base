@@ -27,7 +27,6 @@ import android.app.Instrumentation;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
