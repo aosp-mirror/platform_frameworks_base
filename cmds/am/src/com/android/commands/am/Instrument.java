@@ -25,7 +25,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.AndroidException;
@@ -34,6 +33,8 @@ import android.view.IWindowManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -95,6 +96,12 @@ public class Instrument {
         public void onError(String errorText, boolean commandError);
     }
 
+    private static Collection<String> sorted(Collection<String> list) {
+        final ArrayList<String> copy = new ArrayList<>(list);
+        Collections.sort(copy);
+        return copy;
+    }
+
     /**
      * Printer for the 'classic' text based status reporting.
      */
@@ -124,7 +131,7 @@ public class Instrument {
                 System.out.print(pretty);
             } else {
                 if (results != null) {
-                    for (String key : results.keySet()) {
+                    for (String key : sorted(results.keySet())) {
                         System.out.println(
                                 "INSTRUMENTATION_STATUS: " + key + "=" + results.get(key));
                     }
@@ -214,7 +221,7 @@ public class Instrument {
         private void writeBundle(ProtoOutputStream proto, long fieldId, Bundle bundle) {
             final long bundleToken = proto.startObject(fieldId);
 
-            for (final String key: bundle.keySet()) {
+            for (final String key: sorted(bundle.keySet())) {
                 final long entryToken = proto.startRepeatedObject(
                         InstrumentationData.ResultsBundle.ENTRIES);
 
