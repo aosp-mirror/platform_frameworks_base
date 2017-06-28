@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Søger efter tjeneste"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Opkald via Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Hvis du vil foretage opkald og sende beskeder via Wi-Fi, skal du først anmode dit mobilselskab om at konfigurere denne tjeneste. Derefter skal du slå Wi-Fi-opkald til igen fra Indstillinger."</item>
+    <item msgid="3910386316304772394">"Hvis du vil foretage opkald og sende beskeder via Wi-Fi, skal du først anmode dit mobilselskab om at konfigurere denne tjeneste. Derefter skal du aktivere Wi-Fi-opkald igen fra Indstillinger. (Fejlkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Registrer dig hos dit mobilselskab"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="one">Åbne Wi-Fi-netværk er tilgængelige</item>
       <item quantity="other">Åbne Wi-Fi-netværk er tilgængelige</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Opret forbindelse til et åbent Wi-Fi-netværk"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Opretter forbindelse til et åbent Wi‑Fi-netværk"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Forbundet til Wi-Fi-netværket"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Der kan ikke oprettes forbindelse til Wi-Fi-netværket"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tryk for at se alle netværk"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Opret forbindelse"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Alle netværk"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Log ind på Wi-Fi-netværk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Log ind på netværk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜尋服務"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi 通話"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"如要透過 Wi-Fi 撥打電話及傳送訊息，請先向您的流動網絡供應商要求設定此服務。然後再次在「設定」中開啟 Wi-Fi 通話。"</item>
+    <item msgid="3910386316304772394">"如要透過 Wi-Fi 撥打電話和傳送訊息，請先向流動網絡供應商要求設定此服務，然後再次在「設定」中開啟「Wi-Fi 通話」。(錯誤代碼：<xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"向您的流動網絡供應商註冊"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">有可用的公開 Wi-Fi 網絡</item>
       <item quantity="one">有可用的公開 Wi-Fi 網絡</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"連線至開放的 Wi-Fi 網絡"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"正在連線至開放的 Wi-Fi 網絡"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"已連線至 Wi-Fi 網絡"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"無法連線至 Wi-Fi 網絡"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"輕按即可查看所有網絡"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"連線"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"所有網絡"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"登入 Wi-Fi 網絡"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"登入網絡"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

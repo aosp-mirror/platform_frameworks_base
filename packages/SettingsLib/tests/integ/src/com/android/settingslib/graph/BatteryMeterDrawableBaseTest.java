@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static com.google.common.truth.Truth.assertThat;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyFloat;
 import static org.mockito.Matchers.anyString;
@@ -100,5 +101,18 @@ public class BatteryMeterDrawableBaseTest {
 
     private boolean isRectZero(Rect r) {
         return r.left == 0 && r.top == 0 && r.right == 0 && r.bottom == 0;
+    }
+
+    @Test
+    public void testPlusPaint_isEqualToBoltPaint() {
+        // Before setting color
+        assertTrue(mBatteryDrawable.mPlusPaint.hasEqualAttributes(mBatteryDrawable.mBoltPaint));
+
+        final int fakeFillColor = 123;
+        final int fakeBackgrundColor = 456;
+
+        // After
+        mBatteryDrawable.setColors(fakeFillColor, fakeBackgrundColor);
+        assertTrue(mBatteryDrawable.mPlusPaint.hasEqualAttributes(mBatteryDrawable.mBoltPaint));
     }
 }

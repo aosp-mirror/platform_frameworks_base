@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Po kërkon për shërbim"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Telefonatë me Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Për të bërë telefonata dhe për të dërguar mesazhe me Wi-Fi, në fillim kërkoji operatorit celular ta konfigurojë këtë shërbim. Më pas aktivizo përsëri telefonatat me Wi-Fi, nga Cilësimet."</item>
+    <item msgid="3910386316304772394">"Për të bërë telefonata dhe për të dërguar mesazhe nëpërmjet Wi-Fi, në fillim kërkoji operatorit celular të konfigurojë këtë shërbim. Më pas aktivizo përsëri telefonatat me Wi-Fi nga \"Cilësimet\". (Kodi i gabimit: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Regjistrohu me operatorin tënd celular"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Rrjete të hapura Wi-Fi në përdorim</item>
       <item quantity="one">Rrjet i hapur Wi-Fi në përdorim</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Lidhu me rrjetin e hapur Wi‑Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Po lidhet me rrjetin e hapur Wi‑Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Lidhur me rrjetin e hapur Wi‑Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Nuk mund të lidhet me rrjetin Wi‑Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Trokit për të parë të gjitha rrjetet"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Lidhu"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Të gjitha rrjetet"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Identifikohu në rrjetin Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Identifikohu në rrjet"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

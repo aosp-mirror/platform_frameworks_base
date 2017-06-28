@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Търси се покритие"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Обаждания през Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"За да извършвате обаждания и да изпращате съобщения през Wi-Fi, първо помолете оператора си да настрои тази услуга. След това включете отново функцията за обаждания през Wi-Fi от настройките."</item>
+    <item msgid="3910386316304772394">"За да извършвате обаждания и да изпращате съобщения през Wi-Fi, първо, помолете оператора си да настрои тази услуга. След това включете отново функцията за обаждания през Wi-Fi от настройките. (Код на грешката: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Регистриране с оператора ви"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Има достъпни отворени Wi-Fi мрежи</item>
       <item quantity="one">Има достъпна отворена Wi-Fi мрежа</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Свързване с отворена Wi‑Fi мрежа"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Установява се връзка с отворена Wi‑Fi мрежа"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Установихте връзка с Wi-Fi мрежата"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не можа да се установи връзка с Wi‑Fi мрежата"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Докоснете, за да видите всички мрежи"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Свързване"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Всички мрежи"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Влизане в Wi-Fi мрежа"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Вход в мрежата"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

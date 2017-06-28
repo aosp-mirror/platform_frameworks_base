@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Mencari layanan"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Panggilan Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Untuk melakukan panggilan telepon dan mengirim pesan melalui Wi-Fi, terlebih dahulu minta operator untuk menyiapkan layanan ini. Lalu, aktifkan lagi panggilan telepon Wi-Fi dari Setelan."</item>
+    <item msgid="3910386316304772394">"Untuk menelepon dan mengirim pesan melalui Wi-Fi, tanyalah ke operator Anda terlebih dahulu untuk menyiapkan layanan ini. Kemudian, aktifkan kembali panggilan Wi-Fi dari Setelan. (Kode error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Harap daftarkan ke operator"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Jaringan Wi-Fi terbuka tersedia</item>
       <item quantity="one">Jaringan Wi-Fi terbuka tersedia</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Hubungkan ke jaringan Wi-Fi terbuka"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Menghubungkan ke jaringan Wi-Fi terbuka"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Terhubung ke jaringan Wi-Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Tidak dapat menghubungkan ke jaringan Wi‑Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tap untuk melihat semua jaringan"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Hubungkan"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Semua Jaringan"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Masuk ke jaringan Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Masuk ke jaringan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

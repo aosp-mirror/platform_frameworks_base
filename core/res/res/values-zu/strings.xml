@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Iseshela Isevisi"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Ukushaya kwe-Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Ukuze wenze amakholi uphinde uthumele imilayezo nge-Wi-FI, qala ucele inkampani yakho yenethiwekhi ukuthi isethe le divayisi. Bese uvula ukushaya kwe-Wi-FI futhi kusukela kuzilungiselelo."</item>
+    <item msgid="3910386316304772394">"Ukuze wenze amakholi uphinde uthumele imilayezo nge-Wi-Fi, qala ucele inkampani yakho yenethiwekhi ukuthi isethe le sevisi. Bese uvula ukushaya kwe-Wi-Fi futhi kusukela kuzilungiselelo (Ikhodi yephutha: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Bhalisa ngenkampani yakho yenethiwekhi"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="one">Vula amanethiwekhi we-Wi-Fi atholakalayo</item>
       <item quantity="other">Vula amanethiwekhi we-Wi-Fi atholakalayo</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"Xhuma kunethiwekhi evulekile ye-Wi‑Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Ixhuma kunethiwekhi evulekile ye-Wi‑Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Kuxhumeke kunethiwekhi ye-Wi‑Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Ayikwazanga ukuxhumeka kunethiwekhi ye-Wi-Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Thepha ukuze ubone onke amanethiwekhi"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Xhuma"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Onke amanethiwekhi"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Ngena ngemvume kunethiwekhi ye-Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Ngena ngemvume kunethiwekhi"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

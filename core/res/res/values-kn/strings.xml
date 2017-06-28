@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"ಸೇವೆ ಹುಡುಕಲಾಗುತ್ತಿದೆ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"ವೈ-ಫೈ ಬಳಸಿಕೊಂಡು ಕರೆ ಮಾಡಲು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು, ಮೊದಲು ಈ ಸಾಧನವನ್ನು ಹೊಂದಿಸಲು ನಿಮ್ಮ ವಾಹಕವನ್ನು ಕೇಳಿ. ತದನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಮತ್ತೆ ವೈ-ಫೈ ಆನ್‌ ಮಾಡಿ."</item>
+    <item msgid="3910386316304772394">"ವೈ-ಫೈ ಮೂಲಕ ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು, ಈ ಸೇವೆಯನ್ನು ಹೊಂದಿಸಲು ಮೊದಲು ನಿಮ್ಮ ವಾಹಕವನ್ನು ಕೇಳಿ. ಆ ನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ವೈ-ಫೈ ಕರೆಮಾಡುವಿಕೆಯನ್ನು ಅನ್ನು ಆನ್ ಮಾಡಿ. (ದೋಷ ಕೋಡ್: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"ನಿಮ್ಮ ವಾಹಕದಲ್ಲಿ ನೋಂದಾಯಿಸಿಕೊಳ್ಳಿ"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="one">ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
       <item quantity="other">ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಿ"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"ಸಂಪರ್ಕಿಸಿ"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಕ್‌ಗಳು"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ವೈ-ಫೈ ನೆಟ್‍ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

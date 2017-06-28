@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"സേവനത്തിനായി തിരയുന്നു"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"വൈഫൈ കോളിംഗ്"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"വൈഫൈ വഴി കോളുകൾ വിളിക്കാനും സന്ദേശങ്ങൾ അയയ്‌ക്കാനും ആദ്യം നിങ്ങളുടെ കാരിയറോട് ഈ സേവനം സജ്ജമാക്കാൻ ആവശ്യപ്പെടുക. ക്രമീകരണത്തിൽ നിന്ന് വീണ്ടും വൈഫൈ കോളിംഗ് ഓണാക്കുക."</item>
+    <item msgid="3910386316304772394">"വൈഫൈ വഴി കോളുകൾ ചെയ്യാനും സന്ദേശങ്ങൾ അയയ്‌ക്കാനും ആദ്യം നിങ്ങളുടെ കാരിയറോട് ഈ സേവനം സജ്ജമാക്കാൻ ആവശ്യപ്പെടുക. ക്രമീകരണത്തിൽ നിന്ന് വീണ്ടും വൈഫൈ കോളിംഗ് ഓണാക്കുക. (പിശക് കോഡ്: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"നിങ്ങളുടെ കാരിയറിൽ രജിസ്റ്റർ ചെയ്യുക"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">ലഭ്യമായ വൈഫൈ നെറ്റ്‌വർക്കുകൾ തുറക്കുക</item>
       <item quantity="one">ലഭ്യമായ വൈഫൈ നെറ്റ്‌വർക്ക് തുറക്കുക</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"ലഭ്യമായ വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യുക"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ലഭ്യമായ വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യുന്നു"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റു‌ചെയ്‌‌തു"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"വൈ-ഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്‌റ്റുചെയ്യാനായില്ല"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"എല്ലാ നെറ്റ്‌വർക്കുകളും കാണാൻ ടാപ്പുചെയ്യുക"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"കണക്റ്റുചെയ്യുക"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"എല്ലാ നെറ്റ്‌വർക്കുകളും"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് സൈൻ ഇൻ ചെയ്യുക"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"നെറ്റ്‌വർക്കിലേക്ക് സൈൻ ഇൻ ചെയ്യുക"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"ဆားဗစ်အားရှာဖွေနေသည်"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi  ခေါ်ဆိုမှု"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Wi-Fi သုံး၍ ဖုန်းခေါ်ဆိုရန်နှင့် မက်ဆေ့ဂျ်များပို့ရန်၊ ဤဝန်ဆောင်မှုအား စတင်သုံးနိုင်ရန်အတွက် သင့် မိုဘိုင်းဝန်ဆောင်မှုအား ဦးစွာမေးမြန်းပါ။ ထို့နောက် ဆက်တင်မှတဆင့် Wi-Fi  ခေါ်ဆိုမှုအား ထပ်ဖွင့်ပါ။"</item>
+    <item msgid="3910386316304772394">"Wi-Fi အသုံးပြု၍ ဖုန်းခေါ်ရန်နှင့် မက်ဆေ့ဂျ်ပို့ရန်အတွက် သင့်ဝန်ဆောင်မှုပေးသူကို ဤဝန်ဆောင်မှုအား သတ်မှတ်ပေးရန် ဦးစွာတောင်းဆိုပါ။ ထို့နောက် ဆက်တင်ထဲသို့ သွား၍ Wi-Fi ဖြင့် ဖုန်းခေါ်ခြင်းကို ဖွင့်ရပါမည်။ (အမှားကုဒ်- <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"သင့် မိုဘိုင်းဝန်ဆောင်မှုဖြင့် မှတ်ပုံတင်ရန်"</item>
@@ -1106,20 +1106,13 @@
       <item quantity="other">Wi-Fi ကွန်ယက်များရရှိနိုင်သည်အား ဖွင့်ပါ</item>
       <item quantity="one">Wi-Fi ကွန်ယက်ရရှိနိုင်သည်အား ဖွင့်ပါ</item>
     </plurals>
-    <!-- no translation found for wifi_available_title (3817100557900599505) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connecting (1557292688310330032) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_connected (7542672851522241548) -->
-    <skip />
-    <!-- no translation found for wifi_available_title_failed_to_connect (6861772233582618132) -->
-    <skip />
-    <!-- no translation found for wifi_available_content_failed_to_connect (3377406637062802645) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_connect (2635699628459488788) -->
-    <skip />
-    <!-- no translation found for wifi_available_action_all_networks (1100098935861622985) -->
-    <skip />
+    <string name="wifi_available_title" msgid="3817100557900599505">"အများသုံး Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်ပါ"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"အများသုံး Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်နေသည်"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်ပြီးပါပြီ"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်၍ မရပါ"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ကွန်ရက်အားလုံးကို ကြည့်ရန် တို့ပါ"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"ချိတ်ဆက်ရန်"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"ကွန်ရက်အားလုံး"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ဝိုင်ဖိုင်ကွန်ရက်သို့ လက်မှတ်ထိုးဝင်ပါ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ကွန်ယက်သို့ လက်မှတ်ထိုးဝင်ရန်"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
