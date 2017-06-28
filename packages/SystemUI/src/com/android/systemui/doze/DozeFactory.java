@@ -52,8 +52,9 @@ public class DozeFactory {
                 config,
                 wakeLock);
         machine.setParts(new DozeMachine.Part[]{
-                createDozeTriggers(context, sensorManager, host, config, params, handler, wakeLock,
-                        machine),
+                new DozePauser(handler, machine, alarmManager),
+                createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
+                        handler, wakeLock, machine),
                 createDozeUi(context, host, wakeLock, machine, handler, alarmManager),
         });
 
@@ -61,10 +62,10 @@ public class DozeFactory {
     }
 
     private DozeTriggers createDozeTriggers(Context context, SensorManager sensorManager,
-            DozeHost host, AmbientDisplayConfiguration config, DozeParameters params,
-            Handler handler, WakeLock wakeLock, DozeMachine machine) {
+            DozeHost host, AlarmManager alarmManager, AmbientDisplayConfiguration config,
+            DozeParameters params, Handler handler, WakeLock wakeLock, DozeMachine machine) {
         boolean allowPulseTriggers = true;
-        return new DozeTriggers(context, machine, host, config, params,
+        return new DozeTriggers(context, machine, host, alarmManager, config, params,
                 sensorManager, handler, wakeLock, allowPulseTriggers);
     }
 

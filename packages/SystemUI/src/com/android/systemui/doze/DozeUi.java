@@ -74,6 +74,7 @@ public class DozeUi implements DozeMachine.Part {
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case DOZE_AOD:
+            case DOZE_AOD_PAUSING:
                 scheduleTimeTick();
                 break;
             case DOZE:
