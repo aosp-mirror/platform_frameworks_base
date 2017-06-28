@@ -26,8 +26,9 @@
                android:layout_gravity="top|end"
                android:layout_marginTop="36dp"
                android:layout_marginEnd="@dimen/notification_content_margin_end"
-               android:scaleType="centerCrop"/>
-    <ImageView android:id="@+id/reply_icon_action"
+               android:scaleType="centerCrop"
+               android:importantForAccessibility="no" />
+    <ImageButton android:id="@+id/reply_icon_action"
                android:layout_width="16dp"
                android:layout_height="16dp"
                android:layout_gravity="top|end"
@@ -36,6 +37,7 @@
                android:background="@drawable/notification_reply_background"
                android:src="@drawable/ic_reply_notification"
                android:scaleType="center"
+               android:contentDescription="@string/notification_reply_button_accessibility"
                visiblity="gone"/>
 </FrameLayout>
 
