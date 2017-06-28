@@ -456,11 +456,13 @@ GlopBuilder& GlopBuilder::setFillTextureLayer(GlLayer& layer, float alpha) {
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setFillExternalTexture(Texture& texture, Matrix4& textureTransform) {
+GlopBuilder& GlopBuilder::setFillExternalTexture(Texture& texture, Matrix4& textureTransform,
+        bool requiresFilter) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { &texture, GL_LINEAR, GL_CLAMP_TO_EDGE, &textureTransform };
+    GLenum filter = requiresFilter ? GL_LINEAR : GL_NEAREST;
+    mOutGlop->fill.texture = { &texture, filter, GL_CLAMP_TO_EDGE, &textureTransform };
 
     setFill(SK_ColorWHITE, 1.0f, SkBlendMode::kSrc, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
