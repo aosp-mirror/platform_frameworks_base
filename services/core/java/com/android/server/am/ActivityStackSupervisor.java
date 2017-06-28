@@ -38,11 +38,13 @@ import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCRE
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
+import static android.view.Display.TYPE_VIRTUAL;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
@@ -1654,7 +1656,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // owner.
             final int launchDisplayId = options.getLaunchDisplayId();
             if (launchDisplayId != INVALID_DISPLAY
-                    && !isCallerAllowedToLaunchOnDisplay(callingPid, callingUid, launchDisplayId)) {
+                    && !isCallerAllowedToLaunchOnDisplay(callingPid, callingUid, launchDisplayId,
+                    aInfo)) {
                 final String msg = "Permission Denial: starting " + intent.toString()
                         + " from " + callerApp + " (pid=" + callingPid
                         + ", uid=" + callingUid + ") with launchDisplayId="
@@ -1668,13 +1671,33 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /** Check if caller is allowed to launch activities on specified display. */
-    boolean isCallerAllowedToLaunchOnDisplay(int callingPid, int callingUid, int launchDisplayId) {
+    boolean isCallerAllowedToLaunchOnDisplay(int callingPid, int callingUid, int launchDisplayId,
+            ActivityInfo aInfo) {
         if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check: displayId=" + launchDisplayId
                 + " callingPid=" + callingPid + " callingUid=" + callingUid);
 
         final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(launchDisplayId);
         if (activityDisplay == null) {
             Slog.w(TAG, "Launch on display check: display not found");
+            return false;
+        }
+
+        // Check if the caller can manage activity stacks.
+        final int startAnyPerm = mService.checkPermission(MANAGE_ACTIVITY_STACKS, callingPid,
+                callingUid);
+        if (startAnyPerm == PERMISSION_GRANTED) {
+            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
+                    + " allow launch any on display");
+            return true;
+        }
+
+        if (activityDisplay.mDisplay.getType() == TYPE_VIRTUAL
+                && activityDisplay.mDisplay.getOwnerUid() != SYSTEM_UID
+                && (aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
+            // Limit launching on virtual displays, because their contents can be read from Surface
+            // by apps that created them.
+            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
+                    + " disallow launch on virtual display for not-embedded activity");
             return false;
         }
 
@@ -1696,15 +1719,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (activityDisplay.isUidPresent(callingUid)) {
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                     + " allow launch for caller present on the display");
-            return true;
-        }
-
-        // Check if the caller can manage activity stacks.
-        final int startAnyPerm = mService.checkPermission(MANAGE_ACTIVITY_STACKS, callingPid,
-                callingUid);
-        if (startAnyPerm == PERMISSION_GRANTED) {
-            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
-                    + " allow launch any on display");
             return true;
         }
 
