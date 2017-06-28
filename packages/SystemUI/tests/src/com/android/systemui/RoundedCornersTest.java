@@ -104,6 +104,7 @@ public class RoundedCornersTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore
     public void testRounding() {
         mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 20);
         mContext.getOrCreateTestableResources()
