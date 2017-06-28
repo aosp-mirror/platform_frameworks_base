@@ -41,6 +41,7 @@ import java.util.UUID;
 public class MbmsDownloadReceiver extends BroadcastReceiver {
     private static final String LOG_TAG = "MbmsDownloadReceiver";
     private static final String TEMP_FILE_SUFFIX = ".embms.temp";
+    public static final String DOWNLOAD_TOKEN_SUFFIX = ".download_token";
     private static final int MAX_TEMP_FILE_RETRIES = 5;
 
     public static final String MBMS_FILE_PROVIDER_META_DATA_KEY = "mbms-file-provider-authority";
@@ -50,7 +51,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!verifyIntentContents(intent)) {
+        if (!verifyIntentContents(context, intent)) {
             setResultCode(1 /* TODO: define error constants */);
             return;
         }
@@ -69,7 +70,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         // TODO: Add handling for ACTION_CLEANUP
     }
 
-    private boolean verifyIntentContents(Intent intent) {
+    private boolean verifyIntentContents(Context context, Intent intent) {
         if (MbmsDownloadManager.ACTION_DOWNLOAD_RESULT_INTERNAL.equals(intent.getAction())) {
             if (!intent.hasExtra(MbmsDownloadManager.EXTRA_RESULT)) {
                 Log.w(LOG_TAG, "Download result did not include a result code. Ignoring.");
@@ -93,8 +94,19 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                         "temp file. Ignoring.");
                 return false;
             }
+            DownloadRequest request = intent.getParcelableExtra(MbmsDownloadManager.EXTRA_REQUEST);
+            String expectedTokenFileName = request.getHash() + DOWNLOAD_TOKEN_SUFFIX;
+            File expectedTokenFile = new File(
+                    MbmsUtils.getEmbmsTempFileDirForRequest(context, request),
+                    expectedTokenFileName);
+            if (!expectedTokenFile.exists()) {
+                Log.w(LOG_TAG, "Supplied download request does not match a token that we have. " +
+                        "Expected " + expectedTokenFile);
+                return false;
+            }
             return true;
         } else if (MbmsDownloadManager.ACTION_FILE_DESCRIPTOR_REQUEST.equals(intent.getAction())) {
+            // TODO: get rid of the request argument for a file descriptor request.
             if (!intent.hasExtra(MbmsDownloadManager.EXTRA_REQUEST)) {
                 Log.w(LOG_TAG, "Temp file request not include the associated request. Ignoring.");
                 return false;
@@ -112,7 +124,6 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
     private void moveDownloadedFile(Context context, Intent intent) {
         DownloadRequest request = intent.getParcelableExtra(MbmsDownloadManager.EXTRA_REQUEST);
-        // TODO: check request against token
         Intent intentForApp = request.getIntentForApp();
 
         int result = intent.getIntExtra(MbmsDownloadManager.EXTRA_RESULT,
@@ -149,7 +160,6 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     }
 
     private void cleanupPostMove(Context context, Intent intent) {
-        // TODO: account for in-use temp files
         DownloadRequest request = intent.getParcelableExtra(MbmsDownloadManager.EXTRA_REQUEST);
         if (request == null) {
             Log.w(LOG_TAG, "Intent does not include a DownloadRequest. Ignoring.");
@@ -199,7 +209,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
     private ArrayList<UriPathPair> generateFreshTempFiles(Context context, DownloadRequest request,
             int freshFdCount) {
-        File tempFileDir = getEmbmsTempFileDirForRequest(context, request);
+        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForRequest(context, request);
         if (!tempFileDir.exists()) {
             tempFileDir.mkdirs();
         }
@@ -345,22 +355,12 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
             return false;
         }
 
-        if (!MbmsUtils.isContainedIn(getEmbmsTempFileDirForRequest(context, request), tempFile)) {
+        if (!MbmsUtils.isContainedIn(
+                MbmsUtils.getEmbmsTempFileDirForRequest(context, request), tempFile)) {
             return false;
         }
 
         return true;
-    }
-
-    /**
-     * Returns a File linked to the directory used to store temp files for this request
-     */
-    private static File getEmbmsTempFileDirForRequest(Context context, DownloadRequest request) {
-        File embmsTempFileDir = MbmsTempFileProvider.getEmbmsTempFileDir(context);
-
-        // TODO: better naming scheme for temp file dirs
-        String tempFileDirName = String.valueOf(request.getFileServiceInfo().getServiceId());
-        return new File(embmsTempFileDir, tempFileDirName);
     }
 
     private String getFileProviderAuthorityCached(Context context) {
