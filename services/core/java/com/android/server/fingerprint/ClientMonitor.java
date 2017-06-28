@@ -23,6 +23,8 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Slog;
 
 import java.util.NoSuchElementException;
@@ -36,14 +38,18 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     protected static final String TAG = FingerprintService.TAG; // TODO: get specific name
     protected static final int ERROR_ESRCH = 3; // Likely fingerprint HAL is dead. See errno.h.
     protected static final boolean DEBUG = FingerprintService.DEBUG;
+    private static final long[] DEFAULT_SUCCESS_VIBRATION_PATTERN = new long[] {0, 30};
+    private final Context mContext;
+    private final long mHalDeviceId;
+    private final int mTargetUserId;
+    private final int mGroupId;
+    // True if client does not have MANAGE_FINGERPRINT permission
+    private final boolean mIsRestricted;
+    private final String mOwner;
+    private final VibrationEffect mSuccessVibrationEffect;
+    private final VibrationEffect mErrorVibrationEffect;
     private IBinder mToken;
     private IFingerprintServiceReceiver mReceiver;
-    private int mTargetUserId;
-    private int mGroupId;
-    private boolean mIsRestricted; // True if client does not have MANAGE_FINGERPRINT permission
-    private String mOwner;
-    private Context mContext;
-    private long mHalDeviceId;
     protected boolean mAlreadyCancelled;
 
     /**
@@ -68,6 +74,8 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         mGroupId = groupId;
         mIsRestricted = restricted;
         mOwner = owner;
+        mSuccessVibrationEffect = getSuccessVibrationEffect(context);
+        mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
         try {
             if (token != null) {
                 token.linkToDeath(this, 0);
@@ -79,7 +87,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
 
     /**
      * Contacts fingerprint HAL to start the client.
-     * @return 0 on succes, errno from driver on failure
+     * @return 0 on success, errno from driver on failure
      */
     public abstract int start();
 
@@ -211,4 +219,39 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     public final IBinder getToken() {
         return mToken;
     }
+
+    public final void vibrateSuccess() {
+        Vibrator vibrator = mContext.getSystemService(Vibrator.class);
+        if (vibrator != null) {
+            vibrator.vibrate(mSuccessVibrationEffect);
+        }
+    }
+
+    public final void vibrateError() {
+        Vibrator vibrator = mContext.getSystemService(Vibrator.class);
+        if (vibrator != null) {
+            vibrator.vibrate(mErrorVibrationEffect);
+        }
+    }
+
+    private static VibrationEffect getSuccessVibrationEffect(Context ctx) {
+        int[] arr = ctx.getResources().getIntArray(
+                com.android.internal.R.array.config_longPressVibePattern);
+        final long[] vibePattern;
+        if (arr == null || arr.length == 0) {
+            vibePattern = DEFAULT_SUCCESS_VIBRATION_PATTERN;
+        } else {
+            vibePattern = new long[arr.length];
+            for (int i = 0; i < arr.length; i++) {
+                vibePattern[i] = arr[i];
+            }
+        }
+        if (vibePattern.length == 1) {
+            return VibrationEffect.createOneShot(
+                    vibePattern[0], VibrationEffect.DEFAULT_AMPLITUDE);
+        } else {
+            return VibrationEffect.createWaveform(vibePattern, -1);
+        }
+    }
+
 }
