@@ -39,6 +39,7 @@ import com.android.systemui.util.Assert;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
+import java.util.function.IntConsumer;
 
 /**
  * Handles triggers for ambient state changes.
@@ -98,18 +99,44 @@ public class DozeTriggers implements DozeMachine.Part {
         requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */);
     }
 
+    private void proximityCheckThenCall(IntConsumer callback,
+            boolean alreadyPerformedProxCheck,
+            int pulseReason) {
+        if (alreadyPerformedProxCheck) {
+            callback.accept(ProximityCheck.RESULT_NOT_CHECKED);
+        } else {
+            final long start = SystemClock.uptimeMillis();
+            new ProximityCheck() {
+                @Override
+                public void onProximityResult(int result) {
+                    final long end = SystemClock.uptimeMillis();
+                    DozeLog.traceProximityResult(mContext, result == RESULT_NEAR,
+                            end - start, pulseReason);
+                    callback.accept(result);
+                }
+            }.check();
+        }
+    }
+
     private void onSensor(int pulseReason, boolean sensorPerformedProxCheck,
             float screenX, float screenY) {
         boolean isDoubleTap = pulseReason == DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP;
         boolean isPickup = pulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
 
         if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
-            if (isDoubleTap) {
-                mDozeHost.onDoubleTap(screenX, screenY);
-                mMachine.wakeUp();
-            } else {
-                mDozeHost.extendPulse();
-            }
+            proximityCheckThenCall((result) -> {
+                if (result == ProximityCheck.RESULT_NEAR) {
+                    // In pocket, drop event.
+                    return;
+                }
+                if (isDoubleTap) {
+                    mDozeHost.onDoubleTap(screenX, screenY);
+                    mMachine.wakeUp();
+                } else {
+                    mDozeHost.extendPulse();
+                }
+            }, sensorPerformedProxCheck, pulseReason);
+            return;
         } else {
             requestPulse(pulseReason, sensorPerformedProxCheck);
         }
@@ -202,33 +229,15 @@ public class DozeTriggers implements DozeMachine.Part {
         }
 
         mPulsePending = true;
-        if (!mDozeParameters.getProxCheckBeforePulse() || performedProxCheck) {
-            // skip proximity check
-            continuePulseRequest(reason);
-            return;
-        }
-
-        final long start = SystemClock.uptimeMillis();
-        new ProximityCheck() {
-            @Override
-            public void onProximityResult(int result) {
-                final long end = SystemClock.uptimeMillis();
-                DozeLog.traceProximityResult(mContext, result == RESULT_NEAR,
-                        end - start, reason);
-                if (performedProxCheck) {
-                    // we already continued
-                    return;
-                }
-                // avoid pulsing in pockets
-                if (result == RESULT_NEAR) {
-                    mPulsePending = false;
-                    return;
-                }
-
-                // not in-pocket, continue pulsing
+        proximityCheckThenCall((result) -> {
+            if (result == ProximityCheck.RESULT_NEAR) {
+                // in pocket, abort pulse
+                mPulsePending = false;
+            } else {
+                // not in pocket, continue pulsing
                 continuePulseRequest(reason);
             }
-        }.check();
+        }, !mDozeParameters.getProxCheckBeforePulse() || performedProxCheck, reason);
     }
 
     private boolean canPulse() {
@@ -262,6 +271,7 @@ public class DozeTriggers implements DozeMachine.Part {
         protected static final int RESULT_UNKNOWN = 0;
         protected static final int RESULT_NEAR = 1;
         protected static final int RESULT_FAR = 2;
+        protected static final int RESULT_NOT_CHECKED = 3;
 
         private boolean mRegistered;
         private boolean mFinished;
