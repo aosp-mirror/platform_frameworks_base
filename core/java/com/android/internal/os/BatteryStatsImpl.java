@@ -119,7 +119,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 159 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 160 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -3664,11 +3664,11 @@ public class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_JOB_START, name, uid);
     }
 
-    public void noteJobFinishLocked(String name, int uid) {
+    public void noteJobFinishLocked(String name, int uid, int stopReason) {
         uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
-        getUidStatsLocked(uid).noteStopJobLocked(name, elapsedRealtime);
+        getUidStatsLocked(uid).noteStopJobLocked(name, elapsedRealtime, stopReason);
         if (!mActiveEvents.updateState(HistoryItem.EVENT_JOB_FINISH, name, uid, 0)) {
             return;
         }
@@ -5702,6 +5702,11 @@ public class BatteryStatsImpl extends BatteryStats {
         final OverflowArrayMap<DualTimer> mJobStats;
 
         /**
+         * Count of the jobs that have completed and the reasons why they completed.
+         */
+        final ArrayMap<String, SparseIntArray> mJobCompletions = new ArrayMap<>();
+
+        /**
          * The statistics we have collected for this uid's sensor activations.
          */
         final SparseArray<Sensor> mSensorStats = new SparseArray<>();
@@ -5820,6 +5825,11 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public ArrayMap<String, ? extends BatteryStats.Timer> getJobStats() {
             return mJobStats.getMap();
+        }
+
+        @Override
+        public ArrayMap<String, SparseIntArray> getJobCompletionStats() {
+            return mJobCompletions;
         }
 
         @Override
@@ -6706,6 +6716,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
             mJobStats.cleanup();
+            mJobCompletions.clear();
             for (int ise=mSensorStats.size()-1; ise>=0; ise--) {
                 Sensor s = mSensorStats.valueAt(ise);
                 if (s.reset()) {
@@ -6868,6 +6879,21 @@ public class BatteryStatsImpl extends BatteryStats {
             return !active;
         }
 
+        void writeJobCompletionsToParcelLocked(Parcel out) {
+            int NJC = mJobCompletions.size();
+            out.writeInt(NJC);
+            for (int ijc=0; ijc<NJC; ijc++) {
+                out.writeString(mJobCompletions.keyAt(ijc));
+                SparseIntArray types = mJobCompletions.valueAt(ijc);
+                int NT = types.size();
+                out.writeInt(NT);
+                for (int it=0; it<NT; it++) {
+                    out.writeInt(types.keyAt(it));
+                    out.writeInt(types.valueAt(it));
+                }
+            }
+        }
+
         void writeToParcelLocked(Parcel out, long uptimeUs, long elapsedRealtimeUs) {
             mOnBatteryBackgroundTimeBase.writeToParcel(out, uptimeUs, elapsedRealtimeUs);
             mOnBatteryScreenOffBackgroundTimeBase.writeToParcel(out, uptimeUs, elapsedRealtimeUs);
@@ -6898,6 +6924,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 DualTimer timer = jobStats.valueAt(ij);
                 Timer.writeTimerToParcel(out, timer, elapsedRealtimeUs);
             }
+
+            writeJobCompletionsToParcelLocked(out);
 
             int NSE = mSensorStats.size();
             out.writeInt(NSE);
@@ -7114,6 +7142,24 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        void readJobCompletionsFromParcelLocked(Parcel in) {
+            int numJobCompletions = in.readInt();
+            mJobCompletions.clear();
+            for (int j = 0; j < numJobCompletions; j++) {
+                String jobName = in.readString();
+                int numTypes = in.readInt();
+                if (numTypes > 0) {
+                    SparseIntArray types = new SparseIntArray();
+                    for (int k = 0; k < numTypes; k++) {
+                        int type = in.readInt();
+                        int count = in.readInt();
+                        types.put(type, count);
+                    }
+                    mJobCompletions.put(jobName, types);
+                }
+            }
+        }
+
         void readFromParcelLocked(TimeBase timeBase, TimeBase screenOffTimeBase, Parcel in) {
             mOnBatteryBackgroundTimeBase.readFromParcel(in);
             mOnBatteryScreenOffBackgroundTimeBase.readFromParcel(in);
@@ -7147,6 +7193,8 @@ public class BatteryStatsImpl extends BatteryStats {
                             mBsi.mOnBatteryTimeBase, mOnBatteryBackgroundTimeBase, in));
                 }
             }
+
+            readJobCompletionsFromParcelLocked(in);
 
             int numSensors = in.readInt();
             mSensorStats.clear();
@@ -8460,10 +8508,19 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        public void noteStopJobLocked(String name, long elapsedRealtimeMs) {
+        public void noteStopJobLocked(String name, long elapsedRealtimeMs, int stopReason) {
             DualTimer t = mJobStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
+            }
+            if (mBsi.mOnBatteryTimeBase.isRunning()) {
+                SparseIntArray types = mJobCompletions.get(name);
+                if (types == null) {
+                    types = new SparseIntArray();
+                    mJobCompletions.put(name, types);
+                }
+                int last = types.get(stopReason, 0);
+                types.put(stopReason, last + 1);
             }
         }
 
@@ -11640,6 +11697,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 u.readJobSummaryFromParcelLocked(name, in);
             }
 
+            u.readJobCompletionsFromParcelLocked(in);
+
             int NP = in.readInt();
             if (NP > 1000) {
                 throw new ParcelFormatException("File corrupt: too many sensors " + NP);
@@ -12078,6 +12137,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeString(jobStats.keyAt(ij));
                 jobStats.valueAt(ij).writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             }
+
+            u.writeJobCompletionsToParcelLocked(out);
 
             int NSE = u.mSensorStats.size();
             out.writeInt(NSE);
