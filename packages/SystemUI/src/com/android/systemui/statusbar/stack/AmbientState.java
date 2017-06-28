@@ -62,6 +62,7 @@ public class AmbientState {
     private boolean mHasPulsingNotifications;
     private boolean mUnlockHintRunning;
     private boolean mQsCustomizerShowing;
+    private int mIntrinsicPadding;
 
     public AmbientState(Context context) {
         reload(context);
@@ -322,5 +323,13 @@ public class AmbientState {
 
     public void setQsCustomizerShowing(boolean qsCustomizerShowing) {
         mQsCustomizerShowing = qsCustomizerShowing;
+    }
+
+    public void setIntrinsicPadding(int intrinsicPadding) {
+        mIntrinsicPadding = intrinsicPadding;
+    }
+
+    public int getIntrinsicPadding() {
+        return mIntrinsicPadding;
     }
 }
