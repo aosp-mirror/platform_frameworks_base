@@ -85,4 +85,14 @@ public class MbmsUtils {
 
         context.bindService(bindIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
+
+    /**
+     * Returns a File linked to the directory used to store temp files for this request
+     */
+    public static File getEmbmsTempFileDirForRequest(Context context, DownloadRequest request) {
+        File embmsTempFileDir = MbmsTempFileProvider.getEmbmsTempFileDir(context);
+
+        String tempFileDirName = String.valueOf(request.getFileServiceInfo().getServiceId());
+        return new File(embmsTempFileDir, tempFileDirName);
+    }
 }
