@@ -25,4 +25,5 @@ import android.os.RemoteCallback;
  */
 oneway interface IRuntimePermissionPresenter {
     void getAppPermissions(String packageName, in RemoteCallback callback);
+    void revokeRuntimePermission(String packageName, String permissionName);
 }

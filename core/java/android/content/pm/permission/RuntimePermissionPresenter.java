@@ -22,7 +22,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -31,6 +30,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.permissionpresenterservice.RuntimePermissionPresenterService;
 import android.util.Log;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
 
@@ -118,6 +118,22 @@ public final class RuntimePermissionPresenter {
         mRemoteService.processMessage(message);
     }
 
+    /**
+     * Revoke the permission {@code permissionName} for app {@code packageName}
+     *
+     * @param packageName The package for which to revoke
+     * @param permissionName The permission to revoke
+     */
+    public void revokeRuntimePermission(String packageName, String permissionName) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = packageName;
+        args.arg2 = permissionName;
+
+        Message message = mRemoteService.obtainMessage(
+                RemoteService.MSG_REVOKE_APP_PERMISSIONS, args);
+        mRemoteService.processMessage(message);
+    }
+
     private static final class RemoteService
             extends Handler implements ServiceConnection {
         private static final long UNBIND_TIMEOUT_MILLIS = 10000;
@@ -125,6 +141,7 @@ public final class RuntimePermissionPresenter {
         public static final int MSG_GET_APP_PERMISSIONS = 1;
         public static final int MSG_GET_APPS_USING_PERMISSIONS = 2;
         public static final int MSG_UNBIND = 3;
+        public static final int MSG_REVOKE_APP_PERMISSIONS = 4;
 
         private final Object mLock = new Object();
 
@@ -229,6 +246,25 @@ public final class RuntimePermissionPresenter {
                             mBound = false;
                         }
                         mRemoteInstance = null;
+                    }
+                } break;
+
+                case MSG_REVOKE_APP_PERMISSIONS: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    final String packageName = (String) args.arg1;
+                    final String permissionName = (String) args.arg2;
+                    args.recycle();
+                    final IRuntimePermissionPresenter remoteInstance;
+                    synchronized (mLock) {
+                        remoteInstance = mRemoteInstance;
+                    }
+                    if (remoteInstance == null) {
+                        return;
+                    }
+                    try {
+                        remoteInstance.revokeRuntimePermission(packageName, permissionName);
+                    } catch (RemoteException re) {
+                        Log.e(TAG, "Error getting app permissions", re);
                     }
                 } break;
             }
