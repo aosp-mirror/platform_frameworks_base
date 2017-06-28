@@ -81,6 +81,12 @@ public class DimLayer {
         boolean isAttachedToDisplay();
         /** Gets the bounds of the dim layer user. */
         void getDimBounds(Rect outBounds);
+        /** Returns the layer to place a dim layer. */
+        default int getLayerForDim(WindowStateAnimator animator, int layerOffset,
+                int defaultLayer) {
+            return defaultLayer;
+        }
+
         String toShortString();
     }
     /** The user of this dim layer. */
