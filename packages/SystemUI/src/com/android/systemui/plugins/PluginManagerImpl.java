@@ -42,7 +42,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.PluginInstanceManager.PluginContextWrapper;
-import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 import dalvik.system.PathClassLoader;
@@ -120,14 +119,21 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         }
         PluginInstanceManager<T> p = mFactory.createPluginInstanceManager(mContext, action, null,
                 false, mLooper, cls, this);
+        PluginListener<Plugin> listener = new PluginListener<Plugin>() {
+            @Override
+            public void onPluginConnected(Plugin plugin, Context pluginContext) { }
+        };
+        mPluginMap.put(listener, p);
         mPluginPrefs.addAction(action);
-        PluginInfo<T> info = p.getPlugin();
+        PluginInstanceManager.PluginInfo<T> info = p.getPlugin();
         if (info != null) {
             mOneShotPackages.add(info.mPackage);
             mHasOneShot = true;
             startListening();
+            mPluginMap.remove(listener);
             return info.mPlugin;
         }
+        mPluginMap.remove(listener);
         return null;
     }
 
