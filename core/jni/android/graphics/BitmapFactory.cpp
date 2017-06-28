@@ -579,6 +579,9 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     if (isHardware) {
         sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(outputBitmap);
+        if (!hardwareBitmap.get()) {
+            return nullObjectReturn("Failed to allocate a hardware bitmap");
+        }
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags,
                 ninePatchChunk, ninePatchInsets, -1);
     }
