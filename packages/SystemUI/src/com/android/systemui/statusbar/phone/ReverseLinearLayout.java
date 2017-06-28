@@ -16,10 +16,10 @@ package com.android.systemui.statusbar.phone;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class ReverseLinearLayout extends LinearLayout {
 
     @Override
     public void addView(View child) {
-        reversParams(child.getLayoutParams());
+        reverseParams(child.getLayoutParams(), child);
         if (mIsLayoutReverse) {
             super.addView(child, 0);
         } else {
@@ -58,7 +58,7 @@ public class ReverseLinearLayout extends LinearLayout {
 
     @Override
     public void addView(View child, ViewGroup.LayoutParams params) {
-        reversParams(params);
+        reverseParams(params, child);
         if (mIsLayoutReverse) {
             super.addView(child, 0, params);
         } else {
@@ -100,13 +100,40 @@ public class ReverseLinearLayout extends LinearLayout {
         }
     }
 
-    private void reversParams(ViewGroup.LayoutParams params) {
+    private static void reverseParams(ViewGroup.LayoutParams params, View child) {
+        if (child instanceof Reversable) {
+            ((Reversable) child).reverse();
+        }
+        if (child.getPaddingLeft() == child.getPaddingRight()
+                && child.getPaddingTop() == child.getPaddingBottom()) {
+            child.setPadding(child.getPaddingTop(), child.getPaddingLeft(),
+                    child.getPaddingTop(), child.getPaddingLeft());
+        }
         if (params == null) {
             return;
         }
         int width = params.width;
         params.width = params.height;
         params.height = width;
+    }
+
+    public interface Reversable {
+        void reverse();
+    }
+
+    public static class ReverseFrameLayout extends FrameLayout implements Reversable {
+
+        public ReverseFrameLayout(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void reverse() {
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                reverseParams(child.getLayoutParams(), child);
+            }
+        }
     }
 
 }
