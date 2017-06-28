@@ -20,15 +20,18 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.content.Context;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.util.SparseArray;
+import java.util.Arrays;
 import java.util.List;
 
 import com.android.internal.telephony.ITelephony;
@@ -40,6 +43,9 @@ import com.android.internal.telephony.ITelephony;
 public final class TelephonyScanManager {
 
     private static final String TAG = "TelephonyScanManager";
+
+    /** @hide */
+    public static final String SCAN_RESULT_KEY = "scanResult";
 
     /** @hide */
     public static final int CALLBACK_SCAN_RESULTS = 1;
@@ -112,7 +118,13 @@ public final class TelephonyScanManager {
                 switch (message.what) {
                     case CALLBACK_SCAN_RESULTS:
                         try {
-                            callback.onResults((List<CellInfo>) message.obj);
+                            final Bundle b = message.getData();
+                            final Parcelable[] parcelables = b.getParcelableArray(SCAN_RESULT_KEY);
+                            CellInfo[] ci = new CellInfo[parcelables.length];
+                            for (int i = 0; i < parcelables.length; i++) {
+                                ci[i] = (CellInfo) parcelables[i];
+                            }
+                            callback.onResults((List<CellInfo>) Arrays.asList(ci));
                         } catch (Exception e) {
                             Rlog.e(TAG, "Exception in networkscan callback onResults", e);
                         }
