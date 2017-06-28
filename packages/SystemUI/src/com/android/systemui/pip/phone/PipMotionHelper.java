@@ -241,14 +241,14 @@ public class PipMotionHelper implements Handler.Callback {
     /**
      * Flings the minimized PiP to the closest minimized snap target.
      */
-    Rect flingToMinimizedState(float velocityY, Rect movementBounds) {
+    Rect flingToMinimizedState(float velocityY, Rect movementBounds, Point dragStartPosition) {
         cancelAnimations();
         // We currently only allow flinging the minimized stack up and down, so just lock the
         // movement bounds to the current stack bounds horizontally
         movementBounds = new Rect(mBounds.left, movementBounds.top, mBounds.left,
                 movementBounds.bottom);
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mBounds,
-                0 /* velocityX */, velocityY);
+                0 /* velocityX */, velocityY, dragStartPosition);
         if (!mBounds.equals(toBounds)) {
             mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, 0, FAST_OUT_SLOW_IN);
             mFlingAnimationUtils.apply(mBoundsAnimator, 0,
@@ -281,10 +281,11 @@ public class PipMotionHelper implements Handler.Callback {
      * Flings the PiP to the closest snap target.
      */
     Rect flingToSnapTarget(float velocity, float velocityX, float velocityY, Rect movementBounds,
-            AnimatorUpdateListener updateListener, AnimatorListener listener) {
+            AnimatorUpdateListener updateListener, AnimatorListener listener,
+            Point startPosition) {
         cancelAnimations();
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mBounds,
-                velocityX, velocityY);
+                velocityX, velocityY, startPosition);
         if (!mBounds.equals(toBounds)) {
             mBoundsAnimator = createAnimationToBounds(mBounds, toBounds, 0, FAST_OUT_SLOW_IN);
             mFlingAnimationUtils.apply(mBoundsAnimator, 0,

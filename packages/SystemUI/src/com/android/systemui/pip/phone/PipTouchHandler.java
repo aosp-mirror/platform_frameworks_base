@@ -185,7 +185,7 @@ public class PipTouchHandler {
         mDismissViewController = new PipDismissViewController(context);
         mSnapAlgorithm = new PipSnapAlgorithm(mContext);
         mTouchState = new PipTouchState(mViewConfig);
-        mFlingAnimationUtils = new FlingAnimationUtils(context, 2f);
+        mFlingAnimationUtils = new FlingAnimationUtils(context, 2.5f);
         mGestures = new PipTouchGesture[] {
                 mDefaultMovementGesture
         };
@@ -534,6 +534,7 @@ public class PipTouchHandler {
     private PipTouchGesture mDefaultMovementGesture = new PipTouchGesture() {
         // Whether the PiP was on the left side of the screen at the start of the gesture
         private boolean mStartedOnLeft;
+        private Point mStartPosition;
 
         @Override
         public void onDown(PipTouchState touchState) {
@@ -541,7 +542,9 @@ public class PipTouchHandler {
                 return;
             }
 
-            mStartedOnLeft = mMotionHelper.getBounds().left < mMovementBounds.centerX();
+            Rect bounds = mMotionHelper.getBounds();
+            mStartPosition = new Point(bounds.left, bounds.top);
+            mStartedOnLeft = bounds.left < mMovementBounds.centerX();
             mMovementWithinMinimize = true;
             mMovementWithinDismiss = touchState.getDownTouchPosition().y >= mMovementBounds.bottom;
 
@@ -687,7 +690,8 @@ public class PipTouchHandler {
 
                 if (isFling) {
                     mMotionHelper.flingToSnapTarget(velocity, vel.x, vel.y, mMovementBounds,
-                            mUpdateScrimListener, postAnimationCallback);
+                            mUpdateScrimListener, postAnimationCallback,
+                            mStartPosition);
                 } else {
                     mMotionHelper.animateToClosestSnapTarget(mMovementBounds, mUpdateScrimListener,
                             postAnimationCallback);

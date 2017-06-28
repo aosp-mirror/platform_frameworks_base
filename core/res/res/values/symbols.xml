@@ -1581,6 +1581,7 @@
   <java-symbol type="dimen" name="docked_stack_divider_insets" />
   <java-symbol type="dimen" name="docked_stack_minimize_thickness" />
   <java-symbol type="dimen" name="pip_minimized_visible_size" />
+  <java-symbol type="dimen" name="pip_fling_deceleration" />
   <java-symbol type="integer" name="config_dockedStackDividerSnapMode" />
   <java-symbol type="integer" name="config_pictureInPictureSnapMode" />
   <java-symbol type="fraction" name="docked_stack_divider_fixed_ratio" />
