@@ -290,11 +290,7 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <!-- Overlay styles will replace this theme -->
-    <style name="systemui_base" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
-    </style>
-
-    <style name="systemui_theme" parent="systemui_base">
+    <style name="systemui_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="lightIconTheme">@style/DualToneLightTheme</item>
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
         <item name="bgProtectTextColor">?android:attr/textColorPrimaryInverse</item>
