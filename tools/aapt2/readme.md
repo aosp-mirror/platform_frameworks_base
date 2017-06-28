@@ -5,6 +5,8 @@
 - Fixed issue where enum values were interpreted as integers and range checked. (bug 62358540)
 - Fixed issue where ints and floats with trailing whitespace would not be parsed. (bug 62902869)
 - Fixed issue where `--custom-package` was not honored when writing Manifest.java. (bug 62826426)
+- Add `<key-sets>` and its nested tags to the allowed set of XML tags in AndroidManifest.xml.
+  (bug 62839863)
 
 ## Version 2.17
 ### `aapt2 ...`
