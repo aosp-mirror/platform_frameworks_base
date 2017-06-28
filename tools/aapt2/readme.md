@@ -7,6 +7,8 @@
 - Fixed issue where `--custom-package` was not honored when writing Manifest.java. (bug 62826426)
 - Add `<key-sets>` and its nested tags to the allowed set of XML tags in AndroidManifest.xml.
   (bug 62839863)
+- Fixed issue where Java classes referenced from fragments and menus were not added to
+  the set of Proguard keep rules. (bug 62216174)
 
 ## Version 2.17
 ### `aapt2 ...`
