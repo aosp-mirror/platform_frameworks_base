@@ -167,6 +167,14 @@ public class MbmsDownloadManager {
             "android.telephony.mbms.extra.TEMP_FILES_IN_USE";
 
     /**
+     * Extra containing an instance of {@link android.telephony.mbms.ServiceInfo}, used by
+     * file-descriptor requests and cleanup requests to specify which service they want to
+     * request temp files or clean up temp files for, respectively.
+     */
+    public static final String EXTRA_SERVICE_INFO =
+            "android.telephony.mbms.extra.SERVICE_INFO";
+
+    /**
      * Extra containing a single {@link Uri} indicating the location of the successfully
      * downloaded file. Set on the intent provided via
      * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}.
@@ -510,8 +518,8 @@ public class MbmsDownloadManager {
     }
 
     private void writeDownloadRequestToken(DownloadRequest request) {
-        // TODO: figure out when this token eventually gets deleted
-        File tempFileLocation = MbmsUtils.getEmbmsTempFileDirForRequest(mContext, request);
+        File tempFileLocation = MbmsUtils.getEmbmsTempFileDirForService(mContext,
+                request.getFileServiceInfo());
         if (!tempFileLocation.exists()) {
             tempFileLocation.mkdirs();
         }
