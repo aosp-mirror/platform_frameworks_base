@@ -71,7 +71,7 @@ public class PackageTrackerTest {
 
         // Using the instrumentation context means the database is created in a test app-specific
         // directory. We can use the real thing for this test.
-        mPackageStatusStorage = new PackageStatusStorage(context);
+        mPackageStatusStorage = new PackageStatusStorage(context.getFilesDir());
 
         // For other interactions with the Android framework we create a fake object.
         mFakeIntentHelper = new FakeIntentHelper();
@@ -88,7 +88,7 @@ public class PackageTrackerTest {
     @After
     public void tearDown() throws Exception {
         if (mPackageStatusStorage != null) {
-            mPackageStatusStorage.deleteDatabaseForTests();
+            mPackageStatusStorage.deleteFileForTests();
         }
     }
 
