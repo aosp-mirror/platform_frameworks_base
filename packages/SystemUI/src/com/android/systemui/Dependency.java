@@ -31,6 +31,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.PluginActivityManager;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.PluginManagerImpl;
@@ -275,6 +276,9 @@ public class Dependency extends SystemUI {
                 () -> new ForegroundServiceControllerImpl(mContext));
 
         mProviders.put(UiOffloadThread.class, UiOffloadThread::new);
+
+        mProviders.put(PluginActivityManager.class,
+                () -> new PluginActivityManager(mContext, getDependency(PluginManager.class)));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
