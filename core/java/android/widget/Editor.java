@@ -3909,23 +3909,33 @@ public class Editor {
             menu.removeItem(TextView.ID_ASSIST);
             final TextClassification textClassification =
                     getSelectionActionModeHelper().getTextClassification();
-            if (textClassification != null) {
-                final Drawable icon = textClassification.getIcon();
-                final CharSequence label = textClassification.getLabel();
-                final OnClickListener onClickListener =
-                        textClassification.getOnClickListener();
-                final Intent intent = textClassification.getIntent();
-                if ((icon != null || !TextUtils.isEmpty(label))
-                        && (onClickListener != null || intent != null)) {
-                    menu.add(TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST, label)
-                            .setIcon(icon)
-                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                    mMetricsLogger.write(
-                            new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
-                                    .setType(MetricsEvent.TYPE_OPEN)
-                                    .setSubtype(textClassification.getLogType()));
-                }
+            if (canAssist()) {
+                menu.add(TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST,
+                        textClassification.getLabel())
+                        .setIcon(textClassification.getIcon())
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                mMetricsLogger.write(
+                        new LogMaker(MetricsEvent.TEXT_SELECTION_MENU_ITEM_ASSIST)
+                                .setType(MetricsEvent.TYPE_OPEN)
+                                .setSubtype(textClassification.getLogType()));
             }
+        }
+
+        private boolean canAssist() {
+            final TextClassification textClassification =
+                    getSelectionActionModeHelper().getTextClassification();
+            final boolean validAction = textClassification != null
+                    && (textClassification.getIcon() != null
+                            || !TextUtils.isEmpty(textClassification.getLabel()))
+                    && (textClassification.getOnClickListener() != null
+                            || (textClassification.getIntent() != null
+                                    && mTextView.getContext().canStartActivityForResult()));
+
+            final boolean deviceProvisioned = mTextView.isDeviceProvisioned();
+            if (validAction && !deviceProvisioned) {
+                android.util.EventLog.writeEvent(0x534e4554, "120866126", -1, "");
+            }
+            return validAction && deviceProvisioned;
         }
 
         @Override
