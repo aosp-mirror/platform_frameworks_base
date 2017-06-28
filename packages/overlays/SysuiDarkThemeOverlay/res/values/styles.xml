@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.DeviceDefault.QuickSettings" parent="android:Theme.DeviceDefault">
+    <style name="DarkQuickSettings" parent="android:Theme.DeviceDefault">
         <item name="android:colorPrimary">@*android:color/primary_device_default_settings</item>
         <item name="android:colorPrimaryDark">@*android:color/primary_dark_device_default_settings</item>
         <!-- textColorPrimaryInverse is used on the lock screen and this means that we can't just
@@ -13,4 +13,7 @@
         <item name="android:colorControlNormal">?android:attr/textColorPrimary</item>
         <item name="android:colorBackgroundFloating">#000</item>
     </style>
+
+    <style name="systemui_base" parent="DarkQuickSettings" />
+    <style name="edit_theme" parent="DarkQuickSettings" />
 </resources>
