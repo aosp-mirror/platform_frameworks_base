@@ -575,15 +575,17 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mRotatedViews[Surface.ROTATION_270] =
                 mRotatedViews[Surface.ROTATION_90] = findViewById(R.id.rot90);
 
-        updateCurrentView();
+        mCurrentRotation = -1;
+        reorient();
     }
 
     public boolean needsReorient(int rotation) {
         return mCurrentRotation != rotation;
     }
 
-    private void updateCurrentView() {
+    private boolean updateCurrentView() {
         final int rot = mDisplay.getRotation();
+        if (rot == mCurrentRotation) return false;
         for (int i=0; i<4; i++) {
             mRotatedViews[i].setVisibility(View.GONE);
         }
@@ -595,6 +597,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
         updateLayoutTransitionsEnabled();
         mCurrentRotation = rot;
+        return true;
     }
 
     private void updateRecentsIcon() {
@@ -607,10 +610,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public void reorient() {
-        updateCurrentView();
+        if (!updateCurrentView()) {
+            return;
+        }
+        Log.d(TAG, "reorient", new Throwable());
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
-        ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
+        if (getRootView() instanceof NavigationBarFrame) {
+            ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
+        }
         mDeadZone.setDisplayRotation(mCurrentRotation);
 
         // force the low profile & disabled states into compliance
@@ -644,6 +652,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mVertical = newVertical;
             //Log.v(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w, mVertical?"y":"n"));
             reorient();
+            getHomeButton().setVertical(mVertical);
             notifyVerticalChangedListener(newVertical);
         }
 
