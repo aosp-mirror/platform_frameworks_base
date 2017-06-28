@@ -317,6 +317,21 @@ public abstract class EuiccService extends Service {
     public abstract int onEraseSubscriptions(int slotId);
 
     /**
+     * Ensure that subscriptions will be retained on the next factory reset.
+     *
+     * <p>Called directly before a factory reset. Assumes that a normal factory reset will lead to
+     * profiles being erased on first boot (to cover fastboot/recovery wipes), so the implementation
+     * should persist some bit that will remain accessible after the factory reset to bypass this
+     * flow when this method is called.
+     *
+     * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
+     *     but is here to future-proof the APIs.
+     * @return the result of the operation. May be one of the predefined {@code RESULT_} constants
+     *     or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
+     */
+    public abstract int onRetainSubscriptionsForFactoryReset(int slotId);
+
+    /**
      * Wrapper around IEuiccService that forwards calls to implementations of {@link EuiccService}.
      */
     private class IEuiccServiceWrapper extends IEuiccService.Stub {
@@ -480,6 +495,22 @@ public abstract class EuiccService extends Service {
                 @Override
                 public void run() {
                     int result = EuiccService.this.onEraseSubscriptions(slotId);
+                    try {
+                        callback.onComplete(result);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void retainSubscriptionsForFactoryReset(int slotId,
+                IRetainSubscriptionsForFactoryResetCallback callback) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    int result = EuiccService.this.onRetainSubscriptionsForFactoryReset(slotId);
                     try {
                         callback.onComplete(result);
                     } catch (RemoteException e) {

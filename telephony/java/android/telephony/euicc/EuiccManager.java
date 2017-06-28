@@ -475,6 +475,36 @@ public class EuiccManager {
         }
     }
 
+    /**
+     * Ensure that subscriptions will be retained on the next factory reset.
+     *
+     * <p>By default, all subscriptions on the eUICC are erased the first time a device boots (ever
+     * and after factory resets). This ensures that the data is wiped after a factory reset is
+     * performed via fastboot or recovery mode, as these modes do not support the necessary radio
+     * communication needed to wipe the eSIM.
+     *
+     * <p>However, this method may be called right before a factory reset issued via settings when
+     * the user elects to retain subscriptions. Doing so will mark them for retention so that they
+     * are not cleared after the ensuing reset.
+     *
+     * <p>Requires that the calling app has the {@link android.Manifest.permission#MASTER_CLEAR}
+     * permission. This is for internal system use only.
+     *
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
+     * @hide
+     */
+    public void retainSubscriptionsForFactoryReset(PendingIntent callbackIntent) {
+        if (!isEnabled()) {
+            sendUnavailableError(callbackIntent);
+            return;
+        }
+        try {
+            mController.retainSubscriptionsForFactoryReset(callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private static void sendUnavailableError(PendingIntent callbackIntent) {
         try {
             callbackIntent.send(EMBEDDED_SUBSCRIPTION_RESULT_ERROR);
