@@ -4713,6 +4713,9 @@
     <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for test -->
     <string name="etws_primary_default_message_test">Emergency messages test</string>
 
+    <!-- Content description for the reply button in the notification area [CHAR LIMIT=NONE]-->
+    <string name="notification_reply_button_accessibility">Reply</string>
+
     <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for others -->
     <string name="etws_primary_default_message_others"></string>
 
