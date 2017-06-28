@@ -79,7 +79,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         }
         if (!authenticated) {
             if (receiver != null) {
-                FingerprintUtils.vibrateFingerprintError(getContext());
+                vibrateError();
             }
             // allow system-defined limit of number of attempts before giving up
             int lockoutMode =  handleFailedAttempt();
@@ -99,7 +99,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             result |= lockoutMode != LOCKOUT_NONE; // in a lockout mode
         } else {
             if (receiver != null) {
-                FingerprintUtils.vibrateFingerprintSuccess(getContext());
+                vibrateSuccess();
             }
             result |= true; // we have a valid fingerprint, done
             resetFailedAttempts();
