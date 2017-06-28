@@ -24,10 +24,11 @@
 #include "androidfw/StringPiece.h"
 #include "utils/Unicode.h"
 
+#include "text/Utf8Iterator.h"
 #include "util/BigBuffer.h"
 #include "util/Maybe.h"
-#include "util/Utf8Iterator.h"
 
+using ::aapt::text::Utf8Iterator;
 using ::android::StringPiece;
 using ::android::StringPiece16;
 

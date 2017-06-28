@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "util/Utf8Iterator.h"
+#include "text/Utf8Iterator.h"
 
 #include "android-base/logging.h"
 #include "utils/Unicode.h"
@@ -22,6 +22,7 @@
 using ::android::StringPiece;
 
 namespace aapt {
+namespace text {
 
 Utf8Iterator::Utf8Iterator(const StringPiece& str)
     : str_(str), next_pos_(0), current_codepoint_(0) {
@@ -57,4 +58,5 @@ char32_t Utf8Iterator::Next() {
   return result;
 }
 
+}  // namespace text
 }  // namespace aapt

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_UTIL_UTF8ITERATOR_H
-#define AAPT_UTIL_UTF8ITERATOR_H
+#ifndef AAPT_TEXT_UTF8ITERATOR_H
+#define AAPT_TEXT_UTF8ITERATOR_H
 
 #include "android-base/macros.h"
 #include "androidfw/StringPiece.h"
 
 namespace aapt {
+namespace text {
 
 class Utf8Iterator {
  public:
@@ -42,6 +43,7 @@ class Utf8Iterator {
   char32_t current_codepoint_;
 };
 
+}  // namespace text
 }  // namespace aapt
 
-#endif  // AAPT_UTIL_UTF8ITERATOR_H
+#endif  // AAPT_TEXT_UTF8ITERATOR_H
