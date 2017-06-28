@@ -48,7 +48,7 @@
             android:process=":killable" />
     </application>
 
-    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+    <instrumentation android:name="android.testing.TestableInstrumentation"
         android:targetPackage="com.android.systemui.tests"
         android:label="Tests for SystemUI">
     </instrumentation>
