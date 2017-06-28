@@ -87,12 +87,12 @@ public class MbmsUtils {
     }
 
     /**
-     * Returns a File linked to the directory used to store temp files for this request
+     * Returns a File linked to the directory used to store temp files for this file service
      */
-    public static File getEmbmsTempFileDirForRequest(Context context, DownloadRequest request) {
+    public static File getEmbmsTempFileDirForService(Context context, FileServiceInfo serviceInfo) {
         File embmsTempFileDir = MbmsTempFileProvider.getEmbmsTempFileDir(context);
 
-        String tempFileDirName = String.valueOf(request.getFileServiceInfo().getServiceId());
+        String tempFileDirName = String.valueOf(serviceInfo.getServiceId());
         return new File(embmsTempFileDir, tempFileDirName);
     }
 }
