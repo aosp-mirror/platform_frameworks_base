@@ -271,6 +271,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private void processKeyEvent(EventStreamState state, KeyEvent event, int policyFlags) {
         if (!state.shouldProcessKeyEvent(event)) {
+            super.onInputEvent(event, policyFlags);
             return;
         }
         mEventHandler.onKeyEvent(event, policyFlags);
