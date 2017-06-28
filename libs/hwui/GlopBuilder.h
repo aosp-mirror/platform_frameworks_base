@@ -75,7 +75,8 @@ public:
     GlopBuilder& setFillTextureLayer(GlLayer& layer, float alpha);
     // TODO: setFillLayer normally forces its own wrap & filter mode,
     // which isn't always correct.
-    GlopBuilder& setFillExternalTexture(Texture& texture, Matrix4& textureTransform);
+    GlopBuilder& setFillExternalTexture(Texture& texture, Matrix4& textureTransform,
+            bool requiresFilter);
 
     GlopBuilder& setTransform(const Matrix4& canvas, const int transformFlags);
 
