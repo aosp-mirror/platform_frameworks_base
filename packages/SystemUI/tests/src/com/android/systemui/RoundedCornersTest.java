@@ -21,7 +21,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -30,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
-import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
@@ -48,12 +46,10 @@ import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
-@FlakyTest
 @SmallTest
 public class RoundedCornersTest extends SysuiTestCase {
 
@@ -72,6 +68,7 @@ public class RoundedCornersTest extends SysuiTestCase {
         mWindowManager = mock(WindowManager.class);
         mView = spy(new StatusBarWindowView(mContext, null));
         when(mStatusBar.getStatusBarWindow()).thenReturn(mView);
+        when(mStatusBar.getNavigationBarWindow()).thenReturn(mView);
         mContext.putComponent(StatusBar.class, mStatusBar);
 
         Display display = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
@@ -94,6 +91,8 @@ public class RoundedCornersTest extends SysuiTestCase {
     @Test
     public void testNoRounding() {
         mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 0);
 
         mRoundedCorners.start();
         // No views added.
@@ -107,6 +106,8 @@ public class RoundedCornersTest extends SysuiTestCase {
     @Test
     public void testRounding() {
         mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 20);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 20);
 
         mRoundedCorners.start();
         // Add 2 windows for rounded corners (top and bottom).
