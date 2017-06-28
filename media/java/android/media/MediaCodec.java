@@ -26,6 +26,7 @@ import android.media.MediaCodecInfo.CodecCapabilities;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IHwBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -1903,7 +1904,7 @@ final public class MediaCodec {
 
     private void configure(
             @Nullable MediaFormat format, @Nullable Surface surface,
-            @Nullable MediaCrypto crypto, @Nullable IBinder descramblerBinder,
+            @Nullable MediaCrypto crypto, @Nullable IHwBinder descramblerBinder,
             @ConfigureFlag int flags) {
         if (crypto != null && descramblerBinder != null) {
             throw new IllegalArgumentException("Can't use crypto and descrambler together!");
@@ -2018,7 +2019,7 @@ final public class MediaCodec {
     private native final void native_configure(
             @Nullable String[] keys, @Nullable Object[] values,
             @Nullable Surface surface, @Nullable MediaCrypto crypto,
-            @Nullable IBinder descramblerBinder, @ConfigureFlag int flags);
+            @Nullable IHwBinder descramblerBinder, @ConfigureFlag int flags);
 
     /**
      * Requests a Surface to use as the input to an encoder, in place of input buffers.  This

@@ -438,10 +438,6 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/INetInitiatedListener.aidl \
 	location/java/com/android/internal/location/ILocationProvider.aidl \
 	media/java/android/media/IAudioService.aidl \
-	../av/drm/libmediadrm/aidl/android/media/ICas.aidl \
-	../av/drm/libmediadrm/aidl/android/media/ICasListener.aidl \
-	../av/drm/libmediadrm/aidl/android/media/IDescrambler.aidl \
-	../av/drm/libmediadrm/aidl/android/media/IMediaCasService.aidl \
 	media/java/android/media/IAudioFocusDispatcher.aidl \
 	media/java/android/media/IAudioRoutesObserver.aidl \
 	media/java/android/media/IMediaHTTPConnection.aidl \
@@ -613,6 +609,8 @@ LOCAL_STATIC_JAVA_LIBRARIES :=                          \
     android.hardware.vibrator-V1.0-java-constants        \
     android.hardware.vibrator-V1.1-java-constants        \
     android.hardware.wifi-V1.0-java-constants            \
+
+include hardware/interfaces/cas/1.0/CasHal.mk
 
 # Loaded with System.loadLibrary by android.view.textclassifier
 LOCAL_REQUIRED_MODULES += libtextclassifier
