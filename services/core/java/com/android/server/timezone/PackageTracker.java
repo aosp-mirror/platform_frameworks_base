@@ -21,8 +21,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import android.app.timezone.RulesUpdaterContract;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.provider.TimeZoneRulesDataContract;
 import android.util.Slog;
+
+import java.io.File;
 
 /**
  * Monitors the installed applications associated with time zone updates. If the app packages are
@@ -81,11 +84,17 @@ public class PackageTracker implements IntentHelper.Listener {
     /** Creates the {@link PackageTracker} for normal use. */
     static PackageTracker create(Context context) {
         PackageTrackerHelperImpl helperImpl = new PackageTrackerHelperImpl(context);
+        // TODO(nfuller): Switch to FileUtils.createDir() when available. http://b/31008728
+        File storageDir = new File(Environment.getDataSystemDirectory(), "timezone");
+        if (!storageDir.exists()) {
+            storageDir.mkdir();
+        }
+
         return new PackageTracker(
                 helperImpl /* clock */,
                 helperImpl /* configHelper */,
                 helperImpl /* packageManagerHelper */,
-                new PackageStatusStorage(context),
+                new PackageStatusStorage(storageDir),
                 new IntentHelperImpl(context));
     }
 
