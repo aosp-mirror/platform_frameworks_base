@@ -169,8 +169,7 @@ public class DevicePolicyManager {
      *
      * <p>From version {@link android.os.Build.VERSION_CODES#O}, when managed provisioning has
      * completed, along with the above broadcast, activity intent
-     * {@link #ACTION_PROVISIONING_SUCCESSFUL} will also be sent to the application specified in
-     * the provisioning intent.
+     * {@link #ACTION_PROVISIONING_SUCCESSFUL} will also be sent to the profile owner.
      *
      * <p>If provisioning fails, the managedProfile is removed so the device returns to its
      * previous state.
@@ -857,8 +856,7 @@ public class DevicePolicyManager {
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} broadcast but this will be
      * delivered faster as it's an activity intent.
      *
-     * <p>The intent is only sent to the application on the profile that requested provisioning. In
-     * the device owner case the profile is the primary user.
+     * <p>The intent is only sent to the new device or profile owner.
      *
      * @see #ACTION_PROVISION_MANAGED_PROFILE
      * @see #ACTION_PROVISION_MANAGED_DEVICE

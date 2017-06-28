@@ -238,8 +238,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * {@link android.app.admin.DevicePolicyManager#isProfileOwnerApp}. You will generally handle
      * this in {@link DeviceAdminReceiver#onProfileProvisioningComplete}.
      *
-     * <p>Input: Nothing.</p>
-     * <p>Output: Nothing</p>
+     * @see DevicePolicyManager#ACTION_PROVISIONING_SUCCESSFUL
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @BroadcastBehavior(explicitOnly = true)
@@ -668,6 +667,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * <p> Note that provisioning completes without waiting for any server interactions, so the
      * profile owner needs to wait for data to be available if required (e.g. android device ids or
      * other data that is set as a result of server interactions).
+     *
+     * <p>From version {@link android.os.Build.VERSION_CODES#O}, when managed provisioning has
+     * completed, along with this callback the activity intent
+     * {@link DevicePolicyManager#ACTION_PROVISIONING_SUCCESSFUL} will also be sent to the same
+     * application.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
