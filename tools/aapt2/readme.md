@@ -3,6 +3,7 @@
 ## Version 2.18
 ### `aapt2 ...`
 - Fixed issue where enum values were interpreted as integers and range checked. (bug 62358540)
+- Fixed issue where ints and floats with trailing whitespace would not be parsed. (bug 62902869)
 
 ## Version 2.17
 ### `aapt2 ...`

@@ -27,8 +27,7 @@ import libcore.io.Streams;
 /**
  * A single class that implements multiple helper interfaces for use by {@link RulesManagerService}.
  */
-final class RulesManagerServiceHelperImpl
-        implements PermissionHelper, Executor, FileDescriptorHelper {
+final class RulesManagerServiceHelperImpl implements PermissionHelper, Executor {
 
     private final Context mContext;
 
@@ -46,14 +45,5 @@ final class RulesManagerServiceHelperImpl
     public void execute(Runnable runnable) {
         // TODO Is there a better way?
         new Thread(runnable).start();
-    }
-
-    @Override
-    public byte[] readFully(ParcelFileDescriptor parcelFileDescriptor) throws IOException {
-        try (ParcelFileDescriptor pfd = parcelFileDescriptor) {
-            // Read bytes
-            FileInputStream in = new FileInputStream(pfd.getFileDescriptor(), false /* isOwner */);
-            return Streams.readFully(in);
-        }
     }
 }

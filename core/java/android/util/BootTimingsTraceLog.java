@@ -29,7 +29,7 @@ import java.util.Deque;
  */
 public class BootTimingsTraceLog {
     // Debug boot time for every step if it's non-user build.
-    private static final boolean DEBUG_BOOT_TIME = !"user".equals(Build.TYPE);
+    private static final boolean DEBUG_BOOT_TIME = !Build.IS_USER;
     private final Deque<Pair<String, Long>> mStartTimes
             = DEBUG_BOOT_TIME ? new ArrayDeque<>() : null;
     private final String mTag;

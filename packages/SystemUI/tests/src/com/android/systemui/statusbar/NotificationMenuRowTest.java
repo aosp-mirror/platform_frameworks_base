@@ -57,4 +57,10 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
         row.createMenu(null, null);
         assertTrue(row.getMenuView() != null);
     }
+
+    @Test
+    public void testResetUncreatedMenu() {
+        NotificationMenuRowPlugin row = new NotificationMenuRow(mContext);
+        row.resetMenu();
+    }
 }

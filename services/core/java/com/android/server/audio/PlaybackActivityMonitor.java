@@ -29,6 +29,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -67,6 +69,12 @@ public final class PlaybackActivityMonitor
                     .createIfNeeded()
                     .build();
 
+    // TODO support VolumeShaper on those players
+    private static final int[] UNDUCKABLE_PLAYER_TYPES = {
+            AudioPlaybackConfiguration.PLAYER_TYPE_AAUDIO,
+            AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL,
+    };
+
     // like a PLAY_CREATE_IF_NEEDED operation but with a skip to the end of the ramp
     private static final VolumeShaper.Operation PLAY_SKIP_RAMP =
             new VolumeShaper.Operation.Builder(PLAY_CREATE_IF_NEEDED).setXOffset(1.0f).build();
@@ -84,6 +92,43 @@ public final class PlaybackActivityMonitor
     PlaybackActivityMonitor() {
         PlayMonitorClient.sListenerDeathMonitor = this;
         AudioPlaybackConfiguration.sPlayerDeathMonitor = this;
+    }
+
+    //=================================================================
+    private final ArrayList<Integer> mBannedUids = new ArrayList<Integer>();
+
+    // see AudioManagerInternal.disableAudioForUid(boolean disable, int uid)
+    public void disableAudioForUid(boolean disable, int uid) {
+        synchronized(mPlayerLock) {
+            final int index = mBannedUids.indexOf(new Integer(uid));
+            if (index >= 0) {
+                if (!disable) {
+                    mBannedUids.remove(index);
+                    // nothing else to do, future playback requests from this uid are ok
+                } // no else to handle, uid already present, so disabling again is no-op
+            } else {
+                if (disable) {
+                    for (AudioPlaybackConfiguration apc : mPlayers.values()) {
+                        checkBanPlayer(apc, uid);
+                    }
+                    mBannedUids.add(new Integer(uid));
+                } // no else to handle, uid already not in list, so enabling again is no-op
+            }
+        }
+    }
+
+    private boolean checkBanPlayer(@NonNull AudioPlaybackConfiguration apc, int uid) {
+        final boolean toBan = (apc.getClientUid() == uid);
+        if (toBan) {
+            final int piid = apc.getPlayerInterfaceId();
+            try {
+                Log.v(TAG, "banning player " + piid + " uid:" + uid);
+                apc.getPlayerProxy().pause();
+            } catch (Exception e) {
+                Log.e(TAG, "error banning player " + piid + " uid:" + uid, e);
+            }
+        }
+        return toBan;
     }
 
     //=================================================================
@@ -128,6 +173,14 @@ public final class PlaybackActivityMonitor
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (apc == null) {
                 return;
+            }
+            if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+                for (Integer uidInteger: mBannedUids) {
+                    if (checkBanPlayer(apc, uidInteger.intValue())) {
+                        // player was banned, do not update its state
+                        return;
+                    }
+                }
             }
             if (apc.getPlayerType() == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
                 // FIXME SoundPool not ready for state reporting
@@ -178,10 +231,17 @@ public final class PlaybackActivityMonitor
             pw.println("\n  ducked players:");
             mDuckingManager.dump(pw);
             // players muted due to the device ringing or being in a call
-            pw.println("\n  muted player piids:");
+            pw.print("\n  muted player piids:");
             for (int piid : mMutedPlayers) {
-                pw.println(" " + piid);
+                pw.print(" " + piid);
             }
+            pw.println();
+            // banned players:
+            pw.print("\n  banned uids:");
+            for (int uid : mBannedUids) {
+                pw.print(" " + uid);
+            }
+            pw.println();
         }
     }
 
@@ -298,12 +358,12 @@ public final class PlaybackActivityMonitor
                                 + " uid:" + apc.getClientUid() + " pid:" + apc.getClientPid()
                                 + " - SPEECH");
                         return false;
-                    } else if (apc.getPlayerType()
-                            == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
-                        // TODO support ducking of SoundPool players
+                    } else if (ArrayUtils.contains(UNDUCKABLE_PLAYER_TYPES, apc.getPlayerType())) {
                         Log.v(TAG, "not ducking player " + apc.getPlayerInterfaceId()
                                 + " uid:" + apc.getClientUid() + " pid:" + apc.getClientPid()
-                                + " - SoundPool");
+                                + " due to type:"
+                                + AudioPlaybackConfiguration.toLogFriendlyPlayerType(
+                                        apc.getPlayerType()));
                         return false;
                     }
                     apcsToDuck.add(apc);

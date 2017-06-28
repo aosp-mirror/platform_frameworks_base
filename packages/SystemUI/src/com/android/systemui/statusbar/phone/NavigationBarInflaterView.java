@@ -19,9 +19,11 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Display.Mode;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +44,8 @@ import com.android.systemui.tuner.TunerService.Tunable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 public class NavigationBarInflaterView extends FrameLayout
         implements Tunable, PluginListener<NavBarButtonProvider> {
@@ -71,6 +75,8 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String KEY_CODE_START = "(";
     public static final String KEY_IMAGE_DELIM = ":";
     public static final String KEY_CODE_END = ")";
+    private static final String WEIGHT_SUFFIX = "W";
+    private static final String WEIGHT_CENTERED_SUFFIX = "WC";
 
     private final List<NavBarButtonProvider> mPlugins = new ArrayList<>();
 
@@ -219,26 +225,27 @@ public class NavigationBarInflaterView extends FrameLayout
         String[] center = sets[1].split(BUTTON_SEPARATOR);
         String[] end = sets[2].split(BUTTON_SEPARATOR);
         // Inflate these in start to end order or accessibility traversal will be messed up.
-        inflateButtons(start, (ViewGroup) mRot0.findViewById(R.id.ends_group), isRot0Landscape);
-        inflateButtons(start, (ViewGroup) mRot90.findViewById(R.id.ends_group), !isRot0Landscape);
+        inflateButtons(start, mRot0.findViewById(R.id.ends_group), isRot0Landscape, true);
+        inflateButtons(start, mRot90.findViewById(R.id.ends_group), !isRot0Landscape, true);
 
-        inflateButtons(center, (ViewGroup) mRot0.findViewById(R.id.center_group), isRot0Landscape);
-        inflateButtons(center, (ViewGroup) mRot90.findViewById(R.id.center_group), !isRot0Landscape);
+        inflateButtons(center, mRot0.findViewById(R.id.center_group), isRot0Landscape, false);
+        inflateButtons(center, mRot90.findViewById(R.id.center_group), !isRot0Landscape, false);
 
-        addGravitySpacer((LinearLayout) mRot0.findViewById(R.id.ends_group));
-        addGravitySpacer((LinearLayout) mRot90.findViewById(R.id.ends_group));
+        addGravitySpacer(mRot0.findViewById(R.id.ends_group));
+        addGravitySpacer(mRot90.findViewById(R.id.ends_group));
 
-        inflateButtons(end, (ViewGroup) mRot0.findViewById(R.id.ends_group), isRot0Landscape);
-        inflateButtons(end, (ViewGroup) mRot90.findViewById(R.id.ends_group), !isRot0Landscape);
+        inflateButtons(end, mRot0.findViewById(R.id.ends_group), isRot0Landscape, false);
+        inflateButtons(end, mRot90.findViewById(R.id.ends_group), !isRot0Landscape, false);
     }
 
     private void addGravitySpacer(LinearLayout layout) {
         layout.addView(new Space(mContext), new LinearLayout.LayoutParams(0, 0, 1));
     }
 
-    private void inflateButtons(String[] buttons, ViewGroup parent, boolean landscape) {
+    private void inflateButtons(String[] buttons, ViewGroup parent, boolean landscape,
+            boolean start) {
         for (int i = 0; i < buttons.length; i++) {
-            inflateButton(buttons[i], parent, landscape);
+            inflateButton(buttons[i], parent, landscape, start);
         }
     }
 
@@ -251,16 +258,13 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     @Nullable
-    protected View inflateButton(String buttonSpec, ViewGroup parent, boolean landscape) {
+    protected View inflateButton(String buttonSpec, ViewGroup parent, boolean landscape,
+            boolean start) {
         LayoutInflater inflater = landscape ? mLandscapeInflater : mLayoutInflater;
-        float size = extractSize(buttonSpec);
-        View v = createView(buttonSpec, parent, inflater, landscape);
+        View v = createView(buttonSpec, parent, inflater);
         if (v == null) return null;
 
-        if (size != 0) {
-            ViewGroup.LayoutParams params = v.getLayoutParams();
-            params.width = (int) (params.width * size);
-        }
+        v = applySize(v, buttonSpec, landscape, start);
         parent.addView(v);
         addToDispatchers(v);
         View lastView = landscape ? mLastLandscape : mLastPortrait;
@@ -275,16 +279,41 @@ public class NavigationBarInflaterView extends FrameLayout
         return v;
     }
 
-    private View createView(String buttonSpec, ViewGroup parent, LayoutInflater inflater,
-            boolean landscape) {
+    private View applySize(View v, String buttonSpec, boolean landscape, boolean start) {
+        String sizeStr = extractSize(buttonSpec);
+        if (sizeStr == null) return v;
+
+        if (sizeStr.contains(WEIGHT_SUFFIX)) {
+            float weight = Float.parseFloat(sizeStr.substring(0, sizeStr.indexOf(WEIGHT_SUFFIX)));
+            FrameLayout frame = new FrameLayout(mContext);
+            LayoutParams childParams = new LayoutParams(v.getLayoutParams());
+            if (sizeStr.endsWith(WEIGHT_CENTERED_SUFFIX)) {
+                childParams.gravity = Gravity.CENTER;
+            } else {
+                childParams.gravity = landscape ? (start ? Gravity.BOTTOM : Gravity.TOP)
+                        : (start ? Gravity.START : Gravity.END);
+            }
+            frame.addView(v, childParams);
+            frame.setLayoutParams(new LinearLayout.LayoutParams(0, MATCH_PARENT, weight));
+            frame.setClipChildren(false);
+            frame.setClipToPadding(false);
+            return frame;
+        }
+        float size = Float.parseFloat(sizeStr);
+        ViewGroup.LayoutParams params = v.getLayoutParams();
+        params.width = (int) (params.width * size);
+        return v;
+    }
+
+    private View createView(String buttonSpec, ViewGroup parent, LayoutInflater inflater) {
         View v = null;
         String button = extractButton(buttonSpec);
         if (LEFT.equals(button)) {
-            buttonSpec = Dependency.get(TunerService.class).getValue(NAV_BAR_LEFT, NAVSPACE);
-            button = extractButton(buttonSpec);
+            String s = Dependency.get(TunerService.class).getValue(NAV_BAR_LEFT, NAVSPACE);
+            button = extractButton(s);
         } else if (RIGHT.equals(button)) {
-            buttonSpec = Dependency.get(TunerService.class).getValue(NAV_BAR_RIGHT, MENU_IME);
-            button = extractButton(buttonSpec);
+            String s = Dependency.get(TunerService.class).getValue(NAV_BAR_RIGHT, MENU_IME);
+            button = extractButton(s);
         }
         // Let plugins go first so they can override a standard view if they want.
         for (NavBarButtonProvider provider : mPlugins) {
@@ -340,13 +369,12 @@ public class NavigationBarInflaterView extends FrameLayout
         return Integer.parseInt(subStr);
     }
 
-    public static float extractSize(String buttonSpec) {
+    public static String extractSize(String buttonSpec) {
         if (!buttonSpec.contains(SIZE_MOD_START)) {
-            return 1;
+            return null;
         }
         final int sizeStart = buttonSpec.indexOf(SIZE_MOD_START);
-        String sizeStr = buttonSpec.substring(sizeStart + 1, buttonSpec.indexOf(SIZE_MOD_END));
-        return Float.parseFloat(sizeStr);
+        return buttonSpec.substring(sizeStart + 1, buttonSpec.indexOf(SIZE_MOD_END));
     }
 
     public static String extractButton(String buttonSpec) {
@@ -379,8 +407,8 @@ public class NavigationBarInflaterView extends FrameLayout
                 mButtonDispatchers.valueAt(i).clear();
             }
         }
-        clearAllChildren((ViewGroup) mRot0.findViewById(R.id.nav_buttons));
-        clearAllChildren((ViewGroup) mRot90.findViewById(R.id.nav_buttons));
+        clearAllChildren(mRot0.findViewById(R.id.nav_buttons));
+        clearAllChildren(mRot90.findViewById(R.id.nav_buttons));
     }
 
     private void clearAllChildren(ViewGroup group) {

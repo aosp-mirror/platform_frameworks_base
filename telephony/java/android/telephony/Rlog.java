@@ -33,7 +33,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public final class Rlog {
 
-    private static final boolean USER_BUILD = Build.TYPE.equals("user");
+    private static final boolean USER_BUILD = Build.IS_USER;
 
     private Rlog() {
     }

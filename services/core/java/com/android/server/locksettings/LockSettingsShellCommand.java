@@ -36,6 +36,7 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_CLEAR = "clear";
     private static final String COMMAND_SP = "sp";
     private static final String COMMAND_SET_DISABLED = "set-disabled";
+    private static final String COMMAND_VERIFY = "verify";
 
     private int mCurrentUserId;
     private final LockPatternUtils mLockPatternUtils;
@@ -76,6 +77,9 @@ class LockSettingsShellCommand extends ShellCommand {
                 case COMMAND_SET_DISABLED:
                     runSetDisabled();
                     break;
+                case COMMAND_VERIFY:
+                    runVerify();
+                    break;
                 default:
                     getErrPrintWriter().println("Unknown command: " + cmd);
                     break;
@@ -86,6 +90,11 @@ class LockSettingsShellCommand extends ShellCommand {
             e.printStackTrace(getErrPrintWriter());
             return -1;
         }
+    }
+
+    private void runVerify() {
+        // The command is only run if the credential is correct.
+        getOutPrintWriter().println("Lock credential verified successfully");
     }
 
     @Override

@@ -61,11 +61,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public static final float GRADIENT_SCRIM_ALPHA = 0.45f;
     // A scrim varies its opacity based on a busyness factor, for example
     // how many notifications are currently visible.
-    public static final float GRADIENT_SCRIM_ALPHA_BUSY = 0.90f;
+    public static final float GRADIENT_SCRIM_ALPHA_BUSY = 0.70f;
     protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = GRADIENT_SCRIM_ALPHA;
     protected static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
-    private static final float SCRIM_IN_FRONT_ALPHA = GRADIENT_SCRIM_ALPHA;
-    private static final float SCRIM_IN_FRONT_ALPHA_LOCKED = GRADIENT_SCRIM_ALPHA;
+    private static final float SCRIM_IN_FRONT_ALPHA = GRADIENT_SCRIM_ALPHA_BUSY;
+    private static final float SCRIM_IN_FRONT_ALPHA_LOCKED = GRADIENT_SCRIM_ALPHA_BUSY;
     private static final int TAG_KEY_ANIM = R.id.scrim;
     private static final int TAG_KEY_ANIM_TARGET = R.id.scrim_target;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;

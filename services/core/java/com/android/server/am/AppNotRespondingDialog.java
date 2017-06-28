@@ -35,8 +35,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import static com.android.server.am.ActivityManagerService.IS_USER_BUILD;
-
 final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnClickListener {
     private static final String TAG = "AppNotRespondingDialog";
 

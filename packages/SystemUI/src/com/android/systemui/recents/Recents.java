@@ -207,7 +207,7 @@ public class Recents extends SystemUI
         mImpl = new RecentsImpl(mContext);
 
         // Check if there is a recents override package
-        if ("userdebug".equals(Build.TYPE) || "eng".equals(Build.TYPE)) {
+        if (Build.IS_USERDEBUG || Build.IS_ENG) {
             String cnStr = SystemProperties.get(RECENTS_OVERRIDE_SYSPROP_KEY);
             if (!cnStr.isEmpty()) {
                 mOverrideRecentsPackageName = cnStr;

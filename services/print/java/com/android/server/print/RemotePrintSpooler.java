@@ -72,7 +72,7 @@ final class RemotePrintSpooler {
     private static final boolean DEBUG = false;
 
     private static final long BIND_SPOOLER_SERVICE_TIMEOUT =
-            ("eng".equals(Build.TYPE)) ? 120000 : 10000;
+            (Build.IS_ENG) ? 120000 : 10000;
 
     private final Object mLock = new Object();
 

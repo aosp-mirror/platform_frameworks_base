@@ -43,12 +43,10 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
@@ -56,10 +54,10 @@ public class UsbDebuggingManager {
     private static final String TAG = "UsbDebuggingManager";
     private static final boolean DEBUG = false;
 
-    private final String ADBD_SOCKET = "adbd";
-    private final String ADB_DIRECTORY = "misc/adb";
-    private final String ADB_KEYS_FILE = "adb_keys";
-    private final int BUFFER_SIZE = 4096;
+    private static final String ADBD_SOCKET = "adbd";
+    private static final String ADB_DIRECTORY = "misc/adb";
+    private static final String ADB_KEYS_FILE = "adb_keys";
+    private static final int BUFFER_SIZE = 4096;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -346,7 +344,7 @@ public class UsbDebuggingManager {
     }
 
     /**
-     * @returns true if the componentName led to an Activity that was started.
+     * @return true if the componentName led to an Activity that was started.
      */
     private boolean startConfirmationActivity(ComponentName componentName, UserHandle userHandle,
             String key, String fingerprints) {
@@ -365,7 +363,7 @@ public class UsbDebuggingManager {
     }
 
     /**
-     * @returns true if the componentName led to a Service that was started.
+     * @return true if the componentName led to a Service that was started.
      */
     private boolean startConfirmationService(ComponentName componentName, UserHandle userHandle,
             String key, String fingerprints) {
