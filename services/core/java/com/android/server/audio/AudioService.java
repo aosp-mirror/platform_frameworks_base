@@ -239,6 +239,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_SET_A2DP_SRC_CONNECTION_STATE = 101;
     private static final int MSG_SET_A2DP_SINK_CONNECTION_STATE = 102;
     private static final int MSG_A2DP_DEVICE_CONFIG_CHANGE = 103;
+    private static final int MSG_DISABLE_AUDIO_FOR_UID = 104;
     // end of messages handled under wakelock
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
@@ -4871,6 +4872,12 @@ public class AudioService extends IAudioService.Stub
                     mAudioEventWakeLock.release();
                     break;
 
+                case MSG_DISABLE_AUDIO_FOR_UID:
+                    mPlaybackMonitor.disableAudioForUid( msg.arg1 == 1 /* disable */,
+                            msg.arg2 /* uid */);
+                    mAudioEventWakeLock.release();
+                    break;
+
                 case MSG_REPORT_NEW_ROUTES: {
                     int N = mRoutesObservers.beginBroadcast();
                     if (N > 0) {
@@ -6590,6 +6597,13 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
             }
+        }
+
+        @Override
+        public void disableAudioForUid(boolean disable, int uid) {
+            queueMsgUnderWakeLock(mAudioHandler, MSG_DISABLE_AUDIO_FOR_UID,
+                    disable ? 1 : 0 /* arg1 */,  uid /* arg2 */,
+                    null /* obj */,  0 /* delay */);
         }
     }
 
