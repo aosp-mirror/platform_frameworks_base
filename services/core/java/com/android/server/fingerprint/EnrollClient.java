@@ -65,7 +65,7 @@ public abstract class EnrollClient extends ClientMonitor {
         if (receiver == null)
             return true; // client not listening
 
-        FingerprintUtils.vibrateFingerprintSuccess(getContext());
+        vibrateSuccess();
         MetricsLogger.action(getContext(), MetricsEvent.ACTION_FINGERPRINT_ENROLL);
         try {
             receiver.onEnrollResult(getHalDeviceId(), fpId, groupId, remaining);
