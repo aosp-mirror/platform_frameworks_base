@@ -692,12 +692,7 @@ public class UsbPortManager {
 
         // Guard against possible reentrance by posting the broadcast from the handler
         // instead of from within the critical section.
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            }
-        });
+        mHandler.post(() -> mContext.sendBroadcastAsUser(intent, UserHandle.ALL));
     }
 
     private static void logAndPrint(int priority, IndentingPrintWriter pw, String msg) {
