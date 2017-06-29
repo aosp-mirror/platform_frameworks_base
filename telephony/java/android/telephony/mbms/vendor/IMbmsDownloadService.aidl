@@ -29,31 +29,15 @@ import android.telephony.mbms.IDownloadCallback;
  */
 interface IMbmsDownloadService
 {
-    /**
-     * Initialize download service
-     * Registers this listener, subId with this appName
-     *
-     * No return value.  Async errors may be reported, but none expected (not doing anything yet).
-     */
-    void initialize(String appName, int subId, IMbmsDownloadManagerCallback listener);
+    void initialize(int subId, IMbmsDownloadManagerCallback listener);
 
-    /**
-     * - Registers serviceClasses of interest with the uid/appName/subId key.
-     * - Starts asynch fetching data on download services of matching classes to be reported
-     * later by callback.
-     *
-     * Note that subsequent calls with the same callback, appName, subId and uid will replace
-     * the service class list.
-     */
-    int getFileServices(String appName, int subId, in List<String> serviceClasses);
+    int getFileServices(int subId, in List<String> serviceClasses);
 
-    int setTempFileRootDirectory(String appName, int subId, String rootDirectoryPath);
-    /**
-     * should move the params into a DownloadRequest parcelable
-     */
+    int setTempFileRootDirectory(int subId, String rootDirectoryPath);
+
     int download(in DownloadRequest downloadRequest, IDownloadCallback listener);
 
-    List<DownloadRequest> listPendingDownloads(String appName, int subscriptionId);
+    List<DownloadRequest> listPendingDownloads(int subscriptionId);
 
     int cancelDownload(in DownloadRequest downloadRequest);
 
@@ -66,9 +50,5 @@ interface IMbmsDownloadService
      */
     void resetDownloadKnowledge(in DownloadRequest downloadRequest);
 
-    /**
-     * End of life for this MbmsDownloadManager.
-     * Any pending downloads remain in affect and may start up independently in the future.
-     */
-    void dispose(String appName, int subId);
+    void dispose(int subId);
 }
