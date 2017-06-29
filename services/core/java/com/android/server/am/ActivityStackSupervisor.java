@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
@@ -1656,8 +1657,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // owner.
             final int launchDisplayId = options.getLaunchDisplayId();
             if (launchDisplayId != INVALID_DISPLAY
-                    && !isCallerAllowedToLaunchOnDisplay(callingPid, callingUid, launchDisplayId,
-                    aInfo)) {
+                    && !isCallerAllowedToLaunchOnDisplay(callingPid, callingUid, launchDisplayId)) {
                 final String msg = "Permission Denial: starting " + intent.toString()
                         + " from " + callerApp + " (pid=" + callingPid
                         + ", uid=" + callingUid + ") with launchDisplayId="
@@ -1671,8 +1671,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /** Check if caller is allowed to launch activities on specified display. */
-    boolean isCallerAllowedToLaunchOnDisplay(int callingPid, int callingUid, int launchDisplayId,
-            ActivityInfo aInfo) {
+    boolean isCallerAllowedToLaunchOnDisplay(int callingPid, int callingUid, int launchDisplayId) {
         if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check: displayId=" + launchDisplayId
                 + " callingPid=" + callingPid + " callingUid=" + callingUid);
 
@@ -1683,7 +1682,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Check if the caller can manage activity stacks.
-        final int startAnyPerm = mService.checkPermission(MANAGE_ACTIVITY_STACKS, callingPid,
+        final int startAnyPerm = mService.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED) {
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
@@ -1692,8 +1691,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         if (activityDisplay.mDisplay.getType() == TYPE_VIRTUAL
-                && activityDisplay.mDisplay.getOwnerUid() != SYSTEM_UID
-                && (aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
+                && activityDisplay.mDisplay.getOwnerUid() != SYSTEM_UID) {
             // Limit launching on virtual displays, because their contents can be read from Surface
             // by apps that created them.
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
