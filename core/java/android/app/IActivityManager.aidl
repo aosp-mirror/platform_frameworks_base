@@ -412,9 +412,6 @@ interface IActivityManager {
     void stopSystemLockTaskMode();
     void finishVoiceTask(in IVoiceInteractionSession session);
     boolean isTopOfTask(in IBinder token);
-    boolean requestVisibleBehind(in IBinder token, boolean visible);
-    boolean isBackgroundVisibleBehind(in IBinder token);
-    void backgroundResourcesReleased(in IBinder token);
     void notifyLaunchTaskBehindComplete(in IBinder token);
     int startActivityFromRecents(int taskId, in Bundle options);
     void notifyEnterAnimationComplete(in IBinder token);

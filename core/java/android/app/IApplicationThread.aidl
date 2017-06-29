@@ -140,8 +140,6 @@ oneway interface IApplicationThread {
     void setProcessState(int state);
     void scheduleInstallProvider(in ProviderInfo provider);
     void updateTimePrefs(int timeFormatPreference);
-    void scheduleCancelVisibleBehind(IBinder token);
-    void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean enabled);
     void scheduleEnterAnimationComplete(IBinder token);
     void notifyCleartextNetwork(in byte[] firstPacket);
     void startBinderTracking();

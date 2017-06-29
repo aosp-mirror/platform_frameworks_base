@@ -1275,20 +1275,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void makeFinishingLocked() {
-        if (!finishing) {
-            final ActivityStack stack = getStack();
-            if (stack != null && this == stack.getVisibleBehindActivity()) {
-                // A finishing activity should not remain as visible in the background
-                mStackSupervisor.requestVisibleBehindLocked(this, false);
-            }
-            finishing = true;
-            if (stopped) {
-                clearOptionsLocked();
-            }
+        if (finishing) {
+            return;
+        }
+        finishing = true;
+        if (stopped) {
+            clearOptionsLocked();
+        }
 
-            if (service != null) {
-                service.mTaskChangeNotificationController.notifyTaskStackChanged();
-            }
+        if (service != null) {
+            service.mTaskChangeNotificationController.notifyTaskStackChanged();
         }
     }
 
@@ -1621,20 +1617,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      *
      * @see {@link ActivityStack#checkKeyguardVisibility}
      */
-    boolean shouldBeVisibleIgnoringKeyguard(boolean behindTranslucentActivity,
-            boolean stackVisibleBehind, ActivityRecord visibleBehind,
-            boolean behindFullscreenActivity) {
+    boolean shouldBeVisibleIgnoringKeyguard(boolean behindFullscreenActivity) {
         if (!okToShowLocked()) {
             return false;
         }
 
-        // mLaunchingBehind: Activities launching behind are at the back of the task stack
-        // but must be drawn initially for the animation as though they were visible.
-        final boolean activityVisibleBehind =
-                (behindTranslucentActivity || stackVisibleBehind) && visibleBehind == this;
-
-        boolean isVisible =
-                !behindFullscreenActivity || mLaunchTaskBehind || activityVisibleBehind;
+        boolean isVisible = !behindFullscreenActivity || mLaunchTaskBehind;
 
         if (service.mSupportsLeanbackOnly && isVisible && isRecentsActivity()) {
             // On devices that support leanback only (Android TV), Recents activity can only be
@@ -1745,11 +1733,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         returningOptions = null;
-
-        if (stack.getVisibleBehindActivity() == this) {
-            // When resuming an activity, require it to call requestVisibleBehind() again.
-            stack.setVisibleBehindActivity(null /* ActivityRecord */);
-        }
         mStackSupervisor.checkReadyForSleepLocked();
     }
 
@@ -1783,9 +1766,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
             mWindowContainerController.notifyAppStopped();
 
-            if (stack.getVisibleBehindActivity() == this) {
-                mStackSupervisor.requestVisibleBehindLocked(this, false /* visible */);
-            }
             if (finishing) {
                 clearOptionsLocked();
             } else {

@@ -136,7 +136,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVE
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_URI_PERMISSION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USAGE_STATS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_WHITELISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
@@ -7404,21 +7403,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public final void backgroundResourcesReleased(IBinder token) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                ActivityStack stack = ActivityRecord.getStackLocked(token);
-                if (stack != null) {
-                    stack.backgroundResourcesReleased();
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
     public final void notifyLaunchTaskBehindComplete(IBinder token) {
         mStackSupervisor.scheduleLaunchTaskBehindComplete(token);
     }
@@ -13303,7 +13287,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 final boolean translucentChanged = r.changeWindowTranslucency(true);
                 if (translucentChanged) {
-                    r.getStack().releaseBackgroundResources(r);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
                 mWindowManager.setAppFullscreen(token, true);
@@ -13336,38 +13319,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.setAppFullscreen(token, false);
                 return translucentChanged;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public boolean requestVisibleBehind(IBinder token, boolean visible) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
-                if (r != null) {
-                    return mStackSupervisor.requestVisibleBehindLocked(r, visible);
-                }
-            }
-            return false;
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public boolean isBackgroundVisibleBehind(IBinder token) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                final ActivityStack stack = ActivityRecord.getStackLocked(token);
-                final boolean visible = stack == null ? false : stack.hasVisibleBehindActivity();
-                if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
-                        "isBackgroundVisibleBehind: stack=" + stack + " visible=" + visible);
-                return visible;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

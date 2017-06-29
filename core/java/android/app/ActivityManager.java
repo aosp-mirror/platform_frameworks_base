@@ -24,42 +24,35 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
-import android.graphics.Canvas;
-import android.graphics.GraphicBuffer;
-import android.graphics.Matrix;
-import android.graphics.Point;
-import android.os.BatteryStats;
-import android.os.Build;
-import android.os.Build.VERSION_CODES;
-import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
-
-import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.os.RoSystemProperties;
-import com.android.internal.os.TransferPipe;
-import com.android.internal.util.FastPrintWriter;
-import com.android.server.LocalServices;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.UriPermission;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.GraphicBuffer;
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.BatteryStats;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
@@ -71,6 +64,12 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
+
+import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.os.RoSystemProperties;
+import com.android.internal.os.TransferPipe;
+import com.android.internal.util.FastPrintWriter;
+import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -901,19 +900,6 @@ public class ActivityManager {
          */
         public static boolean isHomeOrRecentsStack(int stackId) {
             return stackId == HOME_STACK_ID || stackId == RECENTS_STACK_ID;
-        }
-
-        /**
-         * Returns true if activities contained in this stack can request visible behind by
-         * calling {@link Activity#requestVisibleBehind}.
-         *
-         * @deprecated This method's functionality is no longer supported as of
-         * {@link android.os.Build.VERSION_CODES#O} and will be removed in a future release.
-         */
-        @Deprecated
-        public static boolean activitiesCanRequestVisibleBehind(int stackId) {
-            return stackId == FULLSCREEN_WORKSPACE_STACK_ID ||
-                    stackId == ASSISTANT_STACK_ID;
         }
 
         /**

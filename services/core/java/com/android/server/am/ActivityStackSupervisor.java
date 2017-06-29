@@ -60,7 +60,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONTAINERS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IDLE;
@@ -2983,13 +2982,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         try {
             final TaskRecord task = r.getTask();
-
-            if (r == task.getStack().getVisibleBehindActivity()) {
-                // An activity can't be pinned and visible behind at the same time. Go ahead and
-                // release it from been visible behind before pinning.
-                requestVisibleBehindLocked(r, false);
-            }
-
             // Resize the pinned stack to match the current size of the task the activity we are
             // going to be moving is currently contained in. We do this to have the right starting
             // animation bounds for the pinned stack to the desired bounds the caller wants.
@@ -3310,70 +3302,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 stackNdx--;
             }
         }
-    }
-
-    boolean requestVisibleBehindLocked(ActivityRecord r, boolean visible) {
-        final ActivityStack stack = r.getStack();
-        if (stack == null) {
-            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
-                    "requestVisibleBehind: r=" + r + " visible=" + visible + " stack is null");
-            return false;
-        }
-
-        if (visible && !StackId.activitiesCanRequestVisibleBehind(stack.mStackId)) {
-            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND, "requestVisibleBehind: r=" + r
-                    + " visible=" + visible + " stackId=" + stack.mStackId
-                    + " can't contain visible behind activities");
-            return false;
-        }
-
-        final boolean isVisible = stack.hasVisibleBehindActivity();
-        if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
-                "requestVisibleBehind r=" + r + " visible=" + visible + " isVisible=" + isVisible);
-
-        final ActivityRecord top = topRunningActivityLocked();
-        if (top == null || top == r || (visible == isVisible)) {
-            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND, "requestVisibleBehind: quick return");
-            stack.setVisibleBehindActivity(visible ? r : null);
-            return true;
-        }
-
-        // A non-top activity is reporting a visibility change.
-        if (visible && top.fullscreen) {
-            // Let the caller know that it can't be seen.
-            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
-                    "requestVisibleBehind: returning top.fullscreen=" + top.fullscreen
-                    + " top.state=" + top.state + " top.app=" + top.app + " top.app.thread="
-                    + top.app.thread);
-            return false;
-        } else if (!visible && stack.getVisibleBehindActivity() != r) {
-            // Only the activity set as currently visible behind should actively reset its
-            // visible behind state.
-            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG_VISIBLE_BEHIND,
-                    "requestVisibleBehind: returning visible=" + visible
-                    + " stack.getVisibleBehindActivity()=" + stack.getVisibleBehindActivity()
-                    + " r=" + r);
-            return false;
-        }
-
-        stack.setVisibleBehindActivity(visible ? r : null);
-        if (!visible) {
-            // If there is a translucent home activity, we need to force it stop being translucent,
-            // because we can't depend on the application to necessarily perform that operation.
-            // Check out b/14469711 for details.
-            final ActivityRecord next = stack.findNextTranslucentActivity(r);
-            if (next != null && next.isHomeActivity()) {
-                mService.convertFromTranslucent(next.appToken);
-            }
-        }
-        if (top.app != null && top.app.thread != null) {
-            // Notify the top app of the change.
-            try {
-                top.app.thread.scheduleBackgroundVisibleBehindChanged(top.appToken, visible);
-            } catch (RemoteException e) {
-            }
-        }
-        return true;
     }
 
     // Called when WindowManager has finished animating the launchingBehind activity to the back.
@@ -4963,8 +4891,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
         final ArrayList<ActivityStack> mStacks = new ArrayList<>();
 
-        ActivityRecord mVisibleBehindActivity;
-
         /** Array of all UIDs that are present on the display. */
         private IntArray mDisplayAccessUIDs = new IntArray();
 
@@ -4996,14 +4922,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (DEBUG_STACK) Slog.v(TAG_STACK, "detachStack: detaching " + stack
                     + " from displayId=" + mDisplayId);
             mStacks.remove(stack);
-        }
-
-        void setVisibleBehindActivity(ActivityRecord r) {
-            mVisibleBehindActivity = r;
-        }
-
-        boolean hasVisibleBehindActivity() {
-            return mVisibleBehindActivity != null;
         }
 
         @Override
