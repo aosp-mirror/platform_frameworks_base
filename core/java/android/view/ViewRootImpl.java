@@ -1904,14 +1904,16 @@ public final class ViewRootImpl implements ViewParent,
                         + " outsets=" + mPendingOutsets.toShortString()
                         + " surface=" + mSurface);
 
-                final Configuration pendingMergedConfig =
-                        mPendingMergedConfiguration.getMergedConfiguration();
-                if (pendingMergedConfig.seq != 0) {
+                // If the pending {@link MergedConfiguration} handed back from
+                // {@link #relayoutWindow} does not match the one last reported,
+                // WindowManagerService has reported back a frame from a configuration not yet
+                // handled by the client. In this case, we need to accept the configuration so we
+                // do not lay out and draw with the wrong configuration.
+                if (!mPendingMergedConfiguration.equals(mLastReportedMergedConfiguration)) {
                     if (DEBUG_CONFIGURATION) Log.v(mTag, "Visible with new config: "
-                            + pendingMergedConfig);
+                            + mPendingMergedConfiguration.getMergedConfiguration());
                     performConfigurationChange(mPendingMergedConfiguration, !mFirst,
                             INVALID_DISPLAY /* same display */);
-                    pendingMergedConfig.seq = 0;
                     updatedConfiguration = true;
                 }
 
@@ -3596,6 +3598,13 @@ public final class ViewRootImpl implements ViewParent,
                 mView.setLayoutDirection(currentLayoutDirection);
             }
             mView.dispatchConfigurationChanged(config);
+
+            // We could have gotten this {@link Configuration} update after we called
+            // {@link #performTraversals} with an older {@link Configuration}. As a result, our
+            // window frame may be stale. We must ensure the next pass of {@link #performTraversals}
+            // catches this.
+            mForceNextWindowRelayout = true;
+            requestLayout();
         }
     }
 
@@ -3757,10 +3766,10 @@ public final class ViewRootImpl implements ViewParent,
                     SomeArgs args = (SomeArgs) msg.obj;
 
                     final int displayId = args.argi3;
-                    final MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg4;
+                    MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg4;
                     final boolean displayChanged = mDisplay.getDisplayId() != displayId;
 
-                    if (mergedConfiguration != null) {
+                    if (!mLastReportedMergedConfiguration.equals(mergedConfiguration)) {
                         // If configuration changed - notify about that and, maybe, about move to
                         // display.
                         performConfigurationChange(mergedConfiguration, false /* force */,
@@ -6094,7 +6103,7 @@ public final class ViewRootImpl implements ViewParent,
         if (params != null) {
             if (DBG) Log.d(mTag, "WindowLayout in layoutWindow:" + params);
         }
-        mPendingMergedConfiguration.getMergedConfiguration().seq = 0;
+
         //Log.d(mTag, ">>>>>> CALLING relayout");
         if (params != null && mOrigWindowType != params.type) {
             // For compatibility with old apps, don't crash here.

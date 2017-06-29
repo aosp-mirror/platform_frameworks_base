@@ -30,7 +30,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
-import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.os.UserHandle.USER_NULL;
@@ -50,7 +49,6 @@ import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHA
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TASK_SNAPSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -233,7 +231,6 @@ import com.android.server.DisplayThread;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.ThreadPriorityBooster;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
@@ -2020,8 +2017,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.setDisplayLayoutNeeded();
                     mWindowPlacerLocked.performSurfacePlacement(true);
                 }
-                result = win.relayoutVisibleWindow(mergedConfiguration, result, attrChanges,
-                        oldVisibility);
+                result = win.relayoutVisibleWindow(result, attrChanges, oldVisibility);
 
                 try {
                     result = createSurfaceControl(outSurface, result, win, winAnimator);
@@ -2159,6 +2155,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!win.isGoneForLayoutLw()) {
                 win.mResizedWhileGone = false;
             }
+
+            // We must always send the latest {@link MergedConfiguration}, regardless of whether we
+            // have already reported it. The client might not have processed the previous value yet
+            // and needs process it before handling the corresponding window frame. the variable
+            // {@code mergedConfiguration} is an out parameter that will be passed back to the
+            // client over IPC and checked there.
+            win.getMergedConfiguration(mergedConfiguration);
+            win.setReportedConfiguration(mergedConfiguration);
+
             outFrame.set(win.mCompatFrame);
             outOverscanInsets.set(win.mOverscanInsets);
             outContentInsets.set(win.mContentInsets);

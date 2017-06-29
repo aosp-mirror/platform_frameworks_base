@@ -2207,8 +2207,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    void prepareWindowToDisplayDuringRelayout(MergedConfiguration mergedConfiguration,
-            boolean wasVisible) {
+    void prepareWindowToDisplayDuringRelayout(boolean wasVisible) {
         // We need to turn on screen regardless of visibility.
         if ((mAttrs.flags & FLAG_TURN_SCREEN_ON) != 0) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "Relayout window turning screen on: " + this);
@@ -2230,16 +2229,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (isDrawnLw() && mService.okToDisplay()) {
             mWinAnimator.applyEnterAnimationLocked();
         }
+    }
 
-        if (isConfigChanged()) {
-            final Configuration globalConfig = mService.mRoot.getConfiguration();
-            final Configuration overrideConfig = getMergedOverrideConfiguration();
-            mergedConfiguration.setConfiguration(globalConfig, overrideConfig);
-            if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + this
-                    + " visible with new global config: " + globalConfig
-                    + " merged override config: " + overrideConfig);
-            mLastReportedConfiguration.setTo(getConfiguration());
-        }
+    void getMergedConfiguration(MergedConfiguration outConfiguration) {
+        final Configuration globalConfig = mService.mRoot.getConfiguration();
+        final Configuration overrideConfig = getMergedOverrideConfiguration();
+        outConfiguration.setConfiguration(globalConfig, overrideConfig);
+    }
+
+    void setReportedConfiguration(MergedConfiguration config) {
+        mLastReportedConfiguration.setTo(config.getMergedConfiguration());
     }
 
     void adjustStartingWindowFlags() {
@@ -3005,14 +3004,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         try {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mCompatFrame);
-            final MergedConfiguration mergedConfiguration;
-            if (isConfigChanged()) {
-                mergedConfiguration = new MergedConfiguration(mService.mRoot.getConfiguration(),
-                        getMergedOverrideConfiguration());
-                mLastReportedConfiguration.setTo(mergedConfiguration.getMergedConfiguration());
-            } else {
-                mergedConfiguration = null;
-            }
+            final MergedConfiguration mergedConfiguration =
+                    new MergedConfiguration(mService.mRoot.getConfiguration(),
+                    getMergedOverrideConfiguration());
+
+            setReportedConfiguration(mergedConfiguration);
+
             if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == DRAW_PENDING)
                 Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
 
@@ -4342,8 +4339,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return !mLastSurfaceInsets.equals(mAttrs.surfaceInsets);
     }
 
-    int relayoutVisibleWindow(MergedConfiguration mergedConfiguration, int result, int attrChanges,
-            int oldVisibility) {
+    int relayoutVisibleWindow(int result, int attrChanges, int oldVisibility) {
         final boolean wasVisible = isVisibleLw();
 
         result |= (!wasVisible || !isDrawnLw()) ? RELAYOUT_RES_FIRST_TIME : 0;
@@ -4366,7 +4362,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mWinAnimator.mEnteringAnimation = true;
 
-        prepareWindowToDisplayDuringRelayout(mergedConfiguration, wasVisible);
+        prepareWindowToDisplayDuringRelayout(wasVisible);
 
         if ((attrChanges & FORMAT_CHANGED) != 0) {
             // If the format can't be changed in place, preserve the old surface until the app draws
