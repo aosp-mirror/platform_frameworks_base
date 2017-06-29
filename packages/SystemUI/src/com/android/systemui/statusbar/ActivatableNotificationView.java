@@ -952,6 +952,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
+    public boolean isDrawingAppearAnimation() {
+        return mDrawingAppearAnimation;
+    }
+
     @Override
     protected void dispatchDraw(Canvas canvas) {
         if (mDrawingAppearAnimation) {
