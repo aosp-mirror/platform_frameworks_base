@@ -77,7 +77,7 @@ public class DeviceDiscoveryService extends Service {
 
     private BluetoothAdapter mBluetoothAdapter;
     private WifiManager mWifiManager;
-    private BluetoothLeScanner mBLEScanner;
+    @Nullable private BluetoothLeScanner mBLEScanner;
     private ScanSettings mDefaultScanSettings = new ScanSettings.Builder().build();
 
     private List<DeviceFilter<?>> mFilters;
@@ -185,7 +185,7 @@ public class DeviceDiscoveryService extends Service {
             mBluetoothAdapter.startDiscovery();
         }
 
-        if (shouldScan(mBLEFilters)) {
+        if (shouldScan(mBLEFilters) && mBLEScanner != null) {
             mBLEScanCallback = new BLEScanCallback();
             mBLEScanner.startScan(mBLEScanFilters, mDefaultScanSettings, mBLEScanCallback);
         }
@@ -224,7 +224,7 @@ public class DeviceDiscoveryService extends Service {
             unregisterReceiver(mBluetoothBroadcastReceiver);
             mBluetoothBroadcastReceiver = null;
         }
-        mBLEScanner.stopScan(mBLEScanCallback);
+        if (mBLEScanner != null) mBLEScanner.stopScan(mBLEScanCallback);
         if (mWifiBroadcastReceiver != null) {
             unregisterReceiver(mWifiBroadcastReceiver);
             mWifiBroadcastReceiver = null;

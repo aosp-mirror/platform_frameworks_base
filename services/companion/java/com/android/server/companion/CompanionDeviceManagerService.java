@@ -383,7 +383,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                                     findDeviceCallback,
                                     getServiceCallback());
                 } catch (RemoteException e) {
-                    throw new RuntimeException(e);
+                    Log.e(LOG_TAG, "Error while initiating device discovery", e);
                 }
             }
 
