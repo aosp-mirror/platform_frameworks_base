@@ -47,11 +47,13 @@ import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 import static android.content.pm.ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
 import static android.content.pm.ActivityInfo.FLAG_MULTIPROCESS;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.FLAG_STATE_NOT_NEEDED;
+import static android.content.pm.ActivityInfo.FLAG_TURN_SCREEN_ON;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
@@ -343,6 +345,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     // directly affects the configuration. We should probably move this into that class and have it
     // handle calculating override configuration from the bounds.
     private final Rect mBounds = new Rect();
+
+    private boolean mShowWhenLocked;
+    private boolean mTurnScreenOn;
 
     /**
      * Temp configs used in {@link #ensureActivityConfigurationLocked(int, boolean)}
@@ -904,6 +909,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         requestedVrComponent = (aInfo.requestedVrComponent == null) ?
                 null : ComponentName.unflattenFromString(aInfo.requestedVrComponent);
+
+        mShowWhenLocked = (aInfo.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+        mTurnScreenOn = (aInfo.flags & FLAG_TURN_SCREEN_ON) != 0;
     }
 
     AppWindowContainerController getWindowContainerController() {
@@ -1258,13 +1266,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return (info.flags & FLAG_ALWAYS_FOCUSABLE) != 0;
     }
 
-    /**
-     * @return true if the activity contains windows that have
-     *         {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set
-     */
-    boolean hasShowWhenLockedWindows() {
-        return service.mWindowManager.containsShowWhenLockedWindow(appToken);
-    }
 
     /**
      * @return true if the activity contains windows that have
@@ -1341,11 +1342,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 intent, getUriPermissionsLocked(), userId);
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
-        final ActivityStack stack = getStack();
-        final boolean isTopActivityInStack =
-                stack != null && stack.topRunningActivityLocked() == this;
-        final boolean isTopActivityWhileSleeping =
-                service.isSleepingLocked() && isTopActivityInStack;
+        final boolean isTopActivityWhileSleeping = service.isSleepingLocked() && isTopRunningActivity();
 
         // We want to immediately deliver the intent to the activity if:
         // - It is currently resumed or paused. i.e. it is currently visible to the user and we want
@@ -1733,7 +1730,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
 
         returningOptions = null;
-        mStackSupervisor.checkReadyForSleepLocked();
+
+        if (canTurnScreenOn()) {
+            mStackSupervisor.wakeUp("turnScreenOnFlag");
+        } else {
+            // If the screen is going to turn on because the caller explicitly requested it and
+            // the keyguard is not showing don't attempt to sleep. Otherwise the Activity will
+            // pause and then resume again later, which will result in a double life-cycle event.
+            mStackSupervisor.checkReadyForSleepLocked();
+        }
     }
 
     final void activityStoppedLocked(Bundle newIcicle, PersistableBundle newPersistentState,
@@ -2795,6 +2800,44 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     int getUid() {
         return info.applicationInfo.uid;
+    }
+
+    void setShowWhenLocked(boolean showWhenLocked) {
+        mShowWhenLocked = showWhenLocked;
+    }
+
+    /**
+     * @return true if the activity contains windows that have
+     *         {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set or if the activity has set
+     *         {@link #mShowWhenLocked}.
+     */
+    boolean canShowWhenLocked() {
+        return mShowWhenLocked || service.mWindowManager.containsShowWhenLockedWindow(appToken);
+    }
+
+    void setTurnScreenOn(boolean turnScreenOn) {
+        mTurnScreenOn = turnScreenOn;
+    }
+
+    /**
+     * Determines whether this ActivityRecord can turn the screen on. It checks whether the flag
+     * {@link #mTurnScreenOn} is set and checks whether the ActivityRecord should be visible
+     * depending on Keyguard state
+     *
+     * @return true if the screen can be turned on, false otherwise.
+     */
+    boolean canTurnScreenOn() {
+        final ActivityStack stack = getStack();
+        return mTurnScreenOn && stack != null &&
+                stack.checkKeyguardVisibility(this, true /* shouldBeVisible */, true /* isTop */);
+    }
+
+    boolean getTurnScreenOnFlag() {
+        return mTurnScreenOn;
+    }
+
+    boolean isTopRunningActivity() {
+        return mStackSupervisor.topRunningActivityLocked() == this;
     }
 
     @Override
