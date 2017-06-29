@@ -1638,6 +1638,17 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Sets the list of domains that are exempt from SafeBrowsing checks. The list is
+     * global for all the WebViews.
+     * TODO: Add documentation for the format of the urls.
+     *
+     * @param urls the list of URLs
+     */
+    public static void setSafeBrowsingWhiteList(@Nullable String[] urls) {
+        getFactory().getStatics().setSafeBrowsingWhiteList(urls);
+    }
+
+    /**
      * Gets the WebBackForwardList for this WebView. This contains the
      * back/forward list for use in querying each item in the history stack.
      * This is a copy of the private WebBackForwardList so it contains only a

@@ -86,6 +86,12 @@ public interface WebViewFactoryProvider {
          * {@link android.webkit.WebView#shutdownSafeBrowsing()}
          */
         void shutdownSafeBrowsing();
+
+        /**
+        * Implement the API method
+        * {@link android.webkit.WebView#setSafeBrowsingWhiteList(String[])}
+        */
+        void setSafeBrowsingWhiteList(String[] urls);
     }
 
     Statics getStatics();
