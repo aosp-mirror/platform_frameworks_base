@@ -1058,6 +1058,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
         final int oldLevel = getLevel();
         if (info != null && isInfoForThisAccessPoint(config, info)) {
             updated = (mInfo == null);
+            if (mConfig != config) {
+                // We do not set updated = true as we do not want to increase the amount of sorting
+                // and copying performed in WifiTracker at this time. If issues involving refresh
+                // are still seen, we will investigate further.
+                update(config); // Notifies the AccessPointListener of the change
+            }
             if (mRssi != info.getRssi()) {
                 mRssi = info.getRssi();
                 updated = true;
