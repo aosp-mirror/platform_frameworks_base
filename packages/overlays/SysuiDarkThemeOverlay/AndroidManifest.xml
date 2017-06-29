@@ -2,7 +2,7 @@
     package="com.android.systemui.theme.dark"
     android:versionCode="1"
     android:versionName="1.0">
-    <overlay android:targetPackage="com.android.systemui" android:priority="1"/>
+    <overlay android:targetPackage="android" android:priority="1"/>
 
     <application android:label="@string/sysui_overlay_dark" android:hasCode="false"/>
 </manifest>
