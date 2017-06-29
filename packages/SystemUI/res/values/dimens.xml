@@ -844,7 +844,4 @@
     <!-- How far to inset the rounded edges -->
     <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
 
-    <!-- Width of the hollow triangle for empty signal state -->
-    <dimen name="mobile_signal_empty_strokewidth">2dp</dimen>
-
 </resources>
