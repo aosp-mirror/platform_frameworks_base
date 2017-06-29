@@ -42,7 +42,6 @@ public class StreamingService {
     public final static int BROADCAST_METHOD = 1;
     public final static int UNICAST_METHOD   = 2;
 
-    private final String mAppName;
     private final int mSubscriptionId;
     private final StreamingServiceInfo mServiceInfo;
     private final IStreamingServiceCallback mCallback;
@@ -51,12 +50,10 @@ public class StreamingService {
     /**
      * @hide
      */
-    public StreamingService(String appName,
-            int subscriptionId,
+    public StreamingService(int subscriptionId,
             IMbmsStreamingService service,
             StreamingServiceInfo streamingServiceInfo,
             IStreamingServiceCallback callback) {
-        mAppName = appName;
         mSubscriptionId = subscriptionId;
         mService = service;
         mServiceInfo = streamingServiceInfo;
@@ -77,7 +74,7 @@ public class StreamingService {
         }
 
         try {
-            return mService.getPlaybackUri(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
+            return mService.getPlaybackUri(mSubscriptionId, mServiceInfo.getServiceId());
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
@@ -103,7 +100,7 @@ public class StreamingService {
         }
 
         try {
-            mService.stopStreaming(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
+            mService.stopStreaming(mSubscriptionId, mServiceInfo.getServiceId());
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;
@@ -117,7 +114,7 @@ public class StreamingService {
         }
 
         try {
-            mService.disposeStream(mAppName, mSubscriptionId, mServiceInfo.getServiceId());
+            mService.disposeStream(mSubscriptionId, mServiceInfo.getServiceId());
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService = null;

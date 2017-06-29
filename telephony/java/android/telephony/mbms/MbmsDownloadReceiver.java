@@ -29,16 +29,16 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FilenameFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 /**
  * @hide
@@ -431,9 +431,9 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
         toFile.getParentFile().mkdirs();
 
-        // TODO: This will not work if the two files are on different filesystems. Add manual
-        // copy later.
         if (fromFile.renameTo(toFile)) {
+            return Uri.fromFile(toFile);
+        } else if (manualMove(fromFile, toFile)) {
             return Uri.fromFile(toFile);
         }
         return null;
@@ -441,7 +441,6 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
     private static boolean verifyTempFilePath(Context context, FileServiceInfo serviceInfo,
             Uri filePath) {
-        // TODO: modify pursuant to final decision on temp file path scheme
         if (!ContentResolver.SCHEME_FILE.equals(filePath.getScheme())) {
             Log.w(LOG_TAG, "Uri " + filePath + " does not have a file scheme");
             return false;
@@ -492,5 +491,41 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                     MbmsDownloadManager.MBMS_DOWNLOAD_SERVICE_ACTION).packageName;
         }
         return mMiddlewarePackageNameCache;
+    }
+
+    private static boolean manualMove(File src, File dst) {
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            if (!dst.exists()) {
+                dst.createNewFile();
+            }
+            in = new FileInputStream(src);
+            out = new FileOutputStream(dst);
+            byte[] buffer = new byte[2048];
+            int len;
+            do {
+                len = in.read(buffer);
+                out.write(buffer, 0, len);
+            } while (len > 0);
+        } catch (IOException e) {
+            Log.w(LOG_TAG, "Manual file move failed due to exception "  + e);
+            if (dst.exists()) {
+                dst.delete();
+            }
+            return false;
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                Log.w(LOG_TAG, "Error closing streams: " + e);
+            }
+        }
+        return true;
     }
 }

@@ -22,11 +22,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
 
-import java.lang.IllegalStateException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 /**
  * A Parcelable class describing a pending Cell-Broadcast download request
@@ -83,7 +83,7 @@ public class DownloadRequest implements Parcelable {
 
         public DownloadRequest build() {
             return new DownloadRequest(id, serviceInfo, source, dest,
-                    subscriptionId, appIntent, null, version);
+                    subscriptionId, appIntent, version);
         }
     }
 
@@ -94,18 +94,16 @@ public class DownloadRequest implements Parcelable {
     private final int subscriptionId;
     private final String serializedResultIntentForApp;
     private final int version;
-    private String appName; // not the Android app Name, the embms app name
 
     private DownloadRequest(int id, FileServiceInfo serviceInfo,
             Uri source, Uri dest,
-            int sub, String appIntent, String name, int version) {
+            int sub, String appIntent, int version) {
         downloadId = id;
         fileServiceInfo = serviceInfo;
         sourceUri = source;
         destinationUri = dest;
         subscriptionId = sub;
         serializedResultIntentForApp = appIntent;
-        appName = name;
         this.version = version;
     }
 
@@ -120,7 +118,6 @@ public class DownloadRequest implements Parcelable {
         destinationUri = dr.destinationUri;
         subscriptionId = dr.subscriptionId;
         serializedResultIntentForApp = dr.serializedResultIntentForApp;
-        appName = dr.appName;
         version = dr.version;
     }
 
@@ -131,7 +128,6 @@ public class DownloadRequest implements Parcelable {
         destinationUri = in.readParcelable(getClass().getClassLoader());
         subscriptionId = in.readInt();
         serializedResultIntentForApp = in.readString();
-        appName = in.readString();
         version = in.readInt();
     }
 
@@ -146,7 +142,6 @@ public class DownloadRequest implements Parcelable {
         out.writeParcelable(destinationUri, flags);
         out.writeInt(subscriptionId);
         out.writeString(serializedResultIntentForApp);
-        out.writeString(appName);
         out.writeInt(version);
     }
 
@@ -176,18 +171,6 @@ public class DownloadRequest implements Parcelable {
         } catch (URISyntaxException e) {
             return null;
         }
-    }
-
-    /** @hide */
-    public synchronized void setAppName(String newAppName) {
-        if (appName != null) {
-            throw new IllegalStateException("Attempting to reset appName");
-        }
-        appName = newAppName;
-    }
-
-    public String getAppName() {
-        return appName;
     }
 
     public int getVersion() {
@@ -233,5 +216,30 @@ public class DownloadRequest implements Parcelable {
         }
         // Add updates for future versions here
         return Base64.encodeToString(digest.digest(), Base64.URL_SAFE | Base64.NO_WRAP);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof DownloadRequest)) {
+            return false;
+        }
+        DownloadRequest request = (DownloadRequest) o;
+        return downloadId == request.downloadId &&
+                subscriptionId == request.subscriptionId &&
+                version == request.version &&
+                Objects.equals(fileServiceInfo, request.fileServiceInfo) &&
+                Objects.equals(sourceUri, request.sourceUri) &&
+                Objects.equals(destinationUri, request.destinationUri) &&
+                Objects.equals(serializedResultIntentForApp, request.serializedResultIntentForApp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(downloadId, fileServiceInfo, sourceUri, destinationUri,
+                subscriptionId, serializedResultIntentForApp, version);
     }
 }

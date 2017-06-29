@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -175,4 +176,26 @@ public class ServiceInfo implements Parcelable {
         return sessionEndTime;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof ServiceInfo)) {
+            return false;
+        }
+        ServiceInfo that = (ServiceInfo) o;
+        return Objects.equals(names, that.names) &&
+                Objects.equals(className, that.className) &&
+                Objects.equals(locales, that.locales) &&
+                Objects.equals(serviceId, that.serviceId) &&
+                Objects.equals(sessionStartTime, that.sessionStartTime) &&
+                Objects.equals(sessionEndTime, that.sessionEndTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(names, className, locales, serviceId, sessionStartTime, sessionEndTime);
+    }
 }

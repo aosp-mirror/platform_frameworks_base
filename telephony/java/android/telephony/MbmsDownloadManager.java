@@ -194,27 +194,23 @@ public class MbmsDownloadManager {
 
     private AtomicReference<IMbmsDownloadService> mService = new AtomicReference<>(null);
     private final IMbmsDownloadManagerCallback mCallback;
-    private final String mDownloadAppName;
 
-    private MbmsDownloadManager(Context context, IMbmsDownloadManagerCallback callback,
-            String downloadAppName, int subId) {
+    private MbmsDownloadManager(Context context, IMbmsDownloadManagerCallback callback, int subId) {
         mContext = context;
         mCallback = callback;
-        mDownloadAppName = downloadAppName;
         mSubscriptionId = subId;
     }
 
     /**
      * Create a new MbmsDownloadManager using the system default data subscription ID.
-     * See {@link #create(Context, IMbmsDownloadManagerCallback, String, int)}
+     * See {@link #create(Context, IMbmsDownloadManagerCallback, int)}
      *
      * @hide
      */
     public static MbmsDownloadManager create(Context context,
-            IMbmsDownloadManagerCallback listener, String downloadAppName)
+            IMbmsDownloadManagerCallback listener)
             throws MbmsException {
-        return create(context, listener, downloadAppName,
-                SubscriptionManager.getDefaultSubscriptionId());
+        return create(context, listener, SubscriptionManager.getDefaultSubscriptionId());
     }
 
     /**
@@ -229,15 +225,13 @@ public class MbmsDownloadManager {
      *
      * @param context The instance of {@link Context} to use
      * @param listener A callback to get asynchronous error messages and file service updates.
-     * @param downloadAppName The app name, as negotiated with the eMBMS provider
      * @param subscriptionId The data subscription ID to use
      * @hide
      */
     public static MbmsDownloadManager create(Context context,
-            IMbmsDownloadManagerCallback listener, String downloadAppName, int subscriptionId)
+            IMbmsDownloadManagerCallback listener, int subscriptionId)
             throws MbmsException {
-        MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, downloadAppName,
-                subscriptionId);
+        MbmsDownloadManager mdm = new MbmsDownloadManager(context, listener, subscriptionId);
         mdm.bindAndInitialize();
         return mdm;
     }
@@ -250,8 +244,7 @@ public class MbmsDownloadManager {
                         IMbmsDownloadService downloadService =
                                 IMbmsDownloadService.Stub.asInterface(service);
                         try {
-                            downloadService.initialize(
-                                    mDownloadAppName, mSubscriptionId, mCallback);
+                            downloadService.initialize(mSubscriptionId, mCallback);
                         } catch (RemoteException e) {
                             Log.e(LOG_TAG, "Service died before initialization");
                             return;
@@ -293,8 +286,7 @@ public class MbmsDownloadManager {
             throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
         }
         try {
-            int returnCode = downloadService.getFileServices(
-                    mDownloadAppName, mSubscriptionId, classList);
+            int returnCode = downloadService.getFileServices(mSubscriptionId, classList);
             if (returnCode != MbmsException.SUCCESS) {
                 throw new MbmsException(returnCode);
             }
@@ -345,8 +337,7 @@ public class MbmsDownloadManager {
         }
 
         try {
-            int result = downloadService.setTempFileRootDirectory(
-                    mDownloadAppName, mSubscriptionId, filePath);
+            int result = downloadService.setTempFileRootDirectory(mSubscriptionId, filePath);
             if (result != MbmsException.SUCCESS) {
                 throw new MbmsException(result);
             }
@@ -396,7 +387,6 @@ public class MbmsDownloadManager {
             tempRootDirectory.mkdirs();
             setTempFileRootDirectory(tempRootDirectory);
         }
-        request.setAppName(mDownloadAppName);
 
         checkValidDownloadDestination(request);
         writeDownloadRequestToken(request);
@@ -404,6 +394,7 @@ public class MbmsDownloadManager {
             downloadService.download(request, callback);
         } catch (RemoteException e) {
             mService.set(null);
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
         }
     }
 
@@ -422,18 +413,31 @@ public class MbmsDownloadManager {
     }
 
     /**
-     * Attempts to cancel the specified DownloadRequest.
+     * Attempts to cancel the specified {@link DownloadRequest}.
      *
-     * May throw a RemoteException.
+     * If the middleware is not aware of the specified download request, an MbmsException will be
+     * thrown with error code {@link MbmsException#ERROR_UNKNOWN_DOWNLOAD_REQUEST}.
      *
-     * Synchronous responses may include
-     * <li>SUCCESS</li>
-     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
-     * <li>ERROR_MSDC_UNKNOWN_REQUEST</li>
+     * If this method returns without throwing an exception, you may assume that cancellation
+     * was successful.
+     * @param downloadRequest The download request that you wish to cancel.
      */
-    public int cancelDownload(DownloadRequest downloadRequest) {
-        // TODO: don't forget to delete the token
-        return 0;
+    public void cancelDownload(DownloadRequest downloadRequest) throws MbmsException {
+        IMbmsDownloadService downloadService = mService.get();
+        if (downloadService == null) {
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+        }
+
+        try {
+            int result = downloadService.cancelDownload(downloadRequest);
+            if (result != MbmsException.SUCCESS) {
+                throw new MbmsException(result);
+            }
+        } catch (RemoteException e) {
+            mService.set(null);
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+        }
+        deleteDownloadRequestToken(downloadRequest);
     }
 
     /**
@@ -472,6 +476,21 @@ public class MbmsDownloadManager {
         return 0;
     }
 
+    public void dispose() {
+        try {
+            IMbmsDownloadService downloadService = mService.get();
+            if (downloadService == null) {
+                Log.i(LOG_TAG, "Service already dead");
+                return;
+            }
+            downloadService.dispose(mSubscriptionId);
+            mService.set(null);
+        } catch (RemoteException e) {
+            // Ignore
+            Log.i(LOG_TAG, "Remote exception while disposing of service");
+        }
+    }
+
     /**
      * Retrieves the {@link ComponentName} for the {@link android.content.BroadcastReceiver} that
      * the various intents from the middleware should be targeted towards.
@@ -502,32 +521,13 @@ public class MbmsDownloadManager {
         return null;
     }
 
-    public void dispose() {
-        try {
-            IMbmsDownloadService downloadService = mService.get();
-            if (downloadService == null) {
-                Log.i(LOG_TAG, "Service already dead");
-                return;
-            }
-            downloadService.dispose(mDownloadAppName, mSubscriptionId);
-            mService.set(null);
-        } catch (RemoteException e) {
-            // Ignore
-            Log.i(LOG_TAG, "Remote exception while disposing of service");
-        }
-    }
-
     private void writeDownloadRequestToken(DownloadRequest request) {
-        File tempFileLocation = MbmsUtils.getEmbmsTempFileDirForService(mContext,
-                request.getFileServiceInfo());
-        if (!tempFileLocation.exists()) {
-            tempFileLocation.mkdirs();
+        File token = getDownloadRequestTokenPath(request);
+        if (!token.getParentFile().exists()) {
+            token.getParentFile().mkdirs();
         }
-        String downloadTokenFileName = request.getHash()
-                + MbmsDownloadReceiver.DOWNLOAD_TOKEN_SUFFIX;
-        File token = new File(tempFileLocation, downloadTokenFileName);
         if (token.exists()) {
-            Log.w(LOG_TAG, "Download token " + downloadTokenFileName + " already exists");
+            Log.w(LOG_TAG, "Download token " + token.getName() + " already exists");
             return;
         }
         try {
@@ -539,6 +539,25 @@ public class MbmsDownloadManager {
             throw new RuntimeException("Failed to create download token for request " + request
                     + " due to IOException " + e);
         }
+    }
+
+    private void deleteDownloadRequestToken(DownloadRequest request) {
+        File token = getDownloadRequestTokenPath(request);
+        if (!token.isFile()) {
+            Log.w(LOG_TAG, "Attempting to delete non-existent download token at " + token);
+            return;
+        }
+        if (!token.delete()) {
+            Log.w(LOG_TAG, "Couldn't delete download token at " + token);
+        }
+    }
+
+    private File getDownloadRequestTokenPath(DownloadRequest request) {
+        File tempFileLocation = MbmsUtils.getEmbmsTempFileDirForService(mContext,
+                request.getFileServiceInfo());
+        String downloadTokenFileName = request.getHash()
+                + MbmsDownloadReceiver.DOWNLOAD_TOKEN_SUFFIX;
+        return new File(tempFileLocation, downloadTokenFileName);
     }
 
     /**
