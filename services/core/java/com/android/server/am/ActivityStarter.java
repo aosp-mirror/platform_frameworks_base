@@ -144,7 +144,7 @@ class ActivityStarter {
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
-    private ActivityStartInterceptor mInterceptor;
+    private final ActivityStartInterceptor mInterceptor;
     private WindowManagerService mWindowManager;
 
     final ArrayList<PendingActivityLaunch> mPendingActivityLaunches = new ArrayList<>();
@@ -446,16 +446,20 @@ class ActivityStarter {
         }
 
         mInterceptor.setStates(userId, realCallingPid, realCallingUid, startFlags, callingPackage);
-        mInterceptor.intercept(intent, rInfo, aInfo, resolvedType, inTask, callingPid, callingUid,
-                options);
-        intent = mInterceptor.mIntent;
-        rInfo = mInterceptor.mRInfo;
-        aInfo = mInterceptor.mAInfo;
-        resolvedType = mInterceptor.mResolvedType;
-        inTask = mInterceptor.mInTask;
-        callingPid = mInterceptor.mCallingPid;
-        callingUid = mInterceptor.mCallingUid;
-        options = mInterceptor.mActivityOptions;
+        if (mInterceptor.intercept(intent, rInfo, aInfo, resolvedType, inTask, callingPid,
+                callingUid, options)) {
+            // activity start was intercepted, e.g. because the target user is currently in quiet
+            // mode (turn off work) or the target application is suspended
+            intent = mInterceptor.mIntent;
+            rInfo = mInterceptor.mRInfo;
+            aInfo = mInterceptor.mAInfo;
+            resolvedType = mInterceptor.mResolvedType;
+            inTask = mInterceptor.mInTask;
+            callingPid = mInterceptor.mCallingPid;
+            callingUid = mInterceptor.mCallingUid;
+            options = mInterceptor.mActivityOptions;
+        }
+
         if (abort) {
             if (resultRecord != null) {
                 resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,

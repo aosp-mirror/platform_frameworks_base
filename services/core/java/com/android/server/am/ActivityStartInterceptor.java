@@ -29,10 +29,10 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -43,18 +43,26 @@ import android.os.Binder;
 import android.os.UserHandle;
 import android.os.UserManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
 
 /**
  * A class that contains activity intercepting logic for {@link ActivityStarter#startActivityLocked}
- * It's initialized
+ * It's initialized via setStates and interception occurs via the intercept method.
+ *
+ * Note that this class is instantiated when {@link ActivityManagerService} gets created so there
+ * is no guarantee that other system services are already present.
  */
 class ActivityStartInterceptor {
 
     private final ActivityManagerService mService;
-    private UserManager mUserManager;
     private final ActivityStackSupervisor mSupervisor;
+    private final Context mServiceContext;
+    private final UserController mUserController;
+
+    // UserManager cannot be final as it's not ready when this class is instantiated during boot
+    private UserManager mUserManager;
 
     /*
      * Per-intent states loaded from ActivityStarter than shouldn't be changed by any
@@ -69,7 +77,8 @@ class ActivityStartInterceptor {
     /*
      * Per-intent states that were load from ActivityStarter and are subject to modifications
      * by the interception routines. After calling {@link #intercept} the caller should assign
-     * these values back to {@link ActivityStarter#startActivityLocked}'s local variables.
+     * these values back to {@link ActivityStarter#startActivityLocked}'s local variables if
+     * {@link #intercept} returns true.
      */
     Intent mIntent;
     int mCallingPid;
@@ -81,10 +90,22 @@ class ActivityStartInterceptor {
     ActivityOptions mActivityOptions;
 
     ActivityStartInterceptor(ActivityManagerService service, ActivityStackSupervisor supervisor) {
-        mService = service;
-        mSupervisor = supervisor;
+        this(service, supervisor, service.mContext, service.mUserController);
     }
 
+    @VisibleForTesting
+    ActivityStartInterceptor(ActivityManagerService service, ActivityStackSupervisor supervisor,
+            Context context, UserController userController) {
+        mService = service;
+        mSupervisor = supervisor;
+        mServiceContext = context;
+        mUserController = userController;
+    }
+
+    /**
+     * Effectively initialize the class before intercepting the start intent. The values set in this
+     * method should not be changed during intercept.
+     */
     void setStates(int userId, int realCallingPid, int realCallingUid, int startFlags,
             String callingPackage) {
         mRealCallingPid = realCallingPid;
@@ -94,9 +115,16 @@ class ActivityStartInterceptor {
         mCallingPackage = callingPackage;
     }
 
-    void intercept(Intent intent, ResolveInfo rInfo, ActivityInfo aInfo, String resolvedType,
+    /**
+     * Intercept the launch intent based on various signals. If an interception happened the
+     * internal variables get assigned and need to be read explicitly by the caller.
+     *
+     * @return true if an interception occurred
+     */
+    boolean intercept(Intent intent, ResolveInfo rInfo, ActivityInfo aInfo, String resolvedType,
             TaskRecord inTask, int callingPid, int callingUid, ActivityOptions activityOptions) {
-        mUserManager = UserManager.get(mService.mContext);
+        mUserManager = UserManager.get(mServiceContext);
+
         mIntent = intent;
         mCallingPid = callingPid;
         mCallingUid = callingUid;
@@ -105,17 +133,18 @@ class ActivityStartInterceptor {
         mResolvedType = resolvedType;
         mInTask = inTask;
         mActivityOptions = activityOptions;
+
         if (interceptSuspendPackageIfNeed()) {
             // Skip the rest of interceptions as the package is suspended by device admin so
             // no user action can undo this.
-            return;
+            return true;
         }
         if (interceptQuietProfileIfNeeded()) {
             // If work profile is turned off, skip the work challenge since the profile can only
             // be unlocked when profile's user is running.
-            return;
+            return true;
         }
-        interceptWorkProfileChallengeIfNeeded();
+        return interceptWorkProfileChallengeIfNeeded();
     }
 
     private boolean interceptQuietProfileIfNeeded() {
@@ -146,8 +175,8 @@ class ActivityStartInterceptor {
                 (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) == 0) {
             return false;
         }
-        DevicePolicyManagerInternal devicePolicyManager = LocalServices.getService(
-                DevicePolicyManagerInternal.class);
+        DevicePolicyManagerInternal devicePolicyManager = LocalServices
+                .getService(DevicePolicyManagerInternal.class);
         if (devicePolicyManager == null) {
             return false;
         }
@@ -207,7 +236,7 @@ class ActivityStartInterceptor {
      */
     private Intent interceptWithConfirmCredentialsIfNeeded(Intent intent, String resolvedType,
             ActivityInfo aInfo, String callingPackage, int userId) {
-        if (!mService.mUserController.shouldConfirmCredentials(userId)) {
+        if (!mUserController.shouldConfirmCredentials(userId)) {
             return null;
         }
         // TODO(b/28935539): should allow certain activities to bypass work challenge
@@ -216,7 +245,7 @@ class ActivityStartInterceptor {
                 Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },
                 new String[]{ resolvedType },
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE, null);
-        final KeyguardManager km = (KeyguardManager) mService.mContext
+        final KeyguardManager km = (KeyguardManager) mServiceContext
                 .getSystemService(KEYGUARD_SERVICE);
         final Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, userId);
         if (newIntent == null) {
