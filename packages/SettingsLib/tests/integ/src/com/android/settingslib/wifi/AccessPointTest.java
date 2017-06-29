@@ -20,6 +20,8 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -621,5 +623,37 @@ public class AccessPointTest {
 
         NetworkInfo newInfo = new NetworkInfo(networkInfo); // same values
         assertThat(ap.update(config, wifiInfo, newInfo)).isFalse();
+    }
+
+    @Test
+    public void testUpdateWithConfigChangeOnly_returnsFalseButInvokesListener() {
+        int networkId = 123;
+        int rssi = -55;
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        config.numNoInternetAccessReports = 1;
+
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(networkId);
+        wifiInfo.setRssi(rssi);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(networkId)
+                .setRssi(rssi)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        AccessPoint.AccessPointListener mockListener = mock(AccessPoint.AccessPointListener.class);
+        ap.setListener(mockListener);
+        WifiConfiguration newConfig = new WifiConfiguration(config);
+        config.validatedInternetAccess = true;
+
+        assertThat(ap.update(newConfig, wifiInfo, networkInfo)).isFalse();
+        verify(mockListener).onAccessPointChanged(ap);
     }
 }
