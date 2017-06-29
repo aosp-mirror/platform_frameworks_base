@@ -22,9 +22,9 @@ import android.annotation.Nullable;
 import android.annotation.RawRes;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -74,7 +74,6 @@ import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -369,18 +368,17 @@ public class WallpaperManager {
         }
 
         WallpaperColors getWallpaperColors(int which) {
-            synchronized (this) {
-                if (which != FLAG_LOCK && which != FLAG_SYSTEM)
-                    throw new IllegalArgumentException(
-                            "which should be either FLAG_LOCK or FLAG_SYSTEM");
-
-                try {
-                    return mService.getWallpaperColors(which);
-                } catch (RemoteException e) {
-                    // Can't get colors, connection lost.
-                }
-                return null;
+            if (which != FLAG_LOCK && which != FLAG_SYSTEM) {
+                throw new IllegalArgumentException(
+                        "Must request colors for exactly one kind of wallpaper");
             }
+
+            try {
+                return mService.getWallpaperColors(which);
+            } catch (RemoteException e) {
+                // Can't get colors, connection lost.
+            }
+            return null;
         }
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault,
