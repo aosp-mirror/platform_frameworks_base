@@ -65,6 +65,15 @@
 
             </LinearLayout>
 
+	    <!-- TODO(b/62534917) wrap content to fit exactly what was provided in the remote views ?-->
+            <LinearLayout
+                android:id="@+id/autofill_save_custom_subtitle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp"
+                android:visibility="gone"/>
+
             <TextView
                 android:id="@+id/autofill_save_subtitle"
                 android:layout_width="fill_parent"
