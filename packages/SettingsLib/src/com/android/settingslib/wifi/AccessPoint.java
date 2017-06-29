@@ -322,8 +322,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (difference != 0) {
             return difference;
         }
+
         // Sort by ssid.
-        return getSsidStr().compareToIgnoreCase(other.getSsidStr());
+        difference = getSsidStr().compareToIgnoreCase(other.getSsidStr());
+        if (difference != 0) {
+            return difference;
+        }
+
+        // Do a case sensitive comparison to distinguish SSIDs that differ in case only
+        return getSsidStr().compareTo(other.getSsidStr());
     }
 
     @Override
