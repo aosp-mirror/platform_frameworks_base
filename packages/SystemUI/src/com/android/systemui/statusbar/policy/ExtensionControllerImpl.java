@@ -262,7 +262,8 @@ public class ExtensionControllerImpl implements ExtensionController {
             public UiModeItem(int uiMode, Supplier<T> supplier) {
                 mDesiredUiMode = uiMode;
                 mSupplier = supplier;
-                mUiMode = mDefaultContext.getResources().getConfiguration().uiMode;
+                mUiMode = mDefaultContext.getResources().getConfiguration().uiMode
+                        & Configuration.UI_MODE_TYPE_MASK;
                 Dependency.get(ConfigurationController.class).addCallback(this);
             }
 

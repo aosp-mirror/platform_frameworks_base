@@ -189,6 +189,23 @@
     <!-- Height of the status bar header bar -->
     <dimen name="status_bar_header_height">124dp</dimen>
 
+    <!-- Height of the status bar header bar in the car setting. -->
+    <dimen name="car_status_bar_header_height">128dp</dimen>
+
+    <!-- The bottom padding of the status bar header. -->
+    <dimen name="status_bar_header_padding_bottom">48dp</dimen>
+
+    <!-- The height of the container that holds the system icons in the quick settings header. -->
+    <dimen name="qs_header_system_icons_area_height">32dp</dimen>
+
+    <!-- The height of the container that holds the system icons in the quick settings header in the
+         car setting. -->
+    <dimen name="car_qs_header_system_icons_area_height">54dp</dimen>
+
+    <!-- The height of the quick settings footer that holds the user switcher, settings icon,
+         etc. -->
+    <dimen name="qs_footer_height">48dp</dimen>
+
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">124dp</dimen>
 
