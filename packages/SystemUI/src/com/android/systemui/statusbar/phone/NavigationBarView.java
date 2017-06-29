@@ -613,7 +613,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (!updateCurrentView()) {
             return;
         }
-        Log.d(TAG, "reorient", new Throwable());
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
         if (getRootView() instanceof NavigationBarFrame) {
