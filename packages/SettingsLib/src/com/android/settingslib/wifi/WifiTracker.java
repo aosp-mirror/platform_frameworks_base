@@ -91,7 +91,7 @@ public class WifiTracker {
     private final boolean mIncludeScans;
     private final boolean mIncludePasspoints;
     @VisibleForTesting final MainHandler mMainHandler;
-    private final WorkHandler mWorkHandler;
+    @VisibleForTesting final WorkHandler mWorkHandler;
 
     private WifiTrackerNetworkCallback mNetworkCallback;
 
@@ -653,6 +653,7 @@ public class WifiTracker {
         /* sticky broadcasts can call this when wifi is disabled */
         if (!mWifiManager.isWifiEnabled()) {
             mMainHandler.sendEmptyMessage(MainHandler.MSG_PAUSE_SCANNING);
+            clearAccessPointsAndConditionallyUpdate();
             return;
         }
 
@@ -696,6 +697,17 @@ public class WifiTracker {
         }
     }
 
+    private void clearAccessPointsAndConditionallyUpdate() {
+        synchronized (mLock) {
+            if (!mInternalAccessPoints.isEmpty()) {
+                mInternalAccessPoints.clear();
+                if (!mMainHandler.hasMessages(MainHandler.MSG_ACCESS_POINT_CHANGED)) {
+                    mMainHandler.sendEmptyMessage(MainHandler.MSG_ACCESS_POINT_CHANGED);
+                }
+            }
+        }
+    }
+
     /**
      * Update all the internal access points rankingScores, badge and metering.
      *
@@ -720,6 +732,9 @@ public class WifiTracker {
 
     private void updateWifiState(int state) {
         mWorkHandler.obtainMessage(WorkHandler.MSG_UPDATE_WIFI_STATE, state, 0).sendToTarget();
+        if (!mWifiManager.isWifiEnabled()) {
+            clearAccessPointsAndConditionallyUpdate();
+        }
     }
 
     public static List<AccessPoint> getCurrentAccessPoints(Context context, boolean includeSaved,
@@ -803,8 +818,15 @@ public class WifiTracker {
                     mListener.onWifiStateChanged(msg.arg1);
                     break;
                 case MSG_ACCESS_POINT_CHANGED:
-                    copyAndNotifyListeners(true /*notifyListeners*/);
-                    mListener.onAccessPointsChanged();
+                    // Only notify listeners of changes if we have fresh scan results, otherwise the
+                    // UI will be updated with stale results. We want to copy the APs regardless,
+                    // for instances where forceUpdate was invoked by the caller.
+                    if (mStaleScanResults) {
+                        copyAndNotifyListeners(false /*notifyListeners*/);
+                    } else {
+                        copyAndNotifyListeners(true /*notifyListeners*/);
+                        mListener.onAccessPointsChanged();
+                    }
                     break;
                 case MSG_RESUME_SCANNING:
                     if (mScanner != null) {
@@ -828,7 +850,8 @@ public class WifiTracker {
         }
     }
 
-    private final class WorkHandler extends Handler {
+    @VisibleForTesting
+    final class WorkHandler extends Handler {
         private static final int MSG_UPDATE_ACCESS_POINTS = 0;
         private static final int MSG_UPDATE_NETWORK_INFO = 1;
         private static final int MSG_RESUME = 2;
