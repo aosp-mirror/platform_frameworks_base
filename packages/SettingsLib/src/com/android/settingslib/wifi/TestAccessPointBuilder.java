@@ -36,6 +36,7 @@ public class TestAccessPointBuilder {
     private static final int MAX_RSSI = -55;
 
     // set some sensible defaults
+    private String mBssid = null;
     private int mRssi = AccessPoint.UNREACHABLE_RSSI;
     private int mNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
     private String ssid = "TestSsid";
@@ -57,6 +58,7 @@ public class TestAccessPointBuilder {
 
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.networkId = mNetworkId;
+        wifiConfig.BSSID = mBssid;
 
         bundle.putString(AccessPoint.KEY_SSID, ssid);
         bundle.putParcelable(AccessPoint.KEY_CONFIG, wifiConfig);
@@ -177,6 +179,11 @@ public class TestAccessPointBuilder {
      */
     public TestAccessPointBuilder setNetworkId(int networkId) {
         mNetworkId = networkId;
+        return this;
+    }
+
+    public TestAccessPointBuilder setBssid(String bssid) {
+        mBssid = bssid;
         return this;
     }
 }

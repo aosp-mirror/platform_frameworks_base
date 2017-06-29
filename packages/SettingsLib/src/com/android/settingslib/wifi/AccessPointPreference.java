@@ -70,6 +70,19 @@ public class AccessPointPreference extends Preference {
             R.string.accessibility_wifi_signal_full
     };
 
+    public static String generatePreferenceKey(AccessPoint accessPoint) {
+        StringBuilder builder = new StringBuilder();
+
+        if (TextUtils.isEmpty(accessPoint.getBssid())) {
+            builder.append(accessPoint.getSsidStr());
+        } else {
+            builder.append(accessPoint.getBssid());
+        }
+
+        builder.append(',').append(accessPoint.getSecurity());
+        return builder.toString();
+    }
+
     // Used for dummy pref.
     public AccessPointPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
