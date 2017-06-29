@@ -36,13 +36,12 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * May throw an {@link IllegalArgumentException} or a {@link SecurityException}
      *
      * @param listener The callback to use to communicate with the app.
-     * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription ID to use.
      * @return {@link MbmsException#SUCCESS} or {@link MbmsException#ERROR_ALREADY_INITIALIZED}
      */
     @Override
-    public int initialize(IMbmsStreamingManagerCallback listener, String appName,
-            int subscriptionId) throws RemoteException {
+    public int initialize(IMbmsStreamingManagerCallback listener, int subscriptionId)
+            throws RemoteException {
         return 0;
     }
 
@@ -51,22 +50,21 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * Starts async fetching data on streaming services of matching classes to be reported
      * later via {@link IMbmsStreamingManagerCallback#streamingServicesUpdated(List)}
      *
-     * Note that subsequent calls with the same uid, appName and subId will replace
+     * Note that subsequent calls with the same uid and subId will replace
      * the service class list.
      *
      * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
-     * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription id to use.
      * @param serviceClasses The service classes that the app wishes to get info on. The strings
      *                       may contain arbitrary data as negotiated between the app and the
      *                       carrier.
      * @return One of {@link MbmsException#SUCCESS},
-     *         {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND},
+     *         {@link MbmsException#ERROR_MIDDLEWARE_NOT_YET_READY},
      *         {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
      */
     @Override
-    public int getStreamingServices(String appName, int subscriptionId,
+    public int getStreamingServices(int subscriptionId,
             List<String> serviceClasses) throws RemoteException {
         return 0;
     }
@@ -74,11 +72,10 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Starts streaming on a particular service. This method may perform asynchronous work. When
      * the middleware is ready to send bits to the frontend, it should inform the app via
-     * {@link IStreamingServiceCallback#streamStateChanged(int)}.
+     * {@link IStreamingServiceCallback#streamStateUpdated(int)}.
      *
      * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
-     * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app has requested.
      * @param listener The listener object on which the app wishes to receive updates.
@@ -86,8 +83,8 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      *         or {@link MbmsException#ERROR_UNABLE_TO_START_SERVICE}.
      */
     @Override
-    public int startStreaming(String appName, int subscriptionId,
-            String serviceId, IStreamingServiceCallback listener) throws RemoteException {
+    public int startStreaming(int subscriptionId, String serviceId,
+            IStreamingServiceCallback listener) throws RemoteException {
         return 0;
     }
 
@@ -97,13 +94,12 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      *
      * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
-     * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app has requested.
      * @return An opaque {@link Uri} to be passed to a video player that understands the format.
      */
     @Override
-    public @Nullable Uri getPlaybackUri(String appName, int subscriptionId, String serviceId)
+    public @Nullable Uri getPlaybackUri(int subscriptionId, String serviceId)
             throws RemoteException {
         return null;
     }
@@ -111,16 +107,15 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Stop streaming the stream identified by {@code serviceId}. Notification of the resulting
      * stream state change should be reported to the app via
-     * {@link IStreamingServiceCallback#streamStateChanged(int)}.
+     * {@link IStreamingServiceCallback#streamStateUpdated(int)}.
      *
      * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
-     * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app wishes to stop.
      */
     @Override
-    public void stopStreaming(String appName, int subscriptionId, String serviceId)
+    public void stopStreaming(int subscriptionId, String serviceId)
             throws RemoteException {
     }
 
@@ -128,33 +123,31 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * Dispose of the stream identified by {@code serviceId} for the app identified by the
      * {@code appName} and {@code subscriptionId} arguments along with the caller's uid.
      * No notification back to the app is required for this operation, and the callback provided via
-     * {@link #startStreaming(String, int, String, IStreamingServiceCallback)} should no longer be
+     * {@link #startStreaming(int, String, IStreamingServiceCallback)} should no longer be
      * used after this method has called by the app.
      *
      * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
-     * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app wishes to dispose of.
      */
     @Override
-    public void disposeStream(String appName, int subscriptionId, String serviceId)
+    public void disposeStream(int subscriptionId, String serviceId)
             throws RemoteException {
     }
 
     /**
-     * Signals that the app wishes to dispose of the session identified by the {@code appName} and
-     * {@code subscriptionId} arguments, as well as the caller's uid. No notification back to the
+     * Signals that the app wishes to dispose of the session identified by the
+     * {@code subscriptionId} argument and the caller's uid. No notification back to the
      * app is required for this operation, and the corresponding callback provided via
-     * {@link #initialize(IMbmsStreamingManagerCallback, String, int)} should no longer be used
+     * {@link #initialize(IMbmsStreamingManagerCallback, int)} should no longer be used
      * after this method has been called by the app.
      *
      * May throw an {@link IllegalStateException}
      *
-     * @param appName The app name as negotiated with the wireless carrier.
      * @param subscriptionId The subscription id to use.
      */
     @Override
-    public void dispose(String appName, int subscriptionId) throws RemoteException {
+    public void dispose(int subscriptionId) throws RemoteException {
     }
 }
