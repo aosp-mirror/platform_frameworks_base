@@ -19,6 +19,7 @@ package android.app.timezone;
 import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 
 /**
  * Constants related to the contract between the Android system and the privileged time zone updater
@@ -82,6 +83,9 @@ public final class RulesUpdaterContract {
             byte[] checkTokenBytes) {
         Intent intent = createUpdaterIntent(updaterAppPackageName);
         intent.putExtra(EXTRA_CHECK_TOKEN, checkTokenBytes);
-        context.sendBroadcast(intent, RulesUpdaterContract.UPDATE_TIME_ZONE_RULES_PERMISSION);
+        context.sendBroadcastAsUser(
+                intent,
+                UserHandle.of(UserHandle.myUserId()),
+                RulesUpdaterContract.UPDATE_TIME_ZONE_RULES_PERMISSION);
     }
 }
