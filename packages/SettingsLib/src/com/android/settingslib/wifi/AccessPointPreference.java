@@ -161,7 +161,7 @@ public class AccessPointPreference extends Preference {
             safeSetDefaultIcon();
             return;
         }
-        TronUtils.logWifiSettingsBadge(context, mWifiSpeed);
+        TronUtils.logWifiSettingsSpeed(context, mWifiSpeed);
 
         // TODO(b/62355275): Revert this to N code after deleting NetworkBadging API
         Drawable drawable = NetworkBadging.getWifiIcon(
