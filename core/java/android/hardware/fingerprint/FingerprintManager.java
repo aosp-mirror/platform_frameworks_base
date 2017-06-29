@@ -99,8 +99,6 @@ public class FingerprintManager {
     /**
      * The {@link FingerprintManager#remove} call failed. Typically this will happen when the
      * provided fingerprint id was incorrect.
-     *
-     * @hide
      */
     public static final int FINGERPRINT_ERROR_UNABLE_TO_REMOVE = 6;
 
@@ -112,7 +110,6 @@ public class FingerprintManager {
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
-     * @hide
      */
     public static final int FINGERPRINT_ERROR_VENDOR = 8;
 
@@ -120,7 +117,6 @@ public class FingerprintManager {
      * The operation was canceled because FINGERPRINT_ERROR_LOCKOUT occurred too many times.
      * Fingerprint authentication is disabled until the user unlocks with strong authentication
      * (PIN/Pattern/Password)
-     * @hide
      */
     public static final int FINGERPRINT_ERROR_LOCKOUT_PERMANENT = 9;
 
