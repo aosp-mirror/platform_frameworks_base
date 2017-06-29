@@ -24,6 +24,7 @@ import android.service.euicc.IGetDownloadableSubscriptionMetadataCallback;
 import android.service.euicc.IGetEidCallback;
 import android.service.euicc.IGetEuiccInfoCallback;
 import android.service.euicc.IGetEuiccProfileInfoListCallback;
+import android.service.euicc.IRetainSubscriptionsForFactoryResetCallback;
 import android.service.euicc.ISwitchToSubscriptionCallback;
 import android.service.euicc.IUpdateSubscriptionNicknameCallback;
 import android.telephony.euicc.DownloadableSubscription;
@@ -46,4 +47,6 @@ oneway interface IEuiccService {
     void updateSubscriptionNickname(int slotId, String iccid, String nickname,
             in IUpdateSubscriptionNicknameCallback callback);
     void eraseSubscriptions(int slotId, in IEraseSubscriptionsCallback callback);
+    void retainSubscriptionsForFactoryReset(
+            int slotId, in IRetainSubscriptionsForFactoryResetCallback callback);
 }

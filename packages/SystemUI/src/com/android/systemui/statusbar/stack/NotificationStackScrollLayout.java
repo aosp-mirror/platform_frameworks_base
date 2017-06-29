@@ -2735,7 +2735,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return view.getHeight();
     }
 
-    private int getPositionInLinearLayout(View requestedView) {
+    public int getPositionInLinearLayout(View requestedView) {
         ExpandableNotificationRow childInGroup = null;
         ExpandableNotificationRow requestedRow = null;
         if (isChildInGroup(requestedView)) {
@@ -3650,6 +3650,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setIntrinsicPadding(int intrinsicPadding) {
         mIntrinsicPadding = intrinsicPadding;
+        mAmbientState.setIntrinsicPadding(intrinsicPadding);
     }
 
     public int getIntrinsicPadding() {

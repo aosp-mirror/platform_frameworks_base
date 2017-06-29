@@ -76,6 +76,7 @@ public class CarStatusBar extends StatusBar implements
     private Drawable mNotificationPanelBackground;
 
     private ConnectedDeviceSignalController mConnectedDeviceSignalController;
+    private ViewGroup mNavigationBarWindow;
     private CarNavigationBarView mNavigationBarView;
 
     private final Object mQueueLock = new Object();
@@ -96,6 +97,11 @@ public class CarStatusBar extends StatusBar implements
     public void destroy() {
         mCarBatteryController.stopListening();
         mConnectedDeviceSignalController.stopListening();
+
+        if (mNavigationBarWindow != null) {
+            mWindowManager.removeViewImmediate(mNavigationBarWindow);
+            mNavigationBarView = null;
+        }
 
         super.destroy();
     }
@@ -153,10 +159,19 @@ public class CarStatusBar extends StatusBar implements
         // SystemUI requires that the navigation bar view have a parent. Since the regular
         // StatusBar inflates navigation_bar_window as this parent view, use the same view for the
         // CarNavigationBarView.
-        ViewGroup navigationBarWindow = (ViewGroup) View.inflate(mContext,
+        mNavigationBarWindow = (ViewGroup) View.inflate(mContext,
                 R.layout.navigation_bar_window, null);
-        View.inflate(mContext, R.layout.car_navigation_bar, navigationBarWindow);
-        mNavigationBarView = (CarNavigationBarView) navigationBarWindow.getChildAt(0);
+        if (mNavigationBarWindow == null) {
+            Log.e(TAG, "CarStatusBar failed inflate for R.layout.navigation_bar_window");
+        }
+
+
+        View.inflate(mContext, R.layout.car_navigation_bar, mNavigationBarWindow);
+        mNavigationBarView = (CarNavigationBarView) mNavigationBarWindow.getChildAt(0);
+        if (mNavigationBarView == null) {
+            Log.e(TAG, "CarStatusBar failed inflate for R.layout.car_navigation_bar");
+        }
+
 
         mController = new CarNavigationBarController(mContext, mNavigationBarView,
                 this /* ActivityStarter*/);
@@ -173,7 +188,7 @@ public class CarStatusBar extends StatusBar implements
         lp.setTitle("CarNavigationBar");
         lp.windowAnimations = 0;
 
-        mWindowManager.addView(navigationBarWindow, lp);
+        mWindowManager.addView(mNavigationBarWindow, lp);
     }
 
     @Override
@@ -216,6 +231,11 @@ public class CarStatusBar extends StatusBar implements
     @Override
     public NavigationBarView getNavigationBarView() {
         return mNavigationBarView;
+    }
+
+    @Override
+    public View getNavigationBarWindow() {
+        return mNavigationBarWindow;
     }
 
     @Override

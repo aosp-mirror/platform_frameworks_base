@@ -21,6 +21,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.UserHandle;
 
 /**
  * This class controls showing/hiding overlays. We don't
@@ -47,10 +48,10 @@ class OverlayControl {
 
     private void setOverlayAllowed(boolean allowed) {
         if (mAppOpsManager != null) {
-            mAppOpsManager.setUserRestriction(
-                    AppOpsManager.OP_SYSTEM_ALERT_WINDOW, !allowed, mToken);
-            mAppOpsManager.setUserRestriction(
-                    AppOpsManager.OP_TOAST_WINDOW, !allowed, mToken);
+            mAppOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW, !allowed,
+                    mToken, null, UserHandle.USER_ALL);
+            mAppOpsManager.setUserRestrictionForUser(AppOpsManager.OP_TOAST_WINDOW, !allowed,
+                    mToken, null, UserHandle.USER_ALL);
         }
     }
 }

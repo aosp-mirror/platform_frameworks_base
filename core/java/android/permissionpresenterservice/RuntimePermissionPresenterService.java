@@ -20,7 +20,6 @@ import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.permission.IRuntimePermissionPresenter;
 import android.content.pm.permission.RuntimePermissionPresentationInfo;
 import android.content.pm.permission.RuntimePermissionPresenter;
@@ -30,6 +29,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallback;
+
 import com.android.internal.os.SomeArgs;
 
 import java.util.List;
@@ -72,6 +72,16 @@ public abstract class RuntimePermissionPresenterService extends Service {
      */
     public abstract List<RuntimePermissionPresentationInfo> onGetAppPermissions(String packageName);
 
+    /**
+     * Revoke the permission {@code permissionName} for app {@code packageName}
+     *
+     * @param packageName The package for which to revoke
+     * @param permissionName The permission to revoke
+     *
+     * @hide
+     */
+    public abstract void onRevokeRuntimePermission(String packageName, String permissionName);
+
     @Override
     public final IBinder onBind(Intent intent) {
         return new IRuntimePermissionPresenter.Stub() {
@@ -83,12 +93,22 @@ public abstract class RuntimePermissionPresenterService extends Service {
                 mHandler.obtainMessage(MyHandler.MSG_GET_APP_PERMISSIONS,
                         args).sendToTarget();
             }
+
+            @Override
+            public void revokeRuntimePermission(String packageName, String permissionName) {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = packageName;
+                args.arg2 = permissionName;
+                mHandler.obtainMessage(MyHandler.MSG_REVOKE_APP_PERMISSION,
+                        args).sendToTarget();
+            }
         };
     }
 
     private final class MyHandler extends Handler {
         public static final int MSG_GET_APP_PERMISSIONS = 1;
         public static final int MSG_GET_APPS_USING_PERMISSIONS = 2;
+        public static final int MSG_REVOKE_APP_PERMISSION = 3;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -112,6 +132,14 @@ public abstract class RuntimePermissionPresenterService extends Service {
                     } else {
                         callback.sendResult(null);
                     }
+                } break;
+                case MSG_REVOKE_APP_PERMISSION: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String packageName = (String) args.arg1;
+                    String permissionName = (String) args.arg2;
+                    args.recycle();
+
+                    onRevokeRuntimePermission(packageName, permissionName);
                 } break;
             }
         }

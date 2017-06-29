@@ -85,7 +85,11 @@ class LayoutVisitor : public BaseVisitor {
     bool check_class = false;
     bool check_name = false;
     if (node->namespace_uri.empty()) {
-      check_class = node->name == "view" || node->name == "fragment";
+      if (node->name == "view") {
+        check_class = true;
+      } else if (node->name == "fragment") {
+        check_class = check_name = true;
+      }
     } else if (node->namespace_uri == xml::kSchemaAndroid) {
       check_name = node->name == "fragment";
     }
@@ -108,6 +112,32 @@ class LayoutVisitor : public BaseVisitor {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LayoutVisitor);
+};
+
+class MenuVisitor : public BaseVisitor {
+ public:
+  MenuVisitor(const Source& source, KeepSet* keep_set) : BaseVisitor(source, keep_set) {
+  }
+
+  virtual void Visit(xml::Element* node) override {
+    if (node->namespace_uri.empty() && node->name == "item") {
+      for (const auto& attr : node->attributes) {
+        if (attr.namespace_uri == xml::kSchemaAndroid) {
+          if ((attr.name == "actionViewClass" || attr.name == "actionProviderClass") &&
+              util::IsJavaClassName(attr.value)) {
+            AddClass(node->line_number, attr.value);
+          } else if (attr.name == "onClick") {
+            AddMethod(node->line_number, attr.value);
+          }
+        }
+      }
+    }
+
+    BaseVisitor::Visit(node);
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MenuVisitor);
 };
 
 class XmlResourceVisitor : public BaseVisitor {
@@ -263,6 +293,12 @@ bool CollectProguardRules(const Source& source, xml::XmlResource* res,
 
     case ResourceType::kTransition: {
       TransitionVisitor visitor(source, keep_set);
+      res->root->Accept(&visitor);
+      break;
+    }
+
+    case ResourceType::kMenu: {
+      MenuVisitor visitor(source, keep_set);
       res->root->Accept(&visitor);
       break;
     }

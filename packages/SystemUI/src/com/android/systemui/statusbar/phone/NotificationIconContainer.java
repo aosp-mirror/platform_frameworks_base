@@ -526,6 +526,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }
 
     public class IconState extends ViewState {
+        public static final int NO_VALUE = NotificationIconContainer.NO_VALUE;
         public float iconAppearAmount = 1.0f;
         public float clampedAppearAmount = 1.0f;
         public int visibleState;
@@ -538,6 +539,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public boolean justUndarkened;
         public int iconColor = StatusBarIconView.NO_COLOR;
         public boolean noAnimations;
+        public boolean isLastExpandIcon;
+        public int customTransformHeight = NO_VALUE;
 
         @Override
         public void applyToView(View view) {
@@ -613,6 +616,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             justReplaced = false;
             needsCannedAnimation = false;
             justUndarkened = false;
+        }
+
+        public boolean hasCustomTransformHeight() {
+            return isLastExpandIcon && customTransformHeight != NO_VALUE;
         }
 
         @Override

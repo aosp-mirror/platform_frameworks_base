@@ -122,9 +122,13 @@ import java.util.Arrays;
  *
  * <p>The service can also customize some aspects of the save UI affordance:
  * <ul>
- *   <li>Add a subtitle by calling {@link Builder#setDescription(CharSequence)}.
+ *   <li>Add a simple subtitle by calling {@link Builder#setDescription(CharSequence)}.
+ *   <li>Add a customized subtitle by calling
+ *       {@link Builder#setCustomDescription(CustomDescription)}.
  *   <li>Customize the button used to reject the save request by calling
  *       {@link Builder#setNegativeAction(int, IntentSender)}.
+ *   <li>Decide whether the UI should be shown based on the user input validation by calling
+ *       {@link Builder#setValidator(Validator)}.
  * </ul>
  */
 public final class SaveInfo implements Parcelable {
@@ -222,6 +226,8 @@ public final class SaveInfo implements Parcelable {
     private final AutofillId[] mOptionalIds;
     private final CharSequence mDescription;
     private final int mFlags;
+    private final CustomDescription mCustomDescription;
+    private final InternalValidator mValidator;
 
     private SaveInfo(Builder builder) {
         mType = builder.mType;
@@ -231,6 +237,8 @@ public final class SaveInfo implements Parcelable {
         mOptionalIds = builder.mOptionalIds;
         mDescription = builder.mDescription;
         mFlags = builder.mFlags;
+        mCustomDescription = builder.mCustomDescription;
+        mValidator = builder.mValidator;
     }
 
     /** @hide */
@@ -268,6 +276,18 @@ public final class SaveInfo implements Parcelable {
         return mDescription;
     }
 
+     /** @hide */
+    @Nullable
+    public CustomDescription getCustomDescription() {
+        return mCustomDescription;
+    }
+
+    /** @hide */
+    @Nullable
+    public InternalValidator getValidator() {
+        return mValidator;
+    }
+
     /**
      * A builder for {@link SaveInfo} objects.
      */
@@ -281,12 +301,14 @@ public final class SaveInfo implements Parcelable {
         private CharSequence mDescription;
         private boolean mDestroyed;
         private int mFlags;
+        private CustomDescription mCustomDescription;
+        private InternalValidator mValidator;
 
         /**
          * Creates a new builder.
          *
-         * @param type the type of information the associated {@link FillResponse} represents, can
-         * be any combination of {@link SaveInfo#SAVE_DATA_TYPE_GENERIC},
+         * @param type the type of information the associated {@link FillResponse} represents. It
+         * can be any combination of {@link SaveInfo#SAVE_DATA_TYPE_GENERIC},
          * {@link SaveInfo#SAVE_DATA_TYPE_PASSWORD},
          * {@link SaveInfo#SAVE_DATA_TYPE_ADDRESS}, {@link SaveInfo#SAVE_DATA_TYPE_CREDIT_CARD},
          * {@link SaveInfo#SAVE_DATA_TYPE_USERNAME}, or
@@ -354,21 +376,46 @@ public final class SaveInfo implements Parcelable {
          *
          * @param description a succint description.
          * @return This Builder.
+         *
+         * @throws IllegalStateException if this call was made after calling
+         * {@link #setCustomDescription(CustomDescription)}.
          */
         public @NonNull Builder setDescription(@Nullable CharSequence description) {
             throwIfDestroyed();
+            Preconditions.checkState(mCustomDescription == null,
+                    "Can call setDescription() or setCustomDescription(), but not both");
             mDescription = description;
+            return this;
+        }
+
+        /**
+         * Sets a custom description to be shown in the UI when the user is asked to save.
+         *
+         * <p>Typically used when the service must show more info about the object being saved,
+         * like a credit card logo, masked number, and expiration date.
+         *
+         * @param customDescription the custom description.
+         * @return This Builder.
+         *
+         * @throws IllegalStateException if this call was made after calling
+         * {@link #setDescription(CharSequence)}.
+         */
+        public @NonNull Builder setCustomDescription(@NonNull CustomDescription customDescription) {
+            throwIfDestroyed();
+            Preconditions.checkState(mDescription == null,
+                    "Can call setDescription() or setCustomDescription(), but not both");
+            mCustomDescription = customDescription;
             return this;
         }
 
         /**
          * Sets the style and listener for the negative save action.
          *
-         * <p>This allows a fill-provider to customize the style and be
+         * <p>This allows an autofill service to customize the style and be
          * notified when the user selects the negative action in the save
          * UI. Note that selecting the negative action regardless of its style
          * and listener being customized would dismiss the save UI and if a
-         * custom listener intent is provided then this intent will be
+         * custom listener intent is provided then this intent is
          * started. The default style is {@link #NEGATIVE_BUTTON_STYLE_CANCEL}</p>
          *
          * @param style The action style.
@@ -393,6 +440,74 @@ public final class SaveInfo implements Parcelable {
         }
 
         /**
+         * Sets an object used to validate the user input - if the input is not valid, the Save UI
+         * affordance is not shown.
+         *
+         * <p>Typically used to validate credit card numbers. Examples:
+         *
+         * <p>Validator for a credit number that must have exactly 16 digits:
+         *
+         * <pre class="prettyprint">
+         * Validator validator = new SimpleRegexValidator(ccNumberId, "^\\d{16}$")
+         * </pre>
+         *
+         * <p>Validator for a credit number that must pass a Luhn checksum and either have
+         * 16 digits, or 15 digits starting with 108:
+         *
+         * <pre class="prettyprint">
+         * import android.service.autofill.Validators;
+         *
+         * Validator validator =
+         *   and(
+         *     new LuhnChecksumValidator(ccNumberId),
+         *     or(
+         *       new SimpleRegexValidator(ccNumberId, "^\\d{16}$"),
+         *       new SimpleRegexValidator(ccNumberId, "^108\\d{12}$")
+         *     )
+         *   );
+         * </pre>
+         *
+         * <p><b>NOTE: </b>the example above is just for illustrative purposes; the same validator
+         * could be created using a single regex for the {@code OR} part:
+         *
+         * <pre class="prettyprint">
+         * Validator validator =
+         *   and(
+         *     new LuhnChecksumValidator(ccNumberId),
+         *     new SimpleRegexValidator(ccNumberId, "^(\\d{16}|108\\d{12})$")
+         *   );
+         * </pre>
+         *
+         * <p>Validator for a credit number contained in just 4 fields and that must have exactly
+         * 4 digits on each field:
+         *
+         * <pre class="prettyprint">
+         * import android.service.autofill.Validators;
+         *
+         * Validator validator =
+         *   and(
+         *     new SimpleRegexValidator.(ccNumberId1, "^\\d{4}$"),
+         *     new SimpleRegexValidator.(ccNumberId2, "^\\d{4}$"),
+         *     new SimpleRegexValidator.(ccNumberId3, "^\\d{4}$"),
+         *     new SimpleRegexValidator.(ccNumberId4, "^\\d{4}$")
+         *   );
+         * </pre>
+         *
+         * @param validator an implementation provided by the Android System.
+         * @return this builder.
+         *
+         * @throws IllegalArgumentException if {@code validator} is not a class provided
+         * by the Android System.
+         */
+        public @NonNull Builder setValidator(@NonNull Validator validator) {
+            throwIfDestroyed();
+            Preconditions.checkArgument((validator instanceof InternalValidator),
+                    "not provided by Android System: " + validator);
+            mValidator = (InternalValidator) validator;
+            return this;
+        }
+
+        /**
          * Builds a new {@link SaveInfo} instance.
          */
         public SaveInfo build() {
@@ -406,7 +521,6 @@ public final class SaveInfo implements Parcelable {
                 throw new IllegalStateException("Already called #build()");
             }
         }
-
     }
 
     /////////////////////////////////////
@@ -424,6 +538,8 @@ public final class SaveInfo implements Parcelable {
                 .append(DebugUtils.flagsToString(SaveInfo.class, "NEGATIVE_BUTTON_STYLE_",
                         mNegativeButtonStyle))
                 .append(", mFlags=").append(mFlags)
+                .append(", mCustomDescription=").append(mCustomDescription)
+                .append(", validation=").append(mValidator)
                 .append("]").toString();
     }
 
@@ -444,6 +560,8 @@ public final class SaveInfo implements Parcelable {
         parcel.writeParcelable(mNegativeActionListener, flags);
         parcel.writeParcelableArray(mOptionalIds, flags);
         parcel.writeCharSequence(mDescription);
+        parcel.writeParcelable(mCustomDescription, flags);
+        parcel.writeParcelable(mValidator, flags);
         parcel.writeInt(mFlags);
     }
 
@@ -461,6 +579,14 @@ public final class SaveInfo implements Parcelable {
                 builder.setOptionalIds(optionalIds);
             }
             builder.setDescription(parcel.readCharSequence());
+            final CustomDescription customDescripton = parcel.readParcelable(null);
+            if (customDescripton != null) {
+                builder.setCustomDescription(customDescripton);
+            }
+            final InternalValidator validator = parcel.readParcelable(null);
+            if (validator != null) {
+                builder.setValidator(validator);
+            }
             builder.setFlags(parcel.readInt());
             return builder.build();
         }

@@ -91,11 +91,9 @@ public class SuggestionParser {
 
     // Shared prefs keys for storing dismissed state.
     // Index into current dismissed state.
+    public static final String SETUP_TIME = "_setup_time";
     private static final String DISMISS_INDEX = "_dismiss_index";
-    private static final String SETUP_TIME = "_setup_time";
     private static final String IS_DISMISSED = "_is_dismissed";
-
-    private static final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
 
     // Default dismiss control for smart suggestions.
     private static final String DEFAULT_SMART_DISMISS_CONTROL = "0,10";
@@ -386,7 +384,7 @@ public class SuggestionParser {
     }
 
     private long getEndTime(long startTime, int daysDelay) {
-        long days = daysDelay * MILLIS_IN_DAY;
+        long days = daysDelay * DateUtils.DAY_IN_MILLIS;
         return startTime + days;
     }
 

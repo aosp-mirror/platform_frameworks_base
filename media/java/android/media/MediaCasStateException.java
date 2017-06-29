@@ -18,9 +18,8 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.ServiceSpecificException;
 
-import static android.media.MediaCasException.*;
+import android.hardware.cas.V1_0.Status;
 
 /**
  * Base class for MediaCas runtime exceptions
@@ -29,46 +28,62 @@ public class MediaCasStateException extends IllegalStateException {
     private final int mErrorCode;
     private final String mDiagnosticInfo;
 
-    /** @hide */
-    public MediaCasStateException(int err, @Nullable String msg, @Nullable String diagnosticInfo) {
+    private MediaCasStateException(int err, @Nullable String msg, @Nullable String diagnosticInfo) {
         super(msg);
         mErrorCode = err;
         mDiagnosticInfo = diagnosticInfo;
     }
 
-    static void throwExceptions(ServiceSpecificException e) {
+    static void throwExceptionIfNeeded(int err) {
+        throwExceptionIfNeeded(err, null /* msg */);
+    }
+
+    static void throwExceptionIfNeeded(int err, @Nullable String msg) {
+        if (err == Status.OK) {
+            return;
+        }
+        if (err == Status.BAD_VALUE) {
+            throw new IllegalArgumentException();
+        }
+
         String diagnosticInfo = "";
-        switch (e.errorCode) {
-        case ERROR_DRM_UNKNOWN:
+        switch (err) {
+        case Status.ERROR_CAS_UNKNOWN:
             diagnosticInfo = "General CAS error";
             break;
-        case ERROR_DRM_NO_LICENSE:
+        case Status.ERROR_CAS_NO_LICENSE:
             diagnosticInfo = "No license";
             break;
-        case ERROR_DRM_LICENSE_EXPIRED:
+        case Status.ERROR_CAS_LICENSE_EXPIRED:
             diagnosticInfo = "License expired";
             break;
-        case ERROR_DRM_SESSION_NOT_OPENED:
+        case Status.ERROR_CAS_SESSION_NOT_OPENED:
             diagnosticInfo = "Session not opened";
             break;
-        case ERROR_DRM_DECRYPT_UNIT_NOT_INITIALIZED:
-            diagnosticInfo = "Not initialized";
-            break;
-        case ERROR_DRM_DECRYPT:
-            diagnosticInfo = "Decrypt error";
-            break;
-        case ERROR_DRM_CANNOT_HANDLE:
+        case Status.ERROR_CAS_CANNOT_HANDLE:
             diagnosticInfo = "Unsupported scheme or data format";
             break;
-        case ERROR_DRM_TAMPER_DETECTED:
+        case Status.ERROR_CAS_INVALID_STATE:
+            diagnosticInfo = "Invalid CAS state";
+            break;
+        case Status.ERROR_CAS_INSUFFICIENT_OUTPUT_PROTECTION:
+            diagnosticInfo = "Insufficient output protection";
+            break;
+        case Status.ERROR_CAS_TAMPER_DETECTED:
             diagnosticInfo = "Tamper detected";
+            break;
+        case Status.ERROR_CAS_DECRYPT_UNIT_NOT_INITIALIZED:
+            diagnosticInfo = "Not initialized";
+            break;
+        case Status.ERROR_CAS_DECRYPT:
+            diagnosticInfo = "Decrypt error";
             break;
         default:
             diagnosticInfo = "Unknown CAS state exception";
             break;
         }
-        throw new MediaCasStateException(e.errorCode, e.getMessage(),
-                String.format("%s (err=%d)", diagnosticInfo, e.errorCode));
+        throw new MediaCasStateException(err, msg,
+                String.format("%s (err=%d)", diagnosticInfo, err));
     }
 
     /**

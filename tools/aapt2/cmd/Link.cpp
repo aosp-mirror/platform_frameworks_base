@@ -989,7 +989,8 @@ class LinkCommand {
       manifest_class->GetCommentBuilder()->AppendComment(proper_annotation);
     }
 
-    const std::string& package_utf8 = context_->GetCompilationPackage();
+    const std::string package_utf8 =
+        options_.custom_java_package.value_or_default(context_->GetCompilationPackage());
 
     std::string out_path = options_.generate_java_class_path.value();
     file::AppendPath(&out_path, file::PackageToPath(package_utf8));

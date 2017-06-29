@@ -31,7 +31,7 @@
     </application>
 
     <instrumentation
-        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:name="android.testing.TestableInstrumentation"
         android:targetPackage="com.android.frameworks.tests.notification"
         android:label="Notification Tests" />
 </manifest>

@@ -17,10 +17,9 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.hardware.cas.V1_0.*;
 import android.media.MediaCasException.UnsupportedCasException;
-import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.IHwBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
@@ -40,7 +39,7 @@ import java.nio.ByteBuffer;
  */
 public final class MediaDescrambler implements AutoCloseable {
     private static final String TAG = "MediaDescrambler";
-    private IDescrambler mIDescrambler;
+    private IDescramblerBase mIDescrambler;
 
     private final void validateInternalStates() {
         if (mIDescrambler == null) {
@@ -51,39 +50,6 @@ public final class MediaDescrambler implements AutoCloseable {
     private final void cleanupAndRethrowIllegalState() {
         mIDescrambler = null;
         throw new IllegalStateException();
-    }
-
-    /**
-     * Class for parceling descrambling parameters over IDescrambler binder.
-     */
-    // This class currently is not used by Java binder. descramble() goes through
-    // jni to use shared memory. However, the parcelable is still required for AIDL.
-    static class DescrambleInfo implements Parcelable {
-        private DescrambleInfo() {
-        }
-
-        private DescrambleInfo(Parcel in) {
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-        }
-
-        public static final Parcelable.Creator<DescrambleInfo> CREATOR
-                = new Parcelable.Creator<DescrambleInfo>() {
-            public DescrambleInfo createFromParcel(Parcel in) {
-                return new DescrambleInfo(in);
-            }
-
-            public DescrambleInfo[] newArray(int size) {
-                return new DescrambleInfo[size];
-            }
-        };
     }
 
     /**
@@ -107,7 +73,7 @@ public final class MediaDescrambler implements AutoCloseable {
         native_setup(mIDescrambler.asBinder());
     }
 
-    IBinder getBinder() {
+    IHwBinder getBinder() {
         validateInternalStates();
 
         return mIDescrambler.asBinder();
@@ -151,9 +117,8 @@ public final class MediaDescrambler implements AutoCloseable {
         validateInternalStates();
 
         try {
-            mIDescrambler.setMediaCasSession(session.mSessionId);
-        } catch (ServiceSpecificException e) {
-            MediaCasStateException.throwExceptions(e);
+            MediaCasStateException.throwExceptionIfNeeded(
+                    mIDescrambler.setMediaCasSession(session.mSessionId));
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -210,7 +175,9 @@ public final class MediaDescrambler implements AutoCloseable {
                     srcBuf, srcBuf.position(), srcBuf.limit(),
                     dstBuf, dstBuf.position(), dstBuf.limit());
         } catch (ServiceSpecificException e) {
-            MediaCasStateException.throwExceptions(e);
+            MediaCasStateException.throwExceptionIfNeeded(e.errorCode, e.getMessage());
+        } catch (RemoteException e) {
+            cleanupAndRethrowIllegalState();
         }
         return -1;
     }
@@ -234,12 +201,12 @@ public final class MediaDescrambler implements AutoCloseable {
     }
 
     private static native final void native_init();
-    private native final void native_setup(@NonNull IBinder decramblerBinder);
+    private native final void native_setup(@NonNull IHwBinder decramblerBinder);
     private native final void native_release();
     private native final int native_descramble(
             byte key, int numSubSamples, int[] numBytesOfClearData, int[] numBytesOfEncryptedData,
             @NonNull ByteBuffer srcBuf, int srcOffset, int srcLimit,
-            ByteBuffer dstBuf, int dstOffset, int dstLimit);
+            ByteBuffer dstBuf, int dstOffset, int dstLimit) throws RemoteException;
 
     static {
         System.loadLibrary("media_jni");

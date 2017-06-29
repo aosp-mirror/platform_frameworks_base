@@ -16,48 +16,18 @@
 package com.android.settingslib;
 
 import android.content.Context;
-import android.net.NetworkBadging;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.settingslib.wifi.AccessPoint.Speed;
 
 /** Utilites for Tron Logging. */
 public final class TronUtils {
 
+    private static final String TAG = "TronUtils";
+
     private TronUtils() {};
 
-    public static void logWifiSettingsBadge(Context context, int badgeEnum) {
-        logNetworkBadgeMetric(context, "settings_wifibadging", badgeEnum);
-    }
-
-    /**
-     * Logs an occurrence of the given network badge to a Histogram.
-     *
-     * @param context Context
-     * @param histogram the Tron histogram name to write to
-     * @param badgeEnum the {@link NetworkBadging.Badging} badge value
-     * @throws IllegalArgumentException if the given badge enum is not supported
-     */
-    private static void logNetworkBadgeMetric(
-            Context context, String histogram, int badgeEnum)
-            throws IllegalArgumentException {
-        int bucket;
-        switch (badgeEnum) {
-            case NetworkBadging.BADGING_NONE:
-                bucket = 0;
-                break;
-            case NetworkBadging.BADGING_SD:
-                bucket = 1;
-                break;
-            case NetworkBadging.BADGING_HD:
-                bucket = 2;
-                break;
-            case NetworkBadging.BADGING_4K:
-                bucket = 3;
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported badge enum: " + badgeEnum);
-        }
-
-        MetricsLogger.histogram(context, histogram, bucket);
+    public static void logWifiSettingsSpeed(Context context, @Speed int speedEnum) {
+        MetricsLogger.histogram(context, "settings_wifi_speed_labels", speedEnum);
     }
 }

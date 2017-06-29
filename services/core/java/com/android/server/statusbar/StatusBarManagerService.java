@@ -795,7 +795,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             mHandler.post(() -> {
                 // ShutdownThread displays UI, so give it a UI context.
                 if (safeMode) {
-                    ShutdownThread.rebootSafeMode(getUiContext(), false);
+                    ShutdownThread.rebootSafeMode(getUiContext(), true);
                 } else {
                     ShutdownThread.reboot(getUiContext(),
                             PowerManager.SHUTDOWN_USER_REQUESTED, false);

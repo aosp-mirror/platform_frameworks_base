@@ -38,7 +38,7 @@ public class QSContainerImpl extends FrameLayout {
     protected View mHeader;
     protected float mQsExpansion;
     private QSCustomizer mQSCustomizer;
-    private QSFooter mQSFooter;
+    private View mQSFooter;
     private float mFullElevation;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {

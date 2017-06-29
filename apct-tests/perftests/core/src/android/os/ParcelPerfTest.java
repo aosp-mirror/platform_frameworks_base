@@ -57,6 +57,46 @@ public class ParcelPerfTest {
     }
 
     @Test
+    public void timeGetDataPosition() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mParcel.dataPosition();
+        }
+    }
+
+    @Test
+    public void timeSetDataSize() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mParcel.setDataSize(0);
+        }
+    }
+
+    @Test
+    public void timeGetDataSize() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mParcel.dataSize();
+        }
+    }
+
+    @Test
+    public void timeSetDataCapacity() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mParcel.setDataCapacity(0);
+        }
+    }
+
+    @Test
+    public void timeGetDataCapacity() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mParcel.dataCapacity();
+        }
+    }
+
+    @Test
     public void timeWriteByte() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         final byte val = 0xF;
@@ -110,6 +150,21 @@ public class ParcelPerfTest {
         while (state.keepRunning()) {
             mParcel.setDataPosition(0);
             mParcel.readLong();
+        }
+    }
+
+    @Test
+    public void timeObtainRecycle() {
+        // Use up the pooled instances.
+        // A lot bigger than the actual size but in case someone increased it.
+        final int POOL_SIZE = 100;
+        for (int i = 0; i < POOL_SIZE; i++) {
+            Parcel.obtain();
+        }
+
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            Parcel.obtain().recycle();
         }
     }
 }

@@ -16,73 +16,83 @@
 
 package com.android.server.timezone;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import com.android.internal.util.FastXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.Xml;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 
 import static com.android.server.timezone.PackageStatus.CHECK_COMPLETED_FAILURE;
 import static com.android.server.timezone.PackageStatus.CHECK_COMPLETED_SUCCESS;
 import static com.android.server.timezone.PackageStatus.CHECK_STARTED;
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 /**
  * Storage logic for accessing/mutating the Android system's persistent state related to time zone
- * update checking. There is expected to be a single instance and all methods synchronized on
- * {@code this} for thread safety.
+ * update checking. There is expected to be a single instance. All non-private methods are thread
+ * safe.
  */
 final class PackageStatusStorage {
 
-    private static final String TAG = "timezone.PackageStatusStorage";
+    private static final String LOG_TAG = "timezone.PackageStatusStorage";
 
-    private static final String DATABASE_NAME = "timezonepackagestatus.db";
-    private static final int DATABASE_VERSION = 1;
-
-    /** The table name. It will have a single row with _id == {@link #SINGLETON_ID} */
-    private static final String TABLE = "status";
-    private static final String COLUMN_ID = "_id";
+    private static final String TAG_PACKAGE_STATUS = "PackageStatus";
 
     /**
-     * Column that stores a monotonically increasing lock ID, used to detect concurrent update
+     * Attribute that stores a monotonically increasing lock ID, used to detect concurrent update
      * issues without on-line locks. Incremented on every write.
      */
-    private static final String COLUMN_OPTIMISTIC_LOCK_ID = "optimistic_lock_id";
+    private static final String ATTRIBUTE_OPTIMISTIC_LOCK_ID = "optimisticLockId";
 
     /**
-     * Column that stores the current "check status" of the time zone update application packages.
+     * Attribute that stores the current "check status" of the time zone update application
+     * packages.
      */
-    private static final String COLUMN_CHECK_STATUS = "check_status";
+    private static final String ATTRIBUTE_CHECK_STATUS = "checkStatus";
 
     /**
-     * Column that stores the version of the time zone rules update application being checked / last
-     * checked.
+     * Attribute that stores the version of the time zone rules update application being checked
+     * / last checked.
      */
-    private static final String COLUMN_UPDATE_APP_VERSION = "update_app_package_version";
+    private static final String ATTRIBUTE_UPDATE_APP_VERSION = "updateAppPackageVersion";
 
     /**
-     * Column that stores the version of the time zone rules data application being checked / last
-     * checked.
+     * Attribute that stores the version of the time zone rules data application being checked
+     * / last checked.
      */
-    private static final String COLUMN_DATA_APP_VERSION = "data_app_package_version";
-
-    /**
-     * The ID of the one row.
-     */
-    private static final int SINGLETON_ID = 1;
+    private static final String ATTRIBUTE_DATA_APP_VERSION = "dataAppPackageVersion";
 
     private static final int UNKNOWN_PACKAGE_VERSION = -1;
 
-    private final DatabaseHelper mDatabaseHelper;
+    private final AtomicFile mPackageStatusFile;
 
-    PackageStatusStorage(Context context) {
-        mDatabaseHelper = new DatabaseHelper(context);
+    PackageStatusStorage(File storageDir) {
+        mPackageStatusFile = new AtomicFile(new File(storageDir, "packageStatus.xml"));
+        if (!mPackageStatusFile.getBaseFile().exists()) {
+            try {
+                insertInitialPackageStatus();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
-    void deleteDatabaseForTests() {
-        SQLiteDatabase.deleteDatabase(mDatabaseHelper.getDatabaseFile());
+    void deleteFileForTests() {
+        synchronized(this) {
+            mPackageStatusFile.delete();
+        }
     }
 
     /**
@@ -93,48 +103,60 @@ final class PackageStatusStorage {
         synchronized (this) {
             try {
                 return getPackageStatusInternal();
-            } catch (IllegalArgumentException e) {
-                // This means that data exists in the table but it was bad.
-                Slog.e(TAG, "Package status invalid, resetting and retrying", e);
+            } catch (ParseException e) {
+                // This means that data exists in the file but it was bad.
+                Slog.e(LOG_TAG, "Package status invalid, resetting and retrying", e);
 
                 // Reset the storage so it is in a good state again.
-                mDatabaseHelper.recoverFromBadData();
-                return getPackageStatusInternal();
+                recoverFromBadData(e);
+                try {
+                    return getPackageStatusInternal();
+                } catch (ParseException e2) {
+                    throw new IllegalStateException("Recovery from bad file failed", e2);
+                }
             }
         }
     }
 
-    private PackageStatus getPackageStatusInternal() {
-        String[] columns = {
-                COLUMN_CHECK_STATUS, COLUMN_UPDATE_APP_VERSION, COLUMN_DATA_APP_VERSION
-        };
-        Cursor cursor = mDatabaseHelper.getReadableDatabase()
-                .query(TABLE, columns, COLUMN_ID + " = ?",
-                        new String[] { Integer.toString(SINGLETON_ID) },
-                        null /* groupBy */, null /* having */, null /* orderBy */);
-        if (cursor.getCount() != 1) {
-            Slog.e(TAG, "Unable to find package status from package status row. Rows returned: "
-                    + cursor.getCount());
-            return null;
+    private PackageStatus getPackageStatusInternal() throws ParseException {
+        try (FileInputStream fis = mPackageStatusFile.openRead()) {
+            XmlPullParser parser = parseToPackageStatusTag(fis);
+            Integer checkStatus = getNullableIntAttribute(parser, ATTRIBUTE_CHECK_STATUS);
+            if (checkStatus == null) {
+                return null;
+            }
+            int updateAppVersion = getIntAttribute(parser, ATTRIBUTE_UPDATE_APP_VERSION);
+            int dataAppVersion = getIntAttribute(parser, ATTRIBUTE_DATA_APP_VERSION);
+            return new PackageStatus(checkStatus,
+                    new PackageVersions(updateAppVersion, dataAppVersion));
+        } catch (IOException e) {
+            ParseException e2 = new ParseException("Error reading package status", 0);
+            e2.initCause(e);
+            throw e2;
         }
-        cursor.moveToFirst();
+    }
 
-        // Determine check status.
-        if (cursor.isNull(0)) {
-            // This is normal the first time getPackageStatus() is called, or after
-            // resetCheckState().
-            return null;
+    // Callers should be synchronized(this).
+    private int recoverFromBadData(Exception cause) {
+        mPackageStatusFile.delete();
+        try {
+            return insertInitialPackageStatus();
+        } catch (IOException e) {
+            IllegalStateException fatal = new IllegalStateException(e);
+            fatal.addSuppressed(cause);
+            throw fatal;
         }
-        int checkStatus = cursor.getInt(0);
+    }
 
-        // Determine package version.
-        if (cursor.isNull(1) || cursor.isNull(2)) {
-            Slog.e(TAG, "Package version information unexpectedly null");
-            return null;
-        }
-        PackageVersions packageVersions = new PackageVersions(cursor.getInt(1), cursor.getInt(2));
+    /** Insert the initial data, returning the optimistic lock ID */
+    private int insertInitialPackageStatus() throws IOException {
+        // Doesn't matter what it is, but we avoid the obvious starting value each time the data
+        // is reset to ensure that old tokens are unlikely to work.
+        final int initialOptimisticLockId = (int) System.currentTimeMillis();
 
-        return new PackageStatus(checkStatus, packageVersions);
+        writePackageStatusInternal(null /* status */, initialOptimisticLockId,
+                null /* packageVersions */);
+        return initialOptimisticLockId;
     }
 
     /**
@@ -147,23 +169,29 @@ final class PackageStatusStorage {
         }
 
         synchronized (this) {
-            Integer optimisticLockId = getCurrentOptimisticLockId();
-            if (optimisticLockId == null) {
-                Slog.w(TAG, "Unable to find optimistic lock ID from package status row");
+            int optimisticLockId;
+            try {
+                optimisticLockId = getCurrentOptimisticLockId();
+            } catch (ParseException e) {
+                Slog.w(LOG_TAG, "Unable to find optimistic lock ID from package status");
 
                 // Recover.
-                optimisticLockId = mDatabaseHelper.recoverFromBadData();
+                optimisticLockId = recoverFromBadData(e);
             }
 
             int newOptimisticLockId = optimisticLockId + 1;
-            boolean statusRowUpdated = writeStatusRow(
-                    optimisticLockId, newOptimisticLockId, CHECK_STARTED, currentInstalledVersions);
-            if (!statusRowUpdated) {
-                Slog.e(TAG, "Unable to update status to CHECK_STARTED in package status row."
-                        + " synchronization failure?");
-                return null;
+            try {
+                boolean statusUpdated = writePackageStatusWithOptimisticLockCheck(
+                        optimisticLockId, newOptimisticLockId, CHECK_STARTED,
+                        currentInstalledVersions);
+                if (!statusUpdated) {
+                    throw new IllegalStateException("Unable to update status to CHECK_STARTED."
+                            + " synchronization failure?");
+                }
+                return new CheckToken(newOptimisticLockId, currentInstalledVersions);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             }
-            return new CheckToken(newOptimisticLockId, currentInstalledVersions);
         }
     }
 
@@ -172,19 +200,25 @@ final class PackageStatusStorage {
      */
     void resetCheckState() {
         synchronized(this) {
-            Integer optimisticLockId = getCurrentOptimisticLockId();
-            if (optimisticLockId == null) {
-                Slog.w(TAG, "resetCheckState: Unable to find optimistic lock ID from package"
-                        + " status row");
+            int optimisticLockId;
+            try {
+                optimisticLockId = getCurrentOptimisticLockId();
+            } catch (ParseException e) {
+                Slog.w(LOG_TAG, "resetCheckState: Unable to find optimistic lock ID from package"
+                        + " status");
                 // Attempt to recover the storage state.
-                optimisticLockId = mDatabaseHelper.recoverFromBadData();
+                optimisticLockId = recoverFromBadData(e);
             }
 
             int newOptimisticLockId = optimisticLockId + 1;
-            if (!writeStatusRow(optimisticLockId, newOptimisticLockId,
-                    null /* status */, null /* packageVersions */)) {
-                Slog.e(TAG, "resetCheckState: Unable to reset package status row,"
-                        + " newOptimisticLockId=" + newOptimisticLockId);
+            try {
+                if (!writePackageStatusWithOptimisticLockCheck(optimisticLockId,
+                        newOptimisticLockId, null /* status */, null /* packageVersions */)) {
+                    throw new IllegalStateException("resetCheckState: Unable to reset package"
+                            + " status, newOptimisticLockId=" + newOptimisticLockId);
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             }
         }
     }
@@ -199,138 +233,146 @@ final class PackageStatusStorage {
             int optimisticLockId = checkToken.mOptimisticLockId;
             int newOptimisticLockId = optimisticLockId + 1;
             int status = succeeded ? CHECK_COMPLETED_SUCCESS : CHECK_COMPLETED_FAILURE;
-            return writeStatusRow(optimisticLockId, newOptimisticLockId,
-                    status, checkToken.mPackageVersions);
-        }
-    }
-
-    // Caller should be synchronized(this)
-    private Integer getCurrentOptimisticLockId() {
-        final String[] columns = { COLUMN_OPTIMISTIC_LOCK_ID };
-        final String querySelection = COLUMN_ID + " = ?";
-        final String[] querySelectionArgs = { Integer.toString(SINGLETON_ID) };
-
-        SQLiteDatabase database = mDatabaseHelper.getReadableDatabase();
-        try (Cursor cursor = database.query(TABLE, columns, querySelection, querySelectionArgs,
-                null /* groupBy */, null /* having */, null /* orderBy */)) {
-            if (cursor.getCount() != 1) {
-                Slog.w(TAG, cursor.getCount() + " rows returned, expected exactly one.");
-                return null;
+            try {
+                return writePackageStatusWithOptimisticLockCheck(optimisticLockId,
+                        newOptimisticLockId, status, checkToken.mPackageVersions);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             }
-            cursor.moveToFirst();
-            return cursor.getInt(0);
         }
     }
 
-    // Caller should be synchronized(this)
-    private boolean writeStatusRow(int optimisticLockId, int newOptimisticLockId, Integer status,
-            PackageVersions packageVersions) {
+    // Caller should be synchronized(this).
+    private int getCurrentOptimisticLockId() throws ParseException {
+        try (FileInputStream fis = mPackageStatusFile.openRead()) {
+            XmlPullParser parser = parseToPackageStatusTag(fis);
+            return getIntAttribute(parser, ATTRIBUTE_OPTIMISTIC_LOCK_ID);
+        } catch (IOException e) {
+            ParseException e2 = new ParseException("Unable to read file", 0);
+            e2.initCause(e);
+            throw e2;
+        }
+    }
+
+    /** Returns a parser or throws ParseException, never returns null. */
+    private static XmlPullParser parseToPackageStatusTag(FileInputStream fis)
+            throws ParseException {
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            int type;
+            while ((type = parser.next()) != END_DOCUMENT) {
+                final String tag = parser.getName();
+                if (type == START_TAG && TAG_PACKAGE_STATUS.equals(tag)) {
+                    return parser;
+                }
+            }
+            throw new ParseException("Unable to find " + TAG_PACKAGE_STATUS + " tag", 0);
+        } catch (XmlPullParserException e) {
+            throw new IllegalStateException("Unable to configure parser", e);
+        } catch (IOException e) {
+            ParseException e2 = new ParseException("Error reading XML", 0);
+            e.initCause(e);
+            throw e2;
+        }
+    }
+
+    // Caller should be synchronized(this).
+    private boolean writePackageStatusWithOptimisticLockCheck(int optimisticLockId,
+            int newOptimisticLockId, Integer status, PackageVersions packageVersions)
+            throws IOException {
+
+        int currentOptimisticLockId;
+        try {
+            currentOptimisticLockId = getCurrentOptimisticLockId();
+            if (currentOptimisticLockId != optimisticLockId) {
+                return false;
+            }
+        } catch (ParseException e) {
+            recoverFromBadData(e);
+            return false;
+        }
+
+        writePackageStatusInternal(status, newOptimisticLockId, packageVersions);
+        return true;
+    }
+
+    // Caller should be synchronized(this).
+    private void writePackageStatusInternal(Integer status, int optimisticLockId,
+            PackageVersions packageVersions) throws IOException {
         if ((status == null) != (packageVersions == null)) {
             throw new IllegalArgumentException(
                     "Provide both status and packageVersions, or neither.");
         }
 
-        SQLiteDatabase database = mDatabaseHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_OPTIMISTIC_LOCK_ID, newOptimisticLockId);
-        if (status == null) {
-            values.putNull(COLUMN_CHECK_STATUS);
-            values.put(COLUMN_UPDATE_APP_VERSION, UNKNOWN_PACKAGE_VERSION);
-            values.put(COLUMN_DATA_APP_VERSION, UNKNOWN_PACKAGE_VERSION);
-        } else {
-            values.put(COLUMN_CHECK_STATUS, status);
-            values.put(COLUMN_UPDATE_APP_VERSION, packageVersions.mUpdateAppVersion);
-            values.put(COLUMN_DATA_APP_VERSION, packageVersions.mDataAppVersion);
+        FileOutputStream fos = null;
+        try {
+            fos = mPackageStatusFile.startWrite();
+            XmlSerializer serializer = new FastXmlSerializer();
+            serializer.setOutput(fos, StandardCharsets.UTF_8.name());
+            serializer.startDocument(null /* encoding */, true /* standalone */);
+            final String namespace = null;
+            serializer.startTag(namespace, TAG_PACKAGE_STATUS);
+            String statusAttributeValue = status == null ? "" : Integer.toString(status);
+            serializer.attribute(namespace, ATTRIBUTE_CHECK_STATUS, statusAttributeValue);
+            serializer.attribute(namespace, ATTRIBUTE_OPTIMISTIC_LOCK_ID,
+                    Integer.toString(optimisticLockId));
+            int updateAppVersion = status == null
+                    ? UNKNOWN_PACKAGE_VERSION : packageVersions.mUpdateAppVersion;
+            serializer.attribute(namespace, ATTRIBUTE_UPDATE_APP_VERSION,
+                    Integer.toString(updateAppVersion));
+            int dataAppVersion = status == null
+                    ? UNKNOWN_PACKAGE_VERSION : packageVersions.mDataAppVersion;
+            serializer.attribute(namespace, ATTRIBUTE_DATA_APP_VERSION,
+                    Integer.toString(dataAppVersion));
+            serializer.endTag(namespace, TAG_PACKAGE_STATUS);
+            serializer.endDocument();
+            serializer.flush();
+            mPackageStatusFile.finishWrite(fos);
+        } catch (IOException e) {
+            if (fos != null) {
+                mPackageStatusFile.failWrite(fos);
+            }
+            throw e;
         }
 
-        String updateSelection = COLUMN_ID + " = ? AND " + COLUMN_OPTIMISTIC_LOCK_ID + " = ?";
-        String[] updateSelectionArgs = {
-                Integer.toString(SINGLETON_ID), Integer.toString(optimisticLockId)
-        };
-        int count = database.update(TABLE, values, updateSelection, updateSelectionArgs);
-        if (count > 1) {
-            // This has to be because of corruption: there should only ever be one row.
-            Slog.w(TAG, "writeStatusRow: " + count + " rows updated, expected exactly one.");
-            // Reset the table.
-            mDatabaseHelper.recoverFromBadData();
-        }
-
-        // 1 is the success case. 0 rows updated means the row is missing or the optimistic lock ID
-        // was not as expected, this could be because of corruption but is most likely due to an
-        // optimistic lock failure. Callers can decide on a case-by-case basis.
-        return count == 1;
-    }
-
-    /** Only used during tests to force an empty table. */
-    void deleteRowForTests() {
-        mDatabaseHelper.getWritableDatabase().delete(TABLE, null, null);
     }
 
     /** Only used during tests to force a known table state. */
     public void forceCheckStateForTests(int checkStatus, PackageVersions packageVersions) {
-        int optimisticLockId = getCurrentOptimisticLockId();
-        writeStatusRow(optimisticLockId, optimisticLockId, checkStatus, packageVersions);
+        synchronized (this) {
+            try {
+                int optimisticLockId = getCurrentOptimisticLockId();
+                writePackageStatusWithOptimisticLockCheck(optimisticLockId, optimisticLockId,
+                        checkStatus, packageVersions);
+            } catch (IOException | ParseException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
-    static class DatabaseHelper extends SQLiteOpenHelper {
-
-        private final Context mContext;
-
-        public DatabaseHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
-            mContext = context;
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + TABLE + " (" +
-                    "_id INTEGER PRIMARY KEY," +
-                    COLUMN_OPTIMISTIC_LOCK_ID + " INTEGER NOT NULL," +
-                    COLUMN_CHECK_STATUS + " INTEGER," +
-                    COLUMN_UPDATE_APP_VERSION + " INTEGER NOT NULL," +
-                    COLUMN_DATA_APP_VERSION + " INTEGER NOT NULL" +
-                    ");");
-            insertInitialRowState(db);
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
-            // no-op: nothing to upgrade
-        }
-
-        /** Recover the initial data row state, returning the new current optimistic lock ID */
-        int recoverFromBadData() {
-            // Delete the table content.
-            SQLiteDatabase writableDatabase = getWritableDatabase();
-            writableDatabase.delete(TABLE, null /* whereClause */, null /* whereArgs */);
-
-            // Insert the initial content.
-            return insertInitialRowState(writableDatabase);
-        }
-
-        /** Insert the initial data row, returning the optimistic lock ID */
-        private static int insertInitialRowState(SQLiteDatabase db) {
-            // Doesn't matter what it is, but we avoid the obvious starting value each time the row
-            // is reset to ensure that old tokens are unlikely to work.
-           final int initialOptimisticLockId = (int) System.currentTimeMillis();
-
-            // Insert the one row.
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_ID, SINGLETON_ID);
-            values.put(COLUMN_OPTIMISTIC_LOCK_ID, initialOptimisticLockId);
-            values.putNull(COLUMN_CHECK_STATUS);
-            values.put(COLUMN_UPDATE_APP_VERSION, UNKNOWN_PACKAGE_VERSION);
-            values.put(COLUMN_DATA_APP_VERSION, UNKNOWN_PACKAGE_VERSION);
-            long id = db.insert(TABLE, null, values);
-            if (id == -1) {
-                Slog.w(TAG, "insertInitialRow: could not insert initial row, id=" + id);
-                return -1;
+    private static Integer getNullableIntAttribute(XmlPullParser parser, String attributeName)
+            throws ParseException {
+        String attributeValue = parser.getAttributeValue(null, attributeName);
+        try {
+            if (attributeValue == null) {
+                throw new ParseException("Attribute " + attributeName + " missing", 0);
+            } else if (attributeValue.isEmpty()) {
+                return null;
             }
-            return initialOptimisticLockId;
+            return Integer.parseInt(attributeValue);
+        } catch (NumberFormatException e) {
+            throw new ParseException(
+                    "Bad integer for attributeName=" + attributeName + ": " + attributeValue, 0);
         }
+    }
 
-        File getDatabaseFile() {
-            return mContext.getDatabasePath(DATABASE_NAME);
+    private static int getIntAttribute(XmlPullParser parser, String attributeName)
+            throws ParseException {
+        Integer value = getNullableIntAttribute(parser, attributeName);
+        if (value == null) {
+            throw new ParseException("Missing attribute " + attributeName, 0);
         }
+        return value;
     }
 }

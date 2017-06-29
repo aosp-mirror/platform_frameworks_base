@@ -24,13 +24,18 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.IntentSender;
 import android.os.Handler;
+import android.service.autofill.CustomDescription;
 import android.service.autofill.SaveInfo;
+import android.service.autofill.ValueFinder;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -107,14 +112,15 @@ final class SaveUi {
     private boolean mDestroyed;
 
     SaveUi(@NonNull Context context, @NonNull CharSequence providerLabel, @NonNull SaveInfo info,
-           @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener) {
+           @NonNull ValueFinder valueFinder, @NonNull OverlayControl overlayControl,
+           @NonNull OnSaveListener listener) {
         mListener = new OneTimeListener(listener);
         mOverlayControl = overlayControl;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
 
-        final TextView titleView = (TextView) view.findViewById(R.id.autofill_save_title);
+        final TextView titleView = view.findViewById(R.id.autofill_save_title);
 
         final ArraySet<String> types = new ArraySet<>(3);
         final int type = info.getType();
@@ -133,6 +139,23 @@ final class SaveUi {
         }
         if ((type & SaveInfo.SAVE_DATA_TYPE_EMAIL_ADDRESS) != 0) {
             types.add(context.getString(R.string.autofill_save_type_email_address));
+        }
+
+        final CustomDescription customDescription = info.getCustomDescription();
+
+        if (customDescription != null) {
+            // TODO(b/62534917): add CTS test
+            if (sDebug) Slog.d(TAG, "Using custom description");
+
+            final RemoteViews presentation = customDescription.getPresentation(valueFinder);
+            if (presentation != null) {
+                final View remote = presentation.apply(context, null);
+                final LinearLayout layout = view.findViewById(R.id.autofill_save_custom_subtitle);
+                layout.addView(remote);
+                layout.setVisibility(View.VISIBLE);
+            } else {
+                Slog.w(TAG, "could not create remote presentation for custom title");
+            }
         }
 
         switch (types.size()) {
@@ -162,9 +185,7 @@ final class SaveUi {
             subTitleView.setVisibility(View.VISIBLE);
         }
 
-        if (sDebug) {
-            Slog.d(TAG, "on constructor: title=" + mTitle + ", subTitle=" + mSubTitle);
-        }
+        if (sDebug) Slog.d(TAG, "on constructor: title=" + mTitle + ", subTitle=" + mSubTitle);
 
         final TextView noButton = view.findViewById(R.id.autofill_save_no);
         if (info.getNegativeActionStyle() == SaveInfo.NEGATIVE_BUTTON_STYLE_REJECT) {

@@ -1,0 +1,105 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.service.autofill;
+
+import static android.view.autofill.Helper.sDebug;
+
+import android.annotation.NonNull;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
+import android.view.autofill.AutofillId;
+
+import com.android.internal.util.Preconditions;
+
+/**
+ * Defines if a field is valid based on a regular expression (regex).
+ *
+ * <p>See {@link SaveInfo.Builder#setValidator(Validator)} for examples.
+ */
+public final class SimpleRegexValidator extends InternalValidator implements Parcelable {
+
+    private static final String TAG = "SimpleRegexValidator";
+
+    private final AutofillId mId;
+    private final String mRegex;
+
+    /**
+      * Default constructor.
+      *
+      * @param id id of the field whose regex is applied to.
+      * @param regex regular expression that defines the result
+      * of the validator: if the regex matches the contents of
+      * the field identified by {@code id}, it returns {@code true}; otherwise, it
+      * returns {@code false}.
+      */
+    public SimpleRegexValidator(@NonNull AutofillId id, @NonNull String regex) {
+        mId = Preconditions.checkNotNull(id);
+        //TODO(b/62534917): throw exception if regex is invalid
+        mRegex = Preconditions.checkNotNull(regex);
+    }
+
+    /** @hide */
+    @Override
+    public boolean isValid(@NonNull ValueFinder finder) {
+        final String value = finder.findByAutofillId(mId);
+        if (value == null) {
+            Log.w(TAG, "No view for id " + mId);
+            return false;
+        }
+        final boolean valid = value.matches(mRegex);
+        if (sDebug) Log.d(TAG, "isValid(): " + valid);
+        return valid;
+    }
+
+    /////////////////////////////////////
+    // Object "contract" methods. //
+    /////////////////////////////////////
+    @Override
+    public String toString() {
+        if (!sDebug) return super.toString();
+
+        return "SimpleRegexValidator: [id=" + mId + ", regex=" + mRegex + "]";
+    }
+
+    /////////////////////////////////////
+    // Parcelable "contract" methods. //
+    /////////////////////////////////////
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeParcelable(mId, flags);
+        parcel.writeString(mRegex);
+    }
+
+    public static final Parcelable.Creator<SimpleRegexValidator> CREATOR =
+            new Parcelable.Creator<SimpleRegexValidator>() {
+        @Override
+        public SimpleRegexValidator createFromParcel(Parcel parcel) {
+            return new SimpleRegexValidator(parcel.readParcelable(null), parcel.readString());
+        }
+
+        @Override
+        public SimpleRegexValidator[] newArray(int size) {
+            return new SimpleRegexValidator[size];
+        }
+    };
+}

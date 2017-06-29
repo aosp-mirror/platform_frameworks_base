@@ -29,7 +29,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
 import java.util.Map;
 
 /**
@@ -49,7 +48,7 @@ public class TestableLooper {
     private TestLooperManager mQueueWrapper;
 
     public TestableLooper(Looper l) throws Exception {
-        this(InstrumentationRegistry.getInstrumentation().acquireLooperManager(l), l);
+        this(acquireLooperManager(l), l);
     }
 
     private TestableLooper(TestLooperManager wrapper, Looper l) throws Exception {
@@ -78,6 +77,9 @@ public class TestableLooper {
      */
     public void destroy() throws NoSuchFieldException, IllegalAccessException {
         mQueueWrapper.release();
+        if (mLooper == Looper.getMainLooper()) {
+            TestableInstrumentation.releaseMain();
+        }
     }
 
     /**
@@ -196,6 +198,13 @@ public class TestableLooper {
         }
     }
 
+    private static TestLooperManager acquireLooperManager(Looper l) {
+        if (l == Looper.getMainLooper()) {
+            TestableInstrumentation.acquireMain();
+        }
+        return InstrumentationRegistry.getInstrumentation().acquireLooperManager(l);
+    }
+
     private static final Map<Object, TestableLooper> sLoopers = new ArrayMap<>();
 
     /**
@@ -247,8 +256,7 @@ public class TestableLooper {
             }
             boolean set = mTestableLooper.mQueueWrapper == null;
             if (set) {
-                mTestableLooper.mQueueWrapper = InstrumentationRegistry.getInstrumentation()
-                        .acquireLooperManager(mLooper);
+                mTestableLooper.mQueueWrapper = acquireLooperManager(mLooper);
             }
             try {
                 Object[] ret = new Object[1];
@@ -283,6 +291,9 @@ public class TestableLooper {
                 if (set) {
                     mTestableLooper.mQueueWrapper.release();
                     mTestableLooper.mQueueWrapper = null;
+                    if (mLooper == Looper.getMainLooper()) {
+                        TestableInstrumentation.releaseMain();
+                    }
                 }
             }
         }

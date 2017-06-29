@@ -67,6 +67,9 @@
     <!-- The amount to leave on-screen when the PIP is minimized. -->
     <dimen name="pip_minimized_visible_size">48dp</dimen>
 
+    <!-- The the PIP decelerates at while moving from a fling. -->
+    <dimen name="pip_fling_deceleration">-3000dp</dimen>
+
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
 
