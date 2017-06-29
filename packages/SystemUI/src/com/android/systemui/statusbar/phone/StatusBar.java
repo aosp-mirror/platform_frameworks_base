@@ -309,7 +309,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final boolean DEBUG_GESTURES = false;
     public static final boolean DEBUG_MEDIA = false;
     public static final boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
-    public static final boolean DEBUG_CAMERA_LIFT = true; // false once b/62623620 is fixed
+    public static final boolean DEBUG_CAMERA_LIFT = false;
 
     public static final boolean DEBUG_WINDOW_STATE = false;
 
