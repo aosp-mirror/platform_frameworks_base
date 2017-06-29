@@ -85,12 +85,8 @@ public class SignalDrawable extends Drawable {
             {-1.9f / VIEWPORT, -1.9f / VIEWPORT},
     };
 
-    // The easiest way to understand this is as if we set Style.STROKE and draw the triangle,
-    // but that is only theoretically right. Instead, draw the triangle and clip out a smaller
-    // one inset by this amount.
-    private final float mEmptyStrokeWidth;
     private static final float INV_TAN = 1f / (float) Math.tan(Math.PI / 8f);
-    private final float mEmptyDiagInset;  // == mEmptyStrokeWidth * INV_TAN
+    private static final float CUT_WIDTH_DP = 1f / 12f;
 
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mForegroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -125,11 +121,6 @@ public class SignalDrawable extends Drawable {
         mLightModeFillColor =
                 Utils.getDefaultColor(context, R.color.light_mode_icon_color_dual_tone_fill);
         mIntrinsicSize = context.getResources().getDimensionPixelSize(R.dimen.signal_icon_size);
-
-        // mCutPath parameters
-        mEmptyStrokeWidth = context.getResources()
-                .getDimensionPixelSize(R.dimen.mobile_signal_empty_strokewidth);
-        mEmptyDiagInset = mEmptyStrokeWidth * INV_TAN;
 
         mHandler = new Handler();
         setDarkIntensity(0);
@@ -262,20 +253,22 @@ public class SignalDrawable extends Drawable {
         }
 
         if (mState == STATE_EMPTY) {
+            final float cutWidth = CUT_WIDTH_DP * height;
+            final float cutDiagInset = cutWidth * INV_TAN;
+
             // Cut out a smaller triangle from the center of mFullPath
             mCutPath.reset();
             mCutPath.setFillType(FillType.WINDING);
-            mCutPath.moveTo(width - padding - mEmptyStrokeWidth,
-                    height - padding - mEmptyStrokeWidth);
-            mCutPath.lineTo(width - padding - mEmptyStrokeWidth, padding + mEmptyDiagInset);
-            mCutPath.lineTo(padding + mEmptyDiagInset, height - padding - mEmptyStrokeWidth);
-            mCutPath.lineTo(width - padding - mEmptyStrokeWidth,
-                    height - padding - mEmptyStrokeWidth);
+            mCutPath.moveTo(width - padding - cutWidth,
+                    height - padding - cutWidth);
+            mCutPath.lineTo(width - padding - cutWidth, padding + cutDiagInset);
+            mCutPath.lineTo(padding + cutDiagInset, height - padding - cutWidth);
+            mCutPath.lineTo(width - padding - cutWidth,
+                    height - padding - cutWidth);
 
-            // In empty state, draw the full path as the foreground paint
-            mForegroundPath.set(mFullPath);
-            mFullPath.reset();
-            mForegroundPath.op(mCutPath, Path.Op.DIFFERENCE);
+            // Draw empty state as only background
+            mForegroundPath.reset();
+            mFullPath.op(mCutPath, Path.Op.DIFFERENCE);
         } else if (mState == STATE_AIRPLANE) {
             // Airplane mode is slashed, full-signal
             mForegroundPath.set(mFullPath);
