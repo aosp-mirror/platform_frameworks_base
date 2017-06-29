@@ -19,6 +19,7 @@ package com.android.server.timezone;
 import com.android.timezone.distro.DistroVersion;
 import com.android.timezone.distro.StagedDistroOperation;
 import com.android.timezone.distro.TimeZoneDistro;
+import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
-import libcore.tzdata.update2.TimeZoneDistroInstaller;
 
 import static com.android.server.timezone.RulesManagerService.REQUIRED_UPDATER_PERMISSION;
 import static org.junit.Assert.assertEquals;
