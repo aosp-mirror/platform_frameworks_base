@@ -58,6 +58,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         };
     }
 
+    @Override
     public void addCallback(Callback callback) {
         mCallbacks.add(callback);
         if (mCallbacks.size() != 0 && !mListening) {
@@ -69,6 +70,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         }
     }
 
+    @Override
     public void removeCallback(Callback callback) {
         if (mCallbacks.remove(callback) && mCallbacks.size() == 0 && mListening) {
             mListening = false;
@@ -77,18 +79,22 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         }
     }
 
+    @Override
     public boolean isShowing() {
         return mShowing;
     }
 
+    @Override
     public boolean isSecure() {
         return mSecure;
     }
 
+    @Override
     public boolean isOccluded() {
         return mOccluded;
     }
 
+    @Override
     public boolean canSkipBouncer() {
         return mCanSkipBouncer;
     }
