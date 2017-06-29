@@ -100,6 +100,7 @@ class Vr2dDisplay {
     private Runnable mStopVDRunnable;
     private boolean mIsVrModeOverrideEnabled;
     private boolean mIsVrModeEnabled;
+    private boolean mIsVirtualDisplayAllowed = true;
 
     public Vr2dDisplay(DisplayManager displayManager,
            ActivityManagerInternal activityManagerInternal, IVrManager vrManager) {
@@ -124,10 +125,11 @@ class Vr2dDisplay {
      */
     private void updateVirtualDisplay() {
         if (DEBUG) {
-            Log.i(TAG, "isVrMode: " + mIsVrModeEnabled + ", override: " + mIsVrModeOverrideEnabled);
+            Log.i(TAG, "isVrMode: " + mIsVrModeEnabled + ", override: " + mIsVrModeOverrideEnabled
+                    + ", isAllowed: " + mIsVirtualDisplayAllowed);
         }
 
-        if (mIsVrModeEnabled || mIsVrModeOverrideEnabled) {
+        if (shouldRunVirtualDisplay()) {
             // TODO: Consider not creating the display until ActivityManager needs one on
             // which to display a 2D application.
             startVirtualDisplay();
@@ -190,33 +192,43 @@ class Vr2dDisplay {
      *
      * <p>Requires {@link android.Manifest.permission#ACCESS_VR_MANAGER} permission.</p>
      *
-     * @param compatDisplayProperties Properties of the virtual display for 2D applications
+     * @param displayProperties Properties of the virtual display for 2D applications
      * in VR mode.
      */
-    public void setVirtualDisplayProperties(Vr2dDisplayProperties compatDisplayProperties) {
+    public void setVirtualDisplayProperties(Vr2dDisplayProperties displayProperties) {
         synchronized(mVdLock) {
             if (DEBUG) {
-                Log.i(TAG, "VD setVirtualDisplayProperties: res = "
-                        + compatDisplayProperties.getWidth() + "X"
-                        + compatDisplayProperties.getHeight() + ", dpi = "
-                        + compatDisplayProperties.getDpi());
+                Log.i(TAG, "VD setVirtualDisplayProperties: " +
+                        displayProperties.toString());
             }
 
-            if (compatDisplayProperties.getWidth() < MIN_VR_DISPLAY_WIDTH ||
-                compatDisplayProperties.getHeight() < MIN_VR_DISPLAY_HEIGHT ||
-                compatDisplayProperties.getDpi() < MIN_VR_DISPLAY_DPI) {
-                throw new IllegalArgumentException (
-                        "Illegal argument: height, width, dpi cannot be negative. res = "
-                        + compatDisplayProperties.getWidth() + "X"
-                        + compatDisplayProperties.getHeight()
-                        + ", dpi = " + compatDisplayProperties.getDpi());
+            int width = displayProperties.getWidth();
+            int height = displayProperties.getHeight();
+            int dpi = displayProperties.getDpi();
+            boolean resized = false;
+
+            if (width < MIN_VR_DISPLAY_WIDTH || height < MIN_VR_DISPLAY_HEIGHT ||
+                    dpi < MIN_VR_DISPLAY_DPI) {
+                Log.i(TAG, "Ignoring Width/Height/Dpi values of " + width + "," + height + ","
+                        + dpi);
+            } else {
+                Log.i(TAG, "Setting width/height/dpi to " + width + "," + height + "," + dpi);
+                mVirtualDisplayWidth = width;
+                mVirtualDisplayHeight = height;
+                mVirtualDisplayDpi = dpi;
+                resized = true;
             }
 
-            mVirtualDisplayWidth = compatDisplayProperties.getWidth();
-            mVirtualDisplayHeight = compatDisplayProperties.getHeight();
-            mVirtualDisplayDpi = compatDisplayProperties.getDpi();
+            if ((displayProperties.getFlags() & Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED)
+                    == Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED) {
+                mIsVirtualDisplayAllowed = true;
+            } else if ((displayProperties.getRemovedFlags() &
+                    Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED)
+                    == Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED) {
+                mIsVirtualDisplayAllowed = false;
+            }
 
-            if (mVirtualDisplay != null) {
+            if (mVirtualDisplay != null && resized && mIsVirtualDisplayAllowed) {
                 mVirtualDisplay.resize(mVirtualDisplayWidth, mVirtualDisplayHeight,
                     mVirtualDisplayDpi);
                 ImageReader oldImageReader = mImageReader;
@@ -224,6 +236,9 @@ class Vr2dDisplay {
                 startImageReader();
                 oldImageReader.close();
             }
+
+            // Start/Stop the virtual display in case the updates indicated that we should.
+            updateVirtualDisplay();
         }
     }
 
@@ -297,7 +312,7 @@ class Vr2dDisplay {
            mStopVDRunnable = new Runnable() {
                @Override
                public void run() {
-                    if (mIsVrModeEnabled) {
+                    if (shouldRunVirtualDisplay()) {
                         Log.i(TAG, "Virtual Display destruction stopped: VrMode is back on.");
                     } else {
                         Log.i(TAG, "Stopping Virtual Display");
@@ -365,5 +380,9 @@ class Vr2dDisplay {
             mImageReader.close();
             mImageReader = null;
         }
+    }
+
+    private boolean shouldRunVirtualDisplay() {
+        return mIsVirtualDisplayAllowed && (mIsVrModeEnabled || mIsVrModeOverrideEnabled);
     }
 }

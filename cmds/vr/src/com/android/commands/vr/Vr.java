@@ -41,6 +41,7 @@ public final class Vr extends BaseCommand {
         "set-persistent-vr-mode-enabled";
     private static final String COMMAND_SET_VR2D_DISPLAY_PROPERTIES =
         "set-display-props";
+    private static final String COMMAND_ENABLE_VD = "enable-virtual-display";
 
     private IVrManager mVrService;
 
@@ -49,7 +50,8 @@ public final class Vr extends BaseCommand {
         out.println(
                 "usage: vr [subcommand]\n" +
                 "usage: vr set-persistent-vr-mode-enabled [true|false]\n" +
-                "usage: vr set-display-props [width] [height] [dpi]\n"
+                "usage: vr set-display-props [width] [height] [dpi]\n" +
+                "usage: vr enable-virtual-display [true|false]\n"
                 );
     }
 
@@ -68,6 +70,9 @@ public final class Vr extends BaseCommand {
                 break;
             case COMMAND_SET_PERSISTENT_VR_MODE_ENABLED:
                 runSetPersistentVrModeEnabled();
+                break;
+            case COMMAND_ENABLE_VD:
+                runEnableVd();
                 break;
             default:
                 throw new IllegalArgumentException ("unknown command '" + command + "'");
@@ -91,6 +96,23 @@ public final class Vr extends BaseCommand {
             mVrService.setVr2dDisplayProperties(vr2dDisplayProperties);
         } catch (RemoteException re) {
             System.err.println("Error: Can't set persistent mode " + re);
+        }
+    }
+
+    private void runEnableVd() throws RemoteException {
+        Vr2dDisplayProperties.Builder builder = new Vr2dDisplayProperties.Builder();
+
+        String value = nextArgRequired();
+        if ("true".equals(value)) {
+            builder.setEnabled(true);
+        } else if ("false".equals(value)) {
+            builder.setEnabled(false);
+        } // Don't do anything if not exactly true/false
+
+        try {
+            mVrService.setVr2dDisplayProperties(builder.build());
+        } catch (RemoteException re) {
+            System.err.println("Error: Can't enable (" + value +") virtual display" + re);
         }
     }
 
