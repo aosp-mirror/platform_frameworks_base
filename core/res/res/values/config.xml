@@ -393,12 +393,21 @@
     <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering -->
     <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
     <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH -->
+    <!-- This list is also modified by code within the framework, including:
+
+             - TYPE_ETHERNET (9) is prepended to this list, and
+             - the output of TelephonyManager.getTetherApnRequired()
+               determines whether both TYPE_MOBILE (0) and TYPE_HIPRI (5)
+               or TYPE_MOBILE_DUN (4) are appended (if not already present).
+
+         For other changes applied to this list, now and in the future, see
+         com.android.server.connectivity.tethering.TetheringConfiguration.
+      -->
     <integer-array translatable="false" name="config_tether_upstream_types">
         <item>0</item>
         <item>1</item>
         <item>5</item>
         <item>7</item>
-        <item>9</item>
     </integer-array>
 
     <!-- If the DUN connection for this CDMA device supports more than just DUN -->
