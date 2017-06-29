@@ -43,6 +43,7 @@ package android.test {
     method public java.util.List<junit.framework.TestCase> getTestCases();
     method public java.lang.String getTestClassName();
     method public junit.framework.TestResult getTestResult();
+    method protected java.lang.Class loadSuiteClass(java.lang.String) throws java.lang.ClassNotFoundException;
     method protected void runFailed(java.lang.String);
     method public void runTest();
     method public void runTest(junit.framework.TestResult);
