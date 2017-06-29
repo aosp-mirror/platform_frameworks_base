@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014 The Android Open Source Project
+     Copyright (C) 2017 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,20 +14,23 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<set xmlns:android="http://schemas.android.com/apk/res/android" >
+<set
+    xmlns:android="http://schemas.android.com/apk/res/android" >
     <set
         android:ordering="sequentially" >
         <objectAnimator
             android:duration="50"
-            android:propertyName="rotation"
-            android:valueFrom="-135"
-            android:valueTo="-135"
-            android:interpolator="@android:interpolator/fast_out_slow_in" />
+            android:propertyName="fillAlpha"
+            android:valueFrom="0.0"
+            android:valueTo="0.0"
+            android:valueType="floatType"
+            android:interpolator="@android:interpolator/linear" />
         <objectAnimator
-            android:duration="400"
-            android:propertyName="rotation"
-            android:valueFrom="-135"
-            android:valueTo="0"
-            android:interpolator="@android:interpolator/fast_out_slow_in" />
+            android:duration="83"
+            android:propertyName="fillAlpha"
+            android:valueFrom="0.0"
+            android:valueTo="1.0"
+            android:valueType="floatType"
+            android:interpolator="@android:interpolator/linear" />
     </set>
 </set>
