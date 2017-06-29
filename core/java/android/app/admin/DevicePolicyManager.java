@@ -3562,7 +3562,7 @@ public class DevicePolicyManager {
      * Maximum supported password length. Kind-of arbitrary.
      * @hide
      */
-    public static final int MAX_PASSWORD_LENGTH = 16;
+    public static final int MAX_PASSWORD_LENGTH = 64;
 
     /**
      * Service Action: Service implemented by a device owner or profile owner supervision app to
