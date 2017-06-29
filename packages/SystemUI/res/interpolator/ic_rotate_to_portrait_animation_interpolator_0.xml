@@ -14,22 +14,6 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<animated-vector
+<pathInterpolator
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/ic_portrait_from_auto_rotate" >
-    <target
-        android:name="device_0"
-        android:animation="@anim/ic_rotate_to_portrait_device_0_animation" />
-    <target
-        android:name="device_merged"
-        android:animation="@anim/ic_rotate_to_portrait_device_merged_animation" />
-    <target
-        android:name="arrows"
-        android:animation="@anim/ic_rotate_to_portrait_arrows_animation" />
-    <target
-        android:name="arrows_0"
-        android:animation="@anim/ic_rotate_to_portrait_arrows_0_animation" />
-    <target
-        android:name="bottom_merged"
-        android:animation="@anim/ic_rotate_to_portrait_bottom_merged_animation" />
-</animated-vector>
+    android:pathData="M 0.0,0.0 c 0.4,0.0 0.6,1.0 1.0,1.0" />
