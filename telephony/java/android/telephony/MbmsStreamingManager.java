@@ -43,16 +43,14 @@ public class MbmsStreamingManager {
 
     private AtomicReference<IMbmsStreamingService> mService = new AtomicReference<>(null);
     private MbmsStreamingManagerCallback mCallbackToApp;
-    private final String mAppName;
 
     private final Context mContext;
     private int mSubscriptionId = INVALID_SUBSCRIPTION_ID;
 
     /** @hide */
     private MbmsStreamingManager(Context context, MbmsStreamingManagerCallback listener,
-                    String streamingAppName, int subscriptionId) {
+                    int subscriptionId) {
         mContext = context;
-        mAppName = streamingAppName;
         mCallbackToApp = listener;
         mSubscriptionId = subscriptionId;
     }
@@ -67,27 +65,24 @@ public class MbmsStreamingManager {
      * @param context The {@link Context} to use.
      * @param listener A callback object on which you wish to receive results of asynchronous
      *                 operations.
-     * @param streamingAppName The name of the streaming app, as specified by the carrier.
      * @param subscriptionId The subscription ID to use.
      */
     public static MbmsStreamingManager create(Context context,
-            MbmsStreamingManagerCallback listener, String streamingAppName, int subscriptionId)
+            MbmsStreamingManagerCallback listener, int subscriptionId)
             throws MbmsException {
-        MbmsStreamingManager manager = new MbmsStreamingManager(context, listener,
-                streamingAppName, subscriptionId);
+        MbmsStreamingManager manager = new MbmsStreamingManager(context, listener, subscriptionId);
         manager.bindAndInitialize();
         return manager;
     }
 
     /**
      * Create a new MbmsStreamingManager using the system default data subscription ID.
-     * See {@link #create(Context, MbmsStreamingManagerCallback, String, int)}.
+     * See {@link #create(Context, MbmsStreamingManagerCallback, int)}.
      */
     public static MbmsStreamingManager create(Context context,
-            MbmsStreamingManagerCallback listener, String streamingAppName)
+            MbmsStreamingManagerCallback listener)
             throws MbmsException {
-        return create(context, listener, streamingAppName,
-                SubscriptionManager.getDefaultSubscriptionId());
+        return create(context, listener, SubscriptionManager.getDefaultSubscriptionId());
     }
 
     /**
@@ -101,7 +96,7 @@ public class MbmsStreamingManager {
             return;
         }
         try {
-            streamingService.dispose(mAppName, mSubscriptionId);
+            streamingService.dispose(mSubscriptionId);
         } catch (RemoteException e) {
             // Ignore for now
         }
@@ -132,8 +127,7 @@ public class MbmsStreamingManager {
             throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
         }
         try {
-            int returnCode = streamingService.getStreamingServices(
-                    mAppName, mSubscriptionId, classList);
+            int returnCode = streamingService.getStreamingServices(mSubscriptionId, classList);
             if (returnCode != MbmsException.SUCCESS) {
                 throw new MbmsException(returnCode);
             }
@@ -168,7 +162,7 @@ public class MbmsStreamingManager {
 
         try {
             int returnCode = streamingService.startStreaming(
-                    mAppName, mSubscriptionId, serviceInfo.getServiceId(), listener);
+                    mSubscriptionId, serviceInfo.getServiceId(), listener);
             if (returnCode != MbmsException.SUCCESS) {
                 throw new MbmsException(returnCode);
             }
@@ -178,8 +172,7 @@ public class MbmsStreamingManager {
             throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
         }
 
-        return new StreamingService(
-                mAppName, mSubscriptionId, streamingService, serviceInfo, listener);
+        return new StreamingService(mSubscriptionId, streamingService, serviceInfo, listener);
     }
 
     private void bindAndInitialize() throws MbmsException {
@@ -190,12 +183,12 @@ public class MbmsStreamingManager {
                         IMbmsStreamingService streamingService =
                                 IMbmsStreamingService.Stub.asInterface(service);
                         try {
-                            streamingService.initialize(mCallbackToApp, mAppName, mSubscriptionId);
+                            streamingService.initialize(mCallbackToApp, mSubscriptionId);
                         } catch (RemoteException e) {
                             Log.e(LOG_TAG, "Service died before initialization");
                             return;
                         }
-                        mService.set(null);
+                        mService.set(streamingService);
                     }
 
                     @Override
