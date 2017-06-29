@@ -614,7 +614,7 @@ public class AppWindowContainerController
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
             return snapshot == null ? STARTING_WINDOW_TYPE_NONE
-                    : snapshotOrientationSameAsDisplay(snapshot) || fromRecents
+                    : snapshotOrientationSameAsTask(snapshot) || fromRecents
                             ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else {
             return STARTING_WINDOW_TYPE_NONE;
@@ -640,24 +640,11 @@ public class AppWindowContainerController
         return true;
     }
 
-    private boolean snapshotOrientationSameAsDisplay(TaskSnapshot snapshot) {
+    private boolean snapshotOrientationSameAsTask(TaskSnapshot snapshot) {
         if (snapshot == null) {
             return false;
         }
-        final Rect rect = new Rect(0, 0, snapshot.getSnapshot().getWidth(),
-                snapshot.getSnapshot().getHeight());
-        rect.inset(snapshot.getContentInsets());
-        final Rect taskBoundsWithoutInsets = new Rect();
-        mContainer.getTask().getBounds(taskBoundsWithoutInsets);
-        final DisplayInfo di = mContainer.getDisplayContent().getDisplayInfo();
-        final Rect displayBounds = new Rect(0, 0, di.logicalWidth, di.logicalHeight);
-        final Rect stableInsets = new Rect();
-        mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                stableInsets);
-        displayBounds.inset(stableInsets);
-        final boolean snapshotInLandscape = rect.width() >= rect.height();
-        final boolean displayInLandscape = displayBounds.width() >= displayBounds.height();
-        return snapshotInLandscape == displayInLandscape;
+        return mContainer.getTask().getConfiguration().orientation == snapshot.getOrientation();
     }
 
     public void removeStartingWindow() {
