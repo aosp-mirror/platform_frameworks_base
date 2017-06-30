@@ -874,7 +874,6 @@ packages_to_document := \
 # The result will be relative to frameworks/base.
 fwbase_dirs_to_document := \
 	legacy-test/src \
-	test-runner/src \
 	$(patsubst $(LOCAL_PATH)/%,%, \
 	  $(wildcard \
 	    $(foreach dir, $(FRAMEWORKS_BASE_JAVA_SRC_DIRS), \
@@ -891,6 +890,12 @@ non_base_dirs := \
 	../opt/telephony/src/java/android/telephony/gsm \
 	../opt/net/voip/src/java/android/net/rtp \
 	../opt/net/voip/src/java/android/net/sip
+
+framework_base_android_test_mock_src_files := \
+	$(call all-java-files-under, test-runner/src/android/test/mock)
+
+framework_base_android_test_runner_excluding_mock_src_files := \
+	$(filter-out $(framework_base_android_test_mock_src_files), $(call all-java-files-under, test-runner/src))
 
 # These are relative to frameworks/base
 dirs_to_check_apis := \
@@ -911,6 +916,7 @@ endef
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 dirs_to_document := \
 	$(dirs_to_check_apis) \
+	test-runner/src \
 	$(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS))
 
 patterns_to_not_document := \
@@ -933,7 +939,9 @@ framework_docs_LOCAL_SRC_FILES := \
 
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
-	$(call find-other-java-files, $(dirs_to_check_apis)) \
+	$(framework_base_android_test_mock_src_files) \
+	$(framework_base_android_test_runner_excluding_mock_src_files) \
+	$(call all-java-files-under, $(dirs_to_check_apis)) \
 	$(common_src_files)
 
 # This is used by ide.mk as the list of source files that are
@@ -957,7 +965,8 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	ext \
 	icu4j \
 	framework \
-	voip-common
+	voip-common \
+	android.test.mock \
 
 # Platform docs can refer to Support Library APIs, but we don't actually build
 # them as part of the docs target, so we need to include them on the classpath.
