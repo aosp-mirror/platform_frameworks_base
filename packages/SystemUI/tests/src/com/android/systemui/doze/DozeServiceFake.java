@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import android.os.PowerManager;
 import android.view.Display;
 
 public class DozeServiceFake implements DozeMachine.Service {
@@ -23,6 +24,7 @@ public class DozeServiceFake implements DozeMachine.Service {
     public boolean finished;
     public int screenState;
     public boolean requestedWakeup;
+    public int screenBrightness;
 
     public DozeServiceFake() {
         reset();
@@ -38,13 +40,19 @@ public class DozeServiceFake implements DozeMachine.Service {
         screenState = state;
     }
 
-    public void reset() {
-        finished = false;
-        screenState = Display.STATE_UNKNOWN;
-    }
-
     @Override
     public void requestWakeUp() {
         requestedWakeup = true;
+    }
+
+    @Override
+    public void setDozeScreenBrightness(int brightness) {
+        screenBrightness = brightness;
+    }
+
+    public void reset() {
+        finished = false;
+        screenState = Display.STATE_UNKNOWN;
+        screenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
     }
 }
