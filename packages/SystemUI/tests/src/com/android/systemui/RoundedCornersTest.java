@@ -46,7 +46,6 @@ import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -105,7 +104,6 @@ public class RoundedCornersTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore
     public void testRounding() {
         mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 20);
         mContext.getOrCreateTestableResources()
@@ -115,8 +113,8 @@ public class RoundedCornersTest extends SysuiTestCase {
         // Add 2 windows for rounded corners (top and bottom).
         verify(mWindowManager, times(2)).addView(any(), any());
 
-        // Add 3 tag listeners for each of the fragments that are needed.
-        verify(mFragmentHostManager, times(3)).addTagListener(any(), any());
+        // Add 2 tag listeners for each of the fragments that are needed.
+        verify(mFragmentHostManager, times(2)).addTagListener(any(), any());
         // One tunable.
         verify(mTunerService, times(1)).addTunable(any(), any());
         // One TunablePadding.
