@@ -31,6 +31,7 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
      */
     public static final int SIGNAL_STRENGTH_UNAVAILABLE = -1;
 
+    @Override
     public void error(int errorCode, String message) {
         // default implementation empty
     }
@@ -41,7 +42,9 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
      * See {@link StreamingService#STATE_STOPPED}, {@link StreamingService#STATE_STARTED}
      * and {@link StreamingService#STATE_STALLED}.
      */
-    public void streamStateUpdated(int state) {
+    @Override
+    public void streamStateUpdated(@StreamingService.StreamingState int state,
+            @StreamingService.StreamingStateChangeReason int reason) {
         // default implementation empty
     }
 
@@ -55,6 +58,7 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
      * This may be called when a looping stream hits the end or
      * when parameters have changed to account for time drift.
      */
+    @Override
     public void mediaDescriptionUpdated() {
         // default implementation empty
     }
@@ -69,6 +73,7 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
      * {@link #SIGNAL_STRENGTH_UNAVAILABLE} if broadcast is not available
      * for this service due to timing, geography or popularity.
      */
+    @Override
     public void broadcastSignalStrengthUpdated(int signalStrength) {
         // default implementation empty
     }
@@ -89,6 +94,7 @@ public class StreamingServiceCallback extends IStreamingServiceCallback.Stub {
      * See {@link StreamingService#BROADCAST_METHOD} and
      * {@link StreamingService#UNICAST_METHOD}
      */
+    @Override
     public void streamMethodUpdated(int methodType) {
         // default implementation empty
     }
