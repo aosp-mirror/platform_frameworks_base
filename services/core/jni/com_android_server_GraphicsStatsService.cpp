@@ -43,8 +43,9 @@ static void addToDump(JNIEnv* env, jobject, jlong dumpPtr, jstring jpath, jstrin
     std::string path;
     const ProfileData* data = nullptr;
     LOG_ALWAYS_FATAL_IF(jdata == nullptr && jpath == nullptr, "Path and data can't both be null");
+    ScopedByteArrayRO buffer{env};
     if (jdata != nullptr) {
-        ScopedByteArrayRO buffer(env, jdata);
+        buffer.reset(jdata);
         LOG_ALWAYS_FATAL_IF(buffer.size() != sizeof(ProfileData),
                 "Buffer size %zu doesn't match expected %zu!", buffer.size(), sizeof(ProfileData));
         data = reinterpret_cast<const ProfileData*>(buffer.get());
