@@ -57,6 +57,8 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.GuestResumeSessionReceiver;
+import com.android.systemui.Prefs;
+import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUISecondaryUserService;
@@ -234,6 +236,9 @@ public class UserSwitcherController {
                                     switchToEnabled));
                         }
                     }
+                }
+                if (records.size() > 1 || guestRecord != null) {
+                    Prefs.putBoolean(mContext, Key.SEEN_MULTI_USER, true);
                 }
 
                 boolean systemCanCreateUsers = !mUserManager.hasBaseUserRestriction(
