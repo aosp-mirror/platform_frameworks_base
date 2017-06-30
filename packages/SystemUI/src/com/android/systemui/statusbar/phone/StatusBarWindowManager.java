@@ -138,7 +138,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     }
 
     private void adjustScreenOrientation(State state) {
-        if (state.isKeyguardShowingAndNotOccluded()) {
+        if (state.isKeyguardShowingAndNotOccluded() || state.dozing) {
             if (mKeyguardScreenRotation) {
                 mLpChanged.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
             } else {
