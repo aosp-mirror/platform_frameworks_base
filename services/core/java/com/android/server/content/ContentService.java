@@ -102,6 +102,22 @@ public final class ContentService extends IContentService.Stub {
             }
         }
 
+
+        @Override
+        public void onStartUser(int userHandle) {
+            mService.onStartUser(userHandle);
+        }
+
+        @Override
+        public void onUnlockUser(int userHandle) {
+            mService.onUnlockUser(userHandle);
+        }
+
+        @Override
+        public void onStopUser(int userHandle) {
+            mService.onStopUser(userHandle);
+        }
+
         @Override
         public void onCleanupUser(int userHandle) {
             synchronized (mService.mCache) {
@@ -160,6 +176,18 @@ public final class ContentService extends IContentService.Stub {
             }
             return mSyncManager;
         }
+    }
+
+    void onStartUser(int userHandle) {
+        if (mSyncManager != null) mSyncManager.onStartUser(userHandle);
+    }
+
+    void onUnlockUser(int userHandle) {
+        if (mSyncManager != null) mSyncManager.onUnlockUser(userHandle);
+    }
+
+    void onStopUser(int userHandle) {
+        if (mSyncManager != null) mSyncManager.onStopUser(userHandle);
     }
 
     @Override
