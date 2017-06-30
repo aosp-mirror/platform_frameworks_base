@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,9 +27,9 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.IDownloadCallback;
 import android.telephony.mbms.DownloadRequest;
-import android.telephony.mbms.DownloadStatus;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsDownloadReceiver;
@@ -40,6 +41,8 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -192,6 +195,18 @@ public class MbmsDownloadManager {
     public static final int RESULT_EXPIRED    = 3;
     // TODO - more results!
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STATUS_UNKNOWN, STATUS_ACTIVELY_DOWNLOADING, STATUS_PENDING_DOWNLOAD,
+            STATUS_PENDING_REPAIR, STATUS_PENDING_DOWNLOAD_WINDOW})
+    public @interface DownloadStatus {}
+
+    public static final int STATUS_UNKNOWN = 0;
+    public static final int STATUS_ACTIVELY_DOWNLOADING = 1;
+    public static final int STATUS_PENDING_DOWNLOAD = 2;
+    public static final int STATUS_PENDING_REPAIR = 3;
+    public static final int STATUS_PENDING_DOWNLOAD_WINDOW = 4;
+
     private final Context mContext;
     private int mSubscriptionId = INVALID_SUBSCRIPTION_ID;
 
@@ -271,8 +286,6 @@ public class MbmsDownloadManager {
      * The serviceClasses argument lets the app filter on types of programming and is opaque data
      * negotiated beforehand between the app and the carrier.
      *
-     * Multiple calls replace the list of serviceClasses of interest.
-     *
      * This may throw an {@link MbmsException} containing one of the following errors:
      * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
      * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
@@ -282,6 +295,12 @@ public class MbmsDownloadManager {
      * callback can include any of the errors except:
      * {@link MbmsException#ERROR_UNABLE_TO_START_SERVICE}
      * {@link MbmsException#ERROR_END_OF_SESSION}
+     *
+     * @param classList A list of service classes which the app wishes to receive
+     *                  {@link IMbmsDownloadManagerCallback#fileServicesUpdated(List)} callbacks
+     *                  about. Subsequent calls to this method will replace this list of service
+     *                  classes (i.e. the middleware will no longer send updates for services
+     *                  matching classes only in the old list).
      */
     public void getFileServices(List<String> classList) throws MbmsException {
         IMbmsDownloadService downloadService = mService.get();
@@ -312,8 +331,9 @@ public class MbmsDownloadManager {
      * will default to a directory formed by the concatenation of the app's files directory and
      * {@link android.telephony.mbms.MbmsTempFileProvider#DEFAULT_TOP_LEVEL_TEMP_DIRECTORY}.
      *
-     * This method may not be called while any download requests are still active. If this is
-     * the case, an {@link MbmsException} will be thrown with code
+     * Before calling this method, the app must cancel all of its pending
+     * {@link DownloadRequest}s via {@link #cancelDownload(DownloadRequest)}. If this is not done,
+     * an {@link MbmsException} will be thrown with code
      * {@link MbmsException#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT}
      *
      * The {@link File} supplied as a root temp file directory must already exist. If not, an
@@ -444,20 +464,30 @@ public class MbmsDownloadManager {
     }
 
     /**
-     * Gets information about current and known upcoming downloads.
+     * Gets information about the status of a file pending download.
      *
-     * Current is a straightforward count of the files being downloaded "now"
-     * for some definition of now (may be racey).
-     * Future downloads include counts of files with pending repair operations, counts of
-     * files with future downloads and indication of scheduled download times with unknown
-     * file details.
+     * If the middleware has not yet been properly initialized or if it has no records of the
+     * file indicated by {@code fileInfo} being associated with {@code downloadRequest},
+     * {@link #STATUS_UNKNOWN} will be returned.
      *
-     * May throw an IllegalArgumentException or RemoteException.
-     *
-     * If the DownloadRequest is unknown the results will be null.
+     * @param downloadRequest The download request to query.
+     * @param fileInfo The particular file within the request to get information on.
+     * @return The status of the download.
      */
-    public DownloadStatus getDownloadStatus(DownloadRequest downloadRequest) {
-        return null;
+    @DownloadStatus
+    public int getDownloadStatus(DownloadRequest downloadRequest, FileInfo fileInfo)
+            throws MbmsException {
+        IMbmsDownloadService downloadService = mService.get();
+        if (downloadService == null) {
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+        }
+
+        try {
+            return downloadService.getDownloadStatus(downloadRequest, fileInfo);
+        } catch (RemoteException e) {
+            mService.set(null);
+            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+        }
     }
 
     /**

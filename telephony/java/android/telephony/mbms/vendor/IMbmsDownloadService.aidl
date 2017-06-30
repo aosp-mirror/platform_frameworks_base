@@ -19,7 +19,7 @@ package android.telephony.mbms.vendor;
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.telephony.mbms.DownloadRequest;
-import android.telephony.mbms.DownloadStatus;
+import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
 import android.telephony.mbms.IDownloadCallback;
 
@@ -41,7 +41,7 @@ interface IMbmsDownloadService
 
     int cancelDownload(in DownloadRequest downloadRequest);
 
-    DownloadStatus getDownloadStatus(in DownloadRequest downloadRequest);
+    int getDownloadStatus(in DownloadRequest downloadRequest, in FileInfo fileInfo);
 
     /*
      * named this for 2 reasons:

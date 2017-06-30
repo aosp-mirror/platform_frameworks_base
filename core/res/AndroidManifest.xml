@@ -1605,6 +1605,10 @@
     <permission android:name="android.permission.RECEIVE_STK_COMMANDS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to send EMBMS download intents to apps-->
+    <permission android:name="android.permission.SEND_EMBMS_INTENTS"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Must be required by an ImsService to ensure that only the
          system can bind to it.
          <p>Protection level: signature|privileged
