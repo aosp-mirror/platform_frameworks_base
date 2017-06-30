@@ -76,8 +76,6 @@ public class DozeService extends DreamService
         super.onDreamingStarted();
         mDozeMachine.requestState(DozeMachine.State.INITIALIZED);
         startDozing();
-        setDozeScreenBrightness(getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessDoze));
         if (mDozePlugin != null) {
             mDozePlugin.onDreamingStarted();
         }

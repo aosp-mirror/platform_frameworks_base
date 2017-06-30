@@ -24,18 +24,11 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 /**
  * Prevents usage of doze screen states on devices that don't support them.
  */
-public class DozeScreenStatePreventingAdapter implements DozeMachine.Service {
-
-    private final DozeMachine.Service mInner;
+public class DozeScreenStatePreventingAdapter extends DozeMachine.Service.Delegate {
 
     @VisibleForTesting
     DozeScreenStatePreventingAdapter(DozeMachine.Service inner) {
-        mInner = inner;
-    }
-
-    @Override
-    public void finish() {
-        mInner.finish();
+        super(inner);
     }
 
     @Override
@@ -43,12 +36,7 @@ public class DozeScreenStatePreventingAdapter implements DozeMachine.Service {
         if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND) {
             state = Display.STATE_ON;
         }
-        mInner.setDozeScreenState(state);
-    }
-
-    @Override
-    public void requestWakeUp() {
-        mInner.requestWakeUp();
+        super.setDozeScreenState(state);
     }
 
     /**

@@ -226,7 +226,6 @@ public class DozeMachine {
 
         updatePulseReason(newState, oldState, pulseReason);
         performTransitionOnComponents(oldState, newState);
-        updateScreenState(newState);
         updateWakeLockState(newState);
 
         resolveIntermediateState(newState);
@@ -312,13 +311,6 @@ public class DozeMachine {
         }
     }
 
-    private void updateScreenState(State newState) {
-        int state = newState.screenState();
-        if (state != Display.STATE_UNKNOWN) {
-            mDozeService.setDozeScreenState(state);
-        }
-    }
-
     private void resolveIntermediateState(State state) {
         switch (state) {
             case INITIALIZED:
@@ -365,5 +357,36 @@ public class DozeMachine {
 
         /** Request waking up. */
         void requestWakeUp();
+
+        /** Set screen brightness */
+        void setDozeScreenBrightness(int brightness);
+
+        class Delegate implements Service {
+            private final Service mDelegate;
+
+            public Delegate(Service delegate) {
+                mDelegate = delegate;
+            }
+
+            @Override
+            public void finish() {
+                mDelegate.finish();
+            }
+
+            @Override
+            public void setDozeScreenState(int state) {
+                mDelegate.setDozeScreenState(state);
+            }
+
+            @Override
+            public void requestWakeUp() {
+                mDelegate.requestWakeUp();
+            }
+
+            @Override
+            public void setDozeScreenBrightness(int brightness) {
+                mDelegate.setDozeScreenBrightness(brightness);
+            }
+        }
     }
 }

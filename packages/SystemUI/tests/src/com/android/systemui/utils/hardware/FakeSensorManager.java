@@ -30,13 +30,15 @@ import android.os.MemoryFile;
 import android.os.SystemClock;
 import android.util.ArraySet;
 
-import com.google.android.collect.Lists;
+import com.android.internal.util.Preconditions;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Rudimentary fake for SensorManager
@@ -49,6 +51,8 @@ import java.util.List;
 public class FakeSensorManager extends SensorManager {
 
     private final MockProximitySensor mMockProximitySensor;
+    private final FakeGenericSensor mFakeLightSensor;
+    private final FakeGenericSensor[] mSensors;
 
     public FakeSensorManager(Context context) throws Exception {
         Sensor proxSensor = context.getSystemService(SensorManager.class)
@@ -57,11 +61,19 @@ public class FakeSensorManager extends SensorManager {
             // No prox? Let's create a fake one!
             proxSensor = createSensor(Sensor.TYPE_PROXIMITY);
         }
-        mMockProximitySensor = new MockProximitySensor(proxSensor);
+
+        mSensors = new FakeGenericSensor[]{
+                mMockProximitySensor = new MockProximitySensor(proxSensor),
+                mFakeLightSensor = new FakeGenericSensor(createSensor(Sensor.TYPE_LIGHT)),
+        };
     }
 
     public MockProximitySensor getMockProximitySensor() {
         return mMockProximitySensor;
+    }
+
+    public FakeGenericSensor getFakeLightSensor() {
+        return mFakeLightSensor;
     }
 
     @Override
@@ -77,7 +89,10 @@ public class FakeSensorManager extends SensorManager {
 
     @Override
     protected List<Sensor> getFullSensorList() {
-        return Lists.newArrayList(mMockProximitySensor.sensor);
+        return Arrays
+                .stream(mSensors)
+                .map(i -> i.mSensor)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -87,8 +102,11 @@ public class FakeSensorManager extends SensorManager {
 
     @Override
     protected void unregisterListenerImpl(SensorEventListener listener, Sensor sensor) {
-        if (sensor == mMockProximitySensor.sensor || sensor == null) {
-            mMockProximitySensor.listeners.remove(listener);
+        Preconditions.checkNotNull(listener);
+        for (FakeGenericSensor s : mSensors) {
+            if (sensor == null || s.mSensor == sensor) {
+                s.mListeners.remove(listener);
+            }
         }
     }
 
@@ -96,9 +114,13 @@ public class FakeSensorManager extends SensorManager {
     protected boolean registerListenerImpl(SensorEventListener listener, Sensor sensor,
             int delayUs,
             Handler handler, int maxReportLatencyUs, int reservedFlags) {
-        if (sensor == mMockProximitySensor.sensor) {
-            mMockProximitySensor.listeners.add(listener);
-            return true;
+        Preconditions.checkNotNull(sensor);
+        Preconditions.checkNotNull(listener);
+        for (FakeGenericSensor s : mSensors) {
+            if (s.mSensor == sensor) {
+                s.mListeners.add(listener);
+                return true;
+            }
         }
         return false;
     }
@@ -196,18 +218,35 @@ public class FakeSensorManager extends SensorManager {
         setter.invoke(sensor, type);
     }
 
-    public class MockProximitySensor {
-        final Sensor sensor;
-        final ArraySet<SensorEventListener> listeners = new ArraySet<>();
+    public class MockProximitySensor extends FakeGenericSensor {
 
         private MockProximitySensor(Sensor sensor) {
-            this.sensor = sensor;
+            super(sensor);
         }
 
         public void sendProximityResult(boolean far) {
-            SensorEvent event = createSensorEvent(1);
-            event.values[0] = far ? sensor.getMaximumRange() : 0;
-            for (SensorEventListener listener : listeners) {
+            sendSensorEvent(far ? getSensor().getMaximumRange() : 0);
+        }
+    }
+
+    public class FakeGenericSensor {
+
+        private final Sensor mSensor;
+        private final ArraySet<SensorEventListener> mListeners = new ArraySet<>();
+
+        public FakeGenericSensor(
+                Sensor sensor) {
+            this.mSensor = sensor;
+        }
+
+        public Sensor getSensor() {
+            return mSensor;
+        }
+
+        public void sendSensorEvent(float... values) {
+            SensorEvent event = createSensorEvent(values.length);
+            System.arraycopy(values, 0, event.values, 0, values.length);
+            for (SensorEventListener listener : mListeners) {
                 listener.onSensorChanged(event);
             }
         }
@@ -222,7 +261,7 @@ public class FakeSensorManager extends SensorManager {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            event.sensor = sensor;
+            event.sensor = mSensor;
             event.timestamp = SystemClock.elapsedRealtimeNanos();
 
             return event;
