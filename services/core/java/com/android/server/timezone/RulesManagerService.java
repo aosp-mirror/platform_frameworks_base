@@ -22,6 +22,7 @@ import com.android.timezone.distro.DistroException;
 import com.android.timezone.distro.DistroVersion;
 import com.android.timezone.distro.StagedDistroOperation;
 import com.android.timezone.distro.TimeZoneDistro;
+import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
 
 import android.app.timezone.Callback;
 import android.app.timezone.DistroFormatVersion;
@@ -42,7 +43,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import libcore.tzdata.update2.TimeZoneDistroInstaller;
 
 // TODO(nfuller) Add EventLog calls where useful in the system server.
 // TODO(nfuller) Check logging best practices in the system server.
