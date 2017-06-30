@@ -261,7 +261,8 @@ class DimLayerController {
                 dimLayer = state.animator.mAnimLayer + LAYER_OFFSET_DIM;
                 dimAmount = DEFAULT_DIM_AMOUNT_DEAD_WINDOW;
             } else {
-                dimLayer = state.animator.mAnimLayer - LAYER_OFFSET_DIM;
+                dimLayer = dimLayerUser.getLayerForDim(state.animator, LAYER_OFFSET_DIM,
+                        state.animator.mAnimLayer - LAYER_OFFSET_DIM);
                 dimAmount = state.animator.mWin.mAttrs.dimAmount;
             }
         }
