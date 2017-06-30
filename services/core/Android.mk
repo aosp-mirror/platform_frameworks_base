@@ -26,7 +26,7 @@ LOCAL_JAVA_LIBRARIES := \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     time_zone_distro \
-    tzdata_update2 \
+    time_zone_distro_installer \
     android.hidl.base-V1.0-java-static \
     android.hardware.weaver-V1.0-java-static \
     android.hardware.biometrics.fingerprint-V2.1-java-static \

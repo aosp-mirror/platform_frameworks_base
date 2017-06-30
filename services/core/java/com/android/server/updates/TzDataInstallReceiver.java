@@ -17,12 +17,12 @@
 package com.android.server.updates;
 
 import com.android.timezone.distro.TimeZoneDistro;
+import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
 
 import android.util.Slog;
 
 import java.io.File;
 import java.io.IOException;
-import libcore.tzdata.update2.TimeZoneDistroInstaller;
 
 /**
  * An install receiver responsible for installing timezone data updates.
