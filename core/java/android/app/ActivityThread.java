@@ -5138,11 +5138,7 @@ public final class ActivityThread {
                 Slog.w(TAG, "Profiling failed on path " + profilerInfo.profileFile
                         + " -- can the process access this path?");
             } finally {
-                try {
-                    profilerInfo.profileFd.close();
-                } catch (IOException e) {
-                    Slog.w(TAG, "Failure closing profile fd", e);
-                }
+                profilerInfo.closeFd();
             }
         } else {
             switch (profileType) {

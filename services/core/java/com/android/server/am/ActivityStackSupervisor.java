@@ -1442,26 +1442,17 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 if (mService.mProfileApp != null && mService.mProfileApp.equals(app.processName)) {
                     if (mService.mProfileProc == null || mService.mProfileProc == app) {
                         mService.mProfileProc = app;
-                        final String profileFile = mService.mProfileFile;
-                        if (profileFile != null) {
-                            ParcelFileDescriptor profileFd = mService.mProfileFd;
-                            if (profileFd != null) {
+                        ProfilerInfo profilerInfoSvc = mService.mProfilerInfo;
+                        if (profilerInfoSvc != null && profilerInfoSvc.profileFile != null) {
+                            if (profilerInfoSvc.profileFd != null) {
                                 try {
-                                    profileFd = profileFd.dup();
+                                    profilerInfoSvc.profileFd = profilerInfoSvc.profileFd.dup();
                                 } catch (IOException e) {
-                                    if (profileFd != null) {
-                                        try {
-                                            profileFd.close();
-                                        } catch (IOException o) {
-                                        }
-                                        profileFd = null;
-                                    }
+                                    profilerInfoSvc.closeFd();
                                 }
                             }
 
-                            profilerInfo = new ProfilerInfo(profileFile, profileFd,
-                                    mService.mSamplingInterval, mService.mAutoStopProfiler,
-                                    mService.mStreamingOutput);
+                            profilerInfo = new ProfilerInfo(profilerInfoSvc);
                         }
                     }
                 }
