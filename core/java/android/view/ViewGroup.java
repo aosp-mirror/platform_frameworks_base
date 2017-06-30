@@ -7609,6 +7609,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * See
      * {@link android.R.styleable#ViewGroup_MarginLayout ViewGroup Margin Layout Attributes}
      * for a list of all child view attributes that this class supports.
+     *
+     * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_margin
+     * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginHorizontal
+     * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginVertical
+     * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginLeft
+     * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginTop
+     * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginRight
+     * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginBottom
+     * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
+     * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
      */
     public static class MarginLayoutParams extends ViewGroup.LayoutParams {
         /**
