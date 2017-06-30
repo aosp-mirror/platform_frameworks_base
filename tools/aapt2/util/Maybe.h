@@ -281,16 +281,12 @@ inline Maybe<T> make_nothing() {
   return Maybe<T>();
 }
 
-/**
- * Define the == operator between Maybe<T> and Maybe<U> only if the operator T
- * == U is defined.
- * That way the compiler will show an error at the callsite when comparing two
- * Maybe<> objects
- * whose inner types can't be compared.
- */
+// Define the == operator between Maybe<T> and Maybe<U> only if the operator T == U is defined.
+// That way the compiler will show an error at the callsite when comparing two Maybe<> objects
+// whose inner types can't be compared.
 template <typename T, typename U>
-typename std::enable_if<has_eq_op<T, U>::value, bool>::type operator==(
-    const Maybe<T>& a, const Maybe<U>& b) {
+typename std::enable_if<has_eq_op<T, U>::value, bool>::type operator==(const Maybe<T>& a,
+                                                                       const Maybe<U>& b) {
   if (a && b) {
     return a.value() == b.value();
   } else if (!a && !b) {
@@ -299,18 +295,22 @@ typename std::enable_if<has_eq_op<T, U>::value, bool>::type operator==(
   return false;
 }
 
-/**
- * Same as operator== but negated.
- */
 template <typename T, typename U>
-typename std::enable_if<has_eq_op<T, U>::value, bool>::type operator!=(
-    const Maybe<T>& a, const Maybe<U>& b) {
+typename std::enable_if<has_eq_op<T, U>::value, bool>::type operator==(const Maybe<T>& a,
+                                                                       const U& b) {
+  return a ? a.value() == b : false;
+}
+
+// Same as operator== but negated.
+template <typename T, typename U>
+typename std::enable_if<has_eq_op<T, U>::value, bool>::type operator!=(const Maybe<T>& a,
+                                                                       const Maybe<U>& b) {
   return !(a == b);
 }
 
 template <typename T, typename U>
-typename std::enable_if<has_lt_op<T, U>::value, bool>::type operator<(
-    const Maybe<T>& a, const Maybe<U>& b) {
+typename std::enable_if<has_lt_op<T, U>::value, bool>::type operator<(const Maybe<T>& a,
+                                                                      const Maybe<U>& b) {
   if (a && b) {
     return a.value() < b.value();
   } else if (!a && !b) {
