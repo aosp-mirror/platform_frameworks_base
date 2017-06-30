@@ -56,8 +56,8 @@ public class MemoryFile {
      */
     public MemoryFile(String name, int length) throws IOException {
         try {
-            mMapping = mSharedMemory.mapReadWrite();
             mSharedMemory = SharedMemory.create(name, length);
+            mMapping = mSharedMemory.mapReadWrite();
         } catch (ErrnoException ex) {
             ex.rethrowAsIOException();
         }
