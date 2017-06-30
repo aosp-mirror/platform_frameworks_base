@@ -171,6 +171,8 @@ bool VerifyJavaStringFormat(const android::StringPiece& str);
 
 class StringBuilder {
  public:
+  explicit StringBuilder(bool preserve_spaces = false);
+
   StringBuilder& Append(const android::StringPiece& str);
   const std::string& ToString() const;
   const std::string& Error() const;
@@ -184,6 +186,7 @@ class StringBuilder {
   explicit operator bool() const;
 
  private:
+  bool preserve_spaces_;
   std::string str_;
   size_t utf16_len_ = 0;
   bool quote_ = false;
