@@ -18,11 +18,12 @@ package android.database;
 
 import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_COLUMNNAME_INDEX;
 import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_DEFAULT_INDEX;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteException;
-import android.os.Handler;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
@@ -40,6 +41,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Usage:  bit FrameworksCoreTests:android.database.DatabaseGeneralTest
+ */
 public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceTestCase {
     private static final String TAG = "DatabaseGeneralTest";
 
@@ -68,7 +72,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
     @Override
     protected void tearDown() throws Exception {
         mDatabase.close();
-        mDatabaseFile.delete();
+        SQLiteDatabase.deleteDatabase(mDatabaseFile);
         super.tearDown();
     }
 
@@ -1042,6 +1046,52 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().contains("cannot set cacheSize to a value less than"));
         }
+    }
+
+    @SmallTest
+    public void testOpenDatabaseLookasideConfig() {
+        // First check that lookaside is active
+        verifyLookasideStats(false);
+        // Reopen test db with lookaside disabled
+        mDatabase.close();
+        SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
+                .setLookasideConfig(0, 0).build();
+        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile.getPath(), params);
+        verifyLookasideStats(true);
+    }
+
+    @SmallTest
+    public void testOpenParamsSetLookasideConfigValidation() {
+        try {
+            SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
+                    .setLookasideConfig(-1, 0).build();
+            fail("Negative slot size should be rejected");
+        } catch (IllegalArgumentException expected) {
+        }
+        try {
+            SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
+                    .setLookasideConfig(0, -10).build();
+            fail("Negative slot count should be rejected");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    void verifyLookasideStats(boolean expectDisabled) {
+        boolean dbStatFound = false;
+        SQLiteDebug.PagerStats info = SQLiteDebug.getDatabaseInfo();
+        for (SQLiteDebug.DbStats dbStat : info.dbStats) {
+            if (dbStat.dbName.endsWith(mDatabaseFile.getName())) {
+                dbStatFound = true;
+                Log.i(TAG, "Lookaside for " + dbStat.dbName + " " + dbStat.lookaside);
+                if (expectDisabled) {
+                    assertTrue("lookaside slots count should be zero", dbStat.lookaside == 0);
+                } else {
+                    assertTrue("lookaside slots count should be greater than zero",
+                            dbStat.lookaside > 0);
+                }
+            }
+        }
+        assertTrue("No dbstat found for " + mDatabaseFile.getName(), dbStatFound);
     }
 
     @LargeTest
