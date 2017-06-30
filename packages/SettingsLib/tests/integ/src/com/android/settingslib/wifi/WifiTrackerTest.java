@@ -59,6 +59,7 @@ import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.FlakyTest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -492,6 +493,7 @@ public class WifiTrackerTest {
         waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
     }
 
+    @FlakyTest
     @Test
     public void scoreCacheUpdateScoresShouldChangeSortOrder() throws InterruptedException {
         WifiTracker tracker =  createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
@@ -530,6 +532,7 @@ public class WifiTrackerTest {
         assertEquals(aps.get(1).getSsidStr(), SSID_2);
     }
 
+    @FlakyTest
     @Test
     public void scoreCacheUpdateScoresShouldInsertSpeedIntoAccessPoint()
             throws InterruptedException {
