@@ -218,8 +218,7 @@ public class WindowStateTests extends WindowTestsBase {
         root.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         root.mTurnOnScreen = false;
 
-        root.prepareWindowToDisplayDuringRelayout(new MergedConfiguration(),
-                wasVisible /*wasVisible*/);
+        root.prepareWindowToDisplayDuringRelayout(wasVisible /*wasVisible*/);
         assertTrue(root.mTurnOnScreen);
     }
 }
