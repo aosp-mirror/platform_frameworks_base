@@ -19,6 +19,7 @@ package com.android.server.policy;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -79,7 +80,7 @@ public class ImmersiveModeConfirmation {
     boolean mVrModeEnabled = false;
 
     public ImmersiveModeConfirmation(Context context) {
-        mContext = context;
+        mContext = ActivityThread.currentActivityThread().getSystemUiContext();
         mHandler = new H();
         mShowDelayMs = getNavBarExitDuration() * 3;
         mPanicThresholdMs = context.getResources()
