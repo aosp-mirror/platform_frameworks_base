@@ -18,7 +18,7 @@ package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
-import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -317,7 +317,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_HIGH);
-        channel.setImportance(NotificationManager.IMPORTANCE_NONE);
+        channel.setImportance(IMPORTANCE_NONE);
         NotificationRecord r = generateNotificationRecord(channel);
         assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
         verify(mUsageStats, times(1)).registerBlocked(eq(r));
@@ -1207,7 +1207,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     @Test
     public void testOnlyAutogroupIfGroupChanged_noGroupChanged_autogroups()
             throws Exception {
-        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "group", false);
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "group",
+                false);
         mNotificationManagerService.addNotification(r);
         mNotificationManagerService.addEnqueuedNotification(r);
 
@@ -1219,4 +1220,26 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         verify(mGroupHelper, never()).onNotificationPosted(any());
     }
 
+    @Test
+    public void testNoFakeColorizedPermission() throws Exception {
+        when(mPackageManagerClient.checkPermission(any(), any())).thenReturn(PERMISSION_DENIED);
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setColorized(true)
+                .setFlag(Notification.FLAG_CAN_COLORIZE, true)
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", uid, 0,
+                nb.build(), new UserHandle(uid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, null,
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        NotificationRecord posted = mNotificationManagerService.findNotificationLocked(
+                PKG, null, nr.sbn.getId(), nr.sbn.getUserId());
+
+        assertFalse(posted.getNotification().isColorized());
+    }
 }
