@@ -57,7 +57,7 @@ import com.android.server.statusbar.StatusBarManagerInternal;
  */
 public class GestureLauncherService extends SystemService {
     private static final boolean DBG = false;
-    private static final boolean DBG_CAMERA_LIFT = true; // false once b/62623620 is fixed
+    private static final boolean DBG_CAMERA_LIFT = false;
     private static final String TAG = "GestureLauncherService";
 
     /**
