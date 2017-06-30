@@ -106,7 +106,7 @@ public final class RadioMetadata implements Parcelable {
 
     static {
         METADATA_KEYS_TYPE = new ArrayMap<String, Integer>();
-        METADATA_KEYS_TYPE.put(METADATA_KEY_RDS_PI, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_RDS_PI, METADATA_TYPE_INT);
         METADATA_KEYS_TYPE.put(METADATA_KEY_RDS_PS, METADATA_TYPE_TEXT);
         METADATA_KEYS_TYPE.put(METADATA_KEY_RDS_PTY, METADATA_TYPE_INT);
         METADATA_KEYS_TYPE.put(METADATA_KEY_RBDS_PTY, METADATA_TYPE_INT);
@@ -385,7 +385,6 @@ public final class RadioMetadata implements Parcelable {
          * the METADATA_KEYs defined in this class are used they may only be one
          * of the following:
          * <ul>
-         * <li>{@link #METADATA_KEY_RDS_PI}</li>
          * <li>{@link #METADATA_KEY_RDS_PS}</li>
          * <li>{@link #METADATA_KEY_RDS_RT}</li>
          * <li>{@link #METADATA_KEY_TITLE}</li>
@@ -413,6 +412,7 @@ public final class RadioMetadata implements Parcelable {
          * the METADATA_KEYs defined in this class are used they may only be one
          * of the following:
          * <ul>
+         * <li>{@link #METADATA_KEY_RDS_PI}</li>
          * <li>{@link #METADATA_KEY_RDS_PTY}</li>
          * <li>{@link #METADATA_KEY_RBDS_PTY}</li>
          * </ul>
