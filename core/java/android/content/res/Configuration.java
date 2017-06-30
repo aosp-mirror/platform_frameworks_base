@@ -1672,7 +1672,24 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         n = this.densityDpi - that.densityDpi;
         if (n != 0) return n;
         n = this.assetsSeq - that.assetsSeq;
-        //if (n != 0) return n;
+        if (n != 0) return n;
+
+        if (this.appBounds == null && that.appBounds != null) {
+            return 1;
+        } else if (this.appBounds != null && that.appBounds == null) {
+            return -1;
+        } else if (this.appBounds != null && that.appBounds != null) {
+            n = this.appBounds.left - that.appBounds.left;
+            if (n != 0) return n;
+            n = this.appBounds.top - that.appBounds.top;
+            if (n != 0) return n;
+            n = this.appBounds.right - that.appBounds.right;
+            if (n != 0) return n;
+            n = this.appBounds.bottom - that.appBounds.bottom;
+            if (n != 0) return n;
+        }
+
+        // if (n != 0) return n;
         return n;
     }
 
