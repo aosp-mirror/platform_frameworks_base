@@ -23,6 +23,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSC
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -39,6 +41,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.wm.DimLayer.DimLayerUser;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -635,6 +638,18 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     @Override
     public boolean dimFullscreen() {
         return isFullscreen();
+    }
+
+    @Override
+    public int getLayerForDim(WindowStateAnimator animator, int layerOffset, int defaultLayer) {
+        // If the dim layer is for a starting window, move the dim layer back in the z-order behind
+        // the lowest activity window to ensure it does not occlude the main window if it is
+        // translucent
+        final AppWindowToken appToken = animator.mWin.mAppToken;
+        if (animator.mAttrType == TYPE_APPLICATION_STARTING && hasChild(appToken) ) {
+            return Math.min(defaultLayer, appToken.getLowestAnimLayer() - layerOffset);
+        }
+        return defaultLayer;
     }
 
     boolean isFullscreen() {
