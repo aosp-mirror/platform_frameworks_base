@@ -370,7 +370,7 @@ static jobject JHwBinder_native_getService(
     if (transport != IServiceManager::Transport::HWBINDER && !vintfLegacy) {
         LOG(ERROR) << "service " << ifaceName << " declares transport method "
                    << toString(transport) << " but framework expects hwbinder.";
-        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
+        signalExceptionForError(env, NAME_NOT_FOUND, true /* canThrowRemoteException */);
         return NULL;
     }
 
