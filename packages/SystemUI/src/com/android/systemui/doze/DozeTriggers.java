@@ -186,10 +186,10 @@ public class DozeTriggers implements DozeMachine.Part {
             case DOZE:
             case DOZE_AOD:
                 mDozeSensors.setProxListening(newState != DozeMachine.State.DOZE);
-                mDozeSensors.setListening(true);
                 if (oldState != DozeMachine.State.INITIALIZED) {
                     mDozeSensors.reregisterAllSensors();
                 }
+                mDozeSensors.setListening(true);
                 break;
             case DOZE_AOD_PAUSED:
                 mDozeSensors.setProxListening(true);
