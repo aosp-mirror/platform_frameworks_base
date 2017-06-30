@@ -625,7 +625,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     (DisplayManager) getContext().getSystemService(Context.DISPLAY_SERVICE);
             ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
             mVr2dDisplay = new Vr2dDisplay(dm, ami, mVrManager);
-            mVr2dDisplay.init(getContext());
+            mVr2dDisplay.init(getContext(), mBootsToVr);
 
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
