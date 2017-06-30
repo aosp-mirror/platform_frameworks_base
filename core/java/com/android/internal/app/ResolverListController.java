@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
 import android.util.Log;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.InterruptedException;
@@ -55,7 +56,11 @@ public class ResolverListController {
     private static final String TAG = "ResolverListController";
     private static final boolean DEBUG = false;
 
+    Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private ResolverComparator mResolverComparator;
+    private boolean isComputed = false;
 
     public ResolverListController(
             Context context,
@@ -68,6 +73,10 @@ public class ResolverListController {
         mLaunchedFromUid = launchedFromUid;
         mTargetIntent = targetIntent;
         mReferrerPackage = referrerPackage;
+        synchronized (mLock) {
+            mResolverComparator =
+                    new ResolverComparator(mContext, mTargetIntent, mReferrerPackage, null);
+        }
     }
 
     @VisibleForTesting
@@ -232,25 +241,29 @@ public class ResolverListController {
     @VisibleForTesting
     @WorkerThread
     public void sort(List<ResolverActivity.ResolvedComponentInfo> inputList) {
-        final CountDownLatch finishComputeSignal = new CountDownLatch(1);
-        ComputeCallback callback = new ComputeCallback(finishComputeSignal);
-        if (mResolverComparator == null) {
-            mResolverComparator =
-                    new ResolverComparator(mContext, mTargetIntent, mReferrerPackage, callback);
-        } else {
-            mResolverComparator.setCallBack(callback);
-        }
-        try {
-            long beforeRank = System.currentTimeMillis();
-            mResolverComparator.compute(inputList);
-            finishComputeSignal.await();
-            Collections.sort(inputList, mResolverComparator);
-            long afterRank = System.currentTimeMillis();
-            if (DEBUG) {
-                Log.d(TAG, "Time Cost: " + Long.toString(afterRank - beforeRank));
+        synchronized (mLock) {
+            if (mResolverComparator == null) {
+                Log.d(TAG, "Comparator has already been destroyed; skipped.");
+                return;
             }
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Compute & Sort was interrupted: " + e);
+            final CountDownLatch finishComputeSignal = new CountDownLatch(1);
+            ComputeCallback callback = new ComputeCallback(finishComputeSignal);
+            mResolverComparator.setCallBack(callback);
+            try {
+                long beforeRank = System.currentTimeMillis();
+                if (!isComputed) {
+                    mResolverComparator.compute(inputList);
+                    finishComputeSignal.await();
+                    isComputed = true;
+                }
+                Collections.sort(inputList, mResolverComparator);
+                long afterRank = System.currentTimeMillis();
+                if (DEBUG) {
+                    Log.d(TAG, "Time Cost: " + Long.toString(afterRank - beforeRank));
+                }
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Compute & Sort was interrupted: " + e);
+            }
         }
     }
 
@@ -271,27 +284,36 @@ public class ResolverListController {
 
     @VisibleForTesting
     public float getScore(ResolverActivity.DisplayResolveInfo target) {
-        if (mResolverComparator == null) {
-            return 0.0f;
+        synchronized (mLock) {
+            if (mResolverComparator == null) {
+                return 0.0f;
+            }
+            return mResolverComparator.getScore(target.getResolvedComponentName());
         }
-        return mResolverComparator.getScore(target.getResolvedComponentName());
     }
 
     public void updateModel(ComponentName componentName) {
-        if (mResolverComparator != null) {
-            mResolverComparator.updateModel(componentName);
+        synchronized (mLock) {
+            if (mResolverComparator != null) {
+                mResolverComparator.updateModel(componentName);
+            }
         }
     }
 
     public void updateChooserCounts(String packageName, int userId, String action) {
-        if (mResolverComparator != null) {
-            mResolverComparator.updateChooserCounts(packageName, userId, action);
+        synchronized (mLock) {
+            if (mResolverComparator != null) {
+                mResolverComparator.updateChooserCounts(packageName, userId, action);
+            }
         }
     }
 
     public void destroy() {
-        if (mResolverComparator != null) {
-            mResolverComparator.destroy();
+        synchronized (mLock) {
+            if (mResolverComparator != null) {
+                mResolverComparator.destroy();
+            }
+            mResolverComparator = null;
         }
     }
 }

@@ -553,7 +553,9 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                 Log.e(TAG, "Error in Predict: " + e);
             }
         }
-        mAfterCompute.afterCompute();
+        if (mAfterCompute != null) {
+            mAfterCompute.afterCompute();
+        }
     }
 
     // adds select prob as the default values, according to a pre-trained Logistic Regression model.
