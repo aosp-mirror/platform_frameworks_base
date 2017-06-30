@@ -642,57 +642,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    @Override
-    public void setCurrentSpellChecker(String locale, String sciId) {
-        if (!calledFromValidUser()) {
-            return;
-        }
-        synchronized(mSpellCheckerMap) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "Requires permission "
-                        + android.Manifest.permission.WRITE_SECURE_SETTINGS);
-            }
-            setCurrentSpellCheckerLocked(sciId);
-        }
-    }
-
-    @Override
-    public void setCurrentSpellCheckerSubtype(String locale, int hashCode) {
-        if (!calledFromValidUser()) {
-            return;
-        }
-        synchronized(mSpellCheckerMap) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "Requires permission "
-                        + android.Manifest.permission.WRITE_SECURE_SETTINGS);
-            }
-            setCurrentSpellCheckerSubtypeLocked(hashCode);
-        }
-    }
-
-    @Override
-    public void setSpellCheckerEnabled(boolean enabled) {
-        if (!calledFromValidUser()) {
-            return;
-        }
-        synchronized(mSpellCheckerMap) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "Requires permission "
-                        + android.Manifest.permission.WRITE_SECURE_SETTINGS);
-            }
-            setSpellCheckerEnabledLocked(enabled);
-        }
-    }
-
     private void setCurrentSpellCheckerLocked(String sciId) {
         if (DBG) {
             Slog.w(TAG, "setCurrentSpellChecker: " + sciId);
@@ -727,18 +676,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             mSettings.putSelectedSpellCheckerSubtype(tempHashCode);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    private void setSpellCheckerEnabledLocked(boolean enabled) {
-        if (DBG) {
-            Slog.w(TAG, "setSpellCheckerEnabled: " + enabled);
-        }
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mSettings.setSpellCheckerEnabled(enabled);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1135,10 +1072,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
         }
 
-        private void putBoolean(final String key, final boolean value) {
-            putInt(key, value ? 1 : 0);
-        }
-
         private boolean getBoolean(final String key, final boolean defaultValue) {
             return getInt(key, defaultValue ? 1 : 0) == 1;
         }
@@ -1176,10 +1109,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         public void putSelectedSpellCheckerSubtype(int hashCode) {
             putInt(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, hashCode);
-        }
-
-        public void setSpellCheckerEnabled(boolean enabled) {
-            putBoolean(Settings.Secure.SPELL_CHECKER_ENABLED, enabled);
         }
 
         @NonNull
