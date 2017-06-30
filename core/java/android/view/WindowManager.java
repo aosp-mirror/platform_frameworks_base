@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -1389,15 +1390,14 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 0x00040000;
 
         /**
-         * Flag to indicate that this window is used as a task snapshot window. A task snapshot
-         * window is a starting window that gets shown with a screenshot from the previous state
-         * that is active until the app has drawn its first frame.
-         *
-         * <p>If this flag is set, SystemUI flags are ignored such that the real window behind can
-         * set the SystemUI flags.
+         * Flag to indicate that any window added by an application process that if of type
+         * {@link #TYPE_TOAST} or that requires
+         * {@link android.app.AppOpsManager#OP_SYSTEM_ALERT_WINDOW} permission should be hidden when
+         * this window is visible.
          * @hide
          */
-        public static final int PRIVATE_FLAG_TASK_SNAPSHOT = 0x00080000;
+        @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+        public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
 
         /**
          * Flag to indicate that this window should be ignored when determining what parts of the
