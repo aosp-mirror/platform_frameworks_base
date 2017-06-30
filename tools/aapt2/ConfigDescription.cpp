@@ -987,4 +987,8 @@ bool ConfigDescription::IsCompatibleWith(const ConfigDescription& o) const {
   return !ConflictsWith(o) && !Dominates(o) && !o.Dominates(*this);
 }
 
+::std::ostream& operator<<(::std::ostream& out, const ConfigDescription& o) {
+  return out << o.toString().string();
+}
+
 }  // namespace aapt
