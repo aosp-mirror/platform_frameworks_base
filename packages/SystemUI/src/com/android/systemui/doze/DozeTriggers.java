@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze;
 
+import android.app.AlarmManager;
 import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -70,7 +71,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
 
     public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
-            AmbientDisplayConfiguration config,
+            AlarmManager alarmManager, AmbientDisplayConfiguration config,
             DozeParameters dozeParameters, SensorManager sensorManager, Handler handler,
             WakeLock wakeLock, boolean allowPulseTriggers) {
         mContext = context;
@@ -82,8 +83,8 @@ public class DozeTriggers implements DozeMachine.Part {
         mHandler = handler;
         mWakeLock = wakeLock;
         mAllowPulseTriggers = allowPulseTriggers;
-        mDozeSensors = new DozeSensors(context, mSensorManager, dozeParameters, config,
-                wakeLock, this::onSensor, this::onProximityFar);
+        mDozeSensors = new DozeSensors(context, alarmManager, mSensorManager, dozeParameters,
+                config, wakeLock, this::onSensor, this::onProximityFar);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
     }
 
@@ -152,18 +153,22 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private void onProximityFar(boolean far) {
         final boolean near = !far;
-        DozeMachine.State state = mMachine.getState();
+        final DozeMachine.State state = mMachine.getState();
+        final boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
+        final boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
+        final boolean aod = (state == DozeMachine.State.DOZE_AOD);
+
         if (near && state == DozeMachine.State.DOZE_PULSING) {
             if (DEBUG) Log.i(TAG, "Prox NEAR, ending pulse");
             DozeLog.tracePulseCanceledByProx(mContext);
             mMachine.requestState(DozeMachine.State.DOZE_PULSE_DONE);
         }
-        if (far && state == DozeMachine.State.DOZE_AOD_PAUSED) {
+        if (far && (paused || pausing)) {
             if (DEBUG) Log.i(TAG, "Prox FAR, unpausing AOD");
             mMachine.requestState(DozeMachine.State.DOZE_AOD);
-        } else if (near && state == DozeMachine.State.DOZE_AOD) {
+        } else if (near && aod) {
             if (DEBUG) Log.i(TAG, "Prox NEAR, pausing AOD");
-            mMachine.requestState(DozeMachine.State.DOZE_AOD_PAUSED);
+            mMachine.requestState(DozeMachine.State.DOZE_AOD_PAUSING);
         }
     }
 
@@ -192,6 +197,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 }
                 break;
             case DOZE_AOD_PAUSED:
+            case DOZE_AOD_PAUSING:
                 mDozeSensors.setProxListening(true);
                 mDozeSensors.setListening(false);
                 break;

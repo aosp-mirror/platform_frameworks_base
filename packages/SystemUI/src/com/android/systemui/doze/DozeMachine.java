@@ -60,13 +60,16 @@ public class DozeMachine {
         /** Doze is done. DozeService is finished. */
         FINISH,
         /** AOD, but the display is temporarily off. */
-        DOZE_AOD_PAUSED;
+        DOZE_AOD_PAUSED,
+        /** AOD, prox is near, transitions to DOZE_AOD_PAUSED after a timeout. */
+        DOZE_AOD_PAUSING;
 
         boolean canPulse() {
             switch (this) {
                 case DOZE:
                 case DOZE_AOD:
                 case DOZE_AOD_PAUSED:
+                case DOZE_AOD_PAUSING:
                     return true;
                 default:
                     return false;
@@ -93,6 +96,7 @@ public class DozeMachine {
                 case DOZE_PULSING:
                     return Display.STATE_ON;
                 case DOZE_AOD:
+                case DOZE_AOD_PAUSING:
                     return Display.STATE_DOZE_SUSPEND;
                 default:
                     return Display.STATE_UNKNOWN;
@@ -284,7 +288,8 @@ public class DozeMachine {
         if (mState == State.FINISH) {
             return State.FINISH;
         }
-        if ((mState == State.DOZE_AOD_PAUSED || mState == State.DOZE_AOD || mState == State.DOZE)
+        if ((mState == State.DOZE_AOD_PAUSED || mState == State.DOZE_AOD_PAUSING
+                || mState == State.DOZE_AOD || mState == State.DOZE)
                 && requestedState == State.DOZE_PULSE_DONE) {
             Log.i(TAG, "Dropping pulse done because current state is already done: " + mState);
             return mState;
