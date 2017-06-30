@@ -426,6 +426,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
     private boolean mScreenTurningOn;
+    private boolean mScreenFullyOff;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -2812,7 +2813,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void onScreenTurnedOff() {
+        mScreenFullyOff = true;
         mFalsingManager.onScreenOff();
+        updateIsKeyguard();
     }
 
     public NotificationStackScrollLayout getNotificationScrollLayout() {
@@ -4198,8 +4201,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private boolean updateIsKeyguard() {
         // For dozing, keyguard needs to be shown whenever the device is non-interactive. Otherwise
-        // there's no surface we can show to the user.
-        boolean keyguardForDozing = mDozingRequested && !mDeviceInteractive;
+        // there's no surface we can show to the user. Note that the device goes fully interactive
+        // late in the transition, so we also allow the device to start dozing once the screen has
+        // turned off fully.
+        boolean keyguardForDozing = mDozingRequested &&
+                (!mDeviceInteractive || mStartedGoingToSleep && (mScreenFullyOff || mIsKeyguard));
         boolean shouldBeKeyguard = mKeyguardRequested || keyguardForDozing;
         if (keyguardForDozing) {
             updatePanelExpansionForKeyguard();
@@ -5140,6 +5146,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void onScreenTurningOn() {
+        mScreenFullyOff = false;
         mScreenTurningOn = true;
         mFalsingManager.onScreenTurningOn();
         mNotificationPanel.onScreenTurningOn();
@@ -5307,7 +5314,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mDozingRequested = true;
                 DozeLog.traceDozing(mContext, mDozing);
                 updateDozing();
-
+                updateIsKeyguard();
             }
         }
 
