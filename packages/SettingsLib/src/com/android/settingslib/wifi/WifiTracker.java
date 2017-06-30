@@ -16,6 +16,7 @@
 package com.android.settingslib.wifi;
 
 import android.annotation.MainThread;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,7 +37,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiNetworkScoreCache.CacheListener;
-import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -247,7 +247,10 @@ public class WifiTracker {
             mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
             mLastInfo = mWifiManager.getConnectionInfo();
             mLastNetworkInfo = mConnectivityManager.getNetworkInfo(mWifiManager.getCurrentNetwork());
-            updateAccessPointsLocked();
+
+            final List<ScanResult> newScanResults = mWifiManager.getScanResults();
+            List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
+            updateAccessPointsLocked(newScanResults, configs);
 
             if (DBG) {
                 Log.d(TAG, "force update - internal access point list:\n" + mInternalAccessPoints);
@@ -377,7 +380,7 @@ public class WifiTracker {
         mNetworkScoreManager.unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI, mScoreCache);
         mScoreCache.clearScores();
 
-        // Synchronize on mLock to avoid concurrent modification during updateAccessPointsLocked
+        // Synchronize on mLock to avoid concurrent modification during updateAccessPoints
         synchronized (mLock) {
             mRequestedScores.clear();
         }
@@ -427,9 +430,8 @@ public class WifiTracker {
         mScanId = 0;
     }
 
-    private Collection<ScanResult> fetchScanResults() {
+    private Collection<ScanResult> updateScanResultCache(final List<ScanResult> newResults) {
         mScanId++;
-        final List<ScanResult> newResults = mWifiManager.getScanResults();
         for (ScanResult newResult : newResults) {
             if (newResult.SSID == null || newResult.SSID.isEmpty()) {
                 continue;
@@ -457,8 +459,8 @@ public class WifiTracker {
         return mScanResultCache.values();
     }
 
-    private WifiConfiguration getWifiConfigurationForNetworkId(int networkId) {
-        final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
+    private WifiConfiguration getWifiConfigurationForNetworkId(
+            int networkId, final List<WifiConfiguration> configs) {
         if (configs != null) {
             for (WifiConfiguration config : configs) {
                 if (mLastInfo != null && networkId == config.networkId &&
@@ -470,20 +472,37 @@ public class WifiTracker {
         return null;
     }
 
-    /** Safely modify {@link #mInternalAccessPoints} by acquiring {@link #mLock} first. */
-    private void updateAccessPointsLocked() {
+    /**
+     * Safely modify {@link #mInternalAccessPoints} by acquiring {@link #mLock} first.
+     *
+     * <p>Will not perform the update if {@link #mStaleScanResults} is true
+     */
+    private void updateAccessPoints() {
+        List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
+        final List<ScanResult> newScanResults = mWifiManager.getScanResults();
+
         synchronized (mLock) {
-            updateAccessPoints();
+            if(!mStaleScanResults) {
+                updateAccessPointsLocked(newScanResults, configs);
+            }
         }
     }
 
     /**
      * Update the internal list of access points.
      *
-     * <p>Should never be called directly, use {@link #updateAccessPointsLocked()} instead.
+     * <p>Do not called directly (except for forceUpdate), use {@link #updateAccessPoints()} which
+     * respects {@link #mStaleScanResults}.
      */
     @GuardedBy("mLock")
-    private void updateAccessPoints() {
+    private void updateAccessPointsLocked(final List<ScanResult> newScanResults,
+            List<WifiConfiguration> configs) {
+        WifiConfiguration connectionConfig = null;
+        if (mLastInfo != null) {
+            connectionConfig = getWifiConfigurationForNetworkId(
+                    mLastInfo.getNetworkId(), mWifiManager.getConfiguredNetworks());
+        }
+
         // Swap the current access points into a cached list.
         List<AccessPoint> cachedAccessPoints = new ArrayList<>(mInternalAccessPoints);
         ArrayList<AccessPoint> accessPoints = new ArrayList<>();
@@ -496,14 +515,9 @@ public class WifiTracker {
     /* Lookup table to more quickly update AccessPoints by only considering objects with the
      * correct SSID.  Maps SSID -> List of AccessPoints with the given SSID.  */
         Multimap<String, AccessPoint> apMap = new Multimap<String, AccessPoint>();
-        WifiConfiguration connectionConfig = null;
-        if (mLastInfo != null) {
-            connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId());
-        }
 
-        final Collection<ScanResult> results = fetchScanResults();
+        final Collection<ScanResult> results = updateScanResultCache(newScanResults);
 
-        final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
         if (configs != null) {
             for (WifiConfiguration config : configs) {
                 if (config.selfAdded && config.numAssociation == 0) {
@@ -671,7 +685,8 @@ public class WifiTracker {
         WifiConfiguration connectionConfig = null;
         mLastInfo = mWifiManager.getConnectionInfo();
         if (mLastInfo != null) {
-            connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId());
+            connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId(),
+                    mWifiManager.getConfiguredNetworks());
         }
 
         boolean updated = false;
@@ -868,15 +883,12 @@ public class WifiTracker {
             }
         }
 
-        @GuardedBy("mLock")
         private void processMessage(Message msg) {
             if (!mRegistered) return;
 
             switch (msg.what) {
                 case MSG_UPDATE_ACCESS_POINTS:
-                    if (!mStaleScanResults) {
-                        updateAccessPointsLocked();
-                    }
+                    updateAccessPoints();
                     break;
                 case MSG_UPDATE_NETWORK_INFO:
                     updateNetworkInfo((NetworkInfo) msg.obj);
