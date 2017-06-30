@@ -93,6 +93,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := legacy.test.stubs
 
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
+LOCAL_SDK_VERSION := current
+LOCAL_ADDITIONAL_DEPENDENCIES := $(legacy_test_api_gen_stamp)
 
 # Make sure to run droiddoc first to generate the stub source files.
 LOCAL_ADDITIONAL_DEPENDENCIES := $(legacy_test_api_gen_stamp)
@@ -162,3 +164,5 @@ LOCAL_MODULE := legacy-performance-test-hostdex
 
 include $(BUILD_HOST_DALVIK_STATIC_JAVA_LIBRARY)
 endif  # HOST_OS == linux
+
+legacy_test_api_gen_stamp :=
