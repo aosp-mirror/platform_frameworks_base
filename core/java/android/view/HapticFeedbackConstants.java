@@ -58,6 +58,7 @@ public class HapticFeedbackConstants {
 
     /**
      * The user has released a virtual or software keyboard key.
+     * @hide
      */
     public static final int VIRTUAL_KEY_RELEASE = 7;
 
