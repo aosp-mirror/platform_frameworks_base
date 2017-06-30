@@ -405,6 +405,7 @@ public class SyncManager {
                 public void onReceive(Context context, Intent intent) {
                     Log.w(TAG, "Writing sync state before shutdown...");
                     getSyncStorageEngine().writeAllState();
+                    mLogger.log("Shutting down.");
                 }
             };
 
@@ -674,7 +675,22 @@ public class SyncManager {
         // before we started checking for account access because they already know
         // the account (they run before) which is the genie is out of the bottle.
         whiteListExistingSyncAdaptersIfNeeded();
+
+        mLogger.log("Sync manager initialized.");
     }
+
+    public void onStartUser(int userHandle) {
+        mLogger.log("onStartUser: user=", userHandle);
+    }
+
+    public void onUnlockUser(int userHandle) {
+        mLogger.log("onUnlockUser: user=", userHandle);
+    }
+
+    public void onStopUser(int userHandle) {
+        mLogger.log("onStopUser: user=", userHandle);
+    }
+
 
     private void whiteListExistingSyncAdaptersIfNeeded() {
         if (!mSyncStorageEngine.shouldGrantSyncAdaptersAccountAccess()) {
