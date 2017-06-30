@@ -145,6 +145,12 @@ void PrintTo(const Maybe<T>& value, std::ostream* out) {
 
 namespace test {
 
+MATCHER_P(StrEq, a,
+          std::string(negation ? "isn't" : "is") + " equal to " +
+              ::testing::PrintToString(android::StringPiece16(a))) {
+  return android::StringPiece16(arg) == a;
+}
+
 MATCHER_P(ValueEq, a,
           std::string(negation ? "isn't" : "is") + " equal to " + ::testing::PrintToString(a)) {
   return arg.Equals(&a);

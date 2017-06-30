@@ -37,6 +37,7 @@ class BasicStringPiece {
  public:
   using const_iterator = const TChar*;
   using difference_type = size_t;
+  using size_type = size_t;
 
   // End of string marker.
   constexpr static const size_t npos = static_cast<size_t>(-1);
