@@ -681,6 +681,7 @@ public final class JobServiceContext implements ServiceConnection {
             return;
         }
         try {
+            applyStoppedReasonLocked(reason);
             mVerb = VERB_STOPPING;
             scheduleOpTimeOutLocked();
             service.stopJob(mParams);
