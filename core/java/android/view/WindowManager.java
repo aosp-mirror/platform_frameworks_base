@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -27,6 +28,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -168,6 +170,18 @@ public interface WindowManager extends ViewManager {
      * @hide
      */
     public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver, int deviceId);
+
+    /**
+     * Return the touch region for the current IME window, or an empty region if there is none.
+     *
+     * @return The region of the IME that is accepting touch inputs, or null if there is no IME, no
+     *         region or there was an error.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    public Region getCurrentImeTouchRegion();
 
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
         /**
