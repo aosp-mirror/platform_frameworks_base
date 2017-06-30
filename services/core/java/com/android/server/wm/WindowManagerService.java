@@ -19,12 +19,14 @@ package com.android.server.wm;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
+import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_USER_HANDLE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -6305,6 +6307,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public Region getCurrentImeTouchRegion() {
+        if (mContext.checkCallingOrSelfPermission(RESTRICTED_VR_ACCESS) != PERMISSION_GRANTED) {
+            throw new SecurityException("getCurrentImeTouchRegion is restricted to VR services");
+        }
         synchronized (mWindowMap) {
             final Region r = new Region();
             if (mInputMethodWindow != null) {
