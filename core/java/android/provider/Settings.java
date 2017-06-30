@@ -7060,6 +7060,12 @@ public final class Settings {
         public static final String NOTIFICATION_BADGING = "notification_badging";
 
         /**
+         * Comma separated list of QS tiles that have been auto-added already.
+         * @hide
+         */
+        public static final String QS_AUTO_ADDED_TILES = "qs_auto_tiles";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -7155,7 +7161,8 @@ public final class Settings {
             ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
             ASSIST_GESTURE_WAKE_ENABLED,
             VR_DISPLAY_MODE,
-            NOTIFICATION_BADGING
+            NOTIFICATION_BADGING,
+            QS_AUTO_ADDED_TILES,
         };
 
         /** @hide */
