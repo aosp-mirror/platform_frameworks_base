@@ -3305,6 +3305,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public abstract String getPermissionControllerPackageName();
 
     /**
