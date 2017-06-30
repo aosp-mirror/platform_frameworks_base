@@ -741,7 +741,8 @@ public final class AutofillManager {
     }
 
     /**
-     * Returns {@code true} if Autofill is supported for this user.
+     * Returns {@code true} if autofill is supported by the current device and
+     * is supported for this user.
      *
      * <p>Autofill is typically supported, but it could be unsupported in cases like:
      * <ol>
