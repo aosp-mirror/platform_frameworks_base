@@ -1186,7 +1186,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a um acessório USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Toque para ver mais opções."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB conectada"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Toque para desativar a depuração do USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Toque para desativar a depuração USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecione para desativar a depuração USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Gerando relatório do bug..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Compartilhar relatório do bug?"</string>

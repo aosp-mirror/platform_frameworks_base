@@ -280,7 +280,7 @@
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"има достъп до календара ви"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"да изпраща и преглежда SMS съобщения"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Съхранение"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Хранилище"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"да има достъп до снимките, мултимедията и файловете на устройството ви"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записва звук"</string>

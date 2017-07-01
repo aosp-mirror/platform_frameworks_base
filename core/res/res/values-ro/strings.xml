@@ -285,7 +285,7 @@
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"trimită și să vadă mesajele SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stocare"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acceseze fotografiile, conținutul media și fișierele de pe dispozitiv"</string>
-    <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfonul"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze sunet"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze videoclipuri"</string>
