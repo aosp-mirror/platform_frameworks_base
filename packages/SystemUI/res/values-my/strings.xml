@@ -262,7 +262,7 @@
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ဖန်သားပြင် အနေအထားက ဒေါင်လိုက်အဖြစ် ပုံသေ လုပ်ထားပါသည်"</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"ယခုတော့ မျက်နှာပြင်သည် အလိုအလျောက် လည်နေမည်။"</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"မျက်နှာပြင် အနေအထားကို ဘေးတိုက် အဖြစ် သော့ချထားသည်။"</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"မျက်နှာပြင် အနေအထားကို ထောင်လိုက် အဖြစ် သော့ချထားသည်။"</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"မျက်နှာပြင်အနေအထားကို ထောင်လိုက်အဖြစ် ပုံသေသတ်မှတ်ထားသည်။"</string>
     <string name="dessert_case" msgid="1295161776223959221">"မုန့်ထည့်သော ပုံး"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ဖန်သားပြင်အသုံးပြုမှု ချွေတာမှုစနစ်"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"အီသာနက်"</string>
@@ -310,6 +310,8 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"လုပ်ပြီး"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"ချိတ်ဆက်ထား"</string>
+    <!-- no translation found for quick_settings_connected_battery_level (4136051440381328892) -->
+    <skip />
     <string name="quick_settings_connecting" msgid="47623027419264404">"ဆက်သွယ်နေ..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"တွဲချီပေးခြင်း"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ဟော့စပေါ့"</string>

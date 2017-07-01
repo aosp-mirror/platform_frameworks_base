@@ -310,6 +310,8 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Meer instellingen"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Gereed"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Verbonden"</string>
+    <!-- no translation found for quick_settings_connected_battery_level (4136051440381328892) -->
+    <skip />
     <string name="quick_settings_connecting" msgid="47623027419264404">"Verbinding maken…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
@@ -725,8 +727,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sluiten"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Sleep omlaag om te sluiten"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Beeld-in-beeld-menu"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in beeld-in-beeld"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Scherm-in-scherm-menu"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in scherm-in-scherm"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en schakel je de functie uit."</string>
     <string name="pip_play" msgid="1417176722760265888">"Afspelen"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Onderbreken"</string>
