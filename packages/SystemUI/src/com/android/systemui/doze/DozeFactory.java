@@ -26,6 +26,7 @@ import android.os.Handler;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -53,6 +54,7 @@ public class DozeFactory {
         DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock);
         machine.setParts(new DozeMachine.Part[]{
                 new DozePauser(handler, machine, alarmManager),
+                new DozeFalsingManagerAdapter(FalsingManager.getInstance(context)),
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
                         handler, wakeLock, machine),
                 createDozeUi(context, host, wakeLock, machine, handler, alarmManager),
