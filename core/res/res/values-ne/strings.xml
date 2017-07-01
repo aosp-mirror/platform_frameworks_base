@@ -361,9 +361,9 @@
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"अनुप्रयोगलाई अनुमति दिन्छ प्रणालीले बुटिङ सकेपछि आफै सुरूवात हुन। यसले TV सुरू गर्न लामो समय लिन सक्छ र अनुप्रयोगहरूलाई अनुमति दिन सक्छ सँधै सञ्चालन भई समग्र रूपमा ट्याब्लेटलाई ढिलो गराएर।"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"अनुप्रयोगलाई प्रणाली बुट गरी सकेपछि जति सक्दो चाँडो आफैंमा सुरु गर्न अनुमति दिन्छ। यसले फोन सुरु गर्नमा ढिला गर्न सक्दछ र अनप्रयोगलाई समग्रमा फोन सधैँ चालु गरेर ढिला बनाउँदछ।"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"स्टिकि प्रसारण पठाउनुहोस्"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"औपचारिक प्रसारणलाई पठाउनको लागि एउटा अनुप्रयोगलाई अनुमति दिन्छ, जुन प्रसारण समाप्त भएपछि बाँकी रहन्छ। अत्याधिक प्रयोगले धेरै मेमोरी प्रयोग गरेको कारणले ट्याब्लेटलाई ढिलो र अस्थिर बनाउन सक्छ।"</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"औपचारिक प्रसारणलाई पठाउनको लागि एउटा अनुप्रयोगलाई अनुमति दिन्छ, जुन प्रसारण समाप्त भएपछि बाँकी रहन्छ। अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग गरेको कारणले ट्याब्लेटलाई ढिलो र अस्थिर बनाउन सक्छ।"</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"अनुप्रयोगलाई टाँसिने प्रसारणहरू पठाउन अनुमति दिन्छ, जुन प्रसारण पछि पनि रहन्छ। अत्यन्य धेरै मेमोरी प्रयोग गर्ने बनाएर अत्यधिक प्रयोगले TV लाई ढिलो वा अस्थिर बनाउन सक्छ ।"</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"औपचारिक प्रसारणलाई पठाउनको लागि एक अनुप्रयोगलाई अनुमति दिन्छ, जुन प्रसारण समाप्त भएपछि बाँकी रहन्छ। अत्याधिक प्रयोगले धेरै मेमोरी प्रयोग गरेको कारणले फोनलाई ढिलो र अस्थिर बनाउन सक्छ।"</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"औपचारिक प्रसारणलाई पठाउनको लागि एक अनुप्रयोगलाई अनुमति दिन्छ, जुन प्रसारण समाप्त भएपछि बाँकी रहन्छ। अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग गरेको कारणले फोनलाई ढिलो र अस्थिर बनाउन सक्छ।"</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"तपाईँका सम्पर्कहरू पढ्नुहोस्"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"अनुप्रयोगलाई निर्दिष्ट व्यक्तिगतसँग अन्य तरिकाहरूबाट कल गर्नु भएका, इमेल गर्नु भएका वा अन्तर्क्रिया गर्नुभएका आवृतिसहितको तपाईंको ट्याब्लेटमा भण्डारण गरिएका सम्पर्कहरूको डेटा पढ्न अनुमति दिन्छ। यो अनुमतिले तपाईंको सम्पर्क डेटा बचत गर्न अनुमति दिन्छ, र खराब अनुप्रयोगहरूले तपाईंको जानकारी बिना सम्पर्क डेटा साझेदारी गर्न सक्दछन्।"</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"अनुप्रयोगलाई अनुमति दिन्छ तपाईँको TV मा भण्डारण गरिएका तपाईँका सम्पर्कका डेटा, तपाईँको कल, इमेलको बारम्बारता, वा अन्य तरीकाले खास व्यक्तिहरूसँग गरिएको सञ्चार लगायत, पढ्न।यस अनुमतिले अनुप्रयोगलाई अनुमति दिन्छ तपाईँको सम्पर्क डेटा सुरक्षित गर्न र दुस्प्रभावी अनुप्रयोगहरूले तपाईँको ज्ञान बिना सम्पर्क डेटा साझेदारी गर्न सक्छन्।"</string>
@@ -720,7 +720,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"सबै सुविधाहरू र डेटाका लागि अनलक गर्नुहोस्"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"अत्याधिक मोहडा खोल्ने प्रयासहरू बढी भए।"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"अत्यधिक मोहडा खोल्ने प्रयासहरू बढी भए।"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM कार्ड छैन"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ट्याब्लेटमा SIM कार्ड छैन।"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"TV मा कुनै SIM कार्ड छैन।"</string>
@@ -1787,6 +1787,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"तटीय क्षेत्र र नदीछेउका ठाउँहरू छाडी उच्च सतहमा अवस्थित कुनै अझ सुरक्षित ठाउँमा जानुहोस्।"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"शान्त रहनुहोस् र नजिकै आश्रयस्थल खोज्नुहोस्।"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"आपतकालीन सन्देशहरूको परीक्षण"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM लाई अनुमति छैन"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM को प्रावधान छैन"</string>

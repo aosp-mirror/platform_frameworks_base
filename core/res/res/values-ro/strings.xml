@@ -285,7 +285,7 @@
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"trimită și să vadă mesajele SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stocare"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acceseze fotografiile, conținutul media și fișierele de pe dispozitiv"</string>
-    <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfonul"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze sunet"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze videoclipuri"</string>
@@ -1815,6 +1815,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Părăsiți imediat zonele de coastă și din apropierea râurilor și îndreptați-vă spre un loc mai sigur, cum ar fi o zonă aflată la înălțime."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Păstrați-vă calmul și căutați un adăpost în apropiere."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Testarea mesajelor de urgență"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Cardul SIM nu este permis"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Cardul SIM nu este activat"</string>
