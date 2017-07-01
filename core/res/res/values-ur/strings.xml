@@ -118,7 +118,9 @@
     <string name="roamingText12" msgid="1189071119992726320">"رومنگ بینر آف"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"سروس کی تلاش کر رہا ہے"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏Wi-Fi کالنگ"</string>
-    <!-- no translation found for wfcOperatorErrorAlertMessages:0 (3910386316304772394) -->
+  <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="3910386316304772394">"‏Wi-Fi سے کالز کرنے اور پیغامات بھیجنے کے لیے، پہلے اپنے کیریئر سے اس سروس کو سیٹ اپ کرنے کے لیے کہیں۔ پھر ترتیبات سے دوبارہ Wi-Fi کالنگ آن کریں۔ (خراب کوڈ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"اپنے کیریئر کے ساتھ رجسٹر کریں"</item>
   </string-array>
@@ -1768,6 +1770,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ساحلی خطوں اور دریائی کناروں کے علاقوں کو فوری طور پر خالی کر کے اونچے ٹیلے جیسے کسی زیادہ محفوظ مقام پر چلے جائیں۔"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"پُرسکون رہیں اور قریبی پناہ حاصل کریں۔"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"ایمرجنسی پیغامات کی جانچ"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"‏SIM کی اجازت نہیں ہے"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"‏SIM فراہم کردہ نہیں ہے"</string>
