@@ -180,4 +180,8 @@ public final class SQLiteDatabaseConfiguration {
         }
         return EMAIL_IN_DB_PATTERN.matcher(path).replaceAll("XX@YY");
     }
+
+    boolean isLookasideConfigSet() {
+        return lookasideSlotCount >= 0 && lookasideSlotSize >= 0;
+    }
 }
