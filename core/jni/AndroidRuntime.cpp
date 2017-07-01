@@ -792,19 +792,27 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
                             "--compiler-filter=", "-Ximage-compiler-option");
     }
 
-    // Make sure there is a preloaded-classes file.
-    if (!hasFile("/system/etc/preloaded-classes")) {
-        ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
-              strerror(errno));
-        return -1;
-    }
-    addOption("-Ximage-compiler-option");
-    addOption("--image-classes=/system/etc/preloaded-classes");
-
-    // If there is a compiled-classes file, push it.
-    if (hasFile("/system/etc/compiled-classes")) {
+    // If there is a boot profile, it takes precedence over the image and preloaded classes.
+    if (hasFile("/system/etc/boot-image.prof")) {
         addOption("-Ximage-compiler-option");
-        addOption("--compiled-classes=/system/etc/compiled-classes");
+        addOption("--profile-file=/system/etc/boot-image.prof");
+        addOption("-Ximage-compiler-option");
+        addOption("--compiler-filter=speed-profile");
+    } else {
+        // Make sure there is a preloaded-classes file.
+        if (!hasFile("/system/etc/preloaded-classes")) {
+            ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
+                  strerror(errno));
+            return -1;
+        }
+        addOption("-Ximage-compiler-option");
+        addOption("--image-classes=/system/etc/preloaded-classes");
+
+        // If there is a compiled-classes file, push it.
+        if (hasFile("/system/etc/compiled-classes")) {
+            addOption("-Ximage-compiler-option");
+            addOption("--compiled-classes=/system/etc/compiled-classes");
+        }
     }
 
     property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
