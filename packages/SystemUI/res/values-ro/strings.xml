@@ -314,6 +314,8 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Mai multe setări"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Terminat"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Conectat"</string>
+    <!-- no translation found for quick_settings_connected_battery_level (4136051440381328892) -->
+    <skip />
     <string name="quick_settings_connecting" msgid="47623027419264404">"Se conectează..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
@@ -733,7 +735,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizați"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Închideți"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Trageți în jos pentru a închide"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Meniul imagine în imagine"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Meniul picture-in-picture"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> este în modul picture-in-picture"</string>
     <string name="pip_notification_message" msgid="4171698133469539591">"Dacă nu doriți ca <xliff:g id="NAME">%s</xliff:g> să utilizeze această funcție, atingeți pentru a deschide setările și dezactivați-o."</string>
     <string name="pip_play" msgid="1417176722760265888">"Redați"</string>
