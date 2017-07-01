@@ -1194,7 +1194,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Nhấn để biết thêm tùy chọn."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Phụ kiện âm thanh không được hỗ trợ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Nhấn để biết thêm thông tin"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Gỡ lỗi USB đã được kết nối"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Đã kết nối gỡ lỗi USB"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Nhấn để vô hiệu hóa gỡ lỗi USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Chọn để vô hiệu hóa gỡ lỗi USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Đang thu thập báo cáo lỗi…"</string>
@@ -1781,6 +1781,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ngay lập tức sơ tán khỏi các vùng ven biển và khu vực ven sông để tới một nơi an toàn hơn như vùng đất cao."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Hãy bình tĩnh và tìm kiếm nơi trú ẩn gần đó."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Kiểm tra thông báo khẩn cấp"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM không được cho phép"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM không được cấp phép"</string>

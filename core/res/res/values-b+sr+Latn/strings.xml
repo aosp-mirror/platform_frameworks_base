@@ -1216,7 +1216,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Dodirnite za još opcija."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Dodatna oprema za audio sadržaj nije podržana"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Dodirnite za više informacija"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Otklanjanje grešaka sa USB-a je uspostavljeno"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Otklanjanje grešaka sa USB-a je omogućeno"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da biste onemogućili otklanjanje grešaka sa USB-a."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Izaberite da biste onemogućili otklanjanja grešaka sa USB-a."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Izveštaj o grešci se generiše…"</string>
@@ -1815,6 +1815,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Odmah se sklonite iz priobalnih regiona i oblasti pored reka na neko bezbednije mesto, na primer, na neko uzvišenje."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Ostanite mirni i potražite sklonište u okolini."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Testiranje poruka u hitnim slučajevima"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM kartica nije dozvoljena"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM kartica nije podešena"</string>

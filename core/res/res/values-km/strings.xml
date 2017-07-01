@@ -131,7 +131,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"​ស្វែង​រក​សេវាកម្ម"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ការហៅតាម Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3910386316304772394">"ដើម្បីធ្វើការហៅ និងផ្ញើសារតាម Wi-Fi អ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនបម្រើសេវាទូរសព្ទរបស់អ្នកដំឡើងសេវាកម្មនេះជាមុនសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតនៅក្នុងការកំណត់។ (លេខកូដបញ្ហា៖ <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="3910386316304772394">"ដើម្បីហៅទូរសព្ទ និងផ្ញើសារតាម Wi-Fi អ្នកត្រូវស្នើឲ្យក្រុមហ៊ុនបម្រើសេវាទូរសព្ទរបស់អ្នកដំឡើងសេវាកម្មនេះជាមុនសិន។ បន្ទាប់មកបើកការហៅតាម Wi-Fi ម្តងទៀតនៅក្នុងការកំណត់។ (លេខកូដបញ្ហា៖ <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"ចុះឈ្មោះជាមួយក្រុមហ៊ុនរបស់អ្នក"</item>
@@ -1783,6 +1783,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ភៀសខ្លួនជាបន្ទាន់ពីតំបន់ឆ្នេរ និងតំបន់តាមមាត់ទន្លេទៅកាន់កន្លែងដែលមានសុវត្ថិភាពជាងនេះ ដូចជាទីទួលណាមួយ។"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"សូមរក្សាភាពស្ងប់ស្ងាត់ ហើយស្វែងរកជម្រកសុវត្ថិភាពដែលនៅជិត។"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"សារសាកល្បងពេលមានអាសន្ន"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"មិន​អនុញ្ញាត​សីុមកាត​ទេ"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"សីុម​មិន​ត្រូវបាន​ផ្តល់ជូន​ទេ"</string>

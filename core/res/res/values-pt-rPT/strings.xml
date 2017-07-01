@@ -1162,7 +1162,7 @@
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Enviar"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Cancelar"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Memorizar a minha escolha"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Pode depois alterar isto em Definições &gt; Aplicações"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Pode alterar mais tarde em Definições &gt; Aplicações"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Permitir Sempre"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nunca Permitir"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Cartão SIM removido"</string>
@@ -1196,7 +1196,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Toque para obter mais informações"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB ligada"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Toque para desativar a depuração USB."</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Seleccione para desativar depuração USB."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecione para desativar a depuração por USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"A criar relatório de erro…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Pretende partilhar o relatório de erro?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"A partilhar relatório de erro…"</string>
@@ -1781,6 +1781,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Abandone imediatamente regiões costeiras e zonas ribeirinhas em direção a um local mais seguro, como um terreno elevado."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantenha a calma e procure abrigo nas proximidades."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Teste de mensagens de emergência"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM não permitido"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM não ativado"</string>
