@@ -65,6 +65,9 @@ public final class UsbAlsaManager {
     private final HashMap<UsbDevice,UsbAudioDevice>
         mAudioDevices = new HashMap<UsbDevice,UsbAudioDevice>();
 
+    private boolean mIsInputHeadset; // as reported by UsbDescriptorParser
+    private boolean mIsOutputHeadset; // as reported by UsbDescriptorParser
+
     private final HashMap<UsbDevice,UsbMidiDevice>
         mMidiDevices = new HashMap<UsbDevice,UsbMidiDevice>();
 
@@ -184,9 +187,14 @@ public final class UsbAlsaManager {
         try {
             // Playback Device
             if (audioDevice.mHasPlayback) {
-                int device = (audioDevice == mAccessoryAudioDevice ?
-                        AudioSystem.DEVICE_OUT_USB_ACCESSORY :
-                        AudioSystem.DEVICE_OUT_USB_DEVICE);
+                int device;
+                if (mIsOutputHeadset) {
+                    device = AudioSystem.DEVICE_OUT_USB_HEADSET;
+                } else {
+                    device = (audioDevice == mAccessoryAudioDevice
+                        ? AudioSystem.DEVICE_OUT_USB_ACCESSORY
+                        : AudioSystem.DEVICE_OUT_USB_DEVICE);
+                }
                 if (DEBUG) {
                     Slog.i(TAG, "pre-call device:0x" + Integer.toHexString(device) +
                             " addr:" + address + " name:" + audioDevice.getDeviceName());
@@ -197,9 +205,14 @@ public final class UsbAlsaManager {
 
             // Capture Device
             if (audioDevice.mHasCapture) {
-               int device = (audioDevice == mAccessoryAudioDevice ?
-                        AudioSystem.DEVICE_IN_USB_ACCESSORY :
-                        AudioSystem.DEVICE_IN_USB_DEVICE);
+                int device;
+                if (mIsInputHeadset) {
+                    device = AudioSystem.DEVICE_IN_USB_HEADSET;
+                } else {
+                    device = (audioDevice == mAccessoryAudioDevice
+                        ? AudioSystem.DEVICE_IN_USB_ACCESSORY
+                        : AudioSystem.DEVICE_IN_USB_DEVICE);
+                }
                 mAudioService.setWiredDeviceConnectionState(
                         device, state, address, audioDevice.getDeviceName(), TAG);
             }
@@ -343,11 +356,15 @@ public final class UsbAlsaManager {
         return selectAudioCard(mCardsParser.getDefaultCard());
     }
 
-    /* package */ void usbDeviceAdded(UsbDevice usbDevice) {
-       if (DEBUG) {
-          Slog.d(TAG, "deviceAdded(): " + usbDevice.getManufacturerName() +
-                  " nm:" + usbDevice.getProductName());
+    /* package */ void usbDeviceAdded(UsbDevice usbDevice,
+            boolean isInputHeadset, boolean isOutputHeadset) {
+        if (DEBUG) {
+            Slog.d(TAG, "deviceAdded(): " + usbDevice.getManufacturerName()
+                    + " nm:" + usbDevice.getProductName());
         }
+
+        mIsInputHeadset = isInputHeadset;
+        mIsOutputHeadset = isOutputHeadset;
 
         // Is there an audio interface in there?
         boolean isAudioDevice = false;

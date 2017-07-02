@@ -26,7 +26,7 @@ LOCAL_JAVA_LIBRARIES := \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     time_zone_distro \
-    tzdata_update2 \
+    time_zone_distro_installer \
     android.hidl.base-V1.0-java-static \
     android.hardware.weaver-V1.0-java-static \
     android.hardware.biometrics.fingerprint-V2.1-java-static \
@@ -45,5 +45,17 @@ LOCAL_JACK_FLAGS := \
  -D jack.transformations.boost-locked-region-priority.classname=com.android.server.am.ActivityManagerService,com.android.server.wm.WindowHashMap \
  -D jack.transformations.boost-locked-region-priority.request=com.android.server.am.ActivityManagerService\#boostPriorityForLockedSection,com.android.server.wm.WindowManagerService\#boostPriorityForLockedSection \
  -D jack.transformations.boost-locked-region-priority.reset=com.android.server.am.ActivityManagerService\#resetPriorityAfterLockedSection,com.android.server.wm.WindowManagerService\#resetPriorityAfterLockedSection
+
+LOCAL_JAR_PROCESSOR := lockedregioncodeinjection
+# Use = instead of := to delay evaluation of ${in} and ${out}
+LOCAL_JAR_PROCESSOR_ARGS = \
+ --targets \
+  "Lcom/android/server/am/ActivityManagerService;,Lcom/android/server/wm/WindowHashMap;" \
+ --pre \
+  "com/android/server/am/ActivityManagerService.boostPriorityForLockedSection,com/android/server/wm/WindowManagerService.boostPriorityForLockedSection" \
+ --post \
+  "com/android/server/am/ActivityManagerService.resetPriorityAfterLockedSection,com/android/server/wm/WindowManagerService.resetPriorityAfterLockedSection" \
+ -o ${out} \
+ -i ${in}
 
 include $(BUILD_STATIC_JAVA_LIBRARY)

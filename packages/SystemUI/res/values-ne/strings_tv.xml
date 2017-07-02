@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="134047986446577723">"तस्बिरभित्रको तस्बिर"</string>
+    <string name="notification_channel_tv_pip" msgid="134047986446577723">"Picture-in-Picture"</string>
     <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(शीर्षकविहीन कार्यक्रम)"</string>
     <string name="pip_close" msgid="3480680679023423574">"PIP लाई बन्द गर्नुहोस्"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"पूर्ण स्क्रिन"</string>

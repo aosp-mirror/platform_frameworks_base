@@ -2680,11 +2680,6 @@ public class UserManagerService extends IUserManager.Stub {
                     addRemovingUserIdLocked(userHandle);
                 }
 
-                try {
-                    mAppOpsService.removeUser(userHandle);
-                } catch (RemoteException e) {
-                    Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user", e);
-                }
                 // Set this to a partially created user, so that the user will be purged
                 // on next startup, in case the runtime stops now before stopping and
                 // removing the user completely.
@@ -2693,6 +2688,11 @@ public class UserManagerService extends IUserManager.Stub {
                 // profiles are queried.
                 userData.info.flags |= UserInfo.FLAG_DISABLED;
                 writeUserLP(userData);
+            }
+            try {
+                mAppOpsService.removeUser(userHandle);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of removing user", e);
             }
 
             if (userData.info.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID

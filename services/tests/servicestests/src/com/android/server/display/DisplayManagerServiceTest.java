@@ -29,9 +29,11 @@ import android.view.SurfaceControl;
 import android.view.WindowManagerInternal;
 
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.display.DisplayDeviceInfo;
 import com.android.server.display.DisplayManagerService.SyncRoot;
 import com.android.server.display.VirtualDisplayAdapter.SurfaceControlDisplayFactory;
+import com.android.server.lights.LightsManager;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -45,35 +47,51 @@ import static org.mockito.Mockito.when;
 
 @SmallTest
 public class DisplayManagerServiceTest extends AndroidTestCase {
-    private Handler mHandler;
-    private DisplayManagerService mDisplayManager;
+    private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;
+    private static final long SHORT_DEFAULT_DISPLAY_TIMEOUT_MILLIS = 10;
+
+    private final DisplayManagerService.Injector mShortMockedInjector =
+            new DisplayManagerService.Injector() {
+                @Override
+                VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot,
+                        Context context, Handler handler, DisplayAdapter.Listener listener) {
+                    return mMockVirtualDisplayAdapter;
+                }
+
+                @Override
+                long getDefaultDisplayDelayTimeout() {
+                    return SHORT_DEFAULT_DISPLAY_TIMEOUT_MILLIS;
+                }
+            };
+    private final DisplayManagerService.Injector mBasicInjector =
+            new DisplayManagerService.Injector() {
+                @Override
+                VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot,
+                        Context context, Handler handler,
+                        DisplayAdapter.Listener displayAdapterListener) {
+                    return new VirtualDisplayAdapter(syncRoot, context, handler,
+                            displayAdapterListener,
+                            (String name, boolean secure) -> mMockDisplayToken);
+                }
+            };
+
     @Mock InputManagerInternal mMockInputManagerInternal;
     @Mock IVirtualDisplayCallback.Stub mMockAppToken;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
+    @Mock LightsManager mMockLightsManager;
     @Mock VirtualDisplayAdapter mMockVirtualDisplayAdapter;
     @Mock IBinder mMockDisplayToken;
 
     @Override
     protected void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mDisplayManager = new DisplayManagerService(mContext,
-        new DisplayManagerService.Injector() {
-            @Override
-            VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot, Context context,
-                    Handler handler, DisplayAdapter.Listener displayAdapterListener) {
-                return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
-                        (String name, boolean secure) -> mMockDisplayToken);
-            }
-        });
-        mHandler = mDisplayManager.getDisplayHandler();
 
         LocalServices.removeServiceForTest(InputManagerInternal.class);
         LocalServices.addService(InputManagerInternal.class, mMockInputManagerInternal);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mMockWindowManagerInternal);
-
-        mDisplayManager.systemReady(false /* safeMode */, false /* onlyCore */);
-        mDisplayManager.windowManagerAndInputReady();
+        LocalServices.removeServiceForTest(LightsManager.class);
+        LocalServices.addService(LightsManager.class, mMockLightsManager);
         super.setUp();
     }
 
@@ -83,8 +101,14 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
     }
 
     public void testCreateVirtualDisplay_sentToInputManager() throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+        displayManager.systemReady(false /* safeMode */, true /* onlyCore */);
+        displayManager.windowManagerAndInputReady();
+
         // This is effectively the DisplayManager service published to ServiceManager.
-        DisplayManagerService.BinderService bs = mDisplayManager.new BinderService();
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
 
         String uniqueId = "uniqueId --- Test";
         String uniqueIdPrefix = "virtual:" + mContext.getPackageName() + ":";
@@ -99,10 +123,10 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
                 "Test Virtual Display", width, height, dpi, null /* surface */, flags /* flags */,
                 uniqueId);
 
-        mDisplayManager.performTraversalInTransactionFromWindowManagerInternal();
+        displayManager.performTraversalInTransactionFromWindowManagerInternal();
 
         // flush the handler
-        mHandler.runWithScissors(() -> {}, 0 /* now */);
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
 
         ArgumentCaptor<List<DisplayViewport>> virtualViewportCaptor =
                 ArgumentCaptor.forClass(List.class);
@@ -118,8 +142,12 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
     }
 
     public void testCreateVirtualDisplayRotatesWithContent() throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+
         // This is effectively the DisplayManager service published to ServiceManager.
-        DisplayManagerService.BinderService bs = mDisplayManager.new BinderService();
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
 
         String uniqueId = "uniqueId --- Rotates With Content Test";
         int width = 600;
@@ -133,13 +161,76 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
                 "Test Virtual Display", width, height, dpi, null /* surface */, flags /* flags */,
                 uniqueId);
 
-        mDisplayManager.performTraversalInTransactionFromWindowManagerInternal();
+        displayManager.performTraversalInTransactionFromWindowManagerInternal();
 
         // flush the handler
-        mHandler.runWithScissors(() -> {}, 0 /* now */);
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
 
-        DisplayDeviceInfo ddi = mDisplayManager.getDisplayDeviceInfoInternal(displayId);
+        DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
         assertNotNull(ddi);
         assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0);
+    }
+
+    /**
+     * Tests that the virtual display is created along-side the default display.
+     */
+    public void testStartVirtualDisplayWithDefaultDisplay_Succeeds() throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+    }
+
+    /**
+     * Tests that we get a Runtime exception when we cannot initialize the default display.
+     */
+    public void testStartVirtualDisplayWithDefDisplay_NoDefaultDisplay() throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        Handler handler = displayManager.getDisplayHandler();
+        handler.runWithScissors(() -> {}, 0 /* now */);
+
+        try {
+            displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+        } catch (RuntimeException e) {
+            return;
+        }
+        fail("Expected DisplayManager to throw RuntimeException when it cannot initialize the"
+                + " default display");
+    }
+
+    /**
+     * Tests that we get a Runtime exception when we cannot initialize the virtual display.
+     */
+    public void testStartVirtualDisplayWithDefDisplay_NoVirtualDisplayAdapter() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext,
+                new DisplayManagerService.Injector() {
+                    @Override
+                    VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot,
+                            Context context, Handler handler, DisplayAdapter.Listener listener) {
+                        return null;  // return null for the adapter.  This should cause a failure.
+                    }
+
+                    @Override
+                    long getDefaultDisplayDelayTimeout() {
+                        return SHORT_DEFAULT_DISPLAY_TIMEOUT_MILLIS;
+                    }
+                });
+        try {
+            displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+        } catch (RuntimeException e) {
+            return;
+        }
+        fail("Expected DisplayManager to throw RuntimeException when it cannot initialize the"
+                + " virtual display adapter");
+    }
+
+    private void registerDefaultDisplays(DisplayManagerService displayManager) {
+        Handler handler = displayManager.getDisplayHandler();
+        // Would prefer to call displayManager.onStart() directly here but it performs binderService
+        // registration which triggers security exceptions when running from a test.
+        handler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS);
+        // flush the handler
+        handler.runWithScissors(() -> {}, 0 /* now */);
     }
 }

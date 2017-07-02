@@ -558,7 +558,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void onFinishInflate() {
         mNavigationInflaterView = (NavigationBarInflaterView) findViewById(
                 R.id.navigation_inflater);
-        updateRotatedViews();
         mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
@@ -567,16 +566,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mDockedStackExists = exists;
             updateRecentsIcon();
         }));
+        updateRotatedViews();
     }
 
-    void updateRotatedViews() {
+    private void updateRotatedViews() {
         mRotatedViews[Surface.ROTATION_0] =
                 mRotatedViews[Surface.ROTATION_180] = findViewById(R.id.rot0);
         mRotatedViews[Surface.ROTATION_270] =
                 mRotatedViews[Surface.ROTATION_90] = findViewById(R.id.rot90);
-
-        mCurrentRotation = -1;
-        reorient();
     }
 
     public boolean needsReorient(int rotation) {
@@ -613,12 +610,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (!updateCurrentView()) {
             return;
         }
-        Log.d(TAG, "reorient", new Throwable());
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
-        if (getRootView() instanceof NavigationBarFrame) {
-            ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
-        }
+
+        ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
+
         mDeadZone.setDisplayRotation(mCurrentRotation);
 
         // force the low profile & disabled states into compliance
@@ -758,6 +754,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        reorient();
         onPluginDisconnected(null); // Create default gesture helper
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NavGesture.class, false /* Only one */);

@@ -1681,7 +1681,14 @@ public class ResolverActivity extends Activity {
         // We assume that at this point we've already filtered out the only intent for a different
         // targetUserId which we're going to use.
         private void addResolveInfo(DisplayResolveInfo dri) {
-            if (dri.mResolveInfo.targetUserId == UserHandle.USER_CURRENT) {
+            if (dri != null && dri.mResolveInfo != null
+                    && dri.mResolveInfo.targetUserId == UserHandle.USER_CURRENT) {
+                // Checks if this info is already listed in display.
+                for (DisplayResolveInfo existingInfo : mDisplayList) {
+                    if (resolveInfoMatch(dri.mResolveInfo, existingInfo.mResolveInfo)) {
+                        return;
+                    }
+                }
                 mDisplayList.add(dri);
             }
         }

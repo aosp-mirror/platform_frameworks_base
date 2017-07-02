@@ -112,7 +112,8 @@ static int sqliteProgressHandlerCallback(void* data) {
 
 
 static jlong nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFlags,
-        jstring labelStr, jboolean enableTrace, jboolean enableProfile) {
+        jstring labelStr, jboolean enableTrace, jboolean enableProfile, jint lookasideSz,
+        jint lookasideCnt) {
     int sqliteFlags;
     if (openFlags & SQLiteConnection::CREATE_IF_NECESSARY) {
         sqliteFlags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
@@ -135,6 +136,16 @@ static jlong nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFla
     if (err != SQLITE_OK) {
         throw_sqlite3_exception_errcode(env, err, "Could not open database");
         return 0;
+    }
+
+    if (lookasideSz >= 0 && lookasideCnt >= 0) {
+        int err = sqlite3_db_config(db, SQLITE_DBCONFIG_LOOKASIDE, NULL, lookasideSz, lookasideCnt);
+        if (err != SQLITE_OK) {
+            ALOGE("sqlite3_db_config(..., %d, %d) failed: %d", lookasideSz, lookasideCnt, err);
+            throw_sqlite3_exception(env, db, "Cannot set lookaside");
+            sqlite3_close(db);
+            return 0;
+        }
     }
 
     // Check that the database is really read/write when that is what we asked for.
@@ -789,7 +800,7 @@ static void nativeResetCancel(JNIEnv* env, jobject clazz, jlong connectionPtr,
 static const JNINativeMethod sMethods[] =
 {
     /* name, signature, funcPtr */
-    { "nativeOpen", "(Ljava/lang/String;ILjava/lang/String;ZZ)J",
+    { "nativeOpen", "(Ljava/lang/String;ILjava/lang/String;ZZII)J",
             (void*)nativeOpen },
     { "nativeClose", "(J)V",
             (void*)nativeClose },

@@ -152,7 +152,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * {@link KeyguardBouncer#needsFullscreenBouncer()}.
      */
     protected void showBouncerOrKeyguard(boolean hideBouncerWhenShowing) {
-        if (mBouncer.needsFullscreenBouncer()) {
+        if (mBouncer.needsFullscreenBouncer() && !mDozing) {
 
             // The keyguard might be showing (already). So we need to hide it.
             mStatusBar.hideKeyguard();
@@ -258,8 +258,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void setDozing(boolean dozing) {
-        mDozing = dozing;
-        updateStates();
+        if (mDozing != dozing) {
+            mDozing = dozing;
+            reset(dozing /* hideBouncerWhenShowing */);
+            updateStates();
+        }
     }
 
     public void onScreenTurnedOff() {

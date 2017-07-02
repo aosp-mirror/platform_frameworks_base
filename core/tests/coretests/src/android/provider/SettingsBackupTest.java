@@ -26,6 +26,7 @@ import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -37,6 +38,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** Tests that ensure appropriate settings are backed up. */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsBackupTest {
@@ -98,6 +100,7 @@ public class SettingsBackupTest {
                     Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
                     Settings.Global.ALWAYS_FINISH_ACTIVITIES,
                     Settings.Global.ANIMATOR_DURATION_SCALE,
+                    Settings.Global.ANOMALY_DETECTION_CONSTANTS,
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
                     Settings.Global.APN_DB_UPDATE_METADATA_URL,
                     Settings.Global.APP_IDLE_CONSTANTS,
@@ -117,7 +120,6 @@ public class SettingsBackupTest {
                     Settings.Global.BLUETOOTH_INTEROPERABILITY_LIST,
                     Settings.Global.BLUETOOTH_MAP_CLIENT_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_MAP_PRIORITY_PREFIX,
-                    Settings.Global.BLUETOOTH_ON, // Candidate for backup?
                     Settings.Global.BLUETOOTH_PAN_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_SAP_PRIORITY_PREFIX,
@@ -166,6 +168,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVICE_IDLE_CONSTANTS,
                     Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
+                    Settings.Global.DEFAULT_SM_DP_PLUS,
                     Settings.Global.DEVICE_NAME,
                     Settings.Global.DEVICE_POLICY_CONSTANTS,
                     Settings.Global.DEVICE_PROVISIONED,
@@ -190,11 +193,14 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
                     Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
                     Settings.Global.ENABLE_CELLULAR_ON_BOOT,
+                    Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
                     Settings.Global.ERROR_LOGCAT_PREFIX,
+                    Settings.Global.EUICC_PROVISIONED,
+                    Settings.Global.EUICC_WIPING_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
                     Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
                     Settings.Global.FSTRIM_MANDATORY_INTERVAL,
@@ -211,6 +217,7 @@ public class SettingsBackupTest {
                     Settings.Global.HTTP_PROXY,
                     Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY,
                     Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY,
+                    Settings.Global.INSTANT_APP_DEXOPT_ENABLED,
                     Settings.Global.INTENT_FIREWALL_UPDATE_CONTENT_URL,
                     Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
                     Settings.Global.JOB_SCHEDULER_CONSTANTS,
@@ -330,6 +337,7 @@ public class SettingsBackupTest {
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
                     Settings.Global.TETHER_DUN_REQUIRED,
+                    Settings.Global.TETHER_OFFLOAD_DISABLED,
                     Settings.Global.TETHER_SUPPORTED,
                     Settings.Global.THEATER_MODE_ON,
                     Settings.Global.TRANSITION_ANIMATION_SCALE,
@@ -488,6 +496,7 @@ public class SettingsBackupTest {
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
+                 Settings.Secure.TV_USER_SETUP_COMPLETE,
                  Settings.Secure.UI_NIGHT_MODE, // candidate?
                  Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED,
                  Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,

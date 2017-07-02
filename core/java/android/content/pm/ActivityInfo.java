@@ -441,6 +441,22 @@ public class ActivityInfo extends ComponentInfo
      * @hide
      */
     public static final int FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x400000;
+
+    /**
+     * Bit in {@link #flags} indicating if the activity should be shown when locked.
+     * See {@link android.R.attr#showWhenLocked}
+     * @hide
+     */
+    public static final int FLAG_SHOW_WHEN_LOCKED = 0x800000;
+
+    /**
+     * Bit in {@link #flags} indicating if the screen should turn on when starting the activity.
+     * See {@link android.R.attr#turnScreenOn}
+     * @hide
+     */
+    public static final int FLAG_TURN_SCREEN_ON = 0x1000000;
+
+
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
@@ -462,6 +478,7 @@ public class ActivityInfo extends ComponentInfo
      * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
      */
     public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
+
     /**
      * Options that have been set in the activity declaration in the
      * manifest.

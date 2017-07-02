@@ -316,6 +316,8 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Další nastavení"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Hotovo"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Připojeno"</string>
+    <!-- no translation found for quick_settings_connected_battery_level (4136051440381328892) -->
+    <skip />
     <string name="quick_settings_connecting" msgid="47623027419264404">"Připojování..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Sdílené připojení"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
@@ -739,8 +741,8 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizovat"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zavřít"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Nápovědu zavřete přetažením dolů"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Nabídka typu obraz v obraze"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v zobrazení obraz v obraze"</string>
+    <string name="pip_menu_title" msgid="3328510504196964712">"Nabídka režimu obraz v obraze"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v režimu obraz v obraze"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Pokud nechcete, aby aplikace <xliff:g id="NAME">%s</xliff:g> tuto funkci používala, klepnutím otevřete nastavení a funkci vypněte."</string>
     <string name="pip_play" msgid="1417176722760265888">"Přehrát"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pozastavit"</string>

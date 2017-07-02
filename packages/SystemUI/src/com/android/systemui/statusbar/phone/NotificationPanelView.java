@@ -345,6 +345,7 @@ public class NotificationPanelView extends PanelView implements
                 false);
         addView(mKeyguardBottomArea, index);
         initBottomArea();
+        setDarkAmount(mDarkAmount);
     }
 
     private void initBottomArea() {

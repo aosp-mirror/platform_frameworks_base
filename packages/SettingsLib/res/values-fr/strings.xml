@@ -55,6 +55,14 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Connecté (sans audio contenu mutimédia)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Connecté (sans accès aux messages)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Connecté (sans audio tel./multimédia)"</string>
+    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Multimédia"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Appels téléphoniques"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfert de fichier"</string>
@@ -352,7 +360,7 @@
     <string name="disabled" msgid="9206776641295849915">"Désactivée"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Autorisé"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Non autorisé"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Installation d\'applications inconnues"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Installation d\'applis inconnues"</string>
     <string name="home" msgid="3256884684164448244">"Paramètres"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0 %"</item>

@@ -934,6 +934,7 @@ public class Preference implements Comparable<Preference> {
      * @param singleLineTitle set {@code true} if the title should be constrained to one line
      */
     public void setSingleLineTitle(boolean singleLineTitle) {
+        mHasSingleLineTitleAttr = true;
         mSingleLineTitle = singleLineTitle;
         notifyChanged();
     }

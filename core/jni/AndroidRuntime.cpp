@@ -167,6 +167,7 @@ extern int register_android_os_Trace(JNIEnv* env);
 extern int register_android_os_FileObserver(JNIEnv *env);
 extern int register_android_os_UEventObserver(JNIEnv* env);
 extern int register_android_os_MemoryFile(JNIEnv* env);
+extern int register_android_os_SharedMemory(JNIEnv* env);
 extern int register_android_net_LocalSocketImpl(JNIEnv* env);
 extern int register_android_net_NetworkUtils(JNIEnv* env);
 extern int register_android_net_TrafficStats(JNIEnv* env);
@@ -791,19 +792,27 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
                             "--compiler-filter=", "-Ximage-compiler-option");
     }
 
-    // Make sure there is a preloaded-classes file.
-    if (!hasFile("/system/etc/preloaded-classes")) {
-        ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
-              strerror(errno));
-        return -1;
-    }
-    addOption("-Ximage-compiler-option");
-    addOption("--image-classes=/system/etc/preloaded-classes");
-
-    // If there is a compiled-classes file, push it.
-    if (hasFile("/system/etc/compiled-classes")) {
+    // If there is a boot profile, it takes precedence over the image and preloaded classes.
+    if (hasFile("/system/etc/boot-image.prof")) {
         addOption("-Ximage-compiler-option");
-        addOption("--compiled-classes=/system/etc/compiled-classes");
+        addOption("--profile-file=/system/etc/boot-image.prof");
+        addOption("-Ximage-compiler-option");
+        addOption("--compiler-filter=speed-profile");
+    } else {
+        // Make sure there is a preloaded-classes file.
+        if (!hasFile("/system/etc/preloaded-classes")) {
+            ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
+                  strerror(errno));
+            return -1;
+        }
+        addOption("-Ximage-compiler-option");
+        addOption("--image-classes=/system/etc/preloaded-classes");
+
+        // If there is a compiled-classes file, push it.
+        if (hasFile("/system/etc/compiled-classes")) {
+            addOption("-Ximage-compiler-option");
+            addOption("--compiled-classes=/system/etc/compiled-classes");
+        }
     }
 
     property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
@@ -1392,6 +1401,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_net_NetworkUtils),
     REG_JNI(register_android_net_TrafficStats),
     REG_JNI(register_android_os_MemoryFile),
+    REG_JNI(register_android_os_SharedMemory),
     REG_JNI(register_com_android_internal_os_PathClassLoaderFactory),
     REG_JNI(register_com_android_internal_os_Zygote),
     REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),

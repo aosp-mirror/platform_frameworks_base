@@ -98,25 +98,4 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         testStack.stopActivityLocked(activityRecord);
     }
-
-    /**
-     * This test verifies that {@link ActivityStack#STACK_VISIBLE_ACTIVITY_BEHIND} is returned from
-     * {@link ActivityStack#shouldBeVisible(ActivityRecord)} from a fullscreen workspace stack with
-     * a visible behind activity when top focused stack is the home stack.
-     */
-    @Test
-    public void testShouldBeVisibleWithVisibleBehindActivity() throws Exception {
-        final ActivityManagerService service = createActivityManagerService();
-        final TaskRecord task = createTask(service, testActivityComponent,
-                ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID);
-        final ActivityStack fullscreenWorkspaceStackId = task.getStack();
-        final ActivityStack homeStack = service.mStackSupervisor.getStack(
-                ActivityManager.StackId.HOME_STACK_ID, true /*createStaticStackIfNeeded*/,
-                true /*onTop*/);
-        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task);
-        service.mStackSupervisor.setFocusStackUnchecked("testEmptyStackShouldBeVisible", homeStack);
-        service.mStackSupervisor.requestVisibleBehindLocked(activityRecord, true);
-        assertEquals(ActivityStack.STACK_VISIBLE_ACTIVITY_BEHIND,
-                fullscreenWorkspaceStackId.shouldBeVisible(null /*starting*/));
-    }
 }

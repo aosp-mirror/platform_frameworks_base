@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -27,6 +28,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -168,6 +170,18 @@ public interface WindowManager extends ViewManager {
      * @hide
      */
     public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver, int deviceId);
+
+    /**
+     * Return the touch region for the current IME window, or an empty region if there is none.
+     *
+     * @return The region of the IME that is accepting touch inputs, or null if there is no IME, no
+     *         region or there was an error.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    public Region getCurrentImeTouchRegion();
 
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
         /**
@@ -941,7 +955,11 @@ public interface WindowManager extends ViewManager {
          * {@link #FLAG_DISMISS_KEYGUARD} to automatically fully dismisss
          * non-secure keyguards.  This flag only applies to the top-most
          * full-screen window.
+         * @deprecated Use {@link android.R.attr#showWhenLocked} or
+         * {@link android.app.Activity#setShowWhenLocked(boolean)} instead to prevent an
+         * unintentional double life-cycle event.
          */
+        @Deprecated
         public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
 
         /** Window flag: ask that the system wallpaper be shown behind
@@ -966,7 +984,12 @@ public interface WindowManager extends ViewManager {
         /** Window flag: when set as a window is being added or made
          * visible, once the window has been shown then the system will
          * poke the power manager's user activity (as if the user had woken
-         * up the device) to turn the screen on. */
+         * up the device) to turn the screen on.
+         * @deprecated Use {@link android.R.attr#turnScreenOn} or
+         * {@link android.app.Activity#setTurnScreenOn(boolean)} instead to prevent an
+         * unintentional double life-cycle event.
+         */
+        @Deprecated
         public static final int FLAG_TURN_SCREEN_ON = 0x00200000;
 
         /** Window flag: when set the window will cause the keyguard to
@@ -1380,15 +1403,14 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 0x00040000;
 
         /**
-         * Flag to indicate that this window is used as a task snapshot window. A task snapshot
-         * window is a starting window that gets shown with a screenshot from the previous state
-         * that is active until the app has drawn its first frame.
-         *
-         * <p>If this flag is set, SystemUI flags are ignored such that the real window behind can
-         * set the SystemUI flags.
+         * Flag to indicate that any window added by an application process that is of type
+         * {@link #TYPE_TOAST} or that requires
+         * {@link android.app.AppOpsManager#OP_SYSTEM_ALERT_WINDOW} permission should be hidden when
+         * this window is visible.
          * @hide
          */
-        public static final int PRIVATE_FLAG_TASK_SNAPSHOT = 0x00080000;
+        @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
+        public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
 
         /**
          * Flag to indicate that this window should be ignored when determining what parts of the

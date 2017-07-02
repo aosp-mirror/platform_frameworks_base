@@ -20,6 +20,7 @@ import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
 import static android.view.SurfaceControl.HIDDEN;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
 import static android.view.WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE;
@@ -32,7 +33,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TASK_SNAPSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
@@ -159,13 +159,13 @@ class TaskSnapshotSurface implements StartingSurface {
             windowFlags = mainWindow.getAttrs().flags;
             windowPrivateFlags = mainWindow.getAttrs().privateFlags;
 
+            layoutParams.dimAmount = mainWindow.getAttrs().dimAmount;
             layoutParams.type = TYPE_APPLICATION_STARTING;
             layoutParams.format = snapshot.getSnapshot().getFormat();
             layoutParams.flags = (windowFlags & ~FLAG_INHERIT_EXCLUDES)
                     | FLAG_NOT_FOCUSABLE
                     | FLAG_NOT_TOUCHABLE;
-            layoutParams.privateFlags = PRIVATE_FLAG_TASK_SNAPSHOT
-                    | (windowPrivateFlags & PRIVATE_FLAG_INHERITS);
+            layoutParams.privateFlags = windowPrivateFlags & PRIVATE_FLAG_INHERITS;
             layoutParams.token = token.token;
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = LayoutParams.MATCH_PARENT;

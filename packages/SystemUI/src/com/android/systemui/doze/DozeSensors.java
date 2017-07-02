@@ -18,6 +18,7 @@ package com.android.systemui.doze;
 
 import android.annotation.AnyThread;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -29,6 +30,7 @@ import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -38,6 +40,7 @@ import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
@@ -51,6 +54,7 @@ public class DozeSensors {
     private static final String TAG = "DozeSensors";
 
     private final Context mContext;
+    private final AlarmManager mAlarmManager;
     private final SensorManager mSensorManager;
     private final TriggerSensor[] mSensors;
     private final ContentResolver mResolver;
@@ -65,10 +69,12 @@ public class DozeSensors {
     private final ProxSensor mProxSensor;
 
 
-    public DozeSensors(Context context, SensorManager sensorManager, DozeParameters dozeParameters,
+    public DozeSensors(Context context, AlarmManager alarmManager, SensorManager sensorManager,
+            DozeParameters dozeParameters,
             AmbientDisplayConfiguration config, WakeLock wakeLock, Callback callback,
             Consumer<Boolean> proxCallback) {
         mContext = context;
+        mAlarmManager = alarmManager;
         mSensorManager = sensorManager;
         mDozeParameters = dozeParameters;
         mConfig = config;
@@ -100,10 +106,14 @@ public class DozeSensors {
     }
 
     private Sensor findSensorWithType(String type) {
+        return findSensorWithType(mSensorManager, type);
+    }
+
+    static Sensor findSensorWithType(SensorManager sensorManager, String type) {
         if (TextUtils.isEmpty(type)) {
             return null;
         }
-        List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        List<Sensor> sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL);
         for (Sensor s : sensorList) {
             if (type.equals(s.getStringType())) {
                 return s;
@@ -140,7 +150,7 @@ public class DozeSensors {
     }
 
     public void setProxListening(boolean listen) {
-        mProxSensor.setRegistered(listen);
+        mProxSensor.setRequested(listen);
     }
 
     private final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
@@ -168,17 +178,41 @@ public class DozeSensors {
 
     private class ProxSensor implements SensorEventListener {
 
+        static final long COOLDOWN_TRIGGER = 2 * 1000;
+        static final long COOLDOWN_PERIOD = 5 * 1000;
+
+        boolean mRequested;
         boolean mRegistered;
         Boolean mCurrentlyFar;
+        long mLastNear;
+        final AlarmTimeout mCooldownTimer;
 
-        void setRegistered(boolean register) {
-            if (mRegistered == register) {
+
+        public ProxSensor() {
+            mCooldownTimer = new AlarmTimeout(mAlarmManager, this::updateRegistered,
+                    "prox_cooldown", mHandler);
+        }
+
+        void setRequested(boolean requested) {
+            if (mRequested == requested) {
                 // Send an update even if we don't re-register.
                 mHandler.post(() -> {
                     if (mCurrentlyFar != null) {
                         mProxCallback.accept(mCurrentlyFar);
                     }
                 });
+                return;
+            }
+            mRequested = requested;
+            updateRegistered();
+        }
+
+        private void updateRegistered() {
+            setRegistered(mRequested && !mCooldownTimer.isScheduled());
+        }
+
+        private void setRegistered(boolean register) {
+            if (mRegistered == register) {
                 return;
             }
             if (register) {
@@ -196,6 +230,17 @@ public class DozeSensors {
         public void onSensorChanged(SensorEvent event) {
             mCurrentlyFar = event.values[0] >= event.sensor.getMaximumRange();
             mProxCallback.accept(mCurrentlyFar);
+
+            long now = SystemClock.elapsedRealtime();
+            if (!mCurrentlyFar) {
+                mLastNear = now;
+            } else if (mCurrentlyFar && now - mLastNear < COOLDOWN_TRIGGER) {
+                // If the last near was very recent, we might be using more power for prox
+                // wakeups than we're saving from turning of the screen. Instead, turn it off
+                // for a while.
+                mCooldownTimer.schedule(COOLDOWN_PERIOD, AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+                updateRegistered();
+            }
         }
 
         @Override

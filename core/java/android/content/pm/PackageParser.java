@@ -4292,6 +4292,15 @@ public class PackageParser {
 
             a.info.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode,
                     ActivityInfo.COLOR_MODE_DEFAULT);
+
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_showWhenLocked, false)) {
+                a.info.flags |= ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
+            }
+
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_turnScreenOn, false)) {
+                a.info.flags |= ActivityInfo.FLAG_TURN_SCREEN_ON;
+            }
+
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;

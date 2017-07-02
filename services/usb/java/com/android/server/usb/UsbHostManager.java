@@ -31,6 +31,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.usb.descriptors.UsbDescriptorParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -257,7 +258,14 @@ public class UsbHostManager {
                     getCurrentUserSettings().deviceAttachedForFixedHandler(mNewDevice,
                             usbDeviceConnectionHandler);
                 }
-                mUsbAlsaManager.usbDeviceAdded(mNewDevice);
+                // deviceName is something like: "/dev/bus/usb/001/001"
+                UsbDescriptorParser parser = new UsbDescriptorParser();
+                if (parser.parseDevice(mNewDevice.getDeviceName())) {
+                    Slog.i(TAG, "---- isHeadset[in:" + parser.isInputHeadset()
+                            + " , out:" + parser.isOutputHeadset() + "]");
+                    mUsbAlsaManager.usbDeviceAdded(mNewDevice,
+                            parser.isInputHeadset(), parser.isOutputHeadset());
+                }
             } else {
                 Slog.e(TAG, "mNewDevice is null in endUsbDeviceAdded");
             }

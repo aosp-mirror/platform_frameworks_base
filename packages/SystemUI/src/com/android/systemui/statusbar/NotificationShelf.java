@@ -505,6 +505,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
             iconState.scaleX = newSize / icon.getHeight() / icon.getIconScale();
             iconState.scaleY = iconState.scaleX;
             iconState.hidden = transitionAmount == 0.0f && !iconState.isAnimating(icon);
+            boolean isAppearing = row.isDrawingAppearAnimation() && !row.isInShelf();
+            if (isAppearing) {
+                iconState.hidden = true;
+                iconState.iconAppearAmount = 0.0f;
+            }
             iconState.alpha = alpha;
             iconState.yTranslation = iconYTranslation;
             if (stayingInShelf) {

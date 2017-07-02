@@ -289,6 +289,9 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     }
 
     private void updateLayerBounds(Rect bounds) {
+        if (bounds.isEmpty()) {
+            return;
+        }
         try {
             suspendChildInvalidation();
             updateLayerBoundsInternal(bounds);

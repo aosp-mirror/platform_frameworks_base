@@ -2843,6 +2843,8 @@
     <eat-comment />
 
     <public-group type="attr" first-id="0x01010569">
+        <public name="showWhenLocked"/>
+        <public name="turnScreenOn"/>
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

@@ -3103,12 +3103,29 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     /**
+     * Check if Setup or Post-Setup update is completed on TV
+     * @return true if completed
+     */
+    private boolean isTvUserSetupComplete() {
+        boolean isTvSetupComplete = Settings.Secure.getInt(getContext().getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0) != 0;
+        isTvSetupComplete &= Settings.Secure.getInt(getContext().getContentResolver(),
+                Settings.Secure.TV_USER_SETUP_COMPLETE, 0) != 0;
+        return isTvSetupComplete;
+    }
+
+    /**
      * Helper method for adding launch-search to most applications. Opens the
      * search window using default settings.
      *
      * @return true if search window opened
      */
     private boolean launchDefaultSearch(KeyEvent event) {
+        if (getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                && !isTvUserSetupComplete()) {
+            // If we are in Setup or Post-Setup update mode on TV, consume the search key
+            return false;
+        }
         boolean result;
         final Callback cb = getCallback();
         if (cb == null || isDestroyed()) {

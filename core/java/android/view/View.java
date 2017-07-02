@@ -724,6 +724,8 @@ import java.util.function.Predicate;
  * @attr ref android.R.styleable#View_nextFocusUp
  * @attr ref android.R.styleable#View_onClick
  * @attr ref android.R.styleable#View_padding
+ * @attr ref android.R.styleable#View_paddingHorizontal
+ * @attr ref android.R.styleable#View_paddingVertical
  * @attr ref android.R.styleable#View_paddingBottom
  * @attr ref android.R.styleable#View_paddingLeft
  * @attr ref android.R.styleable#View_paddingRight

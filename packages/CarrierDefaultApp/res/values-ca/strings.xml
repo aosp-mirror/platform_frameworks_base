@@ -10,7 +10,7 @@
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"No hi ha connexió de dades mòbils"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"Afegeix un pla de dades o d\'itinerància amb %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Estat de les dades mòbils"</string>
-    <string name="action_bar_label" msgid="4290345990334377177">"Inicia la sessió a la xarxa de telefonia mòbil"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Inicia la sessió a la xarxa mòbil"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"La xarxa a què et vols connectar té problemes de seguretat."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Per exemple, la pàgina d\'inici de sessió podria no pertànyer a l\'organització que es mostra."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Continua igualment mitjançant el navegador"</string>
