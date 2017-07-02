@@ -2020,12 +2020,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void setDeviceOwnerSystemPropertyLocked() {
         final boolean deviceProvisioned =
                 mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        final boolean hasDeviceOwner = mOwners.hasDeviceOwner();
         // If the device is not provisioned and there is currently no device owner, do not set the
-        // read-only system property yet, since Device owner may still be provisioned. For Wear
-        // devices, if there is already a device owner then it's OK to set the property to true now,
-        // regardless the provision state.
-        final boolean isWatchWithDeviceOwner = mIsWatch && mOwners.hasDeviceOwner();
-        if (!isWatchWithDeviceOwner && !deviceProvisioned) {
+        // read-only system property yet, since Device owner may still be provisioned.
+        if (!hasDeviceOwner && !deviceProvisioned) {
             return;
         }
         // Still at the first stage of CryptKeeper double bounce, mOwners.hasDeviceOwner is
@@ -2034,20 +2032,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        if (!TextUtils.isEmpty(mInjector.systemPropertiesGet(PROPERTY_DEVICE_OWNER_PRESENT))) {
+        if (!mInjector.systemPropertiesGet(PROPERTY_DEVICE_OWNER_PRESENT, "").isEmpty()) {
             Slog.w(LOG_TAG, "Trying to set ro.device_owner, but it has already been set?");
         } else {
-            if (mOwners.hasDeviceOwner()) {
-                mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "true");
-                Slog.i(LOG_TAG, "Set ro.device_owner property to true");
+            final String value = Boolean.toString(hasDeviceOwner);
+            mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, value);
+            Slog.i(LOG_TAG, "Set ro.device_owner property to " + value);
 
-                if (mInjector.securityLogGetLoggingEnabledProperty()) {
-                    mSecurityLogMonitor.start();
-                    maybePauseDeviceWideLoggingLocked();
-                }
-            } else {
-                mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "false");
-                Slog.i(LOG_TAG, "Set ro.device_owner property to false");
+            if (hasDeviceOwner && mInjector.securityLogGetLoggingEnabledProperty()) {
+                mSecurityLogMonitor.start();
+                maybePauseDeviceWideLoggingLocked();
             }
         }
     }
