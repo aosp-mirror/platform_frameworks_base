@@ -260,7 +260,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"المحتويات مخفية"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"تم إخفاء المحتويات بواسطة السياسة"</string>
-    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"لوحة المفاتيح الظاهرية"</string>
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"لوحة المفاتيح الافتراضية"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"لوحة المفاتيح الفعلية"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"الأمان"</string>
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"وضع السيارة"</string>
@@ -270,7 +270,7 @@
     <string name="notification_channel_network_status" msgid="5025648583129035447">"حالة الشبكة"</string>
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"تنبيهات الشبكة"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"الشبكة متوفرة"</string>
-    <string name="notification_channel_vpn" msgid="8330103431055860618">"حالة الشبكة الظاهرية الخاصة"</string>
+    <string name="notification_channel_vpn" msgid="8330103431055860618">"حالة الشبكة الافتراضية الخاصة"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"إدارة الجهاز"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"التنبيهات"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"عرض توضيحي لبائع التجزئة"</string>
@@ -1215,7 +1215,7 @@
     <item msgid="75483255295529161">"Wi-Fi"</item>
     <item msgid="6862614801537202646">"بلوتوث"</item>
     <item msgid="5447331121797802871">"إيثرنت"</item>
-    <item msgid="8257233890381651999">"‏شبكة ظاهرية خاصة (VPN)"</item>
+    <item msgid="8257233890381651999">"‏شبكة افتراضية خاصة (VPN)"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"نوع شبكة غير معروف"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏تعذر الاتصال بـ Wi-Fi"</string>
@@ -1293,7 +1293,7 @@
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"رفض"</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغيير لوحة المفاتيح"</string>
     <string name="show_ime" msgid="2506087537466597099">"استمرار عرضها على الشاشة أثناء نشاط لوحة المفاتيح الفعلية"</string>
-    <string name="hardware" msgid="194658061510127999">"إظهار لوحة المفاتيح الظاهرية"</string>
+    <string name="hardware" msgid="194658061510127999">"إظهار لوحة المفاتيح الافتراضية"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"تهيئة لوحة المفاتيح الفعلية"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"انقر لاختيار لغة وتنسيق"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
@@ -1381,14 +1381,14 @@
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"مستمع واقع افتراضي"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"موفر الحالة"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"خدمة ترتيب أهمية الإشعارات"</string>
-    <string name="vpn_title" msgid="19615213552042827">"‏تم تنشيط الشبكة الظاهرية الخاصة (VPN)"</string>
+    <string name="vpn_title" msgid="19615213552042827">"‏تم تنشيط الشبكة الافتراضية الخاصة (VPN)"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"‏تم تنشيط VPN بواسطة <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="1610714069627824309">"انقر لإدارة الشبكة."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"تم الاتصال بـ <xliff:g id="SESSION">%s</xliff:g>. انقر لإدارة الشبكة."</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏جارٍ الاتصال بشبكة ظاهرية خاصة (VPN) دائمة التشغيل..."</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏تم الاتصال بشبكة ظاهرية خاصة (VPN) دائمة التشغيل"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"‏تم فصل الشبكة الظاهرية الخاصة (VPN) دائمة التشغيل"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏خطأ بشبكة ظاهرية خاصة (VPN) دائمة التشغيل"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏جارٍ الاتصال بشبكة افتراضية خاصة (VPN) دائمة التشغيل..."</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏تم الاتصال بشبكة افتراضية خاصة (VPN) دائمة التشغيل"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"‏تم فصل الشبكة الافتراضية الخاصة (VPN) دائمة التشغيل"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏خطأ بشبكة افتراضية خاصة (VPN) دائمة التشغيل"</string>
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"انقر للإعداد."</string>
     <string name="upload_file" msgid="2897957172366730416">"اختيار ملف"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"لم يتم اختيار أي ملف"</string>
@@ -1917,6 +1917,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"يُرجى النزوح في الحال من المناطق الساحلية وضفاف النهر إلى مكان أكثر أمانًا مثل الأراضي المرتفعة."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"يُرجى الثبات والبحث عن ملاذ بالجوار."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"اختبار رسائل الطوارئ"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"‏غير مسموح باستخدام SIM"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"‏لم يتم تقديم SIM"</string>

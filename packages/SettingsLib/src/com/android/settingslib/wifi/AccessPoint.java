@@ -16,6 +16,7 @@
 
 package com.android.settingslib.wifi;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.Context;
@@ -53,6 +54,8 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -82,35 +85,30 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     public static final int HIGHER_FREQ_5GHZ = 5900;
 
-    /**
-     * Constant value representing an unlabeled / unscored network.
-     */
-    @VisibleForTesting
-    static final int SPEED_NONE = 0;
-
-    /**
-     * Constant value representing a slow speed network connection.
-     */
-    @VisibleForTesting
-    static final int SPEED_SLOW = 5;
-
-    /**
-     * Constant value representing a medium speed network connection.
-     */
-    @VisibleForTesting
-    static final int SPEED_MEDIUM = 10;
-
-    /**
-     * Constant value representing a fast speed network connection.
-     */
-    @VisibleForTesting
-    static final int SPEED_FAST = 20;
-
-    /**
-     * Constant value representing a very fast speed network connection.
-     */
-    @VisibleForTesting
-    static final int SPEED_VERY_FAST = 30;
+    @IntDef({Speed.NONE, Speed.SLOW, Speed.MODERATE, Speed.FAST, Speed.VERY_FAST})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Speed {
+        /**
+         * Constant value representing an unlabeled / unscored network.
+         */
+        int NONE = 0;
+        /**
+         * Constant value representing a slow speed network connection.
+         */
+        int SLOW = 5;
+        /**
+         * Constant value representing a medium speed network connection.
+         */
+        int MODERATE = 10;
+        /**
+         * Constant value representing a fast speed network connection.
+         */
+        int FAST = 20;
+        /**
+         * Constant value representing a very fast speed network connection.
+         */
+        int VERY_FAST = 30;
+    }
 
     /**
      * Experimental: we should be able to show the user the list of BSSIDs and bands
@@ -177,7 +175,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private Object mTag;
 
     private int mRankingScore = Integer.MIN_VALUE;
-    private int mSpeed = AccessPoint.SPEED_NONE;
+    private int mSpeed = Speed.NONE;
     private boolean mIsScoredNetworkMetered = false;
 
     // used to co-relate internal vs returned accesspoint.
@@ -322,8 +320,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (difference != 0) {
             return difference;
         }
+
         // Sort by ssid.
-        return getSsidStr().compareToIgnoreCase(other.getSsidStr());
+        difference = getSsidStr().compareToIgnoreCase(other.getSsidStr());
+        if (difference != 0) {
+            return difference;
+        }
+
+        // Do a case sensitive comparison to distinguish SSIDs that differ in case only
+        return getSsidStr().compareTo(other.getSsidStr());
     }
 
     @Override
@@ -368,7 +373,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (mRankingScore != Integer.MIN_VALUE) {
             builder.append(",rankingScore=").append(mRankingScore);
         }
-        if (mSpeed != SPEED_NONE) {
+        if (mSpeed != Speed.NONE) {
             builder.append(",speed=").append(mSpeed);
         }
         builder.append(",metered=").append(isMetered());
@@ -399,7 +404,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private boolean updateScores(WifiNetworkScoreCache scoreCache) {
         int oldSpeed = mSpeed;
         int oldRankingScore = mRankingScore;
-        mSpeed = SPEED_NONE;
+        mSpeed = Speed.NONE;
         mRankingScore = Integer.MIN_VALUE;
 
         for (ScanResult result : mScanResultCache.values()) {
@@ -675,7 +680,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // TODO(b/62354743): Standardize and international delimiter usage
         final String concatenator = " / ";
 
-        if (mSpeed != SPEED_NONE) {
+        if (mSpeed != Speed.NONE) {
             summary.append(getSpeedLabel() + concatenator);
         }
 
@@ -799,7 +804,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             if (mRankingScore != Integer.MIN_VALUE) {
                 visibility.append(" rankingScore=").append(getRankingScore());
             }
-            if (mSpeed != SPEED_NONE) {
+            if (mSpeed != Speed.NONE) {
                 visibility.append(" speed=").append(getSpeedLabel());
             }
             visibility.append(String.format(" tx=%.1f,", mInfo.txSuccessRate));
@@ -1053,6 +1058,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
         final int oldLevel = getLevel();
         if (info != null && isInfoForThisAccessPoint(config, info)) {
             updated = (mInfo == null);
+            if (mConfig != config) {
+                // We do not set updated = true as we do not want to increase the amount of sorting
+                // and copying performed in WifiTracker at this time. If issues involving refresh
+                // are still seen, we will investigate further.
+                update(config); // Notifies the AccessPointListener of the change
+            }
             if (mRssi != info.getRssi()) {
                 mRssi = info.getRssi();
                 updated = true;
@@ -1104,15 +1115,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
     @Nullable
     String getSpeedLabel() {
         switch (mSpeed) {
-            case SPEED_VERY_FAST:
+            case Speed.VERY_FAST:
                 return mContext.getString(R.string.speed_label_very_fast);
-            case SPEED_FAST:
+            case Speed.FAST:
                 return mContext.getString(R.string.speed_label_fast);
-            case SPEED_MEDIUM:
+            case Speed.MODERATE:
                 return mContext.getString(R.string.speed_label_okay);
-            case SPEED_SLOW:
+            case Speed.SLOW:
                 return mContext.getString(R.string.speed_label_slow);
-            case SPEED_NONE:
+            case Speed.NONE:
             default:
                 return null;
         }

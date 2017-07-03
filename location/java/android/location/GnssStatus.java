@@ -97,13 +97,12 @@ public final class GnssStatus {
             CONSTELLATION_QZSS, CONSTELLATION_BEIDOU, CONSTELLATION_GALILEO})
     public @interface ConstellationType {}
 
-    /* These package private values are modified by the LocationManager class */
-    /* package */ int[] mSvidWithFlags;
-    /* package */ float[] mCn0DbHz;
-    /* package */ float[] mElevations;
-    /* package */ float[] mAzimuths;
-    /* package */ int mSvCount;
-    /* package */ float[] mCarrierFrequencies;
+    final int[] mSvidWithFlags;
+    final float[] mCn0DbHz;
+    final float[] mElevations;
+    final float[] mAzimuths;
+    final int mSvCount;
+    final float[] mCarrierFrequencies;
 
     GnssStatus(int svCount, int[] svidWithFlags, float[] cn0s, float[] elevations,
             float[] azimuths, float[] carrierFrequencies) {

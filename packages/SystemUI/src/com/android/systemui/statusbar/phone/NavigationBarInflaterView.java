@@ -37,6 +37,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider;
+import com.android.systemui.statusbar.phone.ReverseLinearLayout.ReverseFrameLayout;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -285,7 +286,7 @@ public class NavigationBarInflaterView extends FrameLayout
 
         if (sizeStr.contains(WEIGHT_SUFFIX)) {
             float weight = Float.parseFloat(sizeStr.substring(0, sizeStr.indexOf(WEIGHT_SUFFIX)));
-            FrameLayout frame = new FrameLayout(mContext);
+            FrameLayout frame = new ReverseFrameLayout(mContext);
             LayoutParams childParams = new LayoutParams(v.getLayoutParams());
             if (sizeStr.endsWith(WEIGHT_CENTERED_SUFFIX)) {
                 childParams.gravity = Gravity.CENTER;

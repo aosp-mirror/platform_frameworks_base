@@ -20,6 +20,8 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -166,6 +168,21 @@ public class AccessPointTest {
 
         assertThat(firstAp.getSsidStr().compareToIgnoreCase(secondAp.getSsidStr()) < 0).isTrue();
         assertSortingWorks(firstAp, secondAp);
+    }
+
+    @Test
+    public void testCompareTo_GivesSsidCasePrecendenceAfterAlphabetical() {
+
+        final String firstName = "aaAaaa";
+        final String secondName = "aaaaaa";
+        final String thirdName = "BBBBBB";
+
+        AccessPoint firstAp = new TestAccessPointBuilder(mContext).setSsid(firstName).build();
+        AccessPoint secondAp = new TestAccessPointBuilder(mContext).setSsid(secondName).build();
+        AccessPoint thirdAp = new TestAccessPointBuilder(mContext).setSsid(thirdName).build();
+
+        assertSortingWorks(firstAp, secondAp);
+        assertSortingWorks(secondAp, thirdAp);
     }
 
     @Test
@@ -334,11 +351,11 @@ public class AccessPointTest {
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_VERY_FAST);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
-        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.SPEED_VERY_FAST);
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.VERY_FAST);
         assertThat(ap.getSpeedLabel())
                 .isEqualTo(mContext.getString(R.string.speed_label_very_fast));
     }
@@ -349,11 +366,11 @@ public class AccessPointTest {
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_FAST);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.FAST);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
-        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.SPEED_FAST);
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.FAST);
         assertThat(ap.getSpeedLabel())
                 .isEqualTo(mContext.getString(R.string.speed_label_fast));
     }
@@ -364,11 +381,11 @@ public class AccessPointTest {
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_MEDIUM);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.MODERATE);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
-        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.SPEED_MEDIUM);
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.MODERATE);
         assertThat(ap.getSpeedLabel())
                 .isEqualTo(mContext.getString(R.string.speed_label_okay));
     }
@@ -379,11 +396,11 @@ public class AccessPointTest {
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_SLOW);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.SLOW);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
-        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.SPEED_SLOW);
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.SLOW);
         assertThat(ap.getSpeedLabel())
                 .isEqualTo(mContext.getString(R.string.speed_label_slow));
     }
@@ -394,7 +411,7 @@ public class AccessPointTest {
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_VERY_FAST);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
@@ -408,7 +425,7 @@ public class AccessPointTest {
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.SPEED_VERY_FAST);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
 
         ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
 
@@ -606,5 +623,37 @@ public class AccessPointTest {
 
         NetworkInfo newInfo = new NetworkInfo(networkInfo); // same values
         assertThat(ap.update(config, wifiInfo, newInfo)).isFalse();
+    }
+
+    @Test
+    public void testUpdateWithConfigChangeOnly_returnsFalseButInvokesListener() {
+        int networkId = 123;
+        int rssi = -55;
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        config.numNoInternetAccessReports = 1;
+
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(networkId);
+        wifiInfo.setRssi(rssi);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(networkId)
+                .setRssi(rssi)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        AccessPoint.AccessPointListener mockListener = mock(AccessPoint.AccessPointListener.class);
+        ap.setListener(mockListener);
+        WifiConfiguration newConfig = new WifiConfiguration(config);
+        config.validatedInternetAccess = true;
+
+        assertThat(ap.update(newConfig, wifiInfo, networkInfo)).isFalse();
+        verify(mockListener).onAccessPointChanged(ap);
     }
 }

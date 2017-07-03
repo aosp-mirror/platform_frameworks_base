@@ -59,6 +59,7 @@ import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.test.filters.FlakyTest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -94,7 +95,7 @@ public class WifiTrackerTest {
             new NetworkKey(new WifiKey('"' + SSID_1 + '"', BSSID_1));
     private static final int RSSI_1 = -30;
     private static final byte SCORE_1 = 10;
-    private static final int BADGE_1 = AccessPoint.SPEED_MEDIUM;
+    private static final int BADGE_1 = AccessPoint.Speed.MODERATE;
 
     private static final String SSID_2 = "ssid2";
     private static final String BSSID_2 = "AA:AA:AA:AA:AA:AA";
@@ -102,7 +103,7 @@ public class WifiTrackerTest {
             new NetworkKey(new WifiKey('"' + SSID_2 + '"', BSSID_2));
     private static final int RSSI_2 = -30;
     private static final byte SCORE_2 = 15;
-    private static final int BADGE_2 = AccessPoint.SPEED_FAST;
+    private static final int BADGE_2 = AccessPoint.Speed.FAST;
 
     private static final int CONNECTED_NETWORK_ID = 123;
     private static final int CONNECTED_RSSI = -50;
@@ -256,6 +257,7 @@ public class WifiTrackerTest {
         }
 
         sendScanResultsAndProcess(tracker);
+        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
         return tracker;
     }
@@ -339,6 +341,23 @@ public class WifiTrackerTest {
         Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, networkInfo);
         return createTrackerWithImmediateBroadcastsAndInjectInitialScanResults(intent);
+    }
+
+    private void waitForHandlersToProcessCurrentlyEnqueuedMessages(WifiTracker tracker)
+            throws InterruptedException {
+        CountDownLatch workerLatch = new CountDownLatch(1);
+        tracker.mWorkHandler.post(() -> {
+            workerLatch.countDown();
+        });
+        assertTrue("Latch timed out while waiting for WorkerHandler",
+                workerLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+
+        CountDownLatch mainLatch = new CountDownLatch(1);
+        tracker.mMainHandler.post(() -> {
+            mainLatch.countDown();
+        });
+        assertTrue("Latch timed out while waiting for MainHandler",
+                mainLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
     @Test
@@ -426,7 +445,7 @@ public class WifiTrackerTest {
 
     @Test
     public void startTrackingShouldSetConnectedAccessPointAsActive() throws InterruptedException {
-        WifiTracker tracker =  createTrackerWithScanResultsAndAccessPoint1Connected();
+        WifiTracker tracker = createTrackerWithScanResultsAndAccessPoint1Connected();
 
         List<AccessPoint> aps = tracker.getAccessPoints();
 
@@ -460,18 +479,21 @@ public class WifiTrackerTest {
         startTracking(tracker);
         sendScanResultsAndProcess(tracker);
 
-        updateScoresAndWaitForAccessPointsChangedCallback();
+        updateScoresAndWaitForAccessPointsChangedCallback(tracker);
     }
 
-    private void updateScoresAndWaitForAccessPointsChangedCallback() throws InterruptedException {
+    private void updateScoresAndWaitForAccessPointsChangedCallback(WifiTracker tracker)
+            throws InterruptedException {
         // Updating scores can happen together or one after the other, so the latch countdown is set
         // to 2.
-        mAccessPointsChangedLatch = new CountDownLatch(2);
+        mAccessPointsChangedLatch = new CountDownLatch(1);
         updateScores();
-        assertTrue("onAccessPointChanged was not called twice",
+        assertTrue("onAccessPointChanged was not called after updating scores",
             mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
     }
 
+    @FlakyTest
     @Test
     public void scoreCacheUpdateScoresShouldChangeSortOrder() throws InterruptedException {
         WifiTracker tracker =  createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
@@ -480,7 +502,7 @@ public class WifiTrackerTest {
         assertEquals(aps.get(0).getSsidStr(), SSID_1);
         assertEquals(aps.get(1).getSsidStr(), SSID_2);
 
-        updateScoresAndWaitForAccessPointsChangedCallback();
+        updateScoresAndWaitForAccessPointsChangedCallback(tracker);
 
         aps = tracker.getAccessPoints();
         assertTrue(aps.size() == 2);
@@ -502,7 +524,7 @@ public class WifiTrackerTest {
         assertEquals(aps.get(0).getSsidStr(), SSID_1);
         assertEquals(aps.get(1).getSsidStr(), SSID_2);
 
-        updateScoresAndWaitForAccessPointsChangedCallback();
+        updateScoresAndWaitForAccessPointsChangedCallback(tracker);
 
         aps = tracker.getAccessPoints();
         assertTrue(aps.size() == 2);
@@ -510,11 +532,12 @@ public class WifiTrackerTest {
         assertEquals(aps.get(1).getSsidStr(), SSID_2);
     }
 
+    @FlakyTest
     @Test
     public void scoreCacheUpdateScoresShouldInsertSpeedIntoAccessPoint()
             throws InterruptedException {
         WifiTracker tracker = createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
-        updateScoresAndWaitForAccessPointsChangedCallback();
+        updateScoresAndWaitForAccessPointsChangedCallback(tracker);
 
         List<AccessPoint> aps = tracker.getAccessPoints();
 
@@ -531,7 +554,7 @@ public class WifiTrackerTest {
     public void scoreCacheUpdateMeteredShouldUpdateAccessPointMetering()
             throws InterruptedException {
         WifiTracker tracker = createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
-        updateScoresAndWaitForAccessPointsChangedCallback();
+        updateScoresAndWaitForAccessPointsChangedCallback(tracker);
 
         List<AccessPoint> aps = tracker.getAccessPoints();
 
@@ -553,15 +576,15 @@ public class WifiTrackerTest {
                 0 /* disabled */);
 
         WifiTracker tracker = createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
-        updateScoresAndWaitForAccessPointsChangedCallback();
+        updateScoresAndWaitForAccessPointsChangedCallback(tracker);
 
         List<AccessPoint> aps = tracker.getAccessPoints();
 
         for (AccessPoint ap : aps) {
             if (ap.getSsidStr().equals(SSID_1)) {
-                assertEquals(AccessPoint.SPEED_NONE, ap.getSpeed());
+                assertEquals(AccessPoint.Speed.NONE, ap.getSpeed());
             } else if (ap.getSsidStr().equals(SSID_2)) {
-                assertEquals(AccessPoint.SPEED_NONE, ap.getSpeed());
+                assertEquals(AccessPoint.Speed.NONE, ap.getSpeed());
             }
         }
     }
@@ -754,13 +777,10 @@ public class WifiTrackerTest {
             throws Exception {
         WifiTracker tracker = createMockedWifiTracker();
         startTracking(tracker);
-        tracker.stopTracking();
+        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
-        CountDownLatch latch1 = new CountDownLatch(1);
-        tracker.mMainHandler.post(() -> {
-                latch1.countDown();
-        });
-        assertTrue("Latch 1 timed out", latch1.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+        tracker.stopTracking();
+        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
         startTracking(tracker);
 
@@ -770,14 +790,24 @@ public class WifiTrackerTest {
         tracker.mReceiver.onReceive(
                 mContext, new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION));
 
-        CountDownLatch latch2 = new CountDownLatch(1);
-        tracker.mMainHandler.post(() -> {
-            latch2.countDown();
-        });
-        assertTrue("Latch 2 timed out", latch2.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
         verify(mockWifiListener, never()).onAccessPointsChanged();
 
         sendScanResultsAndProcess(tracker); // verifies onAccessPointsChanged is invoked
+    }
+
+    @Test
+    public void disablingWifiShouldClearExistingAccessPoints() throws Exception {
+        WifiTracker tracker = createTrackerWithScanResultsAndAccessPoint1Connected();
+
+        when(mockWifiManager.isWifiEnabled()).thenReturn(false);
+        mAccessPointsChangedLatch = new CountDownLatch(1);
+        tracker.mReceiver.onReceive(mContext, new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
+
+        mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
+
+        assertThat(tracker.getAccessPoints()).isEmpty();
     }
 }

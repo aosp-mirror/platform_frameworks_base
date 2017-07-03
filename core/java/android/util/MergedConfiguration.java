@@ -161,6 +161,21 @@ public class MergedConfiguration implements Parcelable {
         return "{mGlobalConfig=" + mGlobalConfig + " mOverrideConfig=" + mOverrideConfig + "}";
     }
 
+    @Override
+    public int hashCode() {
+        return mMergedConfig.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+        if (!(that instanceof MergedConfiguration)) {
+            return false;
+        }
+
+        if (that == this) return true;
+        return mMergedConfig.equals(((MergedConfiguration) that).mMergedConfig);
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "mGlobalConfig=" + mGlobalConfig);
         pw.println(prefix + "mOverrideConfig=" + mOverrideConfig);

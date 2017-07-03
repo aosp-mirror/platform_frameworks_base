@@ -49,9 +49,6 @@ public class PipSnapAlgorithm {
     // Allows snapping on the long edge in each orientation and magnets towards corners
     private static final int SNAP_MODE_LONG_EDGE_MAGNET_CORNERS = 4;
 
-    // The friction multiplier to control how slippery the PIP is when flung
-    private static final float SCROLL_FRICTION_MULTIPLIER = 8f;
-
     // Threshold to magnet to a corner
     private static final float CORNER_MAGNET_THRESHOLD = 0.3f;
 
@@ -64,8 +61,8 @@ public class PipSnapAlgorithm {
     private final float mDefaultSizePercent;
     private final float mMinAspectRatioForMinSize;
     private final float mMaxAspectRatioForMinSize;
+    private final int mFlingDeceleration;
 
-    private Scroller mScroller;
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     private final int mMinimizedVisibleSize;
@@ -81,6 +78,8 @@ public class PipSnapAlgorithm {
         mMaxAspectRatioForMinSize = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
         mMinAspectRatioForMinSize = 1f / mMaxAspectRatioForMinSize;
+        mFlingDeceleration = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.pip_fling_deceleration);
         onConfigurationChanged();
     }
 
@@ -107,20 +106,97 @@ public class PipSnapAlgorithm {
      * those for the given {@param stackBounds}.
      */
     public Rect findClosestSnapBounds(Rect movementBounds, Rect stackBounds, float velocityX,
-            float velocityY) {
-        final Rect finalStackBounds = new Rect(stackBounds);
-        if (mScroller == null) {
-            final ViewConfiguration viewConfig = ViewConfiguration.get(mContext);
-            mScroller = new Scroller(mContext);
-            mScroller.setFriction(viewConfig.getScrollFriction() * SCROLL_FRICTION_MULTIPLIER);
+            float velocityY, Point dragStartPosition) {
+        final Rect intersectStackBounds = new Rect(stackBounds);
+        final Point intersect = getEdgeIntersect(stackBounds, movementBounds, velocityX, velocityY,
+                dragStartPosition);
+        intersectStackBounds.offsetTo(intersect.x, intersect.y);
+        return findClosestSnapBounds(movementBounds, intersectStackBounds);
+    }
+
+    /**
+     * @return The point along the {@param movementBounds} that the PIP would intersect with based
+     *         on the provided {@param velX}, {@param velY} along with the position of the PIP when
+     *         the gesture started, {@param dragStartPosition}.
+     */
+    public Point getEdgeIntersect(Rect stackBounds, Rect movementBounds, float velX, float velY,
+            Point dragStartPosition) {
+        final boolean isLandscape = mOrientation == Configuration.ORIENTATION_LANDSCAPE;
+        final int x = stackBounds.left;
+        final int y = stackBounds.top;
+
+        // Find the line of movement the PIP is on. Line defined by: y = slope * x + yIntercept
+        final float slope = velY / velX; // slope = rise / run
+        final float yIntercept = y - slope * x; // rearrange line equation for yIntercept
+        // The PIP can have two intercept points:
+        // 1) Where the line intersects with one of the edges of the screen (vertical line)
+        Point vertPoint = new Point();
+        // 2) Where the line intersects with the top or bottom of the screen (horizontal line)
+        Point horizPoint = new Point();
+
+        // Find the vertical line intersection, x will be one of the edges
+        vertPoint.x = velX > 0 ? movementBounds.right : movementBounds.left;
+        // Sub in x in our line equation to determine y position
+        vertPoint.y = findY(slope, yIntercept, vertPoint.x);
+
+        // Find the horizontal line intersection, y will be the top or bottom of the screen
+        horizPoint.y = velY > 0 ? movementBounds.bottom : movementBounds.top;
+        // Sub in y in our line equation to determine x position
+        horizPoint.x = findX(slope, yIntercept, horizPoint.y);
+
+        // Now pick one of these points -- first determine if we're flinging along the current edge.
+        // Only fling along current edge if it's a direction with space for the PIP to move to
+        int maxDistance;
+        if (isLandscape) {
+            maxDistance = velX > 0
+                    ? movementBounds.right - stackBounds.left
+                    : stackBounds.left - movementBounds.left;
+        } else {
+            maxDistance = velY > 0
+                    ? movementBounds.bottom - stackBounds.top
+                    : stackBounds.top - movementBounds.top;
         }
-        mScroller.fling(stackBounds.left, stackBounds.top,
-                (int) velocityX, (int) velocityY,
-                movementBounds.left, movementBounds.right,
-                movementBounds.top, movementBounds.bottom);
-        finalStackBounds.offsetTo(mScroller.getFinalX(), mScroller.getFinalY());
-        mScroller.abortAnimation();
-        return findClosestSnapBounds(movementBounds, finalStackBounds);
+        if (maxDistance > 0) {
+            // Only fling along the current edge if the start and end point are on the same side
+            final int startPoint = isLandscape ? dragStartPosition.y : dragStartPosition.x;
+            final int endPoint = isLandscape ? horizPoint.y : horizPoint.x;
+            final int center = movementBounds.centerX();
+            if ((startPoint < center && endPoint < center)
+                    || (startPoint > center && endPoint > center)) {
+                // We are flinging along the current edge, figure out how far it should travel
+                // based on velocity and assumed deceleration.
+                int distance = (int) (0 - Math.pow(isLandscape ? velX : velY, 2))
+                        / (2 * mFlingDeceleration);
+                distance = Math.min(distance, maxDistance);
+                // Adjust the point for the distance
+                if (isLandscape) {
+                    horizPoint.x = stackBounds.left + (velX > 0 ? distance : -distance);
+                } else {
+                    horizPoint.y = stackBounds.top + (velY > 0 ? distance : -distance);
+                }
+                return horizPoint;
+            }
+        }
+        // If we're not flinging along the current edge, find the closest point instead.
+        final double distanceVert = Math.hypot(vertPoint.x - x, vertPoint.y - y);
+        final double distanceHoriz = Math.hypot(horizPoint.x - x, horizPoint.y - y);
+        // Ensure that we're actually going somewhere
+        if (distanceVert == 0) {
+            return horizPoint;
+        }
+        if (distanceHoriz == 0) {
+            return vertPoint;
+        }
+        // Otherwise use the closest point
+        return Math.abs(distanceVert) > Math.abs(distanceHoriz) ? horizPoint : vertPoint;
+    }
+
+    private int findY(float slope, float yIntercept, float x) {
+        return (int) ((slope * x) + yIntercept);
+    }
+
+    private int findX(float slope, float yIntercept, float y) {
+        return (int) ((y - yIntercept) / slope);
     }
 
     /**

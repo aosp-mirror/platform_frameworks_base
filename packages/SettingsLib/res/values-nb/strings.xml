@@ -55,6 +55,14 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Tilkoblet (ingen medier)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Tilkoblet (ingen meldingstilgang)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Tilkoblet (ingen telefon eller media)"</string>
+    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
+    <skip />
+    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medielyd"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonsamtaler"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Filoverføring"</string>

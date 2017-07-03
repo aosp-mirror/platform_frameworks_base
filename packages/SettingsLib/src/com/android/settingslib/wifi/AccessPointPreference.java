@@ -70,6 +70,19 @@ public class AccessPointPreference extends Preference {
             R.string.accessibility_wifi_signal_full
     };
 
+    public static String generatePreferenceKey(AccessPoint accessPoint) {
+        StringBuilder builder = new StringBuilder();
+
+        if (TextUtils.isEmpty(accessPoint.getBssid())) {
+            builder.append(accessPoint.getSsidStr());
+        } else {
+            builder.append(accessPoint.getBssid());
+        }
+
+        builder.append(',').append(accessPoint.getSecurity());
+        return builder.toString();
+    }
+
     // Used for dummy pref.
     public AccessPointPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -161,7 +174,7 @@ public class AccessPointPreference extends Preference {
             safeSetDefaultIcon();
             return;
         }
-        TronUtils.logWifiSettingsBadge(context, mWifiSpeed);
+        TronUtils.logWifiSettingsSpeed(context, mWifiSpeed);
 
         // TODO(b/62355275): Revert this to N code after deleting NetworkBadging API
         Drawable drawable = NetworkBadging.getWifiIcon(

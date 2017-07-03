@@ -937,8 +937,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // Update keyguard flags upon finishing relaunch.
             checkKeyguardFlagsChanged();
         }
-
-        updateAllDrawn();
     }
 
     void clearRelaunching() {
@@ -1344,6 +1342,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    /**
+     *  Determines if the token has finished drawing. This should only be called from
+     *  {@link DisplayContent#applySurfaceChangesTransaction}
+     */
     void updateAllDrawn() {
         if (!allDrawn) {
             // Number of drawn windows can be less when a window is being relaunched, wait for
@@ -1569,6 +1571,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
         }
         return null;
+    }
+
+    int getLowestAnimLayer() {
+        for (int i = 0; i < mChildren.size(); i++) {
+            final WindowState w = mChildren.get(i);
+            if (w.mRemoved) {
+                continue;
+            }
+            return w.mWinAnimator.mAnimLayer;
+        }
+        return Integer.MAX_VALUE;
     }
 
     WindowState getHighestAnimLayerWindow(WindowState currentTarget) {

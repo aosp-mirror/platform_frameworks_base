@@ -129,6 +129,42 @@ public class NotificationTestList extends TestActivity
                     mNM.notify(7001, n);
                 }
             },
+            new Test("with zen") {
+                public void run()
+                {
+                    mNM.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALARMS);
+                    Notification n = new Notification.Builder(NotificationTestList.this,
+                            "default")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Default priority")
+                            .build();
+                    mNM.notify("default", 7004, n);
+                    try {
+                        Thread.sleep(8000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    mNM.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL);
+                }
+            },
+            new Test("repeated") {
+                public void run()
+                {
+                    for (int i = 0; i < 50; i++) {
+                        Notification n = new Notification.Builder(NotificationTestList.this,
+                                "default")
+                                .setSmallIcon(R.drawable.icon2)
+                                .setContentTitle("Default priority")
+                                .build();
+                        mNM.notify("default", 7004, n);
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            },
             new Test("Post a group") {
                 public void run()
                 {

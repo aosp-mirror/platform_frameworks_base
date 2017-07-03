@@ -292,6 +292,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/euicc/IGetEidCallback.aidl \
 	core/java/android/service/euicc/IGetEuiccInfoCallback.aidl \
 	core/java/android/service/euicc/IGetEuiccProfileInfoListCallback.aidl \
+	core/java/android/service/euicc/IRetainSubscriptionsForFactoryResetCallback.aidl \
 	core/java/android/service/euicc/ISwitchToSubscriptionCallback.aidl \
 	core/java/android/service/euicc/IUpdateSubscriptionNicknameCallback.aidl \
 	core/java/android/service/gatekeeper/IGateKeeperService.aidl \

@@ -34,6 +34,7 @@ import android.net.dhcp.DhcpClient;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
 import android.net.util.MultinetworkPolicyTracker;
+import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
@@ -184,7 +185,7 @@ public class IpManager extends StateMachine {
         }
 
         private void log(String msg) {
-            mLocalLog.log(PREFIX + msg);
+            mLog.log(PREFIX + msg);
         }
 
         @Override
@@ -399,7 +400,7 @@ public class IpManager extends StateMachine {
     private final WakeupMessage mProvisioningTimeoutAlarm;
     private final WakeupMessage mDhcpActionTimeoutAlarm;
     private final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
-    private final LocalLog mLocalLog;
+    private final SharedLog mLog;
     private final LocalLog mConnectivityPacketLog;
     private final MessageHandlingLogger mMsgStateLogger;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
@@ -440,7 +441,7 @@ public class IpManager extends StateMachine {
         mCallback = new LoggingCallbackWrapper(callback);
         mNwService = nwService;
 
-        mLocalLog = new LocalLog(MAX_LOG_RECORDS);
+        mLog = new SharedLog(MAX_LOG_RECORDS, mTag);
         mConnectivityPacketLog = new LocalLog(MAX_PACKET_RECORDS);
         mMsgStateLogger = new MessageHandlingLogger();
 
@@ -485,7 +486,7 @@ public class IpManager extends StateMachine {
 
             private void logMsg(String msg) {
                 Log.d(mTag, msg);
-                getHandler().post(() -> { mLocalLog.log("OBSERVED " + msg); });
+                getHandler().post(() -> { mLog.log("OBSERVED " + msg); });
             }
         };
 
@@ -493,7 +494,7 @@ public class IpManager extends StateMachine {
         mLinkProperties.setInterfaceName(mInterfaceName);
 
         mMultinetworkPolicyTracker = new MultinetworkPolicyTracker(mContext, getHandler(),
-                () -> { mLocalLog.log("OBSERVED AvoidBadWifi changed"); });
+                () -> { mLog.log("OBSERVED AvoidBadWifi changed"); });
 
         mProvisioningTimeoutAlarm = new WakeupMessage(mContext, getHandler(),
                 mTag + ".EVENT_PROVISIONING_TIMEOUT", EVENT_PROVISIONING_TIMEOUT);
@@ -643,7 +644,7 @@ public class IpManager extends StateMachine {
         pw.println();
         pw.println(mTag + " StateMachine dump:");
         pw.increaseIndent();
-        mLocalLog.readOnlyLocalLog().dump(fd, pw, args);
+        mLog.dump(fd, pw, args);
         pw.decreaseIndent();
 
         pw.println();
@@ -678,7 +679,7 @@ public class IpManager extends StateMachine {
                 msg.arg1, msg.arg2, Objects.toString(msg.obj), mMsgStateLogger);
 
         final String richerLogLine = getWhatToString(msg.what) + " " + logLine;
-        mLocalLog.log(richerLogLine);
+        mLog.log(richerLogLine);
         if (VDBG) {
             Log.d(mTag, richerLogLine);
         }
@@ -703,7 +704,7 @@ public class IpManager extends StateMachine {
     private void logError(String fmt, Object... args) {
         final String msg = "ERROR " + String.format(fmt, args);
         Log.e(mTag, msg);
-        mLocalLog.log(msg);
+        mLog.log(msg);
     }
 
     private void getNetworkInterface() {
@@ -1065,6 +1066,7 @@ public class IpManager extends StateMachine {
             mIpReachabilityMonitor = new IpReachabilityMonitor(
                     mContext,
                     mInterfaceName,
+                    mLog,
                     new IpReachabilityMonitor.Callback() {
                         @Override
                         public void notifyLost(InetAddress ip, String logMsg) {
