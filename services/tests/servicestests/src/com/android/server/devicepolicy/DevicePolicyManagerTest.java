@@ -67,6 +67,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.security.KeyChain;
 import android.telephony.TelephonyManager;
@@ -110,6 +111,7 @@ import java.util.concurrent.TimeUnit;
  * runtest -c com.android.server.devicepolicy.DevicePolicyManagerTest frameworks-services
  */
 @SmallTest
+@Presubmit
 public class DevicePolicyManagerTest extends DpmTestBase {
     private static final List<String> OWNER_SETUP_PERMISSIONS = Arrays.asList(
             permission.MANAGE_DEVICE_ADMINS, permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
