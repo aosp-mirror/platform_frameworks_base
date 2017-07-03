@@ -3358,15 +3358,29 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!mIsExpanded) {
             setOwnScrollY(0);
             mStatusBar.resetUserExpandedStates();
+            clearTemporaryViews();
+            clearUserLockedViews();
+        }
+    }
 
-            // lets make sure nothing is in the overlay / transient anymore
-            clearTemporaryViews(this);
-            for (int i = 0; i < getChildCount(); i++) {
-                ExpandableView child = (ExpandableView) getChildAt(i);
-                if (child instanceof ExpandableNotificationRow) {
-                    ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                    clearTemporaryViews(row.getChildrenContainer());
-                }
+    private void clearUserLockedViews() {
+        for (int i = 0; i < getChildCount(); i++) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                row.setUserLocked(false);
+            }
+        }
+    }
+
+    private void clearTemporaryViews() {
+        // lets make sure nothing is in the overlay / transient anymore
+        clearTemporaryViews(this);
+        for (int i = 0; i < getChildCount(); i++) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                clearTemporaryViews(row.getChildrenContainer());
             }
         }
     }
@@ -3401,6 +3415,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (changed) {
             if (!mIsExpanded) {
                 mGroupManager.collapseAllGroups();
+                mExpandHelper.cancelImmediately();
             }
             updateNotificationAnimationStates();
             updateChronometers();
