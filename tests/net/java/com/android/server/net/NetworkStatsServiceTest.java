@@ -45,6 +45,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_POLL;
+import static com.android.internal.util.TestUtils.waitForIdleHandler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -154,7 +155,7 @@ public class NetworkStatsServiceTest {
     private @Mock IConnectivityManager mConnManager;
     private @Mock IBinder mBinder;
     private @Mock AlarmManager mAlarmManager;
-    private IdleableHandlerThread mHandlerThread;
+    private HandlerThread mHandlerThread;
     private Handler mHandler;
 
     private NetworkStatsService mService;
@@ -181,7 +182,7 @@ public class NetworkStatsServiceTest {
                 mServiceContext, mNetManager, mAlarmManager, wakeLock, mTime,
                 TelephonyManager.getDefault(), mSettings, new NetworkStatsObservers(),
                 mStatsDir, getBaseDir(mStatsDir));
-        mHandlerThread = new IdleableHandlerThread("HandlerThread");
+        mHandlerThread = new HandlerThread("HandlerThread");
         mHandlerThread.start();
         Handler.Callback callback = new NetworkStatsService.HandlerCallback(mService);
         mHandler = new Handler(mHandlerThread.getLooper(), callback);
@@ -886,7 +887,7 @@ public class NetworkStatsServiceTest {
 
         // Send dummy message to make sure that any previous message has been handled
         mHandler.sendMessage(mHandler.obtainMessage(-1));
-        mHandlerThread.waitForIdle(WAIT_TIMEOUT);
+        waitForIdleHandler(mHandler, WAIT_TIMEOUT);
 
 
 
@@ -908,7 +909,7 @@ public class NetworkStatsServiceTest {
         assertNetworkTotal(sTemplateWifi, 1024L, 1L, 2048L, 2L, 0);
 
         // make sure callback has not being called
-        assertEquals(INVALID_TYPE, latchedHandler.mLastMessageType);
+        assertEquals(INVALID_TYPE, latchedHandler.lastMessageType);
 
         // and bump forward again, with counters going higher. this is
         // important, since it will trigger the data usage callback
@@ -926,7 +927,7 @@ public class NetworkStatsServiceTest {
 
         // Wait for the caller to ack receipt of CALLBACK_LIMIT_REACHED
         assertTrue(cv.block(WAIT_TIMEOUT));
-        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, latchedHandler.mLastMessageType);
+        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, latchedHandler.lastMessageType);
         cv.close();
 
         // Allow binder to disconnect
@@ -937,7 +938,7 @@ public class NetworkStatsServiceTest {
 
         // Wait for the caller to ack receipt of CALLBACK_RELEASED
         assertTrue(cv.block(WAIT_TIMEOUT));
-        assertEquals(NetworkStatsManager.CALLBACK_RELEASED, latchedHandler.mLastMessageType);
+        assertEquals(NetworkStatsManager.CALLBACK_RELEASED, latchedHandler.lastMessageType);
 
         // Make sure that the caller binder gets disconnected
         verify(mBinder).unlinkToDeath(any(IBinder.DeathRecipient.class), anyInt());
@@ -1203,12 +1204,12 @@ public class NetworkStatsServiceTest {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
         // Send dummy message to make sure that any previous message has been handled
         mHandler.sendMessage(mHandler.obtainMessage(-1));
-        mHandlerThread.waitForIdle(WAIT_TIMEOUT);
+        waitForIdleHandler(mHandler, WAIT_TIMEOUT);
     }
 
     static class LatchedHandler extends Handler {
         private final ConditionVariable mCv;
-        int mLastMessageType = INVALID_TYPE;
+        int lastMessageType = INVALID_TYPE;
 
         LatchedHandler(Looper looper, ConditionVariable cv) {
             super(looper);
@@ -1217,49 +1218,9 @@ public class NetworkStatsServiceTest {
 
         @Override
         public void handleMessage(Message msg) {
-            mLastMessageType = msg.what;
+            lastMessageType = msg.what;
             mCv.open();
             super.handleMessage(msg);
         }
     }
-
-    /**
-     * A subclass of HandlerThread that allows callers to wait for it to become idle. waitForIdle
-     * will return immediately if the handler is already idle.
-     */
-    static class IdleableHandlerThread extends HandlerThread {
-        private IdleHandler mIdleHandler;
-
-        public IdleableHandlerThread(String name) {
-            super(name);
-        }
-
-        public void waitForIdle(long timeoutMs) {
-            final ConditionVariable cv = new ConditionVariable();
-            final MessageQueue queue = getLooper().getQueue();
-
-            synchronized (queue) {
-                if (queue.isIdle()) {
-                    return;
-                }
-
-                assertNull("BUG: only one idle handler allowed", mIdleHandler);
-                mIdleHandler = new IdleHandler() {
-                    public boolean queueIdle() {
-                        cv.open();
-                        mIdleHandler = null;
-                        return false;  // Remove the handler.
-                    }
-                };
-                queue.addIdleHandler(mIdleHandler);
-            }
-
-            if (!cv.block(timeoutMs)) {
-                fail("HandlerThread " + getName() + " did not become idle after " + timeoutMs
-                        + " ms");
-                queue.removeIdleHandler(mIdleHandler);
-            }
-        }
-    }
-
 }
