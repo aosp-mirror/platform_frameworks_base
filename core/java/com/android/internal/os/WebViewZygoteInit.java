@@ -26,6 +26,7 @@ import android.util.Log;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewFactoryProvider;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -87,17 +88,28 @@ class WebViewZygoteInit {
             // Once we have the classloader, look up the WebViewFactoryProvider implementation and
             // call preloadInZygote() on it to give it the opportunity to preload the native library
             // and perform any other initialisation work that should be shared among the children.
+            boolean preloadSucceeded = false;
             try {
                 Class<WebViewFactoryProvider> providerClass =
                         WebViewFactory.getWebViewProviderClass(loader);
                 Object result = providerClass.getMethod("preloadInZygote").invoke(null);
-                if (!((Boolean)result).booleanValue()) {
+                preloadSucceeded = ((Boolean) result).booleanValue();
+                if (!preloadSucceeded) {
                     Log.e(TAG, "preloadInZygote returned false");
                 }
             } catch (ClassNotFoundException | NoSuchMethodException | SecurityException |
                      IllegalAccessException | InvocationTargetException e) {
                 Log.e(TAG, "Exception while preloading package", e);
             }
+
+            try {
+                DataOutputStream socketOut = getSocketOutputStream();
+                socketOut.writeInt(preloadSucceeded ? 1 : 0);
+            } catch (IOException ioe) {
+                Log.e(TAG, "Error writing to command socket", ioe);
+                return true;
+            }
+
             Log.i(TAG, "Package preload done");
             return false;
         }
