@@ -26,18 +26,24 @@ import android.os.Handler;
 import android.os.Looper;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.IpPrefix;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
+import android.net.util.NetworkConstants;
 import android.net.util.SharedLog;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.StateMachine;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -66,10 +72,16 @@ public class UpstreamNetworkMonitor {
     private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
+    private static final IpPrefix[] MINIMUM_LOCAL_PREFIXES_SET = {
+            prefix("127.0.0.0/8"), prefix("169.254.0.0/16"),
+            prefix("::/3"), prefix("fe80::/64"), prefix("fc00::/7"), prefix("ff00::/8"),
+    };
+
     public static final int EVENT_ON_AVAILABLE      = 1;
     public static final int EVENT_ON_CAPABILITIES   = 2;
     public static final int EVENT_ON_LINKPROPERTIES = 3;
     public static final int EVENT_ON_LOST           = 4;
+    public static final int NOTIFY_EXEMPT_PREFIXES  = 10;
 
     private static final int CALLBACK_LISTEN_ALL = 1;
     private static final int CALLBACK_TRACK_DEFAULT = 2;
@@ -81,6 +93,7 @@ public class UpstreamNetworkMonitor {
     private final Handler mHandler;
     private final int mWhat;
     private final HashMap<Network, NetworkState> mNetworkMap = new HashMap<>();
+    private HashSet<IpPrefix> mOffloadExemptPrefixes;
     private ConnectivityManager mCM;
     private NetworkCallback mListenAllCallback;
     private NetworkCallback mDefaultNetworkCallback;
@@ -88,18 +101,19 @@ public class UpstreamNetworkMonitor {
     private boolean mDunRequired;
     private Network mCurrentDefault;
 
-    public UpstreamNetworkMonitor(Context ctx, StateMachine tgt, int what, SharedLog log) {
+    public UpstreamNetworkMonitor(Context ctx, StateMachine tgt, SharedLog log, int what) {
         mContext = ctx;
         mTarget = tgt;
         mHandler = mTarget.getHandler();
-        mWhat = what;
         mLog = log.forSubComponent(TAG);
+        mWhat = what;
+        mOffloadExemptPrefixes = allOffloadExemptPrefixes(mNetworkMap.values());
     }
 
     @VisibleForTesting
     public UpstreamNetworkMonitor(
-            StateMachine tgt, int what, ConnectivityManager cm, SharedLog log) {
-        this(null, tgt, what, log);
+            ConnectivityManager cm, StateMachine tgt, SharedLog log, int what) {
+        this((Context) null, tgt, log, what);
         mCM = cm;
     }
 
@@ -207,6 +221,10 @@ public class UpstreamNetworkMonitor {
         }
 
         return typeStatePair.ns;
+    }
+
+    public Set<IpPrefix> getOffloadExemptPrefixes() {
+        return (Set<IpPrefix>) mOffloadExemptPrefixes.clone();
     }
 
     private void handleAvailable(int callbackType, Network network) {
@@ -342,6 +360,14 @@ public class UpstreamNetworkMonitor {
         notifyTarget(EVENT_ON_LOST, mNetworkMap.remove(network));
     }
 
+    private void recomputeOffloadExemptPrefixes() {
+        final HashSet<IpPrefix> exemptPrefixes = allOffloadExemptPrefixes(mNetworkMap.values());
+        if (!mOffloadExemptPrefixes.equals(exemptPrefixes)) {
+            mOffloadExemptPrefixes = exemptPrefixes;
+            notifyTarget(NOTIFY_EXEMPT_PREFIXES, exemptPrefixes.clone());
+        }
+    }
+
     // Fetch (and cache) a ConnectivityManager only if and when we need one.
     private ConnectivityManager cm() {
         if (mCM == null) {
@@ -376,6 +402,7 @@ public class UpstreamNetworkMonitor {
         @Override
         public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
             handleLinkProp(network, newLp);
+            recomputeOffloadExemptPrefixes();
         }
 
         // TODO: Handle onNetworkSuspended();
@@ -384,6 +411,7 @@ public class UpstreamNetworkMonitor {
         @Override
         public void onLost(Network network) {
             handleLost(mCallbackType, network);
+            recomputeOffloadExemptPrefixes();
         }
     }
 
@@ -395,16 +423,16 @@ public class UpstreamNetworkMonitor {
         notifyTarget(which, mNetworkMap.get(network));
     }
 
-    private void notifyTarget(int which, NetworkState netstate) {
-        mTarget.sendMessage(mWhat, which, 0, netstate);
+    private void notifyTarget(int which, Object obj) {
+        mTarget.sendMessage(mWhat, which, 0, obj);
     }
 
-    static private class TypeStatePair {
+    private static class TypeStatePair {
         public int type = TYPE_NONE;
         public NetworkState ns = null;
     }
 
-    static private TypeStatePair findFirstAvailableUpstreamByType(
+    private static TypeStatePair findFirstAvailableUpstreamByType(
             Iterable<NetworkState> netStates, Iterable<Integer> preferredTypes) {
         final TypeStatePair result = new TypeStatePair();
 
@@ -430,5 +458,37 @@ public class UpstreamNetworkMonitor {
         }
 
         return result;
+    }
+
+    private static HashSet<IpPrefix> allOffloadExemptPrefixes(Iterable<NetworkState> netStates) {
+        final HashSet<IpPrefix> prefixSet = new HashSet<>();
+
+        addDefaultLocalPrefixes(prefixSet);
+
+        for (NetworkState ns : netStates) {
+            addOffloadExemptPrefixes(prefixSet, ns.linkProperties);
+        }
+
+        return prefixSet;
+    }
+
+    private static void addDefaultLocalPrefixes(Set<IpPrefix> prefixSet) {
+        Collections.addAll(prefixSet, MINIMUM_LOCAL_PREFIXES_SET);
+    }
+
+    private static void addOffloadExemptPrefixes(Set<IpPrefix> prefixSet, LinkProperties lp) {
+        if (lp == null) return;
+
+        for (LinkAddress linkAddr : lp.getAllLinkAddresses()) {
+            prefixSet.add(new IpPrefix(linkAddr.getAddress(), linkAddr.getPrefixLength()));
+        }
+
+        // TODO: Consider adding other non-default routes associated with this
+        // network. Traffic to these destinations should perhaps not go through
+        // the Internet (upstream).
+    }
+
+    private static IpPrefix prefix(String prefixStr) {
+        return new IpPrefix(prefixStr);
     }
 }
