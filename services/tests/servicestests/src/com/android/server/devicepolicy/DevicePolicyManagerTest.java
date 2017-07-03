@@ -2307,11 +2307,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // restore to the debuggable build state
         getServices().buildMock.isDebuggable = true;
 
-        // Always return the default (second arg) when getting system property for long type
-        when(getServices().systemProperties.getLong(anyString(), anyLong())).thenAnswer(
-                invocation -> invocation.getArguments()[1]
-        );
-
         // reset to default (0 means the admin is not participating, so default should be returned)
         dpm.setRequiredStrongAuthTimeout(admin1, 0);
 

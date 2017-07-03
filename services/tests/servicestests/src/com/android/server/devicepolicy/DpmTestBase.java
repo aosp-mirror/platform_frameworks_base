@@ -16,9 +16,13 @@
 
 package com.android.server.devicepolicy;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -62,6 +66,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
         adminAnotherPackage = new ComponentName(DpmMockContext.ANOTHER_PACKAGE_NAME,
                 "whatever.random.class");
         adminNoPerm = new ComponentName(mRealTestContext, DummyDeviceAdmins.AdminNoPerm.class);
+        mockSystemPropertiesToReturnDefault();
     }
 
     @Override
@@ -212,5 +217,26 @@ public abstract class DpmTestBase extends AndroidTestCase {
             .getPackagesForUid(eq(packageUid));
         // Set up getPackageInfo().
         markPackageAsInstalled(admin.getPackageName(), ai, UserHandle.getUserId(packageUid));
+    }
+
+    /**
+     * By default, system properties are mocked to return default value. Override the mock if you
+     * want a specific value.
+     */
+    private void mockSystemPropertiesToReturnDefault() {
+        when(getServices().systemProperties.get(
+                anyString(), anyString())).thenAnswer(
+                invocation -> invocation.getArguments()[1]
+        );
+
+        when(getServices().systemProperties.getBoolean(
+                anyString(), anyBoolean())).thenAnswer(
+                invocation -> invocation.getArguments()[1]
+        );
+
+        when(getServices().systemProperties.getLong(
+                anyString(), anyLong())).thenAnswer(
+                invocation -> invocation.getArguments()[1]
+        );
     }
 }
