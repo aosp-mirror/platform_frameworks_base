@@ -33,8 +33,8 @@ import java.util.Vector;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SharedLogTest {
-    private static final String TIMESTAMP_PATTERN = "\\d{2}:\\d{2}:\\d{2}\\.\\d{3}";
-    private static final String TIMESTAMP = "HH:MM:SS.xxx";
+    private static final String TIMESTAMP_PATTERN = "\\d{2}:\\d{2}:\\d{2}";
+    private static final String TIMESTAMP = "HH:MM:SS";
 
     @Test
     public void testBasicOperation() {
@@ -85,7 +85,7 @@ public class SharedLogTest {
             String got = lines[i];
             String want = expected[i];
             assertTrue(String.format("'%s' did not contain '%s'", got, want), got.endsWith(want));
-            assertTrue(String.format("'%s' did not contain a HH:MM:SS.xxx timestamp", got),
+            assertTrue(String.format("'%s' did not contain a %s timestamp", got, TIMESTAMP),
                     got.replaceFirst(TIMESTAMP_PATTERN, TIMESTAMP).contains(TIMESTAMP));
         }
     }

@@ -27,6 +27,8 @@ import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import static com.android.internal.util.TestUtils.waitForIdleHandler;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -56,7 +58,6 @@ import android.util.ArrayMap;
 
 import com.android.internal.net.VpnInfo;
 import com.android.server.net.NetworkStatsService;
-import com.android.server.net.NetworkStatsServiceTest.IdleableHandlerThread;
 import com.android.server.net.NetworkStatsServiceTest.LatchedHandler;
 
 import java.util.ArrayList;
@@ -102,7 +103,7 @@ public class NetworkStatsObserversTest {
 
     private long mElapsedRealtime;
 
-    private IdleableHandlerThread mObserverHandlerThread;
+    private HandlerThread mObserverHandlerThread;
     private Handler mObserverNoopHandler;
 
     private LatchedHandler mHandler;
@@ -118,7 +119,7 @@ public class NetworkStatsObserversTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mObserverHandlerThread = new IdleableHandlerThread("HandlerThread");
+        mObserverHandlerThread = new HandlerThread("HandlerThread");
         mObserverHandlerThread.start();
         final Looper observerLooper = mObserverHandlerThread.getLooper();
         mStatsObservers = new NetworkStatsObservers() {
@@ -319,7 +320,7 @@ public class NetworkStatsObserversTest {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
+        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.lastMessageType);
     }
 
     @Test
@@ -356,7 +357,7 @@ public class NetworkStatsObserversTest {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
+        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.lastMessageType);
     }
 
     @Test
@@ -429,7 +430,7 @@ public class NetworkStatsObserversTest {
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
         waitForObserverToIdle();
-        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
+        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.lastMessageType);
     }
 
     @Test
@@ -470,19 +471,7 @@ public class NetworkStatsObserversTest {
     }
 
     private void waitForObserverToIdle() {
-        waitForIdleLooper(mObserverHandlerThread.getLooper(), WAIT_TIMEOUT_MS);
-        waitForIdleLooper(mHandler.getLooper(), WAIT_TIMEOUT_MS);
+        waitForIdleHandler(mObserverHandlerThread, WAIT_TIMEOUT_MS);
+        waitForIdleHandler(mHandler, WAIT_TIMEOUT_MS);
     }
-
-    // TODO: unify with ConnectivityService.waitForIdleHandler and
-    // NetworkServiceStatsTest.IdleableHandlerThread
-    private static void waitForIdleLooper(Looper looper, long timeoutMs) {
-        final ConditionVariable cv = new ConditionVariable();
-        final Handler handler = new Handler(looper);
-        handler.post(() -> cv.open());
-        if (!cv.block(timeoutMs)) {
-            fail("Looper did not become idle after " + timeoutMs + " ms");
-        }
-    }
-
 }
