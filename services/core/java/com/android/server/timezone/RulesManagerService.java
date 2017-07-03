@@ -37,12 +37,24 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import libcore.icu.ICU;
+import libcore.util.ZoneInfoDB;
+
+import static android.app.timezone.RulesState.DISTRO_STATUS_INSTALLED;
+import static android.app.timezone.RulesState.DISTRO_STATUS_NONE;
+import static android.app.timezone.RulesState.DISTRO_STATUS_UNKNOWN;
+import static android.app.timezone.RulesState.STAGED_OPERATION_INSTALL;
+import static android.app.timezone.RulesState.STAGED_OPERATION_NONE;
+import static android.app.timezone.RulesState.STAGED_OPERATION_UNINSTALL;
+import static android.app.timezone.RulesState.STAGED_OPERATION_UNKNOWN;
 
 // TODO(nfuller) Add EventLog calls where useful in the system server.
 // TODO(nfuller) Check logging best practices in the system server.
@@ -113,6 +125,11 @@ public final class RulesManagerService extends IRulesManager.Stub {
     public RulesState getRulesState() {
         mPermissionHelper.enforceCallerHasPermission(REQUIRED_UPDATER_PERMISSION);
 
+        return getRulesStateInternal();
+    }
+
+    /** Like {@link #getRulesState()} without the permission check. */
+    private RulesState getRulesStateInternal() {
         synchronized(this) {
             String systemRulesVersion;
             try {
@@ -126,18 +143,18 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
             // Determine the staged operation status, if possible.
             DistroRulesVersion stagedDistroRulesVersion = null;
-            int stagedOperationStatus = RulesState.STAGED_OPERATION_UNKNOWN;
+            int stagedOperationStatus = STAGED_OPERATION_UNKNOWN;
             if (!operationInProgress) {
                 StagedDistroOperation stagedDistroOperation;
                 try {
                     stagedDistroOperation = mInstaller.getStagedDistroOperation();
                     if (stagedDistroOperation == null) {
-                        stagedOperationStatus = RulesState.STAGED_OPERATION_NONE;
+                        stagedOperationStatus = STAGED_OPERATION_NONE;
                     } else if (stagedDistroOperation.isUninstall) {
-                        stagedOperationStatus = RulesState.STAGED_OPERATION_UNINSTALL;
+                        stagedOperationStatus = STAGED_OPERATION_UNINSTALL;
                     } else {
                         // Must be an install.
-                        stagedOperationStatus = RulesState.STAGED_OPERATION_INSTALL;
+                        stagedOperationStatus = STAGED_OPERATION_INSTALL;
                         DistroVersion stagedDistroVersion = stagedDistroOperation.distroVersion;
                         stagedDistroRulesVersion = new DistroRulesVersion(
                                 stagedDistroVersion.rulesVersion,
@@ -150,16 +167,16 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
             // Determine the installed distro state, if possible.
             DistroVersion installedDistroVersion;
-            int distroStatus = RulesState.DISTRO_STATUS_UNKNOWN;
+            int distroStatus = DISTRO_STATUS_UNKNOWN;
             DistroRulesVersion installedDistroRulesVersion = null;
             if (!operationInProgress) {
                 try {
                     installedDistroVersion = mInstaller.getInstalledDistroVersion();
                     if (installedDistroVersion == null) {
-                        distroStatus = RulesState.DISTRO_STATUS_NONE;
+                        distroStatus = DISTRO_STATUS_NONE;
                         installedDistroRulesVersion = null;
                     } else {
-                        distroStatus = RulesState.DISTRO_STATUS_INSTALLED;
+                        distroStatus = DISTRO_STATUS_INSTALLED;
                         installedDistroRulesVersion = new DistroRulesVersion(
                                 installedDistroVersion.rulesVersion,
                                 installedDistroVersion.revision);
@@ -358,6 +375,87 @@ public final class RulesManagerService extends IRulesManager.Stub {
         mPackageTracker.recordCheckResult(checkToken, success);
     }
 
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!mPermissionHelper.checkDumpPermission(TAG, pw)) {
+            return;
+        }
+
+        RulesState rulesState = getRulesStateInternal();
+        if (args != null && args.length == 2) {
+            // Formatting options used for automated tests. The format is less free-form than
+            // the -format options, which are intended to be easier to parse.
+            if ("-format_state".equals(args[0]) && args[1] != null) {
+                for (char c : args[1].toCharArray()) {
+                    switch (c) {
+                        case 'p': // Report operation in progress
+                            pw.println("Operation in progress: "
+                                    + rulesState.isOperationInProgress());
+                            break;
+                        case 's': // Report system image rules version
+                            pw.println("System rules version: "
+                                    + rulesState.getSystemRulesVersion());
+                            break;
+                        case 'c': // Report current installation state
+                            pw.println("Current install state: "
+                                    + distroStatusToString(rulesState.getDistroStatus()));
+                            break;
+                        case 'i': // Report currently installed version
+                            DistroRulesVersion installedRulesVersion =
+                                    rulesState.getInstalledDistroRulesVersion();
+                            pw.print("Installed rules version: ");
+                            if (installedRulesVersion == null) {
+                                pw.println("<None>");
+                            } else {
+                                pw.println(installedRulesVersion.toDumpString());
+                            }
+                            break;
+                        case 'o': // Report staged operation type
+                            int stagedOperationType = rulesState.getStagedOperationType();
+                            pw.println("Staged operation: "
+                                    + stagedOperationToString(stagedOperationType));
+                            break;
+                        case 't':
+                            // Report staged version (i.e. the one that will be installed next boot
+                            // if the staged operation is an install).
+                            pw.print("Staged rules version: ");
+                            DistroRulesVersion stagedDistroRulesVersion =
+                                    rulesState.getStagedDistroRulesVersion();
+                            if (stagedDistroRulesVersion == null) {
+                                pw.println("<None>");
+                            } else {
+                                pw.println("Staged install version: "
+                                        + stagedDistroRulesVersion.toDumpString());
+                            }
+                            break;
+                        case 'a':
+                            // Report the active rules version (i.e. the rules in use by the current
+                            // process).
+                            pw.println("Active rules version (ICU, libcore): "
+                                    + ICU.getTZDataVersion() + ","
+                                    + ZoneInfoDB.getInstance().getVersion());
+                            break;
+                        default:
+                            pw.println("Unknown option: " + c);
+                    }
+                }
+                return;
+            }
+        }
+
+        pw.println("RulesManagerService state: " + toString());
+        pw.println("Active rules version (ICU, libcore): " + ICU.getTZDataVersion() + ","
+                + ZoneInfoDB.getInstance().getVersion());
+        mPackageTracker.dump(pw);
+    }
+
+    @Override
+    public String toString() {
+        return "RulesManagerService{" +
+                "mOperationInProgress=" + mOperationInProgress +
+                '}';
+    }
+
     private static CheckToken createCheckTokenOrThrow(byte[] checkTokenBytes) {
         CheckToken checkToken;
         try {
@@ -367,5 +465,31 @@ public final class RulesManagerService extends IRulesManager.Stub {
                     + Arrays.toString(checkTokenBytes), e);
         }
         return checkToken;
+    }
+
+    private static String distroStatusToString(int distroStatus) {
+        switch(distroStatus) {
+            case DISTRO_STATUS_NONE:
+                return "None";
+            case DISTRO_STATUS_INSTALLED:
+                return "Installed";
+            case DISTRO_STATUS_UNKNOWN:
+            default:
+                return "Unknown";
+        }
+    }
+
+    private static String stagedOperationToString(int stagedOperationType) {
+        switch(stagedOperationType) {
+            case STAGED_OPERATION_NONE:
+                return "None";
+            case STAGED_OPERATION_UNINSTALL:
+                return "Uninstall";
+            case STAGED_OPERATION_INSTALL:
+                return "Install";
+            case STAGED_OPERATION_UNKNOWN:
+            default:
+                return "Unknown";
+        }
     }
 }

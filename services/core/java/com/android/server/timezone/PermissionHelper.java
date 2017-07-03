@@ -16,10 +16,14 @@
 
 package com.android.server.timezone;
 
+import java.io.PrintWriter;
+
 /**
  * An easy-to-mock interface around permission checks for use by {@link RulesManagerService}.
  */
 public interface PermissionHelper {
 
     void enforceCallerHasPermission(String requiredPermission) throws SecurityException;
+
+    boolean checkDumpPermission(String tag, PrintWriter printWriter);
 }
