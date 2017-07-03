@@ -278,7 +278,7 @@ TestResults::OnTestStatus(TestStatus& status)
                 line << " of " << testCount;
             }
         }
-        line << ": " << m_currentAction->target->name << ':' << className << "\\#" << testName;
+        line << ": " << m_currentAction->target->name << ':' << className << "#" << testName;
         print_one_line("%s", line.str().c_str());
     } else if ((resultCode == -1) || (resultCode == -2)) {
         // test failed
@@ -286,9 +286,9 @@ TestResults::OnTestStatus(TestStatus& status)
         // all as "failures".
         m_currentAction->failCount++;
         m_currentAction->target->testFailCount++;
-        printf("%s\n%sFailed: %s:%s\\#%s%s\n", g_escapeClearLine, g_escapeRedBold,
-                m_currentAction->target->name.c_str(), className.c_str(),
-                testName.c_str(), g_escapeEndColor);
+        printf("%s\n%sFailed: %s:%s#%s%s\n", g_escapeClearLine, g_escapeRedBold,
+               m_currentAction->target->name.c_str(), className.c_str(), testName.c_str(),
+               g_escapeEndColor);
 
         bool stackFound;
         string stack = get_bundle_string(results, &stackFound, "stack", NULL);
@@ -403,11 +403,14 @@ print_usage(FILE* out) {
     fprintf(out, "      Builds and installs CtsProtoTestCases.apk, and runs all the\n");
     fprintf(out, "      tests in the ProtoOutputStreamBoolTest class.\n");
     fprintf(out, "\n");
-    fprintf(out, "    bit CtsProtoTestCases:.ProtoOutputStreamBoolTest\\#testWrite\n");
+    fprintf(out, "    bit CtsProtoTestCases:.ProtoOutputStreamBoolTest#testWrite\n");
     fprintf(out, "      Builds and installs CtsProtoTestCases.apk, and runs the testWrite\n");
     fprintf(out, "      test method on that class.\n");
     fprintf(out, "\n");
-    fprintf(out, "    bit CtsProtoTestCases:.ProtoOutputStreamBoolTest\\#testWrite,.ProtoOutputStreamBoolTest\\#testRepeated\n");
+    fprintf(out,
+            "    bit "
+            "CtsProtoTestCases:.ProtoOutputStreamBoolTest#testWrite,.ProtoOutputStreamBoolTest#"
+            "testRepeated\n");
     fprintf(out, "      Builds and installs CtsProtoTestCases.apk, and runs the testWrite\n");
     fprintf(out, "      and testRepeated test methods on that class.\n");
     fprintf(out, "\n");
@@ -812,7 +815,7 @@ run_phases(vector<Target*> targets, const Options& options)
 
             // Stop & Sync
             if (!options.noRestart) {
-                err = run_adb("shell", "stop", NULL);
+                err = run_adb("exec-out", "stop", NULL);
                 check_error(err);
             }
             err = run_adb("remount", NULL);
@@ -831,9 +834,9 @@ run_phases(vector<Target*> targets, const Options& options)
                 } else {
                     print_status("Restarting the runtime");
 
-                    err = run_adb("shell", "setprop", "sys.boot_completed", "0", NULL);
+                    err = run_adb("exec-out", "setprop", "sys.boot_completed", "0", NULL);
                     check_error(err);
-                    err = run_adb("shell", "start", NULL);
+                    err = run_adb("exec-out", "start", NULL);
                     check_error(err);
                 }
 
@@ -846,7 +849,7 @@ run_phases(vector<Target*> targets, const Options& options)
                     sleep(2);
                 }
                 sleep(1);
-                err = run_adb("shell", "wm", "dismiss-keyguard", NULL);
+                err = run_adb("exec-out", "wm", "dismiss-keyguard", NULL);
                 check_error(err);
             }
         }
@@ -863,7 +866,7 @@ run_phases(vector<Target*> targets, const Options& options)
                 continue;
             }
             // TODO: if (!apk.file.fileInfo.exists || apk.file.HasChanged())
-            err = run_adb("shell", "mkdir", "-p", dir.c_str(), NULL);
+            err = run_adb("exec-out", "mkdir", "-p", dir.c_str(), NULL);
             check_error(err);
             err = run_adb("push", pushed.file.filename.c_str(), pushed.dest.c_str(), NULL);
             check_error(err);
@@ -945,9 +948,9 @@ run_phases(vector<Target*> targets, const Options& options)
                         }
                     }
                     if (runAll) {
-                        err = run_adb("shell", installedPath.c_str(), NULL);
+                        err = run_adb("exec-out", installedPath.c_str(), NULL);
                     } else {
-                        err = run_adb("shell", installedPath.c_str(), filterArg.c_str(), NULL);
+                        err = run_adb("exec-out", installedPath.c_str(), filterArg.c_str(), NULL);
                     }
                     if (err == 0) {
                         target->testPassCount++;
@@ -1073,7 +1076,7 @@ run_phases(vector<Target*> targets, const Options& options)
 
         const ActivityAction& action = activityActions[0];
         string componentName = action.packageName + "/" + action.className;
-        err = run_adb("shell", "am", "start", componentName.c_str(), NULL);
+        err = run_adb("exec-out", "am", "start", componentName.c_str(), NULL);
         check_error(err);
     }
 

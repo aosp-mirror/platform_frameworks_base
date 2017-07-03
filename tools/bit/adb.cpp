@@ -73,7 +73,7 @@ string
 get_system_property(const string& name, int* err)
 {
     Command cmd("adb");
-    cmd.AddArg("shell");
+    cmd.AddArg("exec-out");
     cmd.AddArg("getprop");
     cmd.AddArg(name);
 
@@ -278,7 +278,7 @@ run_instrumentation_test(const string& packageName, const string& runner, const 
         InstrumentationCallbacks* callbacks)
 {
     Command cmd("adb");
-    cmd.AddArg("shell");
+    cmd.AddArg("exec-out");
     cmd.AddArg("am");
     cmd.AddArg("instrument");
     cmd.AddArg("-w");
