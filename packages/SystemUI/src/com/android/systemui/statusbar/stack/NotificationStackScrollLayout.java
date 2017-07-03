@@ -91,6 +91,8 @@ import com.android.systemui.statusbar.policy.ScrollAdapter;
 
 import android.support.v4.graphics.ColorUtils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -4255,6 +4257,19 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setDarkShelfOffsetX(int shelfOffsetX) {
         mShelf.setDarkOffsetX(shelfOffsetX);
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(String.format("[%s: pulsing=%s qsCustomizerShowing=%s visibility=%s"
+                        + " alpha:%f scrollY:%d]",
+                this.getClass().getSimpleName(),
+                mPulsing != null ?"T":"f",
+                mAmbientState.isQsCustomizerShowing() ? "T":"f",
+                getVisibility() == View.VISIBLE ? "visible"
+                        : getVisibility() == View.GONE ? "gone"
+                                : "invisible",
+                getAlpha(),
+                mAmbientState.getScrollY()));
     }
 
     /**

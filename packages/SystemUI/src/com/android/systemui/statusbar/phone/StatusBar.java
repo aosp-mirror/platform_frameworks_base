@@ -3487,6 +3487,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             pw.print  ("      ");
             mNotificationPanel.dump(fd, pw, args);
         }
+        pw.println("  mStackScroller: ");
+        if (mStackScroller != null) {
+            pw.print  ("      ");
+            mStackScroller.dump(fd, pw, args);
+        }
 
         DozeLog.dump(pw);
 
