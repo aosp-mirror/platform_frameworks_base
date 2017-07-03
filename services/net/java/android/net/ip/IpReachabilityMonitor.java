@@ -35,6 +35,7 @@ import android.net.netlink.StructNdaCacheInfo;
 import android.net.netlink.StructNdMsg;
 import android.net.netlink.StructNlMsgHdr;
 import android.net.util.MultinetworkPolicyTracker;
+import android.net.util.SharedLog;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.system.ErrnoException;
@@ -150,6 +151,7 @@ public class IpReachabilityMonitor {
     private final PowerManager.WakeLock mWakeLock;
     private final String mInterfaceName;
     private final int mInterfaceIndex;
+    private final SharedLog mLog;
     private final Callback mCallback;
     private final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
     private final NetlinkSocketObserver mNetlinkSocketObserver;
@@ -221,11 +223,11 @@ public class IpReachabilityMonitor {
         return errno;
     }
 
-    public IpReachabilityMonitor(Context context, String ifName, Callback callback) {
-        this(context, ifName, callback, null);
+    public IpReachabilityMonitor(Context context, String ifName, SharedLog log, Callback callback) {
+        this(context, ifName, log, callback, null);
     }
 
-    public IpReachabilityMonitor(Context context, String ifName, Callback callback,
+    public IpReachabilityMonitor(Context context, String ifName, SharedLog log, Callback callback,
             MultinetworkPolicyTracker tracker) throws IllegalArgumentException {
         mInterfaceName = ifName;
         int ifIndex = -1;
@@ -237,6 +239,7 @@ public class IpReachabilityMonitor {
         }
         mWakeLock = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, TAG + "." + mInterfaceName);
+        mLog = log.forSubComponent(TAG);
         mCallback = callback;
         mMultinetworkPolicyTracker = tracker;
         mNetlinkSocketObserver = new NetlinkSocketObserver();
@@ -403,6 +406,8 @@ public class IpReachabilityMonitor {
                 break;
             }
             final int returnValue = probeNeighbor(mInterfaceIndex, target);
+            mLog.log(String.format("put neighbor %s into NUD_PROBE state (rval=%d)",
+                     target.getHostAddress(), returnValue));
             logEvent(IpReachabilityEvent.PROBE, returnValue);
         }
         mLastProbeTimeMs = SystemClock.elapsedRealtime();
