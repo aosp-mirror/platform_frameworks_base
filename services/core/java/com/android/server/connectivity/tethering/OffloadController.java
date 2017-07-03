@@ -19,6 +19,7 @@ package com.android.server.connectivity.tethering;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
 import android.content.ContentResolver;
+import android.net.IpPrefix;
 import android.net.LinkProperties;
 import android.net.RouteInfo;
 import android.net.util.SharedLog;
@@ -28,6 +29,7 @@ import android.provider.Settings;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * A class to encapsulate the business logic of programming the tethering
@@ -45,6 +47,7 @@ public class OffloadController {
     private boolean mConfigInitialized;
     private boolean mControlInitialized;
     private LinkProperties mUpstreamLinkProperties;
+    private Set<IpPrefix> mExemptPrefixes;
 
     public OffloadController(Handler h, OffloadHardwareInterface hwi,
             ContentResolver contentResolver, SharedLog log) {
@@ -106,6 +109,17 @@ public class OffloadController {
         // onOffloadEvent() callback to tell us offload is available again and
         // then reapply all state).
         pushUpstreamParameters();
+    }
+
+    public void updateExemptPrefixes(Set<IpPrefix> exemptPrefixes) {
+        if (!started()) return;
+
+        mExemptPrefixes = exemptPrefixes;
+        // TODO:
+        //     - add IP addresses from all downstream link properties
+        //     - add routes from all non-tethering downstream link properties
+        //     - remove any 64share prefixes
+        //     - push this to the HAL
     }
 
     public void notifyDownstreamLinkProperties(LinkProperties lp) {
