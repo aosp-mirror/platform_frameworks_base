@@ -4196,7 +4196,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         if (shouldBeKeyguard) {
             showKeyguardImpl();
-        } else if (!shouldBeKeyguard && mIsKeyguard) {
+        } else {
             return hideKeyguardImpl();
         }
         return false;
