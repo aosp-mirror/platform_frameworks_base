@@ -30,6 +30,9 @@ import android.provider.TimeZoneRulesDataContract;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -1172,6 +1175,16 @@ public class PackageTrackerTest {
 
         // Check a new token was generated.
         assertFalse(token1.equals(token2));
+    }
+
+    @Test
+    public void dump() {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+
+        mPackageTracker.dump(printWriter);
+
+        assertFalse(stringWriter.toString().isEmpty());
     }
 
     private void simulatePackageInstallation(PackageVersions packageVersions) throws Exception {

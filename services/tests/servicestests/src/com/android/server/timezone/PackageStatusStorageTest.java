@@ -25,6 +25,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -227,5 +229,28 @@ public class PackageStatusStorageTest {
         boolean writeOk2 = mPackageStatusStorage.markChecked(token, true /* succeeded */);
         assertFalse(writeOk2);
         assertEquals(expectedPackageStatus, mPackageStatusStorage.getPackageStatus());
+    }
+
+    @Test
+    public void dump() {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+
+        // Dump initial state.
+        mPackageStatusStorage.dump(printWriter);
+
+        // No crash and it does something.
+        assertFalse(stringWriter.toString().isEmpty());
+
+        // Reset
+        stringWriter.getBuffer().setLength(0);
+        assertTrue(stringWriter.toString().isEmpty());
+
+        // Store something.
+        mPackageStatusStorage.generateCheckToken(VALID_PACKAGE_VERSIONS);
+
+        mPackageStatusStorage.dump(printWriter);
+
+        assertFalse(stringWriter.toString().isEmpty());
     }
 }
