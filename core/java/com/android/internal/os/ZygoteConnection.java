@@ -314,6 +314,10 @@ class ZygoteConnection {
         return ZygoteInit.isPreloadComplete();
     }
 
+    protected DataOutputStream getSocketOutputStream() {
+        return mSocketOutStream;
+    }
+
     protected boolean handlePreloadPackage(String packagePath, String libsPath, String cacheKey) {
         throw new RuntimeException("Zyogte does not support package preloading");
     }
