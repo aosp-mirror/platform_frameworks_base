@@ -23,6 +23,8 @@ import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.NetworkCapabilities.*;
 
+import static com.android.internal.util.TestUtils.waitForIdleHandler;
+
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
@@ -211,20 +213,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    /**
-     * Block until the given handler becomes idle, or until timeoutMs has passed.
-     */
-    private static void waitForIdleHandler(HandlerThread handlerThread, int timeoutMs) {
-        final ConditionVariable cv = new ConditionVariable();
-        final Handler handler = new Handler(handlerThread.getLooper());
-        handler.post(() -> cv.open());
-        if (!cv.block(timeoutMs)) {
-            fail("HandlerThread " + handlerThread.getName() +
-                    " did not become idle after " + timeoutMs + " ms");
-        }
-    }
-
-    public void waitForIdle(int timeoutMs) {
+    public void waitForIdle(int timeoutMsAsInt) {
+        long timeoutMs = timeoutMsAsInt;
         waitForIdleHandler(mService.mHandlerThread, timeoutMs);
         waitForIdle(mCellNetworkAgent, timeoutMs);
         waitForIdle(mWiFiNetworkAgent, timeoutMs);
@@ -232,7 +222,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         waitForIdleHandler(mService.mHandlerThread, timeoutMs);
     }
 
-    public void waitForIdle(MockNetworkAgent agent, int timeoutMs) {
+    public void waitForIdle(MockNetworkAgent agent, long timeoutMs) {
         if (agent == null) {
             return;
         }
