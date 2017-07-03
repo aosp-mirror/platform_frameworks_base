@@ -89,6 +89,13 @@ public class QSFragment extends Fragment implements QS {
         if (savedInstanceState != null) {
             setExpanded(savedInstanceState.getBoolean(EXTRA_EXPANDED));
             setListening(savedInstanceState.getBoolean(EXTRA_LISTENING));
+            int[] loc = new int[2];
+            View edit = view.findViewById(android.R.id.edit);
+            edit.getLocationInWindow(loc);
+            int x = loc[0] + edit.getWidth() / 2;
+            int y = loc[1] + edit.getHeight() / 2;
+            mQSCustomizer.setEditLocation(x, y);
+            mQSCustomizer.restoreInstanceState(savedInstanceState);
         }
     }
 
@@ -105,6 +112,7 @@ public class QSFragment extends Fragment implements QS {
         super.onSaveInstanceState(outState);
         outState.putBoolean(EXTRA_EXPANDED, mQsExpanded);
         outState.putBoolean(EXTRA_LISTENING, mListening);
+        mQSCustomizer.saveInstanceState(outState);
     }
 
     @VisibleForTesting
