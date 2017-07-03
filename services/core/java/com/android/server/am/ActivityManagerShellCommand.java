@@ -2224,7 +2224,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runTaskLock(PrintWriter pw) throws RemoteException {
         String taskIdStr = getNextArgRequired();
         if (taskIdStr.equals("stop")) {
-            mInterface.stopLockTaskMode();
+            mInterface.stopSystemLockTaskMode();
         } else {
             int taskId = Integer.parseInt(taskIdStr);
             mInterface.startSystemLockTaskMode(taskId);

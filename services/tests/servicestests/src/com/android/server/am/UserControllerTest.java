@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import android.app.ActivityManager;
 import android.app.IUserSwitchObserver;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -57,16 +56,15 @@ import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_M
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_START_MSG;
 import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class UserControllerTest extends AndroidTestCase {
@@ -117,11 +115,7 @@ public class UserControllerTest extends AndroidTestCase {
         Mockito.verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         Mockito.verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
         Mockito.verify(mInjector.getWindowManager()).setSwitchingUser(true);
-        Mockito.verify(mInjector.getActivityStackSupervisor()).setLockTaskModeLocked(
-                nullable(TaskRecord.class),
-                eq(ActivityManager.LOCK_TASK_MODE_NONE),
-                anyString(),
-                anyBoolean());
+        Mockito.verify(mInjector.getLockTaskController()).clearLockTaskMode(anyString());
         startForegroundUserAssertions();
     }
 
@@ -131,11 +125,7 @@ public class UserControllerTest extends AndroidTestCase {
         Mockito.verify(
                 mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         Mockito.verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
-        Mockito.verify(mInjector.getActivityStackSupervisor(), never()).setLockTaskModeLocked(
-                nullable(TaskRecord.class),
-                eq(ActivityManager.LOCK_TASK_MODE_NONE),
-                anyString(),
-                anyBoolean());
+        verifyZeroInteractions(mInjector.getLockTaskController());
         startBackgroundUserAssertions();
     }
 
@@ -324,6 +314,7 @@ public class UserControllerTest extends AndroidTestCase {
         UserManagerInternal userManagerInternalMock;
         WindowManagerService windowManagerMock;
         ActivityStackSupervisor activityStackSupervisor;
+        LockTaskController lockTaskController;
         private Context mCtx;
         List<Intent> sentIntents = new ArrayList<>();
 
@@ -337,6 +328,7 @@ public class UserControllerTest extends AndroidTestCase {
             userManagerInternalMock = mock(UserManagerInternal.class);
             windowManagerMock = mock(WindowManagerService.class);
             activityStackSupervisor = mock(ActivityStackSupervisor.class);
+            lockTaskController = mock(LockTaskController.class);
         }
 
         @Override
@@ -398,6 +390,10 @@ public class UserControllerTest extends AndroidTestCase {
         @Override
         ActivityStackSupervisor getActivityStackSupervisor() {
             return activityStackSupervisor;
+        }
+
+        LockTaskController getLockTaskController() {
+            return lockTaskController;
         }
     }
 
