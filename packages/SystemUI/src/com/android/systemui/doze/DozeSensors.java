@@ -174,6 +174,7 @@ public class DozeSensors {
         for (TriggerSensor s : mSensors) {
             pw.print("Sensor: "); pw.println(s.toString());
         }
+        pw.print("ProxSensor: "); pw.println(mProxSensor.toString());
     }
 
     private class ProxSensor implements SensorEventListener {
@@ -246,6 +247,12 @@ public class DozeSensors {
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
+
+        @Override
+        public String toString() {
+            return String.format("{registered=%s, requested=%s, coolingDown=%s, currentlyFar=%s}",
+                    mRegistered, mRequested, mCooldownTimer.isScheduled(), mCurrentlyFar);
+        }
     }
 
     private class TriggerSensor extends TriggerEventListener {
@@ -312,6 +319,7 @@ public class DozeSensors {
         @Override
         @AnyThread
         public void onTrigger(TriggerEvent event) {
+            DozeLog.traceSensor(mContext, mPulseReason);
             mHandler.post(mWakeLock.wrap(() -> {
                 if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
                 boolean sensorPerformsProxCheck = false;
