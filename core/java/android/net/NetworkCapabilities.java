@@ -21,7 +21,6 @@ import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.BitUtils;
-import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 
@@ -424,11 +423,6 @@ public final class NetworkCapabilities implements Parcelable {
     /** @hide */
     public static final int MAX_TRANSPORT = TRANSPORT_WIFI_AWARE;
 
-    /** @hide */
-    public static boolean isValidTransport(int transportType) {
-        return (MIN_TRANSPORT <= transportType) && (transportType <= MAX_TRANSPORT);
-    }
-
     private static final String[] TRANSPORT_NAMES = {
         "CELLULAR",
         "WIFI",
@@ -452,7 +446,9 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public NetworkCapabilities addTransportType(int transportType) {
-        checkValidTransportType(transportType);
+        if (transportType < MIN_TRANSPORT || transportType > MAX_TRANSPORT) {
+            throw new IllegalArgumentException("TransportType out of range");
+        }
         mTransportTypes |= 1 << transportType;
         setNetworkSpecifier(mNetworkSpecifier); // used for exception checking
         return this;
@@ -466,7 +462,9 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public NetworkCapabilities removeTransportType(int transportType) {
-        checkValidTransportType(transportType);
+        if (transportType < MIN_TRANSPORT || transportType > MAX_TRANSPORT) {
+            throw new IllegalArgumentException("TransportType out of range");
+        }
         mTransportTypes &= ~(1 << transportType);
         setNetworkSpecifier(mNetworkSpecifier); // used for exception checking
         return this;
@@ -490,7 +488,10 @@ public final class NetworkCapabilities implements Parcelable {
      * @return {@code true} if set on this instance.
      */
     public boolean hasTransport(int transportType) {
-        return isValidTransport(transportType) && ((mTransportTypes & (1 << transportType)) != 0);
+        if (transportType < MIN_TRANSPORT || transportType > MAX_TRANSPORT) {
+            return false;
+        }
+        return ((mTransportTypes & (1 << transportType)) != 0);
     }
 
     private void combineTransportTypes(NetworkCapabilities nc) {
@@ -898,14 +899,9 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public static String transportNameOf(int transport) {
-        if (!isValidTransport(transport)) {
+        if (transport < 0 || TRANSPORT_NAMES.length <= transport) {
             return "UNKNOWN";
         }
         return TRANSPORT_NAMES[transport];
-    }
-
-    private static void checkValidTransportType(int transport) {
-        Preconditions.checkArgument(
-                isValidTransport(transport), "Invalid TransportType " + transport);
     }
 }
