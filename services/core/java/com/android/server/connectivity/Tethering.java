@@ -57,6 +57,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
@@ -216,10 +217,10 @@ public class Tethering extends BaseNetworkObserver {
                 mContext.getContentResolver(),
                 mLog);
         mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
-                mContext, mTetherMasterSM, mLog, TetherMasterSM.EVENT_UPSTREAM_CALLBACK );
+                mContext, mTetherMasterSM, mLog, TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new HashSet<>();
         mSimChange = new SimChangeListener(
-                mContext, mTetherMasterSM.getHandler(), () -> reevaluateSimCardProvisioning());
+                mContext, smHandler, () -> reevaluateSimCardProvisioning());
 
         mStateReceiver = new StateReceiver();
         IntentFilter filter = new IntentFilter();
@@ -227,13 +228,13 @@ public class Tethering extends BaseNetworkObserver {
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        mContext.registerReceiver(mStateReceiver, filter, null, mTetherMasterSM.getHandler());
+        mContext.registerReceiver(mStateReceiver, filter, null, smHandler);
 
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_MEDIA_SHARED);
         filter.addAction(Intent.ACTION_MEDIA_UNSHARED);
         filter.addDataScheme("file");
-        mContext.registerReceiver(mStateReceiver, filter, null, mTetherMasterSM.getHandler());
+        mContext.registerReceiver(mStateReceiver, filter, null, smHandler);
 
         // load device config info
         updateConfiguration();
@@ -1142,12 +1143,6 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
-    private void startOffloadController() {
-        mOffloadController.start();
-        mOffloadController.updateExemptPrefixes(
-                mUpstreamNetworkMonitor.getOffloadExemptPrefixes());
-    }
-
     class TetherMasterSM extends StateMachine {
         private static final int BASE_MASTER                    = Protocol.BASE_TETHERING;
         // an interface SM has requested Tethering/Local Hotspot
@@ -1165,14 +1160,14 @@ public class Tethering extends BaseNetworkObserver {
         static final int CMD_CLEAR_ERROR                        = BASE_MASTER + 6;
         static final int EVENT_IFACE_UPDATE_LINKPROPERTIES      = BASE_MASTER + 7;
 
-        private State mInitialState;
-        private State mTetherModeAliveState;
+        private final State mInitialState;
+        private final State mTetherModeAliveState;
 
-        private State mSetIpForwardingEnabledErrorState;
-        private State mSetIpForwardingDisabledErrorState;
-        private State mStartTetheringErrorState;
-        private State mStopTetheringErrorState;
-        private State mSetDnsForwardersErrorState;
+        private final State mSetIpForwardingEnabledErrorState;
+        private final State mSetIpForwardingDisabledErrorState;
+        private final State mStartTetheringErrorState;
+        private final State mStopTetheringErrorState;
+        private final State mSetDnsForwardersErrorState;
 
         // This list is a little subtle.  It contains all the interfaces that currently are
         // requesting tethering, regardless of whether these interfaces are still members of
@@ -1212,7 +1207,31 @@ public class Tethering extends BaseNetworkObserver {
 
             mNotifyList = new ArrayList<>();
             mIPv6TetheringCoordinator = new IPv6TetheringCoordinator(mNotifyList, mLog);
+
             setInitialState(mInitialState);
+        }
+
+        private void startOffloadController() {
+            mOffloadController.start();
+            sendOffloadExemptPrefixes();
+        }
+
+        private void sendOffloadExemptPrefixes() {
+            sendOffloadExemptPrefixes(mUpstreamNetworkMonitor.getLocalPrefixes());
+        }
+
+        private void sendOffloadExemptPrefixes(Set<IpPrefix> localPrefixes) {
+            // Add in well-known minimum set.
+            PrefixUtils.addNonForwardablePrefixes(localPrefixes);
+            // Add tragically hardcoded prefixes.
+            localPrefixes.add(PrefixUtils.DEFAULT_WIFI_P2P_PREFIX);
+
+            // Add prefixes for all downstreams, regardless of IP serving mode.
+            for (TetherInterfaceStateMachine tism : mNotifyList) {
+                localPrefixes.addAll(PrefixUtils.localPrefixesFrom(tism.linkProperties()));
+            }
+
+            mOffloadController.setLocalPrefixes(localPrefixes);
         }
 
         class InitialState extends State {
@@ -1221,13 +1240,13 @@ public class Tethering extends BaseNetworkObserver {
                 logMessage(this, message.what);
                 switch (message.what) {
                     case EVENT_IFACE_SERVING_STATE_ACTIVE:
-                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
+                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine) message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode requested by " + who);
                         handleInterfaceServingStateActive(message.arg1, who);
                         transitionTo(mTetherModeAliveState);
                         break;
                     case EVENT_IFACE_SERVING_STATE_INACTIVE:
-                        who = (TetherInterfaceStateMachine)message.obj;
+                        who = (TetherInterfaceStateMachine) message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who);
                         handleInterfaceServingStateInactive(who);
                         break;
@@ -1422,8 +1441,8 @@ public class Tethering extends BaseNetworkObserver {
         }
 
         private void handleUpstreamNetworkMonitorCallback(int arg1, Object o) {
-            if (arg1 == UpstreamNetworkMonitor.NOTIFY_EXEMPT_PREFIXES) {
-                mOffloadController.updateExemptPrefixes((Set<IpPrefix>) o);
+            if (arg1 == UpstreamNetworkMonitor.NOTIFY_LOCAL_PREFIXES) {
+                sendOffloadExemptPrefixes((Set<IpPrefix>) o);
                 return;
             }
 
@@ -1527,7 +1546,7 @@ public class Tethering extends BaseNetworkObserver {
                 boolean retValue = true;
                 switch (message.what) {
                     case EVENT_IFACE_SERVING_STATE_ACTIVE: {
-                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
+                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine) message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode requested by " + who);
                         handleInterfaceServingStateActive(message.arg1, who);
                         who.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
@@ -1541,7 +1560,7 @@ public class Tethering extends BaseNetworkObserver {
                         break;
                     }
                     case EVENT_IFACE_SERVING_STATE_INACTIVE: {
-                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
+                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine) message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who);
                         handleInterfaceServingStateInactive(who);
 
@@ -1573,6 +1592,9 @@ public class Tethering extends BaseNetworkObserver {
                             mOffloadController.notifyDownstreamLinkProperties(newLp);
                         } else {
                             mOffloadController.removeDownstreamInterface(newLp.getInterfaceName());
+                            // Another interface might be in local-only hotspot mode;
+                            // resend all local prefixes to the OffloadController.
+                            sendOffloadExemptPrefixes();
                         }
                         break;
                     }
@@ -1614,7 +1636,7 @@ public class Tethering extends BaseNetworkObserver {
                 boolean retValue = true;
                 switch (message.what) {
                     case EVENT_IFACE_SERVING_STATE_ACTIVE:
-                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
+                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine) message.obj;
                         who.sendMessage(mErrorNotification);
                         break;
                     case CMD_CLEAR_ERROR:
