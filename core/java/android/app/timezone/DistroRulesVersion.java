@@ -125,4 +125,8 @@ public final class DistroRulesVersion implements Parcelable {
                 + ", mRevision='" + mRevision + '\''
                 + '}';
     }
+
+    public String toDumpString() {
+        return mRulesVersion + "," + mRevision;
+    }
 }

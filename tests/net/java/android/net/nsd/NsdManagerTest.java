@@ -349,7 +349,6 @@ public class NsdManagerTest {
                 chan.connect(mContext, this, msg.replyTo);
                 chan.sendMessage(AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED);
             }
-
         }
 
         public static MockServiceHandler create(Context context) {

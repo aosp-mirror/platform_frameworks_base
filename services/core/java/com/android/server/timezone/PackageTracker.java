@@ -26,6 +26,7 @@ import android.provider.TimeZoneRulesDataContract;
 import android.util.Slog;
 
 import java.io.File;
+import java.io.PrintWriter;
 
 /**
  * Monitors the installed applications associated with time zone updates. If the app packages are
@@ -509,5 +510,24 @@ public class PackageTracker implements IntentHelper.Listener {
     private static RuntimeException logAndThrowRuntimeException(String message, Throwable cause) {
         Slog.wtf(TAG, message, cause);
         throw new RuntimeException(message, cause);
+    }
+
+    public void dump(PrintWriter fout) {
+        fout.println("PackageTrackerState: " + toString());
+        mPackageStatusStorage.dump(fout);
+    }
+
+    @Override
+    public String toString() {
+        return "PackageTracker{" +
+                "mTrackingEnabled=" + mTrackingEnabled +
+                ", mUpdateAppPackageName='" + mUpdateAppPackageName + '\'' +
+                ", mDataAppPackageName='" + mDataAppPackageName + '\'' +
+                ", mCheckTimeAllowedMillis=" + mCheckTimeAllowedMillis +
+                ", mFailedCheckRetryCount=" + mFailedCheckRetryCount +
+                ", mLastTriggerTimestamp=" + mLastTriggerTimestamp +
+                ", mCheckTriggered=" + mCheckTriggered +
+                ", mCheckFailureCount=" + mCheckFailureCount +
+                '}';
     }
 }

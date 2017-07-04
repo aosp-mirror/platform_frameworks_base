@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification;
 
 import android.text.Layout;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Pools;
 import android.view.View;
@@ -50,10 +51,67 @@ public class TextViewTransformState extends TransformState {
                 int ownEllipsized = getEllipsisCount();
                 int otherEllipsized = otherTvs.getEllipsisCount();
                 return ownEllipsized == otherEllipsized
-                        && getInnerHeight(mText) == getInnerHeight(otherTvs.mText);
+                        && mText.getLineCount() == otherTvs.mText.getLineCount()
+                        && hasSameSpans(otherTvs);
             }
         }
         return false;
+    }
+
+    private boolean hasSameSpans(TextViewTransformState otherTvs) {
+        boolean hasSpans = mText instanceof Spanned;
+        boolean otherHasSpans = otherTvs.mText instanceof Spanned;
+        if (hasSpans != otherHasSpans) {
+            return false;
+        } else if (!hasSpans) {
+            return true;
+        }
+        // Actually both have spans, let's try to compare them
+        Spanned ownSpanned = (Spanned) mText;
+        Object[] spans = ownSpanned.getSpans(0, ownSpanned.length(), Object.class);
+        Spanned otherSpanned = (Spanned) otherTvs.mText;
+        Object[] otherSpans = otherSpanned.getSpans(0, otherSpanned.length(), Object.class);
+        if (spans.length != otherSpans.length) {
+            return false;
+        }
+        for (int i = 0; i < spans.length; i++) {
+            Object span = spans[i];
+            Object otherSpan = otherSpans[i];
+            if (!span.getClass().equals(otherSpan.getClass())) {
+                return false;
+            }
+            if (ownSpanned.getSpanStart(span) != otherSpanned.getSpanStart(otherSpan)
+                    || ownSpanned.getSpanEnd(span) != otherSpanned.getSpanEnd(otherSpan)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    protected boolean transformScale(TransformState otherState) {
+        if (!(otherState instanceof TextViewTransformState)) {
+            return false;
+        }
+        TextViewTransformState otherTvs = (TextViewTransformState) otherState;
+        int lineCount = mText.getLineCount();
+        return lineCount == 1 && lineCount == otherTvs.mText.getLineCount()
+                && getEllipsisCount() == otherTvs.getEllipsisCount()
+                && getViewHeight() != otherTvs.getViewHeight();
+    }
+
+    @Override
+    protected int getViewWidth() {
+        Layout l = mText.getLayout();
+        if (l != null) {
+            return (int) l.getLineWidth(0);
+        }
+        return super.getViewWidth();
+    }
+
+    @Override
+    protected int getViewHeight() {
+        return mText.getLineHeight();
     }
 
     private int getInnerHeight(TextView text) {
