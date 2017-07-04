@@ -127,8 +127,7 @@ public class NetworkInfo implements Parcelable {
      * @hide
      */
     public NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
-        if (!ConnectivityManager.isNetworkTypeValid(type)
-                && type != ConnectivityManager.TYPE_NONE) {
+        if (!ConnectivityManager.isNetworkTypeValid(type)) {
             throw new IllegalArgumentException("Invalid network type: " + type);
         }
         mNetworkType = type;
