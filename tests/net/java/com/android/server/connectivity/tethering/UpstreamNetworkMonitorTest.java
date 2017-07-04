@@ -44,6 +44,9 @@ import android.os.Message;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
+import android.net.IpPrefix;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
@@ -66,6 +69,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -76,6 +80,9 @@ import java.util.Set;
 @SmallTest
 public class UpstreamNetworkMonitorTest {
     private static final int EVENT_UNM_UPDATE = 1;
+
+    private static final boolean INCLUDES = true;
+    private static final boolean EXCLUDES = false;
 
     @Mock private Context mContext;
     @Mock private IConnectivityManager mCS;
@@ -94,7 +101,8 @@ public class UpstreamNetworkMonitorTest {
 
         mCM = spy(new TestConnectivityManager(mContext, mCS));
         mSM = new TestStateMachine();
-        mUNM = new UpstreamNetworkMonitor(mSM, EVENT_UNM_UPDATE, (ConnectivityManager) mCM, mLog);
+        mUNM = new UpstreamNetworkMonitor(
+                (ConnectivityManager) mCM, mSM, mLog, EVENT_UNM_UPDATE);
     }
 
     @After public void tearDown() throws Exception {
@@ -315,6 +323,101 @@ public class UpstreamNetworkMonitorTest {
         assertTrue(netReq.networkCapabilities.hasCapability(NET_CAPABILITY_DUN));
     }
 
+    @Test
+    public void testOffloadExemptPrefixes() throws Exception {
+        mUNM.start();
+
+        // [0] Test minimum set of exempt prefixes.
+        Set<IpPrefix> exempt = mUNM.getOffloadExemptPrefixes();
+        final String[] MINSET = {
+                "127.0.0.0/8", "169.254.0.0/16",
+                "::/3", "fe80::/64", "fc00::/7", "ff00::/8",
+        };
+        assertPrefixSet(exempt, INCLUDES, MINSET);
+        final Set<String> alreadySeen = new HashSet<>();
+        Collections.addAll(alreadySeen, MINSET);
+        assertEquals(alreadySeen.size(), exempt.size());
+
+        // [1] Pretend Wi-Fi connects.
+        final TestNetworkAgent wifiAgent = new TestNetworkAgent(mCM, TRANSPORT_WIFI);
+        final LinkProperties wifiLp = new LinkProperties();
+        wifiLp.setInterfaceName("wlan0");
+        final String[] WIFI_ADDRS = {
+                "fe80::827a:bfff:fe6f:374d", "100.112.103.18",
+                "2001:db8:4:fd00:827a:bfff:fe6f:374d",
+                "2001:db8:4:fd00:6dea:325a:fdae:4ef4",
+                "fd6a:a640:60bf:e985::123",  // ULA address for good measure.
+        };
+        for (String addrStr : WIFI_ADDRS) {
+            final String cidr = addrStr.contains(":") ? "/64" : "/20";
+            wifiLp.addLinkAddress(new LinkAddress(addrStr + cidr));
+        }
+        wifiAgent.fakeConnect();
+        wifiAgent.sendLinkProperties(wifiLp);
+
+        exempt = mUNM.getOffloadExemptPrefixes();
+        assertPrefixSet(exempt, INCLUDES, alreadySeen);
+        final String[] wifiLinkPrefixes = {
+                // Excludes link-local as that's already tested within MINSET.
+                "100.112.96.0/20", "2001:db8:4:fd00::/64", "fd6a:a640:60bf:e985::/64",
+        };
+        assertPrefixSet(exempt, INCLUDES, wifiLinkPrefixes);
+        Collections.addAll(alreadySeen, wifiLinkPrefixes);
+        assertEquals(alreadySeen.size(), exempt.size());
+
+        // [2] Pretend mobile connects.
+        final TestNetworkAgent cellAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
+        final LinkProperties cellLp = new LinkProperties();
+        cellLp.setInterfaceName("rmnet_data0");
+        final String[] CELL_ADDRS = {
+                "10.102.211.48", "2001:db8:0:1:b50e:70d9:10c9:433d",
+        };
+        for (String addrStr : CELL_ADDRS) {
+            final String cidr = addrStr.contains(":") ? "/64" : "/27";
+            cellLp.addLinkAddress(new LinkAddress(addrStr + cidr));
+        }
+        cellAgent.fakeConnect();
+        cellAgent.sendLinkProperties(cellLp);
+
+        exempt = mUNM.getOffloadExemptPrefixes();
+        assertPrefixSet(exempt, INCLUDES, alreadySeen);
+        final String[] cellLinkPrefixes = { "10.102.211.32/27", "2001:db8:0:1::/64" };
+        assertPrefixSet(exempt, INCLUDES, cellLinkPrefixes);
+        Collections.addAll(alreadySeen, cellLinkPrefixes);
+        assertEquals(alreadySeen.size(), exempt.size());
+
+        // [3] Pretend DUN connects.
+        final TestNetworkAgent dunAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
+        dunAgent.networkCapabilities.addCapability(NET_CAPABILITY_DUN);
+        final LinkProperties dunLp = new LinkProperties();
+        dunLp.setInterfaceName("rmnet_data1");
+        final String[] DUN_ADDRS = {
+                "192.0.2.48", "2001:db8:1:2:b50e:70d9:10c9:433d",
+        };
+        for (String addrStr : DUN_ADDRS) {
+            final String cidr = addrStr.contains(":") ? "/64" : "/27";
+            cellLp.addLinkAddress(new LinkAddress(addrStr + cidr));
+        }
+        dunAgent.fakeConnect();
+        dunAgent.sendLinkProperties(dunLp);
+
+        exempt = mUNM.getOffloadExemptPrefixes();
+        assertPrefixSet(exempt, INCLUDES, alreadySeen);
+        final String[] dunLinkPrefixes = { "192.0.2.32/27", "2001:db8:1:2::/64" };
+        assertPrefixSet(exempt, INCLUDES, dunLinkPrefixes);
+        Collections.addAll(alreadySeen, dunLinkPrefixes);
+        assertEquals(alreadySeen.size(), exempt.size());
+
+        // [4] Pretend Wi-Fi disconnected.  It's addresses/prefixes should no
+        // longer be included (should be properly removed).
+        wifiAgent.fakeDisconnect();
+        exempt = mUNM.getOffloadExemptPrefixes();
+        assertPrefixSet(exempt, INCLUDES, MINSET);
+        assertPrefixSet(exempt, EXCLUDES, wifiLinkPrefixes);
+        assertPrefixSet(exempt, INCLUDES, cellLinkPrefixes);
+        assertPrefixSet(exempt, INCLUDES, dunLinkPrefixes);
+    }
+
     private void assertSatisfiesLegacyType(int legacyType, NetworkState ns) {
         if (legacyType == TYPE_NONE) {
             assertTrue(ns == null);
@@ -476,6 +579,12 @@ public class UpstreamNetworkMonitorTest {
                 cb.onLost(networkId);
             }
         }
+
+        public void sendLinkProperties(LinkProperties lp) {
+            for (NetworkCallback cb : cm.listening.keySet()) {
+                cb.onLinkPropertiesChanged(networkId, lp);
+            }
+        }
     }
 
     public static class TestStateMachine extends StateMachine {
@@ -503,5 +612,20 @@ public class UpstreamNetworkMonitorTest {
 
     static NetworkCapabilities copy(NetworkCapabilities nc) {
         return new NetworkCapabilities(nc);
+    }
+
+    static void assertPrefixSet(Set<IpPrefix> prefixes, boolean expectation, String... expected) {
+        final Set<String> expectedSet = new HashSet<>();
+        Collections.addAll(expectedSet, expected);
+        assertPrefixSet(prefixes, expectation, expectedSet);
+    }
+
+    static void assertPrefixSet(Set<IpPrefix> prefixes, boolean expectation, Set<String> expected) {
+        for (String expectedPrefix : expected) {
+            final String errStr = expectation ? "did not find" : "found";
+            assertEquals(
+                    String.format("Failed expectation: %s prefix: %s", errStr, expectedPrefix),
+                    expectation, prefixes.contains(new IpPrefix(expectedPrefix)));
+        }
     }
 }
