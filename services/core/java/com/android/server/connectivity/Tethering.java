@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity;
 
+import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
 import static android.net.ConnectivityManager.getNetworkTypeName;
@@ -700,7 +701,7 @@ public class Tethering extends BaseNetworkObserver {
 
     private void showTetheredNotification(int icon) {
         NotificationManager notificationManager =
-                (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
             return;
         }
@@ -747,7 +748,7 @@ public class Tethering extends BaseNetworkObserver {
 
     private void clearTetheredNotification() {
         NotificationManager notificationManager =
-            (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+            (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null && mLastNotificationId != 0) {
             notificationManager.cancelAsUser(null, mLastNotificationId,
                     UserHandle.ALL);
@@ -786,11 +787,37 @@ public class Tethering extends BaseNetworkObserver {
 
         private void handleUsbAction(Intent intent) {
             final boolean usbConnected = intent.getBooleanExtra(USB_CONNECTED, false);
+            final boolean usbConfigured = intent.getBooleanExtra(USB_CONFIGURED, false);
             final boolean rndisEnabled = intent.getBooleanExtra(USB_FUNCTION_RNDIS, false);
+
+            mLog.log(String.format("USB bcast connected:%s configured:%s rndis:%s",
+                    usbConnected, usbConfigured, rndisEnabled));
+
+            // There are three types of ACTION_USB_STATE:
+            //
+            //     - DISCONNECTED (USB_CONNECTED and USB_CONFIGURED are 0)
+            //       Meaning: USB connection has ended either because of
+            //       software reset or hard unplug.
+            //
+            //     - CONNECTED (USB_CONNECTED is 1, USB_CONFIGURED is 0)
+            //       Meaning: the first stage of USB protocol handshake has
+            //       occurred but it is not complete.
+            //
+            //     - CONFIGURED (USB_CONNECTED and USB_CONFIGURED are 1)
+            //       Meaning: the USB handshake is completely done and all the
+            //       functions are ready to use.
+            //
+            // For more explanation, see b/62552150 .
+            if (usbConnected && !usbConfigured) {
+                // Nothing for us to do here.
+                // TODO: consider ignoring DISCONNECTED broadcasts as well.
+                return;
+            }
+
             synchronized (Tethering.this.mPublicSync) {
                 mRndisEnabled = rndisEnabled;
                 // start tethering if we have a request pending
-                if (usbConnected && mRndisEnabled && mUsbTetherRequested) {
+                if (usbConfigured && mRndisEnabled && mUsbTetherRequested) {
                     tetherMatchingInterfaces(
                             IControlsTethering.STATE_TETHERED,
                             ConnectivityManager.TETHERING_USB);
@@ -973,7 +1000,7 @@ public class Tethering extends BaseNetworkObserver {
 
     public int setUsbTethering(boolean enable) {
         if (VDBG) Log.d(TAG, "setUsbTethering(" + enable + ")");
-        UsbManager usbManager = mContext.getSystemService(UsbManager.class);
+        UsbManager usbManager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
 
         synchronized (mPublicSync) {
             if (enable) {
