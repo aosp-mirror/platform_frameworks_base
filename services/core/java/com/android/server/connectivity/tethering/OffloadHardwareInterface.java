@@ -76,6 +76,10 @@ public class OffloadHardwareInterface {
             }
         }
 
+        final String logmsg = String.format("initOffloadControl(%s)",
+                (controlCb == null) ? "null"
+                        : "0x" + Integer.toHexString(System.identityHashCode(controlCb)));
+
         mTetheringOffloadCallback = new TetheringOffloadCallback(mHandler, mControlCallback);
         final CbResults results = new CbResults();
         try {
@@ -86,11 +90,11 @@ public class OffloadHardwareInterface {
                         results.errMsg = errMsg;
                     });
         } catch (RemoteException e) {
-            mLog.e("failed to initOffload: " + e);
+            record(logmsg, e);
             return false;
         }
 
-        if (!results.success) mLog.e("initOffload failed: " + results.errMsg);
+        record(logmsg, results);
         return results.success;
     }
 
@@ -108,14 +112,18 @@ public class OffloadHardwareInterface {
         mOffloadControl = null;
         mTetheringOffloadCallback = null;
         mControlCallback = null;
+        mLog.log("stopOffloadControl()");
     }
 
     public boolean setUpstreamParameters(
             String iface, String v4addr, String v4gateway, ArrayList<String> v6gws) {
-        iface = iface != null ? iface : NO_INTERFACE_NAME;
-        v4addr = v4addr != null ? v4addr : NO_IPV4_ADDRESS;
-        v4gateway = v4gateway != null ? v4gateway : NO_IPV4_GATEWAY;
-        v6gws = v6gws != null ? v6gws : new ArrayList<>();
+        iface = (iface != null) ? iface : NO_INTERFACE_NAME;
+        v4addr = (v4addr != null) ? v4addr : NO_IPV4_ADDRESS;
+        v4gateway = (v4gateway != null) ? v4gateway : NO_IPV4_GATEWAY;
+        v6gws = (v6gws != null) ? v6gws : new ArrayList<>();
+
+        final String logmsg = String.format("setUpstreamParameters(%s, %s, %s, [%s])",
+                iface, v4addr, v4gateway, String.join(",", v6gws));
 
         final CbResults results = new CbResults();
         try {
@@ -126,12 +134,25 @@ public class OffloadHardwareInterface {
                         results.errMsg = errMsg;
                     });
         } catch (RemoteException e) {
-            mLog.e("failed to setUpstreamParameters: " + e);
+            record(logmsg, e);
             return false;
         }
 
-        if (!results.success) mLog.e("setUpstreamParameters failed: " + results.errMsg);
+        record(logmsg, results);
         return results.success;
+    }
+
+    private void record(String msg, Throwable t) {
+        mLog.e(msg + " -> exception: " + t);
+    }
+
+    private void record(String msg, CbResults results) {
+        final String logmsg = msg + " -> " + results;
+        if (!results.success) {
+            mLog.e(logmsg);
+        } else {
+            mLog.log(logmsg);
+        }
     }
 
     private static class TetheringOffloadCallback extends ITetheringOffloadCallback.Stub {
@@ -162,5 +183,13 @@ public class OffloadHardwareInterface {
     private static class CbResults {
         boolean success;
         String errMsg;
+
+        public String toString() {
+            if (success) {
+                return "ok";
+            } else {
+                return "fail: " + errMsg;
+            }
+        }
     }
 }
