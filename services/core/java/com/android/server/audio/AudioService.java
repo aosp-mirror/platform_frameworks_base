@@ -28,6 +28,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.IUidObserver;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
@@ -624,6 +625,32 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        }
+
+        @Override public void onUidGone(int uid, boolean disabled) {
+            // Once the uid is no longer running, no need to keep trying to disable its audio.
+            disableAudioForUid(false, uid);
+        }
+
+        @Override public void onUidActive(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidIdle(int uid, boolean disabled) {
+        }
+
+        @Override public void onUidCachedChanged(int uid, boolean cached) {
+            disableAudioForUid(cached, uid);
+        }
+
+        private void disableAudioForUid(boolean disable, int uid) {
+            queueMsgUnderWakeLock(mAudioHandler, MSG_DISABLE_AUDIO_FOR_UID,
+                    disable ? 1 : 0 /* arg1 */,  uid /* arg2 */,
+                    null /* obj */,  0 /* delay */);
+        }
+    };
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -757,6 +784,13 @@ public class AudioService extends IAudioService.Stub
     public void systemReady() {
         sendMsg(mAudioHandler, MSG_SYSTEM_READY, SENDMSG_QUEUE,
                 0, 0, null, 0);
+        try {
+            ActivityManager.getService().registerUidObserver(mUidObserver,
+                    ActivityManager.UID_OBSERVER_CACHED | ActivityManager.UID_OBSERVER_GONE,
+                    ActivityManager.PROCESS_STATE_UNKNOWN, null);
+        } catch (RemoteException e) {
+            // ignored; both services live in system_server
+        }
     }
 
     public void onSystemReady() {
@@ -6601,13 +6635,6 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
             }
-        }
-
-        @Override
-        public void disableAudioForUid(boolean disable, int uid) {
-            queueMsgUnderWakeLock(mAudioHandler, MSG_DISABLE_AUDIO_FOR_UID,
-                    disable ? 1 : 0 /* arg1 */,  uid /* arg2 */,
-                    null /* obj */,  0 /* delay */);
         }
     }
 

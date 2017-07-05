@@ -800,20 +800,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
-        @Override public void onUidStateChanged(int uid, int procState,
-                long procStateSeq) throws RemoteException {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
             mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED,
                     uid, procState, procStateSeq).sendToTarget();
         }
 
-        @Override public void onUidGone(int uid, boolean disabled) throws RemoteException {
+        @Override public void onUidGone(int uid, boolean disabled) {
             mUidEventHandler.obtainMessage(UID_MSG_GONE, uid, 0).sendToTarget();
         }
 
-        @Override public void onUidActive(int uid) throws RemoteException {
+        @Override public void onUidActive(int uid) {
         }
 
-        @Override public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+        @Override public void onUidIdle(int uid, boolean disabled) {
+        }
+
+        @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
     };
 

@@ -363,18 +363,21 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+        public void onUidIdle(int uid, boolean disabled) {
             // Ignored
         }
 
         @Override
-        public void onUidGone(int uid, boolean disabled) throws RemoteException {
+        public void onUidGone(int uid, boolean disabled) {
             onUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT, 0);
         }
 
         @Override
-        public void onUidActive(int uid) throws RemoteException {
+        public void onUidActive(int uid) {
             // Ignored
+        }
+
+        @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
     };
 

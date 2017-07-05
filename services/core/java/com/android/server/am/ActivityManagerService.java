@@ -4344,8 +4344,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (VALIDATE_UID_STATES && mUidObservers.getRegisteredCallbackCount() > 0) {
             for (int j = 0; j < N; ++j) {
                 final UidRecord.ChangeItem item = mActiveUidChanges[j];
-                if (item.change == UidRecord.CHANGE_GONE
-                        || item.change == UidRecord.CHANGE_GONE_IDLE) {
+                if ((item.change & UidRecord.CHANGE_GONE) != 0) {
                     mValidateUids.remove(item.uid);
                 } else {
                     UidRecord validateUid = mValidateUids.get(item.uid);
@@ -4353,9 +4352,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         validateUid = new UidRecord(item.uid);
                         mValidateUids.put(item.uid, validateUid);
                     }
-                    if (item.change == UidRecord.CHANGE_IDLE) {
+                    if ((item.change & UidRecord.CHANGE_IDLE) != 0) {
                         validateUid.idle = true;
-                    } else if (item.change == UidRecord.CHANGE_ACTIVE) {
+                    } else if ((item.change & UidRecord.CHANGE_ACTIVE) != 0) {
                         validateUid.idle = false;
                     }
                     validateUid.curProcState = validateUid.setProcState = item.processState;
@@ -4380,22 +4379,37 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int j = 0; j < changesSize; j++) {
                 UidRecord.ChangeItem item = mActiveUidChanges[j];
                 final int change = item.change;
-                if (change == UidRecord.CHANGE_IDLE
-                        || change == UidRecord.CHANGE_GONE_IDLE) {
+                if (change == UidRecord.CHANGE_PROCSTATE &&
+                        (reg.which & ActivityManager.UID_OBSERVER_PROCSTATE) == 0) {
+                    // No-op common case: no significant change, the observer is not
+                    // interested in all proc state changes.
+                    continue;
+                }
+                if ((change & UidRecord.CHANGE_IDLE) != 0) {
                     if ((reg.which & ActivityManager.UID_OBSERVER_IDLE) != 0) {
                         if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                 "UID idle uid=" + item.uid);
                         observer.onUidIdle(item.uid, item.ephemeral);
                     }
-                } else if (change == UidRecord.CHANGE_ACTIVE) {
+                } else if ((change & UidRecord.CHANGE_ACTIVE) != 0) {
                     if ((reg.which & ActivityManager.UID_OBSERVER_ACTIVE) != 0) {
                         if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                 "UID active uid=" + item.uid);
                         observer.onUidActive(item.uid);
                     }
                 }
-                if (change == UidRecord.CHANGE_GONE
-                        || change == UidRecord.CHANGE_GONE_IDLE) {
+                if ((reg.which & ActivityManager.UID_OBSERVER_CACHED) != 0) {
+                    if ((change & UidRecord.CHANGE_CACHED) != 0) {
+                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                                "UID cached uid=" + item.uid);
+                        observer.onUidCachedChanged(item.uid, true);
+                    } else if ((change & UidRecord.CHANGE_UNCACHED) != 0) {
+                        if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                                "UID active uid=" + item.uid);
+                        observer.onUidCachedChanged(item.uid, false);
+                    }
+                }
+                if ((change & UidRecord.CHANGE_GONE) != 0) {
                     if ((reg.which & ActivityManager.UID_OBSERVER_GONE) != 0) {
                         if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                 "UID gone uid=" + item.uid);
@@ -22170,10 +22184,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (uidRec != null) {
                 uidRec.pendingChange = pendingChange;
-                if (change == UidRecord.CHANGE_GONE && !uidRec.idle) {
+                if ((change & UidRecord.CHANGE_GONE) != 0 && !uidRec.idle) {
                     // If this uid is going away, and we haven't yet reported it is gone,
                     // then do so now.
-                    change = UidRecord.CHANGE_GONE_IDLE;
+                    change |= UidRecord.CHANGE_IDLE;
                 }
             } else if (uid < 0) {
                 throw new IllegalArgumentException("No UidRecord or uid");
@@ -22183,8 +22197,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             mPendingUidChanges.add(pendingChange);
         } else {
             pendingChange = uidRec.pendingChange;
-            if (change == UidRecord.CHANGE_GONE && pendingChange.change == UidRecord.CHANGE_IDLE) {
-                change = UidRecord.CHANGE_GONE_IDLE;
+            // If there is no change in idle or active state, then keep whatever was pending.
+            if ((change & (UidRecord.CHANGE_IDLE | UidRecord.CHANGE_ACTIVE)) == 0) {
+                change |= (pendingChange.change & (UidRecord.CHANGE_IDLE
+                        | UidRecord.CHANGE_ACTIVE));
+            }
+            // If there is no change in cached or uncached state, then keep whatever was pending.
+            if ((change & (UidRecord.CHANGE_CACHED | UidRecord.CHANGE_UNCACHED)) == 0) {
+                change |= (pendingChange.change & (UidRecord.CHANGE_CACHED
+                        | UidRecord.CHANGE_UNCACHED));
+            }
+            // If this is a report of the UID being gone, then we shouldn't keep any previous
+            // report of it being active or cached.  (That is, a gone uid is never active,
+            // and never cached.)
+            if ((change & UidRecord.CHANGE_GONE) != 0) {
+                change &= ~(UidRecord.CHANGE_ACTIVE | UidRecord.CHANGE_CACHED);
+                if (!uidRec.idle) {
+                    // If this uid is going away, and we haven't yet reported it is gone,
+                    // then do so now.
+                    change |= UidRecord.CHANGE_IDLE;
+                }
             }
         }
         pendingChange.change = change;
@@ -22193,27 +22225,26 @@ public class ActivityManagerService extends IActivityManager.Stub
         pendingChange.ephemeral = uidRec != null ? uidRec.ephemeral : isEphemeralLocked(uid);
         pendingChange.procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
         if (uidRec != null) {
+            uidRec.lastReportedChange = change;
             uidRec.updateLastDispatchedProcStateSeq(change);
         }
 
         // Directly update the power manager, since we sit on top of it and it is critical
         // it be kept in sync (so wake locks will be held as soon as appropriate).
         if (mLocalPowerManager != null) {
-            switch (change) {
-                case UidRecord.CHANGE_GONE:
-                case UidRecord.CHANGE_GONE_IDLE:
-                    mLocalPowerManager.uidGone(pendingChange.uid);
-                    break;
-                case UidRecord.CHANGE_IDLE:
-                    mLocalPowerManager.uidIdle(pendingChange.uid);
-                    break;
-                case UidRecord.CHANGE_ACTIVE:
-                    mLocalPowerManager.uidActive(pendingChange.uid);
-                    break;
-                default:
-                    mLocalPowerManager.updateUidProcState(pendingChange.uid,
-                            pendingChange.processState);
-                    break;
+            // TO DO: dispatch cached/uncached changes here, so we don't need to report
+            // all proc state changes.
+            if ((change & UidRecord.CHANGE_ACTIVE) != 0) {
+                mLocalPowerManager.uidActive(pendingChange.uid);
+            }
+            if ((change & UidRecord.CHANGE_IDLE) != 0) {
+                mLocalPowerManager.uidIdle(pendingChange.uid);
+            }
+            if ((change & UidRecord.CHANGE_GONE) != 0) {
+                mLocalPowerManager.uidGone(pendingChange.uid);
+            } else {
+                mLocalPowerManager.updateUidProcState(pendingChange.uid,
+                        pendingChange.processState);
             }
         }
     }
@@ -22797,6 +22828,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     mConstants.BACKGROUND_SETTLE_TIME);
                         }
                     }
+                    if (!uidRec.setIdle) {
+                        uidChange = UidRecord.CHANGE_IDLE;
+                    }
                 } else {
                     if (uidRec.idle) {
                         uidChange = UidRecord.CHANGE_ACTIVE;
@@ -22805,8 +22839,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     uidRec.lastBackgroundTime = 0;
                 }
+                final boolean wasCached = uidRec.setProcState
+                        > ActivityManager.PROCESS_STATE_RECEIVER && uidRec.setProcState
+                        != ActivityManager.PROCESS_STATE_NONEXISTENT;
+                final boolean isCached = uidRec.curProcState
+                        > ActivityManager.PROCESS_STATE_RECEIVER;
+                if (wasCached != isCached) {
+                    uidChange |= isCached ? UidRecord.CHANGE_CACHED : UidRecord.CHANGE_UNCACHED;
+                }
                 uidRec.setProcState = uidRec.curProcState;
                 uidRec.setWhitelist = uidRec.curWhitelist;
+                uidRec.setIdle = uidRec.idle;
                 enqueueUidChangeLocked(uidRec, -1, uidChange);
                 noteUidProcessState(uidRec.uid, uidRec.curProcState);
                 if (uidRec.foregroundServices) {
@@ -22881,6 +22924,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     userId == UserHandle.getUserId(uidRec.uid)) {
                                 EventLogTags.writeAmUidIdle(uidRec.uid);
                                 uidRec.idle = true;
+                                uidRec.setIdle = true;
                                 Slog.w(TAG, "Idling uid " + UserHandle.formatUid(uidRec.uid)
                                         + " from package " + packageName + " user " + userId);
                                 doStopUidLocked(uidRec.uid, uidRec);
@@ -22916,6 +22960,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (bgTime <= maxBgTime) {
                         EventLogTags.writeAmUidIdle(uidRec.uid);
                         uidRec.idle = true;
+                        uidRec.setIdle = true;
                         doStopUidLocked(uidRec.uid, uidRec);
                     } else {
                         if (nextTime == 0 || nextTime > bgTime) {

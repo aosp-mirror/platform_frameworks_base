@@ -2949,8 +2949,15 @@ public final class PowerManagerService extends SystemService
             boolean disabled = false;
             final int appid = UserHandle.getAppId(wakeLock.mOwnerUid);
             if (appid >= Process.FIRST_APPLICATION_UID) {
+                // Cached inactive processes are never allowed to hold wake locks.
+                if (mConstants.NO_CACHED_WAKE_LOCKS) {
+                    disabled = !wakeLock.mUidState.mActive &&
+                            wakeLock.mUidState.mProcState
+                                    != ActivityManager.PROCESS_STATE_NONEXISTENT &&
+                            wakeLock.mUidState.mProcState > ActivityManager.PROCESS_STATE_RECEIVER;
+                }
                 if (mDeviceIdleMode) {
-                    // If we are in idle mode, we will ignore all partial wake locks that are
+                    // If we are in idle mode, we will also ignore all partial wake locks that are
                     // for application uids that are not whitelisted.
                     final UidState state = wakeLock.mUidState;
                     if (Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0 &&
@@ -2959,11 +2966,6 @@ public final class PowerManagerService extends SystemService
                             state.mProcState > ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
                         disabled = true;
                     }
-                } else if (mConstants.NO_CACHED_WAKE_LOCKS) {
-                    disabled = !wakeLock.mUidState.mActive &&
-                            wakeLock.mUidState.mProcState
-                                    != ActivityManager.PROCESS_STATE_NONEXISTENT &&
-                            wakeLock.mUidState.mProcState > ActivityManager.PROCESS_STATE_RECEIVER;
                 }
             }
             if (wakeLock.mDisabled != disabled) {

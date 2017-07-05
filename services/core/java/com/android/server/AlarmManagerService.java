@@ -2893,11 +2893,10 @@ class AlarmManagerService extends SystemService {
     }
 
     final class UidObserver extends IUidObserver.Stub {
-        @Override public void onUidStateChanged(int uid, int procState,
-                long procStateSeq) throws RemoteException {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
         }
 
-        @Override public void onUidGone(int uid, boolean disabled) throws RemoteException {
+        @Override public void onUidGone(int uid, boolean disabled) {
             if (disabled) {
                 synchronized (mLock) {
                     removeForStoppedLocked(uid);
@@ -2905,15 +2904,18 @@ class AlarmManagerService extends SystemService {
             }
         }
 
-        @Override public void onUidActive(int uid) throws RemoteException {
+        @Override public void onUidActive(int uid) {
         }
 
-        @Override public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+        @Override public void onUidIdle(int uid, boolean disabled) {
             if (disabled) {
                 synchronized (mLock) {
                     removeForStoppedLocked(uid);
                 }
             }
+        }
+
+        @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
     };
 
