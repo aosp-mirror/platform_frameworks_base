@@ -81,9 +81,9 @@
     <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"No es poden fer trucades d\'emergència"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Sense servei de veu"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Sense servei de veu/emergència"</string>
-    <string name="RestrictedStateContent" msgid="4278821484643362350">"La xarxa de telefonia mòbil de la teva ubicació temporalment no ofereix aquest servei"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"La xarxa mòbil de la teva ubicació temporalment no ofereix aquest servei"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No es pot accedir a la xarxa"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Per millorar la recepció, prova de canviar el tipus de xarxa a Configuració &gt; Xarxa i Internet &gt; Xarxes de telefonia mòbil &gt; Tipus de xarxa preferit."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Per millorar la recepció, prova de canviar el tipus de xarxa a Configuració &gt; Xarxa i Internet &gt; Xarxes mòbils &gt; Tipus de xarxa preferit."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desviació de trucades"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Mode de devolució de trucada d\'emergència"</string>
@@ -1154,10 +1154,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Permet sempre"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"No permetis mai"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Extracció de la targeta SIM"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"La xarxa de telefonia mòbil no estarà disponible fins que no reiniciïs amb una targeta SIM vàlida inserida."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"La xarxa mòbil no estarà disponible fins que no reiniciïs amb una targeta SIM vàlida inserida."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Fet"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Addició de la targeta SIM"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Reinicia el dispositiu per accedir a la xarxa de telefonia mòbil."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Reinicia el dispositiu per accedir a la xarxa mòbil."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reinicia"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Perquè la nova SIM funcioni, has d\'instal·lar i obrir una aplicació del teu operador de telefonia mòbil."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"BAIXA L\'APLICACIÓ"</string>
@@ -1769,6 +1769,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Abandona immediatament les regions costaneres i riberenques, i cerca un lloc més segur, com ara un terreny elevat."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantén la calma i busca refugi a prop."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Prova de missatges d\'emergència"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM no compatible"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM no proporcionada"</string>

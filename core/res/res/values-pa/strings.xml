@@ -83,7 +83,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ਕੋਈ ਆਵਾਜ਼ੀ/ਸੰਕਟਕਾਲੀਨ ਸੇਵਾ ਨਹੀਂ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"ਤੁਹਾਡੇ ਟਿਕਾਣੇ \'ਤੇ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਵੱਲੋਂ ਉਪਲਬਧ ਨਹੀਂ ਕਰਵਾਈ ਗਈ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ਸਿਗਨਲ ਪ੍ਰਾਪਤੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਸੈਟਿੰਗਾਂ &gt; ਨੈੱਟਵਰਕ ਅਤੇ ਇੰਟਰਨੈੱਟ &gt; ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ &gt; ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਦੀ ਕਿਸਮ \'ਤੇ ਚੁਣੀ ਗਈ ਕਿਸਮ ਨੂੰ ਬਦਲਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ਸਿਗਨਲ ਪ੍ਰਾਪਤੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਸੈਟਿੰਗਾਂ &gt; ਨੈੱਟਵਰਕ ਅਤੇ ਇੰਟਰਨੈੱਟ &gt; ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ &gt; ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਦੀ ਕਿਸਮ \'ਤੇ ਜਾਓ ਅਤੇ ਚੁਣੀ ਗਈ ਕਿਸਮ ਨੂੰ ਬਦਲਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ਕਾਲ ਫਾਰਵਾਰਡਿੰਗ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਬੈਕ ਮੋਡ"</string>
@@ -118,7 +118,9 @@
     <string name="roamingText12" msgid="1189071119992726320">"ਰੋਮਿੰਗ ਬੈਨਰ ਬੰਦ"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"ਸੇਵਾ ਦੀ ਖੋਜ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi ਕਾਲਿੰਗ"</string>
-    <!-- no translation found for wfcOperatorErrorAlertMessages:0 (3910386316304772394) -->
+  <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="3910386316304772394">"Wi-Fi ਤੋਂ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਸੁਨੇਹੇ ਭੇਜਣ ਦੇ ਲਈ, ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੇ ਕੈਰੀਅਰ ਨੂੰ ਇਸ ਸੇਵਾ ਦੀ ਸਥਾਪਨਾ ਕਰਨ ਲਈ ਕਹੋ। ਫਿਰ ਸੈਟਿੰਗਾਂ ਵਿੱਚੋਂ Wi-Fi ਕਾਲਿੰਗ ਨੂੰ ਦੁਬਾਰਾ ਚਾਲੂ ਕਰੋ। (ਗੜਬੜੀ ਕੋਡ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+  </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"ਆਪਣੇ ਕੈਰੀਅਰ ਨਾਲ ਰਜਿਸਟਰ ਕਰੋ"</item>
   </string-array>
@@ -1768,6 +1770,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ਤੁਰੰਤ ਤੱਟੀ ਖੇਤਰਾਂ ਅਤੇ ਨਦੀ ਦੇ ਕਿਨਾਰੇ ਵਾਲੇ ਖੇਤਰਾਂ ਨੂੰ ਖਾਲੀ ਕਰ ਕੇ ਕਿਸੇ ਸੁਰੱਖਿਅਤ ਸਥਾਨ \'ਤੇ ਚਲੇ ਜਾਓ ਜਿਵੇਂ ਕਿ ਉੱਚੀ ਜ਼ਮੀਨ।"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"ਸ਼ਾਂਤ ਰਹੋ ਅਤੇ ਆਸ-ਪਾਸ ਪਨਾਹ ਮੰਗੋ।"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"ਸੰਕਟਕਾਲੀਨ ਸੰਦੇਸ਼ ਟੈਸਟ"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM ਦੀ ਵਿਵਸਥਾ ਨਹੀਂ ਹੈ"</string>
