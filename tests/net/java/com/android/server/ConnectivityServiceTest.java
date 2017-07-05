@@ -869,7 +869,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertNull(mCm.getActiveNetwork());
         assertNull(mCm.getActiveNetworkForUid(Process.myUid()));
         // Test getAllNetworks()
-        assertEquals(0, mCm.getAllNetworks().length);
+        assertEmpty(mCm.getAllNetworks());
     }
 
     /**
@@ -910,7 +910,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCellNetworkAgent.connect(true);
         waitFor(cv);
         verifyActiveNetwork(TRANSPORT_CELLULAR);
-        assertEquals(2, mCm.getAllNetworks().length);
+        assertLength(2, mCm.getAllNetworks());
         assertTrue(mCm.getAllNetworks()[0].equals(mCm.getActiveNetwork()) ||
                 mCm.getAllNetworks()[1].equals(mCm.getActiveNetwork()));
         assertTrue(mCm.getAllNetworks()[0].equals(mWiFiNetworkAgent.getNetwork()) ||
@@ -920,7 +920,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mWiFiNetworkAgent.connect(true);
         waitFor(cv);
         verifyActiveNetwork(TRANSPORT_WIFI);
-        assertEquals(2, mCm.getAllNetworks().length);
+        assertLength(2, mCm.getAllNetworks());
         assertTrue(mCm.getAllNetworks()[0].equals(mCm.getActiveNetwork()) ||
                 mCm.getAllNetworks()[1].equals(mCm.getActiveNetwork()));
         assertTrue(mCm.getAllNetworks()[0].equals(mCellNetworkAgent.getNetwork()) ||
@@ -928,9 +928,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Test cellular linger timeout.
         waitFor(mCellNetworkAgent.getDisconnectedCV());
         waitForIdle();
-        assertEquals(1, mCm.getAllNetworks().length);
+        assertLength(1, mCm.getAllNetworks());
         verifyActiveNetwork(TRANSPORT_WIFI);
-        assertEquals(1, mCm.getAllNetworks().length);
+        assertLength(1, mCm.getAllNetworks());
         assertEquals(mCm.getAllNetworks()[0], mCm.getActiveNetwork());
         // Test WiFi disconnect.
         cv = waitForConnectivityBroadcasts(1);
@@ -1859,7 +1859,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCellNetworkAgent.connectWithoutInternet();
         waitFor(cv);
         waitForIdle();
-        assertEquals(0, mCm.getAllNetworks().length);
+        assertEmpty(mCm.getAllNetworks());
         verifyNoNetwork();
 
         // Test bringing up validated WiFi.
@@ -2533,7 +2533,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertTrue(testFactory.getMyStartRequested());
 
         // Bring up cell data and check that the factory stops looking.
-        assertEquals(1, mCm.getAllNetworks().length);
+        assertLength(1, mCm.getAllNetworks());
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         testFactory.expectAddRequests(2);  // Because the cell request changes score twice.
         mCellNetworkAgent.connect(true);
@@ -2544,7 +2544,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Check that cell data stays up.
         waitForIdle();
         verifyActiveNetwork(TRANSPORT_WIFI);
-        assertEquals(2, mCm.getAllNetworks().length);
+        assertLength(2, mCm.getAllNetworks());
 
         // Turn off mobile data always on and expect the request to disappear...
         testFactory.expectRemoveRequests(1);
@@ -2553,7 +2553,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // ...  and cell data to be torn down.
         cellNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
-        assertEquals(1, mCm.getAllNetworks().length);
+        assertLength(1, mCm.getAllNetworks());
 
         testFactory.unregister();
         mCm.unregisterNetworkCallback(cellNetworkCallback);
@@ -3241,5 +3241,16 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             mCm.registerNetworkCallback(networkRequest, pendingIntent);
             mCm.unregisterNetworkCallback(pendingIntent);
         }
+    }
+
+    private static <T> void assertEmpty(T[] ts) {
+        int length = ts.length;
+        assertEquals("expected empty array, but length was " + length, 0, length);
+    }
+
+    private static <T> void assertLength(int expected, T[] got) {
+        int length = got.length;
+        assertEquals(String.format("expected array of length %s, but length was %s for %s",
+                expected, length, Arrays.toString(got)), expected, length);
     }
 }
