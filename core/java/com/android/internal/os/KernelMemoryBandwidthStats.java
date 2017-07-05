@@ -1,6 +1,7 @@
 package com.android.internal.os;
 
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.LongSparseLongArray;
 import android.util.Slog;
@@ -37,6 +38,8 @@ public class KernelMemoryBandwidthStats {
             return;
         }
 
+        final long startTime = SystemClock.uptimeMillis();
+
         StrictMode.ThreadPolicy policy = StrictMode.allowThreadDiskReads();
         try (BufferedReader reader = new BufferedReader(new FileReader(mSysfsFile))) {
             parseStats(reader);
@@ -49,6 +52,11 @@ public class KernelMemoryBandwidthStats {
             mBandwidthEntries.clear();
         } finally {
             StrictMode.setThreadPolicy(policy);
+        }
+
+        final long readTime = SystemClock.uptimeMillis() - startTime;
+        if (DEBUG || readTime > 100) {
+            Slog.w(TAG, "Reading memory bandwidth file took " + readTime + "ms");
         }
     }
 
