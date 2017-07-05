@@ -2589,9 +2589,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         updateAnimationState(false, child);
 
-        // Make sure the clipRect we might have set is removed
-        expandableView.setClipTopAmount(0);
-
         focusNextViewIfFocused(child);
     }
 
@@ -3038,10 +3035,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void generateChildRemovalEvents() {
         for (View child : mChildrenToRemoveAnimated) {
             boolean childWasSwipedOut = mSwipedOutViews.contains(child);
-            int animationType = childWasSwipedOut
-                    ? AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT
-                    : AnimationEvent.ANIMATION_TYPE_REMOVE;
-            AnimationEvent event = new AnimationEvent(child, animationType);
 
             // we need to know the view after this one
             float removedTranslation = child.getTranslationY();
@@ -3052,7 +3045,16 @@ public class NotificationStackScrollLayout extends ViewGroup
                     removedTranslation = row.getTranslationWhenRemoved();
                     ignoreChildren = false;
                 }
+                childWasSwipedOut |= Math.abs(row.getTranslation()) == row.getWidth();
             }
+            if (!childWasSwipedOut) {
+                Rect clipBounds = child.getClipBounds();
+                childWasSwipedOut = clipBounds.height() == 0;
+            }
+            int animationType = childWasSwipedOut
+                    ? AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT
+                    : AnimationEvent.ANIMATION_TYPE_REMOVE;
+            AnimationEvent event = new AnimationEvent(child, animationType);
             event.viewAfterChangingView = getFirstChildBelowTranlsationY(removedTranslation,
                     ignoreChildren);
             mAnimationEvents.add(event);
