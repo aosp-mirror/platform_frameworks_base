@@ -18,6 +18,7 @@
 
 #include "FrameInfo.h"
 #include "ProfileData.h"
+#include "ProfileDataContainer.h"
 #include "renderthread/TimeLord.h"
 #include "utils/RingBuffer.h"
 
@@ -48,26 +49,25 @@ struct ProfileDataDescription {
 // TODO: Replace DrawProfiler with this
 class JankTracker {
 public:
-    explicit JankTracker(const DisplayInfo& displayInfo);
-    ~JankTracker();
+    explicit JankTracker(ProfileDataContainer* globalData, const DisplayInfo& displayInfo);
 
     void setDescription(JankTrackerType type, const std::string&& name) {
         mDescription.type = type;
         mDescription.name = name;
     }
 
-    void addFrame(const FrameInfo& frame);
+    FrameInfo* startFrame() { return &mFrames.next(); }
+    void finishFrame(const FrameInfo& frame);
 
-    void dump(int fd) { dumpData(fd, &mDescription, mData); }
+    void dumpStats(int fd) { dumpData(fd, &mDescription, mData.get()); }
+    void dumpFrames(int fd);
     void reset();
 
-    void rotateStorage();
-    void switchStorageToAshmem(int ashmemfd);
-
-    uint32_t findPercentile(int p) { return mData->findPercentile(p); }
+    // Exposed for FrameInfoVisualizer
+    // TODO: Figure out a better way to handle this
+    RingBuffer<FrameInfo, 120>& frames() { return mFrames; }
 
 private:
-    void freeData();
     void setFrameInterval(nsecs_t frameIntervalNanos);
 
     static void dumpData(int fd, const ProfileDataDescription* description, const ProfileData* data);
@@ -82,9 +82,12 @@ private:
     // This is only used if we are in pipelined mode and are using HWC2,
     // otherwise it's 0.
     nsecs_t mDequeueTimeForgiveness = 0;
-    ProfileData* mData;
-    bool mIsMapped = false;
+    ProfileDataContainer mData;
+    ProfileDataContainer* mGlobalData;
     ProfileDataDescription mDescription;
+
+    // Ring buffer large enough for 2 seconds worth of frames
+    RingBuffer<FrameInfo, 120> mFrames;
 };
 
 } /* namespace uirenderer */

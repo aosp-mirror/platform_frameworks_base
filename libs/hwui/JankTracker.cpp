@@ -65,11 +65,8 @@ static const int64_t EXEMPT_FRAMES_FLAGS = FrameInfoFlags::SurfaceCanvas;
 // and filter it out of the frame profile data
 static FrameInfoIndex sFrameStart = FrameInfoIndex::IntendedVsync;
 
-JankTracker::JankTracker(const DisplayInfo& displayInfo) {
-    // By default this will use malloc memory. It may be moved later to ashmem
-    // if there is shared space for it and a request comes in to do that.
-    mData = new ProfileData;
-    reset();
+JankTracker::JankTracker(ProfileDataContainer* globalData, const DisplayInfo& displayInfo) {
+    mGlobalData = globalData;
     nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1_s / displayInfo.fps);
 #if USE_HWC2
     nsecs_t sfOffset = frameIntervalNanos - (displayInfo.presentationDeadline - 1_ms);
@@ -87,60 +84,6 @@ JankTracker::JankTracker(const DisplayInfo& displayInfo) {
     }
 #endif
     setFrameInterval(frameIntervalNanos);
-}
-
-JankTracker::~JankTracker() {
-    freeData();
-}
-
-void JankTracker::freeData() {
-    if (mIsMapped) {
-        munmap(mData, sizeof(ProfileData));
-    } else {
-        delete mData;
-    }
-    mIsMapped = false;
-    mData = nullptr;
-}
-
-void JankTracker::rotateStorage() {
-    // If we are mapped we want to stop using the ashmem backend and switch to malloc
-    // We are expecting a switchStorageToAshmem call to follow this, but it's not guaranteed
-    // If we aren't sitting on top of ashmem then just do a reset() as it's functionally
-    // equivalent do a free, malloc, reset.
-    if (mIsMapped) {
-        freeData();
-        mData = new ProfileData;
-    }
-    reset();
-}
-
-void JankTracker::switchStorageToAshmem(int ashmemfd) {
-    int regionSize = ashmem_get_size_region(ashmemfd);
-    if (regionSize < 0) {
-        int err = errno;
-        ALOGW("Failed to get ashmem region size from fd %d, err %d %s", ashmemfd, err, strerror(err));
-        return;
-    }
-    if (regionSize < static_cast<int>(sizeof(ProfileData))) {
-        ALOGW("Ashmem region is too small! Received %d, required %u",
-                regionSize, static_cast<unsigned int>(sizeof(ProfileData)));
-        return;
-    }
-    ProfileData* newData = reinterpret_cast<ProfileData*>(
-            mmap(NULL, sizeof(ProfileData), PROT_READ | PROT_WRITE,
-            MAP_SHARED, ashmemfd, 0));
-    if (newData == MAP_FAILED) {
-        int err = errno;
-        ALOGW("Failed to move profile data to ashmem fd %d, error = %d",
-                ashmemfd, err);
-        return;
-    }
-
-    newData->mergeWith(*mData);
-    freeData();
-    mData = newData;
-    mIsMapped = true;
 }
 
 void JankTracker::setFrameInterval(nsecs_t frameInterval) {
@@ -166,7 +109,7 @@ void JankTracker::setFrameInterval(nsecs_t frameInterval) {
 
 }
 
-void JankTracker::addFrame(const FrameInfo& frame) {
+void JankTracker::finishFrame(const FrameInfo& frame) {
     // Fast-path for jank-free frames
     int64_t totalDuration = frame.duration(sFrameStart, FrameInfoIndex::FrameCompleted);
     if (mDequeueTimeForgiveness
@@ -187,6 +130,7 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     }
     LOG_ALWAYS_FATAL_IF(totalDuration <= 0, "Impossible totalDuration %" PRId64, totalDuration);
     mData->reportFrame(totalDuration);
+    (*mGlobalData)->reportFrame(totalDuration);
 
     // Keep the fast path as fast as possible.
     if (CC_LIKELY(totalDuration < mFrameInterval)) {
@@ -199,11 +143,13 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     }
 
     mData->reportJank();
+    (*mGlobalData)->reportJank();
 
     for (int i = 0; i < NUM_BUCKETS; i++) {
         int64_t delta = frame.duration(COMPARISONS[i].start, COMPARISONS[i].end);
         if (delta >= mThresholds[i] && delta < IGNORE_EXCEEDING) {
             mData->reportJankType((JankType) i);
+            (*mGlobalData)->reportJankType((JankType) i);
         }
     }
 }
@@ -228,8 +174,31 @@ void JankTracker::dumpData(int fd, const ProfileDataDescription* description, co
     dprintf(fd, "\n");
 }
 
+void JankTracker::dumpFrames(int fd) {
+    FILE* file = fdopen(fd, "a");
+    fprintf(file, "\n\n---PROFILEDATA---\n");
+    for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
+        fprintf(file, "%s", FrameInfoNames[i].c_str());
+        fprintf(file, ",");
+    }
+    for (size_t i = 0; i < mFrames.size(); i++) {
+        FrameInfo& frame = mFrames[i];
+        if (frame[FrameInfoIndex::SyncStart] == 0) {
+            continue;
+        }
+        fprintf(file, "\n");
+        for (int i = 0; i < static_cast<int>(FrameInfoIndex::NumIndexes); i++) {
+            fprintf(file, "%" PRId64 ",", frame[i]);
+        }
+    }
+    fprintf(file, "\n---PROFILEDATA---\n\n");
+    fflush(file);
+}
+
 void JankTracker::reset() {
+    mFrames.clear();
     mData->reset();
+    (*mGlobalData)->reset();
     sFrameStart = Properties::filterOutTestOverhead
             ? FrameInfoIndex::HandleInputStart
             : FrameInfoIndex::IntendedVsync;
