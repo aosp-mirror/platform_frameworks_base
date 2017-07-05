@@ -2641,6 +2641,12 @@
     <permission android:name="android.permission.MODIFY_PARENTAL_CONTROLS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to read TvContentRatingSystemInfo
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.READ_CONTENT_RATING_SYSTEMS"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an application to notify TV inputs by sending broadcasts.
          <p>Protection level: signature|privileged
          <p>Not for use by third-party applications.
