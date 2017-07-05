@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.DeviceDefault.QuickSettings" parent="android:Theme.DeviceDefault.Light">
-        <item name="android:textColorPrimaryInverse">@*android:color/primary_text_material_light</item>
-        <item name="android:textColorSecondaryInverse">@*android:color/secondary_text_material_light</item>
-    </style>
-</resources>

@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.DeviceDefault.QuickSettings" parent="android:Theme.DeviceDefault">
+    <style name="qs_base" parent="android:Theme.DeviceDefault">
         <item name="android:colorPrimary">@*android:color/primary_device_default_settings</item>
         <item name="android:colorPrimaryDark">@*android:color/primary_dark_device_default_settings</item>
-        <!-- textColorPrimaryInverse is used on the lock screen and this means that we can't just
-        invert text colors otherwise we won't have contrast on the keyguard -->
-        <item name="android:textColorPrimaryInverse">@*android:color/primary_text_material_dark</item>
-        <!-- same for textColorSecondaryInverse -->
-        <item name="android:textColorSecondaryInverse">@*android:color/secondary_text_material_dark</item>
         <item name="android:colorSecondary">@*android:color/secondary_device_default_settings</item>
         <item name="android:colorAccent">@*android:color/accent_device_default_dark</item>
         <item name="android:colorControlNormal">?android:attr/textColorPrimary</item>
