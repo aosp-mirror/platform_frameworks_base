@@ -1320,6 +1320,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onOverlayChanged();
         }
+        if (mStatusBarKeyguardViewManager != null) {
+            mStatusBarKeyguardViewManager.onOverlayChanged();
+        }
     }
 
     protected void reevaluateStyles() {
