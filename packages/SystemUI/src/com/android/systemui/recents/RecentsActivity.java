@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,9 +43,9 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.keyguard.LatencyTracker;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
-import com.android.keyguard.LatencyTracker;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
@@ -110,11 +111,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private RecentsPackageMonitor mPackageMonitor;
     private Handler mHandler = new Handler();
     private long mLastTabKeyEventTime;
-    private int mLastDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
-    private int mLastDisplayDensity;
     private boolean mFinishedOnStartup;
     private boolean mIgnoreAltTabRelease;
     private boolean mIsVisible;
+    private Configuration mLastConfig;
 
     // Top level views
     private RecentsView mRecentsView;
@@ -333,16 +333,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         setContentView(R.layout.recents);
         takeKeyEvents(true);
         mRecentsView = findViewById(R.id.recents_view);
-        mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mScrimViews = new SystemBarScrimViews(this);
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 
-        Configuration appConfiguration = Utilities.getAppConfiguration(this);
-        mLastDeviceOrientation = appConfiguration.orientation;
-        mLastDisplayDensity = appConfiguration.densityDpi;
+        mLastConfig = Utilities.getAppConfiguration(this);
         mFocusTimerDuration = getResources().getInteger(R.integer.recents_auto_advance_duration);
         mIterateTrigger = new DozeTrigger(mFocusTimerDuration, new Runnable() {
             @Override
@@ -485,10 +480,15 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         Configuration newDeviceConfiguration = Utilities.getAppConfiguration(this);
         int numStackTasks = mRecentsView.getStack().getStackTaskCount();
         EventBus.getDefault().send(new ConfigurationChangedEvent(false /* fromMultiWindow */,
-                mLastDeviceOrientation != newDeviceConfiguration.orientation,
-                mLastDisplayDensity != newDeviceConfiguration.densityDpi, numStackTasks > 0));
-        mLastDeviceOrientation = newDeviceConfiguration.orientation;
-        mLastDisplayDensity = newDeviceConfiguration.densityDpi;
+                mLastConfig.orientation != newDeviceConfiguration.orientation,
+                mLastConfig.densityDpi != newDeviceConfiguration.densityDpi, numStackTasks > 0));
+
+        int configDiff = mLastConfig.updateFrom(newDeviceConfiguration);
+
+        // Recreate activity if an overlay was enabled/disabled
+        if ((configDiff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
+            recreate();
+        }
     }
 
     @Override
