@@ -565,6 +565,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final Rect mLastSurfaceInsets = new Rect();
 
     /**
+     * A flag set by the {@link WindowState} parent to indicate that the parent has examined this
+     * {@link WindowState} in its overall drawing context. This book-keeping allows the parent to
+     * make sure all children have been considered.
+     */
+    private boolean mDrawnStateEvaluated;
+
+    /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
@@ -678,6 +685,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void attach() {
         if (localLOGV) Slog.v(TAG, "Attaching " + this + " token=" + mToken);
         mSession.windowAddedLocked(mAttrs.packageName);
+    }
+
+    /**
+     * Returns whether this {@link WindowState} has been considered for drawing by its parent.
+     */
+    boolean getDrawnStatedEvaluated() {
+        return mDrawnStateEvaluated;
+    }
+
+    /**
+     * Sets whether this {@link WindowState} has been considered for drawing by its parent. Should
+     * be cleared when detached from parent.
+     */
+    void setDrawnStateEvaluated(boolean evaluated) {
+        mDrawnStateEvaluated = evaluated;
+    }
+
+    @Override
+    void onParentSet() {
+        super.onParentSet();
+        setDrawnStateEvaluated(false /*evaluated*/);
     }
 
     @Override
