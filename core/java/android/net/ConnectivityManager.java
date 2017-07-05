@@ -582,6 +582,8 @@ public class ConnectivityManager {
     /** {@hide} */
     public static final int MAX_NETWORK_TYPE = TYPE_VPN;
 
+    private static final int MIN_NETWORK_TYPE = TYPE_MOBILE;
+
     /**
      * If you want to set the default network preference,you can directly
      * change the networkAttributes array in framework's config.xml.
@@ -640,7 +642,7 @@ public class ConnectivityManager {
      */
     @Deprecated
     public static boolean isNetworkTypeValid(int networkType) {
-        return networkType >= 0 && networkType <= MAX_NETWORK_TYPE;
+        return MIN_NETWORK_TYPE <= networkType && networkType <= MAX_NETWORK_TYPE;
     }
 
     /**
@@ -653,6 +655,8 @@ public class ConnectivityManager {
      */
     public static String getNetworkTypeName(int type) {
         switch (type) {
+          case TYPE_NONE:
+                return "NONE";
             case TYPE_MOBILE:
                 return "MOBILE";
             case TYPE_WIFI:
