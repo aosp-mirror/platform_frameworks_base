@@ -3052,4 +3052,5 @@
 
   <java-symbol type="string" name="popup_window_default_title" />
   <java-symbol type="bool" name="config_showAreaUpdateInfoSettings" />
+  <java-symbol type="layout" name="shutdown_dialog" />
 </resources>
