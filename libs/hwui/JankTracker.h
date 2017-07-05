@@ -17,6 +17,7 @@
 #define JANKTRACKER_H_
 
 #include "FrameInfo.h"
+#include "ProfileData.h"
 #include "renderthread/TimeLord.h"
 #include "utils/RingBuffer.h"
 
@@ -28,31 +29,6 @@
 
 namespace android {
 namespace uirenderer {
-
-enum JankType {
-    kMissedVsync = 0,
-    kHighInputLatency,
-    kSlowUI,
-    kSlowSync,
-    kSlowRT,
-
-    // must be last
-    NUM_BUCKETS,
-};
-
-// Try to keep as small as possible, should match ASHMEM_SIZE in
-// GraphicsStatsService.java
-struct ProfileData {
-    std::array<uint32_t, NUM_BUCKETS> jankTypeCounts;
-    // See comments on kBucket* constants for what this holds
-    std::array<uint32_t, 57> frameCounts;
-    // Holds a histogram of frame times in 50ms increments from 150ms to 5s
-    std::array<uint16_t, 97> slowFrameCounts;
-
-    uint32_t totalFrameCount;
-    uint32_t jankFrameCount;
-    nsecs_t statStartTime;
-};
 
 enum class JankTrackerType {
     // The default, means there's no description set
@@ -88,15 +64,12 @@ public:
     void rotateStorage();
     void switchStorageToAshmem(int ashmemfd);
 
-    uint32_t findPercentile(int p) { return findPercentile(mData, p); }
-    static int32_t frameTimeForFrameCountIndex(uint32_t index);
-    static int32_t frameTimeForSlowFrameCountIndex(uint32_t index);
+    uint32_t findPercentile(int p) { return mData->findPercentile(p); }
 
 private:
     void freeData();
     void setFrameInterval(nsecs_t frameIntervalNanos);
 
-    static uint32_t findPercentile(const ProfileData* data, int p);
     static void dumpData(int fd, const ProfileDataDescription* description, const ProfileData* data);
 
     std::array<int64_t, NUM_BUCKETS> mThresholds;
