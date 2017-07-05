@@ -22,6 +22,7 @@
         android:id="@+id/left"
         android:layout_width="12dp"
         android:layout_height="12dp"
+        android:layout_gravity="left"
         android:tint="#ff000000"
         android:src="@drawable/rounded" />
     <ImageView
@@ -29,6 +30,6 @@
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:tint="#ff000000"
-        android:layout_gravity="end"
+        android:layout_gravity="right"
         android:src="@drawable/rounded" />
 </FrameLayout>
