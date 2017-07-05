@@ -38,9 +38,7 @@ constexpr int32_t sCurrentFileVersion = 1;
 constexpr int32_t sHeaderSize = 4;
 static_assert(sizeof(sCurrentFileVersion) == sHeaderSize, "Header size is wrong");
 
-constexpr int sHistogramSize =
-        std::tuple_size<decltype(ProfileData::frameCounts)>::value +
-        std::tuple_size<decltype(ProfileData::slowFrameCounts)>::value;
+constexpr int sHistogramSize = ProfileData::HistogramSize();
 
 static void mergeProfileDataIntoProto(service::GraphicsStatsProto* proto,
         const std::string& package, int versionCode, int64_t startTime, int64_t endTime,
@@ -172,18 +170,18 @@ void mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::st
     proto->set_package_name(package);
     proto->set_version_code(versionCode);
     auto summary = proto->mutable_summary();
-    summary->set_total_frames(summary->total_frames() + data->totalFrameCount);
-    summary->set_janky_frames(summary->janky_frames() + data->jankFrameCount);
+    summary->set_total_frames(summary->total_frames() + data->totalFrameCount());
+    summary->set_janky_frames(summary->janky_frames() + data->jankFrameCount());
     summary->set_missed_vsync_count(
-            summary->missed_vsync_count() + data->jankTypeCounts[kMissedVsync]);
+            summary->missed_vsync_count() + data->jankTypeCount(kMissedVsync));
     summary->set_high_input_latency_count(
-            summary->high_input_latency_count() + data->jankTypeCounts[kHighInputLatency]);
+            summary->high_input_latency_count() + data->jankTypeCount(kHighInputLatency));
     summary->set_slow_ui_thread_count(
-            summary->slow_ui_thread_count() + data->jankTypeCounts[kSlowUI]);
+            summary->slow_ui_thread_count() + data->jankTypeCount(kSlowUI));
     summary->set_slow_bitmap_upload_count(
-            summary->slow_bitmap_upload_count() + data->jankTypeCounts[kSlowSync]);
+            summary->slow_bitmap_upload_count() + data->jankTypeCount(kSlowSync));
     summary->set_slow_draw_count(
-            summary->slow_draw_count() + data->jankTypeCounts[kSlowRT]);
+            summary->slow_draw_count() + data->jankTypeCount(kSlowRT));
 
     bool creatingHistogram = false;
     if (proto->histogram_size() == 0) {
@@ -193,33 +191,20 @@ void mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::st
         LOG_ALWAYS_FATAL("Histogram size mismatch, proto is %d expected %d",
                 proto->histogram_size(), sHistogramSize);
     }
-    for (size_t i = 0; i < data->frameCounts.size(); i++) {
+    int index = 0;
+    data->histogramForEach([&](ProfileData::HistogramEntry entry) {
         service::GraphicsStatsHistogramBucketProto* bucket;
-        int32_t renderTime = JankTracker::frameTimeForFrameCountIndex(i);
         if (creatingHistogram) {
             bucket = proto->add_histogram();
-            bucket->set_render_millis(renderTime);
+            bucket->set_render_millis(entry.renderTimeMs);
         } else {
-            bucket = proto->mutable_histogram(i);
-            LOG_ALWAYS_FATAL_IF(bucket->render_millis() != renderTime,
-                    "Frame time mistmatch %d vs. %d", bucket->render_millis(), renderTime);
+            bucket = proto->mutable_histogram(index);
+            LOG_ALWAYS_FATAL_IF(bucket->render_millis() != static_cast<int32_t>(entry.renderTimeMs),
+                    "Frame time mistmatch %d vs. %u", bucket->render_millis(), entry.renderTimeMs);
         }
-        bucket->set_frame_count(bucket->frame_count() + data->frameCounts[i]);
-    }
-    for (size_t i = 0; i < data->slowFrameCounts.size(); i++) {
-        service::GraphicsStatsHistogramBucketProto* bucket;
-        int32_t renderTime = JankTracker::frameTimeForSlowFrameCountIndex(i);
-        if (creatingHistogram) {
-            bucket = proto->add_histogram();
-            bucket->set_render_millis(renderTime);
-        } else {
-            constexpr int offset = std::tuple_size<decltype(ProfileData::frameCounts)>::value;
-            bucket = proto->mutable_histogram(offset + i);
-            LOG_ALWAYS_FATAL_IF(bucket->render_millis() != renderTime,
-                    "Frame time mistmatch %d vs. %d", bucket->render_millis(), renderTime);
-        }
-        bucket->set_frame_count(bucket->frame_count() + data->slowFrameCounts[i]);
-    }
+        bucket->set_frame_count(bucket->frame_count() + entry.frameCount);
+        index++;
+    });
 }
 
 static int32_t findPercentile(service::GraphicsStatsProto* proto, int percentile) {
