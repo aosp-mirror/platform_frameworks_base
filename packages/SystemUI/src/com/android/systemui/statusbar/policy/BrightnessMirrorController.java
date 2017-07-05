@@ -84,7 +84,6 @@ public class BrightnessMirrorController {
                 .setInterpolator(Interpolators.ALPHA_IN);
     }
 
-
     public void setLocation(View original) {
         original.getLocationInWindow(mInt2Cache);
 
@@ -115,7 +114,15 @@ public class BrightnessMirrorController {
         mBrightnessMirror.setLayoutParams(lp);
     }
 
+    public void onOverlayChanged() {
+        reinflate();
+    }
+
     public void onDensityOrFontScaleChanged() {
+        reinflate();
+    }
+
+    private void reinflate() {
         int index = mStatusBarWindow.indexOfChild(mBrightnessMirror);
         mStatusBarWindow.removeView(mBrightnessMirror);
         mBrightnessMirror = LayoutInflater.from(mBrightnessMirror.getContext()).inflate(
