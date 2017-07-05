@@ -1527,9 +1527,26 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    private void enforceCallingOrSelfPermissionAndAppOp(String permission, final String callingPkg,
+            final int callingUid, String message) {
+        mContext.enforceCallingOrSelfPermission(permission, message);
+
+        final String opName = AppOpsManager.permissionToOp(permission);
+        if (opName != null) {
+            final int appOpMode = mAppOpsManager.noteOp(opName, callingUid, callingPkg);
+            if (appOpMode != AppOpsManager.MODE_ALLOWED) {
+                throw new SecurityException(
+                        message + ": " + callingPkg + " is not allowed to " + permission);
+            }
+        }
+    }
+
     @Override
-    public ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb, final int which,
-            Bundle outParams, int wallpaperUserId) {
+    public ParcelFileDescriptor getWallpaper(String callingPkg, IWallpaperManagerCallback cb,
+            final int which, Bundle outParams, int wallpaperUserId) {
+        enforceCallingOrSelfPermissionAndAppOp(android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                callingPkg, Binder.getCallingUid(), "read wallpaper");
+
         wallpaperUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), wallpaperUserId, false, true, "getWallpaper", null);
 
