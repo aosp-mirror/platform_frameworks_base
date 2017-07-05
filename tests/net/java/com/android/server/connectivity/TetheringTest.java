@@ -327,32 +327,6 @@ public class TetheringTest {
     }
 
     @Test
-    public void testUsbConfiguredBroadcastStartsTethering() throws Exception {
-        when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
-
-        // Emulate pressing the USB tethering button in Settings UI.
-        mTethering.startTethering(TETHERING_USB, null, false);
-        mLooper.dispatchAll();
-        verify(mUsbManager, times(1)).setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS, false);
-
-        // Pretend we receive a USB connected broadcast. Here we also pretend
-        // that the RNDIS function is somehow enabled, so that we see if we
-        // might trip ourselves up.
-        sendUsbBroadcast(true, false, true);
-        mLooper.dispatchAll();
-        // This should produce no activity of any kind.
-        verifyNoMoreInteractions(mConnectivityManager);
-        verifyNoMoreInteractions(mNMService);
-
-        // Pretend we then receive USB configured broadcast.
-        sendUsbBroadcast(true, true, true);
-        mLooper.dispatchAll();
-        // Now we should see the start of tethering mechanics (in this case:
-        // tetherMatchingInterfaces() which starts by fetching all interfaces).
-        verify(mNMService, times(1)).listInterfaces();
-    }
-
-    @Test
     public void failingLocalOnlyHotspotLegacyApBroadcastWithIfaceStatusChanged() throws Exception {
         failingLocalOnlyHotspotLegacyApBroadcast(true);
     }
