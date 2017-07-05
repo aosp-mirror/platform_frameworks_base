@@ -27,6 +27,7 @@ import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.FileObserver;
 import android.os.FileUtils;
@@ -156,11 +157,17 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         if (visibleFolder != null) {
             assert (visibleFolder.isDirectory());
 
-            final ContentResolver resolver = getContext().getContentResolver();
-            final Uri uri = MediaStore.Files.getDirectoryUri("external");
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Files.FileColumns.DATA, visibleFolder.getAbsolutePath());
-            resolver.insert(uri, values);
+            final long token = Binder.clearCallingIdentity();
+
+            try {
+                final ContentResolver resolver = getContext().getContentResolver();
+                final Uri uri = MediaStore.Files.getDirectoryUri("external");
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Files.FileColumns.DATA, visibleFolder.getAbsolutePath());
+                resolver.insert(uri, values);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 
@@ -214,22 +221,28 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         // They should be all null or not null at the same time. File#renameTo() doesn't work across
         // volumes so an exception will be thrown before calling this method.
         if (oldVisibleFile != null && newVisibleFile != null) {
-            final ContentResolver resolver = getContext().getContentResolver();
-            final Uri externalUri = newVisibleFile.isDirectory()
-                    ? MediaStore.Files.getDirectoryUri("external")
-                    : MediaStore.Files.getContentUri("external");
+            final long token = Binder.clearCallingIdentity();
 
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Files.FileColumns.DATA, newVisibleFile.getAbsolutePath());
+            try {
+                final ContentResolver resolver = getContext().getContentResolver();
+                final Uri externalUri = newVisibleFile.isDirectory()
+                        ? MediaStore.Files.getDirectoryUri("external")
+                        : MediaStore.Files.getContentUri("external");
 
-            // Logic borrowed from MtpDatabase.
-            // note - we are relying on a special case in MediaProvider.update() to update
-            // the paths for all children in the case where this is a directory.
-            final String path = oldVisibleFile.getAbsolutePath();
-            resolver.update(externalUri,
-                    values,
-                    "_data LIKE ? AND lower(_data)=lower(?)",
-                    new String[] { path, path });
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Files.FileColumns.DATA, newVisibleFile.getAbsolutePath());
+
+                // Logic borrowed from MtpDatabase.
+                // note - we are relying on a special case in MediaProvider.update() to update
+                // the paths for all children in the case where this is a directory.
+                final String path = oldVisibleFile.getAbsolutePath();
+                resolver.update(externalUri,
+                        values,
+                        "_data LIKE ? AND lower(_data)=lower(?)",
+                        new String[]{path, path});
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 
@@ -253,23 +266,29 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             throws FileNotFoundException {
         // visibleFolder is null if we're removing a document from external thumb drive or SD card.
         if (visibleFile != null) {
-            final ContentResolver resolver = getContext().getContentResolver();
-            final Uri externalUri = MediaStore.Files.getContentUri("external");
+            final long token = Binder.clearCallingIdentity();
 
-            // Remove media store entries for any files inside this directory, using
-            // path prefix match. Logic borrowed from MtpDatabase.
-            if (isFolder) {
-                final String path = visibleFile.getAbsolutePath() + "/";
+            try {
+                final ContentResolver resolver = getContext().getContentResolver();
+                final Uri externalUri = MediaStore.Files.getContentUri("external");
+
+                // Remove media store entries for any files inside this directory, using
+                // path prefix match. Logic borrowed from MtpDatabase.
+                if (isFolder) {
+                    final String path = visibleFile.getAbsolutePath() + "/";
+                    resolver.delete(externalUri,
+                            "_data LIKE ?1 AND lower(substr(_data,1,?2))=lower(?3)",
+                            new String[]{path + "%", Integer.toString(path.length()), path});
+                }
+
+                // Remove media store entry for this exact file.
+                final String path = visibleFile.getAbsolutePath();
                 resolver.delete(externalUri,
-                        "_data LIKE ?1 AND lower(substr(_data,1,?2))=lower(?3)",
-                        new String[] { path + "%", Integer.toString(path.length()), path });
+                        "_data LIKE ?1 AND lower(_data)=lower(?2)",
+                        new String[]{path, path});
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
-
-            // Remove media store entry for this exact file.
-            final String path = visibleFile.getAbsolutePath();
-            resolver.delete(externalUri,
-                    "_data LIKE ?1 AND lower(_data)=lower(?2)",
-                    new String[] { path, path });
         }
     }
 
