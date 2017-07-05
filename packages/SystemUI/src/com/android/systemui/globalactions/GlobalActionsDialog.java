@@ -682,10 +682,14 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
     /** {@inheritDoc} */
     public void onClick(DialogInterface dialog, int which) {
-        if (!(mAdapter.getItem(which) instanceof SilentModeTriStateAction)) {
+        Action item = mAdapter.getItem(which);
+        if ((item instanceof PowerAction)
+                || (item instanceof RestartAction)) {
+            if (mDialog != null) mDialog.fadeOut();
+        } else if (!(item instanceof SilentModeTriStateAction)) {
             dialog.dismiss();
         }
-        mAdapter.getItem(which).onPress();
+        item.onPress();
     }
 
     /**
@@ -1318,6 +1322,17 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                                 * ScrimController.GRADIENT_SCRIM_ALPHA * 255);
                         mGradientDrawable.setAlpha(alpha);
                     })
+                    .start();
+        }
+
+        public void fadeOut() {
+            mHardwareLayout.setTranslationX(0);
+            mHardwareLayout.setAlpha(1);
+            mListView.animate()
+                    .alpha(0)
+                    .translationX(getAnimTranslation())
+                    .setDuration(300)
+                    .setInterpolator(new LogAccelerateInterpolator())
                     .start();
         }
 
