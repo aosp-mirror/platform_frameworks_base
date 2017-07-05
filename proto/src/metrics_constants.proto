@@ -4192,6 +4192,16 @@ message MetricsEvent {
 
     // ---- End O-DR1 Constants, all O-DR1 constants go above this line ----
 
+    // ACTION: Settings > Network & Internet > Mobile network > Mobile data
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    ACTION_MOBILE_NETWORK_MOBILE_DATA_TOGGLE = 1081;
+
+    // ACTION: Settings > Network & Internet > Mobile network > Data usage
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    ACTION_MOBILE_NETWORK_DATA_USAGE = 1082;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
