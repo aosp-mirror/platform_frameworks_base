@@ -368,6 +368,15 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         return mDevice;
     }
 
+    /**
+     * Convenience method that can be mocked - it lets tests avoid having to call getDevice() which
+     * causes problems in tests since BluetoothDevice is final and cannot be mocked.
+     * @return the address of this device
+     */
+    public String getAddress() {
+        return mDevice.getAddress();
+    }
+
     public String getName() {
         return mName;
     }
