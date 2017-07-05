@@ -156,21 +156,24 @@ class LockSettingsShellCommand extends ShellCommand {
         getOutPrintWriter().println("Lock screen disabled set to " + disabled);
     }
 
-    private boolean checkCredential() throws RemoteException, RequestThrottledException {
+    private boolean checkCredential() throws RemoteException {
         final boolean havePassword = mLockPatternUtils.isLockPasswordEnabled(mCurrentUserId);
         final boolean havePattern = mLockPatternUtils.isLockPatternEnabled(mCurrentUserId);
         if (havePassword || havePattern) {
-            boolean result;
-            if (havePassword) {
-                result = mLockPatternUtils.checkPassword(mOld, mCurrentUserId);
-            } else {
-                result = mLockPatternUtils.checkPattern(stringToPattern(mOld),
-                        mCurrentUserId);
-            }
-            if (result) {
-                return true;
-            } else {
-                getOutPrintWriter().println("Old password '" + mOld + "' didn't match");
+            try {
+                final boolean result;
+                if (havePassword) {
+                    result = mLockPatternUtils.checkPassword(mOld, mCurrentUserId);
+                } else {
+                    result = mLockPatternUtils.checkPattern(stringToPattern(mOld), mCurrentUserId);
+                }
+                if (!result) {
+                    mLockPatternUtils.reportFailedPasswordAttempt(mCurrentUserId);
+                    getOutPrintWriter().println("Old password '" + mOld + "' didn't match");
+                }
+                return result;
+            } catch (RequestThrottledException e) {
+                getOutPrintWriter().println("Request throttled");
                 return false;
             }
         } else {
