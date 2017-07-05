@@ -2572,7 +2572,7 @@ public class NotificationPanelView extends PanelView implements
     public void setTouchDisabled(boolean disabled) {
         super.setTouchDisabled(disabled);
         if (disabled && mAffordanceHelper.isSwipingInProgress() && !mIsLaunchTransitionRunning) {
-            mAffordanceHelper.resetImmediately();
+            mAffordanceHelper.reset(false /* animate */);
         }
     }
 
