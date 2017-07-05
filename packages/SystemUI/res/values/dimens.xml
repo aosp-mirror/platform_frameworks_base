@@ -196,7 +196,7 @@
     <dimen name="status_bar_header_padding_bottom">48dp</dimen>
 
     <!-- The height of the container that holds the system icons in the quick settings header. -->
-    <dimen name="qs_header_system_icons_area_height">32dp</dimen>
+    <dimen name="qs_header_system_icons_area_height">40dp</dimen>
 
     <!-- The height of the container that holds the system icons in the quick settings header in the
          car setting. -->
