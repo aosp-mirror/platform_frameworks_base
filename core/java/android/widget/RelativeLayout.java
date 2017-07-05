@@ -833,23 +833,26 @@ public class RelativeLayout extends ViewGroup {
                 if (!wrapContent) {
                     centerHorizontal(child, params, myWidth);
                 } else {
-                    params.mLeft = mPaddingLeft + params.leftMargin;
-                    params.mRight = params.mLeft + child.getMeasuredWidth();
+                    positionAtEdge(child, params, myWidth);
                 }
                 return true;
             } else {
                 // This is the default case. For RTL we start from the right and for LTR we start
                 // from the left. This will give LEFT/TOP for LTR and RIGHT/TOP for RTL.
-                if (isLayoutRtl()) {
-                    params.mRight = myWidth - mPaddingRight- params.rightMargin;
-                    params.mLeft = params.mRight - child.getMeasuredWidth();
-                } else {
-                    params.mLeft = mPaddingLeft + params.leftMargin;
-                    params.mRight = params.mLeft + child.getMeasuredWidth();
-                }
+                positionAtEdge(child, params, myWidth);
             }
         }
         return rules[ALIGN_PARENT_END] != 0;
+    }
+
+    private void positionAtEdge(View child, LayoutParams params, int myWidth) {
+        if (isLayoutRtl()) {
+            params.mRight = myWidth - mPaddingRight - params.rightMargin;
+            params.mLeft = params.mRight - child.getMeasuredWidth();
+        } else {
+            params.mLeft = mPaddingLeft + params.leftMargin;
+            params.mRight = params.mLeft + child.getMeasuredWidth();
+        }
     }
 
     private boolean positionChildVertical(View child, LayoutParams params, int myHeight,
