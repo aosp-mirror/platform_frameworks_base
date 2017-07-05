@@ -5369,6 +5369,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
+        public boolean isProvisioned() {
+            return mDeviceProvisionedController.isDeviceProvisioned()
+                    && mDeviceProvisionedController.isCurrentUserSetup();
+        }
+
+        @Override
         public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
             StatusBar.this.startPendingIntentDismissingKeyguard(intent);
         }
