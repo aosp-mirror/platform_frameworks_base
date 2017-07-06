@@ -35,11 +35,10 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
 import android.view.View;
 
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.drawable.GradientDrawable;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
-
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.drawable.GradientDrawable;
 
 import org.junit.Before;
 import org.junit.Test;

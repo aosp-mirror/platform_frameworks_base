@@ -14,9 +14,9 @@
 
 package com.android.systemui.globalactions;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-
 import com.android.internal.R;
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.EmergencyAffordanceManager;
@@ -28,7 +28,6 @@ import com.android.systemui.HardwareUiLayout;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.volume.VolumeDialogImpl;
 import com.android.systemui.volume.VolumeDialogMotion.LogAccelerateInterpolator;
 import com.android.systemui.volume.VolumeDialogMotion.LogDecelerateInterpolator;
 
@@ -42,11 +41,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
-import android.database.DataSetObserver;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -68,11 +63,9 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -85,9 +78,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.ColorExtractor.GradientColors;
-import com.google.android.colorextraction.drawable.GradientDrawable;
+import com.android.internal.colorextraction.drawable.GradientDrawable;
 
 import java.util.ArrayList;
 import java.util.List;

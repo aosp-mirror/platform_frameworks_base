@@ -42,6 +42,7 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
@@ -82,8 +83,7 @@ import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.phone.ScrimController;
 
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.drawable.GradientDrawable;
+import com.android.internal.colorextraction.drawable.GradientDrawable;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
