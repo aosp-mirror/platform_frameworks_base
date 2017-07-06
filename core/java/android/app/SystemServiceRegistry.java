@@ -39,6 +39,7 @@ import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
 import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.hardware.ConsumerIrManager;
@@ -651,25 +652,30 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<PrintManager>() {
             @Override
             public PrintManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                // Get the services without throwing as this is an optional feature
-                IBinder iBinder = ServiceManager.getService(Context.PRINT_SERVICE);
-                IPrintManager service = IPrintManager.Stub.asInterface(iBinder);
+                IPrintManager service = null;
+                // If the feature not present, don't try to look up every time
+                if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
+                    service = IPrintManager.Stub.asInterface(ServiceManager
+                            .getServiceOrThrow(Context.PRINT_SERVICE));
+                }
                 return new PrintManager(ctx.getOuterContext(), service, UserHandle.myUserId(),
                         UserHandle.getAppId(Process.myUid()));
             }});
 
         registerService(Context.COMPANION_DEVICE_SERVICE, CompanionDeviceManager.class,
                 new CachedServiceFetcher<CompanionDeviceManager>() {
-                    @Override
-                    public CompanionDeviceManager createService(ContextImpl ctx)
-                            throws ServiceNotFoundException {
-                        // Get the services without throwing as this is an optional feature
-                        IBinder iBinder =
-                                ServiceManager.getService(Context.COMPANION_DEVICE_SERVICE);
-                        ICompanionDeviceManager service =
-                                ICompanionDeviceManager.Stub.asInterface(iBinder);
-                        return new CompanionDeviceManager(service, ctx.getOuterContext());
-                    }});
+            @Override
+            public CompanionDeviceManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                ICompanionDeviceManager service = null;
+                // If the feature not present, don't try to look up every time
+                if (ctx.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
+                    service = ICompanionDeviceManager.Stub.asInterface(
+                            ServiceManager.getServiceOrThrow(Context.COMPANION_DEVICE_SERVICE));
+                }
+                return new CompanionDeviceManager(service, ctx.getOuterContext());
+            }});
 
         registerService(Context.CONSUMER_IR_SERVICE, ConsumerIrManager.class,
                 new CachedServiceFetcher<ConsumerIrManager>() {

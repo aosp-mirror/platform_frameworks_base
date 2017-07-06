@@ -1182,9 +1182,9 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"点按即可查看更多选项。"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"音频配件不受支持"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"点按即可了解详情"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到 USB 调试"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"点按即可停用 USB 调试功能。"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"选择停用USB调试。"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"选择即可停用 USB 调试功能。"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"正在生成错误报告…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享错误报告吗？"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"正在分享错误报告…"</string>
@@ -1769,6 +1769,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"请立即从沿海和河滨区域撤离到高地等较安全的地方。"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"请保持冷静，并寻找附近的避难地点。"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"紧急消息测试"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"不受允许的 SIM 卡"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"未配置的 SIM 卡"</string>

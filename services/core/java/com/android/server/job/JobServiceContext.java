@@ -681,6 +681,7 @@ public final class JobServiceContext implements ServiceConnection {
             return;
         }
         try {
+            applyStoppedReasonLocked(reason);
             mVerb = VERB_STOPPING;
             scheduleOpTimeOutLocked();
             service.stopJob(mParams);
@@ -704,10 +705,10 @@ public final class JobServiceContext implements ServiceConnection {
         }
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
-        mJobPackageTracker.noteInactive(completedJob);
+        mJobPackageTracker.noteInactive(completedJob, mParams.getStopReason());
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(),
-                    mRunningJob.getSourceUid());
+                    mRunningJob.getSourceUid(), mParams.getStopReason());
         } catch (RemoteException e) {
             // Whatever.
         }

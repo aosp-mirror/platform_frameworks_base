@@ -151,6 +151,12 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
 
         LayoutInflater inflater = LayoutInflater.from(context);
+
+        mEmptyView = (TextView) inflater.inflate(R.layout.recents_empty, this, false);
+        addView(mEmptyView);
+
+        boolean usingDarkText =
+                Color.luminance(mEmptyView.getTextColors().getDefaultColor()) < 0.5f;
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             mStackActionButton = (TextView) inflater.inflate(R.layout.recents_stack_action_button,
                     this, false);
@@ -160,10 +166,21 @@ public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsC
                     EventBus.getDefault().send(new DismissAllTaskViewsEvent());
                 }
             });
+            // Disable black shadow if text color is already dark.
+            if (usingDarkText) {
+                mStackActionButton.setShadowLayer(0, 0, 0, 0);
+            }
             addView(mStackActionButton);
         }
-        mEmptyView = (TextView) inflater.inflate(R.layout.recents_empty, this, false);
-        addView(mEmptyView);
+
+        // Let's also require dark status and nav bars if the text is dark
+        int systemBarsStyle = usingDarkText ? View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR |
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR : 0;
+
+        setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                systemBarsStyle);
     }
 
     /**

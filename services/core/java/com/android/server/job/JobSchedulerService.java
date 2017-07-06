@@ -2052,7 +2052,15 @@ public final class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             boolean foundSome = false;
             for (int i=0; i<mActiveServices.size(); i++) {
-                mActiveServices.get(i).timeoutIfExecutingLocked(pkgName, userId, hasJobId, jobId);
+                final JobServiceContext jc = mActiveServices.get(i);
+                final JobStatus js = jc.getRunningJobLocked();
+                if (jc.timeoutIfExecutingLocked(pkgName, userId, hasJobId, jobId)) {
+                    foundSome = true;
+                    pw.print("Timing out: ");
+                    js.printUniqueId(pw);
+                    pw.print(" ");
+                    pw.println(js.getServiceComponent().flattenToShortString());
+                }
             }
             if (!foundSome) {
                 pw.println("No matching executing jobs found.");

@@ -1228,7 +1228,7 @@
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Нажмите, чтобы получить дополнительную информацию"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Нажмите, чтобы отключить отладку по USB."</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Нажмите, чтобы отключить отладку USB."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Нажмите, чтобы отключить отладку по USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Подготовка отчета об ошибке"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Разрешить доступ к информации об ошибке?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Отправка отчета об ошибке"</string>
@@ -1837,6 +1837,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Немедленно эвакуируйтесь из прибрежной зоны в более высокое место."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Сохраняйте спокойствие и поищите укрытие поблизости."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Тестовое экстренное сообщение"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Использование SIM-карты запрещено"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-карта не активирована"</string>

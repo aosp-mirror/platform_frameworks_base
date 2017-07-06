@@ -93,16 +93,17 @@ public class RoundedCorners extends SystemUI implements Tunable {
     private void setupPadding(int padding) {
         // Add some padding to all the content near the edge of the screen.
         StatusBar sb = getComponent(StatusBar.class);
-        View statusBar = sb.getStatusBarWindow();
+        View statusBar = (sb != null ? sb.getStatusBarWindow() : null);
+        if (statusBar != null) {
+            TunablePadding.addTunablePadding(statusBar.findViewById(R.id.keyguard_header), PADDING,
+                    padding, FLAG_END);
 
-        TunablePadding.addTunablePadding(statusBar.findViewById(R.id.keyguard_header), PADDING,
-                padding, FLAG_END);
-
-        FragmentHostManager fragmentHostManager = FragmentHostManager.get(statusBar);
-        fragmentHostManager.addTagListener(CollapsedStatusBarFragment.TAG,
-                new TunablePaddingTagListener(padding, R.id.status_bar));
-        fragmentHostManager.addTagListener(QS.TAG,
-                new TunablePaddingTagListener(padding, R.id.header));
+            FragmentHostManager fragmentHostManager = FragmentHostManager.get(statusBar);
+            fragmentHostManager.addTagListener(CollapsedStatusBarFragment.TAG,
+                    new TunablePaddingTagListener(padding, R.id.status_bar));
+            fragmentHostManager.addTagListener(QS.TAG,
+                    new TunablePaddingTagListener(padding, R.id.header));
+        }
     }
 
     private WindowManager.LayoutParams getWindowLayoutParams() {

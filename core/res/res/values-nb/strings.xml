@@ -119,7 +119,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Leter etter tjeneste"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-anrop"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3910386316304772394">"For å ringe og sende meldinger over Wi-Fi må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på Wi-Fi-anrop igjen fra Innstillinger. (Feilkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="3910386316304772394">"For å ringe og sende meldinger over Wi-Fi, må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på Wi-Fi-anrop igjen fra Innstillinger. (Feilkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Registrer deg hos operatøren din"</item>
@@ -1769,6 +1769,8 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Evakuer umiddelbart fra kyst- og elveområder til et tryggere sted, for eksempel høyt terreng."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Hold deg rolig og søk ly i nærheten."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test av nødmeldinger"</string>
+    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
+    <skip />
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM-kortet er ikke tillatt"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-kortet er ikke klargjort"</string>

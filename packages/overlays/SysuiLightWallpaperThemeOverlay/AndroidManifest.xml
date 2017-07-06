@@ -2,7 +2,7 @@
     package="com.android.systemui.theme.lightwallpaper"
     android:versionCode="1"
     android:versionName="1.0">
-    <overlay android:targetPackage="android" android:priority="2"/>
+    <overlay android:targetPackage="com.android.systemui" android:priority="2"/>
 
     <application android:label="@string/sysui_overlay_light" android:hasCode="false"/>
 </manifest>

@@ -840,7 +840,10 @@ public class BatteryStatsHelper {
             if (sipper.shouldHide) {
                 if (sipper.drainType != BatterySipper.DrainType.OVERCOUNTED
                         && sipper.drainType != BatterySipper.DrainType.SCREEN
-                        && sipper.drainType != BatterySipper.DrainType.UNACCOUNTED) {
+                        && sipper.drainType != BatterySipper.DrainType.UNACCOUNTED
+                        && sipper.drainType != BatterySipper.DrainType.BLUETOOTH
+                        && sipper.drainType != BatterySipper.DrainType.WIFI
+                        && sipper.drainType != BatterySipper.DrainType.IDLE) {
                     // Don't add it if it is overcounted, unaccounted or screen
                     proportionalSmearPowerMah += sipper.totalPowerMah;
                 }
@@ -861,19 +864,19 @@ public class BatteryStatsHelper {
      * time.
      */
     public void smearScreenBatterySipper(List<BatterySipper> sippers, BatterySipper screenSipper) {
-        final long rawRealtimeMs = SystemClock.elapsedRealtime();
         long totalActivityTimeMs = 0;
         final SparseLongArray activityTimeArray = new SparseLongArray();
         for (int i = 0, size = sippers.size(); i < size; i++) {
             final BatteryStats.Uid uid = sippers.get(i).uidObj;
             if (uid != null) {
-                final long timeMs = getForegroundActivityTotalTimeMs(uid, rawRealtimeMs);
+                final long timeMs = getProcessForegroundTimeMs(uid,
+                        BatteryStats.STATS_SINCE_CHARGED);
                 activityTimeArray.put(uid.getUid(), timeMs);
                 totalActivityTimeMs += timeMs;
             }
         }
 
-        if (totalActivityTimeMs >= 10 * DateUtils.MINUTE_IN_MILLIS) {
+        if (screenSipper != null && totalActivityTimeMs >= 10 * DateUtils.MINUTE_IN_MILLIS) {
             final double screenPowerMah = screenSipper.totalPowerMah;
             for (int i = 0, size = sippers.size(); i < size; i++) {
                 final BatterySipper sipper = sippers.get(i);
@@ -936,14 +939,39 @@ public class BatteryStatsHelper {
         return false;
     }
 
+    public long convertUsToMs(long timeUs) {
+        return timeUs / 1000;
+    }
+
+    public long convertMsToUs(long timeMs) {
+        return timeMs * 1000;
+    }
+
     @VisibleForTesting
-    public long getForegroundActivityTotalTimeMs(BatteryStats.Uid uid, long rawRealtimeMs) {
+    public long getForegroundActivityTotalTimeUs(BatteryStats.Uid uid, long rawRealtimeUs) {
         final BatteryStats.Timer timer = uid.getForegroundActivityTimer();
         if (timer != null) {
-            return timer.getTotalTimeLocked(rawRealtimeMs, BatteryStats.STATS_SINCE_CHARGED);
+            return timer.getTotalTimeLocked(rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
         }
 
         return 0;
+    }
+
+    @VisibleForTesting
+    public long getProcessForegroundTimeMs(BatteryStats.Uid uid, int which) {
+        final long rawRealTimeUs = convertMsToUs(SystemClock.elapsedRealtime());
+        final int foregroundTypes[] = {BatteryStats.Uid.PROCESS_STATE_TOP};
+
+        long timeUs = 0;
+        for (int type : foregroundTypes) {
+            final long localTime = uid.getProcessStateTime(type, rawRealTimeUs, which);
+            timeUs += localTime;
+        }
+
+        // Return the min value of STATE_TOP time and foreground activity time, since both of these
+        // time have some errors.
+        return convertUsToMs(
+                Math.min(timeUs, getForegroundActivityTotalTimeUs(uid, rawRealTimeUs)));
     }
 
     @VisibleForTesting

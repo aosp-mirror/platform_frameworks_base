@@ -18,9 +18,12 @@
 package com.android.internal.os;
 
 
+import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -54,11 +57,16 @@ import java.util.List;
 @SmallTest
 public class BatteryStatsHelperTest extends TestCase {
     private static final long TIME_FOREGROUND_ACTIVITY_ZERO = 0;
-    private static final long TIME_FOREGROUND_ACTIVITY = 100 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long TIME_FOREGROUND_ACTIVITY = 100 * DateUtils.MINUTE_IN_MILLIS * 1000;
+    private static final long TIME_STATE_FOREGROUND_MS = 10 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long TIME_STATE_FOREGROUND_US = TIME_STATE_FOREGROUND_MS * 1000;
 
     private static final int UID = 123456;
     private static final double BATTERY_SCREEN_USAGE = 300;
     private static final double BATTERY_SYSTEM_USAGE = 600;
+    private static final double BATTERY_WIFI_USAGE = 200;
+    private static final double BATTERY_IDLE_USAGE = 600;
+    private static final double BATTERY_BLUETOOTH_USAGE = 300;
     private static final double BATTERY_OVERACCOUNTED_USAGE = 500;
     private static final double BATTERY_UNACCOUNTED_USAGE = 700;
     private static final double BATTERY_APP_USAGE = 100;
@@ -67,6 +75,12 @@ public class BatteryStatsHelperTest extends TestCase {
 
     @Mock
     private BatteryStats.Uid mUid;
+    @Mock
+    private BatterySipper mWifiBatterySipper;
+    @Mock
+    private BatterySipper mBluetoothBatterySipper;
+    @Mock
+    private BatterySipper mIdleBatterySipper;
     @Mock
     private BatterySipper mNormalBatterySipper;
     @Mock
@@ -108,6 +122,15 @@ public class BatteryStatsHelperTest extends TestCase {
 
         mUnaccountedBatterySipper.drainType = BatterySipper.DrainType.UNACCOUNTED;
         mUnaccountedBatterySipper.totalPowerMah = BATTERY_UNACCOUNTED_USAGE;
+
+        mWifiBatterySipper.drainType = BatterySipper.DrainType.WIFI;
+        mWifiBatterySipper.totalPowerMah = BATTERY_WIFI_USAGE;
+
+        mBluetoothBatterySipper.drainType = BatterySipper.DrainType.BLUETOOTH;
+        mBluetoothBatterySipper.totalPowerMah = BATTERY_BLUETOOTH_USAGE;
+
+        mIdleBatterySipper.drainType = BatterySipper.DrainType.IDLE;
+        mIdleBatterySipper.totalPowerMah = BATTERY_IDLE_USAGE;
 
         mContext = InstrumentationRegistry.getContext();
         mBatteryStatsHelper = spy(new BatteryStatsHelper(mContext));
@@ -165,6 +188,9 @@ public class BatteryStatsHelperTest extends TestCase {
         sippers.add(mSystemBatterySipper);
         sippers.add(mOvercountedBatterySipper);
         sippers.add(mUnaccountedBatterySipper);
+        sippers.add(mWifiBatterySipper);
+        sippers.add(mBluetoothBatterySipper);
+        sippers.add(mIdleBatterySipper);
         doReturn(true).when(mBatteryStatsHelper).isTypeSystem(mSystemBatterySipper);
         doNothing().when(mBatteryStatsHelper).smearScreenBatterySipper(any(), any());
 
@@ -219,6 +245,19 @@ public class BatteryStatsHelperTest extends TestCase {
         assertThat(mBatteryStatsHelper.isTypeService(mNormalBatterySipper)).isTrue();
     }
 
+    @Test
+    public void testGetProcessForegroundTimeMs_largerActivityTime_returnMinTime() {
+        doReturn(TIME_STATE_FOREGROUND_US + 500).when(mBatteryStatsHelper)
+                .getForegroundActivityTotalTimeUs(eq(mUid), anyLong());
+        doReturn(TIME_STATE_FOREGROUND_US).when(mUid).getProcessStateTime(eq(PROCESS_STATE_TOP),
+                anyLong(), anyInt());
+
+        final long time = mBatteryStatsHelper.getProcessForegroundTimeMs(mUid,
+                BatteryStats.STATS_SINCE_CHARGED);
+
+        assertThat(time).isEqualTo(TIME_STATE_FOREGROUND_MS);
+    }
+
     private BatterySipper createTestSmearBatterySipper(long activityTime, double totalPowerMah,
             int uidCode, boolean isUidNull) {
         final BatterySipper sipper = mock(BatterySipper.class);
@@ -227,14 +266,13 @@ public class BatteryStatsHelperTest extends TestCase {
         doReturn(uidCode).when(sipper).getUid();
         if (!isUidNull) {
             final BatteryStats.Uid uid = mock(BatteryStats.Uid.class, RETURNS_DEEP_STUBS);
-            doReturn(activityTime).when(mBatteryStatsHelper).getForegroundActivityTotalTimeMs(
-                    eq(uid), anyLong());
+            doReturn(activityTime).when(mBatteryStatsHelper).getProcessForegroundTimeMs(eq(uid),
+                    anyInt());
             doReturn(uidCode).when(uid).getUid();
             sipper.uidObj = uid;
         }
 
         return sipper;
     }
-
 
 }

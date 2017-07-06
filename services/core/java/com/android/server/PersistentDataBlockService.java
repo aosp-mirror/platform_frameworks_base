@@ -380,6 +380,12 @@ public class PersistentDataBlockService extends SystemService {
         }
     }
 
+    private long doGetMaximumDataBlockSize() {
+        long actualSize = getBlockDeviceSize() - HEADER_SIZE - DIGEST_SIZE_BYTES
+                - FRP_CREDENTIAL_RESERVED_SIZE - 1;
+        return actualSize <= MAX_DATA_BLOCK_SIZE ? actualSize : MAX_DATA_BLOCK_SIZE;
+    }
+
     private native long nativeGetBlockDeviceSize(String path);
     private native int nativeWipe(String path);
 
@@ -389,7 +395,7 @@ public class PersistentDataBlockService extends SystemService {
             enforceUid(Binder.getCallingUid());
 
             // Need to ensure we don't write over the last byte
-            long maxBlockSize = getMaximumDataBlockSize();
+            long maxBlockSize = doGetMaximumDataBlockSize();
             if (data.length > maxBlockSize) {
                 // partition is ~500k so shouldn't be a problem to downcast
                 return (int) -maxBlockSize;
@@ -569,9 +575,8 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public long getMaximumDataBlockSize() {
-            long actualSize = getBlockDeviceSize() - HEADER_SIZE - DIGEST_SIZE_BYTES
-                    - FRP_CREDENTIAL_RESERVED_SIZE - 1;
-            return actualSize <= MAX_DATA_BLOCK_SIZE ? actualSize : MAX_DATA_BLOCK_SIZE;
+            enforceUid(Binder.getCallingUid());
+            return doGetMaximumDataBlockSize();
         }
 
         @Override

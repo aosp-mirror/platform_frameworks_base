@@ -19,6 +19,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -28,9 +29,15 @@ import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.leak.RotationUtils;
+
+import java.util.ArrayList;
+
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
 public class HardwareUiLayout extends FrameLayout implements Tunable {
 
@@ -49,7 +56,7 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
     private int mEndPoint;
     private boolean mEdgeBleed;
     private boolean mRoundedDivider;
-    private boolean mLandscape;
+    private int mRotation = ROTATION_NONE;
     private boolean mRotatedBackground;
 
     public HardwareUiLayout(Context context, AttributeSet attrs) {
@@ -93,8 +100,10 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
     private void updateEdgeMargin(int edge) {
         if (mChild != null) {
             MarginLayoutParams params = (MarginLayoutParams) mChild.getLayoutParams();
-            if (mLandscape) {
+            if (mRotation == ROTATION_LANDSCAPE) {
                 params.topMargin = edge;
+            } else if (mRotation == ROTATION_SEASCAPE) {
+                params.bottomMargin = edge;
             } else {
                 params.rightMargin = edge;
             }
@@ -118,6 +127,7 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
                 mChild.addOnLayoutChangeListener(
                         (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
                                 updatePosition());
+                updateRotation();
             } else {
                 return;
             }
@@ -127,30 +137,69 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
             animateChild(mOldHeight, newHeight);
         }
         post(() -> updatePosition());
-        boolean landscape = getMeasuredWidth() > getMeasuredHeight();
-        if (landscape != mLandscape) {
-            mLandscape = landscape;
-            if (mLandscape) {
-                toLandscape();
-                if (mChild instanceof LinearLayout) {
-                    mRotatedBackground = true;
-                    mBackground.setRotatedBackground(true);
-                    ((LinearLayout) mChild).setOrientation(LinearLayout.HORIZONTAL);
-                    swapDimens(mChild);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateRotation();
+    }
+
+    private void updateRotation() {
+        int rotation = RotationUtils.getRotation(getContext());
+        if (rotation != mRotation) {
+            rotate(mRotation, rotation);
+            mRotation = rotation;
+        }
+    }
+
+    private void rotate(int from, int to) {
+        if (from != ROTATION_NONE && to != ROTATION_NONE) {
+            // Rather than handling this confusing case, just do 2 rotations.
+            rotate(from, ROTATION_NONE);
+            rotate(ROTATION_NONE, to);
+            return;
+        }
+        if (from == ROTATION_LANDSCAPE || to == ROTATION_SEASCAPE) {
+            rotateRight();
+        } else {
+            rotateLeft();
+        }
+        if (to != ROTATION_NONE) {
+            if (mChild instanceof LinearLayout) {
+                mRotatedBackground = true;
+                mBackground.setRotatedBackground(true);
+                LinearLayout linearLayout = (LinearLayout) mChild;
+                if (to == ROTATION_SEASCAPE) {
+                    swapOrder(linearLayout);
                 }
-            } else {
-                fromLandscape();
-                if (mChild instanceof LinearLayout) {
-                    mRotatedBackground = false;
-                    mBackground.setRotatedBackground(false);
-                    ((LinearLayout) mChild).setOrientation(LinearLayout.VERTICAL);
-                    swapDimens(mChild);
+                linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+                swapDimens(this.mChild);
+            }
+        } else {
+            if (mChild instanceof LinearLayout) {
+                mRotatedBackground = false;
+                mBackground.setRotatedBackground(false);
+                LinearLayout linearLayout = (LinearLayout) mChild;
+                if (from == ROTATION_SEASCAPE) {
+                    swapOrder(linearLayout);
                 }
+                linearLayout.setOrientation(LinearLayout.VERTICAL);
+                swapDimens(mChild);
             }
         }
     }
 
-    private void fromLandscape() {
+    private void swapOrder(LinearLayout linearLayout) {
+        ArrayList<View> children = new ArrayList<>();
+        for (int i = 0; i < linearLayout.getChildCount(); i++) {
+            children.add(0, linearLayout.getChildAt(i));
+            linearLayout.removeViewAt(i);
+        }
+        children.forEach(v -> linearLayout.addView(v));
+    }
+
+    private void rotateRight() {
         rotateRight(this);
         rotateRight(mChild);
         swapDimens(this);
@@ -202,7 +251,7 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
         return retGravity;
     }
 
-    private void toLandscape() {
+    private void rotateLeft() {
         rotateLeft(this);
         rotateLeft(mChild);
         swapDimens(this);

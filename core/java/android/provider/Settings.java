@@ -195,6 +195,24 @@ public final class Settings {
             "android.settings.AIRPLANE_MODE_SETTINGS";
 
     /**
+     * Activity Action: Show mobile data usage list.
+     * <p>
+     * Input: {@link EXTRA_NETWORK_TEMPLATE} and {@link EXTRA_SUB_ID} should be included to specify
+     * how and what mobile data statistics should be collected.
+     * <p>
+     * Output: Nothing
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MOBILE_DATA_USAGE =
+            "android.settings.MOBILE_DATA_USAGE";
+
+    /** @hide */
+    public static final String EXTRA_NETWORK_TEMPLATE = "network_template";
+    /** @hide */
+    public static final String EXTRA_SUB_ID = "sub_id";
+
+    /**
      * Activity Action: Modify Airplane mode settings using a voice command.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.

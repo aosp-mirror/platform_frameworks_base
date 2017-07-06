@@ -279,6 +279,7 @@
     <protected-broadcast android:name="com.android.nfc.cardemulation.action.CLOSE_TAP_DIALOG" />
     <protected-broadcast android:name="com.android.nfc.handover.action.ALLOW_CONNECT" />
     <protected-broadcast android:name="com.android.nfc.handover.action.DENY_CONNECT" />
+    <protected-broadcast android:name="com.android.nfc.handover.action.TIMEOUT_CONNECT" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_ON_DETECTED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_OFF_DETECTED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.AID_SELECTED" />
@@ -2639,6 +2640,12 @@
          <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.MODIFY_PARENTAL_CONTROLS"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to read TvContentRatingSystemInfo
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.READ_CONTENT_RATING_SYSTEMS"
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to notify TV inputs by sending broadcasts.

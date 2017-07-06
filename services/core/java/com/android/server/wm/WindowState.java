@@ -446,7 +446,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Set when the orientation is changing and this window has not yet
      * been updated for the new orientation.
      */
-    boolean mOrientationChanging;
+    private boolean mOrientationChanging;
 
     /**
      * The orientation during the last visible call to relayout. If our
@@ -565,6 +565,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final Rect mLastSurfaceInsets = new Rect();
 
     /**
+     * A flag set by the {@link WindowState} parent to indicate that the parent has examined this
+     * {@link WindowState} in its overall drawing context. This book-keeping allows the parent to
+     * make sure all children have been considered.
+     */
+    private boolean mDrawnStateEvaluated;
+
+    /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
@@ -678,6 +685,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void attach() {
         if (localLOGV) Slog.v(TAG, "Attaching " + this + " token=" + mToken);
         mSession.windowAddedLocked(mAttrs.packageName);
+    }
+
+    /**
+     * Returns whether this {@link WindowState} has been considered for drawing by its parent.
+     */
+    boolean getDrawnStatedEvaluated() {
+        return mDrawnStateEvaluated;
+    }
+
+    /**
+     * Sets whether this {@link WindowState} has been considered for drawing by its parent. Should
+     * be cleared when detached from parent.
+     */
+    void setDrawnStateEvaluated(boolean evaluated) {
+        mDrawnStateEvaluated = evaluated;
+    }
+
+    @Override
+    void onParentSet() {
+        super.onParentSet();
+        setDrawnStateEvaluated(false /*evaluated*/);
     }
 
     @Override
@@ -1161,7 +1189,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // then we need to hold off on unfreezing the display until this window has been
             // redrawn; to do that, we need to go through the process of getting informed by the
             // application when it has finished drawing.
-            if (mOrientationChanging || dragResizingChanged || isResizedWhileNotDragResizing()) {
+            if (getOrientationChanging() || dragResizingChanged
+                    || isResizedWhileNotDragResizing()) {
                 if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
                     Slog.v(TAG_WM, "Orientation or resize start waiting for draw"
                             + ", mDrawState=DRAW_PENDING in " + this
@@ -1176,15 +1205,31 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG_WM, "Resizing window " + this);
                 mService.mResizingWindows.add(this);
             }
-        } else if (mOrientationChanging) {
+        } else if (getOrientationChanging()) {
             if (isDrawnLw()) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Orientation not waiting for draw in "
                         + this + ", surfaceController " + winAnimator.mSurfaceController);
-                mOrientationChanging = false;
+                setOrientationChanging(false);
                 mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                         - mService.mDisplayFreezeTime);
             }
         }
+    }
+
+    boolean getOrientationChanging() {
+        // In addition to the local state flag, we must also consider the difference in the last
+        // reported configuration vs. the current state. If the client code has not been informed of
+        // the change, logic dependent on having finished processing the orientation, such as
+        // unfreezing, could be improperly triggered.
+        // TODO(b/62846907): Checking against {@link mLastReportedConfiguration} could be flaky as
+        //                   this is not necessarily what the client has processed yet. Find a
+        //                   better indicator consistent with the client.
+        return mOrientationChanging
+                || getConfiguration().orientation != mLastReportedConfiguration.orientation;
+    }
+
+    void setOrientationChanging(boolean changing) {
+        mOrientationChanging = changing;
     }
 
     DisplayContent getDisplayContent() {
@@ -2660,10 +2705,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mAppFreezing = false;
 
-        if (mHasSurface && !mOrientationChanging
+        if (mHasSurface && !getOrientationChanging()
                 && mService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "set mOrientationChanging of " + this);
-            mOrientationChanging = true;
+            setOrientationChanging(true);
             mService.mRoot.mOrientationChangeComplete = false;
         }
         mLastFreezeDuration = 0;
@@ -3082,7 +3127,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWinAnimator.mSurfaceResized = false;
             mReportOrientationChanged = false;
         } catch (RemoteException e) {
-            mOrientationChanging = false;
+            setOrientationChanging(false);
             mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                     - mService.mDisplayFreezeTime);
             // We are assuming the hosting process is dead or in a zombie state.
@@ -3443,10 +3488,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(" mDestroying="); pw.print(mDestroying);
                     pw.print(" mRemoved="); pw.println(mRemoved);
         }
-        if (mOrientationChanging || mAppFreezing || mTurnOnScreen
+        if (getOrientationChanging() || mAppFreezing || mTurnOnScreen
                 || mReportOrientationChanged) {
             pw.print(prefix); pw.print("mOrientationChanging=");
                     pw.print(mOrientationChanging);
+                    pw.print(" configOrientationChanging=");
+                    pw.print(mLastReportedConfiguration.orientation
+                            != getConfiguration().orientation);
                     pw.print(" mAppFreezing="); pw.print(mAppFreezing);
                     pw.print(" mTurnOnScreen="); pw.print(mTurnOnScreen);
                     pw.print(" mReportOrientationChanged="); pw.println(mReportOrientationChanged);

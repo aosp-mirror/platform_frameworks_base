@@ -280,7 +280,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // Stop timer
         curr = 1000 * (clocks.realtime = clocks.uptime = 161);
-        bi.noteJobFinishLocked(jobName, UID);
+        bi.noteJobFinishLocked(jobName, UID, 0);
 
         // Move to background
         curr = 1000 * (clocks.realtime = clocks.uptime = 202);
@@ -296,7 +296,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
         // Stop timer
         curr = 1000 * (clocks.realtime = clocks.uptime = 409);
-        bi.noteJobFinishLocked(jobName, UID);
+        bi.noteJobFinishLocked(jobName, UID, 0);
 
         // Test
         curr = 1000 * (clocks.realtime = clocks.uptime = 657);
@@ -319,7 +319,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         final String jobName2 = "second_job";
         bi.noteJobStartLocked(jobName2, UID);
         assertEquals(2, bi.getUidStats().get(UID).getJobStats().size());
-        bi.noteJobFinishLocked(jobName2, UID);
+        bi.noteJobFinishLocked(jobName2, UID, 0);
     }
 
     @SmallTest

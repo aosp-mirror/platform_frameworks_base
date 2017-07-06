@@ -21,6 +21,9 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.util.SparseArray;
+
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -1554,5 +1557,50 @@ public class BaseBundle {
         p.setDataPosition(0);
 
         mParcelledData = p;
+    }
+
+    /** {@hide} */
+    public static void dumpStats(IndentingPrintWriter pw, String key, Object value) {
+        final Parcel tmp = Parcel.obtain();
+        tmp.writeValue(value);
+        final int size = tmp.dataPosition();
+        tmp.recycle();
+
+        // We only really care about logging large values
+        if (size > 1024) {
+            pw.println(key + " [size=" + size + "]");
+            if (value instanceof BaseBundle) {
+                dumpStats(pw, (BaseBundle) value);
+            } else if (value instanceof SparseArray) {
+                dumpStats(pw, (SparseArray) value);
+            }
+        }
+    }
+
+    /** {@hide} */
+    public static void dumpStats(IndentingPrintWriter pw, SparseArray array) {
+        pw.increaseIndent();
+        if (array == null) {
+            pw.println("[null]");
+            return;
+        }
+        for (int i = 0; i < array.size(); i++) {
+            dumpStats(pw, "0x" + Integer.toHexString(array.keyAt(i)), array.valueAt(i));
+        }
+        pw.decreaseIndent();
+    }
+
+    /** {@hide} */
+    public static void dumpStats(IndentingPrintWriter pw, BaseBundle bundle) {
+        pw.increaseIndent();
+        if (bundle == null) {
+            pw.println("[null]");
+            return;
+        }
+        final ArrayMap<String, Object> map = bundle.getMap();
+        for (int i = 0; i < map.size(); i++) {
+            dumpStats(pw, map.keyAt(i), map.valueAt(i));
+        }
+        pw.decreaseIndent();
     }
 }

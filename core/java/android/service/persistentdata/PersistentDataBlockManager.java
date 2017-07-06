@@ -130,6 +130,7 @@ public class PersistentDataBlockManager {
      *
      * Returns -1 on error.
      */
+    @SuppressLint("Doclava125")
     public long getMaximumDataBlockSize() {
         try {
             return sService.getMaximumDataBlockSize();
