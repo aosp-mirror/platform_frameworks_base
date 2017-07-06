@@ -28,11 +28,15 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.testing.AndroidTestingRunner;
 import android.support.test.filters.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
+import android.testing.ViewUtils;
 import android.view.View;
 
-import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import com.google.android.colorextraction.ColorExtractor;
 import com.google.android.colorextraction.drawable.GradientDrawable;
@@ -43,15 +47,25 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class ScrimViewTest extends SysuiTestCase {
+public class ScrimViewTest extends LeakCheckedTest {
 
     ScrimView mView;
 
     @Before
     public void setUp() {
+        injectLeakCheckedDependency(ConfigurationController.class);
         mView = new ScrimView(getContext());
         mView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         mView.layout(0, 0, 1920, 1080);
+    }
+
+    @Test
+    @RunWithLooper
+    public void testAttachDetach() {
+        ViewUtils.attachView(mView);
+        TestableLooper.get(this).processAllMessages();
+        ViewUtils.detachView(mView);
+        TestableLooper.get(this).processAllMessages();
     }
 
     @Test

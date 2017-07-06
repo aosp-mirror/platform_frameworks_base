@@ -94,11 +94,24 @@ public class ScrimView extends View implements ConfigurationController.Configura
         mColors = new ColorExtractor.GradientColors();
         updateScreenSize();
         updateColorWithTint(false);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
 
         // We need to know about configuration changes to update the gradient size
         // since it's independent from view bounds.
         ConfigurationController config = Dependency.get(ConfigurationController.class);
         config.addCallback(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        ConfigurationController config = Dependency.get(ConfigurationController.class);
+        config.removeCallback(this);
     }
 
     @Override
