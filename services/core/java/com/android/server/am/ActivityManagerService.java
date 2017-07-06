@@ -414,6 +414,7 @@ import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
 
+import java.text.SimpleDateFormat;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -5507,11 +5508,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // NOTE: We should consider creating the file in native code atomically once we've
             // gotten rid of the old scheme of dumping and lot of the code that deals with paths
             // can be removed.
-            try {
-                tracesFile = File.createTempFile("anr_", "", tracesDir);
-                FileUtils.setPermissions(tracesFile.getAbsolutePath(), 0600, -1, -1); // -rw-------
-            } catch (IOException ioe) {
-                Slog.w(TAG, "Unable to create ANR traces file: ", ioe);
+            tracesFile = createAnrDumpFile(tracesDir);
+            if (tracesFile == null) {
                 return null;
             }
 
@@ -5521,6 +5519,31 @@ public class ActivityManagerService extends IActivityManager.Stub
         dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids,
                 useTombstonedForJavaTraces);
         return tracesFile;
+    }
+
+    @GuardedBy("ActivityManagerService.class")
+    private static SimpleDateFormat sAnrFileDateFormat;
+
+    private static synchronized File createAnrDumpFile(File tracesDir) {
+        if (sAnrFileDateFormat == null) {
+            sAnrFileDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
+        }
+
+        final String formattedDate = sAnrFileDateFormat.format(new Date());
+        final File anrFile = new File(tracesDir, "anr_" + formattedDate);
+
+        try {
+            if (anrFile.createNewFile()) {
+                FileUtils.setPermissions(anrFile.getAbsolutePath(), 0600, -1, -1); // -rw-------
+                return anrFile;
+            } else {
+                Slog.w(TAG, "Unable to create ANR dump file: createNewFile failed");
+            }
+        } catch (IOException ioe) {
+            Slog.w(TAG, "Exception creating ANR dump file:", ioe);
+        }
+
+        return null;
     }
 
     /**
