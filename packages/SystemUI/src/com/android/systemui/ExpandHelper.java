@@ -545,6 +545,16 @@ public class ExpandHelper implements Gefingerpoken {
      */
     @VisibleForTesting
     void finishExpanding(boolean forceAbort, float velocity) {
+        finishExpanding(forceAbort, velocity, true /* allowAnimation */);
+    }
+
+    /**
+     * Finish the current expand motion
+     * @param forceAbort whether the expansion should be forcefully aborted and returned to the old
+     *                   state
+     * @param velocity the velocity this was expanded/ collapsed with
+     */
+    private void finishExpanding(boolean forceAbort, float velocity, boolean allowAnimation) {
         if (!mExpanding) return;
 
         if (DEBUG) Log.d(TAG, "scale in finishing on view: " + mResizedView);
@@ -568,7 +578,7 @@ public class ExpandHelper implements Gefingerpoken {
         mCallback.expansionStateChanged(false);
         int naturalHeight = mScaler.getNaturalHeight();
         float targetHeight = nowExpanded ? naturalHeight : mSmallSize;
-        if (targetHeight != currentHeight && mEnabled) {
+        if (targetHeight != currentHeight && mEnabled && allowAnimation) {
             mScaleAnimation.setFloatValues(targetHeight);
             mScaleAnimation.setupStartValues();
             final View scaledView = mResizedView;
@@ -622,10 +632,22 @@ public class ExpandHelper implements Gefingerpoken {
     }
 
     /**
+     * Use this to abort any pending expansions in progress and force that there will be no
+     * animations.
+     */
+    public void cancelImmediately() {
+        cancel(false /* allowAnimation */);
+    }
+
+    /**
      * Use this to abort any pending expansions in progress.
      */
     public void cancel() {
-        finishExpanding(true /* forceAbort */, 0f /* velocity */);
+        cancel(true /* allowAnimation */);
+    }
+
+    private void cancel(boolean allowAnimation) {
+        finishExpanding(true /* forceAbort */, 0f /* velocity */, allowAnimation);
         clearView();
 
         // reset the gesture detector
