@@ -3619,6 +3619,13 @@
         <attr name="name" />
     </declare-styleable>
 
+    <!-- Specify one or more <code>t3tPmm-filter</code> elements inside a
+         <code>host-nfcf-service</code> element to specify a LF_T3T_PMM -->
+    <declare-styleable name="T3tPmmFilter">
+        <attr name="name" />
+
+    </declare-styleable>
+
     <declare-styleable name="ActionMenuItemView">
         <attr name="minWidth" />
     </declare-styleable>
