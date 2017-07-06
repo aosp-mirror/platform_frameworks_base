@@ -36,7 +36,8 @@ public class InterestingConfigChanges {
     }
 
     public boolean applyNewConfig(Resources res) {
-        int configChanges = mLastConfiguration.updateFrom(res.getConfiguration());
+        int configChanges = mLastConfiguration.updateFrom(
+                Configuration.generateDelta(mLastConfiguration, res.getConfiguration()));
         boolean densityChanged = mLastDensity != res.getDisplayMetrics().densityDpi;
         if (densityChanged || (configChanges & (mFlags)) != 0) {
             mLastDensity = res.getDisplayMetrics().densityDpi;
