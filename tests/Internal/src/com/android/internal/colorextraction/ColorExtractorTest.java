@@ -62,21 +62,6 @@ public class ColorExtractorTest {
     }
 
     @Test
-    public void getColors_usesFallbackIfFails() {
-        ExtractionType alwaysFail =
-                (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,
-                        outGradientColorsExtraDark) -> false;
-        ColorExtractor extractor = new ColorExtractor(mContext, alwaysFail);
-        GradientColors colors = extractor.getColors(WallpaperManager.FLAG_SYSTEM);
-
-        assertEquals("Should be using the fallback color.",
-                colors.getMainColor(), ColorExtractor.FALLBACK_COLOR);
-        assertEquals("Should be using the fallback color.",
-                colors.getSecondaryColor(), ColorExtractor.FALLBACK_COLOR);
-        assertFalse("Dark text support should be false.", colors.supportsDarkText());
-    }
-
-    @Test
     public void getColors_usesExtractedColors() {
         GradientColors colorsExpectedNormal = new GradientColors();
         colorsExpectedNormal.setMainColor(Color.RED);
@@ -96,8 +81,6 @@ public class ColorExtractorTest {
             outGradientColorsNormal.set(colorsExpectedNormal);
             outGradientColorsDark.set(colorsExpectedDark);
             outGradientColorsExtraDark.set(colorsExpectedExtraDark);
-            // Successful extraction
-            return true;
         };
         ColorExtractor extractor = new ColorExtractor(mContext, type);
 
