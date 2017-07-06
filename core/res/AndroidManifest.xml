@@ -278,6 +278,7 @@
     <protected-broadcast android:name="com.android.nfc.cardemulation.action.CLOSE_TAP_DIALOG" />
     <protected-broadcast android:name="com.android.nfc.handover.action.ALLOW_CONNECT" />
     <protected-broadcast android:name="com.android.nfc.handover.action.DENY_CONNECT" />
+    <protected-broadcast android:name="com.android.nfc.handover.action.TIMEOUT_CONNECT" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_ON_DETECTED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_OFF_DETECTED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.AID_SELECTED" />
