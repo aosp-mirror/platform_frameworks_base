@@ -21,7 +21,14 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
+import android.util.Log;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -35,24 +42,52 @@ import java.util.Objects;
 public class DownloadRequest implements Parcelable {
     // Version code used to keep token calculation consistent.
     private static final int CURRENT_VERSION = 1;
+    private static final String LOG_TAG = "MbmsDownloadRequest";
+
+    /**
+     * Maximum permissible length for the app's download-completion intent, when serialized via
+     * {@link Intent#toUri(int)}.
+     */
+    public static final int MAX_APP_INTENT_SIZE = 50000;
+
+    /**
+     * Maximum permissible length for the app's destination path, when serialized via
+     * {@link Uri#toString()}.
+     */
+    public static final int MAX_DESTINATION_URI_SIZE = 50000;
 
     /** @hide */
+    private static class OpaqueDataContainer implements Serializable {
+        private final String destinationUri;
+        private final String appIntent;
+        private final int version;
+
+        public OpaqueDataContainer(String destinationUri, String appIntent, int version) {
+            this.destinationUri = destinationUri;
+            this.appIntent = appIntent;
+            this.version = version;
+        }
+    }
+
     public static class Builder {
-        private int id;
-        private FileServiceInfo serviceInfo;
+        private String fileServiceId;
         private Uri source;
         private Uri dest;
         private int subscriptionId;
         private String appIntent;
         private int version = CURRENT_VERSION;
 
-        public Builder setId(int id) {
-            this.id = id;
+        public Builder setServiceInfo(FileServiceInfo serviceInfo) {
+            fileServiceId = serviceInfo.getServiceId();
             return this;
         }
 
-        public Builder setServiceInfo(FileServiceInfo serviceInfo) {
-            this.serviceInfo = serviceInfo;
+        /**
+         * @hide
+         * TODO: systemapi
+         */
+        public Builder setServiceId(String serviceId) {
+            fileServiceId = serviceId;
             return this;
         }
 
@@ -62,6 +97,10 @@ public class DownloadRequest implements Parcelable {
         }
 
         public Builder setDest(Uri dest) {
+            if (dest.toString().length() > MAX_DESTINATION_URI_SIZE) {
+                throw new IllegalArgumentException("Destination uri must not exceed length " +
+                        MAX_DESTINATION_URI_SIZE);
+            }
             this.dest = dest;
             return this;
         }
@@ -73,33 +112,53 @@ public class DownloadRequest implements Parcelable {
 
         public Builder setAppIntent(Intent intent) {
             this.appIntent = intent.toUri(0);
+            if (this.appIntent.length() > MAX_APP_INTENT_SIZE) {
+                throw new IllegalArgumentException("App intent must not exceed length " +
+                        MAX_APP_INTENT_SIZE);
+            }
             return this;
         }
 
-        public Builder setVersion(int version) {
-            this.version = version;
+        /**
+         * For use by middleware only
+         * TODO: systemapi
+         * @hide
+         */
+        public Builder setOpaqueData(byte[] data) {
+            try {
+                ObjectInputStream stream = new ObjectInputStream(new ByteArrayInputStream(data));
+                OpaqueDataContainer dataContainer = (OpaqueDataContainer) stream.readObject();
+                version = dataContainer.version;
+                appIntent = dataContainer.appIntent;
+                dest = Uri.parse(dataContainer.destinationUri);
+            } catch (IOException e) {
+                // Really should never happen
+                Log.e(LOG_TAG, "Got IOException trying to parse opaque data");
+                throw new IllegalArgumentException(e);
+            } catch (ClassNotFoundException e) {
+                Log.e(LOG_TAG, "Got ClassNotFoundException trying to parse opaque data");
+                throw new IllegalArgumentException(e);
+            }
             return this;
         }
 
         public DownloadRequest build() {
-            return new DownloadRequest(id, serviceInfo, source, dest,
+            return new DownloadRequest(fileServiceId, source, dest,
                     subscriptionId, appIntent, version);
         }
     }
 
-    private final int downloadId;
-    private final FileServiceInfo fileServiceInfo;
+    private final String fileServiceId;
     private final Uri sourceUri;
     private final Uri destinationUri;
     private final int subscriptionId;
     private final String serializedResultIntentForApp;
     private final int version;
 
-    private DownloadRequest(int id, FileServiceInfo serviceInfo,
+    private DownloadRequest(String fileServiceId,
             Uri source, Uri dest,
             int sub, String appIntent, int version) {
-        downloadId = id;
-        fileServiceInfo = serviceInfo;
+        this.fileServiceId = fileServiceId;
         sourceUri = source;
         destinationUri = dest;
         subscriptionId = sub;
@@ -112,8 +171,7 @@ public class DownloadRequest implements Parcelable {
     }
 
     private DownloadRequest(DownloadRequest dr) {
-        downloadId = dr.downloadId;
-        fileServiceInfo = dr.fileServiceInfo;
+        fileServiceId = dr.fileServiceId;
         sourceUri = dr.sourceUri;
         destinationUri = dr.destinationUri;
         subscriptionId = dr.subscriptionId;
@@ -122,8 +180,7 @@ public class DownloadRequest implements Parcelable {
     }
 
     private DownloadRequest(Parcel in) {
-        downloadId = in.readInt();
-        fileServiceInfo = in.readParcelable(getClass().getClassLoader());
+        fileServiceId = in.readString();
         sourceUri = in.readParcelable(getClass().getClassLoader());
         destinationUri = in.readParcelable(getClass().getClassLoader());
         subscriptionId = in.readInt();
@@ -136,8 +193,7 @@ public class DownloadRequest implements Parcelable {
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(downloadId);
-        out.writeParcelable(fileServiceInfo, flags);
+        out.writeString(fileServiceId);
         out.writeParcelable(sourceUri, flags);
         out.writeParcelable(destinationUri, flags);
         out.writeInt(subscriptionId);
@@ -145,12 +201,8 @@ public class DownloadRequest implements Parcelable {
         out.writeInt(version);
     }
 
-    public int getDownloadId() {
-        return downloadId;
-    }
-
-    public FileServiceInfo getFileServiceInfo() {
-        return fileServiceInfo;
+    public String getFileServiceId() {
+        return fileServiceId;
     }
 
     public Uri getSourceUri() {
@@ -173,6 +225,27 @@ public class DownloadRequest implements Parcelable {
         }
     }
 
+    /**
+     * @hide
+     * TODO: systemapi
+     */
+    public byte[] getOpaqueData() {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ObjectOutputStream stream = new ObjectOutputStream(byteArrayOutputStream);
+            OpaqueDataContainer container = new OpaqueDataContainer(
+                    destinationUri.toString(), serializedResultIntentForApp, version);
+            stream.writeObject(container);
+            stream.flush();
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            // Really should never happen
+            Log.e(LOG_TAG, "Got IOException trying to serialize opaque data");
+            return null;
+        }
+    }
+
+    /** @hide */
     public int getVersion() {
         return version;
     }
@@ -228,10 +301,9 @@ public class DownloadRequest implements Parcelable {
             return false;
         }
         DownloadRequest request = (DownloadRequest) o;
-        return downloadId == request.downloadId &&
-                subscriptionId == request.subscriptionId &&
+        return subscriptionId == request.subscriptionId &&
                 version == request.version &&
-                Objects.equals(fileServiceInfo, request.fileServiceInfo) &&
+                Objects.equals(fileServiceId, request.fileServiceId) &&
                 Objects.equals(sourceUri, request.sourceUri) &&
                 Objects.equals(destinationUri, request.destinationUri) &&
                 Objects.equals(serializedResultIntentForApp, request.serializedResultIntentForApp);
@@ -239,7 +311,7 @@ public class DownloadRequest implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(downloadId, fileServiceInfo, sourceUri, destinationUri,
+        return Objects.hash(fileServiceId, sourceUri, destinationUri,
                 subscriptionId, serializedResultIntentForApp, version);
     }
 }
