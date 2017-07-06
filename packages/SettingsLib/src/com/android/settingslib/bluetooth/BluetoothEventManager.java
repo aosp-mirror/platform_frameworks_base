@@ -102,6 +102,7 @@ public class BluetoothEventManager {
         // Fine-grained state broadcasts
         addHandler(BluetoothDevice.ACTION_CLASS_CHANGED, new ClassChangedHandler());
         addHandler(BluetoothDevice.ACTION_UUID, new UuidChangedHandler());
+        addHandler(BluetoothDevice.ACTION_BATTERY_LEVEL_CHANGED, new BatteryLevelChangedHandler());
 
         // Dock event broadcasts
         addHandler(Intent.ACTION_DOCK_EVENT, new DockEventHandler());
@@ -376,6 +377,17 @@ public class BluetoothEventManager {
             }
         }
     }
+
+    private class BatteryLevelChangedHandler implements Handler {
+        public void onReceive(Context context, Intent intent,
+                BluetoothDevice device) {
+            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
+            if (cachedDevice != null) {
+                cachedDevice.refresh();
+            }
+        }
+    }
+
     boolean readPairedDevices() {
         Set<BluetoothDevice> bondedDevices = mLocalAdapter.getBondedDevices();
         if (bondedDevices == null) {
