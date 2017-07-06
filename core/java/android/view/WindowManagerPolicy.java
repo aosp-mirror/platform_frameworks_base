@@ -74,6 +74,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.animation.Animation;
@@ -1309,6 +1310,14 @@ public interface WindowManagerPolicy {
      * Return whether the default display is on and not blocked by a black surface.
      */
     public boolean isScreenOn();
+
+    /**
+     * @return whether the device is currently {@link PowerManager#isInteractive() interactive}.
+     *
+     * Note: the screen can be on while the device is not interactive, e.g. when the device is
+     * showing Ambient Display.
+     */
+    boolean isInteractive();
 
     /**
      * Tell the policy that the lid switch has changed state.
