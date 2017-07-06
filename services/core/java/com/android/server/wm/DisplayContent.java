@@ -1073,7 +1073,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
             if (w.mHasSurface && !rotateSeamlessly) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Set mOrientationChanging of " + w);
-                w.mOrientationChanging = true;
+                w.setOrientationChanging(true);
                 mService.mRoot.mOrientationChangeComplete = false;
                 w.mLastFreezeDuration = 0;
             }
@@ -2679,10 +2679,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_TIMEOUT;
 
         forAllWindows(w -> {
-            if (!w.mOrientationChanging) {
+            if (!w.getOrientationChanging()) {
                 return;
             }
-            w.mOrientationChanging = false;
+            w.setOrientationChanging(false);
             w.mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                     - mService.mDisplayFreezeTime);
             Slog.w(TAG_WM, "Force clearing orientation change: " + w);
