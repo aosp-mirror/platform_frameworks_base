@@ -193,6 +193,11 @@ public abstract class ContentObserver {
      */
     private void dispatchChange(boolean selfChange, Uri uri, int userId) {
         if (mHandler == null) {
+            synchronized (mLock) {
+                if (mTransport == null) {
+                    return;
+                }
+            }
             onChange(selfChange, uri, userId);
         } else {
             mHandler.post(new NotificationRunnable(selfChange, uri, userId));
@@ -213,6 +218,11 @@ public abstract class ContentObserver {
 
         @Override
         public void run() {
+            synchronized (mLock) {
+                if (mTransport == null) {
+                    return;
+                }
+            }
             ContentObserver.this.onChange(mSelfChange, mUri, mUserId);
         }
     }
