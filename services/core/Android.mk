@@ -41,4 +41,16 @@ LOCAL_JACK_FLAGS := \
  -D jack.transformations.boost-locked-region-priority.request=com.android.server.am.ActivityManagerService\#boostPriorityForLockedSection \
  -D jack.transformations.boost-locked-region-priority.reset=com.android.server.am.ActivityManagerService\#resetPriorityAfterLockedSection
 
+LOCAL_JAR_PROCESSOR := lockedregioncodeinjection
+# Use = instead of := to delay evaluation of ${in} and ${out}
+LOCAL_JAR_PROCESSOR_ARGS = \
+ --targets \
+  "Lcom/android/server/am/ActivityManagerService;,Lcom/android/server/wm/WindowHashMap;" \
+ --pre \
+  "com/android/server/am/ActivityManagerService.boostPriorityForLockedSection,com/android/server/wm/WindowManagerService.boostPriorityForLockedSection" \
+ --post \
+  "com/android/server/am/ActivityManagerService.resetPriorityAfterLockedSection,com/android/server/wm/WindowManagerService.resetPriorityAfterLockedSection" \
+ -o ${out} \
+ -i ${in}
+
 include $(BUILD_STATIC_JAVA_LIBRARY)
