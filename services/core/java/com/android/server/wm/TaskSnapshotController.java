@@ -18,6 +18,9 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
 
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
@@ -29,6 +32,7 @@ import android.graphics.Rect;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.ArraySet;
+import android.util.Slog;
 import android.view.DisplayListCanvas;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
@@ -57,6 +61,7 @@ import java.io.PrintWriter;
  * To access this class, acquire the global window manager lock.
  */
 class TaskSnapshotController {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotController" : TAG_WM;
 
     /**
      * Return value for {@link #getSnapshotMode}: We are allowed to take a real screenshot to be
@@ -147,10 +152,17 @@ class TaskSnapshotController {
                     break;
             }
             if (snapshot != null) {
-                mCache.putSnapshot(task, snapshot);
-                mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
-                if (task.getController() != null) {
-                    task.getController().reportSnapshotChanged(snapshot);
+                final GraphicBuffer buffer = snapshot.getSnapshot();
+                if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
+                    buffer.destroy();
+                    Slog.e(TAG, "Invalid task snapshot dimensions " + buffer.getWidth() + "x"
+                            + buffer.getHeight());
+                } else {
+                    mCache.putSnapshot(task, snapshot);
+                    mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+                    if (task.getController() != null) {
+                        task.getController().reportSnapshotChanged(snapshot);
+                    }
                 }
             }
         }
