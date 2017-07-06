@@ -3770,7 +3770,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // SystemUIService notifies SystemBars of configuration changes, which then calls down here
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         updateResources();
         updateDisplaySize(); // populates mDisplayMetrics
 
