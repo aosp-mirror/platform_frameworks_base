@@ -26,6 +26,7 @@ import android.content.res.TypedArray;
 import android.icu.text.DecimalFormatSymbols;
 import android.os.Parcelable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
@@ -52,6 +53,7 @@ import com.android.internal.widget.NumericTextView.OnValueChangedListener;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * A delegate implementing the radial clock-based TimePicker.
@@ -111,7 +113,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     private int mCurrentHour;
     private int mCurrentMinute;
     private boolean mIs24Hour;
-    private boolean mIsAmPmAtStart;
+    private boolean mIsAmPmAtLeft = false; // The layouts put AM/PM at the right by default.
 
     // Localization data.
     private boolean mHourFormatShowLeadingZero;
@@ -431,28 +433,35 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         setCurrentItemShowing(index, false, true);
     }
 
+    // Find the location of AM/PM based on locale information.
+    private static boolean isAmPmAtLeftSide(Locale locale) {
+        final String dateTimePattern = DateFormat.getBestDateTimePattern(locale, "hm");
+        final boolean isAmPmAtStart = dateTimePattern.startsWith("a");
+        if (TextUtils.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_LTR) {
+            return isAmPmAtStart;
+        } else {
+            return !isAmPmAtStart;
+        }
+    }
+
     private void updateHeaderAmPm() {
         if (mIs24Hour) {
             mAmPmLayout.setVisibility(View.GONE);
         } else {
-            // Ensure that AM/PM layout is in the correct position.
-            final String dateTimePattern = DateFormat.getBestDateTimePattern(mLocale, "hm");
-            final boolean isAmPmAtStart = dateTimePattern.startsWith("a");
-            setAmPmAtStart(isAmPmAtStart);
-
+            setAmPmAtLeft(isAmPmAtLeftSide(mLocale));
             updateAmPmLabelStates(mCurrentHour < 12 ? AM : PM);
         }
     }
 
-    private void setAmPmAtStart(boolean isAmPmAtStart) {
-        if (mIsAmPmAtStart != isAmPmAtStart) {
-            mIsAmPmAtStart = isAmPmAtStart;
+    private void setAmPmAtLeft(boolean isAmPmAtLeft) {
+        if (mIsAmPmAtLeft != isAmPmAtLeft) {
+            mIsAmPmAtLeft = isAmPmAtLeft;
 
             final RelativeLayout.LayoutParams params =
                     (RelativeLayout.LayoutParams) mAmPmLayout.getLayoutParams();
             if (params.getRule(RelativeLayout.RIGHT_OF) != 0 ||
                     params.getRule(RelativeLayout.LEFT_OF) != 0) {
-                if (isAmPmAtStart) {
+                if (isAmPmAtLeft) {
                     params.removeRule(RelativeLayout.RIGHT_OF);
                     params.addRule(RelativeLayout.LEFT_OF, mHourView.getId());
                 } else {
