@@ -2882,8 +2882,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     } else {
                         // If a new task is being launched, then mark the existing top activity as
                         // supporting picture-in-picture while pausing
-                        if (focusedTopActivity != null &&
-                                focusedTopActivity.getStack().getStackId() != PINNED_STACK_ID) {
+                        if (focusedTopActivity != null
+                                && focusedTopActivity.getStackId() != PINNED_STACK_ID
+                                && r.getStackId() != ASSISTANT_STACK_ID) {
                             focusedTopActivity.supportsPictureInPictureWhilePausing = true;
                         }
                         transit = TRANSIT_TASK_OPEN;
@@ -4549,7 +4550,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         // If a new task is moved to the front, then mark the existing top activity as supporting
         // picture-in-picture while paused
-        if (topActivity != null && topActivity.getStack().getStackId() != PINNED_STACK_ID) {
+        if (topActivity != null && topActivity.getStackId() != PINNED_STACK_ID
+                && tr.getStackId() != ASSISTANT_STACK_ID) {
             topActivity.supportsPictureInPictureWhilePausing = true;
         }
 
