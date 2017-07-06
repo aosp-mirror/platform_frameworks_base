@@ -269,10 +269,13 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     private int calculateMode() {
         boolean unlockingAllowed = mUpdateMonitor.isUnlockingWithFingerprintAllowed();
+        boolean pulsing = mDozeScrimController.isPulsing();
+        boolean dozingWithScreenOn = mStatusBar.isDozing() && !mStatusBar.isScreenFullyOff();
+
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
                 return MODE_ONLY_WAKE;
-            } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
+            } else if ((pulsing || dozingWithScreenOn) && unlockingAllowed) {
                 return MODE_WAKE_AND_UNLOCK_PULSING;
             } else if (unlockingAllowed || !mUnlockMethodCache.isMethodSecure()) {
                 return MODE_WAKE_AND_UNLOCK;
