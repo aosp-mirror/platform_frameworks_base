@@ -393,10 +393,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void noteJobFinish(String name, int uid) {
+    public void noteJobFinish(String name, int uid, int stopReason) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteJobFinishLocked(name, uid);
+            mStats.noteJobFinishLocked(name, uid, stopReason);
         }
     }
 
