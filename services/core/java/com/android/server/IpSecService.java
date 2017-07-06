@@ -206,7 +206,11 @@ public class IpSecService extends IIpSecService.Stub {
 
         T get(int key) {
             T val = mArray.get(key);
-            val.checkOwnerOrSystemAndThrow();
+            // The value should never be null unless the resource doesn't exist
+            // (since we do not allow null resources to be added).
+            if (val != null) {
+                val.checkOwnerOrSystemAndThrow();
+            }
             return val;
         }
 
