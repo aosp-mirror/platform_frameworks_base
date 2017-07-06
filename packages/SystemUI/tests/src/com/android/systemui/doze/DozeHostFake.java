@@ -72,6 +72,11 @@ class DozeHostFake implements DozeHost {
     }
 
     @Override
+    public boolean isProvisioned() {
+        return false;
+    }
+
+    @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
         throw new RuntimeException("not implemented");
     }

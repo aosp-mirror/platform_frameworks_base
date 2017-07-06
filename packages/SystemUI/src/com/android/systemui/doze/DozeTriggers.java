@@ -172,14 +172,6 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
-    private void onCarMode() {
-        mMachine.requestState(DozeMachine.State.FINISH);
-    }
-
-    private void onPowerSave() {
-        mMachine.requestState(DozeMachine.State.FINISH);
-    }
-
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
@@ -215,11 +207,10 @@ public class DozeTriggers implements DozeMachine.Part {
     }
 
     private void checkTriggersAtInit() {
-        if (mUiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR) {
-            onCarMode();
-        }
-        if (mDozeHost.isPowerSaveActive()) {
-            onPowerSave();
+        if (mUiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR
+                || mDozeHost.isPowerSaveActive()
+                || !mDozeHost.isProvisioned()) {
+            mMachine.requestState(DozeMachine.State.FINISH);
         }
     }
 
@@ -355,7 +346,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 requestPulse(DozeLog.PULSE_REASON_INTENT, false /* performedProxCheck */);
             }
             if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
-                onCarMode();
+                mMachine.requestState(DozeMachine.State.FINISH);
             }
             if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
                 mDozeSensors.onUserSwitched();
@@ -391,7 +382,7 @@ public class DozeTriggers implements DozeMachine.Part {
         @Override
         public void onPowerSaveChanged(boolean active) {
             if (active) {
-                onPowerSave();
+                mMachine.requestState(DozeMachine.State.FINISH);
             }
         }
     };
