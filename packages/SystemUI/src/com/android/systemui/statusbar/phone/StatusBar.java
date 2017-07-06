@@ -1023,6 +1023,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStatusBarView.setBar(this);
                     mStatusBarView.setPanel(mNotificationPanel);
                     mStatusBarView.setScrimController(mScrimController);
+                    mStatusBarView.setBouncerShowing(mBouncerShowing);
                     setAreThereNotifications();
                     checkBarModes();
                 }).getFragmentManager()
@@ -5107,7 +5108,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void setBouncerShowing(boolean bouncerShowing) {
         mBouncerShowing = bouncerShowing;
-        mStatusBarView.setBouncerShowing(bouncerShowing);
+        if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
         recomputeDisableFlags(true /* animate */);
     }
 
