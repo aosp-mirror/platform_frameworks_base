@@ -1578,12 +1578,14 @@ public class RemoteViews implements Parcelable, Filter {
         ViewGroupActionAdd(Parcel parcel, BitmapCache bitmapCache, ApplicationInfo info,
                 int depth) {
             viewId = parcel.readInt();
+            mIndex = parcel.readInt();
             mNestedViews = new RemoteViews(parcel, bitmapCache, info, depth);
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(VIEW_GROUP_ACTION_ADD_TAG);
             dest.writeInt(viewId);
+            dest.writeInt(mIndex);
             mNestedViews.writeToParcel(dest, flags);
         }
 
