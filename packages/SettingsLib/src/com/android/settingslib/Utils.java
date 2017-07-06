@@ -130,7 +130,7 @@ public class Utils {
     }
 
     /** Formats a double from 0.0..1.0 as a percentage. */
-    private static String formatPercentage(double percentage) {
+    public static String formatPercentage(double percentage) {
         return NumberFormat.getPercentInstance().format(percentage);
     }
 
