@@ -533,6 +533,8 @@
     <dimen name="content_rect_bottom_clip_allowance">20dp</dimen>
 
     <dimen name="chooser_grid_padding">0dp</dimen>
+    <!-- Spacing around the background change frome service to non-service -->
+    <dimen name="chooser_service_spacing">8dp</dimen>
 
     <item type="dimen" name="aerr_padding_list_top">15dp</item>
     <item type="dimen" name="aerr_padding_list_bottom">8dp</item>
