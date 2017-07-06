@@ -45,4 +45,15 @@ public class FunctionalUtils {
     public interface ThrowingSupplier<T> {
         T get() throws Exception;
     }
+
+    /**
+     * An equivalent of {@link java.util.function.Consumer} that allows throwing checked exceptions
+     *
+     * This can be used to specify a lambda argument without forcing all the checked exceptions
+     * to be handled within it
+     */
+    @FunctionalInterface
+    public interface ThrowingConsumer<T> {
+        void accept(T t) throws Exception;
+    }
 }

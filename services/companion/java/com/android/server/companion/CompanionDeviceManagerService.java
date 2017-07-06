@@ -57,6 +57,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.text.BidiFormatter;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.ExceptionUtils;
 import android.util.Log;
@@ -83,6 +84,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -247,9 +249,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 throws RemoteException {
             checkCallerIsSystemOr(callingPackage, userId);
             checkUsesFeature(callingPackage, getCallingUserId());
-            return CollectionUtils.map(
+            return new ArrayList<>(CollectionUtils.map(
                     readAllAssociations(userId, callingPackage),
-                    a -> a.deviceAddress);
+                    a -> a.deviceAddress));
         }
 
         //TODO also revoke notification access
@@ -495,20 +497,20 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 new Association(userId, deviceAddress, priviledgedPackage)));
     }
 
-    private void updateAssociations(Function<List<Association>, List<Association>> update) {
+    private void updateAssociations(Function<Set<Association>, Set<Association>> update) {
         updateAssociations(update, getCallingUserId());
     }
 
-    private void updateAssociations(Function<List<Association>, List<Association>> update,
+    private void updateAssociations(Function<Set<Association>, Set<Association>> update,
             int userId) {
         final AtomicFile file = getStorageFileForUser(userId);
         synchronized (file) {
-            List<Association> associations = readAllAssociations(userId);
-            final List<Association> old = CollectionUtils.copyOf(associations);
+            Set<Association> associations = readAllAssociations(userId);
+            final Set<Association> old = CollectionUtils.copyOf(associations);
             associations = update.apply(associations);
             if (size(old) == size(associations)) return;
 
-            List<Association> finalAssociations = associations;
+            Set<Association> finalAssociations = associations;
             file.write((out) -> {
                 XmlSerializer xml = Xml.newSerializer();
                 try {
@@ -517,13 +519,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     xml.startDocument(null, true);
                     xml.startTag(null, XML_TAG_ASSOCIATIONS);
 
-                    for (int i = 0; i < size(finalAssociations); i++) {
-                        Association association = finalAssociations.get(i);
+                    CollectionUtils.forEach(finalAssociations, association -> {
                         xml.startTag(null, XML_TAG_ASSOCIATION)
-                            .attribute(null, XML_ATTR_PACKAGE, association.companionAppPackage)
-                            .attribute(null, XML_ATTR_DEVICE, association.deviceAddress)
-                            .endTag(null, XML_TAG_ASSOCIATION);
-                    }
+                                .attribute(null, XML_ATTR_PACKAGE, association.companionAppPackage)
+                                .attribute(null, XML_ATTR_DEVICE, association.deviceAddress)
+                                .endTag(null, XML_TAG_ASSOCIATION);
+                    });
 
                     xml.endTag(null, XML_TAG_ASSOCIATIONS);
                     xml.endDocument();
@@ -545,17 +546,17 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     @Nullable
-    private ArrayList<Association> readAllAssociations(int userId) {
+    private Set<Association> readAllAssociations(int userId) {
         return readAllAssociations(userId, null);
     }
 
     @Nullable
-    private ArrayList<Association> readAllAssociations(int userId, @Nullable String packageFilter) {
+    private Set<Association> readAllAssociations(int userId, @Nullable String packageFilter) {
         final AtomicFile file = getStorageFileForUser(userId);
 
         if (!file.getBaseFile().exists()) return null;
 
-        ArrayList<Association> result = null;
+        ArraySet<Association> result = null;
         final XmlPullParser parser = Xml.newPullParser();
         synchronized (file) {
             try (FileInputStream in = file.openRead()) {
@@ -627,12 +628,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         public int onCommand(String cmd) {
             switch (cmd) {
                 case "list": {
-                    ArrayList<Association> associations = readAllAssociations(getNextArgInt());
-                    for (int i = 0; i < size(associations); i++) {
-                        Association a = associations.get(i);
-                        getOutPrintWriter()
-                                .println(a.companionAppPackage + " " + a.deviceAddress);
-                    }
+                    CollectionUtils.forEach(
+                            readAllAssociations(getNextArgInt()),
+                            a -> getOutPrintWriter()
+                                    .println(a.companionAppPackage + " " + a.deviceAddress));
                 } break;
 
                 case "associate": {
