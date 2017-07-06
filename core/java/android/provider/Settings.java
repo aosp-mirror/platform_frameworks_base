@@ -6989,6 +6989,16 @@ public final class Settings {
                 "automatic_storage_manager_last_run";
 
         /**
+         * If the automatic storage manager has been disabled by policy. Note that this doesn't
+         * mean that the automatic storage manager is prevented from being re-enabled -- this only
+         * means that it was turned off by policy at least once.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_TURNED_OFF_BY_POLICY =
+                "automatic_storage_manager_turned_off_by_policy";
+
+        /**
          * Whether SystemUI navigation keys is enabled.
          * @hide
          */
