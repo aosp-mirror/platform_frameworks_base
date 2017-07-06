@@ -142,7 +142,8 @@ public class MbmsStreamingManager {
      * Starts streaming a requested service, reporting status to the indicated listener.
      * Returns an object used to control that stream. The stream may not be ready for consumption
      * immediately upon return from this method -- wait until the streaming state has been
-     * reported via {@link android.telephony.mbms.StreamingServiceCallback#streamStateUpdated(int)}
+     * reported via
+     * {@link android.telephony.mbms.StreamingServiceCallback#streamStateUpdated(int, int)}
      *
      * May throw an {@link MbmsException} containing any of the following error codes:
      * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
