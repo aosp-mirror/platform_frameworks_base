@@ -5177,6 +5177,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDozeScrimController.onScreenTurnedOn();
     }
 
+    /**
+     * @return true if the screen is currently fully off, i.e. has finished turning off and has
+     *         since not started turning on.
+     */
+    public boolean isScreenFullyOff() {
+        return mScreenFullyOff;
+    }
+
     @Override
     public void showScreenPinningRequest(int taskId) {
         if (mKeyguardMonitor.isShowing()) {
