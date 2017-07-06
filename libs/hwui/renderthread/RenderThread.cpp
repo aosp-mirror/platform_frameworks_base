@@ -200,13 +200,12 @@ void RenderThread::initThreadLocals() {
     initializeDisplayEventReceiver();
     mEglManager = new EglManager(*this);
     mRenderState = new RenderState(*this);
-    mJankTracker = new JankTracker(mDisplayInfo);
     mVkManager = new VulkanManager(*this);
     mCacheManager = new CacheManager(mDisplayInfo);
 }
 
 void RenderThread::dumpGraphicsMemory(int fd) {
-    jankTracker().dump(fd);
+    globalProfileData()->dump(fd);
 
     String8 cachesOutput;
     String8 pipeline;
