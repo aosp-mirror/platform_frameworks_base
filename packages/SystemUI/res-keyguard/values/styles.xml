@@ -60,7 +60,7 @@
         <item name="android:layout_gravity">center_horizontal|bottom</item>
     </style>
 
-    <style name="PasswordTheme" parent="@android:style/Theme.DeviceDefault">
+    <style name="PasswordTheme" parent="systemui_theme">
         <item name="android:textColor">?attr/bgProtectTextColor</item>
         <item name="android:colorControlNormal">?attr/bgProtectTextColor</item>
         <item name="android:colorControlActivated">?attr/bgProtectTextColor</item>
