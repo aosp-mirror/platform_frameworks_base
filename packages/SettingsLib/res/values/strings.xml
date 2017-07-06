@@ -465,6 +465,8 @@
     <string name="wifi_allow_scan_with_traffic">Always allow Wi\u2011Fi Roam Scans</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
+    <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
+    <string name="tethering_hardware_offload">Tethering hardware acceleration</string>
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
     <!-- Setting Checkbox title for enabling Bluetooth inband ringing -->
@@ -534,6 +536,7 @@
     <!-- Setting Checkbox title whether to enable view attribute inspection -->
     <string name="debug_view_attributes">Enable view attribute inspection</string>
     <string name="mobile_data_always_on_summary">Always keep mobile data active, even when Wi\u2011Fi is active (for fast network switching).</string>
+    <string name="tethering_hardware_offload_summary">Use tethering hardware acceleration if available</string>
     <!-- Title of warning dialog about the implications of enabling USB debugging -->
     <string name="adb_warning_title">Allow USB debugging?</string>
     <!-- Warning text to user about the implications of enabling USB debugging -->
