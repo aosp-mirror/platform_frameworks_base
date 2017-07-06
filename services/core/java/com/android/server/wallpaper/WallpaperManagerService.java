@@ -2616,6 +2616,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
                 pw.print("  mPadding="); pw.println(wallpaper.padding);
                 pw.print("  mName=");  pw.println(wallpaper.name);
+                pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
                 pw.print("  mWallpaperComponent="); pw.println(wallpaper.wallpaperComponent);
                 if (wallpaper.connection != null) {
                     WallpaperConnection conn = wallpaper.connection;
@@ -2646,6 +2647,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
                 pw.print("  mPadding="); pw.println(wallpaper.padding);
                 pw.print("  mName=");  pw.println(wallpaper.name);
+                pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
             }
 
         }
