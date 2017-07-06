@@ -14,7 +14,7 @@
 # limitations under the License.
 
 make -j44 FrameworksCoreTests
-adb install -r ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
+adb install -r -g ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
 adb logcat -c
 
 echo "Running benchmark 5 times"
