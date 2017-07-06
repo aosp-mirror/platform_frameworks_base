@@ -291,7 +291,6 @@ class TaskSnapshotPersister {
                 failed = true;
             }
             if (!writeBuffer()) {
-                writeBuffer();
                 failed = true;
             }
             if (failed) {
@@ -327,11 +326,7 @@ class TaskSnapshotPersister {
             final File reducedFile = getReducedResolutionBitmapFile(mTaskId, mUserId);
             final Bitmap bitmap = Bitmap.createHardwareBitmap(mSnapshot.getSnapshot());
             if (bitmap == null) {
-                Slog.e(TAG, "Invalid task snapshot");
-                return false;
-            } else if (bitmap.getWidth() == 0 || bitmap.getHeight() == 0) {
-                Slog.e(TAG, "Invalid task snapshot dimensions " + bitmap.getWidth() + "x"
-                        + bitmap.getHeight());
+                Slog.e(TAG, "Invalid task snapshot hw bitmap");
                 return false;
             }
 
