@@ -100,6 +100,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.util.LogWriter;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -125,6 +126,7 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
 
@@ -132,8 +134,6 @@ import dalvik.system.BaseDexClassLoader;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
 import dalvik.system.VMRuntime;
-
-import com.google.android.collect.Lists;
 
 import libcore.io.DropBox;
 import libcore.io.EventLogger;
@@ -152,6 +152,7 @@ import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -3052,7 +3053,7 @@ public final class ActivityThread {
     public void handleInstallProvider(ProviderInfo info) {
         final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
         try {
-            installContentProviders(mInitialApplication, Lists.newArrayList(info));
+            installContentProviders(mInitialApplication, Arrays.asList(info));
         } finally {
             StrictMode.setThreadPolicy(oldPolicy);
         }
@@ -3935,6 +3936,14 @@ public final class ActivityThread {
                 ActivityManager.getService().activityStopped(
                     activity.token, state, persistentState, description);
             } catch (RemoteException ex) {
+                // Dump statistics about bundle to help developers debug
+                final LogWriter writer = new LogWriter(Log.WARN, TAG);
+                final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+                pw.println("Bundle stats:");
+                Bundle.dumpStats(pw, state);
+                pw.println("PersistableBundle stats:");
+                Bundle.dumpStats(pw, persistentState);
+
                 if (ex instanceof TransactionTooLargeException
                         && activity.packageInfo.getTargetSdkVersion() < Build.VERSION_CODES.N) {
                     Log.e(TAG, "App sent too much data in instance state, so it was ignored", ex);
