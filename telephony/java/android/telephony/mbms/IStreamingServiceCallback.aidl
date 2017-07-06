@@ -21,7 +21,7 @@ package android.telephony.mbms;
  */
 oneway interface IStreamingServiceCallback {
     void error(int errorCode, String message);
-    void streamStateUpdated(int state);
+    void streamStateUpdated(int state, int reason);
     void mediaDescriptionUpdated();
     void broadcastSignalStrengthUpdated(int signalStrength);
     void streamMethodUpdated(int methodType);
