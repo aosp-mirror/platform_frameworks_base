@@ -93,19 +93,21 @@ public class MbmsDownloadManager {
     /**
      * Integer extra indicating the result code of the download. One of
      * {@link #RESULT_SUCCESSFUL}, {@link #RESULT_EXPIRED}, or {@link #RESULT_CANCELLED}.
+     * TODO: Not systemapi.
      */
     public static final String EXTRA_RESULT = "android.telephony.mbms.extra.RESULT";
 
     /**
      * Extra containing the {@link android.telephony.mbms.FileInfo} for which the download result
      * is for. Must not be null.
-     * TODO: future systemapi (here and and all extras) except the two for the app intent
+     * TODO: Not systemapi.
      */
     public static final String EXTRA_FILE_INFO = "android.telephony.mbms.extra.FILE_INFO";
 
     /**
      * Extra containing the {@link DownloadRequest} for which the download result or file
      * descriptor request is for. Must not be null.
+     * TODO: future systemapi (here and and all extras) except the three for the app intent
      */
     public static final String EXTRA_REQUEST = "android.telephony.mbms.extra.REQUEST";
 
@@ -180,6 +182,7 @@ public class MbmsDownloadManager {
      * {@link android.telephony.mbms.DownloadRequest.Builder#setAppIntent(Intent)}.
      * Will always be set to a non-null value if {@link #EXTRA_RESULT} is set to
      * {@link #RESULT_SUCCESSFUL}.
+     * TODO: Not systemapi.
      */
     public static final String EXTRA_COMPLETED_FILE_URI =
             "android.telephony.mbms.extra.COMPLETED_FILE_URI";
@@ -554,7 +557,7 @@ public class MbmsDownloadManager {
 
     private File getDownloadRequestTokenPath(DownloadRequest request) {
         File tempFileLocation = MbmsUtils.getEmbmsTempFileDirForService(mContext,
-                request.getFileServiceInfo());
+                request.getFileServiceId());
         String downloadTokenFileName = request.getHash()
                 + MbmsDownloadReceiver.DOWNLOAD_TOKEN_SUFFIX;
         return new File(tempFileLocation, downloadTokenFileName);
