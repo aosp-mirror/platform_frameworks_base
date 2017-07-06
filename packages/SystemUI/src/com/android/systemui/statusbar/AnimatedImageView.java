@@ -32,6 +32,7 @@ public class AnimatedImageView extends ImageView {
     private final boolean mHasOverlappingRendering;
     AnimationDrawable mAnim;
     boolean mAttached;
+    private boolean mAllowAnimation;
 
     // Tracks the last image that was set, so that we don't refresh the image if it is exactly
     // the same as the previous one. If this is a resid, we track that. If it's a drawable, we
@@ -56,6 +57,17 @@ public class AnimatedImageView extends ImageView {
         }
     }
 
+    public void setAllowAnimation(boolean allowAnimation) {
+        if (mAllowAnimation != allowAnimation) {
+            mAllowAnimation = allowAnimation;
+            updateAnim();
+            if (!mAllowAnimation && mAnim != null) {
+                // Reset drawable such that we show the first frame whenever we're not animating.
+                mAnim.setVisible(getVisibility() == VISIBLE, true /* restart */);
+            }
+        }
+    }
+
     private void updateAnim() {
         Drawable drawable = getDrawable();
         if (mAttached && mAnim != null) {
@@ -63,7 +75,7 @@ public class AnimatedImageView extends ImageView {
         }
         if (drawable instanceof AnimationDrawable) {
             mAnim = (AnimationDrawable) drawable;
-            if (isShown()) {
+            if (isShown() && mAllowAnimation) {
                 mAnim.start();
             }
         } else {
@@ -114,7 +126,7 @@ public class AnimatedImageView extends ImageView {
     protected void onVisibilityChanged(View changedView, int vis) {
         super.onVisibilityChanged(changedView, vis);
         if (mAnim != null) {
-            if (isShown()) {
+            if (isShown() && mAllowAnimation) {
                 mAnim.start();
             } else {
                 mAnim.stop();
