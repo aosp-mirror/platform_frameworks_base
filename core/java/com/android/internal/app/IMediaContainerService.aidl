@@ -27,9 +27,6 @@ interface IMediaContainerService {
 
     PackageInfoLite getMinimalPackageInfo(String packagePath, int flags, String abiOverride);
     ObbInfo getObbInfo(String filename);
-    long calculateDirectorySize(String directory);
-    /** Return file system stats: [0] is total bytes, [1] is available bytes */
-    long[] getFileSystemStats(String path);
     void clearDirectory(String directory);
     long calculateInstalledSize(String packagePath, boolean isForwardLocked, String abiOverride);
 }
