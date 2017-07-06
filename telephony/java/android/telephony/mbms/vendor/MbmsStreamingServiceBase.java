@@ -72,7 +72,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Starts streaming on a particular service. This method may perform asynchronous work. When
      * the middleware is ready to send bits to the frontend, it should inform the app via
-     * {@link IStreamingServiceCallback#streamStateUpdated(int)}.
+     * {@link IStreamingServiceCallback#streamStateUpdated(int, int)}.
      *
      * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
@@ -107,7 +107,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Stop streaming the stream identified by {@code serviceId}. Notification of the resulting
      * stream state change should be reported to the app via
-     * {@link IStreamingServiceCallback#streamStateUpdated(int)}.
+     * {@link IStreamingServiceCallback#streamStateUpdated(int, int)}.
      *
      * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *

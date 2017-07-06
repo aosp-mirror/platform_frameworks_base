@@ -16,11 +16,15 @@
 
 package android.telephony.mbms;
 
+import android.annotation.IntDef;
 import android.net.Uri;
 import android.os.DeadObjectException;
 import android.os.RemoteException;
 import android.telephony.mbms.vendor.IMbmsStreamingService;
 import android.util.Log;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * @hide
@@ -30,10 +34,29 @@ public class StreamingService {
 
     /**
      * The state of a stream, reported via {@link StreamingServiceCallback#streamStateUpdated}
+     * @hide
      */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STATE_STOPPED, STATE_STARTED, STATE_STALLED})
+    public @interface StreamingState {}
     public final static int STATE_STOPPED = 1;
     public final static int STATE_STARTED = 2;
     public final static int STATE_STALLED = 3;
+
+    /**
+     * The reason for a stream state change, reported via
+     * {@link StreamingServiceCallback#streamStateUpdated}
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({REASON_BY_USER_REQUEST, REASON_END_OF_SESSION, REASON_FREQUENCY_CONFLICT,
+            REASON_OUT_OF_MEMORY, REASON_NOT_CONNECTED_TO_HOMECARRIER_LTE})
+    public @interface StreamingStateChangeReason {}
+    public static final int REASON_BY_USER_REQUEST = 1;
+    public static final int REASON_END_OF_SESSION = 2;
+    public static final int REASON_FREQUENCY_CONFLICT = 3;
+    public static final int REASON_OUT_OF_MEMORY = 4;
+    public static final int REASON_NOT_CONNECTED_TO_HOMECARRIER_LTE = 5;
 
     /**
      * The method of transmission currently used for a stream,
