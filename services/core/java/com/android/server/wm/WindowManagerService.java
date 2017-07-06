@@ -2322,7 +2322,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // artifacts when we unfreeze the display if some different animation
         // is running.
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WM#applyAnimationLocked");
-        if (okToDisplay()) {
+        if (okToAnimate()) {
             final DisplayContent displayContent = atoken.getTask().getDisplayContent();
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             final int width = displayInfo.appWidth;
@@ -2400,6 +2400,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean okToDisplay() {
         return !mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOn();
+    }
+
+    boolean okToAnimate() {
+        return okToDisplay() && mPolicy.isInteractive();
     }
 
     @Override
@@ -2668,7 +2672,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             boolean prepared = mAppTransition.prepareAppTransitionLocked(transit, alwaysKeepCurrent,
                     flags, forceOverride);
-            if (prepared && okToDisplay()) {
+            if (prepared && okToAnimate()) {
                 mSkipAppTransitionAnimation = false;
             }
         }
