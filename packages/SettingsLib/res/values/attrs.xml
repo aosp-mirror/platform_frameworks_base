@@ -48,4 +48,9 @@
 
     <attr name="footerPreferenceStyle" format="reference" />
 
+    <declare-styleable name="PreferenceImageView">
+        <attr name="maxWidth" format="dimension" />
+        <attr name="maxHeight" format="dimension" />
+    </declare-styleable>
+
 </resources>
