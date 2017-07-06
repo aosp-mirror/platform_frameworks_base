@@ -266,13 +266,17 @@ public class NavigationBarInflaterView extends FrameLayout
         parent.addView(v);
         addToDispatchers(v);
         View lastView = landscape ? mLastLandscape : mLastPortrait;
+        View accessibilityView = v;
+        if (v instanceof ReverseFrameLayout) {
+            accessibilityView = ((ReverseFrameLayout) v).getChildAt(0);
+        }
         if (lastView != null) {
-            v.setAccessibilityTraversalAfter(lastView.getId());
+            accessibilityView.setAccessibilityTraversalAfter(lastView.getId());
         }
         if (landscape) {
-            mLastLandscape = v;
+            mLastLandscape = accessibilityView;
         } else {
-            mLastPortrait = v;
+            mLastPortrait = accessibilityView;
         }
         return v;
     }
