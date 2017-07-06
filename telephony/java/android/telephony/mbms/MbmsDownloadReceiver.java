@@ -83,7 +83,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     public static final int RESULT_DOWNLOAD_FINALIZATION_ERROR = 4;
 
     /**
-     * Indicates that the manager weas unable to generate one or more of the requested file
+     * Indicates that the manager was unable to generate one or more of the requested file
      * descriptors.
      * This is a non-fatal result code -- some file descriptors may still be generated, but there
      * is no guarantee that they will be the same number as requested.
@@ -149,7 +149,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
             DownloadRequest request = intent.getParcelableExtra(MbmsDownloadManager.EXTRA_REQUEST);
             String expectedTokenFileName = request.getHash() + DOWNLOAD_TOKEN_SUFFIX;
             File expectedTokenFile = new File(
-                    MbmsUtils.getEmbmsTempFileDirForService(context, request.getFileServiceInfo()),
+                    MbmsUtils.getEmbmsTempFileDirForService(context, request.getFileServiceId()),
                     expectedTokenFileName);
             if (!expectedTokenFile.exists()) {
                 Log.w(LOG_TAG, "Supplied download request does not match a token that we have. " +
@@ -201,22 +201,24 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
         Uri destinationUri = request.getDestinationUri();
         Uri finalTempFile = intent.getParcelableExtra(MbmsDownloadManager.EXTRA_FINAL_URI);
-        if (!verifyTempFilePath(context, request.getFileServiceInfo(), finalTempFile)) {
+        if (!verifyTempFilePath(context, request.getFileServiceId(), finalTempFile)) {
             Log.w(LOG_TAG, "Download result specified an invalid temp file " + finalTempFile);
             setResultCode(RESULT_DOWNLOAD_FINALIZATION_ERROR);
             return;
         }
 
-        String relativePath = calculateDestinationFileRelativePath(request,
-                (FileInfo) intent.getParcelableExtra(MbmsDownloadManager.EXTRA_FILE_INFO));
+        FileInfo completedFileInfo =
+                (FileInfo) intent.getParcelableExtra(MbmsDownloadManager.EXTRA_FILE_INFO);
+        String relativePath = calculateDestinationFileRelativePath(request, completedFileInfo);
 
         Uri finalFileLocation = moveTempFile(finalTempFile, destinationUri, relativePath);
         if (finalFileLocation == null) {
             Log.w(LOG_TAG, "Failed to move temp file to final destination");
-            // TODO: how do we notify the app of this?
             setResultCode(RESULT_DOWNLOAD_FINALIZATION_ERROR);
+            return;
         }
         intentForApp.putExtra(MbmsDownloadManager.EXTRA_COMPLETED_FILE_URI, finalFileLocation);
+        intentForApp.putExtra(MbmsDownloadManager.EXTRA_FILE_INFO, completedFileInfo);
 
         context.sendBroadcast(intentForApp);
         setResultCode(RESULT_OK);
@@ -235,7 +237,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
 
         for (Uri tempFileUri : tempFiles) {
-            if (verifyTempFilePath(context, request.getFileServiceInfo(), tempFileUri)) {
+            if (verifyTempFilePath(context, request.getFileServiceId(), tempFileUri)) {
                 File tempFile = new File(tempFileUri.getSchemeSpecificPart());
                 tempFile.delete();
             }
@@ -276,7 +278,8 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     private ArrayList<UriPathPair> generateFreshTempFiles(Context context,
             FileServiceInfo serviceInfo,
             int freshFdCount) {
-        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context, serviceInfo);
+        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context,
+                serviceInfo.getServiceId());
         if (!tempFileDir.exists()) {
             tempFileDir.mkdirs();
         }
@@ -327,7 +330,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         ArrayList<UriPathPair> result = new ArrayList<>(pausedFiles.size());
 
         for (Uri fileUri : pausedFiles) {
-            if (!verifyTempFilePath(context, serviceInfo, fileUri)) {
+            if (!verifyTempFilePath(context, serviceInfo.getServiceId(), fileUri)) {
                 Log.w(LOG_TAG, "Supplied file " + fileUri + " is not a valid temp file to resume");
                 setResultCode(RESULT_TEMP_FILE_GENERATION_ERROR);
                 continue;
@@ -351,7 +354,8 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     private void cleanupTempFiles(Context context, Intent intent) {
         FileServiceInfo serviceInfo =
                 intent.getParcelableExtra(MbmsDownloadManager.EXTRA_SERVICE_INFO);
-        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context, serviceInfo);
+        File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context,
+                serviceInfo.getServiceId());
         List<Uri> filesInUse =
                 intent.getParcelableArrayListExtra(MbmsDownloadManager.EXTRA_TEMP_FILES_IN_USE);
         File[] filesToDelete = tempFileDir.listFiles(new FileFilter() {
@@ -439,7 +443,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         return null;
     }
 
-    private static boolean verifyTempFilePath(Context context, FileServiceInfo serviceInfo,
+    private static boolean verifyTempFilePath(Context context, String serviceId,
             Uri filePath) {
         if (!ContentResolver.SCHEME_FILE.equals(filePath.getScheme())) {
             Log.w(LOG_TAG, "Uri " + filePath + " does not have a file scheme");
@@ -454,7 +458,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
 
         if (!MbmsUtils.isContainedIn(
-                MbmsUtils.getEmbmsTempFileDirForService(context, serviceInfo), tempFile)) {
+                MbmsUtils.getEmbmsTempFileDirForService(context, serviceId), tempFile)) {
             return false;
         }
 
