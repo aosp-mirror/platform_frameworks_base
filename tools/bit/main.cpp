@@ -731,7 +731,7 @@ run_phases(vector<Target*> targets, const Options& options)
             InstallApk& apk = installApks[i];
             if (!apk.file.fileInfo.exists || apk.file.HasChanged()) {
                 // It didn't exist before or it changed, so int needs install
-                err = run_adb("install", "-r", apk.file.filename.c_str(), NULL);
+                err = run_adb("install", "-r", "-g", apk.file.filename.c_str(), NULL);
                 check_error(err);
                 apk.installed = true;
             } else {
