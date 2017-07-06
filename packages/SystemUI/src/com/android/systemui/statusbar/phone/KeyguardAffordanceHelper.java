@@ -168,8 +168,7 @@ public class KeyguardAffordanceHelper {
                         distance = mTranslationOnDown + distance;
                         distance = Math.max(0, distance);
                     }
-                    setTranslation(distance, false /* isReset */, false /* animateReset */,
-                            false /* force */);
+                    setTranslation(distance, false /* isReset */, false /* animateReset */);
                 }
                 break;
 
@@ -374,12 +373,11 @@ public class KeyguardAffordanceHelper {
         targetView.finishAnimation(velocity, mAnimationEndRunnable);
     }
 
-    private void setTranslation(float translation, boolean isReset, boolean animateReset,
-            boolean force) {
+    private void setTranslation(float translation, boolean isReset, boolean animateReset) {
         translation = rightSwipePossible() ? translation : Math.max(0, translation);
         translation = leftSwipePossible() ? translation : Math.min(0, translation);
         float absTranslation = Math.abs(translation);
-        if (translation != mTranslation || isReset || force) {
+        if (translation != mTranslation || isReset) {
             KeyguardAffordanceView targetView = translation > 0 ? mLeftIcon : mRightIcon;
             KeyguardAffordanceView otherView = translation > 0 ? mRightIcon : mLeftIcon;
             float alpha = absTranslation / getMinTranslationAmount();
@@ -394,15 +392,15 @@ public class KeyguardAffordanceHelper {
             boolean slowAnimation = isReset && isBelowFalsingThreshold();
             if (!isReset) {
                 updateIcon(targetView, radius, alpha + fadeOutAlpha * targetView.getRestingAlpha(),
-                        false, false, force, false);
+                        false, false, false, false);
             } else {
                 updateIcon(targetView, 0.0f, fadeOutAlpha * targetView.getRestingAlpha(),
-                        animateIcons, slowAnimation, force, forceNoCircleAnimation);
+                        animateIcons, slowAnimation, true /* isReset */, forceNoCircleAnimation);
             }
             updateIcon(otherView, 0.0f, fadeOutAlpha * otherView.getRestingAlpha(),
-                    animateIcons, slowAnimation, force, forceNoCircleAnimation);
+                    animateIcons, slowAnimation, isReset, forceNoCircleAnimation);
             updateIcon(mCenterIcon, 0.0f, fadeOutAlpha * mCenterIcon.getRestingAlpha(),
-                    animateIcons, slowAnimation, force, forceNoCircleAnimation);
+                    animateIcons, slowAnimation, isReset, forceNoCircleAnimation);
 
             mTranslation = translation;
         }
@@ -510,21 +508,13 @@ public class KeyguardAffordanceHelper {
     }
 
     public void reset(boolean animate) {
-        reset(animate, false /* force */);
-    }
-
-    public void reset(boolean animate, boolean force) {
         cancelAnimation();
-        setTranslation(0.0f, true, animate, force);
+        setTranslation(0.0f, true /* isReset */, animate);
         mMotionCancelled = true;
         if (mSwipingInProgress) {
             mCallback.onSwipingAborted();
             mSwipingInProgress = false;
         }
-    }
-
-    public void resetImmediately() {
-        reset(false /* animate */, true /* force */);
     }
 
     public boolean isSwipingInProgress() {
