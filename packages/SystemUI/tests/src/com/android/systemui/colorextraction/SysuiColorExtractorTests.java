@@ -23,18 +23,13 @@ import android.app.WallpaperManager;
 import android.graphics.Color;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Pair;
 
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.types.Tonal;
 import com.android.systemui.SysuiTestCase;
-
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.types.Tonal;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Tests color extraction generation.
