@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import android.annotation.StringRes;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -32,6 +34,15 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
      * if not set, 0.
      */
     public int descriptionRes;
+
+    /**
+     * A string resource identifier (in the package's resources) used to request the permissions.
+     * From the "request" attribute or, if not set, 0.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @StringRes int requestRes;
 
     /**
      * The description string provided in the AndroidManifest file, if any.  You
@@ -64,6 +75,7 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
     public PermissionGroupInfo(PermissionGroupInfo orig) {
         super(orig);
         descriptionRes = orig.descriptionRes;
+        requestRes = orig.requestRes;
         nonLocalizedDescription = orig.nonLocalizedDescription;
         flags = orig.flags;
         priority = orig.priority;
@@ -106,6 +118,7 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeInt(descriptionRes);
+        dest.writeInt(requestRes);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
         dest.writeInt(flags);
         dest.writeInt(priority);
@@ -124,6 +137,7 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
     private PermissionGroupInfo(Parcel source) {
         super(source);
         descriptionRes = source.readInt();
+        requestRes = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         flags = source.readInt();
         priority = source.readInt();

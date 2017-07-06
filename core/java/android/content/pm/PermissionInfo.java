@@ -198,6 +198,15 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public int descriptionRes;
 
     /**
+     * A string resource identifier (in the package's resources) used to request the permissions.
+     * From the "request" attribute or, if not set, 0.
+     *
+     * @hide
+     */
+    @SystemApi
+    public int requestRes;
+
+    /**
      * The description string provided in the AndroidManifest file, if any.  You
      * probably don't want to use this, since it will be null if the description
      * is in a resource.  You probably want
@@ -272,6 +281,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         flags = orig.flags;
         group = orig.group;
         descriptionRes = orig.descriptionRes;
+        requestRes = orig.requestRes;
         nonLocalizedDescription = orig.nonLocalizedDescription;
     }
 
@@ -315,6 +325,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(flags);
         dest.writeString(group);
         dest.writeInt(descriptionRes);
+        dest.writeInt(requestRes);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
     }
 
@@ -334,6 +345,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         flags = source.readInt();
         group = source.readString();
         descriptionRes = source.readInt();
+        requestRes = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
     }
 }
