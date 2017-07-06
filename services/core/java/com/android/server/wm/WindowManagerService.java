@@ -1445,6 +1445,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
+            win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
+
             final AppWindowToken aToken = token.asAppWindowToken();
             if (type == TYPE_APPLICATION_STARTING && aToken != null) {
                 aToken.startingWindow = win;
