@@ -1053,7 +1053,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /** Attempt to update the AccessPoint and return true if an update occurred. */
-    public boolean update(WifiConfiguration config, WifiInfo info, NetworkInfo networkInfo) {
+    public boolean update(
+            @Nullable WifiConfiguration config, WifiInfo info, NetworkInfo networkInfo) {
         boolean updated = false;
         final int oldLevel = getLevel();
         if (info != null && isInfoForThisAccessPoint(config, info)) {
@@ -1088,9 +1089,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return updated;
     }
 
-    void update(WifiConfiguration config) {
+    void update(@Nullable WifiConfiguration config) {
         mConfig = config;
-        networkId = config.networkId;
+        networkId = config != null ? config.networkId : WifiConfiguration.INVALID_NETWORK_ID;
         if (mAccessPointListener != null) {
             mAccessPointListener.onAccessPointChanged(this);
         }
