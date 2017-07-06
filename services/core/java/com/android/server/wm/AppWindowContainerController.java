@@ -436,7 +436,7 @@ public class AppWindowContainerController
 
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
-            if (mService.okToDisplay() && mService.mAppTransition.isTransitionSet()) {
+            if (mService.okToAnimate() && mService.mAppTransition.isTransitionSet()) {
                 // A dummy animation is a placeholder animation which informs others that an
                 // animation is going on (in this case an application transition). If the animation
                 // was transferred from another application/animator, no dummy animator should be
