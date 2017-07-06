@@ -349,6 +349,9 @@ public class NotificationPanelView extends PanelView implements
         addView(mKeyguardBottomArea, index);
         initBottomArea();
         setDarkAmount(mDarkAmount);
+
+        setKeyguardStatusViewVisibility(mStatusBarState, false, false);
+        setKeyguardBottomAreaVisibility(mStatusBarState, false);
     }
 
     private void initBottomArea() {
