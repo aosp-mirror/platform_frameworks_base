@@ -95,6 +95,11 @@ TEST_F(ResourceParserTest, ParseEscapedString) {
   ASSERT_THAT(str, NotNull());
   EXPECT_THAT(*str, StrValueEq("?123"));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  ASSERT_TRUE(TestParse(R"(<string name="bar">This isn\’t a bad string</string>)"));
+  str = test::GetValue<String>(&table_, "string/bar");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str, StrValueEq("This isn’t a bad string"));
 }
 
 TEST_F(ResourceParserTest, ParseFormattedString) {
