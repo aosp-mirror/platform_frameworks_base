@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
@@ -491,9 +490,27 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /** Check if placing task or activity on specified display is allowed. */
-    boolean canPlaceEntityOnDisplay(int displayId, boolean resizeable) {
-        return displayId == DEFAULT_DISPLAY || (mService.mSupportsMultiDisplay
-                && (resizeable || displayConfigMatchesGlobal(displayId)));
+    boolean canPlaceEntityOnDisplay(int displayId, boolean resizeable, int callingPid,
+            int callingUid, ActivityInfo activityInfo) {
+        if (displayId == DEFAULT_DISPLAY) {
+            // No restrictions for the default display.
+            return true;
+        }
+        if (!mService.mSupportsMultiDisplay) {
+            // Can't launch on secondary displays if feature is not supported.
+            return false;
+        }
+        if (!resizeable && !displayConfigMatchesGlobal(displayId)) {
+            // Can't apply wrong configuration to non-resizeable activities.
+            return false;
+        }
+        if (!isCallerAllowedToLaunchOnDisplay(callingPid, callingUid, displayId, activityInfo)) {
+            // Can't place activities to a display that has restricted launch rules.
+            // In this case the request should be made by explicitly adding target display id and
+            // by caller with corresponding permissions. See #isCallerAllowedToLaunchOnDisplay().
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -1679,8 +1696,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Check if someone tries to launch an activity on a private display with a different
             // owner.
             final int launchDisplayId = options.getLaunchDisplayId();
-            if (launchDisplayId != INVALID_DISPLAY
-                    && !isCallerAllowedToLaunchOnDisplay(callingPid, callingUid, launchDisplayId)) {
+            if (launchDisplayId != INVALID_DISPLAY && !isCallerAllowedToLaunchOnDisplay(callingPid,
+                    callingUid, launchDisplayId, aInfo)) {
                 final String msg = "Permission Denial: starting " + intent.toString()
                         + " from " + callerApp + " (pid=" + callingPid
                         + ", uid=" + callingUid + ") with launchDisplayId="
@@ -1694,9 +1711,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /** Check if caller is allowed to launch activities on specified display. */
-    boolean isCallerAllowedToLaunchOnDisplay(int callingPid, int callingUid, int launchDisplayId) {
+    boolean isCallerAllowedToLaunchOnDisplay(int callingPid, int callingUid, int launchDisplayId,
+            ActivityInfo aInfo) {
         if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check: displayId=" + launchDisplayId
                 + " callingPid=" + callingPid + " callingUid=" + callingUid);
+
+        if (callingPid == -1 && callingUid == -1) {
+            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check: no caller info, skip check");
+            return true;
+        }
 
         final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(launchDisplayId);
         if (activityDisplay == null) {
@@ -1704,7 +1727,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        // Check if the caller can manage activity stacks.
+        // Check if the caller has enough privileges to embed activities and launch to private
+        // displays.
         final int startAnyPerm = mService.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED) {
@@ -1714,12 +1738,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         if (activityDisplay.mDisplay.getType() == TYPE_VIRTUAL
-                && activityDisplay.mDisplay.getOwnerUid() != SYSTEM_UID) {
+                && activityDisplay.mDisplay.getOwnerUid() != SYSTEM_UID
+                && activityDisplay.mDisplay.getOwnerUid() != aInfo.applicationInfo.uid) {
             // Limit launching on virtual displays, because their contents can be read from Surface
             // by apps that created them.
-            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
-                    + " disallow launch on virtual display for not-embedded activity");
-            return false;
+            if ((aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
+                if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
+                        + " disallow launch on virtual display for not-embedded activity.");
+                return false;
+            }
         }
 
         if (!activityDisplay.isPrivate()) {

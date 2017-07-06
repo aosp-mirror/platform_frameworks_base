@@ -1841,13 +1841,30 @@ class ActivityStarter {
 
         final TaskRecord sourceTask = mSourceRecord.getTask();
         final ActivityStack sourceStack = mSourceRecord.getStack();
-        // We only want to allow changing stack if the target task is not the top one,
-        // otherwise we would move the launching task to the other side, rather than show
-        // two side by side.
-        final boolean moveStackAllowed = sourceStack.topTask() != sourceTask;
+        // We only want to allow changing stack in two cases:
+        // 1. If the target task is not the top one. Otherwise we would move the launching task to
+        //    the other side, rather than show two side by side.
+        // 2. If activity is not allowed on target display.
+        final int targetDisplayId = mTargetStack != null ? mTargetStack.mDisplayId
+                : sourceStack.mDisplayId;
+        final boolean moveStackAllowed = sourceStack.topTask() != sourceTask
+                || !mStartActivity.canBeLaunchedOnDisplay(targetDisplayId);
         if (moveStackAllowed) {
             mTargetStack = getLaunchStack(mStartActivity, mLaunchFlags, mStartActivity.getTask(),
                     mOptions);
+            // If target stack is not found now - we can't just rely on the source stack, as it may
+            // be not suitable. Let's check other displays.
+            if (mTargetStack == null && targetDisplayId != sourceStack.mDisplayId) {
+                // Can't use target display, lets find a stack on the source display.
+                mTargetStack = mService.mStackSupervisor.getValidLaunchStackOnDisplay(
+                        sourceStack.mDisplayId, mStartActivity);
+            }
+            if (mTargetStack == null) {
+                // There are no suitable stacks on the target and source display(s). Look on all
+                // displays.
+                mTargetStack = mService.mStackSupervisor.getNextValidLaunchStackLocked(
+                        mStartActivity, -1 /* currentFocus */);
+            }
         }
 
         if (mTargetStack == null) {

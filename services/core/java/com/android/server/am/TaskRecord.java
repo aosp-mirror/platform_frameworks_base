@@ -1582,7 +1582,8 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
         return mService.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
-                isResizeable(false /* checkSupportsPip */));
+                isResizeable(false /* checkSupportsPip */), -1 /* don't check PID */,
+                -1 /* don't check UID */, null /* activityInfo */);
     }
 
     /**

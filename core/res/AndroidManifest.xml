@@ -1855,6 +1855,10 @@
     <permission android:name="android.permission.MANAGE_ACTIVITY_STACKS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to embed other activities -->
+    <permission android:name="android.permission.ACTIVITY_EMBEDDING"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to start any activity, regardless of permission
          protection or exported state.
          @hide -->
