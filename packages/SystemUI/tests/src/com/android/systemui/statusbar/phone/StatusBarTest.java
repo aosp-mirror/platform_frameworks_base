@@ -67,6 +67,7 @@ import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
@@ -153,6 +154,12 @@ public class StatusBarTest extends SysuiTestCase {
                 return true;
             }
         });
+    }
+
+    @Test
+    public void testSetBouncerShowing_noCrash() {
+        mStatusBar.mCommandQueue = mock(CommandQueue.class);
+        mStatusBar.setBouncerShowing(true);
     }
 
     @Test
