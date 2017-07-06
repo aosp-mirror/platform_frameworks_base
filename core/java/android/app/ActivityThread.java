@@ -5692,11 +5692,12 @@ public final class ActivityThread {
         // Allow disk access during application and provider setup. This could
         // block processing ordered broadcasts, but later processing would
         // probably end up doing the same disk access.
+        Application app;
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskWrites();
         try {
             // If the app is being launched for full backup or restore, bring it up in
             // a restricted environment with the base application class.
-            Application app = data.info.makeApplication(data.restrictedBackupMode, null);
+            app = data.info.makeApplication(data.restrictedBackupMode, null);
             mInitialApplication = app;
 
             // don't bring up providers in restricted mode; they may depend on the
@@ -5720,18 +5721,18 @@ public final class ActivityThread {
                     "Exception thrown in onCreate() of "
                     + data.instrumentationName + ": " + e.toString(), e);
             }
-
-            try {
-                mInstrumentation.callApplicationOnCreate(app);
-            } catch (Exception e) {
-                if (!mInstrumentation.onException(app, e)) {
-                    throw new RuntimeException(
-                        "Unable to create application " + app.getClass().getName()
-                        + ": " + e.toString(), e);
-                }
-            }
         } finally {
             StrictMode.setThreadPolicy(savedPolicy);
+        }
+
+        try {
+            mInstrumentation.callApplicationOnCreate(app);
+        } catch (Exception e) {
+            if (!mInstrumentation.onException(app, e)) {
+                throw new RuntimeException(
+                    "Unable to create application " + app.getClass().getName()
+                    + ": " + e.toString(), e);
+            }
         }
 
         // Preload fonts resources
