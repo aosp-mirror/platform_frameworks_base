@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.app.ActivityManager;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
@@ -160,6 +161,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // True if should use light sensor to automatically determine doze screen brightness.
     private final boolean mAllowAutoBrightnessWhileDozingConfig;
+
+    // Whether or not the color fade on screen on / off is enabled.
+    private final boolean mColorFadeEnabled;
 
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish color fade animation instead.
@@ -407,6 +411,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         mScreenBrightnessRangeMinimum = screenBrightnessRangeMinimum;
 
+
+        mColorFadeEnabled = !ActivityManager.isLowRamDeviceStatic();
         mColorFadeFadesConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_animateScreenLights);
 
@@ -497,17 +503,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Initialize the power state object for the default display.
         // In the future, we might manage multiple displays independently.
         mPowerState = new DisplayPowerState(mBlanker,
-                new ColorFade(Display.DEFAULT_DISPLAY));
+                mColorFadeEnabled ? new ColorFade(Display.DEFAULT_DISPLAY) : null);
 
-        mColorFadeOnAnimator = ObjectAnimator.ofFloat(
-                mPowerState, DisplayPowerState.COLOR_FADE_LEVEL, 0.0f, 1.0f);
-        mColorFadeOnAnimator.setDuration(COLOR_FADE_ON_ANIMATION_DURATION_MILLIS);
-        mColorFadeOnAnimator.addListener(mAnimatorListener);
+        if (mColorFadeEnabled) {
+            mColorFadeOnAnimator = ObjectAnimator.ofFloat(
+                    mPowerState, DisplayPowerState.COLOR_FADE_LEVEL, 0.0f, 1.0f);
+            mColorFadeOnAnimator.setDuration(COLOR_FADE_ON_ANIMATION_DURATION_MILLIS);
+            mColorFadeOnAnimator.addListener(mAnimatorListener);
 
-        mColorFadeOffAnimator = ObjectAnimator.ofFloat(
-                mPowerState, DisplayPowerState.COLOR_FADE_LEVEL, 1.0f, 0.0f);
-        mColorFadeOffAnimator.setDuration(COLOR_FADE_OFF_ANIMATION_DURATION_MILLIS);
-        mColorFadeOffAnimator.addListener(mAnimatorListener);
+            mColorFadeOffAnimator = ObjectAnimator.ofFloat(
+                    mPowerState, DisplayPowerState.COLOR_FADE_LEVEL, 1.0f, 0.0f);
+            mColorFadeOffAnimator.setDuration(COLOR_FADE_OFF_ANIMATION_DURATION_MILLIS);
+            mColorFadeOffAnimator.addListener(mAnimatorListener);
+        }
 
         mScreenBrightnessRampAnimator = new RampAnimator<DisplayPowerState>(
                 mPowerState, DisplayPowerState.SCREEN_BRIGHTNESS);
@@ -784,9 +792,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Note that we do not wait for the brightness ramp animation to complete before
         // reporting the display is ready because we only need to ensure the screen is in the
         // right power state even as it continues to converge on the desired brightness.
-        final boolean ready = mPendingScreenOnUnblocker == null
-                && !mColorFadeOnAnimator.isStarted()
-                && !mColorFadeOffAnimator.isStarted()
+        final boolean ready = mPendingScreenOnUnblocker == null &&
+                (!mColorFadeEnabled ||
+                        (!mColorFadeOnAnimator.isStarted() && !mColorFadeOffAnimator.isStarted()))
                 && mPowerState.waitUntilClean(mCleanListener);
         final boolean finished = ready
                 && !mScreenBrightnessRampAnimator.isAnimating();
@@ -959,8 +967,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void animateScreenStateChange(int target, boolean performScreenOffTransition) {
         // If there is already an animation in progress, don't interfere with it.
-        if (mColorFadeOnAnimator.isStarted()
-                || mColorFadeOffAnimator.isStarted()) {
+        if (mColorFadeEnabled &&
+                (mColorFadeOnAnimator.isStarted() || mColorFadeOffAnimator.isStarted())) {
             if (target != Display.STATE_ON) {
                 return;
             }
@@ -984,7 +992,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (!setScreenState(Display.STATE_ON)) {
                 return; // screen on blocked
             }
-            if (USE_COLOR_FADE_ON_ANIMATION && mPowerRequest.isBrightOrDim()) {
+            if (USE_COLOR_FADE_ON_ANIMATION && mColorFadeEnabled && mPowerRequest.isBrightOrDim()) {
                 // Perform screen on animation.
                 if (mPowerState.getColorFadeLevel() == 1.0f) {
                     mPowerState.dismissColorFade();
@@ -1060,6 +1068,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         } else {
             // Want screen off.
             mPendingScreenOff = true;
+            if (!mColorFadeEnabled) {
+                mPowerState.setColorFadeLevel(0.0f);
+            }
+
             if (mPowerState.getColorFadeLevel() == 0.0f) {
                 // Turn the screen off.
                 // A black surface is already hiding the contents of the screen.
