@@ -1150,7 +1150,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             ExtensionFragmentListener.attachExtensonToFragment(container, QS.TAG, R.id.qs_frame,
                     Dependency.get(ExtensionController.class).newExtension(QS.class)
                             .withPlugin(QS.class)
-                            .withUiMode(UI_MODE_TYPE_CAR, () -> new QSFragment())
                             .withDefault(() -> new QSFragment())
                             .build());
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
@@ -1318,6 +1317,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mKeyguardIndicationController.setVisible(mState == StatusBarState.KEYGUARD);
         mKeyguardIndicationController.setDozing(mDozing);
+        if (mBrightnessMirrorController != null) {
+            mBrightnessMirrorController.onOverlayChanged();
+        }
     }
 
     protected void reevaluateStyles() {
@@ -4207,7 +4209,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         if (shouldBeKeyguard) {
             showKeyguardImpl();
-        } else if (!shouldBeKeyguard && mIsKeyguard) {
+        } else {
             return hideKeyguardImpl();
         }
         return false;

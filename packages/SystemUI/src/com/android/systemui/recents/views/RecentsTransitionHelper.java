@@ -400,8 +400,8 @@ public class RecentsTransitionHelper {
             view.draw(c);
         }
         node.end(c);
-        return ThreadedRenderer.createHardwareBitmap(node, bufferWidth, bufferHeight)
-                .createGraphicBufferHandle();
+        Bitmap hwBitmap = ThreadedRenderer.createHardwareBitmap(node, bufferWidth, bufferHeight);
+        return hwBitmap.createGraphicBufferHandle();
     }
 
     /**
