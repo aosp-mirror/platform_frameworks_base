@@ -17217,12 +17217,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                             }
                         } catch (IOException e) {
                             if (!isCheckinRequest) {
-                                pw.println("Got IoException!");
+                                pw.println("Got IoException! " + e);
                                 pw.flush();
                             }
                         } catch (RemoteException e) {
                             if (!isCheckinRequest) {
-                                pw.println("Got RemoteException!");
+                                pw.println("Got RemoteException! " + e);
                                 pw.flush();
                             }
                         }
