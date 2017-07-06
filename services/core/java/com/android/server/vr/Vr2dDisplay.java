@@ -59,7 +59,7 @@ class Vr2dDisplay {
     /**
      * The default height of the VR virtual display
      */
-    public static final int DEFAULT_VIRTUAL_DISPLAY_HEIGHT = 1400;
+    public static final int DEFAULT_VIRTUAL_DISPLAY_HEIGHT = 1800;
 
     /**
      * The default height of the VR virtual dpi.
