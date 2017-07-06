@@ -58,7 +58,12 @@ public class OffloadController {
     }
 
     public void start() {
-        if (isOffloadDisabled() || started()) return;
+        if (started()) return;
+
+        if (isOffloadDisabled()) {
+            mLog.i("tethering offload disabled");
+            return;
+        }
 
         if (!mConfigInitialized) {
             mConfigInitialized = mHwInterface.initOffloadConfig();
