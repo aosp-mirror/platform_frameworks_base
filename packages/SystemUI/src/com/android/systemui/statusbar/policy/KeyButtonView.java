@@ -228,7 +228,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 setPressed(false);
                 // Always send a release ourselves because it doesn't seem to be sent elsewhere
                 // and it feels weird to sometimes get a release haptic and other times not.
-                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY_RELEASE);
+                if ((SystemClock.uptimeMillis() - mDownTime) > 100) {
+                    performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY_RELEASE);
+                }
                 if (mCode != 0) {
                     if (doIt) {
                         sendEvent(KeyEvent.ACTION_UP, 0);
