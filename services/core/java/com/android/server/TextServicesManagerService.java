@@ -85,6 +85,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private final TextServicesSettings mSettings;
     @NonNull
     private final UserManager mUserManager;
+    private final Object mLock = new Object();
 
     public static final class Lifecycle extends SystemService {
         private TextServicesManagerService mService;
@@ -124,7 +125,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     void systemRunning() {
-        synchronized (mSpellCheckerMap) {
+        synchronized (mLock) {
             if (!mSystemReady) {
                 mSystemReady = true;
                 resetInternalState(mSettings.getCurrentUserId());
@@ -133,13 +134,13 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     void onSwitchUser(@UserIdInt int userId) {
-        synchronized (mSpellCheckerMap) {
+        synchronized (mLock) {
             resetInternalState(userId);
         }
     }
 
     void onUnlockUser(@UserIdInt int userId) {
-        synchronized(mSpellCheckerMap) {
+        synchronized (mLock) {
             final int currentUserId = mSettings.getCurrentUserId();
             if (userId != currentUserId) {
                 return;
@@ -215,7 +216,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             if (!isChangingPackagesOfCurrentUser()) {
                 return;
             }
-            synchronized (mSpellCheckerMap) {
+            synchronized (mLock) {
                 buildSpellCheckerMapLocked(
                         mContext, mSpellCheckerList, mSpellCheckerMap, mSettings);
                 // TODO: Update for each locale
@@ -440,7 +441,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     private SpellCheckerInfo getCurrentSpellCheckerWithoutVerification() {
-        synchronized (mSpellCheckerMap) {
+        synchronized (mLock) {
             final String curSpellCheckerId = mSettings.getSelectedSpellChecker();
             if (DBG) {
                 Slog.w(TAG, "getCurrentSpellChecker: " + curSpellCheckerId);
@@ -464,7 +465,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         final int subtypeHashCode;
         final SpellCheckerInfo sci;
         final Locale systemLocale;
-        synchronized (mSpellCheckerMap) {
+        synchronized (mLock) {
             subtypeHashCode =
                     mSettings.getSelectedSpellCheckerSubtype(SpellCheckerSubtype.SUBTYPE_ID_NONE);
             if (DBG) {
@@ -546,7 +547,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             Slog.e(TAG, "getSpellCheckerService: Invalid input.");
             return;
         }
-        synchronized(mSpellCheckerMap) {
+        synchronized (mLock) {
             if (!mSpellCheckerMap.containsKey(sciId)) {
                 return;
             }
@@ -578,7 +579,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         if (!calledFromValidUser()) {
             return false;
         }
-        synchronized(mSpellCheckerMap) {
+        synchronized (mLock) {
             return isSpellCheckerEnabledLocked();
         }
     }
@@ -628,7 +629,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         if (DBG) {
             Slog.d(TAG, "FinishSpellCheckerService");
         }
-        synchronized(mSpellCheckerMap) {
+        synchronized (mLock) {
             final ArrayList<SpellCheckerBindGroup> removeList = new ArrayList<>();
             for (SpellCheckerBindGroup group : mSpellCheckerBindGroups.values()) {
                 if (group == null) continue;
@@ -698,7 +699,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        synchronized(mSpellCheckerMap) {
+        synchronized (mLock) {
             pw.println("Current Text Services Manager state:");
             pw.println("  Spell Checkers:");
             int spellCheckerIndex = 0;
@@ -796,7 +797,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 Slog.d(TAG, "onServiceConnected");
             }
 
-            synchronized(mSpellCheckerMap) {
+            synchronized (mLock) {
                 mSpellChecker = spellChecker;
                 mConnected = true;
                 // Dispatch pending getISpellCheckerSession requests.
@@ -810,7 +811,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 Slog.d(TAG, "onServiceDisconnected");
             }
 
-            synchronized(mSpellCheckerMap) {
+            synchronized (mLock) {
                 mSpellChecker = null;
                 mConnected = false;
             }
@@ -820,7 +821,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             if (DBG) {
                 Slog.w(TAG, "remove listener: " + listener.hashCode());
             }
-            synchronized(mSpellCheckerMap) {
+            synchronized (mLock) {
                 mListeners.unregister(listener);
                 cleanLocked();
             }
@@ -858,7 +859,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         public void removeAll() {
             Slog.e(TAG, "Remove the spell checker bind unexpectedly.");
-            synchronized(mSpellCheckerMap) {
+            synchronized (mLock) {
                 final int size = mListeners.getRegisteredCallbackCount();
                 for (int i = 0; i < size; ++i) {
                     mListeners.unregister(mListeners.getRegisteredCallbackItem(i));
@@ -898,7 +899,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         void onSessionCreated(@Nullable final ISpellCheckerSession newSession,
                 @NonNull final SessionRequest request) {
-            synchronized (mSpellCheckerMap) {
+            synchronized (mLock) {
                 if (mUnbindCalled) {
                     return;
                 }
@@ -926,7 +927,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            synchronized(mSpellCheckerMap) {
+            synchronized (mLock) {
                 onServiceConnectedInnerLocked(name, service);
             }
         }
@@ -945,7 +946,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            synchronized(mSpellCheckerMap) {
+            synchronized (mLock) {
                 onServiceDisconnectedInnerLocked(name);
             }
         }
