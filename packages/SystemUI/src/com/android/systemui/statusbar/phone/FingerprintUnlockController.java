@@ -163,8 +163,8 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             }
             mHandler.postDelayed(mReleaseFingerprintWakeLockRunnable,
                     FINGERPRINT_WAKELOCK_TIMEOUT_MS);
-            if (mDozeScrimController.isPulsing()) {
 
+            if (pulsingOrAod()) {
                 // If we are waking the device up while we are pulsing the clock and the
                 // notifications would light up first, creating an unpleasant animation.
                 // Defer changing the screen brightness by forcing doze brightness on our window
@@ -173,6 +173,12 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             }
         }
         Trace.endSection();
+    }
+
+    private boolean pulsingOrAod() {
+        boolean pulsing = mDozeScrimController.isPulsing();
+        boolean dozingWithScreenOn = mStatusBar.isDozing() && !mStatusBar.isScreenFullyOff();
+        return pulsing || dozingWithScreenOn;
     }
 
     @Override
@@ -269,13 +275,11 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     private int calculateMode() {
         boolean unlockingAllowed = mUpdateMonitor.isUnlockingWithFingerprintAllowed();
-        boolean pulsing = mDozeScrimController.isPulsing();
-        boolean dozingWithScreenOn = mStatusBar.isDozing() && !mStatusBar.isScreenFullyOff();
 
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
                 return MODE_ONLY_WAKE;
-            } else if ((pulsing || dozingWithScreenOn) && unlockingAllowed) {
+            } else if (pulsingOrAod() && unlockingAllowed) {
                 return MODE_WAKE_AND_UNLOCK_PULSING;
             } else if (unlockingAllowed || !mUnlockMethodCache.isMethodSecure()) {
                 return MODE_WAKE_AND_UNLOCK;

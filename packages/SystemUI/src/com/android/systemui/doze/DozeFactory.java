@@ -49,8 +49,12 @@ public class DozeFactory {
         WakeLock wakeLock = new DelayedWakeLock(handler,
                 WakeLock.createPartial(context, "Doze"));
 
-        DozeMachine.Service wrappedService = DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(
-                DozeScreenStatePreventingAdapter.wrapIfNeeded(dozeService, params), params);
+        DozeMachine.Service wrappedService = dozeService;
+        wrappedService = new DozeBrightnessHostForwarder(wrappedService, host);
+        wrappedService = DozeScreenStatePreventingAdapter.wrapIfNeeded(wrappedService, params);
+        wrappedService = DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(wrappedService,
+                params);
+
         DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock);
         machine.setParts(new DozeMachine.Part[]{
                 new DozePauser(handler, machine, alarmManager),
