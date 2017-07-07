@@ -5443,6 +5443,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
 
+        @Override
+        public void setDozeScreenBrightness(int value) {
+            mStatusBarWindowManager.setDozeScreenBrightness(value);
+        }
+
         public void dispatchDoubleTap(float viewX, float viewY) {
             dispatchTap(mAmbientIndicationContainer, viewX, viewY);
             dispatchTap(mAmbientIndicationContainer, viewX, viewY);
