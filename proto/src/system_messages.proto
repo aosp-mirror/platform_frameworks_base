@@ -183,6 +183,10 @@ message SystemMessage {
     // Inform the user that the connected audio accessory is not supported
     NOTE_USB_AUDIO_ACCESSORY_NOT_SUPPORTED = 41;
 
+    // Inform the user that a wrong password was detected while attempting to connect
+    // to a Wi-Fi network
+    NOTE_WIFI_WRONG_PASSWORD = 42;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
