@@ -190,6 +190,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"主动从 WLAN 网络切换到移动数据网络"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"一律允许WLAN漫游扫描"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"始终开启移动数据网络"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"停用绝对音量功能"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"启用手机默认铃声"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"蓝牙 AVRCP 版本"</string>
@@ -221,6 +223,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"允许模拟位置"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"启用视图属性检查功能"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"始终开启移动数据网络，即使 WLAN 网络已开启（便于快速切换网络）。"</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"是否允许 USB 调试？"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB 调试仅用于开发目的。该功能可用于在您的计算机和设备之间复制数据、在您的设备上安装应用（事先不发通知）以及读取日志数据。"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"是否针对您之前授权的所有计算机撤消 USB 调试的访问权限？"</string>

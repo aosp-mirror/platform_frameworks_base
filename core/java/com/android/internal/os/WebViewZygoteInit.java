@@ -26,9 +26,10 @@ import android.util.Log;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewFactoryProvider;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Startup class for the WebView zygote process.
@@ -68,8 +69,7 @@ class WebViewZygoteInit {
         }
 
         @Override
-        protected boolean handlePreloadPackage(String packagePath, String libsPath,
-                                               String cacheKey) {
+        protected void handlePreloadPackage(String packagePath, String libsPath, String cacheKey) {
             Log.i(TAG, "Beginning package preload");
             // Ask ApplicationLoaders to create and cache a classloader for the WebView APK so that
             // our children will reuse the same classloader instead of creating their own.
@@ -87,19 +87,33 @@ class WebViewZygoteInit {
             // Once we have the classloader, look up the WebViewFactoryProvider implementation and
             // call preloadInZygote() on it to give it the opportunity to preload the native library
             // and perform any other initialisation work that should be shared among the children.
+            boolean preloadSucceeded = false;
             try {
                 Class<WebViewFactoryProvider> providerClass =
                         WebViewFactory.getWebViewProviderClass(loader);
-                Object result = providerClass.getMethod("preloadInZygote").invoke(null);
-                if (!((Boolean)result).booleanValue()) {
-                    Log.e(TAG, "preloadInZygote returned false");
+                Method preloadInZygote = providerClass.getMethod("preloadInZygote");
+                preloadInZygote.setAccessible(true);
+                if (preloadInZygote.getReturnType() != Boolean.TYPE) {
+                    Log.e(TAG, "Unexpected return type: preloadInZygote must return boolean");
+                } else {
+                    preloadSucceeded = (boolean) providerClass.getMethod("preloadInZygote")
+                            .invoke(null);
+                    if (!preloadSucceeded) {
+                        Log.e(TAG, "preloadInZygote returned false");
+                    }
                 }
-            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException |
-                     IllegalAccessException | InvocationTargetException e) {
+            } catch (ReflectiveOperationException e) {
                 Log.e(TAG, "Exception while preloading package", e);
             }
+
+            try {
+                DataOutputStream socketOut = getSocketOutputStream();
+                socketOut.writeInt(preloadSucceeded ? 1 : 0);
+            } catch (IOException ioe) {
+                throw new IllegalStateException("Error writing to command socket", ioe);
+            }
+
             Log.i(TAG, "Package preload done");
-            return false;
         }
     }
 
@@ -113,16 +127,23 @@ class WebViewZygoteInit {
             throw new RuntimeException("Failed to setpgid(0,0)", ex);
         }
 
+        final Runnable caller;
         try {
             sServer.registerServerSocket("webview_zygote");
-            sServer.runSelectLoop(TextUtils.join(",", Build.SUPPORTED_ABIS));
-            sServer.closeServerSocket();
-        } catch (Zygote.MethodAndArgsCaller caller) {
-            caller.run();
+            // The select loop returns early in the child process after a fork and
+            // loops forever in the zygote.
+            caller = sServer.runSelectLoop(TextUtils.join(",", Build.SUPPORTED_ABIS));
         } catch (RuntimeException e) {
             Log.e(TAG, "Fatal exception:", e);
+            throw e;
+        } finally {
+            sServer.closeServerSocket();
         }
 
-        System.exit(0);
+        // We're in the child process and have exited the select loop. Proceed to execute the
+        // command.
+        if (caller != null) {
+            caller.run();
+        }
     }
 }

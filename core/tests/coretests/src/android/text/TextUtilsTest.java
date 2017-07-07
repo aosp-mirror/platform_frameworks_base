@@ -363,14 +363,23 @@ public class TextUtilsTest {
     @Test
     public void testCharSequenceCreator() {
         Parcel p = Parcel.obtain();
-        TextUtils.writeToParcel(null, p, 0);
-        CharSequence text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
-        assertNull("null CharSequence should generate null from parcel", text);
+        CharSequence text;
+        try {
+            TextUtils.writeToParcel(null, p, 0);
+            text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+            assertNull("null CharSequence should generate null from parcel", text);
+        } finally {
+            p.recycle();
+        }
         p = Parcel.obtain();
-        TextUtils.writeToParcel("test", p, 0);
-        p.setDataPosition(0);
-        text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
-        assertEquals("conversion to/from parcel failed", "test", text);
+        try {
+            TextUtils.writeToParcel("test", p, 0);
+            p.setDataPosition(0);
+            text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+            assertEquals("conversion to/from parcel failed", "test", text);
+        } finally {
+            p.recycle();
+        }
     }
 
     @Test
@@ -378,10 +387,14 @@ public class TextUtilsTest {
         Parcel p;
         CharSequence text;
         p = Parcel.obtain();
-        TextUtils.writeToParcel(null, p, 0);
-        p.setDataPosition(0);
-        text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
-        assertNull("null CharSequence should generate null from parcel", text);
+        try {
+            TextUtils.writeToParcel(null, p, 0);
+            p.setDataPosition(0);
+            text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+            assertNull("null CharSequence should generate null from parcel", text);
+        } finally {
+            p.recycle();
+        }
     }
 
     @Test
@@ -389,10 +402,14 @@ public class TextUtilsTest {
         Parcel p;
         CharSequence text;
         p = Parcel.obtain();
-        TextUtils.writeToParcel(new SpannableString("test"), p, 0);
-        p.setDataPosition(0);
-        text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
-        assertEquals("conversion to/from parcel failed", "test", text.toString());
+        try {
+            TextUtils.writeToParcel(new SpannableString("test"), p, 0);
+            p.setDataPosition(0);
+            text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+            assertEquals("conversion to/from parcel failed", "test", text.toString());
+        } finally {
+            p.recycle();
+        }
     }
 
     @Test
@@ -400,10 +417,14 @@ public class TextUtilsTest {
         Parcel p;
         CharSequence text;
         p = Parcel.obtain();
-        TextUtils.writeToParcel("test", p, 0);
-        p.setDataPosition(0);
-        text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
-        assertEquals("conversion to/from parcel failed", "test", text.toString());
+        try {
+            TextUtils.writeToParcel("test", p, 0);
+            p.setDataPosition(0);
+            text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+            assertEquals("conversion to/from parcel failed", "test", text.toString());
+        } finally {
+            p.recycle();
+        }
     }
 
     /**

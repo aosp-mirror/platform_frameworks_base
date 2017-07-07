@@ -737,6 +737,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
     @Nullable private View mAmbientIndicationContainer;
+    private String mKeyToRemoveOnGutsClosed;
     private SysuiColorExtractor mColorExtractor;
     private ForegroundServiceController mForegroundServiceController;
 
@@ -1023,6 +1024,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStatusBarView.setBar(this);
                     mStatusBarView.setPanel(mNotificationPanel);
                     mStatusBarView.setScrimController(mScrimController);
+                    mStatusBarView.setBouncerShowing(mBouncerShowing);
                     setAreThereNotifications();
                     checkBarModes();
                 }).getFragmentManager()
@@ -1321,6 +1323,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController.setDozing(mDozing);
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onOverlayChanged();
+        }
+        if (mStatusBarKeyguardViewManager != null) {
+            mStatusBarKeyguardViewManager.onOverlayChanged();
         }
     }
 
@@ -1787,6 +1792,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             mRemoteInputEntriesToRemoveOnCollapse.add(entry);
             return;
         }
+        if (entry != null && mNotificationGutsExposed != null
+                && mNotificationGutsExposed == entry.row.getGuts()) {
+            Log.w(TAG, "Keeping notification because it's showing guts. " + key);
+            mLatestRankingMap = ranking;
+            mKeyToRemoveOnGutsClosed = key;
+            return;
+        }
 
         if (entry != null) {
             mForegroundServiceController.removeNotification(entry.notification);
@@ -1874,6 +1886,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         } catch (RemoteException ex) {
             // system process is dead if we're here.
+        }
+        if (mStackScroller.hasPulsingNotifications() && mHeadsUpManager.getAllEntries().isEmpty()) {
+            // We were showing a pulse for a notification, but no notifications are pulsing anymore.
+            // Finish the pulse.
+            mDozeScrimController.pulseOutNow();
         }
         // end old BaseStatusBar.performRemoveNotification.
     }
@@ -3472,6 +3489,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         pw.println(Settings.Global.zenModeToString(mZenMode));
         pw.print("  mUseHeadsUp=");
         pw.println(mUseHeadsUp);
+        pw.print("  mKeyToRemoveOnGutsClosed=");
+        pw.println(mKeyToRemoveOnGutsClosed);
         if (mStatusBarView != null) {
             dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         }
@@ -3770,7 +3789,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // SystemUIService notifies SystemBars of configuration changes, which then calls down here
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         updateResources();
         updateDisplaySize(); // populates mDisplayMetrics
 
@@ -4570,16 +4589,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .supportsDarkText();
         // And wallpaper defines if QS should be light or dark.
         boolean useDarkTheme = false;
-        final WallpaperManager wallpaperManager = mContext.getSystemService(WallpaperManager.class);
-        if (wallpaperManager != null) {
-            WallpaperColors wallpaperColors = wallpaperManager
-                    .getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
-            if (wallpaperColors != null) {
-                final int mainColor = wallpaperColors.getPrimaryColor().toArgb();
-                final float[] hsl = new float[3];
-                ColorUtils.colorToHSL(mainColor, hsl);
-                useDarkTheme = hsl[2] < 0.2f;
-            }
+        final WallpaperColors systemColors =
+                mColorExtractor.getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
+        if (systemColors != null) {
+            int mainColor = systemColors.getPrimaryColor().toArgb();
+            float[] hsl = new float[3];
+            ColorUtils.colorToHSL(mainColor, hsl);
+            useDarkTheme = hsl[2] < 0.2f;
         }
 
         // Enable/disable dark UI.
@@ -5104,7 +5120,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void setBouncerShowing(boolean bouncerShowing) {
         mBouncerShowing = bouncerShowing;
-        mStatusBarView.setBouncerShowing(bouncerShowing);
+        if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
         recomputeDisableFlags(true /* animate */);
     }
 
@@ -5172,6 +5188,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onScreenTurnedOn() {
         mScreenTurningOn = false;
         mDozeScrimController.onScreenTurnedOn();
+    }
+
+    /**
+     * @return true if the screen is currently fully off, i.e. has finished turning off and has
+     *         since not started turning on.
+     */
+    public boolean isScreenFullyOff() {
+        return mScreenFullyOff;
     }
 
     @Override
@@ -5382,6 +5406,21 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
+        public boolean isProvisioned() {
+            return mDeviceProvisionedController.isDeviceProvisioned()
+                    && mDeviceProvisionedController.isCurrentUserSetup();
+        }
+
+        @Override
+        public boolean isBlockingDoze() {
+            if (mFingerprintUnlockController.hasPendingAuthentication()) {
+                Log.i(TAG, "Blocking AOD because fingerprint has authenticated");
+                return true;
+            }
+            return false;
+        }
+
+        @Override
         public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
             StatusBar.this.startPendingIntentDismissingKeyguard(intent);
         }
@@ -5413,6 +5452,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                     dispatchDoubleTap(viewX, viewY);
                 }
             }
+        }
+
+        @Override
+        public void setDozeScreenBrightness(int value) {
+            mStatusBarWindowManager.setDozeScreenBrightness(value);
         }
 
         public void dispatchDoubleTap(float viewX, float viewY) {
@@ -6122,6 +6166,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mNotificationGutsExposed == g) {
                 mNotificationGutsExposed = null;
                 mGutsMenuItem = null;
+            }
+            String key = sbn.getKey();
+            if (key.equals(mKeyToRemoveOnGutsClosed)) {
+                mKeyToRemoveOnGutsClosed = null;
+                removeNotification(key, mLatestRankingMap);
             }
         });
 
@@ -7082,9 +7131,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         Entry entry = mNotificationData.get(key);
         if (entry == null) {
             return;
-        } else {
-            mHeadsUpEntriesToRemoveOnSwitch.remove(entry);
-            mRemoteInputEntriesToRemoveOnCollapse.remove(entry);
+        }
+        mHeadsUpEntriesToRemoveOnSwitch.remove(entry);
+        mRemoteInputEntriesToRemoveOnCollapse.remove(entry);
+        if (key.equals(mKeyToRemoveOnGutsClosed)) {
+            mKeyToRemoveOnGutsClosed = null;
+            Log.w(TAG, "Notification that was kept for guts was updated. " + key);
         }
 
         Notification n = notification.getNotification();

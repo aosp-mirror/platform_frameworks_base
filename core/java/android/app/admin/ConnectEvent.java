@@ -23,7 +23,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * A class that represents a connect library call event.
+ * A class that represents a TCP connect event initiated through the standard network stack.
+ *
+ * <p>It contains information about the originating app as well as the remote TCP endpoint.
+ *
+ * <p>Support both IPv4 and IPv6 connections.
  */
 public final class ConnectEvent extends NetworkEvent implements Parcelable {
 

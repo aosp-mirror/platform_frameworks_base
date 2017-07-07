@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Bağlandı (medya yok)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Bağlı (mesaj erişimi yok)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Bağlandı (telefon veya medya yok)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Bağlandı, pil seviyesi <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Bağlandı (telefon yok), pil seviyesi <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Bağlandı (medya yok), pil seviyesi <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Bağlandı (telefon veya medya yok), pil seviyesi <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medya sesi"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefon çağrıları"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Dosya aktarımı"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Kablosuzdan mobil ağa agresif geçiş"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Kablosuz Dolaşım Taramalarına daima izin ver"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil veri her zaman etkin"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Mutlak sesi iptal et"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Bant içi zil çaldırmayı etkinleştir"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP Sürümü"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Sahte konumlara izin ver"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Görünüm özelliği incelemeyi etkinleştir"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Kablosuz bağlantı etkin bile olsa mobil veri kullanımını her zaman etkin tut (ağlar arasında hızlı geçiş yapmak için)."</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"USB hata ayıklamasına izin verilsin mi?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB hata ayıklaması yalnızca geliştirme amaçlıdır. Verileri bilgisayarınızla cihazınız arasında kopyalamak, bildirim göndermeksizin uygulamaları cihazınıza yüklemek ve günlük verilerini okumak için kullanın."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Daha önce yetki verdiğiniz tüm bilgisayarların USB hata ayıklama erişimini iptal etmek istiyor musunuz?"</string>

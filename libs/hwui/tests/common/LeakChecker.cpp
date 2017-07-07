@@ -58,9 +58,8 @@ static void logUnreachable(initializer_list<UnreachableMemoryInfo> infolist) {
     if (merged.num_leaks) {
         cout << endl << "Leaked memory!" << endl;
         if (!merged.leaks[0].backtrace.num_frames) {
-            cout << "Re-run with 'setprop libc.debug.malloc.program hwui_unit_test'"
-                    << endl << "and 'setprop libc.debug.malloc.options backtrace=8'"
-                    << " to get backtraces" << endl;
+            cout << "Re-run with 'export LIBC_DEBUG_MALLOC_OPTIONS=backtrace' to get backtraces"
+                    << endl;
         }
         cout << merged.ToString(false);
     }

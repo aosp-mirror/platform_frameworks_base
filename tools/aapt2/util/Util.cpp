@@ -16,19 +16,20 @@
 
 #include "util/Util.h"
 
-#include <utils/Unicode.h>
 #include <algorithm>
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include "androidfw/StringPiece.h"
+#include "utils/Unicode.h"
 
 #include "util/BigBuffer.h"
 #include "util/Maybe.h"
+#include "util/Utf8Iterator.h"
 
-using android::StringPiece;
-using android::StringPiece16;
+using ::android::StringPiece;
+using ::android::StringPiece16;
 
 namespace aapt {
 namespace util {
@@ -283,33 +284,46 @@ bool VerifyJavaStringFormat(const StringPiece& str) {
   return true;
 }
 
-static Maybe<std::string> ParseUnicodeCodepoint(const char** start,
-                                                const char* end) {
+static bool AppendCodepointToUtf8String(char32_t codepoint, std::string* output) {
+  ssize_t len = utf32_to_utf8_length(&codepoint, 1);
+  if (len < 0) {
+    return false;
+  }
+
+  const size_t start_append_pos = output->size();
+
+  // Make room for the next character.
+  output->resize(output->size() + len);
+
+  char* dst = &*(output->begin() + start_append_pos);
+  utf32_to_utf8(&codepoint, 1, dst, len + 1);
+  return true;
+}
+
+static bool AppendUnicodeCodepoint(Utf8Iterator* iter, std::string* output) {
   char32_t code = 0;
-  for (size_t i = 0; i < 4 && *start != end; i++, (*start)++) {
-    char c = **start;
+  for (size_t i = 0; i < 4 && iter->HasNext(); i++) {
+    char32_t codepoint = iter->Next();
     char32_t a;
-    if (c >= '0' && c <= '9') {
-      a = c - '0';
-    } else if (c >= 'a' && c <= 'f') {
-      a = c - 'a' + 10;
-    } else if (c >= 'A' && c <= 'F') {
-      a = c - 'A' + 10;
+    if (codepoint >= U'0' && codepoint <= U'9') {
+      a = codepoint - U'0';
+    } else if (codepoint >= U'a' && codepoint <= U'f') {
+      a = codepoint - U'a' + 10;
+    } else if (codepoint >= U'A' && codepoint <= U'F') {
+      a = codepoint - U'A' + 10;
     } else {
       return {};
     }
     code = (code << 4) | a;
   }
+  return AppendCodepointToUtf8String(code, output);
+}
 
-  ssize_t len = utf32_to_utf8_length(&code, 1);
-  if (len < 0) {
-    return {};
+static bool IsCodepointSpace(char32_t codepoint) {
+  if (static_cast<uint32_t>(codepoint) & 0xffffff00u) {
+    return false;
   }
-
-  std::string result_utf8;
-  result_utf8.resize(len);
-  utf32_to_utf8(&code, 1, &*result_utf8.begin(), len + 1);
-  return result_utf8;
+  return isspace(static_cast<char>(codepoint));
 }
 
 StringBuilder& StringBuilder::Append(const StringPiece& str) {
@@ -318,57 +332,46 @@ StringBuilder& StringBuilder::Append(const StringPiece& str) {
   }
 
   // Where the new data will be appended to.
-  size_t new_data_index = str_.size();
+  const size_t new_data_index = str_.size();
 
-  const char* const end = str.end();
-  const char* start = str.begin();
-  const char* current = start;
-  while (current != end) {
+  Utf8Iterator iter(str);
+  while (iter.HasNext()) {
+    const char32_t codepoint = iter.Next();
+
     if (last_char_was_escape_) {
-      switch (*current) {
-        case 't':
+      switch (codepoint) {
+        case U't':
           str_ += '\t';
           break;
-        case 'n':
+
+        case U'n':
           str_ += '\n';
           break;
-        case '#':
-          str_ += '#';
+
+        case U'#':
+        case U'@':
+        case U'?':
+        case U'"':
+        case U'\'':
+        case U'\\':
+          str_ += static_cast<char>(codepoint);
           break;
-        case '@':
-          str_ += '@';
-          break;
-        case '?':
-          str_ += '?';
-          break;
-        case '"':
-          str_ += '"';
-          break;
-        case '\'':
-          str_ += '\'';
-          break;
-        case '\\':
-          str_ += '\\';
-          break;
-        case 'u': {
-          current++;
-          Maybe<std::string> c = ParseUnicodeCodepoint(&current, end);
-          if (!c) {
+
+        case U'u':
+          if (!AppendUnicodeCodepoint(&iter, &str_)) {
             error_ = "invalid unicode escape sequence";
             return *this;
           }
-          str_ += c.value();
-          current -= 1;
           break;
-        }
 
         default:
-          // Ignore.
+          // Ignore the escape character and just include the codepoint.
+          AppendCodepointToUtf8String(codepoint, &str_);
           break;
       }
       last_char_was_escape_ = false;
-      start = current + 1;
-    } else if (*current == '"') {
+
+    } else if (codepoint == U'"') {
       if (!quote_ && trailing_space_) {
         // We found an opening quote, and we have
         // trailing space, so we should append that
@@ -383,13 +386,13 @@ StringBuilder& StringBuilder::Append(const StringPiece& str) {
         }
       }
       quote_ = !quote_;
-      str_.append(start, current - start);
-      start = current + 1;
-    } else if (*current == '\'' && !quote_) {
+
+    } else if (codepoint == U'\'' && !quote_) {
       // This should be escaped.
       error_ = "unescaped apostrophe";
       return *this;
-    } else if (*current == '\\') {
+
+    } else if (codepoint == U'\\') {
       // This is an escape sequence, convert to the real value.
       if (!quote_ && trailing_space_) {
         // We had trailing whitespace, so
@@ -399,40 +402,35 @@ StringBuilder& StringBuilder::Append(const StringPiece& str) {
         }
         trailing_space_ = false;
       }
-      str_.append(start, current - start);
-      start = current + 1;
       last_char_was_escape_ = true;
-    } else if (!quote_) {
-      // This is not quoted text, so look for whitespace.
-      if (isspace(*current)) {
-        // We found whitespace, see if we have seen some
-        // before.
-        if (!trailing_space_) {
-          // We didn't see a previous adjacent space,
-          // so mark that we did.
+    } else {
+      if (quote_) {
+        // Quotes mean everything is taken, including whitespace.
+        AppendCodepointToUtf8String(codepoint, &str_);
+      } else {
+        // This is not quoted text, so we will accumulate whitespace and only emit a single
+        // character of whitespace if it is followed by a non-whitespace character.
+        if (IsCodepointSpace(codepoint)) {
+          // We found whitespace.
           trailing_space_ = true;
-          str_.append(start, current - start);
+        } else {
+          if (trailing_space_) {
+            // We saw trailing space before, so replace all
+            // that trailing space with one space.
+            if (!str_.empty()) {
+              str_ += ' ';
+            }
+            trailing_space_ = false;
+          }
+          AppendCodepointToUtf8String(codepoint, &str_);
         }
-
-        // Keep skipping whitespace.
-        start = current + 1;
-      } else if (trailing_space_) {
-        // We saw trailing space before, so replace all
-        // that trailing space with one space.
-        if (!str_.empty()) {
-          str_ += ' ';
-        }
-        trailing_space_ = false;
       }
     }
-    current++;
   }
-  str_.append(start, end - start);
 
   // Accumulate the added string's UTF-16 length.
-  ssize_t len = utf8_to_utf16_length(
-      reinterpret_cast<const uint8_t*>(str_.data()) + new_data_index,
-      str_.size() - new_data_index);
+  ssize_t len = utf8_to_utf16_length(reinterpret_cast<const uint8_t*>(str_.data()) + new_data_index,
+                                     str_.size() - new_data_index);
   if (len < 0) {
     error_ = "invalid unicode code point";
     return *this;

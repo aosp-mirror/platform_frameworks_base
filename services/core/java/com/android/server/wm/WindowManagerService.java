@@ -1445,6 +1445,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
+            win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
+
             final AppWindowToken aToken = token.asAppWindowToken();
             if (type == TYPE_APPLICATION_STARTING && aToken != null) {
                 aToken.startingWindow = win;
@@ -2326,7 +2329,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // artifacts when we unfreeze the display if some different animation
         // is running.
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WM#applyAnimationLocked");
-        if (okToDisplay()) {
+        if (okToAnimate()) {
             final DisplayContent displayContent = atoken.getTask().getDisplayContent();
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             final int width = displayInfo.appWidth;
@@ -2404,6 +2407,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean okToDisplay() {
         return !mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOn();
+    }
+
+    boolean okToAnimate() {
+        return okToDisplay() && mPolicy.isInteractive();
     }
 
     @Override
@@ -2672,7 +2679,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             boolean prepared = mAppTransition.prepareAppTransitionLocked(transit, alwaysKeepCurrent,
                     flags, forceOverride);
-            if (prepared && okToDisplay()) {
+            if (prepared && okToAnimate()) {
                 mSkipAppTransitionAnimation = false;
             }
         }
@@ -5789,7 +5796,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // orientation.
         if (!okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Changing surface while display frozen: " + w);
-            w.setOrientationChanging(true);
+            w.mOrientationChanging = true;
             w.mLastFreezeDuration = 0;
             mRoot.mOrientationChangeComplete = false;
             if (mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_NONE) {

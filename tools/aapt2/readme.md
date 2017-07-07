@@ -10,6 +10,7 @@
 - Fixed issue where Java classes referenced from fragments and menus were not added to
   the set of Proguard keep rules. (bug 62216174)
 - Automatically version XML `<adaptive-icon>` resources to v26. (bug 62316340)
+- Fixed issue where escaped unicode characters would generate malformed UTF-8. (bug 62839202)
 
 ## Version 2.17
 ### `aapt2 ...`

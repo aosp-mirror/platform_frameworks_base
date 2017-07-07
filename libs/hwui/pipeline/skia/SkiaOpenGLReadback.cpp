@@ -97,6 +97,7 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
             image = scaledSurface->makeImageSnapshot();
 
             if (image->readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
+                bitmap->notifyPixelsChanged();
                 copyResult = CopyResult::Success;
             }
         }

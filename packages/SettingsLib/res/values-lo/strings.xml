@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີສື່)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"ເຊື່ອມຕໍ່ (ບໍ່ມີການເຂົ້າເຖິງຂໍ້ຄວາມ)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ ຫຼືສື່)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"ເຊື່ອມຕໍ່ແລ້ວ, ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີມີເດຍ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ ຫຼື ມີເດຍ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"ສຽງ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ການໂທ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ການໂອນຍ້າຍໄຟລ໌"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ສະຫຼັບເປັນ Wi-Fi ເມື່ອມືຖືສັນຍານອ່ອນ"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ອະ​ນຸ​ຍາດ​ການ​ສະ​ແກນ​ການ​ໂຣມ Wi‑Fi ​ສະ​ເໝີ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືຕະຫຼອດເວລາ"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ປິດໃຊ້ລະດັບສຽງສົມບູນ"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ເປີດສຽງເຕືອນແບບອິນແບນ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ເວີຊັນ Bluetooth AVRCP"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ອະນຸຍາດໃຫ້ຈຳລອງຕຳແໜ່ງ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ເປີດ​ນຳ​ໃຊ້​ການກວດ​ສອບ​ຄຸນ​ສົມ​ບັດ​ມຸມມອງ"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ໃຫ້​ຂໍ້​ມູນ​ມື​ຖື​ເປີດ​ຢູ່​ສະ​ເໝີ, ແມ້​ແຕ່​ເມື່ອ Wi‑Fi ເປີດ​ຢູ່ (ສຳ​ລັບ​ການ​ສະ​ຫຼັບ​ເຄືອ​ຂ່າຍ​ໄວ)."</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"ອະນຸຍາດໃຫ້ດີບັ໊ກຜ່ານ USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"ການດີບັ໊ກຜ່ານ USB ແມ່ນມີຈຸດປະສົງເພື່ອການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບຯໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະອ່ານຂໍ້ມູນການບັນທຶກ."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ຖອດຖອນການເຂົ້າເຖິງການດີບັ໊ກຜ່ານ USB ຈາກຄອມພິວເຕີທຸກເຄື່ອງ ທີ່ທ່ານເຄີຍອະນຸຍາດກ່ອນໜ້ານີ້?"</string>

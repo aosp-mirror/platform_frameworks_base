@@ -446,7 +446,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Set when the orientation is changing and this window has not yet
      * been updated for the new orientation.
      */
-    private boolean mOrientationChanging;
+    boolean mOrientationChanging;
 
     /**
      * The orientation during the last visible call to relayout. If our
@@ -1189,8 +1189,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // then we need to hold off on unfreezing the display until this window has been
             // redrawn; to do that, we need to go through the process of getting informed by the
             // application when it has finished drawing.
-            if (getOrientationChanging() || dragResizingChanged
-                    || isResizedWhileNotDragResizing()) {
+            if (mOrientationChanging || dragResizingChanged || isResizedWhileNotDragResizing()) {
                 if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
                     Slog.v(TAG_WM, "Orientation or resize start waiting for draw"
                             + ", mDrawState=DRAW_PENDING in " + this
@@ -1205,31 +1204,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG_WM, "Resizing window " + this);
                 mService.mResizingWindows.add(this);
             }
-        } else if (getOrientationChanging()) {
+        } else if (mOrientationChanging) {
             if (isDrawnLw()) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Orientation not waiting for draw in "
                         + this + ", surfaceController " + winAnimator.mSurfaceController);
-                setOrientationChanging(false);
+                mOrientationChanging = false;
                 mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                         - mService.mDisplayFreezeTime);
             }
         }
-    }
-
-    boolean getOrientationChanging() {
-        // In addition to the local state flag, we must also consider the difference in the last
-        // reported configuration vs. the current state. If the client code has not been informed of
-        // the change, logic dependent on having finished processing the orientation, such as
-        // unfreezing, could be improperly triggered.
-        // TODO(b/62846907): Checking against {@link mLastReportedConfiguration} could be flaky as
-        //                   this is not necessarily what the client has processed yet. Find a
-        //                   better indicator consistent with the client.
-        return mOrientationChanging
-                || getConfiguration().orientation != mLastReportedConfiguration.orientation;
-    }
-
-    void setOrientationChanging(boolean changing) {
-        mOrientationChanging = changing;
     }
 
     DisplayContent getDisplayContent() {
@@ -1683,7 +1666,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean adjustedForMinimizedDockOrIme = task != null
                 && (task.mStack.isAdjustedForMinimizedDockedStack()
                 || task.mStack.isAdjustedForIme());
-        if (mService.okToDisplay()
+        if (mService.okToAnimate()
                 && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                 && !isDragResizing() && !adjustedForMinimizedDockOrIme
                 && (task == null || getTask().mStack.hasMovementAnimations())
@@ -1852,7 +1835,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // First, see if we need to run an animation. If we do, we have to hold off on removing the
         // window until the animation is done. If the display is frozen, just remove immediately,
         // since the animation wouldn't be seen.
-        if (mHasSurface && mService.okToDisplay()) {
+        if (mHasSurface && mService.okToAnimate()) {
             if (mWillReplaceWindow) {
                 // This window is going to be replaced. We need to keep it around until the new one
                 // gets added, then we will get rid of this one.
@@ -2276,7 +2259,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mLayoutNeeded = true;
         }
 
-        if (isDrawnLw() && mService.okToDisplay()) {
+        if (isDrawnLw() && mService.okToAnimate()) {
             mWinAnimator.applyEnterAnimationLocked();
         }
     }
@@ -2432,7 +2415,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (doAnimation) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "doAnimation: mPolicyVisibility="
                     + mPolicyVisibility + " mAnimation=" + mWinAnimator.mAnimation);
-            if (!mService.okToDisplay()) {
+            if (!mService.okToAnimate()) {
                 doAnimation = false;
             } else if (mPolicyVisibility && mWinAnimator.mAnimation == null) {
                 // Check for the case where we are currently visible and
@@ -2462,7 +2445,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean hideLw(boolean doAnimation, boolean requestAnim) {
         if (doAnimation) {
-            if (!mService.okToDisplay()) {
+            if (!mService.okToAnimate()) {
                 doAnimation = false;
             }
         }
@@ -2705,10 +2688,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mAppFreezing = false;
 
-        if (mHasSurface && !getOrientationChanging()
+        if (mHasSurface && !mOrientationChanging
                 && mService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "set mOrientationChanging of " + this);
-            setOrientationChanging(true);
+            mOrientationChanging = true;
             mService.mRoot.mOrientationChangeComplete = false;
         }
         mLastFreezeDuration = 0;
@@ -3127,7 +3110,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWinAnimator.mSurfaceResized = false;
             mReportOrientationChanged = false;
         } catch (RemoteException e) {
-            setOrientationChanging(false);
+            mOrientationChanging = false;
             mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                     - mService.mDisplayFreezeTime);
             // We are assuming the hosting process is dead or in a zombie state.
@@ -3488,13 +3471,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(" mDestroying="); pw.print(mDestroying);
                     pw.print(" mRemoved="); pw.println(mRemoved);
         }
-        if (getOrientationChanging() || mAppFreezing || mTurnOnScreen
+        if (mOrientationChanging || mAppFreezing || mTurnOnScreen
                 || mReportOrientationChanged) {
             pw.print(prefix); pw.print("mOrientationChanging=");
                     pw.print(mOrientationChanging);
-                    pw.print(" configOrientationChanging=");
-                    pw.print(mLastReportedConfiguration.orientation
-                            != getConfiguration().orientation);
                     pw.print(" mAppFreezing="); pw.print(mAppFreezing);
                     pw.print(" mTurnOnScreen="); pw.print(mTurnOnScreen);
                     pw.print(" mReportOrientationChanged="); pw.println(mReportOrientationChanged);

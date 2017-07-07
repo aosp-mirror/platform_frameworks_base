@@ -186,9 +186,9 @@ public class AudioPolicy {
 
         /**
          * Declares whether this policy will grant and deny audio focus through
-         * the {@link AudioPolicy.AudioPolicyStatusListener}.
+         * the {@link AudioPolicy.AudioPolicyFocusListener}.
          * If set to {@code true}, it is mandatory to set an
-         * {@link AudioPolicy.AudioPolicyStatusListener} in order to successfully build
+         * {@link AudioPolicy.AudioPolicyFocusListener} in order to successfully build
          * an {@code AudioPolicy} instance.
          * @param enforce true if the policy will govern audio focus decisions.
          * @return the same Builder instance.

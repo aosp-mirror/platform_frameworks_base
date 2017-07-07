@@ -392,6 +392,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.videoBytes = stats[2];
         res.imageBytes = stats[3];
         res.appBytes = stats[4];
+        res.obbBytes = stats[5];
         return res;
     }
 

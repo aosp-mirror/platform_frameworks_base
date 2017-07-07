@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@Ignore("Flaky")
 public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
     @Test
@@ -106,7 +107,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_4G);
     }
 
-    @Ignore("Flaky")
     @Test
     public void testDataDisabledIcon() {
         setupNetworkController();

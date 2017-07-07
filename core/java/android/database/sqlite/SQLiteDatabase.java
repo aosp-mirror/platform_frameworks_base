@@ -2366,6 +2366,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
              * <p>SQLite default settings will be used, if this method isn't called.
              * Use {@code setLookasideConfig(0,0)} to disable lookaside
              *
+             * <p><strong>Note:</strong> Provided slotSize/slotCount configuration is just a
+             * recommendation. The system may choose different values depending on a device, e.g.
+             * lookaside allocations can be disabled on low-RAM devices
+             *
              * @param slotSize The size in bytes of each lookaside slot.
              * @param slotCount The total number of lookaside memory slots per database connection.
              */

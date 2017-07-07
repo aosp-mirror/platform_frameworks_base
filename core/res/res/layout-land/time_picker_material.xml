@@ -34,6 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:paddingTop="@dimen/timepicker_radial_picker_top_margin"
             android:orientation="horizontal">
 

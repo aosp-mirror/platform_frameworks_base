@@ -427,11 +427,11 @@ CREATE_BRIDGE4(dumpProfileInfo, CanvasContext* context, RenderThread* thread,
     if (args->dumpFlags & DumpFlags::FrameStats) {
         args->context->dumpFrames(args->fd);
     }
+    if (args->dumpFlags & DumpFlags::JankStats) {
+        args->thread->globalProfileData()->dump(args->fd);
+    }
     if (args->dumpFlags & DumpFlags::Reset) {
         args->context->resetFrameStats();
-    }
-    if (args->dumpFlags & DumpFlags::JankStats) {
-        args->thread->jankTracker().dump(args->fd);
     }
     return nullptr;
 }
@@ -458,7 +458,7 @@ void RenderProxy::resetProfileInfo() {
 
 CREATE_BRIDGE2(frameTimePercentile, RenderThread* thread, int percentile) {
     return reinterpret_cast<void*>(static_cast<uintptr_t>(
-        args->thread->jankTracker().findPercentile(args->percentile)));
+        args->thread->globalProfileData()->findPercentile(args->percentile)));
 }
 
 uint32_t RenderProxy::frameTimePercentile(int p) {
@@ -483,7 +483,7 @@ void RenderProxy::dumpGraphicsMemory(int fd) {
 }
 
 CREATE_BRIDGE2(setProcessStatsBuffer, RenderThread* thread, int fd) {
-    args->thread->jankTracker().switchStorageToAshmem(args->fd);
+    args->thread->globalProfileData().switchStorageToAshmem(args->fd);
     close(args->fd);
     return nullptr;
 }
@@ -497,7 +497,7 @@ void RenderProxy::setProcessStatsBuffer(int fd) {
 }
 
 CREATE_BRIDGE1(rotateProcessStatsBuffer, RenderThread* thread) {
-    args->thread->jankTracker().rotateStorage();
+    args->thread->globalProfileData().rotateStorage();
     return nullptr;
 }
 

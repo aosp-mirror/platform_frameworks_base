@@ -26,6 +26,7 @@ import android.content.res.TypedArray;
 import android.icu.text.DecimalFormatSymbols;
 import android.os.Parcelable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
@@ -111,7 +112,11 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     private int mCurrentHour;
     private int mCurrentMinute;
     private boolean mIs24Hour;
-    private boolean mIsAmPmAtStart;
+
+    // The portrait layout puts AM/PM at the right by default.
+    private boolean mIsAmPmAtLeft = false;
+    // The landscape layouts put AM/PM at the bottom by default.
+    private boolean mIsAmPmAtTop = false;
 
     // Localization data.
     private boolean mHourFormatShowLeadingZero;
@@ -435,34 +440,70 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         if (mIs24Hour) {
             mAmPmLayout.setVisibility(View.GONE);
         } else {
-            // Ensure that AM/PM layout is in the correct position.
+            // Find the location of AM/PM based on locale information.
             final String dateTimePattern = DateFormat.getBestDateTimePattern(mLocale, "hm");
             final boolean isAmPmAtStart = dateTimePattern.startsWith("a");
-            setAmPmAtStart(isAmPmAtStart);
-
+            setAmPmStart(isAmPmAtStart);
             updateAmPmLabelStates(mCurrentHour < 12 ? AM : PM);
         }
     }
 
-    private void setAmPmAtStart(boolean isAmPmAtStart) {
-        if (mIsAmPmAtStart != isAmPmAtStart) {
-            mIsAmPmAtStart = isAmPmAtStart;
-
-            final RelativeLayout.LayoutParams params =
-                    (RelativeLayout.LayoutParams) mAmPmLayout.getLayoutParams();
-            if (params.getRule(RelativeLayout.RIGHT_OF) != 0 ||
-                    params.getRule(RelativeLayout.LEFT_OF) != 0) {
-                if (isAmPmAtStart) {
-                    params.removeRule(RelativeLayout.RIGHT_OF);
-                    params.addRule(RelativeLayout.LEFT_OF, mHourView.getId());
-                } else {
-                    params.removeRule(RelativeLayout.LEFT_OF);
-                    params.addRule(RelativeLayout.RIGHT_OF, mMinuteView.getId());
-                }
+    private void setAmPmStart(boolean isAmPmAtStart) {
+        final RelativeLayout.LayoutParams params =
+                (RelativeLayout.LayoutParams) mAmPmLayout.getLayoutParams();
+        if (params.getRule(RelativeLayout.RIGHT_OF) != 0
+                || params.getRule(RelativeLayout.LEFT_OF) != 0) {
+            // Horizontal mode, with AM/PM appearing to left/right of hours and minutes.
+            final boolean isAmPmAtLeft;
+            if (TextUtils.getLayoutDirectionFromLocale(mLocale) == View.LAYOUT_DIRECTION_LTR) {
+                isAmPmAtLeft = isAmPmAtStart;
+            } else {
+                isAmPmAtLeft = !isAmPmAtStart;
+            }
+            if (mIsAmPmAtLeft == isAmPmAtLeft) {
+                // AM/PM is already at the correct location. No change needed.
+                return;
             }
 
-            mAmPmLayout.setLayoutParams(params);
+            if (isAmPmAtLeft) {
+                params.removeRule(RelativeLayout.RIGHT_OF);
+                params.addRule(RelativeLayout.LEFT_OF, mHourView.getId());
+            } else {
+                params.removeRule(RelativeLayout.LEFT_OF);
+                params.addRule(RelativeLayout.RIGHT_OF, mMinuteView.getId());
+            }
+            mIsAmPmAtLeft = isAmPmAtLeft;
+        } else if (params.getRule(RelativeLayout.BELOW) != 0
+                || params.getRule(RelativeLayout.ABOVE) != 0) {
+            // Vertical mode, with AM/PM appearing to top/bottom of hours and minutes.
+            if (mIsAmPmAtTop == isAmPmAtStart) {
+                // AM/PM is already at the correct location. No change needed.
+                return;
+            }
+
+            final int otherViewId;
+            if (isAmPmAtStart) {
+                otherViewId = params.getRule(RelativeLayout.BELOW);
+                params.removeRule(RelativeLayout.BELOW);
+                params.addRule(RelativeLayout.ABOVE, otherViewId);
+            } else {
+                otherViewId = params.getRule(RelativeLayout.ABOVE);
+                params.removeRule(RelativeLayout.ABOVE);
+                params.addRule(RelativeLayout.BELOW, otherViewId);
+            }
+
+            // Switch the top and bottom paddings on the other view.
+            final View otherView = mRadialTimePickerHeader.findViewById(otherViewId);
+            final int top = otherView.getPaddingTop();
+            final int bottom = otherView.getPaddingBottom();
+            final int left = otherView.getPaddingLeft();
+            final int right = otherView.getPaddingRight();
+            otherView.setPadding(left, bottom, right, top);
+
+            mIsAmPmAtTop = isAmPmAtStart;
         }
+
+        mAmPmLayout.setLayoutParams(params);
     }
 
     /**

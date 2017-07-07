@@ -96,6 +96,7 @@ public class QSIconViewImpl extends QSIconView {
             int padding = state.icon != null ? state.icon.getPadding() : 0;
             if (d != null) {
                 d.setAutoMirrored(false);
+                d.setLayoutDirection(getLayoutDirection());
             }
             iv.setImageDrawable(d);
             if (state.slash != null && iv instanceof SlashImageView) {
@@ -144,22 +145,26 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     public static void animateGrayScale(int fromColor, int toColor, ImageView iv) {
-        final float fromAlpha = Color.alpha(fromColor);
-        final float toAlpha = Color.alpha(toColor);
-        final float fromChannel = Color.red(fromColor);
-        final float toChannel = Color.red(toColor);
+        if (ValueAnimator.areAnimatorsEnabled()) {
+            final float fromAlpha = Color.alpha(fromColor);
+            final float toAlpha = Color.alpha(toColor);
+            final float fromChannel = Color.red(fromColor);
+            final float toChannel = Color.red(toColor);
 
-        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-        anim.setDuration(QS_ANIM_LENGTH);
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+            anim.setDuration(QS_ANIM_LENGTH);
+            anim.addUpdateListener(animation -> {
+                float fraction = animation.getAnimatedFraction();
+                int alpha = (int) (fromAlpha + (toAlpha - fromAlpha) * fraction);
+                int channel = (int) (fromChannel + (toChannel - fromChannel) * fraction);
 
-        anim.addUpdateListener(animation -> {
-            float fraction = animation.getAnimatedFraction();
-            int alpha = (int) (fromAlpha + (toAlpha - fromAlpha) * fraction);
-            int channel = (int) (fromChannel + (toChannel - fromChannel) * fraction);
+                setTint(iv, Color.argb(alpha, channel, channel, channel));
+            });
 
-            setTint(iv, Color.argb(alpha, channel, channel, channel));
-        });
-        anim.start();
+            anim.start();
+        } else {
+            setTint(iv, toColor);
+        }
     }
 
     public static void setTint(ImageView iv, int color) {

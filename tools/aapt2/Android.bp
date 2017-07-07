@@ -115,6 +115,7 @@ cc_library_host_static {
         "unflatten/ResChunkPullParser.cpp",
         "util/BigBuffer.cpp",
         "util/Files.cpp",
+        "util/Utf8Iterator.cpp",
         "util/Util.cpp",
         "ConfigDescription.cpp",
         "Debug.cpp",

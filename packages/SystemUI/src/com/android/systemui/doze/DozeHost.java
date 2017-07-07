@@ -31,6 +31,8 @@ public interface DozeHost {
     void dozeTimeTick();
     boolean isPowerSaveActive();
     boolean isPulsingBlocked();
+    boolean isProvisioned();
+    boolean isBlockingDoze();
 
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
     void abortPulsing();
@@ -39,6 +41,8 @@ public interface DozeHost {
     void setAnimateWakeup(boolean animateWakeup);
 
     void onDoubleTap(float x, float y);
+
+    void setDozeScreenBrightness(int value);
 
     interface Callback {
         default void onNotificationHeadsUp() {}

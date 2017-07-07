@@ -36,16 +36,9 @@ import java.util.List;
 /**
  * Provides information about the colors of a wallpaper.
  * <p>
- * This class contains two main components:
- * <ul>
- * <li>Named colors: Most visually representative colors of a wallpaper. Can be either
+ * Exposes the 3 most visually representative colors of a wallpaper. Can be either
  * {@link WallpaperColors#getPrimaryColor()}, {@link WallpaperColors#getSecondaryColor()}
  * or {@link WallpaperColors#getTertiaryColor()}.
- * </li>
- * <li>Hints: How colors may affect other system components. Currently the only supported hint is
- * {@link WallpaperColors#HINT_SUPPORTS_DARK_TEXT}, which specifies if dark text is preferred
- * over the wallpaper.</li>
- * </ul>
  */
 public final class WallpaperColors implements Parcelable {
 
@@ -53,6 +46,7 @@ public final class WallpaperColors implements Parcelable {
      * Specifies that dark text is preferred over the current wallpaper for best presentation.
      * <p>
      * eg. A launcher may set its text color to black if this flag is specified.
+     * @hide
      */
     public static final int HINT_SUPPORTS_DARK_TEXT = 0x1;
 
@@ -91,9 +85,8 @@ public final class WallpaperColors implements Parcelable {
     /**
      * Constructs {@link WallpaperColors} from a drawable.
      * <p>
-     * Main colors will be extracted from the drawable and hints will be calculated.
+     * Main colors will be extracted from the drawable.
      *
-     * @see WallpaperColors#HINT_SUPPORTS_DARK_TEXT
      * @param drawable Source where to extract from.
      */
     public static WallpaperColors fromDrawable(Drawable drawable) {
@@ -122,9 +115,8 @@ public final class WallpaperColors implements Parcelable {
     /**
      * Constructs {@link WallpaperColors} from a bitmap.
      * <p>
-     * Main colors will be extracted from the bitmap and hints will be calculated.
+     * Main colors will be extracted from the bitmap.
      *
-     * @see WallpaperColors#HINT_SUPPORTS_DARK_TEXT
      * @param bitmap Source where to extract from.
      */
     public static WallpaperColors fromBitmap(@NonNull Bitmap bitmap) {
@@ -185,6 +177,20 @@ public final class WallpaperColors implements Parcelable {
     }
 
     /**
+     * Constructs a new object from three colors.
+     *
+     * @param primaryColor Primary color.
+     * @param secondaryColor Secondary color.
+     * @param tertiaryColor Tertiary color.
+     * @see WallpaperColors#fromBitmap(Bitmap)
+     * @see WallpaperColors#fromDrawable(Drawable)
+     */
+    public WallpaperColors(@NonNull Color primaryColor, @Nullable Color secondaryColor,
+            @Nullable Color tertiaryColor) {
+        this(primaryColor, secondaryColor, tertiaryColor, 0);
+    }
+
+    /**
      * Constructs a new object from three colors, where hints can be specified.
      *
      * @param primaryColor Primary color.
@@ -194,6 +200,7 @@ public final class WallpaperColors implements Parcelable {
      * @see WallpaperColors#HINT_SUPPORTS_DARK_TEXT
      * @see WallpaperColors#fromBitmap(Bitmap)
      * @see WallpaperColors#fromDrawable(Drawable)
+     * @hide
      */
     public WallpaperColors(@NonNull Color primaryColor, @Nullable Color secondaryColor,
             @Nullable Color tertiaryColor, int colorHints) {
@@ -307,6 +314,7 @@ public final class WallpaperColors implements Parcelable {
      *
      * @see WallpaperColors#HINT_SUPPORTS_DARK_TEXT
      * @return True if dark text is supported.
+     * @hide
      */
     public int getColorHints() {
         return mColorHints;

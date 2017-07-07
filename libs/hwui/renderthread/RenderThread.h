@@ -97,7 +97,7 @@ public:
     TimeLord& timeLord() { return mTimeLord; }
     RenderState& renderState() const { return *mRenderState; }
     EglManager& eglManager() const { return *mEglManager; }
-    JankTracker& jankTracker() { return *mJankTracker; }
+    ProfileDataContainer& globalProfileData() { return mGlobalProfileData; }
     Readback& readback();
 
     const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
@@ -160,7 +160,7 @@ private:
     RenderState* mRenderState;
     EglManager* mEglManager;
 
-    JankTracker* mJankTracker = nullptr;
+    ProfileDataContainer mGlobalProfileData;
     Readback* mReadback = nullptr;
 
     sk_sp<GrContext> mGrContext;

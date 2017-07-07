@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Povezano (bez medija)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Povezano (bez pristupa porukama)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Povezano (bez zvuka telefona ili medija)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Povezano, baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Povezano (bez telefona), baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Povezano (bez medija), baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Povezano (bez telefona ili medija), baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Zvuk medija"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonski pozivi"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Prenošenje fajla"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Agresivni prijenos s Wi-Fi mreže na mob."</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvijek dopustiti Wi-Fi lutajuće skeniranje"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilna mreža za prijenos podataka je uvijek aktivna"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogućite apsolutnu jačinu zvuka"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Omogući zvono unutar pojasa"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP verzija"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dozvoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogući pregled atributa prikaza"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Uvijek drži mobilne podatke aktivnim, čak i kada je Wi-Fi je aktivan (za brzo prebacivanje između mreža)."</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"Omogućiti otklanjanje grešaka putem uređaja spojenog na USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Otklanjanje grešaka putem uređaja spojenog na USB je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Opozvati pristup otklanjanju grešaka putem uređaja spojenog na USB za sve računare koje ste prethodno ovlastili?"</string>

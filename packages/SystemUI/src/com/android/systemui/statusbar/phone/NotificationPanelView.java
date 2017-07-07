@@ -346,6 +346,9 @@ public class NotificationPanelView extends PanelView implements
         addView(mKeyguardBottomArea, index);
         initBottomArea();
         setDarkAmount(mDarkAmount);
+
+        setKeyguardStatusViewVisibility(mStatusBarState, false, false);
+        setKeyguardBottomAreaVisibility(mStatusBarState, false);
     }
 
     private void initBottomArea() {
@@ -2561,7 +2564,7 @@ public class NotificationPanelView extends PanelView implements
     public void setTouchDisabled(boolean disabled) {
         super.setTouchDisabled(disabled);
         if (disabled && mAffordanceHelper.isSwipingInProgress() && !mIsLaunchTransitionRunning) {
-            mAffordanceHelper.resetImmediately();
+            mAffordanceHelper.reset(false /* animate */);
         }
     }
 

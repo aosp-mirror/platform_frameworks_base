@@ -230,18 +230,19 @@ public class SignalDrawable extends Drawable {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        final float width = getBounds().width();
+        final float height = getBounds().height();
+
         boolean isRtl = getLayoutDirection() == LayoutDirection.RTL;
         if (isRtl) {
             canvas.save();
             // Mirror the drawable
-            canvas.translate(canvas.getWidth(), 0);
+            canvas.translate(width, 0);
             canvas.scale(-1.0f, 1.0f);
         }
         mFullPath.reset();
         mFullPath.setFillType(FillType.WINDING);
 
-        final float width = getBounds().width();
-        final float height = getBounds().height();
         final float padding = Math.round(PAD * width);
         final float cornerRadius = RADIUS_RATIO * height;
         // Offset from circle where the hypotenuse meets the circle

@@ -1448,7 +1448,7 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Zobacz wszystkie"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Wybierz działanie"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Udostępnij przez:"</string>
-    <string name="sending" msgid="3245653681008218030">"Wysyłanie..."</string>
+    <string name="sending" msgid="3245653681008218030">"Wysyłam..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Uruchomić przeglądarkę?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Odebrać połączenie?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Zawsze"</string>
@@ -1837,8 +1837,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Niezwłocznie ewakuuj się z regionów nabrzeżnych i położonych przy rzekach w bezpieczniejsze miejsce, np. na wzniesienie."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Zachowaj spokój i poszukaj schronienia w pobliżu."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test komunikatów alarmowych"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Odpowiedz"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Niedozwolona karta SIM"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Nieobsługiwana karta SIM"</string>

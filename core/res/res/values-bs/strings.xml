@@ -84,7 +84,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nema govornih/hitnih usluga"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Trenutno nije u ponudi mobilne mreže na vašoj lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nije moguće dosegnuti mrežu"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Da poboljšate prijem, pokušajte promijeniti odabrani tip u meniju Postavke &lt; Mreža i internet &lt; Mobilne mreže &lt; Preferirani tip mreže."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Da poboljšate prijem, pokušajte promijeniti odabranu vrstu u meniju Postavke &lt; Mreža i internet &lt; Mobilne mreže &lt; Preferirana vrsta mreže."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozorenja"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Preusmjeravanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Način rada za hitni povratni poziv"</string>
@@ -195,10 +195,10 @@
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Ažuriranje sistema Android"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Priprema za ažuriranje..."</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Obrađuje se paket ažuriranja..."</string>
-    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Ponovno se pokreće..."</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Ponovno pokretanje......"</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"Vraćanje na fabričke postavke"</string>
-    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Ponovno se pokreće..."</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"Gašenje u toku…"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Ponovno pokretanje......"</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"Isključivanje...…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Vaš tablet će se isključiti."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"TV će se isključiti."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Sat će se isključiti."</string>
@@ -1281,7 +1281,7 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Omogućava aplikaciji da traži dozvolu za zanemarivanje optimizacije baterije za tu aplikaciju."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Dodirnite dvaput za kontrolu uvećanja"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Dodavanje vidžeta nije uspjelo."</string>
-    <string name="ime_action_go" msgid="8320845651737369027">"Počni"</string>
+    <string name="ime_action_go" msgid="8320845651737369027">"Započni"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Pretraži"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Poslati"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Naprijed"</string>
@@ -1700,7 +1700,7 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skupi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne ometaj"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Odmor"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Radni dan uveče"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Radni dan uvečer"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>
     <string name="muted_by" msgid="6147073845094180001">"Ton isključila aplikacija <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
@@ -1809,8 +1809,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Odmah se evakuirajte iz priobalnih područja i područja oko rijeka na sigurnije mjesto kao što su viši predjeli."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Ostanite smireni i potražite sklonište u blizini."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test poruka za hitne slučajeve"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Odgovori"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM kartica nije dozvoljena"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM kartica nije dodijeljena"</string>
