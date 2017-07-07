@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Povezava vzpostavljena (brez predstavnosti)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Povezava vzp. (ni dostopa do sporočil)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Povezava vzpostavljena (brez telefona ali predstavnosti)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Povezava je vzpostavljena, raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Povezava je vzpostavljena (brez telefona), raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Povezava je vzpostavljena (brez predstavnosti), raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Povezava je vzpostavljena (brez telefona ali predstavnosti), raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Zvok predstavnosti"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonski klici"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Prenos datoteke"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Odločen prehod iz Wi-Fi-ja v mobil. omr."</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vedno omogoči iskanje omrežij Wi-Fi za gostovanje"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Prenos podatkov v mobilnem omrežju je vedno aktiven"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogočanje absolutnega praga glasnosti"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Omogoči zvonjenje iz telefona"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Različica profila AVRCP za Bluetooth"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dovoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogoči pregled atributa pogleda"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Prenos podatkov v mobilnih omrežjih je vedno aktiven – tudi ko je aktivna povezava Wi-Fi (za hiter preklop med omrežji)."</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"Ali dovolite odpravljanje težav s povezavo USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Odpravljanje težav s povezavo USB je namenjeno samo za razvoj. Lahko ga uporabljate za kopiranje podatkov med računalnikom in napravo, nameščanje aplikacij v napravo brez obveščanja in branje podatkov v dnevniku."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Ali želite preklicati dostop do odpravljanja težav prek povezave USB iz vseh računalnikov, ki ste jih pooblastili?"</string>

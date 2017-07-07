@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"מחובר (ללא מדיה)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"מחובר (אין גישה להודעות)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"מחובר (ללא טלפון או מדיה)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"מחובר, הסוללה ב-<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"מחובר (ללא טלפון), הסוללה ב-<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"מחובר (ללא מדיה), הסוללה ב-<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"מחובר (ללא טלפון וללא מדיה), הסוללה ב-<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"אודיו של מדיה"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"שיחות טלפון"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"העברת קבצים"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"‏העברה אגרסיבית מ-Wi‑Fi לרשת סלולרית"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏התר תמיד סריקות נדידה של Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"חבילת הגלישה פעילה תמיד"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"השבת עוצמת קול מוחלטת"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"‏הפעל צלצולים בערוץ ה-Bluetooth‏ (in-band ringing)"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏Bluetooth גרסה AVRCP"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"אפשר מיקומים מדומים"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"אפשר בדיקת תכונת תצוגה"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏השאר את חבילת הגלישה פעילה תמיד, גם כש-Wi‑Fi פעיל (למעבר מהיר בין רשתות)."</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"‏לאפשר ניפוי באגים של USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏ניפוי באגים באמצעות USB מיועד למטרות פיתוח בלבד. השתמש בו להעתקת נתונים בין המחשב והמכשיר שלך, להתקנת אפליקציות במכשיר ללא התראה ולקריאת נתוני יומן."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"‏האם לבטל את הגישה לניפוי ב-USB מכל המחשבים שהענקת להם בעבר הרשאה?"</string>
