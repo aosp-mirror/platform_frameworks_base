@@ -16,8 +16,7 @@
 
 package android.database.sqlite;
 
-import dalvik.system.CloseGuard;
-
+import android.app.ActivityManager;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
@@ -25,6 +24,8 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.PrefixPrinter;
 import android.util.Printer;
+
+import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -147,6 +148,11 @@ public final class SQLiteConnectionPool implements Closeable {
 
     private SQLiteConnectionPool(SQLiteDatabaseConfiguration configuration) {
         mConfiguration = new SQLiteDatabaseConfiguration(configuration);
+        // Disable lookaside allocator on low-RAM devices
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            mConfiguration.lookasideSlotCount = 0;
+            mConfiguration.lookasideSlotSize = 0;
+        }
         setMaxConnectionPoolSizeLocked();
     }
 
@@ -1004,7 +1010,10 @@ public final class SQLiteConnectionPool implements Closeable {
             printer.println("Connection pool for " + mConfiguration.path + ":");
             printer.println("  Open: " + mIsOpen);
             printer.println("  Max connections: " + mMaxConnectionPoolSize);
-
+            if (mConfiguration.isLookasideConfigSet()) {
+                printer.println("  Lookaside config: sz=" + mConfiguration.lookasideSlotSize
+                        + " cnt=" + mConfiguration.lookasideSlotCount);
+            }
             printer.println("  Available primary connection:");
             if (mAvailablePrimaryConnection != null) {
                 mAvailablePrimaryConnection.dump(indentedPrinter, verbose);
