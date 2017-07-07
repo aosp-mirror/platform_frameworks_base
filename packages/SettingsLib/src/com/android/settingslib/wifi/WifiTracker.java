@@ -144,15 +144,7 @@ public class WifiTracker {
 
     @VisibleForTesting
     Scanner mScanner;
-
-    /**
-     * Bit used to indicate that a SCAN_RESULTS_AVAILABLE_ACTION broadcast has not been received
-     * since the last time tracking was resumed.
-     *
-     * <p>This bit is used to prevent callbacks to {@link WifiListener#onAccessPointChanged()} that
-     * would result in stale data being fetched.
-     */
-    private boolean mStaleScanResults = true;
+    private boolean mStaleScanResults = false;
 
     public WifiTracker(Context context, WifiListener wifiListener,
             boolean includeSaved, boolean includeScans) {
@@ -775,21 +767,20 @@ public class WifiTracker {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
+            if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
+                mStaleScanResults = false;
+            }
+
             if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
                 updateWifiState(intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                         WifiManager.WIFI_STATE_UNKNOWN));
-            } else if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
-                Message.obtain(
-                            mWorkHandler,
-                            WorkHandler.MSG_UPDATE_ACCESS_POINTS,
-                            WorkHandler.ARG_CLEAR_STALE_SCAN_RESULTS,
-                            0)
-                        .sendToTarget();
-            } else if (WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION.equals(action)
-                    || WifiManager.LINK_CONFIGURATION_CHANGED_ACTION.equals(action)) {
+            } else if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action) ||
+                    WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION.equals(action) ||
+                    WifiManager.LINK_CONFIGURATION_CHANGED_ACTION.equals(action)) {
                 mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
             } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
-                NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                NetworkInfo info = (NetworkInfo) intent.getParcelableExtra(
+                        WifiManager.EXTRA_NETWORK_INFO);
                 mConnected.set(info.isConnected());
 
                 mMainHandler.sendEmptyMessage(MainHandler.MSG_CONNECTED_CHANGED);
@@ -881,8 +872,6 @@ public class WifiTracker {
         private static final int MSG_RESUME = 2;
         private static final int MSG_UPDATE_WIFI_STATE = 3;
 
-        private static final int ARG_CLEAR_STALE_SCAN_RESULTS = 1;
-
         public WorkHandler(Looper looper) {
             super(looper);
         }
@@ -899,9 +888,6 @@ public class WifiTracker {
 
             switch (msg.what) {
                 case MSG_UPDATE_ACCESS_POINTS:
-                    if (msg.arg1 == ARG_CLEAR_STALE_SCAN_RESULTS) {
-                        mStaleScanResults = false;
-                    }
                     updateAccessPoints();
                     break;
                 case MSG_UPDATE_NETWORK_INFO:
