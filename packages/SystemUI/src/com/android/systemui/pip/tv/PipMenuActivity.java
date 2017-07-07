@@ -45,6 +45,9 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        if (!mPipManager.isPipShown()) {
+            finish();
+        }
         setContentView(R.layout.tv_pip_menu);
         mPipManager.addListener(this);
 
