@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#include "util/Utf8Iterator.h"
+#include "text/Utf8Iterator.h"
 
 #include "test/Test.h"
 
 using ::testing::Eq;
 
 namespace aapt {
+namespace text {
 
 TEST(Utf8IteratorTest, IteratesOverAscii) {
   Utf8Iterator iter("hello");
@@ -62,4 +63,5 @@ TEST(Utf8IteratorTest, IteratesOverUnicode) {
   EXPECT_FALSE(iter.HasNext());
 }
 
+}  // namespace text
 }  // namespace aapt
