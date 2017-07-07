@@ -342,6 +342,10 @@ print_usage(FILE* out) {
     fprintf(out, "      Builds and installs CtsProtoTestCases.apk, and runs the testWrite\n");
     fprintf(out, "      and testRepeated test methods on that class.\n");
     fprintf(out, "\n");
+    fprintf(out, "    bit CtsProtoTestCases:android.util.proto.cts.\n");
+    fprintf(out, "      Builds and installs CtsProtoTestCases.apk, and runs the tests in the java package\n");
+    fprintf(out, "      \"android.util.proto.cts\".\n");
+    fprintf(out, "\n");
     fprintf(out, "  Launching an Activity\n");
     fprintf(out, "  ---------------------\n");
     fprintf(out, "  To launch an activity, specify the activity class name after\n");
