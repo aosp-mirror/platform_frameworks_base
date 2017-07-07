@@ -491,10 +491,10 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         if (myHeight <= 0) myHeight = getHeight();
 
         final boolean formatChanged = mFormat != mRequestedFormat;
-        final boolean creating = (mSurfaceControl == null || formatChanged)
+        final boolean visibleChanged = mVisible != mRequestedVisible;
+        final boolean creating = (mSurfaceControl == null || formatChanged || visibleChanged)
                 && mRequestedVisible;
         final boolean sizeChanged = mSurfaceWidth != myWidth || mSurfaceHeight != myHeight;
-        final boolean visibleChanged = mVisible != mRequestedVisible;
         final boolean windowVisibleChanged = mWindowVisibility != mLastWindowVisibility;
         boolean redrawNeeded = false;
 
