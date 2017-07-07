@@ -15,13 +15,15 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * An audio class-specific Midi Input Jack Interface.
  * see midi10.pdf section B.4.3
  */
-public class UsbMSMidiInputJack extends UsbACInterface {
-    private static final String TAG = "MSMidiInputJack";
+public final class UsbMSMidiInputJack extends UsbACInterface {
+    private static final String TAG = "UsbMSMidiInputJack";
 
     UsbMSMidiInputJack(int length, byte type, byte subtype, byte subclass) {
         super(length, type, subtype, subclass);
@@ -32,5 +34,14 @@ public class UsbMSMidiInputJack extends UsbACInterface {
         // TODO - read data memebers
         stream.advance(mLength - stream.getReadCount());
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.writeHeader(3, "MS Midi Input Jack: " + ReportCanvas.getHexString(getType())
+                + " SubType: " + ReportCanvas.getHexString(getSubclass())
+                + " Length: " + getLength());
     }
 }

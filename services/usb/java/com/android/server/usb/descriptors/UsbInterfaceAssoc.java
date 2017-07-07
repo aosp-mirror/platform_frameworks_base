@@ -15,14 +15,16 @@
  */
 package com.android.server.usb.descriptors;
 
+// import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * A USB Interface Association Descriptor.
  * found this one here: http://www.usb.org/developers/docs/whitepapers/iadclasscode_r10.pdf
  * also: https://msdn.microsoft.com/en-us/library/windows/hardware/ff540054(v=vs.85).aspx
  */
-public class UsbInterfaceAssoc extends UsbDescriptor {
-    private static final String TAG = "InterfaceAssoc";
+public final class UsbInterfaceAssoc extends UsbDescriptor {
+    private static final String TAG = "UsbInterfaceAssoc";
 
     private byte mFirstInterface;
     private byte mInterfaceCount;
@@ -70,4 +72,11 @@ public class UsbInterfaceAssoc extends UsbDescriptor {
 
         return mLength;
     }
+
+    // TODO - Report fields
+//    @Override
+//    public void report(ReportCanvas canvas) {
+//        super.report(canvas);
+//
+//    }
 }

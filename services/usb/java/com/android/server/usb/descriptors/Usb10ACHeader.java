@@ -15,18 +15,16 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * An audio class-specific Interface Header.
  * see audio10.pdf section 4.3.2
  */
-public class UsbACHeader extends UsbACInterface {
-    private static final String TAG = "ACHeader";
+public final class Usb10ACHeader extends UsbACHeaderInterface {
+    private static final String TAG = "Usb10ACHeader";
 
-    private int mADCRelease;    // 3:2 Audio Device Class Specification Release (BCD).
-    private int mTotalLength;   // 5:2 Total number of bytes returned for the class-specific
-                                // AudioControl interface descriptor. Includes the combined length
-                                // of this descriptor header and all Unit and Terminal descriptors.
     private byte mNumInterfaces = 0; // 7:1 The number of AudioStreaming and MIDIStreaming
                                      // interfaces in the Audio Interface Collection to which this
                                      // AudioControl interface belongs: n
@@ -34,16 +32,8 @@ public class UsbACHeader extends UsbACInterface {
                                             // numbers associate with this endpoint
     private byte mControls;                 // Vers 2.0 thing
 
-    public UsbACHeader(int length, byte type, byte subtype, byte subclass) {
-        super(length, type, subtype, subclass);
-    }
-
-    public int getADCRelease() {
-        return mADCRelease;
-    }
-
-    public int getTotalLength() {
-        return mTotalLength;
+    public Usb10ACHeader(int length, byte type, byte subtype, byte subclass, int spec) {
+        super(length, type, subtype, subclass, spec);
     }
 
     public byte getNumInterfaces() {
@@ -60,9 +50,8 @@ public class UsbACHeader extends UsbACInterface {
 
     @Override
     public int parseRawDescriptors(ByteStream stream) {
-        mADCRelease = stream.unpackUsbWord();
 
-        mTotalLength = stream.unpackUsbWord();
+        mTotalLength = stream.unpackUsbShort();
         if (mADCRelease >= 0x200) {
             mControls = stream.getByte();
         } else {
@@ -74,5 +63,31 @@ public class UsbACHeader extends UsbACInterface {
         }
 
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.openList();
+        int numInterfaces = getNumInterfaces();
+        StringBuilder sb = new StringBuilder();
+        sb.append("" + numInterfaces + " Interfaces");
+        if (numInterfaces > 0) {
+            sb.append(" [");
+            byte[] interfaceNums = getInterfaceNums();
+            if (interfaceNums != null) {
+                for (int index = 0; index < numInterfaces; index++) {
+                    sb.append("" + interfaceNums[index]);
+                    if (index < numInterfaces - 1) {
+                        sb.append(" ");
+                    }
+                }
+            }
+            sb.append("]");
+        }
+        canvas.writeListItem(sb.toString());
+        canvas.writeListItem("Controls: " + ReportCanvas.getHexString(getControls()));
+        canvas.closeList();
     }
 }

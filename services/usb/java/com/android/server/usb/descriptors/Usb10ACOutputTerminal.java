@@ -15,18 +15,20 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * An audio class-specific Output Terminal Interface.
  * see audio10.pdf section 4.3.2.2
  */
-public class UsbACOutputTerminal extends UsbACTerminal {
-    private static final String TAG = "ACOutputTerminal";
+public final class Usb10ACOutputTerminal extends UsbACTerminal {
+    private static final String TAG = "Usb10ACOutputTerminal";
 
     private byte mSourceID;         // 7:1 From Input Terminal. (0x01)
     private byte mTerminal;         // 8:1 Unused.
 
-    public UsbACOutputTerminal(int length, byte type, byte subtype, byte subClass) {
+    public Usb10ACOutputTerminal(int length, byte type, byte subtype, byte subClass) {
         super(length, type, subtype, subClass);
     }
 
@@ -45,5 +47,14 @@ public class UsbACOutputTerminal extends UsbACTerminal {
         mSourceID = stream.getByte();
         mTerminal = stream.getByte();
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.openList();
+        canvas.writeListItem("Source ID: " + ReportCanvas.getHexString(getSourceID()));
+        canvas.closeList();
     }
 }

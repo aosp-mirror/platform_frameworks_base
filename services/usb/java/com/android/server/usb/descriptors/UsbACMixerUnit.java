@@ -15,23 +15,14 @@
  */
 package com.android.server.usb.descriptors;
 
-/**
- * @hide
- * An audio class-specific Mixer Interface.
- * see audio10.pdf section 4.3.2.3
- */
 public class UsbACMixerUnit extends UsbACInterface {
-    private static final String TAG = "ACMixerUnit";
+    private static final String TAG = "UsbACMixerUnit";
 
-    private byte mUnitID;       // 3:1
-    private byte mNumInputs;    // 4:1 Number of Input Pins of this Unit.
-    private byte[] mInputIDs;   // 5...:1 ID of the Unit or Terminal to which the Input Pins
-                                // are connected.
-    private byte mNumOutputs;   // The number of output channels
-    private int mChannelConfig; // Spacial location of output channels
-    private byte mChanNameID;   // First channel name string descriptor ID
-    private byte[] mControls;   // bitmasks of which controls are present for each channel
-    private byte mNameID;       // string descriptor ID of mixer name
+    protected byte mUnitID;         // 3:1
+    protected byte mNumInputs;      // 4:1 Number of Input Pins of this Unit.
+    protected byte[] mInputIDs;     // 5...:1 ID of the Unit or Terminal to which the Input Pins
+                                    // are connected.
+    protected byte mNumOutputs;     // The number of output channels
 
     public UsbACMixerUnit(int length, byte type, byte subtype, byte subClass) {
         super(length, type, subtype, subClass);
@@ -53,20 +44,9 @@ public class UsbACMixerUnit extends UsbACInterface {
         return mNumOutputs;
     }
 
-    public int getChannelConfig() {
-        return mChannelConfig;
-    }
-
-    public byte getChanNameID() {
-        return mChanNameID;
-    }
-
-    public byte[] getControls() {
-        return mControls;
-    }
-
-    public byte getNameID() {
-        return mNameID;
+    protected static int calcControlArraySize(int numInputs, int numOutputs) {
+        int totalChannels = numInputs * numOutputs;
+        return (totalChannels + 7) / 8;
     }
 
     @Override
@@ -78,22 +58,6 @@ public class UsbACMixerUnit extends UsbACInterface {
             mInputIDs[input] = stream.getByte();
         }
         mNumOutputs = stream.getByte();
-        mChannelConfig = stream.unpackUsbWord();
-        mChanNameID = stream.getByte();
-
-        int controlArraySize;
-        int totalChannels = mNumInputs * mNumOutputs;
-        if (totalChannels % 8 == 0) {
-            controlArraySize = totalChannels / 8;
-        } else {
-            controlArraySize = totalChannels / 8 + 1;
-        }
-        mControls = new byte[controlArraySize];
-        for (int index = 0; index < controlArraySize; index++) {
-            mControls[index] = stream.getByte();
-        }
-
-        mNameID = stream.getByte();
 
         return mLength;
     }

@@ -13,16 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.usb.descriptors;
+package com.android.server.usb.descriptors.tree;
+
+import com.android.server.usb.descriptors.report.ReportCanvas;
+import com.android.server.usb.descriptors.report.Reporting;
 
 /**
  * @hide
- * A holder for any unrecognized descriptor encountered in the descriptor stream.
+ * A shared super class for UsbDescriptor tree nodes.
  */
-public final class UsbUnknown extends UsbDescriptor {
-    static final String TAG = "UsbUnknown";
+public class UsbDescriptorsTreeNode implements Reporting {
+    private static final String TAG = "UsbDescriptorsTreeNode";
 
-    public UsbUnknown(int length, byte type) {
-        super(length, type);
+    /**
+     * Implements generate a comprehehensive report of descriptor.
+     */
+    @Override
+    public void report(ReportCanvas canvas) {
+    }
+
+    /**
+     * Implements generate an abreviated report of descriptor.
+     */
+    @Override
+    public void shortReport(ReportCanvas canvas) {
     }
 }
