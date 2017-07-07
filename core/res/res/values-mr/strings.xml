@@ -1770,8 +1770,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"किनारपट्टीचे प्रदेश आणि नदीकाठची क्षेत्रे त्वरित रिकामी करून उंच मैदानासारख्या अधिक सुरक्षित ठिकाणी जा."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"शांत रहा आणि जवळपास निवारा शोधा."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"आणीबाणी संदेश चाचणी"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"प्रत्युत्तर द्या"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"सिमला अनुमती नाही"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"सिमसाठी तरतूद नाही"</string>
