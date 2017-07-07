@@ -724,7 +724,7 @@ public class WifiTrackerTest {
         verify(mockWifiManager, times(2)).getConfiguredNetworks();
         verify(mockConnectivityManager).getNetworkInfo(any(Network.class));
 
-        verify(mockWifiListener, never()).onAccessPointsChanged(); // mStaleAccessPoints is true
+        verify(mockWifiListener).onAccessPointsChanged();
         assertThat(tracker.getAccessPoints().size()).isEqualTo(2);
         assertThat(tracker.getAccessPoints().get(0).isActive()).isTrue();
     }
@@ -792,25 +792,6 @@ public class WifiTrackerTest {
 
         waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
-        verify(mockWifiListener, never()).onAccessPointsChanged();
-
-        sendScanResultsAndProcess(tracker); // verifies onAccessPointsChanged is invoked
-    }
-
-    @Test
-    public void startTrackingShouldNotSendAnyCallbacksUntilScanResultsAreProcessed()
-            throws Exception {
-        WifiTracker tracker = createMockedWifiTracker();
-        startTracking(tracker);
-        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
-
-        tracker.mReceiver.onReceive(mContext, new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
-        tracker.mReceiver.onReceive(
-                mContext, new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION));
-        tracker.mReceiver.onReceive(
-                mContext, new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION));
-
-        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
         verify(mockWifiListener, never()).onAccessPointsChanged();
 
         sendScanResultsAndProcess(tracker); // verifies onAccessPointsChanged is invoked
