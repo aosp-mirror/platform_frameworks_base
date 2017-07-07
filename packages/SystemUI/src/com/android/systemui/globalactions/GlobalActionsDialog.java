@@ -1304,6 +1304,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                                 * ScrimController.GRADIENT_SCRIM_ALPHA * 255);
                         mGradientDrawable.setAlpha(alpha);
                     })
+                    .withEndAction(() -> getWindow().getDecorView().requestAccessibilityFocus())
                     .start();
         }
 
