@@ -1420,7 +1420,7 @@
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Aina"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Vain kerran"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ei tue työprofiilia"</string>
-    <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet-laite"</string>
+    <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tabletti"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"Televisio"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Puhelin"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kuulokkeet"</string>
@@ -1781,8 +1781,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Siirry heti rannikkoalueilta ja jokien varsilta korkeampiin tai muuten turvallisempiin paikkoihin."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Pysy rauhallisena ja hakeudu lähimpään suojapaikkaan."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Hätäilmoitustesti"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Vastaa"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM-kortti estetty"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-kortti ei käyttäjien hallinnassa"</string>

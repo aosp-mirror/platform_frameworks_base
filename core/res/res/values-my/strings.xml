@@ -1782,8 +1782,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ကမ်းရိုးတန်းနှင့် မြစ်ကမ်းရိုးတစ်လျှောက်ရှိ နေရာဒေသတို့မှ ချက်ချင်းထွက်ခွာပြီး ဘေးကင်းရာကုန်းမြင့်ဒေသသို့ ပြောင်းရွှေ့ပါ။"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"စိတ်ငြိမ်ငြိမ်ထားပြီး အနီးအနားတဝိုက်တွင် ခိုနားစရာ နေရာရှာပါ။"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"အရေးပေါ် မက်ဆေ့ဂျ် စမ်းသပ်မှု"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"စာပြန်ရန်"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"ဆင်းမ်ကို ထောက်ပံ့မထားပါ"</string>
