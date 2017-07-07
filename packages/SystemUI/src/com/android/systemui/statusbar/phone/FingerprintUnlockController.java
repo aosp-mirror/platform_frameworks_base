@@ -263,6 +263,12 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         Trace.endSection();
     }
 
+    public boolean hasPendingAuthentication() {
+        return mPendingAuthenticatedUserId != -1
+                && mUpdateMonitor.isUnlockingWithFingerprintAllowed()
+                && mPendingAuthenticatedUserId == KeyguardUpdateMonitor.getCurrentUser();
+    }
+
     public int getMode() {
         return mMode;
     }
