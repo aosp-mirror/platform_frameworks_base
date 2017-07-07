@@ -1783,8 +1783,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ភៀសខ្លួនជាបន្ទាន់ពីតំបន់ឆ្នេរ និងតំបន់តាមមាត់ទន្លេទៅកាន់កន្លែងដែលមានសុវត្ថិភាពជាងនេះ ដូចជាទីទួលណាមួយ។"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"សូមរក្សាភាពស្ងប់ស្ងាត់ ហើយស្វែងរកជម្រកសុវត្ថិភាពដែលនៅជិត។"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"សារសាកល្បងពេលមានអាសន្ន"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"ឆ្លើយតប"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"មិន​អនុញ្ញាត​សីុមកាត​ទេ"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"សីុម​មិន​ត្រូវបាន​ផ្តល់ជូន​ទេ"</string>

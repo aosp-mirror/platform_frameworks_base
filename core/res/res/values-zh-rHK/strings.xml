@@ -1781,8 +1781,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"請立即從沿海和河岸地區撤離，前往高地等較安全的地點。"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"請保持冷靜，並尋找附近的避難所。"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"緊急訊息測試"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"回覆"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"不允許使用 SIM 卡"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"無法識別 SIM 卡"</string>
