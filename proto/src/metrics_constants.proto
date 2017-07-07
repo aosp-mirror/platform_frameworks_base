@@ -4208,6 +4208,11 @@ message MetricsEvent {
     // OS: O MR
     ACTION_MOBILE_NETWORK_DATA_USAGE = 1082;
 
+    // FIELD - State of asynchronous ranking when Settings search result is clicked
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    FIELD_SETTINGS_SEARCH_RESULT_ASYNC_RANKING_STATE = 1083;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
