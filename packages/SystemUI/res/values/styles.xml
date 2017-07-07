@@ -435,8 +435,7 @@
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
     </style>
 
-    <style name="TunerPreferenceTheme" parent="@android:style/Theme.DeviceDefault.Settings">
-        <item name="dropdownPreferenceStyle">@style/Preference.DropDown.Material</item>
+    <style name="TunerPreferenceTheme" parent="@style/PreferenceThemeOverlay.SettingsBase">
     </style>
 
     <style name="TextAppearance.NotificationInfo">
