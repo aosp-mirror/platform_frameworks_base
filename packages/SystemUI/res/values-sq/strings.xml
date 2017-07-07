@@ -310,8 +310,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Cilësime të tjera"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"U krye!"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"I lidhur"</string>
-    <!-- no translation found for quick_settings_connected_battery_level (4136051440381328892) -->
-    <skip />
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"E lidhur, bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Po lidhet..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Lidhje çiftimi"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Qasje në zona publike interneti"</string>
