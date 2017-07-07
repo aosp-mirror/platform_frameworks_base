@@ -1769,8 +1769,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Evakueeruge ranniku ja jõekallaste piirkondadest viivitamatult ohutusse kohta, näiteks kõrgematesse kohtadesse."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Jääge rahulikuks ja otsige lähedusest peavarju."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Hädaabisõnumite test"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Vasta"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM-kaart pole lubatud"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-kaart on ettevalmistamata"</string>

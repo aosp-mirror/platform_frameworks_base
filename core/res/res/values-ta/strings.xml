@@ -1770,8 +1770,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"கடலோரப் பகுதிகளிலும் ஆற்றங்கரைகளிலும் வசிப்பவர்கள் உடனடியாகப் பாதுகாப்பான இடத்திற்குச் (மேட்டுப்பகுதி) செல்லவும்."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"பதட்டப்படாதீர்கள், அருகில் ஏதேனும் பாதுகாப்பான இடம் உள்ளதா எனப் பாருங்கள்."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"அவசரக் காலச் செய்திகளுக்கான சோதனை"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"பதிலளிக்கும்"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"சிம் அனுமதிக்கப்படவில்லை"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"சிம் அமைக்கப்படவில்லை"</string>

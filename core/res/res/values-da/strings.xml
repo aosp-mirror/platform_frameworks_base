@@ -1769,8 +1769,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Forlad omgående kyst- og flodområder, og søg mod et mere sikkert sted, f.eks. et højere terræn."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Bevar roen, og søg ly i nærheden."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test af nødbeskeder"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Svar"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM-kortet har ikke adgangstilladelse"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-kortet er ikke aktiveret"</string>
