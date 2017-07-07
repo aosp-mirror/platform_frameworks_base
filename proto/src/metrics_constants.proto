@@ -4190,6 +4190,12 @@ message MetricsEvent {
     // OS: O DR
     FIELD_TIME_ELAPSED_BETWEEN_CHARGE_MS = 1030;
 
+    // OPEN: Settings->Connected Devices->Bluetooth->(click on details link for a paired device)
+    // -> Forget button.
+    // CATEGORY: SETTINGS
+    // OS: O DR
+    DIALOG_BLUETOOTH_PAIRED_DEVICE_FORGET = 1031;
+
     // ---- End O-DR1 Constants, all O-DR1 constants go above this line ----
 
     // ACTION: Settings > Network & Internet > Mobile network > Mobile data
