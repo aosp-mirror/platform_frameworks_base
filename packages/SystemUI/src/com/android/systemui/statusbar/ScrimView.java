@@ -39,11 +39,10 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.drawable.GradientDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.drawable.GradientDrawable;
 
 /**
  * A view which can draw a scrim

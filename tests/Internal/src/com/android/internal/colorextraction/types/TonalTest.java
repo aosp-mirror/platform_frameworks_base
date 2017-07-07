@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-package com.google.android.colorextraction.types;
+package com.android.internal.colorextraction.types;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -22,19 +22,15 @@ import android.app.WallpaperColors;
 import android.graphics.Color;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.v4.graphics.ColorUtils;
-import android.util.Pair;
 import android.util.Range;
 
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.graphics.ColorUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Tests tonal palette generation.
@@ -71,9 +67,8 @@ public class TonalTest {
     public void colorRange_excludeBlacklistedColor() {
         // Creating a WallpaperColors object that contains *only* blacklisted colors
         float[] hsl = Tonal.BLACKLISTED_COLORS[0].getCenter();
-        ArrayList<Pair<Color, Integer>> blacklistedColorList = new ArrayList<>();
-        blacklistedColorList.add(new Pair<>(Color.valueOf(ColorUtils.HSLToColor(hsl)), 1));
-        WallpaperColors colors = new WallpaperColors(blacklistedColorList);
+        WallpaperColors colors = new WallpaperColors(Color.valueOf(ColorUtils.HSLToColor(hsl)),
+                null, null, 0);
 
         // Make sure that palette generation will fail
         Tonal tonal = new Tonal();
