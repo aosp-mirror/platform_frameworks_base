@@ -268,6 +268,9 @@ public class Dependency extends SystemUI {
         mProviders.put(AccessibilityManagerWrapper.class,
                 () -> new AccessibilityManagerWrapper(mContext));
 
+        // Creating a new instance will trigger color extraction.
+        // Thankfully this only happens once - during boot - and WallpaperManagerService
+        // loads colors from cache.
         mProviders.put(SysuiColorExtractor.class, () -> new SysuiColorExtractor(mContext));
 
         mProviders.put(TunablePaddingService.class, () -> new TunablePaddingService());
