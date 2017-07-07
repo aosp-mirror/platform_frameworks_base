@@ -32,6 +32,7 @@ import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.PendingIntent;
 import android.app.UserSwitchObserver;
+import android.app.WallpaperColors;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
@@ -55,7 +56,6 @@ import android.graphics.BitmapRegionDecoder;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -64,8 +64,8 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.Process;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SELinux;
@@ -76,12 +76,10 @@ import android.os.UserManager;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
-import android.app.WallpaperColors;
 import android.service.wallpaper.WallpaperService;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.EventLog;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -99,7 +97,6 @@ import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 
-import java.util.ArrayList;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -347,32 +344,44 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             needsExtraction = wallpaper.primaryColors == null;
         }
 
-        // This should not be synchronized because color extraction
-        // might take a while.
+        // Let's notify the current values, it's fine if it's null, it just means
+        // that we don't know yet.
+        notifyColorListeners(wallpaper.primaryColors, which);
+
         if (needsExtraction) {
             extractColors(wallpaper);
+            notifyColorListeners(wallpaper.primaryColors, which);
         }
+    }
 
+    private void notifyColorListeners(WallpaperColors wallpaperColors, int which) {
+        final IWallpaperManagerCallback[] listeners;
+        final IWallpaperManagerCallback keyguardListener;
         synchronized (mLock) {
-            final int n = mColorsChangedListeners.beginBroadcast();
-            for (int i = 0; i < n; i++) {
-                IWallpaperManagerCallback callback = mColorsChangedListeners.getBroadcastItem(i);
-                try {
-                    callback.onWallpaperColorsChanged(wallpaper.primaryColors, which);
-                } catch (RemoteException e) {
-                    // Callback is gone, it's not necessary to unregister it since
-                    // RemoteCallbackList#getBroadcastItem will take care of it.
-                }
+            // Make a synchronized copy of the listeners to avoid concurrent list modification.
+            int callbackCount = mColorsChangedListeners.beginBroadcast();
+            listeners = new IWallpaperManagerCallback[callbackCount];
+            for (int i = 0; i < callbackCount; i++) {
+                listeners[i] = mColorsChangedListeners.getBroadcastItem(i);
             }
             mColorsChangedListeners.finishBroadcast();
+            keyguardListener = mKeyguardListener;
+        }
 
-            final IWallpaperManagerCallback cb = mKeyguardListener;
-            if (cb != null) {
-                try {
-                    cb.onWallpaperColorsChanged(wallpaper.primaryColors, which);
-                } catch (RemoteException e) {
-                    // Oh well it went away; no big deal
-                }
+        for (int i = 0; i < listeners.length; i++) {
+            try {
+                listeners[i].onWallpaperColorsChanged(wallpaperColors, which);
+            } catch (RemoteException e) {
+                // Callback is gone, it's not necessary to unregister it since
+                // RemoteCallbackList#getBroadcastItem will take care of it.
+            }
+        }
+
+        if (keyguardListener != null) {
+            try {
+                keyguardListener.onWallpaperColorsChanged(wallpaperColors, which);
+            } catch (RemoteException e) {
+                // Oh well it went away; no big deal
             }
         }
     }
@@ -414,6 +423,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         synchronized (mLock) {
             if (wallpaper.wallpaperId == wallpaperId) {
                 wallpaper.primaryColors = colors;
+                // Now that we have the colors, let's save them into the xml
+                // to avoid having to run this again.
+                saveSettingsLocked(wallpaper.userId);
             } else {
                 Slog.w(TAG, "Not setting primary colors since wallpaper changed");
             }
@@ -1366,6 +1378,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
             RuntimeException e = null;
             try {
+                wallpaper.primaryColors = null;
                 wallpaper.imageWallpaperPending = false;
                 if (userId != mCurrentUserId) return;
                 if (bindWallpaperComponentLocked(defaultFailed
@@ -1860,6 +1873,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             try {
                 wallpaper.imageWallpaperPending = false;
                 if (bindWallpaperComponentLocked(name, false, true, wallpaper, null)) {
+                    wallpaper.primaryColors = null;
                     wallpaper.wallpaperId = makeWallpaperIdLocked();
                     notifyCallbacksLocked(wallpaper);
                     shouldNotifyColors = true;
@@ -1996,7 +2010,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             }
             wallpaper.wallpaperComponent = componentName;
             wallpaper.connection = newConn;
-            wallpaper.primaryColors = null;
             newConn.mReply = reply;
             try {
                 if (wallpaper.userId == mCurrentUserId) {
@@ -2202,7 +2215,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     out.attribute(null, "colorValue"+i, Integer.toString(wc.toArgb()));
                 }
             }
-            out.attribute(null, "supportsDarkText",
+            out.attribute(null, "colorHints",
                     Integer.toString(wallpaper.primaryColors.getColorHints()));
         }
 
@@ -2439,7 +2452,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         int colorsCount = getAttributeInt(parser, "colorsCount", 0);
         if (colorsCount > 0) {
             Color primary = null, secondary = null, tertiary = null;
-            final List<Color> colors = new ArrayList<>();
             for (int i = 0; i < colorsCount; i++) {
                 Color color = Color.valueOf(getAttributeInt(parser, "colorValue" + i, 0));
                 if (i == 0) {
