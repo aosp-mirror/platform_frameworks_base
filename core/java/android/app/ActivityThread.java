@@ -658,6 +658,7 @@ public final class ActivityThread {
     }
 
     static final class DumpHeapData {
+        public boolean runGc;
         String path;
         ParcelFileDescriptor fd;
     }
@@ -1023,8 +1024,10 @@ public final class ActivityThread {
             sendMessage(H.PROFILER_CONTROL, profilerInfo, start ? 1 : 0, profileType);
         }
 
-        public void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd) {
+        @Override
+        public void dumpHeap(boolean managed, boolean runGc, String path, ParcelFileDescriptor fd) {
             DumpHeapData dhd = new DumpHeapData();
+            dhd.runGc = runGc;
             dhd.path = path;
             dhd.fd = fd;
             sendMessage(H.DUMP_HEAP, dhd, managed ? 1 : 0, 0, true /*async*/);
@@ -5171,6 +5174,11 @@ public final class ActivityThread {
     }
 
     static final void handleDumpHeap(boolean managed, DumpHeapData dhd) {
+        if (dhd.runGc) {
+            System.gc();
+            System.runFinalization();
+            System.gc();
+        }
         if (managed) {
             try {
                 Debug.dumpHprofData(dhd.path, dhd.fd.getFileDescriptor());
