@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Collegato (contenuti multimed. esclusi)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Connesso (nessun accesso ai messaggi)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Collegato (telef. o conten. mult. esclusi)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Connesso, batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Connesso (telefono escluso), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Connesso (contenuti multimediali esclusi), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Connesso (telefono o contenuti multimediali esclusi), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Audio multimediale"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonate"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Trasferimento file"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi‑Fi aggressivo per passaggio a cellulare"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Consenti sempre scansioni roaming Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dati mobili sempre attivi"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Disattiva volume assoluto"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Attiva suoneria in banda"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versione Bluetooth AVRCP"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Consenti posizioni fittizie"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Attiva controllo attributi visualizzazione"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantieni sempre i dati cellulare attivi, anche se il Wi‑Fi è attivo (per un passaggio fra reti rapido)."</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"Consentire debug USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Il debug USB è solo a scopo di sviluppo. Utilizzalo per copiare dati tra il computer e il dispositivo, per installare applicazioni sul tuo dispositivo senza notifica e per leggere i dati dei log."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Revocare l\'accesso al debug USB da tutti i computer precedentemente autorizzati?"</string>

@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Під’єднано (без медіа-файлів)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Під’єднано (без доступу до повідомлень)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Під’єднано (без телефону чи медіа)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Під’єдано, заряд акумулятора: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Під’єднано (без телефона), заряд акумулятора: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Під’єднано (без медіа-вмісту), заряд акумулятора: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Під’єднано (без телефона та медіа-вмісту), заряд акумулятора: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Звук медіа-файлів"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Телефонні дзвінки"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Передавання файлів"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Перемикатися з Wi-Fi на мобільну мережу"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Завжди шукати мережі Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Не вимикати мобільне передавання даних"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Вимкнути абсолютну гучність"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Увімкнути внутрішньосмугові сигнали"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версія Bluetooth AVRCP"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Дозв. фіктивні місцезн."</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Увімкнути оцінку атрибуції переглядів"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не вимикати мобільний Інтернет, навіть якщо ввімкнено Wi‑Fi (щоб швидше переходити між мережами)."</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"Дозвол. налагодж. USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Налагодження USB застосовується лише з метою розробки. Його можна використовувати для копіювання даних між комп’ютером і пристроєм, встановлення програм на вашому пристрої без сповіщення та читання даних журналу."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Скасувати доступ до налагодження USB для всіх комп’ютерів, які раніше отримали таке право?"</string>

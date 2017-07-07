@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Csatlakoztatva (nincs hordozó)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Csatlakoztatva (nincs üzenet-hozzáférés)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Csatlakoztatva (nincs telefon vagy hordozó)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Csatlakoztatva; az akkumulátor töltöttségi szintje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Csatlakoztatva (telefonhang nélkül); az akkumulátor töltöttségi szintje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Csatlakoztatva (médiahang nélkül); az akkumulátor töltöttségi szintje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Csatlakoztatva (telefon- vagy médiahang nélkül); az akkumulátor töltöttségi szintje:<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Média audió"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonhívások"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Fájlátvitel"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Agresszív Wi‑Fi–mobilhálózat átadás"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi-roaming ellenőrzésének engedélyezése mindig"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"A mobilhálózati kapcsolat mindig aktív"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Abszolút hangerő funkció letiltása"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Sávon belüli csörgetés engedélyezése"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"A Bluetooth AVRCP-verziója"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Helyutánzatok engedélyezése"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Nézetattribútum vizsgálatának engedélyezése"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"A mobiladat-kapcsolat mindig maradjon aktív, még akkor is, ha a Wi‑Fi aktív (a gyors hálózatváltás érdekében)."</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"Engedélyezi az USB hibakeresést?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Az USB hibakeresés fejlesztési célokat szolgál. Használhatja adatok másolására a számítógép és a készülék között, alkalmazások a készülékre való értesítés nélküli telepítésére és naplózási adatok olvasására."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Visszavonja a hozzáférést az USB-s hibakereséshez az összes számítógépről, ahol korábban engedélyezte azt?"</string>

@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"مربوط (کوئی میڈیا نہیں ہے)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"مربوط (کسی پیغام تک رسائی نہیں ہے)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"مربوط (کوئی فون یا میڈیا نہیں ہے)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"منسلک ہے، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"منسلک ہے (کوئی فون نہیں)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"منسلک ہے (کوئی میڈیا نہیں)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"منسلک ہے (کوئی فون یا میڈیا نہیں)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"میڈيا آڈیو"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"فون کالز"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"فائل کی منتقلی"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"‏Wi‑Fi سے موبائل کو جارحانہ ہینڈ اوور"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏ہمیشہ Wi‑Fi روم اسکینز کی اجازت دیں"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"موبائل ڈیٹا ہمیشہ فعال رکھیں"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"مطلق والیوم کو غیر فعال کریں"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ان بینڈ رنگنگ فعال کریں"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏بلوٹوتھ AVRCP ورژن"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"فرضی مقامات کی اجازت دیں"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"منظر انتساب کے معائنہ کو فعال کریں"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏Wi‑Fi فعال ہونے پر بھی موبائل ڈیٹا کو ہمیشہ فعال رکھیں (تیزی سے نیٹ ورک سوئچ کرنے کیلئے)۔"</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"‏USB ڈیبگ کرنے کی اجازت دیں؟"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏USB ڈیبگ کرنا صرف ڈیولپمنٹ کے مقاصد کیلئے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کیلئے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"‏اپنے ذریعہ پہلے سے اجازت یافتہ سبھی کمپیوٹرز سے USB ڈیبگ کرنے کی رسائی کو کالعدم کریں؟"</string>
