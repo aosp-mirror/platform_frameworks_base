@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -950,5 +951,28 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         waitForIdle();
 
         verify(mSnoozeHelper, never()).repostGroupSummary(anyString(), anyInt(), anyString());
+    }
+
+    @Test
+    public void testNoFakeColorizedPermission() throws Exception {
+        when(mPackageManagerClient.checkPermission(any(), any())).thenReturn(PERMISSION_DENIED);
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setColorized(true)
+                .setFlag(Notification.FLAG_CAN_COLORIZE, true)
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", uid, 0,
+                nb.build(), new UserHandle(uid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, null,
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        NotificationRecord posted = mNotificationManagerService.findNotificationLocked(
+                PKG, null, nr.sbn.getId(), nr.sbn.getUserId());
+
+        assertFalse(posted.getNotification().isColorized());
     }
 }
