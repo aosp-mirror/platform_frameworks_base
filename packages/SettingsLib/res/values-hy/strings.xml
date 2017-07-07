@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Միացված է (առանց մեդիա)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Միացված է (հաղորդագրությանը մուտք չկա)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Միացված է (առանց հեռախոսի և մեդիայի)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Միացված է, մարտկոցի լիցք՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Միացած է (հեռախոս չկա), մարտկոցի լիցք՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Միացված է (մեդիա չկա), մարտկոցի լիցք՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Միացված է (հեռախոս կամ մեդիա չկա), մարտկոցի լիցք՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Մեդիա աուդիո"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Հեռախոսազանգեր"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Ֆայլերի փոխանցում"</string>
@@ -73,8 +69,8 @@
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Ինտերնետ կապի տարածում"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"SMS հաղորդագրություններ"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM քարտի հասանելիություն"</string>
-    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ձայն՝ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ձայն"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD աուդիո՝ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD աուդիո"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Միացված է մեդիա աուդիոյին"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Միացված է հեռախոսի ձայնային տվյալներին"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Միացված է ֆայլերի փոխանցման սերվերին"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi-Fi-ից կտրուկ անցում բջջային ինտերնետի"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Միշտ թույլատրել Wi‑Fi ռոումինգի որոնումը"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Բջջային ինտերնետը միշտ ակտիվ է"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Անջատել ձայնի բացարձակ ուժգնությունը"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Միացնել ներխմբային զանգը"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP տարբերակը"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Թույլ տալ կեղծ տեղադրություններ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Միացնել ցուցադրման հատկանիշների ստուգումը"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Միշտ ակտիվացրած պահել բջջային տվյալները, նույնիսկ Wi‑Fi-ը միացրած ժամանակ (ցանցերի միջև արագ փոխարկման համար):"</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"Թույլատրե՞լ USB-ի վրիպազերծումը:"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB վրիպազերծումը միայն ծրագրավորման նպատակների համար է: Օգտագործեք այն ձեր համակարգչից տվյալները ձեր սարք պատճենելու համար, առանց ծանուցման ձեր սարքի վրա ծրագրեր տեղադրելու և տվյալների մատյանը ընթերցելու համար:"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Փակե՞լ USB-ի վրիպազերծման մուտքը` անջատելով այն բոլոր համակարգիչներից, որտեղ նախկինում թույլատրել էիք:"</string>
