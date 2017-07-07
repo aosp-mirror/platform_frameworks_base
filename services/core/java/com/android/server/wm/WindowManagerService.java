@@ -5796,7 +5796,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // orientation.
         if (!okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Changing surface while display frozen: " + w);
-            w.setOrientationChanging(true);
+            w.mOrientationChanging = true;
             w.mLastFreezeDuration = 0;
             mRoot.mOrientationChangeComplete = false;
             if (mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_NONE) {
