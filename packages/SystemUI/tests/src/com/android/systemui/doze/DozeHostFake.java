@@ -101,4 +101,8 @@ class DozeHostFake implements DozeHost {
         doubleTapX = y;
         doubleTapY = y;
     }
+
+    @Override
+    public void setDozeScreenBrightness(int value) {
+    }
 }
