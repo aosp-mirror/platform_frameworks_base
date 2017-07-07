@@ -756,7 +756,14 @@ public class StatusBarIconView extends AnimatedImageView {
             updateIconScale();
             updateDecorColor();
             updateIconColor();
+            updateAllowAnimation();
         }, dark, fade, delay);
+    }
+
+    private void updateAllowAnimation() {
+        if (mDarkAmount == 0 || mDarkAmount == 1) {
+            setAllowAnimation(mDarkAmount == 0);
+        }
     }
 
     public interface OnVisibilityChangedListener {
