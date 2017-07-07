@@ -736,6 +736,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private HashMap<String, Entry> mPendingNotifications = new HashMap<>();
     private boolean mClearAllEnabled;
     @Nullable private View mAmbientIndicationContainer;
+    private String mKeyToRemoveOnGutsClosed;
     private SysuiColorExtractor mColorExtractor;
     private ForegroundServiceController mForegroundServiceController;
 
@@ -1787,6 +1788,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && (entry.row != null && !entry.row.isDismissed())) {
             mLatestRankingMap = ranking;
             mRemoteInputEntriesToRemoveOnCollapse.add(entry);
+            return;
+        }
+        if (entry != null && mNotificationGutsExposed != null
+                && mNotificationGutsExposed == entry.row.getGuts()) {
+            Log.w(TAG, "Keeping notification because it's showing guts. " + key);
+            mLatestRankingMap = ranking;
+            mKeyToRemoveOnGutsClosed = key;
             return;
         }
 
@@ -3465,6 +3473,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         pw.println(Settings.Global.zenModeToString(mZenMode));
         pw.print("  mUseHeadsUp=");
         pw.println(mUseHeadsUp);
+        pw.print("  mKeyToRemoveOnGutsClosed=");
+        pw.println(mKeyToRemoveOnGutsClosed);
         if (mStatusBarView != null) {
             dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         }
@@ -6130,6 +6140,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationGutsExposed = null;
                 mGutsMenuItem = null;
             }
+            String key = sbn.getKey();
+            if (key.equals(mKeyToRemoveOnGutsClosed)) {
+                mKeyToRemoveOnGutsClosed = null;
+                removeNotification(key, mLatestRankingMap);
+            }
         });
 
         View gutsView = item.getGutsView();
@@ -7088,9 +7103,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         Entry entry = mNotificationData.get(key);
         if (entry == null) {
             return;
-        } else {
-            mHeadsUpEntriesToRemoveOnSwitch.remove(entry);
-            mRemoteInputEntriesToRemoveOnCollapse.remove(entry);
+        }
+        mHeadsUpEntriesToRemoveOnSwitch.remove(entry);
+        mRemoteInputEntriesToRemoveOnCollapse.remove(entry);
+        if (key.equals(mKeyToRemoveOnGutsClosed)) {
+            mKeyToRemoveOnGutsClosed = null;
+            Log.w(TAG, "Notification that was kept for guts was updated. " + key);
         }
 
         Notification n = notification.getNotification();
