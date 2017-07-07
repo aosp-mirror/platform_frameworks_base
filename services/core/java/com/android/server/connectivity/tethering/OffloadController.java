@@ -142,8 +142,9 @@ public class OffloadController {
     }
 
     private boolean isOffloadDisabled() {
-        // Defaults to |false| if not present.
-        return (Settings.Global.getInt(mContentResolver, TETHER_OFFLOAD_DISABLED, 0) != 0);
+        final int defaultDisposition = mHwInterface.getDefaultTetherOffloadDisabled();
+        return (Settings.Global.getInt(
+                mContentResolver, TETHER_OFFLOAD_DISABLED, defaultDisposition) != 0);
     }
 
     private boolean started() {

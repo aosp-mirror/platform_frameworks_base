@@ -46,6 +46,7 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.Test;
@@ -73,6 +74,13 @@ public class OffloadControllerTest {
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        // TODO: call this when available.
+        // FakeSettingsProvider.clearSettingsProvider();
+    }
+
+    @After public void tearDown() throws Exception {
+        // TODO: call this when available.
+        // FakeSettingsProvider.clearSettingsProvider();
     }
 
     private void setupFunctioningHardwareInterface() {
@@ -81,9 +89,15 @@ public class OffloadControllerTest {
                 .thenReturn(true);
     }
 
-    @Test
-    public void testNoSettingsValueAllowsStart() {
+    private void enableOffload() {
+        Settings.Global.putInt(mContentResolver, TETHER_OFFLOAD_DISABLED, 0);
+    }
+
+    // TODO: Restore when FakeSettingsProvider.clearSettingsProvider() is available.
+    // @Test
+    public void testNoSettingsValueDefaultDisabledDoesNotStart() {
         setupFunctioningHardwareInterface();
+        when(mHardware.getDefaultTetherOffloadDisabled()).thenReturn(1);
         try {
             Settings.Global.getInt(mContentResolver, TETHER_OFFLOAD_DISABLED);
             fail();
@@ -94,6 +108,29 @@ public class OffloadControllerTest {
         offload.start();
 
         final InOrder inOrder = inOrder(mHardware);
+        inOrder.verify(mHardware, times(1)).getDefaultTetherOffloadDisabled();
+        inOrder.verify(mHardware, never()).initOffloadConfig();
+        inOrder.verify(mHardware, never()).initOffloadControl(
+                any(OffloadHardwareInterface.ControlCallback.class));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    // TODO: Restore when FakeSettingsProvider.clearSettingsProvider() is available.
+    // @Test
+    public void testNoSettingsValueDefaultEnabledDoesStart() {
+        setupFunctioningHardwareInterface();
+        when(mHardware.getDefaultTetherOffloadDisabled()).thenReturn(0);
+        try {
+            Settings.Global.getInt(mContentResolver, TETHER_OFFLOAD_DISABLED);
+            fail();
+        } catch (SettingNotFoundException expected) {}
+
+        final OffloadController offload =
+                new OffloadController(null, mHardware, mContentResolver, new SharedLog("test"));
+        offload.start();
+
+        final InOrder inOrder = inOrder(mHardware);
+        inOrder.verify(mHardware, times(1)).getDefaultTetherOffloadDisabled();
         inOrder.verify(mHardware, times(1)).initOffloadConfig();
         inOrder.verify(mHardware, times(1)).initOffloadControl(
                 any(OffloadHardwareInterface.ControlCallback.class));
@@ -110,6 +147,7 @@ public class OffloadControllerTest {
         offload.start();
 
         final InOrder inOrder = inOrder(mHardware);
+        inOrder.verify(mHardware, times(1)).getDefaultTetherOffloadDisabled();
         inOrder.verify(mHardware, times(1)).initOffloadConfig();
         inOrder.verify(mHardware, times(1)).initOffloadControl(
                 any(OffloadHardwareInterface.ControlCallback.class));
@@ -126,6 +164,7 @@ public class OffloadControllerTest {
         offload.start();
 
         final InOrder inOrder = inOrder(mHardware);
+        inOrder.verify(mHardware, times(1)).getDefaultTetherOffloadDisabled();
         inOrder.verify(mHardware, never()).initOffloadConfig();
         inOrder.verify(mHardware, never()).initOffloadControl(anyObject());
         inOrder.verifyNoMoreInteractions();
@@ -134,11 +173,14 @@ public class OffloadControllerTest {
     @Test
     public void testSetUpstreamLinkPropertiesWorking() throws Exception {
         setupFunctioningHardwareInterface();
+        enableOffload();
+
         final OffloadController offload =
                 new OffloadController(null, mHardware, mContentResolver, new SharedLog("test"));
         offload.start();
 
         final InOrder inOrder = inOrder(mHardware);
+        inOrder.verify(mHardware, times(1)).getDefaultTetherOffloadDisabled();
         inOrder.verify(mHardware, times(1)).initOffloadConfig();
         inOrder.verify(mHardware, times(1)).initOffloadControl(
                 any(OffloadHardwareInterface.ControlCallback.class));
