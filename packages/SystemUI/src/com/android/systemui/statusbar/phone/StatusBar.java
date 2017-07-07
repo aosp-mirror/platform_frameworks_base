@@ -4573,16 +4573,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .supportsDarkText();
         // And wallpaper defines if QS should be light or dark.
         boolean useDarkTheme = false;
-        final WallpaperManager wallpaperManager = mContext.getSystemService(WallpaperManager.class);
-        if (wallpaperManager != null) {
-            WallpaperColors wallpaperColors = wallpaperManager
-                    .getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
-            if (wallpaperColors != null) {
-                final int mainColor = wallpaperColors.getPrimaryColor().toArgb();
-                final float[] hsl = new float[3];
-                ColorUtils.colorToHSL(mainColor, hsl);
-                useDarkTheme = hsl[2] < 0.2f;
-            }
+        final WallpaperColors systemColors =
+                mColorExtractor.getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
+        if (systemColors != null) {
+            int mainColor = systemColors.getPrimaryColor().toArgb();
+            float[] hsl = new float[3];
+            ColorUtils.colorToHSL(mainColor, hsl);
+            useDarkTheme = hsl[2] < 0.2f;
         }
 
         // Enable/disable dark UI.
