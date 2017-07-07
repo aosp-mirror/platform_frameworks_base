@@ -248,6 +248,12 @@ public class DozeLog {
         }
     }
 
+    public static void traceSensor(Context context, int pulseReason) {
+        if (!ENABLED) return;
+        init(context);
+        log("sensor type=" + pulseReasonToString(pulseReason));
+    }
+
     private static class SummaryStats {
         private int mCount;
 
