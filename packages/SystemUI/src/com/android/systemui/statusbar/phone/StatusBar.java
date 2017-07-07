@@ -1871,6 +1871,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         } catch (RemoteException ex) {
             // system process is dead if we're here.
         }
+        if (mStackScroller.hasPulsingNotifications() && mHeadsUpManager.getAllEntries().isEmpty()) {
+            // We were showing a pulse for a notification, but no notifications are pulsing anymore.
+            // Finish the pulse.
+            mDozeScrimController.pulseOutNow();
+        }
         // end old BaseStatusBar.performRemoveNotification.
     }
 
