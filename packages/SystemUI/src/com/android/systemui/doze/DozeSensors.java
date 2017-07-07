@@ -233,7 +233,9 @@ public class DozeSensors {
             mProxCallback.accept(mCurrentlyFar);
 
             long now = SystemClock.elapsedRealtime();
-            if (!mCurrentlyFar) {
+            if (mCurrentlyFar == null) {
+                // Sensor has been unregistered by the proxCallback. Do nothing.
+            } else if (!mCurrentlyFar) {
                 mLastNear = now;
             } else if (mCurrentlyFar && now - mLastNear < COOLDOWN_TRIGGER) {
                 // If the last near was very recent, we might be using more power for prox
