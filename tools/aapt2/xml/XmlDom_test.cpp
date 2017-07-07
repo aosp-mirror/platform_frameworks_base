@@ -21,7 +21,9 @@
 
 #include "test/Test.h"
 
+using ::testing::Eq;
 using ::testing::NotNull;
+using ::testing::SizeIs;
 
 namespace aapt {
 
@@ -30,47 +32,59 @@ constexpr const char* kXmlPreamble =
 
 TEST(XmlDomTest, Inflate) {
   std::stringstream in(kXmlPreamble);
-  in << R"EOF(
-        <Layout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            <TextView android:id="@+id/id"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content" />
-        </Layout>
-    )EOF";
+  in << R"(
+      <Layout xmlns:android="http://schemas.android.com/apk/res/android"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+        <TextView android:id="@+id/id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+      </Layout>)";
 
-  const Source source = {"test.xml"};
+  const Source source("test.xml");
   StdErrDiagnostics diag;
   std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, source);
   ASSERT_THAT(doc, NotNull());
 
   xml::Namespace* ns = xml::NodeCast<xml::Namespace>(doc->root.get());
   ASSERT_THAT(ns, NotNull());
-  EXPECT_EQ(ns->namespace_uri, xml::kSchemaAndroid);
-  EXPECT_EQ(ns->namespace_prefix, "android");
+  EXPECT_THAT(ns->namespace_uri, Eq(xml::kSchemaAndroid));
+  EXPECT_THAT(ns->namespace_prefix, Eq("android"));
 }
 
 // Escaping is handled after parsing of the values for resource-specific values.
 TEST(XmlDomTest, ForwardEscapes) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"EOF(
-      <element value="\?hello" pattern="\\d{5}">\\d{5}</element>)EOF");
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
+      <element value="\?hello" pattern="\\d{5}">\\d{5}</element>)");
 
-  xml::Element* el = xml::FindRootElement(doc->root.get());
+  xml::Element* el = xml::FindRootElement(doc.get());
   ASSERT_THAT(el, NotNull());
 
   xml::Attribute* attr = el->FindAttribute({}, "pattern");
   ASSERT_THAT(attr, NotNull());
-  EXPECT_EQ("\\\\d{5}", attr->value);
+  EXPECT_THAT(attr->value, Eq("\\\\d{5}"));
 
   attr = el->FindAttribute({}, "value");
   ASSERT_THAT(attr, NotNull());
-  EXPECT_EQ("\\?hello", attr->value);
+  EXPECT_THAT(attr->value, Eq("\\?hello"));
 
-  ASSERT_EQ(1u, el->children.size());
+  ASSERT_THAT(el->children, SizeIs(1u));
+
   xml::Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
   ASSERT_THAT(text, NotNull());
-  EXPECT_EQ("\\\\d{5}", text->text);
+  EXPECT_THAT(text->text, Eq("\\\\d{5}"));
+}
+
+TEST(XmlDomTest, XmlEscapeSequencesAreParsed) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(<element value="&quot;" />)");
+
+  xml::Element* el = xml::FindRootElement(doc.get());
+  ASSERT_THAT(el, NotNull());
+
+  xml::Attribute* attr = el->FindAttribute({}, "value");
+  ASSERT_THAT(attr, NotNull());
+
+  EXPECT_THAT(attr->value, Eq("\""));
 }
 
 }  // namespace aapt

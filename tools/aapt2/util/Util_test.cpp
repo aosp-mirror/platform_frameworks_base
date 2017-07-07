@@ -20,16 +20,17 @@
 
 #include "test/Test.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
+using ::testing::Eq;
+using ::testing::Ne;
+using ::testing::SizeIs;
 
 namespace aapt {
 
 TEST(UtilTest, TrimOnlyWhitespace) {
-  const std::string full = "\n        ";
-
-  StringPiece trimmed = util::TrimWhitespace(full);
+  const StringPiece trimmed = util::TrimWhitespace("\n        ");
   EXPECT_TRUE(trimmed.empty());
-  EXPECT_EQ(0u, trimmed.size());
+  EXPECT_THAT(trimmed, SizeIs(0u));
 }
 
 TEST(UtilTest, StringEndsWith) {
@@ -41,85 +42,74 @@ TEST(UtilTest, StringStartsWith) {
 }
 
 TEST(UtilTest, StringBuilderSplitEscapeSequence) {
-  EXPECT_EQ(StringPiece("this is a new\nline."), util::StringBuilder()
-                                                     .Append("this is a new\\")
-                                                     .Append("nline.")
-                                                     .ToString());
+  EXPECT_THAT(util::StringBuilder().Append("this is a new\\").Append("nline.").ToString(),
+              Eq("this is a new\nline."));
 }
 
 TEST(UtilTest, StringBuilderWhitespaceRemoval) {
-  EXPECT_EQ(StringPiece("hey guys this is so cool"),
-            util::StringBuilder()
-                .Append("    hey guys ")
-                .Append(" this is so cool ")
-                .ToString());
-
-  EXPECT_EQ(StringPiece(" wow,  so many \t spaces. what?"),
-            util::StringBuilder()
-                .Append(" \" wow,  so many \t ")
-                .Append("spaces. \"what? ")
-                .ToString());
-
-  EXPECT_EQ(StringPiece("where is the pie?"), util::StringBuilder()
-                                                  .Append("  where \t ")
-                                                  .Append(" \nis the "
-                                                          " pie?")
-                                                  .ToString());
+  EXPECT_THAT(util::StringBuilder().Append("    hey guys ").Append(" this is so cool ").ToString(),
+              Eq("hey guys this is so cool"));
+  EXPECT_THAT(
+      util::StringBuilder().Append(" \" wow,  so many \t ").Append("spaces. \"what? ").ToString(),
+      Eq(" wow,  so many \t spaces. what?"));
+  EXPECT_THAT(util::StringBuilder().Append("  where \t ").Append(" \nis the pie?").ToString(),
+              Eq("where is the pie?"));
 }
 
 TEST(UtilTest, StringBuilderEscaping) {
-  EXPECT_EQ(StringPiece("hey guys\n this \t is so\\ cool"),
-            util::StringBuilder()
-                .Append("    hey guys\\n ")
-                .Append(" this \\t is so\\\\ cool ")
-                .ToString());
-
-  EXPECT_EQ(StringPiece("@?#\\\'"),
-            util::StringBuilder().Append("\\@\\?\\#\\\\\\'").ToString());
+  EXPECT_THAT(util::StringBuilder()
+                  .Append("    hey guys\\n ")
+                  .Append(" this \\t is so\\\\ cool ")
+                  .ToString(),
+              Eq("hey guys\n this \t is so\\ cool"));
+  EXPECT_THAT(util::StringBuilder().Append("\\@\\?\\#\\\\\\'").ToString(), Eq("@?#\\\'"));
 }
 
 TEST(UtilTest, StringBuilderMisplacedQuote) {
-  util::StringBuilder builder{};
+  util::StringBuilder builder;
   EXPECT_FALSE(builder.Append("they're coming!"));
 }
 
 TEST(UtilTest, StringBuilderUnicodeCodes) {
-  EXPECT_EQ(std::string("\u00AF\u0AF0 woah"),
-            util::StringBuilder().Append("\\u00AF\\u0AF0 woah").ToString());
-
+  EXPECT_THAT(util::StringBuilder().Append("\\u00AF\\u0AF0 woah").ToString(),
+              Eq("\u00AF\u0AF0 woah"));
   EXPECT_FALSE(util::StringBuilder().Append("\\u00 yo"));
+}
+
+TEST(UtilTest, StringBuilderPreserveSpaces) {
+  EXPECT_THAT(util::StringBuilder(true /*preserve_spaces*/).Append("\"").ToString(), Eq("\""));
 }
 
 TEST(UtilTest, TokenizeInput) {
   auto tokenizer = util::Tokenize(StringPiece("this| is|the|end"), '|');
   auto iter = tokenizer.begin();
-  ASSERT_EQ(*iter, StringPiece("this"));
+  ASSERT_THAT(*iter, Eq("this"));
   ++iter;
-  ASSERT_EQ(*iter, StringPiece(" is"));
+  ASSERT_THAT(*iter, Eq(" is"));
   ++iter;
-  ASSERT_EQ(*iter, StringPiece("the"));
+  ASSERT_THAT(*iter, Eq("the"));
   ++iter;
-  ASSERT_EQ(*iter, StringPiece("end"));
+  ASSERT_THAT(*iter, Eq("end"));
   ++iter;
-  ASSERT_EQ(tokenizer.end(), iter);
+  ASSERT_THAT(iter, Eq(tokenizer.end()));
 }
 
 TEST(UtilTest, TokenizeEmptyString) {
   auto tokenizer = util::Tokenize(StringPiece(""), '|');
   auto iter = tokenizer.begin();
-  ASSERT_NE(tokenizer.end(), iter);
-  ASSERT_EQ(StringPiece(), *iter);
+  ASSERT_THAT(iter, Ne(tokenizer.end()));
+  ASSERT_THAT(*iter, Eq(StringPiece()));
   ++iter;
-  ASSERT_EQ(tokenizer.end(), iter);
+  ASSERT_THAT(iter, Eq(tokenizer.end()));
 }
 
 TEST(UtilTest, TokenizeAtEnd) {
   auto tokenizer = util::Tokenize(StringPiece("one."), '.');
   auto iter = tokenizer.begin();
-  ASSERT_EQ(*iter, StringPiece("one"));
+  ASSERT_THAT(*iter, Eq("one"));
   ++iter;
-  ASSERT_NE(iter, tokenizer.end());
-  ASSERT_EQ(*iter, StringPiece());
+  ASSERT_THAT(iter, Ne(tokenizer.end()));
+  ASSERT_THAT(*iter, Eq(StringPiece()));
 }
 
 TEST(UtilTest, IsJavaClassName) {
@@ -146,52 +136,34 @@ TEST(UtilTest, IsJavaPackageName) {
 }
 
 TEST(UtilTest, FullyQualifiedClassName) {
-  Maybe<std::string> res = util::GetFullyQualifiedClassName("android", ".asdf");
-  ASSERT_TRUE(res);
-  EXPECT_EQ(res.value(), "android.asdf");
-
-  res = util::GetFullyQualifiedClassName("android", ".a.b");
-  ASSERT_TRUE(res);
-  EXPECT_EQ(res.value(), "android.a.b");
-
-  res = util::GetFullyQualifiedClassName("android", "a.b");
-  ASSERT_TRUE(res);
-  EXPECT_EQ(res.value(), "a.b");
-
-  res = util::GetFullyQualifiedClassName("", "a.b");
-  ASSERT_TRUE(res);
-  EXPECT_EQ(res.value(), "a.b");
-
-  res = util::GetFullyQualifiedClassName("android", "Class");
-  ASSERT_TRUE(res);
-  EXPECT_EQ(res.value(), "android.Class");
-
-  res = util::GetFullyQualifiedClassName("", "");
-  ASSERT_FALSE(res);
-
-  res = util::GetFullyQualifiedClassName("android", "./Apple");
-  ASSERT_FALSE(res);
+  EXPECT_THAT(util::GetFullyQualifiedClassName("android", ".asdf"), Eq("android.asdf"));
+  EXPECT_THAT(util::GetFullyQualifiedClassName("android", ".a.b"), Eq("android.a.b"));
+  EXPECT_THAT(util::GetFullyQualifiedClassName("android", "a.b"), Eq("a.b"));
+  EXPECT_THAT(util::GetFullyQualifiedClassName("", "a.b"), Eq("a.b"));
+  EXPECT_THAT(util::GetFullyQualifiedClassName("android", "Class"), Eq("android.Class"));
+  EXPECT_FALSE(util::GetFullyQualifiedClassName("", ""));
+  EXPECT_FALSE(util::GetFullyQualifiedClassName("android", "./Apple"));
 }
 
 TEST(UtilTest, ExtractResourcePathComponents) {
   StringPiece prefix, entry, suffix;
   ASSERT_TRUE(util::ExtractResFilePathParts("res/xml-sw600dp/entry.xml", &prefix, &entry, &suffix));
-  EXPECT_EQ(prefix, "res/xml-sw600dp/");
-  EXPECT_EQ(entry, "entry");
-  EXPECT_EQ(suffix, ".xml");
+  EXPECT_THAT(prefix, Eq("res/xml-sw600dp/"));
+  EXPECT_THAT(entry, Eq("entry"));
+  EXPECT_THAT(suffix, Eq(".xml"));
 
   ASSERT_TRUE(util::ExtractResFilePathParts("res/xml-sw600dp/entry.9.png", &prefix, &entry, &suffix));
-  EXPECT_EQ(prefix, "res/xml-sw600dp/");
-  EXPECT_EQ(entry, "entry");
-  EXPECT_EQ(suffix, ".9.png");
+  EXPECT_THAT(prefix, Eq("res/xml-sw600dp/"));
+  EXPECT_THAT(entry, Eq("entry"));
+  EXPECT_THAT(suffix, Eq(".9.png"));
+
+  ASSERT_TRUE(util::ExtractResFilePathParts("res//.", &prefix, &entry, &suffix));
+  EXPECT_THAT(prefix, Eq("res//"));
+  EXPECT_THAT(entry, Eq(""));
+  EXPECT_THAT(suffix, Eq("."));
 
   EXPECT_FALSE(util::ExtractResFilePathParts("AndroidManifest.xml", &prefix, &entry, &suffix));
   EXPECT_FALSE(util::ExtractResFilePathParts("res/.xml", &prefix, &entry, &suffix));
-
-  ASSERT_TRUE(util::ExtractResFilePathParts("res//.", &prefix, &entry, &suffix));
-  EXPECT_EQ(prefix, "res//");
-  EXPECT_EQ(entry, "");
-  EXPECT_EQ(suffix, ".");
 }
 
 TEST(UtilTest, VerifyJavaStringFormat) {

@@ -327,6 +327,9 @@ static bool IsCodepointSpace(char32_t codepoint) {
   return isspace(static_cast<char>(codepoint));
 }
 
+StringBuilder::StringBuilder(bool preserve_spaces) : preserve_spaces_(preserve_spaces) {
+}
+
 StringBuilder& StringBuilder::Append(const StringPiece& str) {
   if (!error_.empty()) {
     return *this;
@@ -372,14 +375,12 @@ StringBuilder& StringBuilder::Append(const StringPiece& str) {
       }
       last_char_was_escape_ = false;
 
-    } else if (codepoint == U'"') {
+    } else if (!preserve_spaces_ && codepoint == U'"') {
       if (!quote_ && trailing_space_) {
-        // We found an opening quote, and we have
-        // trailing space, so we should append that
+        // We found an opening quote, and we have trailing space, so we should append that
         // space now.
         if (trailing_space_) {
-          // We had trailing whitespace, so
-          // replace with a single space.
+          // We had trailing whitespace, so replace with a single space.
           if (!str_.empty()) {
             str_ += ' ';
           }
@@ -388,7 +389,7 @@ StringBuilder& StringBuilder::Append(const StringPiece& str) {
       }
       quote_ = !quote_;
 
-    } else if (codepoint == U'\'' && !quote_) {
+    } else if (!preserve_spaces_ && codepoint == U'\'' && !quote_) {
       // This should be escaped.
       error_ = "unescaped apostrophe";
       return *this;
@@ -405,7 +406,7 @@ StringBuilder& StringBuilder::Append(const StringPiece& str) {
       }
       last_char_was_escape_ = true;
     } else {
-      if (quote_) {
+      if (preserve_spaces_ || quote_) {
         // Quotes mean everything is taken, including whitespace.
         AppendCodepointToUtf8String(codepoint, &str_);
       } else {
