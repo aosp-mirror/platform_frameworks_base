@@ -42,8 +42,12 @@ import java.text.NumberFormat;
  *
  * <p>The progress range is 0 to {@link #getMax() max}.</p>
  *
- * @deprecated Use a progress indicator such as ProgressBar inline inside of
- * an activity rather than using this modal dialog.
+ * @deprecated <code>ProgressDialog</code> is a modal dialog, which prevents the
+ * user from interacting with the app. Instead of using this class, you should
+ * use a progress indicator like {@link android.widget.ProgressBar}, which can
+ * be embedded in your app's UI. Alternatively, you can use a
+ * <a href="/guide/topics/ui/notifiers/notifications.html">notification</a>
+ * to inform the user of the task's progress.
  */
 @Deprecated
 public class ProgressDialog extends AlertDialog {
