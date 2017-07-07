@@ -96,6 +96,7 @@ public class QSIconViewImpl extends QSIconView {
             int padding = state.icon != null ? state.icon.getPadding() : 0;
             if (d != null) {
                 d.setAutoMirrored(false);
+                d.setLayoutDirection(getLayoutDirection());
             }
             iv.setImageDrawable(d);
             if (state.slash != null && iv instanceof SlashImageView) {
