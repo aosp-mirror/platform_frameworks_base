@@ -54,6 +54,7 @@ public class DozeScrimController {
     private float mBehindTarget;
     private boolean mDozingAborted;
     private boolean mWakeAndUnlocking;
+    private boolean mFullyPulsing;
 
     public DozeScrimController(ScrimController scrimController, Context context) {
         mContext = context;
@@ -136,6 +137,12 @@ public class DozeScrimController {
         abortPulsing();
     }
 
+    public void pulseOutNow() {
+        if (mPulseCallback != null && mFullyPulsing) {
+            mPulseOut.run();
+        }
+    }
+
     public void onScreenTurnedOn() {
         if (isPulsing()) {
             final boolean pickupOrDoubleTap = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP
@@ -163,6 +170,7 @@ public class DozeScrimController {
         if (DEBUG) Log.d(TAG, "Cancel pulsing");
 
         if (mPulseCallback != null) {
+            mFullyPulsing = false;
             mHandler.removeCallbacks(mPulseIn);
             mHandler.removeCallbacks(mPulseOut);
             mHandler.removeCallbacks(mPulseOutExtended);
@@ -297,6 +305,7 @@ public class DozeScrimController {
             mHandler.postDelayed(mPulseOut, mDozeParameters.getPulseVisibleDuration());
             mHandler.postDelayed(mPulseOutExtended,
                     mDozeParameters.getPulseVisibleDurationExtended());
+            mFullyPulsing = true;
         }
     };
 
@@ -311,6 +320,8 @@ public class DozeScrimController {
     private final Runnable mPulseOut = new Runnable() {
         @Override
         public void run() {
+            mFullyPulsing = false;
+            mHandler.removeCallbacks(mPulseOut);
             mHandler.removeCallbacks(mPulseOutExtended);
             if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
