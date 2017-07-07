@@ -304,8 +304,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mNeedsDrawableColorUpdate = false;
             if (mKeyguardShowing) {
                 // Always animate color changes if we're seeing the keyguard
-                mScrimInFront.setColors(mLockColors);
-                mScrimBehind.setColors(mLockColors);
+                mScrimInFront.setColors(mLockColors, true /* animated */);
+                mScrimBehind.setColors(mLockColors, true /* animated */);
             } else {
                 // Only animate scrim color if the scrim view is actually visible
                 boolean animateScrimInFront = mScrimInFront.getViewAlpha() != 0;
