@@ -623,11 +623,13 @@ interface ITelephony {
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * @param subId The subscription to use.
+     * @param callingPackage the name of the package making the call.
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      */
-    IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID, int p2);
+    IccOpenLogicalChannelResponse iccOpenLogicalChannel(
+            int subId, String callingPackage, String AID, int p2);
 
     /**
      * Closes a previously opened logical channel to the ICC card.
