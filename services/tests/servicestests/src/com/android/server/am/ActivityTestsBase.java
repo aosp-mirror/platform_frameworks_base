@@ -120,6 +120,7 @@ public class ActivityTestsBase {
                 null /*_taskDescription*/, new ActivityManager.TaskThumbnailInfo());
         final ActivityStack stack = service.mStackSupervisor.getStack(stackId,
                 true /*createStaticStackIfNeeded*/, true /*onTop*/);
+        service.mStackSupervisor.setFocusStackUnchecked("test", stack);
         stack.addTask(task, true, "creating test task");
         task.setStack(stack);
         task.setWindowContainerController(mock(TaskWindowContainerController.class));
