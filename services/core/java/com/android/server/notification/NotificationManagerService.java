@@ -20,6 +20,7 @@ import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.notification.NotificationListenerService
         .NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
 import static android.service.notification.NotificationListenerService
@@ -3174,6 +3175,15 @@ public class NotificationManagerService extends SystemService {
                     pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                     (userId == UserHandle.USER_ALL) ? UserHandle.USER_SYSTEM : userId);
             Notification.addFieldsFromContext(ai, notification);
+
+            int canColorize = mPackageManagerClient.checkPermission(
+                    android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg);
+            if (canColorize == PERMISSION_GRANTED) {
+                notification.flags |= Notification.FLAG_CAN_COLORIZE;
+            } else {
+                notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
+            }
+
         } catch (NameNotFoundException e) {
             Slog.e(TAG, "Cannot create a context for sending app", e);
             return;
