@@ -5412,6 +5412,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
+        public boolean isBlockingDoze() {
+            if (mFingerprintUnlockController.hasPendingAuthentication()) {
+                Log.i(TAG, "Blocking AOD because fingerprint has authenticated");
+                return true;
+            }
+            return false;
+        }
+
+        @Override
         public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
             StatusBar.this.startPendingIntentDismissingKeyguard(intent);
         }

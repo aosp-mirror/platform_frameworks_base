@@ -32,6 +32,7 @@ public interface DozeHost {
     boolean isPowerSaveActive();
     boolean isPulsingBlocked();
     boolean isProvisioned();
+    boolean isBlockingDoze();
 
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
     void abortPulsing();
