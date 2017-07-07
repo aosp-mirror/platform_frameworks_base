@@ -41,6 +41,7 @@ public interface DozeHost {
 
     void onDoubleTap(float x, float y);
 
+    void setDozeScreenBrightness(int value);
 
     interface Callback {
         default void onNotificationHeadsUp() {}
