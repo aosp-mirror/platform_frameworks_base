@@ -402,7 +402,6 @@ public class AsyncChannel {
 
         // Initialize destination fields
         mDstMessenger = dstMessenger;
-        linkToDeathMonitor();
         if (DBG) log("connected srcHandler to the dstMessenger X");
     }
 
