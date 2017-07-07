@@ -54,7 +54,7 @@ public class WifiAwareSession implements AutoCloseable {
         mClientId = clientId;
         mTerminated = false;
 
-        mCloseGuard.open("destroy");
+        mCloseGuard.open("close");
     }
 
     /**

@@ -82,7 +82,7 @@ public class DiscoverySession implements AutoCloseable {
         mClientId = clientId;
         mSessionId = sessionId;
 
-        mCloseGuard.open("destroy");
+        mCloseGuard.open("close");
     }
 
     /**
