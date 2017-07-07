@@ -4213,6 +4213,11 @@ message MetricsEvent {
     // OS: O MR
     FIELD_SETTINGS_SEARCH_RESULT_ASYNC_RANKING_STATE = 1083;
 
+    // ACTION: Settings > Connected devices > SMS Mirroring
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    ACTION_SETTINGS_SMS_MIRRORING = 1084;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
