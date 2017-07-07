@@ -2822,11 +2822,11 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                         break;
 
                     case FINAL:
-                        if (!mFinished) finalizeBackup();
-                        else {
-                            Slog.e(TAG, "Duplicate finish");
+                        if (!mFinished) {
+                            finalizeBackup();
+                        } else {
+                            Slog.e(TAG, "Duplicate finish of K/V pass");
                         }
-                        mFinished = true;
                         break;
                 }
             }
@@ -3180,6 +3180,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                         break;
                 }
             }
+            mFinished = true;
             Slog.i(BackupManagerService.TAG, "K/V backup pass finished.");
             // Only once we're entirely finished do we release the wakelock for k/v backup.
             mWakelock.release();
