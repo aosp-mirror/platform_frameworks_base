@@ -21,12 +21,11 @@
     android:layout_width="@dimen/global_actions_panel_width"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
-    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:minHeight="114dp"
+    android:gravity="center"
     android:orientation="vertical"
-    android:paddingBottom="24dip"
     android:paddingEnd="8dip"
-    android:paddingStart="8dip"
-    android:paddingTop="24dip">
+    android:paddingStart="8dip">
 
     <ImageView
         android:id="@*android:id/icon"
