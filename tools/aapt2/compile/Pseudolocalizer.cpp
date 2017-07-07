@@ -445,9 +445,15 @@ std::string PseudoMethodBidi::Text(const StringPiece& source) {
   std::string result;
   bool lastspace = true;
   bool space = true;
+  bool escape = false;
+  const char ESCAPE_CHAR = '\\';
   for (size_t i = 0; i < source.size(); i++) {
     char c = s[i];
-    space = isspace(c);
+    if (!escape && c == ESCAPE_CHAR) {
+      escape = true;
+      continue;
+    }
+    space = (!escape && isspace(c)) || (escape && (c == 'n' || c == 't'));
     if (lastspace && !space) {
       // Word start
       result += kRlm + kRlo;
@@ -456,6 +462,10 @@ std::string PseudoMethodBidi::Text(const StringPiece& source) {
       result += kPdf + kRlm;
     }
     lastspace = space;
+    if (escape) {
+      result.append(&ESCAPE_CHAR, 1);
+      escape=false;
+    }
     result.append(&c, 1);
   }
   if (!lastspace) {
