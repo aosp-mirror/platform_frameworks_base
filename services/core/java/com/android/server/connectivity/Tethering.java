@@ -1077,11 +1077,8 @@ public class Tethering extends BaseNetworkObserver {
         return list.toArray(new String[list.size()]);
     }
 
-    private void maybeLogMessage(State state, int what) {
-        if (DBG) {
-            Log.d(TAG, state.getName() + " got " +
-                    sMagicDecoderRing.get(what, Integer.toString(what)));
-        }
+    private void logMessage(State state, int what) {
+        mLog.log(state.getName() + " got " + sMagicDecoderRing.get(what, Integer.toString(what)));
     }
 
     private boolean upstreamWanted() {
@@ -1205,7 +1202,7 @@ public class Tethering extends BaseNetworkObserver {
         class InitialState extends State {
             @Override
             public boolean processMessage(Message message) {
-                maybeLogMessage(this, message.what);
+                logMessage(this, message.what);
                 switch (message.what) {
                     case EVENT_IFACE_SERVING_STATE_ACTIVE:
                         TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
@@ -1297,21 +1294,21 @@ public class Tethering extends BaseNetworkObserver {
                 // Find the interface with the default IPv4 route. It may be the
                 // interface described by linkProperties, or one of the interfaces
                 // stacked on top of it.
-                Log.i(TAG, "Finding IPv4 upstream interface on: " + ns.linkProperties);
+                mLog.i("Finding IPv4 upstream interface on: " + ns.linkProperties);
                 RouteInfo ipv4Default = RouteInfo.selectBestRoute(
                     ns.linkProperties.getAllRoutes(), Inet4Address.ANY);
                 if (ipv4Default != null) {
                     iface = ipv4Default.getInterface();
-                    Log.i(TAG, "Found interface " + ipv4Default.getInterface());
+                    mLog.i("Found interface " + ipv4Default.getInterface());
                 } else {
-                    Log.i(TAG, "No IPv4 upstream interface, giving up.");
+                    mLog.i("No IPv4 upstream interface, giving up.");
                 }
             }
 
             if (iface != null) {
                 setDnsForwarders(ns.network, ns.linkProperties);
             }
-            notifyTetheredOfNewUpstreamIface(iface);
+            notifyDownstreamsOfNewUpstreamIface(iface);
             if (ns != null && pertainsToCurrentUpstream(ns)) {
                 // If we already have NetworkState for this network examine
                 // it immediately, because there likely will be no second
@@ -1346,8 +1343,8 @@ public class Tethering extends BaseNetworkObserver {
             }
         }
 
-        protected void notifyTetheredOfNewUpstreamIface(String ifaceName) {
-            if (DBG) Log.d(TAG, "Notifying tethered with upstream=" + ifaceName);
+        protected void notifyDownstreamsOfNewUpstreamIface(String ifaceName) {
+            mLog.log("Notifying downstreams of upstream=" + ifaceName);
             mCurrentUpstreamIface = ifaceName;
             for (TetherInterfaceStateMachine sm : mNotifyList) {
                 sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
@@ -1489,7 +1486,7 @@ public class Tethering extends BaseNetworkObserver {
                 mOffloadController.stop();
                 mUpstreamNetworkMonitor.stop();
                 mSimChange.stopListening();
-                notifyTetheredOfNewUpstreamIface(null);
+                notifyDownstreamsOfNewUpstreamIface(null);
                 handleNewUpstreamNetworkState(null);
             }
 
@@ -1508,7 +1505,7 @@ public class Tethering extends BaseNetworkObserver {
 
             @Override
             public boolean processMessage(Message message) {
-                maybeLogMessage(this, message.what);
+                logMessage(this, message.what);
                 boolean retValue = true;
                 switch (message.what) {
                     case EVENT_IFACE_SERVING_STATE_ACTIVE: {
