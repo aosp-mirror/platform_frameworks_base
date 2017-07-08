@@ -617,9 +617,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         return alpha * expandFactor;
     }
 
-    public void forceHideScrims(boolean hide) {
+    public void forceHideScrims(boolean hide, boolean animated) {
         mForceHideScrims = hide;
-        mAnimateChange = false;
+        mAnimateChange = animated;
         scheduleUpdate();
     }
 
