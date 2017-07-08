@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-package com.google.android.colorextraction;
+package com.android.internal.colorextraction;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Color;
@@ -30,9 +29,10 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.google.android.colorextraction.ColorExtractor.GradientColors;
-import com.google.android.colorextraction.types.ExtractionType;
-import com.google.android.colorextraction.types.Tonal;
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.colorextraction.types.ExtractionType;
+import com.android.internal.colorextraction.types.Tonal;
 
 import org.junit.Before;
 import org.junit.Test;

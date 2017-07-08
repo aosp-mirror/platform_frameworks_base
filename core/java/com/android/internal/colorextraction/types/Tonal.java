@@ -14,20 +14,19 @@
  * limitations under the License
  */
 
-package com.google.android.colorextraction.types;
+package com.android.internal.colorextraction.types;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.WallpaperColors;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.graphics.ColorUtils;
 import android.util.Log;
 import android.util.MathUtils;
-import android.util.Pair;
 import android.util.Range;
 
-import com.google.android.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.graphics.ColorUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -616,7 +615,7 @@ public class Tonal implements ExtractionType {
 
     @SuppressWarnings("WeakerAccess")
     @VisibleForTesting
-    static final ColorRange[] BLACKLISTED_COLORS = new ColorRange[] {
+    public static final ColorRange[] BLACKLISTED_COLORS = new ColorRange[] {
 
             // Red
             new ColorRange(
@@ -768,18 +767,18 @@ public class Tonal implements ExtractionType {
      * </ul>
      */
     @VisibleForTesting
-    static class ColorRange {
+    public static class ColorRange {
         private Range<Float> mHue;
         private Range<Float> mSaturation;
         private Range<Float> mLightness;
 
-        ColorRange(Range<Float> hue, Range<Float> saturation, Range<Float> lightness) {
+        public ColorRange(Range<Float> hue, Range<Float> saturation, Range<Float> lightness) {
             mHue = hue;
             mSaturation = saturation;
             mLightness = lightness;
         }
 
-        boolean containsColor(float h, float s, float l) {
+        public boolean containsColor(float h, float s, float l) {
             if (!mHue.contains(h)) {
                 return false;
             } else if (!mSaturation.contains(s)) {
@@ -790,8 +789,7 @@ public class Tonal implements ExtractionType {
             return true;
         }
 
-        @VisibleForTesting
-        float[] getCenter() {
+        public float[] getCenter() {
             return new float[] {
                     mHue.getLower() + (mHue.getUpper() - mHue.getLower()) / 2f,
                     mSaturation.getLower() + (mSaturation.getUpper() - mSaturation.getLower()) / 2f,

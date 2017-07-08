@@ -81,13 +81,9 @@ import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
 import com.android.systemui.plugins.VolumeDialog;
-import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerZenModePanel;
-
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.drawable.GradientDrawable;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
