@@ -9346,33 +9346,29 @@ public class PackageManagerService extends IPackageManager.Stub
                     false /* force */,
                     bootComplete);
 
-            boolean secondaryDexOptStatus = true;
             if (pkg.isSystemApp()) {
                 // Only dexopt shared secondary dex files belonging to system apps to not slow down
                 // too much boot after an OTA.
-                secondaryDexOptStatus = mDexManager.dexoptSecondaryDex(pkg.packageName,
+                mDexManager.dexoptSecondaryDex(pkg.packageName,
                         compilerFilter,
                         false /* force */,
                         true /* compileOnlySharedDex */);
             }
 
-            if (secondaryDexOptStatus) {
-                switch (primaryDexOptStaus) {
-                    case PackageDexOptimizer.DEX_OPT_PERFORMED:
-                        numberOfPackagesOptimized++;
-                        break;
-                    case PackageDexOptimizer.DEX_OPT_SKIPPED:
-                        numberOfPackagesSkipped++;
-                        break;
-                    case PackageDexOptimizer.DEX_OPT_FAILED:
-                        numberOfPackagesFailed++;
-                        break;
-                    default:
-                        Log.e(TAG, "Unexpected dexopt return code " + primaryDexOptStaus);
-                        break;
-                }
-            } else {
-                numberOfPackagesFailed++;
+            // TODO(shubhamajmera): Record secondary dexopt stats.
+            switch (primaryDexOptStaus) {
+                case PackageDexOptimizer.DEX_OPT_PERFORMED:
+                    numberOfPackagesOptimized++;
+                    break;
+                case PackageDexOptimizer.DEX_OPT_SKIPPED:
+                    numberOfPackagesSkipped++;
+                    break;
+                case PackageDexOptimizer.DEX_OPT_FAILED:
+                    numberOfPackagesFailed++;
+                    break;
+                default:
+                    Log.e(TAG, "Unexpected dexopt return code " + primaryDexOptStaus);
+                    break;
             }
         }
 
