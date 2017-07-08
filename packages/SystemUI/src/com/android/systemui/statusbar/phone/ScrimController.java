@@ -33,6 +33,9 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.colorextraction.ColorExtractor.OnColorsChangedListener;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -42,9 +45,6 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.ViewState;
-
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.ColorExtractor.OnColorsChangedListener;
 
 /**
  * Controls both the scrim behind the notifications and in front of the notifications (when a
@@ -80,8 +80,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private final SysuiColorExtractor mColorExtractor;
-    private ColorExtractor.GradientColors mLockColors;
-    private ColorExtractor.GradientColors mSystemColors;
+    private GradientColors mLockColors;
+    private GradientColors mSystemColors;
     private boolean mNeedsDrawableColorUpdate;
 
     protected float mScrimBehindAlpha;

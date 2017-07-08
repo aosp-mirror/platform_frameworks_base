@@ -14,24 +14,22 @@
  * limitations under the License
  */
 
-package com.google.android.colorextraction;
+package com.android.internal.colorextraction;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Trace;
-import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.google.android.colorextraction.types.ExtractionType;
-import com.google.android.colorextraction.types.Tonal;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.colorextraction.types.ExtractionType;
+import com.android.internal.colorextraction.types.Tonal;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class to process wallpaper colors and generate a tonal palette based on them.
