@@ -1779,8 +1779,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ondoka mara moja kwenye maeneo ya ufuo na mito ili uende kwenye sehemu salama kama vile milimani."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Tulia na utafute hifadhi ya karibu."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Jaribio la ujumbe wa dharura"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Jibu"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM imekataliwa"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM haikubaliwi"</string>

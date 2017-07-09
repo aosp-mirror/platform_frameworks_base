@@ -381,6 +381,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public boolean isInteractive() {
+        return true;
+    }
+
+    @Override
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
 
     }

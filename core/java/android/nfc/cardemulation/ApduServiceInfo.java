@@ -253,6 +253,20 @@ public final class ApduServiceInfo implements Parcelable {
                         Log.e(TAG, "Ignoring invalid or duplicate aid: " + aid);
                     }
                     a.recycle();
+                } else if (eventType == XmlPullParser.START_TAG &&
+                        tagName.equals("aid-suffix-filter") && currentGroup != null) {
+                    final TypedArray a = res.obtainAttributes(attrs,
+                            com.android.internal.R.styleable.AidFilter);
+                    String aid = a.getString(com.android.internal.R.styleable.AidFilter_name).
+                            toUpperCase();
+                    // Add wildcard char to indicate suffix
+                    aid = aid.concat("#");
+                    if (CardEmulation.isValidAid(aid) && !currentGroup.aids.contains(aid)) {
+                        currentGroup.aids.add(aid);
+                    } else {
+                        Log.e(TAG, "Ignoring invalid or duplicate aid: " + aid);
+                    }
+                    a.recycle();
                 }
             }
         } catch (NameNotFoundException e) {
@@ -297,6 +311,17 @@ public final class ApduServiceInfo implements Parcelable {
         return prefixAids;
     }
 
+    public List<String> getSubsetAids() {
+        final ArrayList<String> subsetAids = new ArrayList<String>();
+        for (AidGroup group : getAidGroups()) {
+            for (String aid : group.aids) {
+                if (aid.endsWith("#")) {
+                    subsetAids.add(aid);
+                }
+            }
+        }
+        return subsetAids;
+    }
     /**
      * Returns the registered AID group for this category.
      */

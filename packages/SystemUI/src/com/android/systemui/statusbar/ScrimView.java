@@ -39,11 +39,10 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.drawable.GradientDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.drawable.GradientDrawable;
 
 /**
  * A view which can draw a scrim
@@ -94,11 +93,24 @@ public class ScrimView extends View implements ConfigurationController.Configura
         mColors = new ColorExtractor.GradientColors();
         updateScreenSize();
         updateColorWithTint(false);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
 
         // We need to know about configuration changes to update the gradient size
         // since it's independent from view bounds.
         ConfigurationController config = Dependency.get(ConfigurationController.class);
         config.addCallback(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        ConfigurationController config = Dependency.get(ConfigurationController.class);
+        config.removeCallback(this);
     }
 
     @Override

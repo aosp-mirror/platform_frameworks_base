@@ -441,6 +441,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     mChildren.get(i).mWinAnimator.hide("immediately hidden");
                 }
                 SurfaceControl.closeTransaction();
+                removeStartingWindow();
             }
 
             if (!mService.mClosingApps.contains(this) && !mService.mOpeningApps.contains(this)) {
@@ -518,6 +519,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return super.checkCompleteDeferredRemoval();
     }
 
+    private void removeStartingWindow() {
+        if (startingData != null && getController() != null) {
+            getController().removeStartingWindow();
+        }
+    }
+
     void onRemovedFromDisplay() {
         if (mRemovingFromDisplay) {
             return;
@@ -545,9 +552,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM, "removeAppToken: "
                 + this + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
 
-        if (startingData != null && getController() != null) {
-            getController().removeStartingWindow();
-        }
+        removeStartingWindow();
 
         // If this window was animating, then we need to ensure that the app transition notifies
         // that animations have completed in WMS.handleAnimatingStoppedAndTransitionLocked(), so

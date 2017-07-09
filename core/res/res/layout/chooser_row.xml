@@ -18,11 +18,9 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="horizontal"
-              android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:minHeight="80dp"
+              android:layout_width="match_parent"
+              android:layout_height="100dp"
               android:gravity="start|top"
-              android:paddingTop="8dp"
-              android:paddingBottom="8dp"
               android:paddingStart="@dimen/chooser_grid_padding"
               android:paddingEnd="@dimen/chooser_grid_padding"
               android:weightSum="4">

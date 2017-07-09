@@ -1838,6 +1838,8 @@
   <java-symbol type="integer" name="config_networkNotifySwitchType" />
   <java-symbol type="array" name="config_networkNotifySwitches" />
   <java-symbol type="integer" name="config_networkAvoidBadWifi" />
+  <java-symbol type="integer" name="config_networkWakeupPacketMark" />
+  <java-symbol type="integer" name="config_networkWakeupPacketMask" />
   <java-symbol type="integer" name="config_networkMeteredMultipathPreference" />
   <java-symbol type="integer" name="config_notificationsBatteryFullARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryLedOff" />
@@ -3059,4 +3061,5 @@
   <java-symbol type="array" name="config_batteryPackageTypeService" />
   <java-symbol type="bool" name="config_showAreaUpdateInfoSettings" />
   <java-symbol type="layout" name="shutdown_dialog" />
+  <java-symbol type="dimen" name="chooser_service_spacing" />
 </resources>

@@ -174,6 +174,7 @@ public class DozeSensors {
         for (TriggerSensor s : mSensors) {
             pw.print("Sensor: "); pw.println(s.toString());
         }
+        pw.print("ProxSensor: "); pw.println(mProxSensor.toString());
     }
 
     private class ProxSensor implements SensorEventListener {
@@ -232,7 +233,9 @@ public class DozeSensors {
             mProxCallback.accept(mCurrentlyFar);
 
             long now = SystemClock.elapsedRealtime();
-            if (!mCurrentlyFar) {
+            if (mCurrentlyFar == null) {
+                // Sensor has been unregistered by the proxCallback. Do nothing.
+            } else if (!mCurrentlyFar) {
                 mLastNear = now;
             } else if (mCurrentlyFar && now - mLastNear < COOLDOWN_TRIGGER) {
                 // If the last near was very recent, we might be using more power for prox
@@ -245,6 +248,12 @@ public class DozeSensors {
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+
+        @Override
+        public String toString() {
+            return String.format("{registered=%s, requested=%s, coolingDown=%s, currentlyFar=%s}",
+                    mRegistered, mRequested, mCooldownTimer.isScheduled(), mCurrentlyFar);
         }
     }
 
@@ -312,6 +321,7 @@ public class DozeSensors {
         @Override
         @AnyThread
         public void onTrigger(TriggerEvent event) {
+            DozeLog.traceSensor(mContext, mPulseReason);
             mHandler.post(mWakeLock.wrap(() -> {
                 if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
                 boolean sensorPerformsProxCheck = false;

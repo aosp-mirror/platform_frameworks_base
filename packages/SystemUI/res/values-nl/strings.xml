@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Geen meldingen"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Actief"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meldingen"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Accu is bijna leeg"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Batterij is bijna leeg"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend. Batterijbesparing is ingeschakeld."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Opladen via USB niet ondersteund.\nGebruik alleen de bijgeleverde oplader."</string>
@@ -102,11 +102,11 @@
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Kleiner scherm uitzoomen naar groter scherm."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-verbinding ingesteld."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth-verbinding verbroken."</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"Geen accu."</string>
-    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Accu: één streepje."</string>
-    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Accu: twee streepjes."</string>
-    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Accu: drie streepjes."</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Accu is vol."</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Geen batterij."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Batterij: één streepje."</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Batterij: twee streepjes."</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Batterij: drie streepjes."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Batterij is vol."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Geen telefoonsignaal."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Telefoon: één streepje."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Telefoon: twee streepjes."</string>
@@ -161,8 +161,8 @@
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Geen simkaart."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Netwerk van provider wordt gewijzigd."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Accudetails openen"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Accu: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Accu wordt opgeladen, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procent."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Batterij: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batterij wordt opgeladen, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systeeminstellingen."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Meldingen."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Alle meldingen bekijken"</string>
@@ -310,8 +310,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Meer instellingen"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Gereed"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Verbonden"</string>
-    <!-- no translation found for quick_settings_connected_battery_level (4136051440381328892) -->
-    <skip />
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Verbonden, batterij <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Verbinding maken…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
@@ -506,7 +505,7 @@
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Volumeknoppen van %s worden weergegeven. Veeg omhoog om te sluiten."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Volumeknoppen verborgen"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Systeem-UI-tuner"</string>
-    <string name="show_battery_percentage" msgid="5444136600512968798">"Percentage ingebouwde accu weergeven"</string>
+    <string name="show_battery_percentage" msgid="5444136600512968798">"Percentage ingebouwde batterij weergeven"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Accupercentage weergeven in het pictogram op de statusbalk wanneer er niet wordt opgeladen"</string>
     <string name="quick_settings" msgid="10042998191725428">"Snelle instellingen"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusbalk"</string>

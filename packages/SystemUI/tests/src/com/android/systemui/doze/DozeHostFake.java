@@ -72,6 +72,16 @@ class DozeHostFake implements DozeHost {
     }
 
     @Override
+    public boolean isProvisioned() {
+        return false;
+    }
+
+    @Override
+    public boolean isBlockingDoze() {
+        return false;
+    }
+
+    @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
         throw new RuntimeException("not implemented");
     }
@@ -95,5 +105,9 @@ class DozeHostFake implements DozeHost {
     public void onDoubleTap(float x, float y) {
         doubleTapX = y;
         doubleTapY = y;
+    }
+
+    @Override
+    public void setDozeScreenBrightness(int value) {
     }
 }

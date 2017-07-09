@@ -67,7 +67,6 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -589,22 +588,20 @@ public class TrustManagerService extends SystemService {
     }
 
     private void maybeEnableFactoryTrustAgents(LockPatternUtils utils, int userId) {
+        if (0 != Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.TRUST_AGENTS_INITIALIZED, 0, userId)) {
+            return;
+        }
+        PackageManager pm = mContext.getPackageManager();
+        List<ResolveInfo> resolveInfos = resolveAllowedTrustAgents(pm, userId);
         ComponentName defaultAgent = getDefaultFactoryTrustAgent(mContext);
         boolean shouldUseDefaultAgent = defaultAgent != null;
+        ArraySet<ComponentName> discoveredAgents = new ArraySet<>();
 
         if (shouldUseDefaultAgent) {
+            discoveredAgents.add(defaultAgent);
             Log.i(TAG, "Enabling " + defaultAgent + " because it is a default agent.");
-            utils.setEnabledTrustAgents(Collections.singleton(defaultAgent), userId);
         } else { // A default agent is not set; perform regular trust agent discovery
-            if (0 != Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.TRUST_AGENTS_INITIALIZED, 0, userId)) {
-                return;
-            }
-            PackageManager pm = mContext.getPackageManager();
-            List<ResolveInfo> resolveInfos = resolveAllowedTrustAgents(pm, userId);
-
-            ArraySet<ComponentName> discoveredAgents = new ArraySet<>();
-
             for (ResolveInfo resolveInfo : resolveInfos) {
                 ComponentName componentName = getComponentName(resolveInfo);
                 int applicationInfoFlags = resolveInfo.serviceInfo.applicationInfo.flags;
@@ -615,13 +612,13 @@ public class TrustManagerService extends SystemService {
                 }
                 discoveredAgents.add(componentName);
             }
-
-            List<ComponentName> previouslyEnabledAgents = utils.getEnabledTrustAgents(userId);
-            if (previouslyEnabledAgents != null) {
-                discoveredAgents.addAll(previouslyEnabledAgents);
-            }
-            utils.setEnabledTrustAgents(discoveredAgents, userId);
         }
+
+        List<ComponentName> previouslyEnabledAgents = utils.getEnabledTrustAgents(userId);
+        if (previouslyEnabledAgents != null) {
+            discoveredAgents.addAll(previouslyEnabledAgents);
+        }
+        utils.setEnabledTrustAgents(discoveredAgents, userId);
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.TRUST_AGENTS_INITIALIZED, 1, userId);
     }

@@ -14,11 +14,11 @@
  * limitations under the License
  */
 
-package com.google.android.colorextraction.types;
+package com.android.internal.colorextraction.types;
 
 import android.app.WallpaperColors;
 
-import com.google.android.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.ColorExtractor;
 
 /**
  * Interface to allow various color extraction implementations.

@@ -55,14 +55,10 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"കണക്‌റ്റുചെയ്‌തു (മീഡിയ ഇല്ല)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"കണക്റ്റുചെയ്‌തു (സന്ദേശ ആക്‌സസ്സില്ല)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"കണ‌ക്റ്റുചെ‌യ്തു (ഫോണോ മീഡിയയോ അല്ല)"</string>
-    <!-- no translation found for bluetooth_connected_battery_level (7049181126136692368) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (5504193961248406027) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (4751724026365870779) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1549265779323455261) -->
-    <skip />
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"കണക്‌റ്റുചെയ്‌തു, ബാറ്ററി നില <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"കണ‌ക്റ്റുചെയ്‌തു (ഫോൺ ഇല്ല), ബാറ്ററി നില <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"കണക്‌റ്റുചെയ്‌തു (മീഡിയ ഇല്ല), ബാറ്ററി നില <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"കണ‌ക്റ്റുചെയ്‌തു (ഫോണോ മീഡിയയോ ഇല്ല), ബാറ്ററി നില<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"മീഡിയ ഓഡിയോ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ഫോണ്‍‌ കോളുകൾ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ഫയൽ കൈമാറൽ"</string>
@@ -190,6 +186,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"മൊബൈൽ ഹാൻഡ്ഓവറിലേക്ക് വൈഫൈ സക്രിയമാക്കുക"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"എപ്പോഴും വൈഫൈ റോം സ്‌‌കാൻ അനുവദിക്കൂ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"മൊബൈൽ ഡാറ്റ എല്ലായ്‌പ്പോഴും സജീവം"</string>
+    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
+    <skip />
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"അബ്‌സൊല്യൂട്ട് വോളിയം പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ഇൻ-ബാൻഡ് റിംഗുചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP പതിപ്പ്"</string>
@@ -221,6 +219,8 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"വ്യാജ ലൊക്കേഷനുകൾ അനുവദിക്കുക"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ആട്രിബ്യൂട്ട് പരിശോധന കാണൽ സജീവമാക്കൂ"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"വൈഫൈ സജീവമാണെങ്കിലും, മൊബൈൽ ഡാറ്റ സജീവമായി നിർത്തുക (വേഗത്തിൽ നെറ്റ്‌വർക്ക് മാറുന്നതിനായി)."</string>
+    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
+    <skip />
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ഡീബഗ്ഗുചെയ്യാൻ അനുവദിക്കണോ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ഡീബഗ്ഗിംഗ് വികസന ആവശ്യകതകൾക്ക് മാത്രമുള്ളതാണ്. നിങ്ങളുടെ കമ്പ്യൂട്ടറിനും ഉപകരണത്തിനുമിടയിൽ ഡാറ്റ പകർത്തുന്നതിനും അറിയിപ്പില്ലാതെ തന്നെ നിങ്ങളുടെ ഉപകരണത്തിൽ അപ്ലിക്കേഷനുകൾ ഇൻസ്‌റ്റാളുചെയ്യുന്നതിനും ലോഗ് ഡാറ്റ റീഡുചെയ്യുന്നതിനും ഇത് ഉപയോഗിക്കുക."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"നിങ്ങൾ മുമ്പ് അംഗീകരിച്ച എല്ലാ കമ്പ്യൂട്ടറുകളിൽ നിന്നും USB ഡീബഗ്ഗുചെയ്യുന്നതിനുള്ള ആക്‌സസ്സ് പിൻവലിക്കണോ?"</string>

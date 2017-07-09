@@ -693,8 +693,9 @@ public class UsbDeviceManager {
                 // Set the new USB configuration.
                 setUsbConfig(oemFunctions);
 
-                if (UsbManager.containsFunction(functions, UsbManager.USB_FUNCTION_MTP)
-                        || UsbManager.containsFunction(functions, UsbManager.USB_FUNCTION_PTP)) {
+                if (mBootCompleted
+                        && (UsbManager.containsFunction(functions, UsbManager.USB_FUNCTION_MTP)
+                        || UsbManager.containsFunction(functions, UsbManager.USB_FUNCTION_PTP))) {
                     // Start up dependent services.
                     updateUsbStateBroadcastIfNeeded(true);
                 }

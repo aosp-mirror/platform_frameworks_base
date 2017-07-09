@@ -32,6 +32,7 @@ import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.SignalDrawable;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -47,6 +48,7 @@ import static org.mockito.Mockito.mock;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@Ignore("Flaky")
 public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     @Test

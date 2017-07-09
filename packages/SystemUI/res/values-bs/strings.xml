@@ -312,8 +312,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Više postavki"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Gotovo"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Povezano"</string>
-    <!-- no translation found for quick_settings_connected_battery_level (4136051440381328892) -->
-    <skip />
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Povezano, baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Povezivanje..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Dijeljenje veze"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Pristupna tačka"</string>
@@ -655,8 +654,8 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Isključeno"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigaciona traka"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Raspored"</string>
-    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Dodatni tip dugmeta lijevo"</string>
-    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Dodatni tip dugmeta desno"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Vrsta dodatnog dugmeta lijevo"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Vrsta dodatnog dugmeta desno"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(zadano)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Međumemorija"</item>
