@@ -15,20 +15,24 @@
  */
 
 #include "ResourceTable.h"
-#include "ConfigDescription.h"
-#include "NameMangler.h"
-#include "ResourceValues.h"
-#include "ValueVisitor.h"
-#include "util/Util.h"
 
-#include <android-base/logging.h>
-#include <androidfw/ResourceTypes.h>
 #include <algorithm>
 #include <memory>
 #include <string>
 #include <tuple>
 
-using android::StringPiece;
+#include "android-base/logging.h"
+#include "androidfw/ResourceTypes.h"
+
+#include "ConfigDescription.h"
+#include "NameMangler.h"
+#include "ResourceValues.h"
+#include "ValueVisitor.h"
+#include "text/Unicode.h"
+#include "util/Util.h"
+
+using ::aapt::text::IsValidResourceEntryName;
+using ::android::StringPiece;
 
 namespace aapt {
 
@@ -283,12 +287,9 @@ ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* exist
   return CollisionResult::kConflict;
 }
 
-static constexpr const char* kValidNameChars = "._-";
-
 static StringPiece ValidateName(const StringPiece& name) {
-  auto iter = util::FindNonAlphaNumericAndNotInSet(name, kValidNameChars);
-  if (iter != name.end()) {
-    return StringPiece(iter, 1);
+  if (!IsValidResourceEntryName(name)) {
+    return name;
   }
   return {};
 }

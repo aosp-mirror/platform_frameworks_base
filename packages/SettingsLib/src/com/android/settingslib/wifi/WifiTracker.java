@@ -16,7 +16,6 @@
 package com.android.settingslib.wifi;
 
 import android.annotation.MainThread;
-import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -144,14 +143,6 @@ public class WifiTracker {
 
     @VisibleForTesting
     Scanner mScanner;
-
-    /**
-     * Bit used to indicate that a SCAN_RESULTS_AVAILABLE_ACTION broadcast has not been received
-     * since the last time tracking was resumed.
-     *
-     * <p>This bit is used to prevent callbacks to {@link WifiListener#onAccessPointChanged()} that
-     * would result in stale data being fetched.
-     */
     private boolean mStaleScanResults = true;
 
     public WifiTracker(Context context, WifiListener wifiListener,
@@ -779,10 +770,10 @@ public class WifiTracker {
                 updateWifiState(intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                         WifiManager.WIFI_STATE_UNKNOWN));
             } else if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
-                Message.obtain(
-                            mWorkHandler,
+                mWorkHandler
+                        .obtainMessage(
                             WorkHandler.MSG_UPDATE_ACCESS_POINTS,
-                            WorkHandler.ARG_CLEAR_STALE_SCAN_RESULTS,
+                            WorkHandler.CLEAR_STALE_SCAN_RESULTS,
                             0)
                         .sendToTarget();
             } else if (WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION.equals(action)
@@ -881,7 +872,7 @@ public class WifiTracker {
         private static final int MSG_RESUME = 2;
         private static final int MSG_UPDATE_WIFI_STATE = 3;
 
-        private static final int ARG_CLEAR_STALE_SCAN_RESULTS = 1;
+        private static final int CLEAR_STALE_SCAN_RESULTS = 1;
 
         public WorkHandler(Looper looper) {
             super(looper);
@@ -899,7 +890,7 @@ public class WifiTracker {
 
             switch (msg.what) {
                 case MSG_UPDATE_ACCESS_POINTS:
-                    if (msg.arg1 == ARG_CLEAR_STALE_SCAN_RESULTS) {
+                    if (msg.arg1 == CLEAR_STALE_SCAN_RESULTS) {
                         mStaleScanResults = false;
                     }
                     updateAccessPoints();

@@ -283,10 +283,19 @@ run_instrumentation_test(const string& packageName, const string& runner, const 
     cmd.AddArg("instrument");
     cmd.AddArg("-w");
     cmd.AddArg("-m");
-    if (className.length() > 0) {
-        cmd.AddArg("-e");
-        cmd.AddArg("class");
-        cmd.AddArg(className);
+    const int classLen = className.length();
+    if (classLen > 0) {
+        if (classLen > 1 && className[classLen - 1] == '.') {
+            cmd.AddArg("-e");
+            cmd.AddArg("package");
+
+            // "am" actually accepts without removing the last ".", but for cleanlines...
+            cmd.AddArg(className.substr(0, classLen - 1));
+        } else {
+            cmd.AddArg("-e");
+            cmd.AddArg("class");
+            cmd.AddArg(className);
+        }
     }
     cmd.AddArg(packageName + "/" + runner);
 

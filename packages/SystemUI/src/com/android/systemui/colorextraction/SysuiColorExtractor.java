@@ -27,10 +27,9 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
-
-import com.google.android.colorextraction.ColorExtractor;
-import com.google.android.colorextraction.types.ExtractionType;
-import com.google.android.colorextraction.types.Tonal;
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.types.ExtractionType;
+import com.android.internal.colorextraction.types.Tonal;
 
 /**
  * ColorExtractor aware of wallpaper visibility
