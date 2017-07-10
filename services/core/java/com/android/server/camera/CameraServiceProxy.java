@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceProxy;
+import android.metrics.LogMaker;
 import android.nfc.INfcAdapter;
 import android.os.Binder;
 import android.os.Handler;
@@ -35,12 +36,15 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -70,6 +74,9 @@ public class CameraServiceProxy extends SystemService
 
     private static final int RETRY_DELAY_TIME = 20; //ms
 
+    // Maximum entries to keep in usage history before dumping out
+    private static final int MAX_USAGE_HISTORY = 100;
+
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final Handler mHandler;
@@ -83,7 +90,7 @@ public class CameraServiceProxy extends SystemService
 
     private final ArrayMap<String, CameraUsageEvent> mActiveCameraUsage = new ArrayMap<>();
     private final List<CameraUsageEvent> mCameraUsageHistory = new ArrayList<>();
-
+    private final MetricsLogger mLogger = new MetricsLogger();
     private static final String NFC_NOTIFICATION_PROP = "ro.camera.notify_nfc";
     private static final String NFC_SERVICE_BINDER_NAME = "nfc";
     private static final IBinder nfcInterfaceToken = new Binder();
@@ -260,13 +267,34 @@ public class CameraServiceProxy extends SystemService
      */
     void dumpUsageEvents() {
         synchronized(mLock) {
+            // Randomize order of events so that it's not meaningful
+            Collections.shuffle(mCameraUsageHistory);
             for (CameraUsageEvent e : mCameraUsageHistory) {
                 if (DEBUG) {
                     Slog.v(TAG, "Camera: " + e.mClientName + " used a camera facing " +
                             cameraFacingToString(e.mCameraFacing) + " for " +
                             e.getDuration() + " ms");
                 }
-                // TODO: Add event logging here
+                int subtype = 0;
+                switch(e.mCameraFacing) {
+                    case ICameraServiceProxy.CAMERA_FACING_BACK:
+                        subtype = MetricsEvent.CAMERA_BACK_USED;
+                        break;
+                    case ICameraServiceProxy.CAMERA_FACING_FRONT:
+                        subtype = MetricsEvent.CAMERA_FRONT_USED;
+                        break;
+                    case ICameraServiceProxy.CAMERA_FACING_EXTERNAL:
+                        subtype = MetricsEvent.CAMERA_EXTERNAL_USED;
+                        break;
+                    default:
+                        continue;
+                }
+                LogMaker l = new LogMaker(MetricsEvent.ACTION_CAMERA_EVENT)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .setSubtype(subtype)
+                        .setLatency(e.getDuration())
+                        .setPackageName(e.mClientName);
+                mLogger.write(l);
             }
             mCameraUsageHistory.clear();
         }
@@ -362,6 +390,9 @@ public class CameraServiceProxy extends SystemService
                     if (doneEvent != null) {
                         doneEvent.markCompleted();
                         mCameraUsageHistory.add(doneEvent);
+                        if (mCameraUsageHistory.size() > MAX_USAGE_HISTORY) {
+                            dumpUsageEvents();
+                        }
                     }
                     break;
             }
