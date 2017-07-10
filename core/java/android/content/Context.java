@@ -2955,7 +2955,8 @@ public abstract class Context {
             SHORTCUT_SERVICE,
             //@hide: CONTEXTHUB_SERVICE,
             SYSTEM_HEALTH_SERVICE,
-            //@hide: INCIDENT_SERVICE
+            //@hide: INCIDENT_SERVICE,
+            COMPANION_DEVICE_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
