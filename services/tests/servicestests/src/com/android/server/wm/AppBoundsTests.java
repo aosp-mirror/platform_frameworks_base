@@ -27,6 +27,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -121,7 +122,6 @@ public class AppBoundsTests extends WindowTestsBase {
                 mParentBounds);
     }
 
-
     private void testStackBoundsConfiguration(Integer stackId, Rect parentBounds, Rect bounds,
             Rect expectedConfigBounds) {
         final StackWindowController stackController = stackId != null ?
@@ -139,5 +139,30 @@ public class AppBoundsTests extends WindowTestsBase {
 
         assertTrue((expectedConfigBounds == null && config.appBounds == null)
                 || expectedConfigBounds.equals(config.appBounds));
+    }
+
+    /**
+     * Ensures appBounds are considered in {@link Configuration#compareTo(Configuration)}.
+     */
+    @Test
+    public void testConfigurationCompareTo() throws Exception {
+        final Configuration blankConfig = new Configuration();
+
+        final Configuration config1 = new Configuration();
+        config1.appBounds = new Rect(1, 2, 3, 4);
+
+        final Configuration config2 = new Configuration(config1);
+
+        assertEquals(config1.compareTo(config2), 0);
+
+        config2.appBounds.left = 0;
+
+        // Different bounds
+        assertNotEquals(config1.compareTo(config2), 0);
+
+        // No bounds
+        assertEquals(config1.compareTo(blankConfig), -1);
+        assertEquals(blankConfig.compareTo(config1), 1);
+
     }
 }
