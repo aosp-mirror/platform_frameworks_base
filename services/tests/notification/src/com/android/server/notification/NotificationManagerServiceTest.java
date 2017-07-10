@@ -984,4 +984,37 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
         assertFalse(posted.getNotification().isColorized());
     }
+
+    @Test
+    public void testGetNotificationCountLocked() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, null, false);
+            mNotificationManagerService.addEnqueuedNotification(r);
+        }
+        for (int i = 0; i < 20; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, null, false);
+            mNotificationManagerService.addNotification(r);
+        }
+
+        // another package
+        Notification n =
+                new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "tag", uid, 0,
+                n, new UserHandle(uid), null, 0);
+        NotificationRecord otherPackage =
+                new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+        mNotificationManagerService.addEnqueuedNotification(otherPackage);
+        mNotificationManagerService.addNotification(otherPackage);
+
+        // Same notifications are enqueued as posted, everything counts b/c id and tag don't match
+        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(PKG, new UserHandle(uid).getIdentifier(), 0, null));
+        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(PKG, new UserHandle(uid).getIdentifier(), 0, "tag2"));
+        assertEquals(2, mNotificationManagerService.getNotificationCountLocked("a", new UserHandle(uid).getIdentifier(), 0, "banana"));
+
+        // exclude a known notification - it's excluded from only the posted list, not enqueued
+        assertEquals(39, mNotificationManagerService.getNotificationCountLocked(PKG, new UserHandle(uid).getIdentifier(), 0, "tag"));
+    }
 }
