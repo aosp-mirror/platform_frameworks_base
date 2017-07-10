@@ -16,35 +16,31 @@
 
 package android.service.notification;
 
-import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.TestApi;
-import android.app.NotificationChannel;
-import android.app.NotificationChannelGroup;
-import android.companion.CompanionDeviceManager;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-
-import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
+import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -54,6 +50,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.widget.RemoteViews;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
 
@@ -199,6 +196,7 @@ public abstract class NotificationListenerService extends Service {
      * The full trim of the StatusBarNotification including all its features.
      *
      * @hide
+     * @removed
      */
     @SystemApi
     public static final int TRIM_FULL = 0;
@@ -219,6 +217,7 @@ public abstract class NotificationListenerService extends Service {
      * </ol>
      *
      * @hide
+     * @removed
      */
     @SystemApi
     public static final int TRIM_LIGHT = 1;
@@ -605,9 +604,9 @@ public abstract class NotificationListenerService extends Service {
      * @param snoozeCriterionId The{@link SnoozeCriterion#getId()} of a context to snooze the
      *                          notification until.
      * @hide
+     * @removed
      */
     @SystemApi
-    @TestApi
     public final void snoozeNotification(String key, String snoozeCriterionId) {
         if (!isBound()) return;
         try {
@@ -749,6 +748,7 @@ public abstract class NotificationListenerService extends Service {
      * before performing this operation.
      *
      * @hide
+     * @removed
      *
      * @param trim trim of the notifications to be passed via {@link #onNotificationPosted}.
      *             See <code>TRIM_*</code> constants.
@@ -801,6 +801,7 @@ public abstract class NotificationListenerService extends Service {
      * current user). Useful when you don't know what's already been posted.
      *
      * @hide
+     * @removed
      *
      * @param trim trim of the notifications to be returned. See <code>TRIM_*</code> constants.
      * @return An array of active notifications, sorted in natural order.
@@ -832,6 +833,7 @@ public abstract class NotificationListenerService extends Service {
      * more data out of those notifications.
      *
      * @hide
+     * @removed
      *
      * @param keys the keys of the notifications to request
      * @param trim trim of the notifications to be returned. See <code>TRIM_*</code> constants.
@@ -1046,6 +1048,7 @@ public abstract class NotificationListenerService extends Service {
      * @param componentName the component that will consume the notification information
      * @param currentUser the user to use as the stream filter
      * @hide
+     * @removed
      */
     @SystemApi
     public void registerAsSystemService(Context context, ComponentName componentName,
@@ -1066,6 +1069,7 @@ public abstract class NotificationListenerService extends Service {
      * <p>This method will fail for listeners that were not registered
      * with (@link registerAsService).
      * @hide
+     * @removed
      */
     @SystemApi
     public void unregisterAsSystemService() throws RemoteException {
@@ -1434,9 +1438,9 @@ public abstract class NotificationListenerService extends Service {
          * If the {@link NotificationAssistantService} has added people to this notification, then
          * this will be non-null.
          * @hide
+         * @removed
          */
         @SystemApi
-        @TestApi
         public List<String> getAdditionalPeople() {
             return mOverridePeople;
         }
@@ -1446,9 +1450,9 @@ public abstract class NotificationListenerService extends Service {
          * user interface displays options for snoozing notifications these criteria should be
          * displayed as well.
          * @hide
+         * @removed
          */
         @SystemApi
-        @TestApi
         public List<SnoozeCriterion> getSnoozeCriteria() {
             return mSnoozeCriteria;
         }

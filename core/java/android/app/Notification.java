@@ -5264,7 +5264,7 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @hide
+     * @removed
      */
     @SystemApi
     public static Class<? extends Style> getNotificationStyleClass(String templateClass) {
