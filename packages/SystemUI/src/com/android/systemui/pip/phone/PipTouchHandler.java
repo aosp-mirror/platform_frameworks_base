@@ -30,6 +30,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -401,7 +402,7 @@ public class PipTouchHandler {
     /**
      * Updates the appearance of the menu and scrim on top of the PiP while dismissing.
      */
-    void updateDismissFraction() {
+    private void updateDismissFraction() {
         if (mMenuController != null) {
             Rect bounds = mMotionHelper.getBounds();
             final float target = mMovementBounds.bottom + bounds.height();
@@ -427,7 +428,7 @@ public class PipTouchHandler {
     /**
      * Sets the minimized state.
      */
-    void setMinimizedStateInternal(boolean isMinimized) {
+    private void setMinimizedStateInternal(boolean isMinimized) {
         if (!ENABLE_MINIMIZE) {
             return;
         }
@@ -466,7 +467,7 @@ public class PipTouchHandler {
     /**
      * Sets the menu visibility.
      */
-    void setMenuState(int menuState, boolean resize) {
+    private void setMenuState(int menuState, boolean resize) {
         if (menuState == MENU_STATE_FULL) {
             // Save the current snap fraction and if we do not drag or move the PiP, then
             // we store back to this snap fraction.  Otherwise, we'll reset the snap
@@ -534,7 +535,8 @@ public class PipTouchHandler {
     private PipTouchGesture mDefaultMovementGesture = new PipTouchGesture() {
         // Whether the PiP was on the left side of the screen at the start of the gesture
         private boolean mStartedOnLeft;
-        private Point mStartPosition;
+        private final Point mStartPosition = new Point();
+        private final PointF mDelta = new PointF();
 
         @Override
         public void onDown(PipTouchState touchState) {
@@ -543,7 +545,8 @@ public class PipTouchHandler {
             }
 
             Rect bounds = mMotionHelper.getBounds();
-            mStartPosition = new Point(bounds.left, bounds.top);
+            mDelta.set(0f, 0f);
+            mStartPosition.set(bounds.left, bounds.top);
             mStartedOnLeft = bounds.left < mMovementBounds.centerX();
             mMovementWithinMinimize = true;
             mMovementWithinDismiss = touchState.getDownTouchPosition().y >= mMovementBounds.bottom;
@@ -577,10 +580,11 @@ public class PipTouchHandler {
 
             if (touchState.isDragging()) {
                 // Move the pinned stack freely
-                mTmpBounds.set(mMotionHelper.getBounds());
                 final PointF lastDelta = touchState.getLastTouchDelta();
-                float left = mTmpBounds.left + lastDelta.x;
-                float top = mTmpBounds.top + lastDelta.y;
+                float lastX = mStartPosition.x + mDelta.x;
+                float lastY = mStartPosition.y + mDelta.y;
+                float left = lastX + lastDelta.x;
+                float top = lastY + lastDelta.y;
                 if (!touchState.allowDraggingOffscreen() || !ENABLE_MINIMIZE) {
                     left = Math.max(mMovementBounds.left, Math.min(mMovementBounds.right, left));
                 }
@@ -590,6 +594,12 @@ public class PipTouchHandler {
                 } else {
                     top = Math.max(mMovementBounds.top, Math.min(mMovementBounds.bottom, top));
                 }
+
+                // Add to the cumulative delta after bounding the position
+                mDelta.x += left - lastX;
+                mDelta.y += top - lastY;
+
+                mTmpBounds.set(mMotionHelper.getBounds());
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds);
 
