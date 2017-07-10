@@ -99,6 +99,45 @@ public class NotificationTest {
         assertTrue(satisfiesTextContrast(secondaryTextColor, backgroundColor));
     }
 
+    @Test
+    public void testHasCompletedProgress_noProgress() {
+        Notification n = new Notification.Builder(mContext).build();
+
+        assertFalse(n.hasCompletedProgress());
+    }
+
+    @Test
+    public void testHasCompletedProgress_complete() {
+        Notification n = new Notification.Builder(mContext)
+                .setProgress(100, 100, true)
+                .build();
+        Notification n2 = new Notification.Builder(mContext)
+                .setProgress(10, 10, false)
+                .build();
+        assertTrue(n.hasCompletedProgress());
+        assertTrue(n2.hasCompletedProgress());
+    }
+
+    @Test
+    public void testHasCompletedProgress_notComplete() {
+        Notification n = new Notification.Builder(mContext)
+                .setProgress(100, 99, true)
+                .build();
+        Notification n2 = new Notification.Builder(mContext)
+                .setProgress(10, 4, false)
+                .build();
+        assertFalse(n.hasCompletedProgress());
+        assertFalse(n2.hasCompletedProgress());
+    }
+
+    @Test
+    public void testHasCompletedProgress_zeroMax() {
+        Notification n = new Notification.Builder(mContext)
+                .setProgress(0, 0, true)
+                .build();
+        assertFalse(n.hasCompletedProgress());
+    }
+
     private Notification.Builder getMediaNotification() {
         MediaSession session = new MediaSession(mContext, "test");
         return new Notification.Builder(mContext, "color")

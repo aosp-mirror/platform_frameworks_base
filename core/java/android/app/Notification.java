@@ -2541,6 +2541,22 @@ public class Notification implements Parcelable
         }
     }
 
+    /**
+     * @hide
+     */
+    public boolean hasCompletedProgress() {
+        // not a progress notification; can't be complete
+        if (!extras.containsKey(EXTRA_PROGRESS)
+                || !extras.containsKey(EXTRA_PROGRESS_MAX)) {
+            return false;
+        }
+        // many apps use max 0 for 'indeterminate'; not complete
+        if (extras.getInt(EXTRA_PROGRESS_MAX) == 0) {
+            return false;
+        }
+        return extras.getInt(EXTRA_PROGRESS) == extras.getInt(EXTRA_PROGRESS_MAX);
+    }
+
     /** @removed */
     @Deprecated
     public String getChannel() {
