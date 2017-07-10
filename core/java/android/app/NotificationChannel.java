@@ -15,11 +15,6 @@
  */
 package android.app;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.annotation.SystemApi;
 import android.app.NotificationManager.Importance;
 import android.content.Intent;
@@ -30,6 +25,11 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -743,7 +743,7 @@ public final class NotificationChannel implements Parcelable {
 
     private static String longArrayToString(long[] values) {
         StringBuffer sb = new StringBuffer();
-        if (values != null) {
+        if (values != null && values.length > 0) {
             for (int i = 0; i < values.length - 1; i++) {
                 sb.append(values[i]).append(DELIMITER);
             }
