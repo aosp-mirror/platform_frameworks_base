@@ -163,6 +163,8 @@
     <!-- This is a list of all the libraries available for application
          code to link against. -->
 
+    <library name="android.test.mock"
+            file="/system/framework/android.test.mock.jar" />
     <library name="android.test.runner"
             file="/system/framework/android.test.runner.jar" />
     <library name="javax.obex"
