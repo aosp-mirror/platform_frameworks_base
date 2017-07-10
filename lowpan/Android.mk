@@ -28,4 +28,6 @@ LOCAL_AIDL_INCLUDES += frameworks/base/lowpan/java
 LOCAL_AIDL_INCLUDES += frameworks/base/core/java
 LOCAL_SRC_FILES += $(call all-Iaidl-files-under, java/android/net/lowpan)
 include $(BUILD_SHARED_LIBRARY)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))
 endif
