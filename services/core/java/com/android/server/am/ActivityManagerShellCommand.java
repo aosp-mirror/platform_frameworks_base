@@ -23,6 +23,7 @@ import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
+import android.app.IUidObserver;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.usage.ConfigurationStats;
@@ -184,6 +185,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runMakeIdle(pw);
                 case "monitor":
                     return runMonitor(pw);
+                case "watch-uids":
+                    return runWatchUids(pw);
                 case "hang":
                     return runHang(pw);
                 case "restart":
@@ -1286,6 +1289,141 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         MyActivityController controller = new MyActivityController(mInterface, pw,
                 getRawInputStream(), gdbPort, monkey);
+        controller.run();
+        return 0;
+    }
+
+    static final class MyUidObserver extends IUidObserver.Stub {
+        final IActivityManager mInterface;
+        final PrintWriter mPw;
+        final InputStream mInput;
+
+        static final int STATE_NORMAL = 0;
+
+        int mState;
+
+        MyUidObserver(IActivityManager iam, PrintWriter pw, InputStream input) {
+            mInterface = iam;
+            mPw = pw;
+            mInput = input;
+        }
+
+        @Override
+        public void onUidStateChanged(int uid, int procState, long procStateSeq) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.print(" procstate ");
+                mPw.print(ProcessList.makeProcStateString(procState));
+                mPw.print(" seq ");
+                mPw.println(procStateSeq);
+                mPw.flush();
+            }
+        }
+
+        @Override
+        public void onUidGone(int uid, boolean disabled) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.print(" gone");
+                if (disabled) {
+                    mPw.print(" disabled");
+                }
+                mPw.println();
+                mPw.flush();
+            }
+        }
+
+        @Override
+        public void onUidActive(int uid) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.println(" active");
+                mPw.flush();
+            }
+        }
+
+        @Override
+        public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.print(" idle");
+                if (disabled) {
+                    mPw.print(" disabled");
+                }
+                mPw.println();
+                mPw.flush();
+            }
+        }
+
+        @Override
+        public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
+            synchronized (this) {
+                mPw.print(uid);
+                mPw.println(cached ? " cached" : " uncached");
+                mPw.flush();
+            }
+        }
+
+        void printMessageForState() {
+            switch (mState) {
+                case STATE_NORMAL:
+                    mPw.println("Watching uid states...  available commands:");
+                    break;
+            }
+            mPw.println("(q)uit: finish watching");
+        }
+
+        void run() throws RemoteException {
+            try {
+                printMessageForState();
+                mPw.flush();
+
+                mInterface.registerUidObserver(this, ActivityManager.UID_OBSERVER_ACTIVE
+                        | ActivityManager.UID_OBSERVER_GONE | ActivityManager.UID_OBSERVER_PROCSTATE
+                        | ActivityManager.UID_OBSERVER_IDLE | ActivityManager.UID_OBSERVER_CACHED,
+                        ActivityManager.PROCESS_STATE_UNKNOWN, null);
+                mState = STATE_NORMAL;
+
+                InputStreamReader converter = new InputStreamReader(mInput);
+                BufferedReader in = new BufferedReader(converter);
+                String line;
+
+                while ((line = in.readLine()) != null) {
+                    boolean addNewline = true;
+                    if (line.length() <= 0) {
+                        addNewline = false;
+                    } else if ("q".equals(line) || "quit".equals(line)) {
+                        break;
+                    } else {
+                        mPw.println("Invalid command: " + line);
+                    }
+
+                    synchronized (this) {
+                        if (addNewline) {
+                            mPw.println("");
+                        }
+                        printMessageForState();
+                        mPw.flush();
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace(mPw);
+                mPw.flush();
+            } finally {
+                mInterface.unregisterUidObserver(this);
+            }
+        }
+    }
+
+    int runWatchUids(PrintWriter pw) throws RemoteException {
+        String opt;
+        while ((opt=getNextOption()) != null) {
+            getErrPrintWriter().println("Error: Unknown option: " + opt);
+            return -1;
+        }
+
+        MyUidObserver controller = new MyUidObserver(mInterface, pw, getRawInputStream());
         controller.run();
         return 0;
     }
@@ -2595,6 +2733,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  monitor [--gdb <port>]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");
+            pw.println("  watch-uids [--gdb <port>]");
+            pw.println("      Start watching for and reporting uid state changes.");
             pw.println("  hang [--allow-restart]");
             pw.println("      Hang the system.");
             pw.println("      --allow-restart: allow watchdog to perform normal system restart");
