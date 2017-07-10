@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi-Fi желісінен мобильдік желіге ауысу"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi роумингін іздеулерге әрқашан рұқсат ету"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобильдік деректер әрқашан қосулы"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Тетерингтің аппараттық жеделдетуі"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Абсолютті дыбыс деңгейін өшіру"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Ішкі жолақтағы шылдырлауды қосу"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP нұсқасы"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Жасанды аймақтарды пайдалануға рұқсат беру"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Көру төлсипатын тексеруді қосу"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi қосулы кезде де ұялы деректерді белсенді етіп ұстау (желіні жылдам ауыстыру үшін)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Қолжетімді болса тетерингтің аппараттық жеделдетуін пайдалану"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB жөндеулеріне рұқсат берілсін бе?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB жөндеу дамыту мақсаттарына ғана арналған. Оны компьютер және құрылғы арасында дерек көшіру, құрылғыға ескертусіз қолданба орнату және тіркелім деректерін оқу үшін қолданыңыз."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Бұған дейін рұқсат берілген барлық компьютерлерде USB жөндеу функциясына тыйым салынсын ба?"</string>

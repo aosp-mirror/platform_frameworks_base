@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ආක්‍රමණික Wi‑Fi සිට ජංගම බාර දීම"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi රෝම් පරිලෝකන වෙතට සැමවිට අවසර දෙන්න"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ජංගම දත්ත සැමවිට ක්‍රියාකාරීය"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ටෙදරින් දෘඪාංග ත්වරණය"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"නිරපේක්ෂ හඩ පරිමාව අබල කරන්න"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"කලාපය තුළ නාද වීම සබල කරන්න"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"බ්ලූටූත් AVRCP අනුවාදය"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ව්‍යාජ ස්ථාන අනුමත කරන්න"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"උපලක්ෂණ පරික්ෂාව බැලීම සබල කරන්න"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi අක්‍රිය විට පවා, සැම විටම ජංගම දත්ත ක්‍රියාකාරීව තබන්න (අවසන් ජාල මාරුව සඳහා)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ලබා ගත හැකි නම්, ටෙදරින් දෘඪාංග ත්වරණය භාවිත කරන්න"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB දෝශාවේක්ෂණයට ඉඩ දෙන්නද?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB දෝශාවේක්ෂණය සංවර්ධන කටයුතු සඳහා පමණක් යොදාගැනේ. එය ඔබගේ පරිගණකය සහ ඔබගේ උපාංගය අතර දත්ත පිටපත් කිරීමට පමණක් භාවිතා කරන්න, ඔබගේ උපාංගය මත දැනුම්දීම් රහිතව යෙදුම් ස්ථාපනය කරන්න, සහ ලොග් දත්ත කියවන්න."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ඔබ මින්පෙර අවසර ලබාදුන් සියළුම පරිගණක වෙතින් USB නිදොස්කරණට ප්‍රවේශය අහෝසි කරන්නද?"</string>

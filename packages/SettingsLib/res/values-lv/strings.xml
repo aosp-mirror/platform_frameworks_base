@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Agresīva pāreja no Wi‑Fi uz mobilo tīklu"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vienmēr atļaut Wi‑Fi meklēšanu"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Vienmēr aktīvs mobilo datu savienojums"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Paātrināta aparatūras darbība piesaistei"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Atspējot absolūto skaļumu"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Iespējot iekšjoslas zvanīšanu"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP versija"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Atļaut neīstas vietas"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Iespējot atribūtu pārbaudi"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobilo datu savienojums būs vienmēr aktīvs, pat ja būs aktīvs Wi-Fi savienojums (ātrai ierīces pārslēgšanai uz citu tīklu)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Izmantot paātrinātu aparatūras darbību piesaistei, ja tā ir pieejama"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Vai atļaut USB atkļūdošanu?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB atkļūdošana ir paredzēta tikai ar izstrādi saistītām darbībām. Izmantojiet to datu kopēšanai no datora uz ierīci un pretēji, lietotņu instalēšanai ierīcē bez paziņojumiem un žurnāla datu lasīšanai."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vai atcelt piekļuvi USB atkļūdošanai no visiem datoriem, kuriem iepriekš piešķīrāt piekļuvi?"</string>

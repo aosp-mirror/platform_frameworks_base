@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Agresivan prelaz sa Wi‑Fi mreže na mobilnu"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvek dozvoli skeniranje Wi‑Fi-ja u romingu"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilni podaci su uvek aktivni"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardversko ubrzanje privezivanja"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogući glavno podešavanje jačine zvuka"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Omogućavanje zvonjave na istom kanalu"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Verzija Bluetooth AVRCP-a"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dozvoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogući proveru atributa za pregled"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Neka mobilni podaci uvek budu aktivni, čak i kada je Wi‑Fi aktivan (radi brze promene mreže)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Koristi hardversko ubrzanje privezivanja ako je dostupno"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Dozvoli otklanjanje USB grešaka?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Otklanjanje USB grešaka namenjeno je samo za svrhe programiranja. Koristite ga za kopiranje podataka sa računara na uređaj i obrnuto, instaliranje aplikacija na uređaju bez obaveštenja i čitanje podataka iz evidencije."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Želite li da opozovete pristup otklanjanju USB grešaka sa svih računara koje ste prethodno odobrili?"</string>

@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"સશક્ત Wi‑Fiથી મોબાઇલ પર હૅન્ડઓવર"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"હંમેશા Wi‑Fi રોમ સ્કૅન્સને મંજૂરી આપો"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"મોબાઇલ ડેટા હંમેશાં સક્રિય"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ટિથરિંગ માટે હાર્ડવેર ગતિવૃદ્ધિ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ચોક્કસ વૉલ્યૂમને અક્ષમ કરો"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"બેંડમાં રિંગ કરવાનું સક્ષમ કરો"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP સંસ્કરણ"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"મોક સ્થાનોની મંજૂરી આપો"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"લક્ષણ નિરીક્ષણ જોવાનું સક્ષમ કરો"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi  સક્રિય હોય ત્યારે પણ, હંમેશા મોબાઇલ ડેટાને સક્રિય રાખો (ઝડપી નેટવર્ક સ્વિચિંગ માટે)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"જો ટિથરિંગ માટે હાર્ડવેર ગતિવૃદ્ધિ ઉપલબ્ધ હોય તો તેનો ઉપયોગ કરો"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ડિબગિંગને મંજૂરી આપીએ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ડિબગીંગ ફક્ત વિકાસ હેતુઓ માટે જ બનાવાયેલ છે. તેનો ઉપયોગ તમારા કમ્પ્યુટર અને તમારા ઉપકરણ વચ્ચે ડેટાને કૉપિ કરવા, સૂચના વગર તમારા ઉપકરણ પર ઍપ્લિકેશનો ઇન્સ્ટોલ કરવા અને લૉગ ડેટા વાંચવા માટે કરો."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"તમે અગાઉ અધિકૃત કરેલા તમામ કમ્પ્યુટર્સમાંથી USB ડિબગિંગ પરની અ‍ૅક્સેસ રદબાતલ કરીએ?"</string>
