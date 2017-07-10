@@ -424,8 +424,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
                             if (stagedDistroRulesVersion == null) {
                                 pw.println("<None>");
                             } else {
-                                pw.println("Staged install version: "
-                                        + stagedDistroRulesVersion.toDumpString());
+                                pw.println(stagedDistroRulesVersion.toDumpString());
                             }
                             break;
                         case 'a':
