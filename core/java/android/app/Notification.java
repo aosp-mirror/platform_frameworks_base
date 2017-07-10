@@ -561,6 +561,11 @@ public class Notification implements Parcelable
     @SystemApi
     public static final int FLAG_AUTOGROUP_SUMMARY  = 0x00000400;
 
+    /**
+     * @hide
+     */
+    public static final int FLAG_CAN_COLORIZE = 0x00000800;
+
     public int flags;
 
     /** @hide */
@@ -5174,7 +5179,16 @@ public class Notification implements Parcelable
         if (isColorizedMedia()) {
             return true;
         }
-        return extras.getBoolean(EXTRA_COLORIZED) && isForegroundService();
+        return extras.getBoolean(EXTRA_COLORIZED)
+                && (hasColorizedPermission() || isForegroundService());
+    }
+
+    /**
+     * Returns whether an app can colorize due to the android.permission.USE_COLORIZED_NOTIFICATIONS
+     * permission. The permission is checked when a notification is enqueued.
+     */
+    private boolean hasColorizedPermission() {
+        return (flags & Notification.FLAG_CAN_COLORIZE) != 0;
     }
 
     /**
