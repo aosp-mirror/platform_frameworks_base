@@ -37,41 +37,79 @@ interface ILowpanInterface {
     //////////////////////////////////////////////////////////////////////////
     // Property Key Constants
 
+    /** Type: Boolean */
     const String KEY_INTERFACE_ENABLED      = "android.net.lowpan.property.INTERFACE_ENABLED";
+
+    /** Type: Boolean */
     const String KEY_INTERFACE_UP           = "android.net.lowpan.property.INTERFACE_UP";
+
+    /** Type: Boolean */
     const String KEY_INTERFACE_COMMISSIONED = "android.net.lowpan.property.INTERFACE_COMMISSIONED";
+
+    /** Type: Boolean */
     const String KEY_INTERFACE_CONNECTED    = "android.net.lowpan.property.INTERFACE_CONNECTED";
+
+    /** Type: String */
     const String KEY_INTERFACE_STATE        = "android.net.lowpan.property.INTERFACE_STATE";
 
+    /** Type: String */
     const String KEY_NETWORK_NAME             = "android.net.lowpan.property.NETWORK_NAME";
+
+    /** Type: Integer */
     const String KEY_NETWORK_TYPE             = "android.net.lowpan.property.NETWORK_TYPE";
+
+    /** Type: Integer */
     const String KEY_NETWORK_PANID            = "android.net.lowpan.property.NETWORK_PANID";
+
+    /** Type: byte[] */
     const String KEY_NETWORK_XPANID           = "android.net.lowpan.property.NETWORK_XPANID";
+
+    /** Type: String */
     const String KEY_NETWORK_ROLE             = "android.net.lowpan.property.NETWORK_ROLE";
+
+    /** Type: byte[] */
     const String KEY_NETWORK_MASTER_KEY       = "android.net.lowpan.property.NETWORK_MASTER_KEY";
+
+    /** Type: Integer */
     const String KEY_NETWORK_MASTER_KEY_INDEX
         = "android.net.lowpan.property.NETWORK_MASTER_KEY_INDEX";
 
+    /** Type: int[] */
     const String KEY_SUPPORTED_CHANNELS = "android.net.lowpan.property.SUPPORTED_CHANNELS";
+
+    /** Type: Integer */
     const String KEY_CHANNEL            = "android.net.lowpan.property.CHANNEL";
+
+    /** Type: int[] */
     const String KEY_CHANNEL_MASK       = "android.net.lowpan.property.CHANNEL_MASK";
+
+    /** Type: Integer */
     const String KEY_MAX_TX_POWER       = "android.net.lowpan.property.MAX_TX_POWER";
+
+    /** Type: Integer */
     const String KEY_RSSI               = "android.net.lowpan.property.RSSI";
+
+    /** Type: Integer */
     const String KEY_LQI                = "android.net.lowpan.property.LQI";
 
-    const String KEY_LINK_ADDRESS_ARRAY = "android.net.lowpan.property.LINK_ADDRESS_ARRAY";
-    const String KEY_ROUTE_INFO_ARRAY   = "android.net.lowpan.property.ROUTE_INFO_ARRAY";
-
+    /** Type: byte[] */
     const String KEY_BEACON_ADDRESS     = "android.net.lowpan.property.BEACON_ORIGIN_ADDRESS";
+
+    /** Type: Boolean */
     const String KEY_BEACON_CAN_ASSIST  = "android.net.lowpan.property.BEACON_CAN_ASSIST";
 
+    /** Type: String */
     const String DRIVER_VERSION         = "android.net.lowpan.property.DRIVER_VERSION";
+
+    /** Type: String */
     const String NCP_VERSION            = "android.net.lowpan.property.NCP_VERSION";
 
-    /** @hide */
+    /** Type: byte[]
+     * @hide */
     const String KEY_EXTENDED_ADDRESS = "android.net.lowpan.property.EXTENDED_ADDRESS";
 
-    /** @hide */
+    /** Type: byte[]
+     * @hide */
     const String KEY_MAC_ADDRESS      = "android.net.lowpan.property.MAC_ADDRESS";
 
     //////////////////////////////////////////////////////////////////////////
@@ -143,6 +181,9 @@ interface ILowpanInterface {
 
     void startEnergyScan(in Map properties, ILowpanEnergyScanCallback listener);
     oneway void stopEnergyScan();
+
+    String[] copyLinkAddresses();
+    IpPrefix[] copyLinkNetworks();
 
     void addOnMeshPrefix(in IpPrefix prefix, int flags);
     oneway void removeOnMeshPrefix(in IpPrefix prefix);

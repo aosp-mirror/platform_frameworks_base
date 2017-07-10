@@ -18,9 +18,12 @@ package android.net.lowpan;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.net.IpPrefix;
+import android.net.LinkAddress;
+import android.os.DeadObjectException;
 import android.os.Handler;
-import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
@@ -188,60 +191,35 @@ public class LowpanInterface {
         public void onPropertiesChanged(@NonNull Map properties) {}
     }
 
-    private ILowpanInterface mBinder;
+    private final ILowpanInterface mBinder;
+    private final Looper mLooper;
     private final HashMap<Integer, ILowpanInterfaceListener> mListenerMap = new HashMap<>();
 
-    /** Map between IBinder identity hashes and LowpanInstance objects. */
-    private static final HashMap<Integer, LowpanInterface> sInstanceMap = new HashMap<>();
+    /**
+     * Create a new LowpanInterface instance. Applications will almost always want to use {@link
+     * LowpanManager#getInterface LowpanManager.getInterface()} instead of this.
+     *
+     * @param context the application context
+     * @param service the Binder interface
+     * @param looper the Binder interface
+     * @hide
+     */
+    public LowpanInterface(Context context, ILowpanInterface service, Looper looper) {
+        /* We aren't currently using the context, but if we need
+         * it later on we can easily add it to the class.
+         */
 
-    private LowpanInterface(IBinder binder) {
-        mBinder = ILowpanInterface.Stub.asInterface(binder);
+        mBinder = service;
+        mLooper = looper;
     }
 
     /**
-     * Get the LowpanInterface object associated with this IBinder. Returns null if this IBinder
-     * does not implement the appropriate interface.
+     * Returns the ILowpanInterface object associated with this interface.
      *
      * @hide
      */
-    @NonNull
-    public static final LowpanInterface from(IBinder binder) {
-        Integer hashCode = Integer.valueOf(System.identityHashCode(binder));
-        LowpanInterface instance;
-
-        synchronized (sInstanceMap) {
-            instance = sInstanceMap.get(hashCode);
-
-            if (instance == null) {
-                instance = new LowpanInterface(binder);
-                sInstanceMap.put(hashCode, instance);
-            }
-        }
-
-        return instance;
-    }
-
-    /** {@hide} */
-    public static final LowpanInterface from(ILowpanInterface iface) {
-        return from(iface.asBinder());
-    }
-
-    /** {@hide} */
-    public static final LowpanInterface getInterfaceFromBinder(IBinder binder) {
-        return from(binder);
-    }
-
-    /**
-     * Returns the IBinder object associated with this interface.
-     *
-     * @hide
-     */
-    public IBinder getBinder() {
-        return mBinder.asBinder();
-    }
-
-    private static void throwAsPublicException(Throwable t) throws LowpanException {
-        LowpanException.throwAsPublicException(t);
+    public ILowpanInterface getService() {
+        return mBinder;
     }
 
     // Private Property Helpers
@@ -251,11 +229,10 @@ public class LowpanInterface {
             mBinder.setProperties(properties);
 
         } catch (RemoteException x) {
-            // Catch and ignore all binder exceptions
-            Log.e(TAG, x.toString());
+            throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
     }
 
@@ -263,13 +240,13 @@ public class LowpanInterface {
     Map<String, Object> getProperties(String keys[]) throws LowpanException {
         try {
             return mBinder.getProperties(keys);
+
         } catch (RemoteException x) {
-            // Catch and ignore all binder exceptions
-            Log.e(TAG, x.toString());
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
-            throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
-        return new HashMap();
     }
 
     /** @hide */
@@ -294,13 +271,13 @@ public class LowpanInterface {
     <T> String getPropertyAsString(LowpanProperty<T> key) throws LowpanException {
         try {
             return mBinder.getPropertyAsString(key.getName());
+
         } catch (RemoteException x) {
-            // Catch and ignore all binder exceptions
-            Log.e(TAG, x.toString());
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
-            throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
-        return null;
     }
 
     int getPropertyAsInt(LowpanProperty<Integer> key) throws LowpanException {
@@ -332,10 +309,12 @@ public class LowpanInterface {
             Map<String, Object> parameters = new HashMap();
             provision.addToMap(parameters);
             mBinder.form(parameters);
+
         } catch (RemoteException x) {
-            throwAsPublicException(x);
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
-            throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
     }
 
@@ -352,10 +331,12 @@ public class LowpanInterface {
             Map<String, Object> parameters = new HashMap();
             provision.addToMap(parameters);
             mBinder.join(parameters);
+
         } catch (RemoteException x) {
-            throwAsPublicException(x);
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
-            throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
     }
 
@@ -386,10 +367,12 @@ public class LowpanInterface {
     public void leave() throws LowpanException {
         try {
             mBinder.leave();
+
         } catch (RemoteException x) {
-            throwAsPublicException(x);
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
-            throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
     }
 
@@ -415,34 +398,26 @@ public class LowpanInterface {
     public void reset() throws LowpanException {
         try {
             mBinder.reset();
+
         } catch (RemoteException x) {
-            throwAsPublicException(x);
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
-            throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
     }
 
     // Public Getters and Setters
 
-    /**
-     * Returns the name of this network interface.
-     *
-     * <p>Will return empty string if this interface is no longer viable.
-     */
+    /** Returns the name of this network interface. */
     @NonNull
     public String getName() {
         try {
             return mBinder.getName();
+
         } catch (RemoteException x) {
-            // Catch and ignore all binder exceptions
-            // when fetching the name.
-            Log.e(TAG, x.toString());
-        } catch (ServiceSpecificException x) {
-            // Catch and ignore all service-specific exceptions
-            // when fetching the name.
-            Log.e(TAG, x.toString());
+            throw x.rethrowAsRuntimeException();
         }
-        return "";
     }
 
     /**
@@ -640,58 +615,77 @@ public class LowpanInterface {
     public void registerCallback(@NonNull Callback cb, @Nullable Handler handler) {
         ILowpanInterfaceListener.Stub listenerBinder =
                 new ILowpanInterfaceListener.Stub() {
-                    public void onPropertiesChanged(Map properties) {
+                    private Handler mHandler;
+
+                    {
+                        if (handler != null) {
+                            mHandler = handler;
+                        } else if (mLooper != null) {
+                            mHandler = new Handler(mLooper);
+                        } else {
+                            mHandler = new Handler();
+                        }
+                    }
+
+                    @Override public void onPropertiesChanged(Map properties) {
                         Runnable runnable =
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        for (String key : (Set<String>) properties.keySet()) {
-                                            Object value = properties.get(key);
-                                            switch (key) {
-                                                case ILowpanInterface.KEY_INTERFACE_ENABLED:
-                                                    cb.onEnabledChanged(
-                                                            ((Boolean) value).booleanValue());
-                                                    break;
-                                                case ILowpanInterface.KEY_INTERFACE_UP:
-                                                    cb.onUpChanged(
-                                                            ((Boolean) value).booleanValue());
-                                                    break;
-                                                case ILowpanInterface.KEY_INTERFACE_CONNECTED:
-                                                    cb.onConnectedChanged(
-                                                            ((Boolean) value).booleanValue());
-                                                    break;
-                                                case ILowpanInterface.KEY_INTERFACE_STATE:
-                                                    cb.onStateChanged((String) value);
-                                                    break;
-                                                case ILowpanInterface.KEY_NETWORK_NAME:
-                                                case ILowpanInterface.KEY_NETWORK_PANID:
-                                                case ILowpanInterface.KEY_NETWORK_XPANID:
-                                                case ILowpanInterface.KEY_CHANNEL:
-                                                    cb.onLowpanIdentityChanged(getLowpanIdentity());
-                                                    break;
-                                                case ILowpanInterface.KEY_NETWORK_ROLE:
-                                                    cb.onRoleChanged(value.toString());
-                                                    break;
-                                            }
+                                () -> {
+                                    for (String key : (Set<String>) properties.keySet()) {
+                                        Object value = properties.get(key);
+                                        switch (key) {
+                                            case ILowpanInterface.KEY_INTERFACE_ENABLED:
+                                                cb.onEnabledChanged(
+                                                        ((Boolean) value).booleanValue());
+                                                break;
+                                            case ILowpanInterface.KEY_INTERFACE_UP:
+                                                cb.onUpChanged(((Boolean) value).booleanValue());
+                                                break;
+                                            case ILowpanInterface.KEY_INTERFACE_CONNECTED:
+                                                cb.onConnectedChanged(
+                                                        ((Boolean) value).booleanValue());
+                                                break;
+                                            case ILowpanInterface.KEY_INTERFACE_STATE:
+                                                cb.onStateChanged((String) value);
+                                                break;
+                                            case ILowpanInterface.KEY_NETWORK_NAME:
+                                            case ILowpanInterface.KEY_NETWORK_PANID:
+                                            case ILowpanInterface.KEY_NETWORK_XPANID:
+                                            case ILowpanInterface.KEY_CHANNEL:
+                                                cb.onLowpanIdentityChanged(getLowpanIdentity());
+                                                break;
+                                            case ILowpanInterface.KEY_NETWORK_ROLE:
+                                                cb.onRoleChanged(value.toString());
+                                                break;
                                         }
-                                        cb.onPropertiesChanged(properties);
                                     }
+                                    cb.onPropertiesChanged(properties);
                                 };
 
-                        if (handler != null) {
-                            handler.post(runnable);
-                        } else {
-                            runnable.run();
-                        }
+                        mHandler.post(runnable);
+                    }
+
+                    @Override public void onLinkNetworkAdded(IpPrefix prefix) {
+                        // Support for this event isn't yet implemented.
+                    }
+
+                    @Override public void onLinkNetworkRemoved(IpPrefix prefix) {
+                        // Support for this event isn't yet implemented.
+                    }
+
+                    @Override public void onLinkAddressAdded(String address) {
+                        // Support for this event isn't yet implemented.
+                    }
+
+                    @Override public void onLinkAddressRemoved(String address) {
+                        // Support for this event isn't yet implemented.
                     }
                 };
         try {
             mBinder.addListener(listenerBinder);
         } catch (RemoteException x) {
-            // Log and ignore. If this happens, this interface
-            // is likely dead anyway.
-            Log.e(TAG, x.toString());
+            throw x.rethrowAsRuntimeException();
         }
+
         synchronized (mListenerMap) {
             mListenerMap.put(System.identityHashCode(cb), listenerBinder);
         }
@@ -728,9 +722,11 @@ public class LowpanInterface {
 
                 try {
                     mBinder.removeListener(listenerBinder);
+                } catch (DeadObjectException x) {
+                    // We ignore a dead object exception because that
+                    // pretty clearly means our callback isn't registered.
                 } catch (RemoteException x) {
-                    // Catch and ignore all binder exceptions
-                    Log.e(TAG, x.toString());
+                    throw x.rethrowAsRuntimeException();
                 }
             }
         }
@@ -752,6 +748,46 @@ public class LowpanInterface {
     // Route Management
 
     /**
+     * Makes a copy of the internal list of LinkAddresses.
+     *
+     * @hide
+     */
+    public LinkAddress[] copyLinkAddresses() throws LowpanException {
+        try {
+            String[] linkAddressStrings = mBinder.copyLinkAddresses();
+            LinkAddress[] ret = new LinkAddress[linkAddressStrings.length];
+            int i = 0;
+            for (String str : linkAddressStrings) {
+                ret[i++] = new LinkAddress(str);
+            }
+            return ret;
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
+            throw LowpanException.rethrowAsLowpanException(x);
+        }
+    }
+
+    /**
+     * Makes a copy of the internal list of networks reachable on via this link.
+     *
+     * @hide
+     */
+    public IpPrefix[] copyLinkNetworks() throws LowpanException {
+        try {
+            return mBinder.copyLinkNetworks();
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
+            throw LowpanException.rethrowAsLowpanException(x);
+        }
+    }
+
+    /**
      * Advertise the given IP prefix as an on-mesh prefix.
      *
      * @hide
@@ -759,10 +795,12 @@ public class LowpanInterface {
     public void addOnMeshPrefix(IpPrefix prefix, int flags) throws LowpanException {
         try {
             mBinder.addOnMeshPrefix(prefix, flags);
+
         } catch (RemoteException x) {
-            throwAsPublicException(x);
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
-            throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
     }
 
@@ -775,9 +813,10 @@ public class LowpanInterface {
     public void removeOnMeshPrefix(IpPrefix prefix) {
         try {
             mBinder.removeOnMeshPrefix(prefix);
+
         } catch (RemoteException x) {
-            // Catch and ignore all binder exceptions
-            Log.e(TAG, x.toString());
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
             // Catch and ignore all service exceptions
             Log.e(TAG, x.toString());
@@ -793,10 +832,12 @@ public class LowpanInterface {
     public void addExternalRoute(IpPrefix prefix, int flags) throws LowpanException {
         try {
             mBinder.addExternalRoute(prefix, flags);
+
         } catch (RemoteException x) {
-            throwAsPublicException(x);
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
-            throwAsPublicException(x);
+            throw LowpanException.rethrowAsLowpanException(x);
         }
     }
 
@@ -808,9 +849,10 @@ public class LowpanInterface {
     public void removeExternalRoute(IpPrefix prefix) {
         try {
             mBinder.removeExternalRoute(prefix);
+
         } catch (RemoteException x) {
-            // Catch and ignore all binder exceptions
-            Log.e(TAG, x.toString());
+            throw x.rethrowAsRuntimeException();
+
         } catch (ServiceSpecificException x) {
             // Catch and ignore all service exceptions
             Log.e(TAG, x.toString());

@@ -21,6 +21,7 @@ import android.net.lowpan.ILowpanManagerListener;
 /** {@hide} */
 interface ILowpanManager {
 
+    /* Keep this in sync with Context.LOWPAN_SERVICE */
     const String LOWPAN_SERVICE_NAME = "lowpan";
 
     ILowpanInterface getInterface(@utf8InCpp String name);

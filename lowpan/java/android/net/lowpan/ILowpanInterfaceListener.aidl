@@ -16,7 +16,15 @@
 
 package android.net.lowpan;
 
+import android.net.IpPrefix;
+
 /** {@hide} */
 interface ILowpanInterfaceListener {
     oneway void onPropertiesChanged(in Map properties);
+
+    oneway void onLinkNetworkAdded(in IpPrefix prefix);
+    oneway void onLinkNetworkRemoved(in IpPrefix prefix);
+
+    oneway void onLinkAddressAdded(in String address);
+    oneway void onLinkAddressRemoved(in String address);
 }

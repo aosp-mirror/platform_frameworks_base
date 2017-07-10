@@ -19,14 +19,15 @@ package android.net.lowpan;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.AndroidException;
-import android.util.Log;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * Manager object for looking up LoWPAN interfaces.
@@ -45,72 +46,119 @@ public class LowpanManager {
         public void onInterfaceRemoved(LowpanInterface lowpanInterface) {}
     }
 
-    private Context mContext;
-    private ILowpanManager mManager;
-    private HashMap<Integer, ILowpanManagerListener> mListenerMap = new HashMap<>();
+    private final Map<Integer, ILowpanManagerListener> mListenerMap = new HashMap<>();
+    private final Map<String, LowpanInterface> mInterfaceCache = new HashMap<>();
 
-    private static LowpanManager sSingletonInstance;
+    /* This is a WeakHashMap because we don't want to hold onto
+     * a strong reference to ILowpanInterface, so that it can be
+     * garbage collected if it isn't being used anymore. Since
+     * the value class holds onto this specific ILowpanInterface,
+     * we also need to have a weak reference to the value.
+     * This design pattern allows us to skip removal of items
+     * from this Map without leaking memory.
+     */
+    private final Map<ILowpanInterface, WeakReference<LowpanInterface>> mBinderCache =
+            new WeakHashMap<>();
+
+    private final ILowpanManager mService;
+    private final Context mContext;
+    private final Looper mLooper;
 
     // Static Methods
 
-    /** Returns a reference to the LowpanManager object, allocating it if necessary. */
-    public static LowpanManager getManager() {
-        return from(null);
+    public static LowpanManager from(Context context) {
+        return (LowpanManager) context.getSystemService(Context.LOWPAN_SERVICE);
     }
 
-    public static LowpanManager from(Context context) {
-        // TODO: Actually get this from the context!
+    /** @hide */
+    public static LowpanManager getManager() {
+        IBinder binder = ServiceManager.getService(Context.LOWPAN_SERVICE);
 
-        if (sSingletonInstance == null) {
-            sSingletonInstance = new LowpanManager();
+        if (binder != null) {
+            ILowpanManager service = ILowpanManager.Stub.asInterface(binder);
+            return new LowpanManager(service);
         }
-        return sSingletonInstance;
+
+        return null;
     }
 
     // Constructors
 
-    /**
-     * Private LowpanManager constructor. Since we are a singleton, we do not allow external
-     * construction.
-     */
-    private LowpanManager() {}
-
-    // Private Methods
-
-    /**
-     * Returns a reference to the ILowpanManager interface, provided by the LoWPAN Manager Service.
-     */
-    @Nullable
-    private synchronized ILowpanManager getILowpanManager() {
-        // Use a local reference of this object for thread safety.
-        ILowpanManager manager = mManager;
-
-        if (manager == null) {
-            IBinder serviceBinder =
-                    new ServiceManager().getService(ILowpanManager.LOWPAN_SERVICE_NAME);
-
-            manager = ILowpanManager.Stub.asInterface(serviceBinder);
-
-            mManager = manager;
-
-            // Add any listeners
-            synchronized (mListenerMap) {
-                for (ILowpanManagerListener listener : mListenerMap.values()) {
-                    try {
-                        manager.addListener(listener);
-
-                    } catch (RemoteException x) {
-                        // Consider any failure here as implying the manager is defunct
-                        mManager = null;
-                        manager = null;
-                    }
-                }
-            }
-        }
-        return manager;
+    LowpanManager(ILowpanManager service) {
+        mService = service;
+        mContext = null;
+        mLooper = null;
     }
 
-    // Public Methods
+    /**
+     * Create a new LowpanManager instance. Applications will almost always want to use {@link
+     * android.content.Context#getSystemService Context.getSystemService()} to retrieve the standard
+     * {@link android.content.Context#LOWPAN_SERVICE Context.LOWPAN_SERVICE}.
+     *
+     * @param context the application context
+     * @param service the Binder interface
+     * @param looper the default Looper to run callbacks on
+     * @hide - hide this because it takes in a parameter of type ILowpanManager, which is a system
+     *     private class.
+     */
+    public LowpanManager(Context context, ILowpanManager service, Looper looper) {
+        mContext = context;
+        mService = service;
+        mLooper = looper;
+    }
+
+    /** @hide */
+    @Nullable
+    public LowpanInterface getInterface(@NonNull ILowpanInterface ifaceService) {
+        LowpanInterface iface = null;
+
+        try {
+            synchronized (mBinderCache) {
+                if (mBinderCache.containsKey(ifaceService)) {
+                    iface = mBinderCache.get(ifaceService).get();
+                }
+
+                if (iface == null) {
+                    String ifaceName = ifaceService.getName();
+
+                    iface = new LowpanInterface(mContext, ifaceService, mLooper);
+
+                    synchronized (mInterfaceCache) {
+                        mInterfaceCache.put(iface.getName(), iface);
+                    }
+
+                    mBinderCache.put(ifaceService, new WeakReference(iface));
+
+                    /* Make sure we remove the object from the
+                     * interface cache if the associated service
+                     * dies.
+                     */
+                    ifaceService
+                            .asBinder()
+                            .linkToDeath(
+                                    new IBinder.DeathRecipient() {
+                                        @Override
+                                        public void binderDied() {
+                                            synchronized (mInterfaceCache) {
+                                                LowpanInterface iface =
+                                                        mInterfaceCache.get(ifaceName);
+
+                                                if ((iface != null)
+                                                        && (iface.getService() == ifaceService)) {
+                                                    mInterfaceCache.remove(ifaceName);
+                                                }
+                                            }
+                                        }
+                                    },
+                                    0);
+                }
+            }
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+        }
+
+        return iface;
+    }
 
     /**
      * Returns a reference to the requested LowpanInterface object. If the given interface doesn't
@@ -118,27 +166,32 @@ public class LowpanManager {
      */
     @Nullable
     public LowpanInterface getInterface(@NonNull String name) {
-        LowpanInterface ret = null;
-        ILowpanManager manager = getILowpanManager();
+        LowpanInterface iface = null;
 
-        // Maximum number of tries is two. We should only try
-        // more than once if our manager has died or there
-        // was some sort of AIDL buffer full event.
-        for (int i = 0; i < 2 && manager != null; i++) {
-            try {
-                ILowpanInterface iface = manager.getInterface(name);
-                if (iface != null) {
-                    ret = LowpanInterface.getInterfaceFromBinder(iface.asBinder());
+        try {
+            /* This synchronized block covers both branches of the enclosed
+             * if() statement in order to avoid a race condition. Two threads
+             * calling getInterface() with the same name would race to create
+             * the associated LowpanInterface object, creating two of them.
+             * Having the whole block be synchronized avoids that race.
+             */
+            synchronized (mInterfaceCache) {
+                if (mInterfaceCache.containsKey(name)) {
+                    iface = mInterfaceCache.get(name);
+
+                } else {
+                    ILowpanInterface ifaceService = mService.getInterface(name);
+
+                    if (ifaceService != null) {
+                        iface = getInterface(ifaceService);
+                    }
                 }
-                break;
-            } catch (RemoteException x) {
-                // In all of the cases when we get this exception, we reconnect and try again
-                mManager = null;
-                manager = getILowpanManager();
             }
+        } catch (RemoteException x) {
+            throw x.rethrowFromSystemServer();
         }
 
-        return ret;
+        return iface;
     }
 
     /**
@@ -160,23 +213,11 @@ public class LowpanManager {
      */
     @NonNull
     public String[] getInterfaceList() {
-        ILowpanManager manager = getILowpanManager();
-
-        // Maximum number of tries is two. We should only try
-        // more than once if our manager has died or there
-        // was some sort of AIDL buffer full event.
-        for (int i = 0; i < 2 && manager != null; i++) {
-            try {
-                return manager.getInterfaceList();
-            } catch (RemoteException x) {
-                // In all of the cases when we get this exception, we reconnect and try again
-                mManager = null;
-                manager = getILowpanManager();
-            }
+        try {
+            return mService.getInterfaceList();
+        } catch (RemoteException x) {
+            throw x.rethrowFromSystemServer();
         }
-
-        // Return empty list if we have no service.
-        return new String[0];
     }
 
     /**
@@ -189,55 +230,52 @@ public class LowpanManager {
             throws LowpanException {
         ILowpanManagerListener.Stub listenerBinder =
                 new ILowpanManagerListener.Stub() {
-                    public void onInterfaceAdded(ILowpanInterface lowpanInterface) {
-                        Runnable runnable =
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        cb.onInterfaceAdded(
-                                                LowpanInterface.getInterfaceFromBinder(
-                                                        lowpanInterface.asBinder()));
-                                    }
-                                };
+                    private Handler mHandler;
 
+                    {
                         if (handler != null) {
-                            handler.post(runnable);
+                            mHandler = handler;
+                        } else if (mLooper != null) {
+                            mHandler = new Handler(mLooper);
                         } else {
-                            runnable.run();
+                            mHandler = new Handler();
                         }
                     }
 
-                    public void onInterfaceRemoved(ILowpanInterface lowpanInterface) {
+                    @Override
+                    public void onInterfaceAdded(ILowpanInterface ifaceService) {
                         Runnable runnable =
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        cb.onInterfaceRemoved(
-                                                LowpanInterface.getInterfaceFromBinder(
-                                                        lowpanInterface.asBinder()));
+                                () -> {
+                                    LowpanInterface iface = getInterface(ifaceService);
+
+                                    if (iface != null) {
+                                        cb.onInterfaceAdded(iface);
                                     }
                                 };
 
-                        if (handler != null) {
-                            handler.post(runnable);
-                        } else {
-                            runnable.run();
-                        }
+                        mHandler.post(runnable);
+                    }
+
+                    @Override
+                    public void onInterfaceRemoved(ILowpanInterface ifaceService) {
+                        Runnable runnable =
+                                () -> {
+                                    LowpanInterface iface = getInterface(ifaceService);
+
+                                    if (iface != null) {
+                                        cb.onInterfaceRemoved(iface);
+                                    }
+                                };
+
+                        mHandler.post(runnable);
                     }
                 };
-        ILowpanManager manager = getILowpanManager();
-        if (manager != null) {
-            try {
-                manager.addListener(listenerBinder);
-            } catch (DeadObjectException x) {
-                mManager = null;
-                // Tickle the ILowpanManager instance, which might
-                // get us added back.
-                getILowpanManager();
-            } catch (Throwable x) {
-                LowpanException.throwAsPublicException(x);
-            }
+        try {
+            mService.addListener(listenerBinder);
+        } catch (RemoteException x) {
+            throw x.rethrowFromSystemServer();
         }
+
         synchronized (mListenerMap) {
             mListenerMap.put(Integer.valueOf(System.identityHashCode(cb)), listenerBinder);
         }
@@ -253,20 +291,23 @@ public class LowpanManager {
      *
      * @hide
      */
-    public void unregisterCallback(@NonNull Callback cb) throws AndroidException {
+    public void unregisterCallback(@NonNull Callback cb) {
         Integer hashCode = Integer.valueOf(System.identityHashCode(cb));
-        ILowpanManagerListener listenerBinder = mListenerMap.get(hashCode);
+        ILowpanManagerListener listenerBinder = null;
+
+        synchronized (mListenerMap) {
+            listenerBinder = mListenerMap.get(hashCode);
+            mListenerMap.remove(hashCode);
+        }
+
         if (listenerBinder != null) {
-            synchronized (mListenerMap) {
-                mListenerMap.remove(hashCode);
+            try {
+                mService.removeListener(listenerBinder);
+            } catch (RemoteException x) {
+                throw x.rethrowFromSystemServer();
             }
-            if (getILowpanManager() != null) {
-                try {
-                    mManager.removeListener(listenerBinder);
-                } catch (DeadObjectException x) {
-                    mManager = null;
-                }
-            }
+        } else {
+            throw new RuntimeException("Attempt to unregister an unknown callback");
         }
     }
 }
