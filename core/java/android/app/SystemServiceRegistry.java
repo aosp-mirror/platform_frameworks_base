@@ -83,6 +83,8 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
+import android.net.lowpan.ILowpanManager;
+import android.net.lowpan.LowpanManager;
 import android.net.wifi.IRttManager;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.IWifiScanner;
@@ -538,6 +540,16 @@ final class SystemServiceRegistry {
             public WallpaperManager createService(ContextImpl ctx) {
                 return new WallpaperManager(ctx.getOuterContext(),
                         ctx.mMainThread.getHandler());
+            }});
+
+        registerService(Context.LOWPAN_SERVICE, LowpanManager.class,
+                new CachedServiceFetcher<LowpanManager>() {
+            @Override
+            public LowpanManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(Context.LOWPAN_SERVICE);
+                ILowpanManager service = ILowpanManager.Stub.asInterface(b);
+                return new LowpanManager(ctx.getOuterContext(), service,
+                        ConnectivityThread.getInstanceLooper());
             }});
 
         registerService(Context.WIFI_SERVICE, WifiManager.class,
