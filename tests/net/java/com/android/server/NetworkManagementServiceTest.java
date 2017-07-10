@@ -16,16 +16,6 @@
 
 package com.android.server;
 
-import android.content.Context;
-import android.net.LinkAddress;
-import android.net.LocalSocket;
-import android.net.LocalServerSocket;
-import android.os.Binder;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import com.android.server.net.BaseNetworkObserver;
-import com.android.internal.util.test.BroadcastInterceptingContext;
-
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -33,14 +23,37 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.content.Context;
+import android.net.INetd;
+import android.net.LinkAddress;
+import android.net.LocalSocket;
+import android.net.LocalServerSocket;
+import android.os.BatteryStats;
+import android.os.Binder;
+import android.os.IBinder;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.internal.app.IBatteryStats;
+import com.android.server.NetworkManagementService.SystemServices;
+import com.android.server.net.BaseNetworkObserver;
+
 import java.io.IOException;
 import java.io.OutputStream;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for {@link NetworkManagementService}.
  */
-@LargeTest
-public class NetworkManagementServiceTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class NetworkManagementServiceTest {
 
     private static final String SOCKET_NAME = "__test__NetworkManagementServiceTest";
     private NetworkManagementService mNMService;
@@ -48,27 +61,46 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
     private LocalSocket mSocket;
     private OutputStream mOutputStream;
 
-    @Override
+    @Mock private Context mContext;
+    @Mock private IBatteryStats.Stub mBatteryStatsService;
+    @Mock private INetd.Stub mNetdService;
+
+    private final SystemServices mServices = new SystemServices() {
+        @Override
+        public IBinder getService(String name) {
+            switch (name) {
+                case BatteryStats.SERVICE_NAME:
+                    return mBatteryStatsService;
+                default:
+                    throw new UnsupportedOperationException("Unknown service " + name);
+            }
+        }
+        @Override
+        public void registerLocalService(NetworkManagementInternal nmi) {
+        }
+        @Override
+        public INetd getNetd() {
+            return mNetdService;
+        }
+    };
+
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-        // TODO: make this unnecessary. runtest might already make it unnecessary.
-        System.setProperty("dexmaker.dexcache", getContext().getCacheDir().toString());
+        MockitoAnnotations.initMocks(this);
 
         // Set up a sheltered test environment.
-        BroadcastInterceptingContext context = new BroadcastInterceptingContext(getContext());
         mServerSocket = new LocalServerSocket(SOCKET_NAME);
 
         // Start the service and wait until it connects to our socket.
-        mNMService = NetworkManagementService.create(context, SOCKET_NAME);
+        mNMService = NetworkManagementService.create(mContext, SOCKET_NAME, mServices);
         mSocket = mServerSocket.accept();
         mOutputStream = mSocket.getOutputStream();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         if (mSocket != null) mSocket.close();
         if (mServerSocket != null) mServerSocket.close();
-        super.tearDown();
     }
 
     /**
@@ -80,12 +112,13 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
     }
 
     private static <T> T expectSoon(T mock) {
-        return verify(mock, timeout(100));
+        return verify(mock, timeout(200));
     }
 
     /**
      * Tests that network observers work properly.
      */
+    @Test
     public void testNetworkObservers() throws Exception {
         BaseNetworkObserver observer = mock(BaseNetworkObserver.class);
         doReturn(new Binder()).when(observer).asBinder();  // Used by registerObserver.
@@ -143,22 +176,16 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
          * Interface class activity.
          */
 
-        sendMessage("613 IfaceClass active rmnet0");
-        expectSoon(observer).interfaceClassDataActivityChanged("rmnet0", true, 0);
+        sendMessage("613 IfaceClass active 1 1234 10012");
+        expectSoon(observer).interfaceClassDataActivityChanged("1", true, 1234);
 
-        sendMessage("613 IfaceClass active rmnet0 1234");
-        expectSoon(observer).interfaceClassDataActivityChanged("rmnet0", true, 1234);
+        sendMessage("613 IfaceClass idle 9 5678");
+        expectSoon(observer).interfaceClassDataActivityChanged("9", false, 5678);
 
-        sendMessage("613 IfaceClass idle eth0");
-        expectSoon(observer).interfaceClassDataActivityChanged("eth0", false, 0);
+        sendMessage("613 IfaceClass reallyactive 9 4321");
+        expectSoon(observer).interfaceClassDataActivityChanged("9", false, 4321);
 
-        sendMessage("613 IfaceClass idle eth0 1234");
-        expectSoon(observer).interfaceClassDataActivityChanged("eth0", false, 1234);
-
-        sendMessage("613 IfaceClass reallyactive rmnet0 1234");
-        expectSoon(observer).interfaceClassDataActivityChanged("rmnet0", false, 1234);
-
-        sendMessage("613 InterfaceClass reallyactive rmnet0");
+        sendMessage("613 InterfaceClass reallyactive 1");
         // Invalid group.
 
 
