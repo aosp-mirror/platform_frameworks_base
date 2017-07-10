@@ -573,7 +573,8 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private final NotificationDelegate mNotificationDelegate = new NotificationDelegate() {
+    @VisibleForTesting
+    final NotificationDelegate mNotificationDelegate = new NotificationDelegate() {
 
         @Override
         public void onSetDisabled(int status) {
@@ -3830,7 +3831,8 @@ public class NotificationManagerService extends SystemService {
         // notification was a summary and the new one isn't, or when the old
         // notification was a summary and its group key changed.
         if (oldIsSummary && (!isSummary || !oldGroup.equals(group))) {
-            cancelGroupChildrenLocked(old, callingUid, callingPid, null, false /* sendDelete */);
+            cancelGroupChildrenLocked(old, callingUid, callingPid, null, false /* sendDelete */,
+                    null);
         }
     }
 
@@ -4581,7 +4583,7 @@ public class NotificationManagerService extends SystemService {
                         boolean wasPosted = removeFromNotificationListsLocked(r);
                         cancelNotificationLocked(r, sendDelete, reason, wasPosted);
                         cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
-                                sendDelete);
+                                sendDelete, null);
                         updateLightsLocked();
                     } else {
                         // No notification was found, assume that it is snoozed and cancel it.
@@ -4652,7 +4654,6 @@ public class NotificationManagerService extends SystemService {
                         }
                         return true;
                     };
-
                     cancelAllNotificationsByListLocked(mNotificationList, callingUid, callingPid,
                             pkg, true /*nullPkgIndicatesUserSwitch*/, channelId, flagChecker,
                             false /*includeCurrentProfiles*/, userId, false /*sendDelete*/, reason,
@@ -4700,7 +4701,6 @@ public class NotificationManagerService extends SystemService {
             if (channelId != null && !channelId.equals(r.getChannel().getId())) {
                 continue;
             }
-
             if (canceledNotifications == null) {
                 canceledNotifications = new ArrayList<>();
             }
@@ -4712,7 +4712,7 @@ public class NotificationManagerService extends SystemService {
             final int M = canceledNotifications.size();
             for (int i = 0; i < M; i++) {
                 cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,
-                        listenerName, false /* sendDelete */);
+                        listenerName, false /* sendDelete */, flagChecker);
             }
             updateLightsLocked();
         }
@@ -4779,7 +4779,7 @@ public class NotificationManagerService extends SystemService {
     // Warning: The caller is responsible for invoking updateLightsLocked().
     @GuardedBy("mNotificationLock")
     private void cancelGroupChildrenLocked(NotificationRecord r, int callingUid, int callingPid,
-            String listenerName, boolean sendDelete) {
+            String listenerName, boolean sendDelete, FlagChecker flagChecker) {
         Notification n = r.getNotification();
         if (!n.isGroupSummary()) {
             return;
@@ -4793,15 +4793,15 @@ public class NotificationManagerService extends SystemService {
         }
 
         cancelGroupChildrenByListLocked(mNotificationList, r, callingUid, callingPid, listenerName,
-                sendDelete, true);
+                sendDelete, true, flagChecker);
         cancelGroupChildrenByListLocked(mEnqueuedNotifications, r, callingUid, callingPid,
-                listenerName, sendDelete, false);
+                listenerName, sendDelete, false, flagChecker);
     }
 
     @GuardedBy("mNotificationLock")
     private void cancelGroupChildrenByListLocked(ArrayList<NotificationRecord> notificationList,
             NotificationRecord parentNotification, int callingUid, int callingPid,
-            String listenerName, boolean sendDelete, boolean wasPosted) {
+            String listenerName, boolean sendDelete, boolean wasPosted, FlagChecker flagChecker) {
         final String pkg = parentNotification.sbn.getPackageName();
         final int userId = parentNotification.getUserId();
         final int reason = REASON_GROUP_SUMMARY_CANCELED;
@@ -4810,7 +4810,8 @@ public class NotificationManagerService extends SystemService {
             final StatusBarNotification childSbn = childR.sbn;
             if ((childSbn.isGroup() && !childSbn.getNotification().isGroupSummary()) &&
                     childR.getGroupKey().equals(parentNotification.getGroupKey())
-                    && (childR.getFlags() & Notification.FLAG_FOREGROUND_SERVICE) == 0) {
+                    && (childR.getFlags() & Notification.FLAG_FOREGROUND_SERVICE) == 0
+                    && (flagChecker == null || flagChecker.apply(childR.getFlags()))) {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),
                         childSbn.getTag(), userId, 0, 0, reason, listenerName);
                 notificationList.remove(i);
