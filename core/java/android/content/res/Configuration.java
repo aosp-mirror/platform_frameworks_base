@@ -1395,7 +1395,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if ((compareUndefined || delta.mRotation != ROTATION_UNDEFINED)
                 && mRotation != delta.mRotation) {
-            changed |= ActivityInfo.CONFIG_ORIENTATION;
+            changed |= ActivityInfo.CONFIG_ROTATION;
         }
         if ((compareUndefined || getScreenLayoutNoDirection(delta.screenLayout) !=
                 (SCREENLAYOUT_SIZE_UNDEFINED | SCREENLAYOUT_LONG_UNDEFINED))
