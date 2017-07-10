@@ -50,8 +50,8 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"Эч качан текшерилбесин"</item>
-    <item msgid="6042769699089883931">"DRM мазмунун гана текшерүү"</item>
-    <item msgid="9174900380056846820">"Ар дайым текшерүү"</item>
+    <item msgid="6042769699089883931">"DRM мазмуну гана текшерилсин"</item>
+    <item msgid="9174900380056846820">"Ар дайым текшерилсин"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"Эч качан HDCP текшерүү колдонулбасын"</item>

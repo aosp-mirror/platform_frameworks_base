@@ -137,7 +137,7 @@
     <item msgid="364670732877872677">"အကောင်းဆုံးကြိုးပမ်းမှု (ပေးပို့နှုန်း အလိုက်)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="8665206199209698501">"ပိတ်ပါ"</item>
+    <item msgid="8665206199209698501">"ပိတ်ရန်"</item>
     <item msgid="1593289376502312923">"64K"</item>
     <item msgid="487545340236145324">"256K"</item>
     <item msgid="2423528675294333831">"1M"</item>
@@ -145,13 +145,13 @@
     <item msgid="2803199102589126938">"16M"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="6089470720451068364">"ပိတ်ပါ"</item>
+    <item msgid="6089470720451068364">"ပိတ်ရန်"</item>
     <item msgid="4622460333038586791">"64K"</item>
     <item msgid="2212125625169582330">"256K"</item>
     <item msgid="1704946766699242653">"1M"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="6921048829791179331">"ပိတ်ပါ"</item>
+    <item msgid="6921048829791179331">"ပိတ်ရန်"</item>
     <item msgid="2969458029344750262">"မှတ်တမ်းယာယီကြားခံနယ်တစ်ခုလျှင် 64K"</item>
     <item msgid="1342285115665698168">"မှတ်တမ်းယာယီကြားခံနယ်တစ်ခုလျှင် 256K"</item>
     <item msgid="1314234299552254621">"မှတ်တမ်းယာယီကြားခံနယ်တစ်ခုလျှင် 1M"</item>
@@ -159,13 +159,13 @@
     <item msgid="5431354956856655120">"မှတ်တမ်းယာယီကြားခံနယ်တစ်ခုလျှင် 16M"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
-    <item msgid="1744840221860799971">"ပိတ်ပါ"</item>
+    <item msgid="1744840221860799971">"ပိတ်ရန်"</item>
     <item msgid="3054662377365844197">"အားလုံး"</item>
     <item msgid="688870735111627832">"ရေဒီယိုမှလွဲ၍ အားလုံး"</item>
     <item msgid="2850427388488887328">"ကာနယ်သာ"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="2216470072500521830">"ပိတ်ပါ"</item>
+    <item msgid="2216470072500521830">"ပိတ်ရန်"</item>
     <item msgid="172978079776521897">"မှတ်တမ်းသိမ်းဆည်းရန် လျာထားချက်များ အားလုံး"</item>
     <item msgid="3873873912383879240">"ရေဒီယို မှတ်တမ်းသိမ်းဆည်းရန်လျာထားချက်မှလွဲ၍ အားလုံး"</item>
     <item msgid="8489661142527693381">"ကာနယ်မှတ်တမ်းသိမ်းဆည်းရန် လျာထားချက်သာ"</item>
@@ -218,17 +218,17 @@
     <item msgid="1340692776955662664">"glGetError အမှားတက်လျှင်ခေါ်သောလုပ်ငန်းစဉ်"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="993742912147090253">"ပိတ်"</item>
+    <item msgid="993742912147090253">"ပိတ်ရန်"</item>
     <item msgid="675719912558941285">"စတုဂံမဟုတ်သော ဖောက်ရန်အပိုင်းကို အပြာရောင်ဖြင့်ဆွဲပါ"</item>
     <item msgid="1064373276095698656">"စမ်းသပ်ထားသော ပုံဆွဲရန်ညွှန်ကြားချက်များကို အစိမ်းရောင်ဖြင့် အသားပေး ဖော်ပြပါ"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"ပိတ်"</item>
+    <item msgid="2193584639058893150">"ပိတ်ရန်"</item>
     <item msgid="2751513398307949636">"ဖန်သားပြင်ပေါ်မှာ မျဉ်းတန်းကဲ့သို့"</item>
     <item msgid="2355151170975410323">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> ဖြင့်"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"ပိတ်"</item>
+    <item msgid="8190572633763871652">"ပိတ်ရန်"</item>
     <item msgid="7688197031296835369">"ရှိရင်းစွဲထက်ပိုသော ဧရိယာများကိုပြရန်"</item>
     <item msgid="2290859360633824369">"အရောင်ရောနှောသောဧရိယာများပြရန်"</item>
   </string-array>

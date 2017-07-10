@@ -101,7 +101,7 @@
     <string name="unknown" msgid="1592123443519355854">"未知"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"用户：<xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"已设置部分默认选项"</string>
-    <string name="launch_defaults_none" msgid="4241129108140034876">"未设置任何默认选项"</string>
+    <string name="launch_defaults_none" msgid="4241129108140034876">"没有默认操作"</string>
     <string name="tts_settings" msgid="8186971894801348327">"文字转语音设置"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"文字转语音 (TTS) 输出"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"语速"</string>
@@ -151,9 +151,9 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"此用户无权修改VPN设置"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"此用户无权修改网络共享设置"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"此用户无权修改接入点名称设置"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"USB调试"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB 调试"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"连接USB后启用调试模式"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"撤消USB调试授权"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"撤消 USB 调试授权"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"错误报告快捷方式"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"在电源菜单中显示用于提交错误报告的按钮"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"不锁定屏幕"</string>
@@ -204,9 +204,9 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"允许模拟位置"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"启用视图属性检查功能"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"始终开启移动数据网络，即使 WLAN 网络已开启（便于快速切换网络）。"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"是否允许USB调试？"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"是否允许 USB 调试？"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB 调试仅用于开发目的。该功能可用于在您的计算机和设备之间复制数据、在您的设备上安装应用（事先不发通知）以及读取日志数据。"</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"是否针对您之前授权的所有计算机撤消USB调试的访问权限？"</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"是否针对您之前授权的所有计算机撤消 USB 调试的访问权限？"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"允许开发设置？"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"这些设置仅适用于开发工作。一旦启用，会导致您的设备以及设备上的应用崩溃或出现异常。"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"通过USB验证应用"</string>
@@ -223,7 +223,7 @@
     <string name="debug_app_set" msgid="2063077997870280017">"调试应用：<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"选择应用"</string>
     <string name="no_application" msgid="2813387563129153880">"无"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"等待调试器"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"等待调试程序"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"调试应用会在执行前等待附加调试器"</string>
     <string name="telephony_monitor_switch" msgid="1764958220062121194">"电话监控器"</string>
     <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"电话监控器会在检测到电话/调制解调器功能存在问题时收集相关日志，并向用户发出通知，提醒用户提交错误报告"</string>

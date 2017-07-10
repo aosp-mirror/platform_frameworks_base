@@ -340,7 +340,7 @@
     <string name="disabled" msgid="9206776641295849915">"Onemogućeno"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Dozvoljeno"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Nije dozvoljeno"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Instalirajte nepozn. apl."</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Instaliranje nepoznatih aplikacija"</string>
     <string name="home" msgid="3256884684164448244">"Početna za Podešavanja"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

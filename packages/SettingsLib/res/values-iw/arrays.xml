@@ -152,11 +152,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"כבוי"</item>
-    <item msgid="2969458029344750262">"‏64K לכל מאגר יומן"</item>
-    <item msgid="1342285115665698168">"‏256K לכל מאגר יומן"</item>
-    <item msgid="1314234299552254621">"‏1M לכל מאגר יומן"</item>
-    <item msgid="3606047780792894151">"‏4M לכל מאגר יומן"</item>
-    <item msgid="5431354956856655120">"‏16M לכל מאגר יומן"</item>
+    <item msgid="2969458029344750262">"‏64K לכל מאגר של יומן רישום"</item>
+    <item msgid="1342285115665698168">"‏256K לכל מאגר של יומן רישום"</item>
+    <item msgid="1314234299552254621">"‏1M לכל מאגר של יומן רישום"</item>
+    <item msgid="3606047780792894151">"‏4M לכל מאגר של יומן רישום"</item>
+    <item msgid="5431354956856655120">"‏16M לכל מאגר של יומן רישום"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="1744840221860799971">"כבוי"</item>
