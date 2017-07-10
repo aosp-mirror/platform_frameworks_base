@@ -7158,6 +7158,10 @@ public final class Settings {
             VR_DISPLAY_MODE,
             NOTIFICATION_BADGING,
             QS_AUTO_ADDED_TILES,
+            SCREENSAVER_ENABLED,
+            SCREENSAVER_COMPONENTS,
+            SCREENSAVER_ACTIVATE_ON_DOCK,
+            SCREENSAVER_ACTIVATE_ON_SLEEP,
         };
 
         /**
