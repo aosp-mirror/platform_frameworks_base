@@ -1051,6 +1051,22 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="isolatedSplits" format="boolean" />
 
+    <!-- The classname of the classloader used to load the application's classes
+         from its APK. The APK in question can either be the 'base' APK or any
+         of the application's 'split' APKs if it's using a feature split.
+
+         <p>
+         The supported values for this attribute are
+         <code>dalvik.system.PathClassLoader</code> and
+         <code>dalvik.system.DelegateLastClassLoader</code>. If unspecified,
+         the default value of this attribute is <code>dalvik.system.PathClassLoader</code>.
+
+         If an unknown classloader is provided, a PackageParserException with cause
+         <code>PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED</code> will be
+         thrown and the app will not be installed.
+         -->
+    <attr name="classLoader" format="string" />
+
     <!-- If set to <code>true</code>, indicates to the platform that this APK is
          a 'feature' split and that it implicitly depends on the base APK. This distinguishes
          this split APK from a 'configuration' split, which provides resource overrides
@@ -1484,6 +1500,9 @@
             <!-- Apps which are primarily productivity apps, such as cloud storage or workplace apps. -->
             <enum name="productivity" value="7" />
         </attr>
+
+        <!-- Declares the kind of classloader this application's classes must be loaded with -->
+        <attr name="classLoader" />
 
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
