@@ -20,192 +20,387 @@ option optimize_for = LITE_RUNTIME;
 
 package aapt.pb;
 
+// A configuration description that wraps the binary form of the C++ class
+// aapt::ConfigDescription, with an added product definition.
 message ConfigDescription {
-	optional bytes data = 1;
-	optional string product = 2;
+  optional bytes data = 1;
+  optional string product = 2;
 }
 
+// A string pool that wraps the binary form of the C++ class android::ResStringPool.
 message StringPool {
-	optional bytes data = 1;
+  optional bytes data = 1;
 }
 
-message CompiledFile {
-	message Symbol {
-		optional string resource_name = 1;
-		optional uint32 line_no = 2;
-	}
-
-	optional string resource_name = 1;
-	optional ConfigDescription config = 2;
-	optional string source_path = 3;
-	repeated Symbol exported_symbols = 4;
-}
-
-message ResourceTable {
-	optional StringPool string_pool = 1;
-	optional StringPool source_pool = 2;
-	optional StringPool symbol_pool = 3;
-	repeated Package packages = 4;
-}
-
-message Package {
-	optional uint32 package_id = 1;
-	optional string package_name = 2;
-	repeated Type types = 3;
-}
-
-message Type {	
-	optional uint32 id = 1;
-	optional string name = 2;
-	repeated Entry entries = 3;
-}
-
-message SymbolStatus {
-	enum Visibility {
-		Unknown = 0;
-		Private = 1;
-		Public = 2;
-	}
-	optional Visibility visibility = 1;
-	optional Source source = 2;
-	optional string comment = 3;
-	optional bool allow_new = 4;
-}
-
-message Entry {
-	optional uint32 id = 1;
-	optional string name = 2;
-	optional SymbolStatus symbol_status = 3;
-	repeated ConfigValue config_values = 4;
-}
-
-message ConfigValue {
-	optional ConfigDescription config = 1;
-	optional Value value = 2;
-}
-
+// Developer friendly source file information for an entity in the resource table.
 message Source {
-	optional uint32 path_idx = 1;
-	optional uint32 line_no = 2;
-	optional uint32 col_no = 3;
+  // The index of the string path within the source string pool of a ResourceTable.
+  optional uint32 path_idx = 1;
+
+  optional uint32 line_no = 2;
+  optional uint32 col_no = 3;
 }
 
+// The top level message representing an external resource file (layout XML, PNG, etc).
+message CompiledFile {
+  message Symbol {
+    // The name of the symbol (in the form package:type/name).
+    optional string resource_name = 1;
+
+    // Line number in the file at which this symbol is defined. For debug use.
+    optional uint32 line_no = 2;
+  }
+
+  // The name of the resource (in the form package:type/name).
+  optional string resource_name = 1;
+
+  // The configuration for which the resource is defined.
+  optional ConfigDescription config = 2;
+
+  // The filesystem path to where the source file originated.
+  // Mainly used to display helpful error messages.
+  optional string source_path = 3;
+
+  // Any symbols this file auto-generates/exports (eg. @+id/foo in an XML file).
+  repeated Symbol exported_symbols = 4;
+}
+
+// Top level message representing a resource table.
+message ResourceTable {
+  // The string pool containing string values (strings that actually end up in the binary ARSC
+  // file) referenced throughout the resource table.
+  optional StringPool string_pool = 1;
+
+  // The string pool containing source paths referenced throughout the resource table. This does
+  // not end up in the final binary ARSC file.
+  optional StringPool source_pool = 2;
+
+  // The string pool containing the names of unresolved symbols. This does not end up in the final
+  // binary ARSC file. Unresolved symbols are just resource names that haven't had a resource ID
+  // assigned to them, therefore can't be referenced by resource ID.
+  optional StringPool symbol_pool = 3;
+
+  // Resource definitions corresponding to an Android package.
+  repeated Package packages = 4;
+}
+
+// Defines resources for an Android package.
+message Package {
+  // The package ID of this package, in the range [0x00, 0xff].
+  // The ID 0x00 is reserved for shared libraries, or when the ID is assigned at run-time.
+  // The ID 0x01 is reserved for the 'android' package (framework).
+  // The ID range [0x02, 0x7f) is reserved for auto-assignment to shared libraries at run-time.
+  // The ID 0x7f is reserved for the application package.
+  // IDs > 0x7f are reserved for the application as well and are treated as feature splits.
+  optional uint32 package_id = 1;
+
+  // The Java compatible Android package name of the app.
+  optional string package_name = 2;
+
+  // The series of types defined by the package.
+  repeated Type types = 3;
+}
+
+// A set of resources grouped under a common type. Such types include string, layout, xml, dimen,
+// attr, etc. This maps to the second part of a resource identifier in Java (R.type.entry).
+message Type {
+  // The ID of the type. This may be 0, which indicates no ID is set.
+  optional uint32 id = 1;
+
+  // The name of the type. This corresponds to the 'type' part of a full resource name of the form
+  // package:type/entry. The set of legal type names is listed in Resource.cpp.
+  optional string name = 2;
+
+  // The entries defined for this type.
+  repeated Entry entries = 3;
+}
+
+// The status of a symbol/entry. This contains information like visibility (public/private),
+// comments, and whether the entry can be overridden.
+message SymbolStatus {
+  // The visibility of the resource outside of its package.
+  enum Visibility {
+    // No visibility was explicitly specified. This is typically treated as private.
+    // The distinction is important when two separate R.java files are generated: a public and
+    // private one. An unknown visibility, in this case, would cause the resource to be omitted
+    // from either R.java.
+    Unknown = 0;
+
+    // A resource was explicitly marked as private. This means the resource can not be accessed
+    // outside of its package unless the @*package:type/entry notation is used (the asterisk being
+    // the private accessor). If two R.java files are generated (private + public), the resource
+    // will only be emitted to the private R.java file.
+    Private = 1;
+
+    // A resource was explicitly marked as public. This means the resource can be accessed
+    // from any package, and is emitted into all R.java files, public and private.
+    Public = 2;
+  }
+
+  optional Visibility visibility = 1;
+
+  // The path at which this entry's visibility was defined (eg. public.xml).
+  optional Source source = 2;
+
+  // The comment associated with the <public> tag.
+  optional string comment = 3;
+
+  // Whether the symbol can be merged into another resource table without there being an existing
+  // definition to override. Used for overlays and set to true when <add-resource> is specified.
+  optional bool allow_new = 4;
+}
+
+// An entry declaration. An entry has a full resource ID that is the combination of package ID,
+// type ID, and its own entry ID. An entry on its own has no value, but values are defined for
+// various configurations/variants.
+message Entry {
+  // The ID of this entry. Together with the package ID and type ID, this forms a full resource ID
+  // of the form 0xPPTTEEEE, where PP is the package ID, TT is the type ID, and EEEE is the entry
+  // ID.
+  optional uint32 id = 1;
+
+  // The name of this entry. This corresponds to the 'entry' part of a full resource name of the
+  // form package:type/entry.
+  optional string name = 2;
+
+  // The symbol status of this entry, which includes visibility information.
+  optional SymbolStatus symbol_status = 3;
+
+  // The set of values defined for this entry, each corresponding to a different
+  // configuration/variant.
+  repeated ConfigValue config_values = 4;
+}
+
+// A Configuration/Value pair.
+message ConfigValue {
+  optional ConfigDescription config = 1;
+  optional Value value = 2;
+}
+
+// The generic meta-data for every value in a resource table.
+message Value {
+  // Where the value was defined.
+  optional Source source = 1;
+
+  // Any comment associated with the value.
+  optional string comment = 2;
+
+  // Whether the value can be overridden.
+  optional bool weak = 3;
+
+  // If the value is an Item, this is set.
+  optional Item item = 4;
+
+  // If the value is a CompoundValue, this is set.
+  optional CompoundValue compound_value = 5;
+}
+
+// An Item is an abstract type. It represents a value that can appear inline in many places, such
+// as XML attribute values or on the right hand side of style attribute definitions. The concrete
+// type is one of the types below. Only one can be set.
+message Item {
+  optional Reference ref = 1;
+  optional String str = 2;
+  optional RawString raw_str = 3;
+  optional FileReference file = 4;
+  optional Id id = 5;
+  optional Primitive prim = 6;
+}
+
+// A CompoundValue is an abstract type. It represents a value that is a made of other values.
+// These can only usually appear as top-level resources. The concrete type is one of the types
+// below. Only one can be set.
+message CompoundValue {
+  optional Attribute attr = 1;
+  optional Style style = 2;
+  optional Styleable styleable = 3;
+  optional Array array = 4;
+  optional Plural plural = 5;
+}
+
+// A value that is a reference to another resource. This reference can be by name or resource ID.
 message Reference {
-	enum Type {
-		Ref = 0;
-		Attr = 1;
-	}
-	optional Type type = 1;
-	optional uint32 id = 2;
-	optional uint32 symbol_idx = 3;
-	optional bool private = 4;
+  enum Type {
+    // A plain reference (@package:type/entry).
+    Ref = 0;
+
+    // A reference to a theme attribute (?package:type/entry).
+    Attr = 1;
+  }
+
+  optional Type type = 1;
+
+  // The resource ID (0xPPTTEEEE) of the resource being referred.
+  optional uint32 id = 2;
+
+  // If the resource ID is not resolved, the index into the symbol string pool where the name of
+  // the reference is stored. The symbol string pool is located at the top level ResourceTable
+  // message.
+  optional uint32 symbol_idx = 3;
+
+  // Whether this reference is referencing a private resource (@*package:type/entry).
+  optional bool private = 4;
 }
 
+// A value that represents an ID. This is just a placeholder, as ID values are used to occupy a
+// resource ID (0xPPTTEEEE) as a unique identifier. Their value is unimportant.
 message Id {
 }
 
+// A value that is a string.
 message String {
-	optional uint32 idx = 1;
+  // The index into the values string pool, located at the top level ResourceTable message.
+  optional uint32 idx = 1;
 }
 
+// A value that is a raw string, which is unescaped/uninterpreted. This is typically used to
+// represent the value of a style attribute before the attribute is compiled and the set of
+// allowed values is known.
 message RawString {
-	optional uint32 idx = 1;
+  // The index into the values string pool, located at the top level ResourceTable message.
+  optional uint32 idx = 1;
 }
 
+// A value that is a reference to an external entity, like an XML file or a PNG.
 message FileReference {
-	optional uint32 path_idx = 1;
+  // The index into the values string pool, located at the top level ResourceTable message. This
+  // represents the path to the file within an APK (typically res/type-config/entry.ext).
+  optional uint32 path_idx = 1;
 }
 
+// A value that represents a primitive data type (float, int, boolean, etc.).
+// Corresponds to the fields (type/data) of the C struct android::Res_value.
 message Primitive {
-	optional uint32 type = 1;
-	optional uint32 data = 2;
+  optional uint32 type = 1;
+  optional uint32 data = 2;
 }
 
+// A value that represents an XML attribute and what values it accepts.
 message Attribute {
-	message Symbol {
-		optional Source source = 1;
-		optional string comment = 2;
-		optional Reference name = 3;
-		optional uint32 value = 4;
-	}
-	optional uint32 format_flags = 1;
-	optional int32 min_int = 2;
-	optional int32 max_int = 3;
-	repeated Symbol symbols = 4;
+  // A Symbol used to represent an enum or a flag.
+  message Symbol {
+    // Where the enum/flag item was defined.
+    optional Source source = 1;
+
+    // Any comments associated with the enum or flag.
+    optional string comment = 2;
+
+    // The name of the enum/flag as a reference. Enums/flag items are generated as ID resource
+    // values.
+    optional Reference name = 3;
+
+    // The value of the enum/flag.
+    optional uint32 value = 4;
+  }
+
+  // A bitmask of types that this XML attribute accepts. Corresponds to the flags in the C struct
+  // android::ResTable_map.
+  optional uint32 format_flags = 1;
+
+  // The smallest integer allowed for this XML attribute. Only makes sense if the format includes
+  // TYPE_INTEGER.
+  optional int32 min_int = 2;
+
+  // The largest integer allowed for this XML attribute. Only makes sense if the format includes
+  // TYPE_INTEGER.
+  optional int32 max_int = 3;
+
+  // The set of enums/flags defined in this attribute. Only makes sense if the format includes
+  // either TYPE_ENUM or TYPE_FLAGS. Having both is an error.
+  repeated Symbol symbols = 4;
 }
 
+// A value that represents a style.
 message Style {
-	message Entry {
-		optional Source source = 1;
-		optional string comment = 2;
-		optional Reference key = 3;
-		optional Item item = 4;
-	}
+  // An XML attribute/value pair defined in the style.
+  message Entry {
+    // Where the entry was defined.
+    optional Source source = 1;
 
-	optional Reference parent = 1;
-	optional Source parent_source = 2;
-	repeated Entry entries = 3;
+    // Any comments associated with the entry.
+    optional string comment = 2;
+
+    // A reference to the XML attribute.
+    optional Reference key = 3;
+
+    // The Item defined for this XML attribute.
+    optional Item item = 4;
+  }
+
+  // The optinal style from which this style inherits attributes.
+  optional Reference parent = 1;
+
+  // The source file information of the parent inheritance declaration.
+  optional Source parent_source = 2;
+
+  // The set of XML attribute/value pairs for this style.
+  repeated Entry entries = 3;
 }
 
+// A value that represents a <declare-styleable> XML resource. These are not real resources and
+// only end up as Java fields in the generated R.java. They do not end up in the binary ARSC file.
 message Styleable {
-	message Entry {
-		optional Source source = 1;
-		optional string comment = 2;
-		optional Reference attr = 3;
-	}
-	repeated Entry entries = 1;
+  // An attribute defined for this styleable.
+  message Entry {
+    // Where the attribute was defined within the <declare-styleable> block.
+    optional Source source = 1;
+
+    // Any comments associated with the declaration.
+    optional string comment = 2;
+
+    // The reference to the attribute.
+    optional Reference attr = 3;
+  }
+
+  // The set of attribute declarations.
+  repeated Entry entries = 1;
 }
 
+// A value that represents an array of resource values.
 message Array {
-	message Entry {
-		optional Source source = 1;
-		optional string comment = 2;
-		optional Item item = 3;
-	}
-	repeated Entry entries = 1;
+  // A single element of the array.
+  message Entry {
+    // Where the element was defined.
+    optional Source source = 1;
+
+    // Any comments associated with the element.
+    optional string comment = 2;
+
+    // The value assigned to this element.
+    optional Item item = 3;
+  }
+
+  // The list of array elements.
+  repeated Entry entries = 1;
 }
 
+// A value that represents a string and its many variations based on plurality.
 message Plural {
-	enum Arity {
-		Zero = 0;
-		One = 1;
-		Two = 2;
-		Few = 3;
-		Many = 4;
-		Other = 5;
-	}
-		
-	message Entry {
-		optional Source source = 1;
-		optional string comment = 2;
-		optional Arity arity = 3;
-		optional Item item = 4;
-	}
-	repeated Entry entries = 1;
-}
+  // The arity of the plural.
+  enum Arity {
+    Zero = 0;
+    One = 1;
+    Two = 2;
+    Few = 3;
+    Many = 4;
+    Other = 5;
+  }
 
-message Item {
-	optional Reference ref = 1;
-	optional String str = 2;
-	optional RawString raw_str = 3;
-	optional FileReference file = 4;
-	optional Id id = 5;
-	optional Primitive prim = 6;
-}
+  // The plural value for a given arity.
+  message Entry {
+    // Where the plural was defined.
+    optional Source source = 1;
 
-message CompoundValue {
-	optional Attribute attr = 1;
-	optional Style style = 2;
-	optional Styleable styleable = 3;
-	optional Array array = 4;
-	optional Plural plural = 5;
-}
+    // Any comments associated with the plural.
+    optional string comment = 2;
 
-message Value {
-	optional Source source = 1;
-	optional string comment = 2;
-	optional bool weak = 3;
-	
-	optional Item item = 4;
-	optional CompoundValue compound_value = 5;	
+    // The arity of the plural.
+    optional Arity arity = 3;
+
+    // The value assigned to this plural.
+    optional Item item = 4;
+  }
+
+  // The set of arity/plural mappings.
+  repeated Entry entries = 1;
 }
