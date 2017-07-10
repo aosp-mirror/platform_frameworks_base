@@ -6715,7 +6715,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mActiveUids.put(proc.uid, uidRec);
             EventLogTags.writeAmUidRunning(uidRec.uid);
             noteUidProcessState(uidRec.uid, uidRec.curProcState);
-            enqueueUidChangeLocked(uidRec, -1, UidRecord.CHANGE_ACTIVE);
         }
         proc.uidRecord = uidRec;
 
@@ -22807,8 +22806,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (int i=mActiveUids.size()-1; i>=0; i--) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
             int uidChange = UidRecord.CHANGE_PROCSTATE;
-            if (uidRec.setProcState != uidRec.curProcState
-                    || uidRec.setWhitelist != uidRec.curWhitelist) {
+            if (uidRec.curProcState != ActivityManager.PROCESS_STATE_NONEXISTENT
+                    && (uidRec.setProcState != uidRec.curProcState
+                           || uidRec.setWhitelist != uidRec.curWhitelist)) {
                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                         "Changes in " + uidRec + ": proc state from " + uidRec.setProcState
                         + " to " + uidRec.curProcState + ", whitelist from " + uidRec.setWhitelist
@@ -22829,7 +22829,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     mConstants.BACKGROUND_SETTLE_TIME);
                         }
                     }
-                    if (!uidRec.setIdle) {
+                    if (uidRec.idle && !uidRec.setIdle) {
                         uidChange = UidRecord.CHANGE_IDLE;
                     }
                 } else {
