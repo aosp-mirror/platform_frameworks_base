@@ -25,6 +25,7 @@
 
 #include <limits.h>
 
+#include <android-base/chrono_utils.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <utils/Timers.h>
@@ -125,22 +126,34 @@ static void nativeReleaseSuspendBlocker(JNIEnv *env, jclass /* clazz */, jstring
 static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
     if (gPowerModule) {
         if (enable) {
-            ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(true) while turning screen on");
+            android::base::Timer t;
             gPowerModule->setInteractive(gPowerModule, true);
+            if (t.duration() > 20ms) {
+                ALOGD("Excessive delay in setInteractive(true) while turning screen on");
+            }
         } else {
-            ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(false) while turning screen off");
+            android::base::Timer t;
             gPowerModule->setInteractive(gPowerModule, false);
+            if (t.duration() > 20ms) {
+                ALOGD("Excessive delay in setInteractive(false) while turning screen off");
+            }
         }
     }
 }
 
 static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
     if (enable) {
-        ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_enable() while turning screen off");
+        android::base::Timer t;
         autosuspend_enable();
+        if (t.duration() > 100ms) {
+            ALOGD("Excessive delay in autosuspend_enable() while turning screen off");
+        }
     } else {
-        ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_disable() while turning screen on");
+        android::base::Timer t;
         autosuspend_disable();
+        if (t.duration() > 100ms) {
+            ALOGD("Excessive delay in autosuspend_disable() while turning screen on");
+        }
     }
 }
 

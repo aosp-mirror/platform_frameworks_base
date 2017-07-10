@@ -20,6 +20,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 
+#include <android-base/chrono_utils.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
 #include <hardware/hardware.h>
@@ -137,8 +138,9 @@ static void setLight_native(JNIEnv* /* env */, jobject /* clazz */, jlong ptr,
     state.brightnessMode = brightnessMode;
 
     {
-        ALOGD_IF_SLOW(50, "Excessive delay setting light");
+        android::base::Timer t;
         devices->lights[light]->set_light(devices->lights[light], &state);
+        if (t.duration() > 50ms) ALOGD("Excessive delay setting light");
     }
 }
 
