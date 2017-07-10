@@ -191,7 +191,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 // Set the current spell checker if there is one or more spell checkers
                 // available. In this case, "sci" is the first one in the available spell
                 // checkers.
-                setCurrentSpellCheckerLocked(sci.getId());
+                setCurrentSpellCheckerLocked(sci);
             }
         }
     }
@@ -230,9 +230,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                         change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE
                         // Package modified
                         || isPackageModified(packageName)) {
-                    sci = findAvailSpellCheckerLocked(packageName);
-                    if (sci != null) {
-                        setCurrentSpellCheckerLocked(sci.getId());
+                    SpellCheckerInfo availSci = findAvailSpellCheckerLocked(packageName);
+                    // Set the spell checker settings if different than before
+                    if (availSci != null && !availSci.getId().equals(sci.getId())) {
+                        setCurrentSpellCheckerLocked(availSci);
                     }
                 }
             }
@@ -643,15 +644,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    private void setCurrentSpellCheckerLocked(String sciId) {
+    private void setCurrentSpellCheckerLocked(SpellCheckerInfo sci) {
+        final String sciId = sci.getId();
         if (DBG) {
             Slog.w(TAG, "setCurrentSpellChecker: " + sciId);
-        }
-        if (TextUtils.isEmpty(sciId) || !mSpellCheckerMap.containsKey(sciId)) return;
-        final SpellCheckerInfo currentSci = getCurrentSpellChecker(null);
-        if (currentSci != null && currentSci.getId().equals(sciId)) {
-            // Do nothing if the current spell checker is same as new spell checker.
-            return;
         }
         final long ident = Binder.clearCallingIdentity();
         try {
