@@ -1317,7 +1317,7 @@
          permission.
          [This is only used if config_enableUpdateableTimeZoneRules and
          config_timeZoneRulesUpdateTrackingEnabled are true.] -->
-    <string name="config_timeZoneRulesUpdaterPackage" translateable="false"></string>
+    <string name="config_timeZoneRulesUpdaterPackage" translateable="false">com.android.timezone.updater</string>
 
     <!-- The package of the time zone rules data application. Expected to be configured
          by OEMs to reference their own priv-app APK package.
