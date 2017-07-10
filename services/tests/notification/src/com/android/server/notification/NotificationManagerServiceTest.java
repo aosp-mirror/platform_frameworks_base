@@ -86,7 +86,6 @@ import com.android.server.lights.LightsManager;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class NotificationManagerServiceTest extends NotificationTestCase {
-    private static final long WAIT_FOR_IDLE_TIMEOUT = 2;
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private final int uid = Binder.getCallingUid();
     private NotificationManagerService mNotificationManagerService;
@@ -110,6 +109,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     private AudioManager mAudioManager;
     @Mock
     ActivityManager mActivityManager;
+
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
     @Mock

@@ -595,7 +595,7 @@ public class NotificationUsageStats {
         }
 
         public boolean isAlertRateLimited() {
-            boolean limited = alertRate.isRateLimited(SystemClock.elapsedRealtime());
+            boolean limited = alertRate.shouldRateLimitAlert(SystemClock.elapsedRealtime());
             if (limited) {
                 numAlertViolations++;
             }
