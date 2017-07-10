@@ -21,6 +21,8 @@ import android.os.SystemClock;
 import android.util.Base64;
 import android.util.TimeUtils;
 
+import java.util.Arrays;
+
 import com.android.internal.location.nano.GnssLogsProto.GnssLog;
 
 /**
@@ -40,6 +42,7 @@ public class GnssMetrics {
     locationFailureStatistics = new Statistics();
     timeToFirstFixSecStatistics = new Statistics();
     positionAccuracyMeterStatistics = new Statistics();
+    topFourAverageCn0Statistics = new Statistics();
     reset();
   }
 
@@ -95,6 +98,27 @@ public class GnssMetrics {
     return;
   }
 
+  /*
+  * Logs CN0 when at least 4 SVs are available
+  *
+  */
+  public void logCn0(float[] cn0s, int numSv) {
+    if (numSv < 4) {
+      return;
+    }
+    float[] cn0Array = Arrays.copyOf(cn0s, numSv);
+    Arrays.sort(cn0Array);
+    if (cn0Array[numSv - 4] > 0.0) {
+      double top4AvgCn0 = 0.0;
+      for (int i = numSv - 4; i < numSv; i++) {
+        top4AvgCn0 += (double) cn0Array[i];
+      }
+      top4AvgCn0 /= 4;
+      topFourAverageCn0Statistics.addItem(top4AvgCn0);
+    }
+    return;
+  }
+
   /**
    * Dumps GNSS metrics as a proto string
    * @return
@@ -116,6 +140,12 @@ public class GnssMetrics {
       msg.meanPositionAccuracyMeters = (int) positionAccuracyMeterStatistics.getMean();
       msg.standardDeviationPositionAccuracyMeters
           = (int) positionAccuracyMeterStatistics.getStandardDeviation();
+    }
+    if (topFourAverageCn0Statistics.getCount() > 0) {
+      msg.numTopFourAverageCn0Processed = topFourAverageCn0Statistics.getCount();
+      msg.meanTopFourAverageCn0DbHz = topFourAverageCn0Statistics.getMean();
+      msg.standardDeviationTopFourAverageCn0DbHz
+          = topFourAverageCn0Statistics.getStandardDeviation();
     }
     String s = Base64.encodeToString(GnssLog.toByteArray(msg), Base64.DEFAULT);
     reset();
@@ -154,6 +184,14 @@ public class GnssMetrics {
           positionAccuracyMeterStatistics.getMean()).append("\n");
       s.append("  Position accuracy standard deviation (m): ").append(
           positionAccuracyMeterStatistics.getStandardDeviation()).append("\n");
+    }
+    s.append("  Number of CN0 reports: ").append(
+        topFourAverageCn0Statistics.getCount()).append("\n");
+    if (topFourAverageCn0Statistics.getCount() > 0) {
+      s.append("  Top 4 Avg CN0 mean (dB-Hz): ").append(
+          topFourAverageCn0Statistics.getMean()).append("\n");
+      s.append("  Top 4 Avg CN0 standard deviation (dB-Hz): ").append(
+          topFourAverageCn0Statistics.getStandardDeviation()).append("\n");
     }
     s.append("GNSS_KPI_END").append("\n");
     return s.toString();
@@ -211,6 +249,9 @@ public class GnssMetrics {
   /** Position accuracy statistics */
   private Statistics positionAccuracyMeterStatistics;
 
+  /** Top 4 average CN0 statistics */
+  private Statistics topFourAverageCn0Statistics;
+
   /**
    * Resets GNSS metrics
    */
@@ -221,6 +262,7 @@ public class GnssMetrics {
     locationFailureStatistics.reset();
     timeToFirstFixSecStatistics.reset();
     positionAccuracyMeterStatistics.reset();
+    topFourAverageCn0Statistics.reset();
     return;
   }
 }
