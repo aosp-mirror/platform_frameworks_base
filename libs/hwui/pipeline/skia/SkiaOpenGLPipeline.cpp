@@ -303,6 +303,13 @@ sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThr
         return nullptr;
     }
 
+    auto colorSpace = info.colorSpace();
+    bool convertToSRGB = false;
+    if (colorSpace && (!colorSpace->isSRGB())) {
+        isSupported = false;
+        convertToSRGB = true;
+    }
+
     SkBitmap bitmap;
     if (isSupported) {
         bitmap = skBitmap;
@@ -310,7 +317,7 @@ sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThr
         bitmap.allocPixels(SkImageInfo::MakeN32(info.width(), info.height(), info.alphaType(),
                 nullptr));
         bitmap.eraseColor(0);
-        if (info.colorType() == kRGBA_F16_SkColorType) {
+        if (info.colorType() == kRGBA_F16_SkColorType || convertToSRGB) {
             // Drawing RGBA_F16 onto ARGB_8888 is not supported
             skBitmap.readPixels(bitmap.info().makeColorSpace(SkColorSpace::MakeSRGB()),
                     bitmap.getPixels(), bitmap.rowBytes(), 0, 0);
