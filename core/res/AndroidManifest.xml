@@ -958,18 +958,18 @@
     <!-- ====================================================================== -->
 
     <!-- @hide Allows an application to Access UCE-Presence.
-         <p>Protection level: dangerous
+         <p>Protection level: signature|privileged
     -->
     <permission android:name="android.permission.ACCESS_UCE_PRESENCE_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
-        android:protectionLevel="signatureOrSystem"/>
+        android:protectionLevel="signature|privileged"/>
 
     <!-- @hide Allows an application to Access UCE-OPTIONS.
-         <p>Protection level: dangerous
+         <p>Protection level: signature|privileged
     -->
     <permission android:name="android.permission.ACCESS_UCE_OPTIONS_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
-        android:protectionLevel="signatureOrSystem"/>
+        android:protectionLevel="signature|privileged"/>
 
 
 
@@ -2210,7 +2210,7 @@
 
     <!-- Allows an application to clear the caches of all installed
          applications on the device.
-         <p>Protection level: system|signature
+         <p>Protection level: signature|privileged
     -->
     <permission android:name="android.permission.CLEAR_APP_CACHE"
         android:protectionLevel="signature|privileged" />
@@ -2571,7 +2571,7 @@
 
     <!-- Must be required by a {@link android.service.wallpaper.WallpaperService},
          to ensure that only the system can bind to it.
-         <p>Protection level: system|signature
+         <p>Protection level: signature|privileged
     -->
     <permission android:name="android.permission.BIND_WALLPAPER"
         android:protectionLevel="signature|privileged" />
@@ -2608,7 +2608,7 @@
 
     <!-- Must be required by a {@link android.media.tv.TvInputService}
          to ensure that only the system can bind to it.
-         <p>Protection level: signature
+         <p>Protection level: signature|privileged
     -->
     <permission android:name="android.permission.BIND_TV_INPUT"
         android:protectionLevel="signature|privileged" />
@@ -3365,7 +3365,7 @@
     <!-- The system process that is allowed to bind to services in carrier apps will
          have this permission. Carrier apps should use this permission to protect
          their services that only the system is allowed to bind to.
-         <p>Protection level: system|signature
+         <p>Protection level: signature|privileged
     -->
     <permission android:name="android.permission.BIND_CARRIER_SERVICES"
         android:label="@string/permlab_bindCarrierServices"
