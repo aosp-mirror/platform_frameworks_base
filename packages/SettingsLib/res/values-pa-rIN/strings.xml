@@ -87,9 +87,9 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ਹਟਾਏ ਗਏ ਐਪਸ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ਹਟਾਏ ਗਏ ਐਪਸ ਅਤੇ ਉਪਭੋਗਤਾ"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB ਟੀਥਰਿੰਗ"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB ਟੈਦਰਿੰਗ"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ਪੋਰਟੇਬਲ ਹੌਟਸਪੌਟ"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth ਟੀਥਰਿੰਗ"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth ਟੈਦਰਿੰਗ"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ਟੀਥਰਿੰਗ"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"ਟੀਥਰਿੰਗ &amp; ਪੋਰਟੇਬਲ ਹੌਟਸਪੌਟ"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"ਸਾਰੀਆਂ ਕੰਮ ਐਪਾਂ"</string>
@@ -115,7 +115,7 @@
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"ਇਹ ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਇੰਜਣ ਉਹ ਸਾਰਾ ਟੈਕਸਟ ਇਕੱਤਰ ਕਰਨ ਵਿੱਚ ਸਮਰੱਥ ਹੋ ਸਕਦਾ ਹੈ, ਜੋ ਬੋਲਿਆ ਜਾਏਗਾ, ਨਿੱਜੀ ਡੈਟਾ ਸਮੇਤ ਜਿਵੇਂ ਪਾਸਵਰਡ ਅਤੇ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ। ਇਹ <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ਇੰਜਣ ਤੋਂ ਆਉਂਦਾ ਹੈ। ਕੀ ਇਸ ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਇੰਜਣ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"ਇਸ ਭਾਸ਼ਾ ਲਈ ਟੈਕਸਟ-ਟੂ-ਸਪੀਚ ਆਊਟਪੁਟ ਲਈ ਇੱਕ ਚਾਲੂ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨ ਦੀ ਲੋੜ ਹੈ।"</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"ਇਹ ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਦਾ ਇੱਕ ਉਦਾਹਰਨ ਹੈ"</string>
-    <string name="tts_status_title" msgid="7268566550242584413">"ਡਿਫੌਲਟ ਭਾਸ਼ਾ ਸਥਿਤੀ"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਭਾਸ਼ਾ ਸਥਿਤੀ"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> ਪੂਰੀ ਤਰ੍ਹਾਂ ਸਮਰਥਿਤ ਹੈ"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> ਲਈ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨ ਲੁੜੀਂਦਾ ਹੈ"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
@@ -163,7 +163,7 @@
     <string name="mock_location_app" msgid="7966220972812881854">"ਮੌਕ ਸਥਾਨ ਐਪ ਚੁਣੋ"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"ਕੋਈ ਵੀ ਮੌਕ ਸਥਾਨ ਐਪ ਸੈੱਟ ਨਹੀਂ ਕੀਤੀ ਗਈ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"ਮੌਕ ਸਥਾਨ ਐਪ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="debug_networking_category" msgid="7044075693643009662">"ਨੈਟਵਰਕਿੰਗ"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"ਨੈੱਟਵਰਕਿੰਗ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ਵਾਇਰਲੈਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi ਵਰਬੋਸ ਲੌਗਿੰਗ ਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ਸੈਲਿਊਲਰ ਹੈਂਡਓਵਰ ਲਈ ਅਗਰੈਸਿਵ Wi‑Fi"</string>
@@ -263,7 +263,7 @@
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ਨਵਾਂ ਪਾਸਵਰਡ ਅਤੇ ਪੁਸ਼ਟੀ ਮੇਲ ਨਹੀਂ ਖਾਂਦੀ"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ਬੈਕਅਪ ਪਾਸਵਰਡ ਸੈਟ ਕਰਨ ਵਿੱਚ ਅਸਫਲਤਾ"</string>
   <string-array name="color_mode_names">
-    <item msgid="2425514299220523812">"ਚਮਕੀਲਾ (ਡਿਫੌਲਟ)"</item>
+    <item msgid="2425514299220523812">"ਚਮਕੀਲਾ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
     <item msgid="8446070607501413455">"ਕੁਦਰਤੀ"</item>
     <item msgid="6553408765810699025">"ਸਟੈਂਡਰਡ"</item>
   </string-array>
@@ -286,8 +286,8 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ਤਬਦੀਲ ਕਰੋ ..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ਫ਼ਾਈਲ ਪਹਿਲਾਂ ਤੋਂ ਇਨਕ੍ਰਿਪਟਡ ਹੈ"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"ਫ਼ਾਈਲ ਆਧਾਰਿਤ ਇਨਕ੍ਰਿਪਸ਼ਨ ਵਿੱਚ ਤਬਦੀਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"ਡੈਟਾ ਪਾਰਟੀਸ਼ਨ ਨੂੰ ਫ਼ਾਈਲ ਆਧਾਰਿਤ ਇਨਕ੍ਰਿਪਸ਼ਨ ਵਿੱਚ ਤਬਦੀਲ ਕਰੋ\n !!ਚੇਤਾਵਨੀ!! ਇਹ ਤੁਹਾਡੇ ਸਾਰੇ ਡੈਟੇ ਨੂੰ ਸਾਫ਼ ਕਰ ਦੇਵੇਗਾ\n ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਅਲਫਾ ਹੈ, ਅਤੇ ਸ਼ਾਇਦ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।\n ਜਾਰੀ ਰੱਖਣ ਲਈ \'ਮਿਟਾਓ ਅਤੇ ਤਬਦੀਲ ਕਰੋ...\' ਨੂੰ ਦਬਾਓ।"</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"ਮਿਟਾਓ ਅਤੇ ਤਬਦੀਲ ਕਰੋ..."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"ਡੈਟਾ ਪਾਰਟੀਸ਼ਨ ਦਾ ਫ਼ਾਈਲ ਆਧਾਰਿਤ ਇਨਕ੍ਰਿਪਸ਼ਨ ਵਿੱਚ ਰੁਪਾਂਤਰਣ ਕਰੋ\n !!ਚੇਤਾਵਨੀ!! ਇਹ ਤੁਹਾਡੇ ਸਾਰੇ ਡੈਟੇ ਨੂੰ ਮਿਟਾ ਦੇਵੇਗਾ\n ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਪ੍ਰਯੋਗਿਕ ਹੈ, ਅਤੇ ਸ਼ਾਇਦ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।\n ਜਾਰੀ ਰੱਖਣ ਲਈ \'ਮਿਟਾਓ ਅਤੇ ਰੁਪਾਂਤਰਣ ਕਰੋ...\' ਨੂੰ ਦਬਾਓ।"</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"ਮਿਟਾਓ ਅਤੇ ਰੁਪਾਂਤਰਣ ਕਰੋ..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"ਤਸਵੀਰ ਰੰਗ ਮੋਡ"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"ਅਯੋਗ ਬਣਾਇਆ"</string>
@@ -335,9 +335,9 @@
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> ਬਾਕੀ"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"ਛੋਟਾ"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</string>
-    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"ਵੱਡਾ"</string>
-    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"ਥੋੜ੍ਹਾ ਵੱਡਾ"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ਸਭ ਤੋਂ ਵੱਡਾ"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"ਵੱਡੀ"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"ਥੋੜ੍ਹਾ ਵੱਡੀ"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ਸਭ ਤੋਂ ਵੱਡੀ"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ਮਦਦ ਅਤੇ ਪ੍ਰਤੀਕਰਮ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ਮੀਨੂ"</string>

@@ -111,7 +111,7 @@
     <string name="tts_play_example_title" msgid="7094780383253097230">"Entzun adibide bat"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Erreproduzitu hizketa-sintesiaren demostrazio laburra"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Instalatu ahotsaren datuak"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalatu hizketaren sintesirako behar diren ahots-datuak"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalatu hizketaren sintesirako behar diren ahotsaren datuak"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Hizketaren sintesi-motorrak idazten duzun testu guztia bil dezake, pasahitzak eta kreditu-txarteleko zenbakiak bezalako datu pertsonalak barne. <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> motorrak egin du eskaera. Hizketaren sintesi-motor hori erabili nahi duzu?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Testua ahots bihurtzeko eginbidea erabiltzeko, hizkuntza honek sareko konexioa behar du."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Hizketa-sintesiaren adibide bat da hau"</string>
@@ -312,7 +312,7 @@
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> haririk gabe guztiz kargatu arte"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Ezezaguna"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Kargatzea"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Kargatzen"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"KA bidez kargatzen"</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Kargatzen"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB bidez kargatzen"</string>

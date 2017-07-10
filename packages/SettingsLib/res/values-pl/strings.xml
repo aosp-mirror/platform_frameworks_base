@@ -282,7 +282,7 @@
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacja WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ustaw implementację WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ta opcja nie jest już obsługiwana. Spróbuj ponownie."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Przekształć na szyfrowanie plików"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Szyfrowanie plików"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Przekształć…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Pliki są już zaszyfrowane"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Przekształcanie na szyfrowanie plików"</string>

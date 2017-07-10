@@ -100,7 +100,7 @@
     <string name="launch_defaults_none" msgid="4241129108140034876">"ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ಪಠ್ಯದಿಂದ ಧ್ವನಿಗೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"ಧ್ವನಿಗೆ-ಪಠ್ಯದ ಔಟ್‌ಪುಟ್‌"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"ಧ್ವನಿಯ ದರ"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"ಧ್ವನಿಯ ಪ್ರಮಾಣ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ಪಠ್ಯವನ್ನು ಹೇಳಿದ ವೇಗ"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ಪಿಚ್"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"ಸಂಯೋಜಿತ ಧ್ವನಿಯ ಟೋನ್ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತದೆ"</string>
@@ -182,8 +182,8 @@
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"ಸಾಧನದಲ್ಲಿ ನಿರಂತರವಾಗಿ ಸಂಗ್ರಹಿಸಲು ಲಾಗ್ ಬಫರ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB ಕಾನ್ಫಿಗರೇಶನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB ಕಾನ್ಫಿಗರೇಶನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="allow_mock_location" msgid="2787962564578664888">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸು"</string>
-    <string name="allow_mock_location_summary" msgid="317615105156345626">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸು"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸಿ"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ವೀಕ್ಷಣೆ ಆಟ್ರಿಬ್ಯೂಟ್ ಪರಿಶೀಲನೆ"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ವೈ-ಫೈ ಸಕ್ರಿಯವಾಗಿರುವಾಗಲೂ, ಯಾವಾಗಲೂ ಮೊಬೈಲ್‌ ಡೇಟಾ ಸಕ್ರಿಯವಾಗಿರಿಸಿ (ವೇಗವಾಗಿ ನೆಟ್‌ವರ್ಕ್‌ ಬದಲಾಯಿಸಲು)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
@@ -213,7 +213,7 @@
     <string name="debug_monitoring_category" msgid="7640508148375798343">"ಪರಿವೀಕ್ಷಣೆ ಮಾಡುವಿಕೆ"</string>
     <string name="strict_mode" msgid="1938795874357830695">"ಸ್ಟ್ರಿಕ್ಟ್‌‌ ಮೋಡ್ ಸಕ್ರಿಯ"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮುಖ್ಯ ಥ್ರೆಡ್‌ನಲ್ಲಿ ದೀರ್ಘ ಕಾರ್ಯಾಚರಣೆ ನಿರ್ವಹಿಸಿದಾಗ ಪರದೆಯನ್ನು ಫ್ಲ್ಯಾಶ್ ಮಾಡು"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"ಪಾಯಿಂಟರ್ ಸ್ಥಾನ"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"ಪಾಯಿಂಟರ್ ಸ್ಥಳ"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"ಪ್ರಸ್ತುತ ಸ್ಪರ್ಶ ಡೇಟಾ ತೋರಿಸುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
     <string name="show_touches" msgid="2642976305235070316">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"ಟ್ಯಾಪ್‌ಗಳಿಗೆ ದೃಶ್ಯ ಪ್ರತಿಕ್ರಿಯೆ ತೋರಿಸು"</string>
@@ -279,15 +279,15 @@
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ಈಗ ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="enable_webview_multiprocess" msgid="3352660896640797330">"ಬಹುಪ್ರಕ್ರಿಯೆ WebView"</string>
     <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView ರೆಂಡರರ್‌‌‌ಗಳನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿ ರನ್‌ ಮಾಡಿ"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆ"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ಹೊಂದಿಸಿ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ಈ ಆಯ್ಕೆಯು ಇನ್ನು ಮುಂದೆ ಮಾನ್ಯವಾಗಿರುವುದಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ಫೈಲ್ ಎನ್‌ಕ್ರಿಪ್ಶನ್‌ಗೆ ಪರಿವರ್ತಿಸು"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ಪರಿವರ್ತಿಸು…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ಫೈಲ್ ಈಗಾಗಲೇ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"ಫೈಲ್ ಆಧಾರಿತ ಎನ್‌ಕ್ರಿಪ್ಶನ್‌ಗೆ ಪರಿವರ್ತಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"ಡೇಟಾ ವಿಭಜನೆಯನ್ನು ಫೈಲ್ ಆಧಾರಿತ ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಆಗಿ ಪರಿವರ್ತಿಸಿ.\n !!ಎಚ್ಚರಿಕೆ!! ಇದು ನಿಮ್ಮ ಎಲ್ಲ ಡೇಟಾವನ್ನು ಅಳಿಸುತ್ತದೆ.\n ಈ ವೈಶಿಷ್ಟ್ಯವು ಆಲ್ಫಾ ಆಗಿರುತ್ತದೆ ಮತ್ತು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದೆ ಇರಬಹುದು.\n ಮುಂದುವರಿಸಲು \'ಅಳಿಸು ಮತ್ತು ಪರಿವರ್ತಿಸು…\' ಒತ್ತಿರಿ."</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"ಅಳಿಸು ಮತ್ತು ಪರಿವರ್ತಿಸು…"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"ಡೇಟಾ ವಿಭಜನೆಯನ್ನು ಫೈಲ್ ಆಧಾರಿತ ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಆಗಿ ಪರಿವರ್ತಿಸಿ.\n !!ಎಚ್ಚರಿಕೆ!! ಇದು ನಿಮ್ಮ ಎಲ್ಲ ಡೇಟಾವನ್ನು ಅಳಿಸಿತ್ತದೆ.\n ಈ ವೈಶಿಷ್ಟ್ಯವು ಆಲ್ಫಾ ಆಗಿರುತ್ತದೆ ಮತ್ತು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದೆ ಇರಬಹುದು.\n ಮುಂದುವರಿಸಲು \'ಅಳಿಸಿ ಮತ್ತು ಪರಿವರ್ತಿಸು…\' ಒತ್ತಿರಿ."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"ಅಳಿಸಿ ಮತ್ತು ಪರಿವರ್ತಿಸು…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"ಚಿತ್ರ ಬಣ್ಣದ ಮೋಡ್"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB ಬಳಸಿ"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>

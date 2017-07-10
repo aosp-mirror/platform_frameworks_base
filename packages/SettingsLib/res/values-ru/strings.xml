@@ -48,7 +48,7 @@
     <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Профиль HSP/HFP"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Профиль OPP"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Профиль HID"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Интернет-доступ"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Доступ к Интернету"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Обмен контактами"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Использовать для обмена контактами"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Профиль PAN"</string>
@@ -70,12 +70,12 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Использовать для аудиоустройства телефона"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Используется для передачи файлов"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Использовать для ввода"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Подключить"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ПОДКЛЮЧИТЬ"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Добавить"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ДОБАВИТЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Отмена"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Сопряжение обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
-    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\", так как введен неверный PIN-код или пароль."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не удалось установить сопряжение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не удалось установить сопряжение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\", так как введен неверный PIN-код или пароль."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Не удается установить соединение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает сопряжение."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi выключен"</string>
@@ -149,12 +149,12 @@
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Этот пользователь не может изменять настройки точки доступа"</string>
     <string name="enable_adb" msgid="7982306934419797485">"Отладка по USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Включить режим отладки при подключении к компьютеру по USB"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Запретить доступ для USB-отладки"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Отозвать доступ для USB-отладки"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Отчет об ошибке"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Показывать в меню кнопку для отправки отчета об ошибке"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Не выключать экран"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Во время зарядки экран будет всегда включен"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Включить журнал трансляции операций HCI Bluetooth"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Включить журнал HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Сохранять все пакеты HCI Bluetooth в файле"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Заводская разблокировка"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Разрешить разблокировку загрузчика ОС"</string>
@@ -186,13 +186,13 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Разрешить использование фиктивных местоположений"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Включить проверку атрибутов"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не отключать передачу данных по мобильной сети даже при активном Wi-Fi-подключении (для быстрого переключения между сетями)."</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Разрешить отладку USB?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Разрешить отладку по USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отладка по USB – это режим, который позволяет использовать ваше устройство как внешний накопитель: перемещать файлы (с компьютера и на компьютер), напрямую устанавливать приложения, а также просматривать системные журналы."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Запретить доступ к USB-отладке для всех компьютеров, которым он был разрешен?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Изменение настроек"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Только для разработчиков. Изменение этих настроек может привести к сбоям или неправильной работе устройства и приложений."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Установка через USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Проверка безопасности приложений, устанавливаемых через ADB/ADT"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Проверять приложения при установке"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Выполнять проверку безопасности приложений при установке через ADB/ADT"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Отключить абсолютный уровень громкости Bluetooth при возникновении проблем на удаленных устройствах, например при слишком громком звучании или невозможности контролировать настройку."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локальный терминальный доступ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Разрешить терминальный доступ к локальной оболочке"</string>
@@ -206,19 +206,19 @@
     <string name="no_application" msgid="2813387563129153880">"Нет"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Подождите, пока подключится отладчик"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Приложение ожидает подключения отладчика"</string>
-    <string name="debug_input_category" msgid="1811069939601180246">"Ввод текста"</string>
-    <string name="debug_drawing_category" msgid="6755716469267367852">"Рисование"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Ввод"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Отрисовка"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Аппаратное ускорение визуализации"</string>
     <string name="media_category" msgid="4388305075496848353">"Мультимедиа"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Мониторинг"</string>
-    <string name="strict_mode" msgid="1938795874357830695">"Включен строгий режим"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Строгий режим"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Подсвечивать экран во время длительных операций"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Отображать касания"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Визуализировать на экране нажатия и жесты"</string>
     <string name="show_touches" msgid="2642976305235070316">"Визуальный отклик"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Показывать места нажатия на экране"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Показ. обнов. поверхности"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Подсвечивать окна полностью при их обновлении"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Подсвечивать поверхности окон при обновлении"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Показывать обнов. экрана"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Подсвечивать области экрана при отрисовке с GPU"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Показ. аппаратные обновл."</string>
@@ -231,29 +231,29 @@
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Откл. передачу аудио (USB)"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Откл. автом. маршрутизацию на внеш. USB-устройства"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Показывать границы элементов"</string>
-    <string name="debug_layout_summary" msgid="2001775315258637682">"Показывать границы клипа, поля и т. д."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Написание справа налево"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Показывать границы обрезки, поля и т. п."</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Отразить интерфейс"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Включить написание справа налево для всех языков"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU-ускорение"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Всегда использовать GPU для двухмерного рисования"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Включить 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Включить 4x MSAA в приложениях OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Отладить операции непрямоугольного усечения"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Запись времени работы GPU"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Профилировать GPU-отрисовку"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Анимация окон"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Анимация переходов"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Длительность анимации"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Эмуляция доп. экранов"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Приложения"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Не сохранять активности"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Вытеснение фоновых Activity"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Удалять сводку действий после их завершения"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Лимит фоновых процессов"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Все ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Уведомлять о том, что приложение не отвечает"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Разрешить сохранение на внешние накопители"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Разрешает сохранение приложений на внешних накопителях независимо от значений манифеста"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Разрешить сохранение приложений на внешних накопителях (независимо от значений в манифесте)"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Изменение размера в многооконном режиме"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Разрешить изменение размера в многооконном режиме (независимо от значений манифеста)"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Разрешить изменение размера окон в многооконном режиме (независимо от значений в манифесте)"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Разрешить создание окон произвольной формы"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Включить экспериментальную функцию создания окон произвольной формы"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Пароль для резервного копирования"</string>
@@ -277,8 +277,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Включено. Нажмите, чтобы отключить."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Работающие приложения"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Просмотр и управление работающими приложениями"</string>
-    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Многопроцессорный WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Выполнять обработчики WebView отдельно"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Многопроцессный WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Запускать обработчики WebView в отдельных процессах"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Сервис WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Настройки сервиса WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Вариант недействителен. Повторите попытку."</string>

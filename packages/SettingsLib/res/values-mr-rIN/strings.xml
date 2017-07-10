@@ -192,7 +192,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"विकास सेटिंग्जला अनुमती द्यायची?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"या सेटिंग्जचा हेतू फक्त विकास करण्याच्या वापरासाठी आहे. त्यामुळे आपले डिव्हाइस आणि त्यावरील अनुप्रयोग विघटित होऊ शकतात किंवा गैरवर्तन करू शकतात."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB वरील अॅप्स सत्यापित करा"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानीकारक वर्तनासाठी ADB/ADT द्वारे स्थापित अॅप्स तपासा."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक वर्तनासाठी ADB/ADT द्वारे स्थापित अॅप्स तपासा."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"दूरस्थ डिव्हाइसेसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटुथ संपूर्ण आवाज वैशिष्ट्य अक्षम करते."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानिक टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानिक शेल प्रवेश देणारा टर्मिनल अॅप सक्षम करा"</string>

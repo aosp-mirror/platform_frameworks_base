@@ -53,7 +53,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Користи за споделување контакти"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Споделување конекција на интернет"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"Порака за пристап"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Пристап до СИМ"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Пристап до SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Поврзан со аудио на медиуми"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Поврзан со аудио на телефон"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Поврзан со сервер за пренос на датотеки"</string>
@@ -65,7 +65,7 @@
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Споделување локална конекција на интернет со уред"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Користи за пристап на интернет"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Користи за карта"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Користете се пристап до СИМ"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Користете се пристап до SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Користи за аудио на медиуми"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Користи за аудио на телефон"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Користи за пренос на датотеки"</string>
@@ -87,7 +87,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Оперативен систем Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Отстранети апликации"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Отстранети апликации и корисници"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Поврзување со УСБ"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Поврзување со USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Преносл. точка на пристап"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Поврзување со Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Поврзување"</string>
@@ -149,7 +149,7 @@
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Поставките за името на пристапната точка не се достапни за овој корисник"</string>
     <string name="enable_adb" msgid="7982306934419797485">"Отстранување грешки на USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Режим на отстранување грешки кога е поврзано USB"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Отповикај овластувања за отстранување грешки од УСБ"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Отповикај овластувања за отстранување грешки од USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Кратенка за извештај за грешка"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Прикажи копче во менито за вклучување за да се направи извештај за грешка"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Остани во активен режим"</string>
@@ -180,18 +180,18 @@
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Кога веќе не го следиме постојаниот дневник, мора да ги избришеме податоците на дневникот што се наоѓаат на вашиот уред."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"Зачувувај податоци на дневникот"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Изберете привремена меморија на евиденција што ќе се користи постојано на уредот"</string>
-    <string name="select_usb_configuration_title" msgid="2649938511506971843">"Изберете конфигурација за УСБ"</string>
-    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Изберете конфигурација за УСБ"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"Изберете конфигурација за USB"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Изберете конфигурација за USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Овозможи лажни локации"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Овозможи лажни локации"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Овозможете проверка на атрибутот на приказот"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Секогаш држи го активен мобилниот интернет, дури и при активно Wi-Fi (за брзо префрлување мрежа)."</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Овозможи отстранување грешки на УСБ?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"Отстранувањето грешки на УСБ е наменето само за целите на развој. Користете го за копирање податоци меѓу вашиот компјутер и вашиот уред, за инсталирање апликации на вашиот уред без известување и за читање евиденција на податоци."</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Отповикај пристап кон отстранување грешка од УСБ од сите претходно овластени компјутери?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Овозможи отстранување грешки на USB?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Отстранувањето грешки на USB е наменето само за целите на развој. Користете го за копирање податоци меѓу вашиот компјутер и вашиот уред, за инсталирање апликации на вашиот уред без известување и за читање евиденција на податоци."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Отповикај пристап кон отстранување грешка од USB од сите претходно овластени компјутери?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Дозволи подесувања за развој?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Овие подесувања се наменети само за употреба за развој. Тие може да предизвикаат уредот и апликациите во него да се расипат или да се однесуваат необично."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Потврди апликации преку УСБ"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Потврди апликации преку USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Провери апликации инсталирани преку ADB/ADT за штетно однесување."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Ја оневозможува карактеристиката за апсолутна јачина на звук преку Bluetooth во случај кога ќе настанат проблеми со далечинските уреди, како на пр., неприфатливо силен звук или недоволна контрола."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локален терминал"</string>
@@ -228,8 +228,8 @@
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Секогаш користи GPU за составување екран"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Симулирај простор на бои"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Овозможи траги на OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Исклучи УСБ-пренасочување"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Исклучи автоматско пренасочување до УСБ-аудиоуреди"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Исклучи USB-пренасочување"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Исклучи автоматско пренасочување до USB-аудиоуреди"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Прикажи граници на слој"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Прикажи граници на клип, маргини, итн."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Сила на RTL за насока на слој"</string>
@@ -315,7 +315,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Се полни"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Полнење на струја"</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Се полни"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Полнење преку УСБ"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Полнење преку USB"</string>
     <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Се полни"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Безжично полнење"</string>
     <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Се полни"</string>

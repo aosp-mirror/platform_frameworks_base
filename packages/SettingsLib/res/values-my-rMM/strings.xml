@@ -78,7 +78,7 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ပင်နံပါတ် သို့မဟုတ် ဖြတ်သန်းခွင့်ကီးမမှန်ကန်သောကြောင့်<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ။"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်ဆက်သွယ်မရပါ"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်တွဲချိတ်ရန် ပယ်ချခံရသည်"</string>
-    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi  မရှိ"</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi  ပိတ်ထားသည်"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi  ချိတ်ဆက်ထားမှု မရှိပါ"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi  ၁ ဘားရှိ"</string>
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi  ၂ ဘား"</string>
@@ -87,9 +87,9 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android စနစ်"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ဖယ်ရှားထားသော အက်ပ်များ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ဖယ်ရှားထားသော အပလီကေးရှင်းနှင့် သုံးစွဲသူများ"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USBမှတဆင့်ချိတ်ဆက်ခြင်း"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB သုံး၍ချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ရွေ့လျားနိုင်သောဟော့စပေါ့"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ဘလူးတုသ်တဆင့်ပြန်ချိတ်ဆက်"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ဘလူးတုသ်သုံးချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"တဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"တဆင့်ချိတ်ဆက်ခြင်း၊ ဟော့စပေါ့"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"အလုပ်သုံးအက်ပ်များအားလုံး"</string>
@@ -139,7 +139,7 @@
   </string-array>
     <string name="choose_profile" msgid="8229363046053568878">"ပရိုဖိုင်ရွေးရန်"</string>
     <string name="category_personal" msgid="1299663247844969448">"ကိုယ်ရေး"</string>
-    <string name="category_work" msgid="8699184680584175622">"အလုပ်အကိုင်"</string>
+    <string name="category_work" msgid="8699184680584175622">"အလုပ်"</string>
     <string name="development_settings_title" msgid="215179176067683667">"ဆော့ဝဲလ်ရေးသူ၏ ရွေးချယ်မှုများ"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"တီထွင်သူများ ရွေးစရာကို ဖွင့်ပါ"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"အပလီကေးရှင်းတိုးတက်မှုအတွက် ရွေးချယ်မှုကိုသတ်မှတ်သည်"</string>
@@ -163,7 +163,7 @@
     <string name="mock_location_app" msgid="7966220972812881854">"တည်နေရာအတုပြု အက်ပ်ရွေးရန်"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"တည်နေရာအတုပြ အက်ပ်သတ်မှတ်ထားခြင်းမရှိပါ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"တည်နေရာအတုပြ အက်ပ်- <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="debug_networking_category" msgid="7044075693643009662">"ကွန်ရက်လုပ်ငန်း"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"ချိတ်ဆက်ဆောင်ရွက်ခြင်း"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Verbose မှတ်တမ်းတင်ခြင်းအား ဖွင့်မည်"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ထိရောက်သည့် Wi‑Fi မှ ဆဲလ်လူလာ လွှဲပြောင်းမှု"</string>
@@ -197,7 +197,7 @@
     <string name="enable_terminal_title" msgid="95572094356054120">"လိုကယ်တာမီနယ်"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"local shell အသုံးပြုခွင့်ကမ်းလှမ်းသော တာမင်နယ်အပလီကေးရှင်းဖွင့်ပါ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP စစ်ဆေးမှု"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCPစစ်ဆေးခြင်းလုပ်ဆောင်မှုကို သတ်မှတ်မည်"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP စစ်ဆေးပုံကို သတ်မှတ်မည်"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"အမှားရှာဖွေဖယ်ရှားခြင်း"</string>
     <string name="debug_app" msgid="8349591734751384446">"အမှားရှာသည့်အပလီကေးရှင်းရွေးချယ်ရန်"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"အမှားရှာသည့်အပလီကေးရှင်းတခုမှ မသတ်မှတ်ထားပါ"</string>
@@ -296,7 +296,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomaly (အပြာ-အဝါ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"အရောင်ပြင်ဆင်မှု"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ဒီအင်္ဂါရပ်မှာ စမ်းသပ်မှု ဖြစ်၍ လုပ်ကိုင်မှုကို အကျိုးသက်ရောက်နိုင်သည်။"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ဤဝန်ဆောင်မှုမှာ စမ်းသပ်အဆင့်သာဖြစ်၍ လုပ်ဆောင်မှုအားနည်းနိုင်သည်။"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"ခန့်မှန်းခြေ <xliff:g id="TIME">%1$s</xliff:g> ကျန်ပါသည်"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ကျန်သည်"</string>

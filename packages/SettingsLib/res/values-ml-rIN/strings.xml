@@ -272,7 +272,7 @@
     <item msgid="8280754435979370728">"നമ്മൾ കാണുന്നത് പോലെയുള്ള സ്വാഭാവിക വർണ്ണങ്ങൾ"</item>
     <item msgid="5363960654009010371">"ഡിജിറ്റൽ ഉള്ളടക്കത്തിനായി വർണ്ണങ്ങൾ ഒപ്റ്റിമൈസ് ചെയ്തു"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"നിഷ്‌ക്രിയ ആപ്പ്‌സ്"</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"നിഷ്‌ക്രിയ ആപ്പുകൾ"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"നിഷ്‌ക്രിയം. മാറ്റുന്നതിനു ടാപ്പുചെയ്യുക."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"സജീവം. മാറ്റുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ"</string>
@@ -303,13 +303,13 @@
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - ഏകദേശം <xliff:g id="TIME">%2$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - പൂർണ്ണമായും ചാർജ്ജാകുന്നതിന്, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - ഫുൾ ചാർജാകാൻ, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - AC-യിൽ പൂർണ്ണമായും ചാർജ്ജാകുന്നതിന്, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - AC-യിൽ ഫുൾ ചാർജാകാൻ, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - USB വഴി പൂർണ്ണമായും ചാർജ്ജാകുന്നതിന്, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - USB വഴി ഫുൾ ചാർജാകാൻ, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - വയർലെസ് വഴി പൂർണ്ണമായും ചാർജ്ജാകുന്നതിന്, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - വയർലെസ് വഴി ഫുൾ ചാർജാകാൻ, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"അജ്ഞാതം"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ചാർജ്ജുചെയ്യുന്നു"</string>

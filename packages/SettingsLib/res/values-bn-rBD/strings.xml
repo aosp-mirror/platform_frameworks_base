@@ -25,7 +25,7 @@
     <string name="wifi_remembered" msgid="4955746899347821096">"সংরক্ষিত"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"অক্ষম হয়েছে"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP কনফিগারেশনের ব্যর্থতা"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi সংযোগের ব্যর্থতা"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"ওয়াই ফাই সংযোগের ব্যর্থতা"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"প্রমাণীকরণ সমস্যা"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"পরিসরের মধ্যে নয়"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"কোনো ইন্টারনেট অ্যাক্সেস শনাক্ত হয়নি, স্বয়ংক্রিয়ভাবে পুনরায় সংযোগ স্থাপন করবে না৷"</string>
@@ -78,12 +78,12 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ভুল পিন বা পাস কী দেওয়ার কারণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সঙ্গে যুক্ত করা যায়নি।"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সঙ্গে যোগাযোগ করতে পারবেন না।"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"যুক্ত করা <xliff:g id="DEVICE_NAME">%1$s</xliff:g> প্রত্যাখ্যান করেছে।"</string>
-    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi বন্ধ৷"</string>
-    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wifi এর সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
-    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifi এ একটি দণ্ড৷"</string>
-    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi এ দুইটি দণ্ড৷"</string>
-    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi এ তিনটি দণ্ড৷"</string>
-    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wifi এ সম্পূর্ণ সিগন্যাল৷"</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"ওয়াই ফাই বন্ধ৷"</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"ওয়াই ফাই এর সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"ওয়াই ফাই এ একটি দণ্ড৷"</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"ওয়াই ফাই এ দুইটি দণ্ড৷"</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"ওয়াই ফাই এ তিনটি দণ্ড৷"</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"ওয়াই ফাই এ সম্পূর্ণ সিগন্যাল৷"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"সরানো অ্যাপ্লিকেশানগুলি"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"সরানো অ্যাপ্লিকেশানগুলি এবং ব্যবহারকারীগণ"</string>
@@ -100,7 +100,7 @@
     <string name="launch_defaults_none" msgid="4241129108140034876">"কোনো ডিফল্ট সেট করা নেই"</string>
     <string name="tts_settings" msgid="8186971894801348327">"পাঠ্য থেকে ভাষ্য আউটপুট সেটিংস"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"লেখিত-থেকে-ভাষ্য"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"ভাষ্য হার"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"কথা বলার হার"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"যে গতিতে পাঠ্য উচ্চারিত হয়"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"পিচ"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"সিন্থেসাইজ করা ভাষ্যের স্বরকে প্রভাবিত করে"</string>
@@ -167,7 +167,7 @@
     <string name="wifi_display_certification" msgid="8611569543791307533">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং সক্ষম করুন"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ওয়াই-ফাই থেকে সেলুলারে তৎপর পরিবর্তন"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা Wifi রোম স্ক্যানকে অনুমতি দিন"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা ওয়াই ফাই রোম স্ক্যানকে অনুমতি দিন"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"সেলুলার ডেটা সর্বদাই সক্রিয় থাকে"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>

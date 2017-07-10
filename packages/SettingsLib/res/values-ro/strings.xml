@@ -257,7 +257,7 @@
     <string name="enable_freeform_support" msgid="1461893351278940416">"Activați ferestrele cu formă liberă"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Activați compatibilitatea pentru ferestrele experimentale cu formă liberă."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Parolă copie rez. desktop"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"În prezent, copiile de rezervă complete pe desktop nu sunt protejate"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"În prezent, backupurile complete pe desktop nu sunt protejate"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Atingeți ca să modificați sau să eliminați parola pentru backupurile complete pe desktop"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"A fost setată o parolă de rezervă nouă"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Parola nouă și confirmarea acesteia nu se potrivesc."</string>
@@ -286,7 +286,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Convertiți…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Criptarea bazată pe sistemul de fișiere este finalizată"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Se face conversia la criptarea bazată pe sistemul de fișiere"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Faceți conversia partiției de date la criptarea bazată pe sistemul de fișiere. \n !!Avertisment!! Astfel, toate datele dvs. vor fi șterse.\n Aceasta este o funcție în versiune alpha și este posibil să nu funcționeze corect.\n Apăsați pe „Ștergeți și convertiți…” pentru a continua."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Faceți conversia partiției de date la criptarea bazată pe sistemul de fișiere. \n AVERTISMENT! Astfel, toate datele dvs. vor fi șterse.\n Aceasta este o funcție în versiune alpha și este posibil să nu funcționeze corect.\n Apăsați pe „Ștergeți și convertiți…” pentru a continua."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Ștergeți și convertiți…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Modul de culori pentru imagini"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Folosiți sRGB"</string>
@@ -303,13 +303,13 @@
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> – timp rămas: aproximativ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – timp rămas: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> până la încărcare completă"</string>
+    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> până la încărcarea completă"</string>
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> până la încărcare completă la c.a."</string>
+    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> până la încărcarea completă la c.a."</string>
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> până la încărcare completă prin USB"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> până la încărcarea completă prin USB"</string>
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> până la încărcare completă wireless"</string>
+    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> până la încărcarea completă wireless"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Necunoscut"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Încarcă"</string>

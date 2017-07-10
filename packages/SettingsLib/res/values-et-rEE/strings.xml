@@ -89,7 +89,7 @@
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Eemaldatud rakendused ja kasutajad"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB jagamine"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Kantav tööpunkt"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetoothi jagamine"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Jagamine Bluetoothiga"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Jagamine"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Jagam. ja kant. kuumkoht"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Kõik töörakendused"</string>
@@ -110,8 +110,8 @@
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Määrab räägitud teksti keelespetsiifilise hääle"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Kuulake näidet"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Esita lühike kõnesünteesi demo"</string>
-    <string name="tts_install_data_title" msgid="4264378440508149986">"Installi hääleandmed"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"Installi kõnesünteesi jaoks vajalikud hääleandmed"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Häälandmete installimine"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Installige kõnesünteesi jaoks vajalikud häälandmed"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"See kõnesünteesimootor võib koguda kogu kõneldud teksti, sh isiklikke andmeid, nagu paroolid ja krediitkaardinumbrid. Selle aluseks on mootor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Kas lubada kõnesünteesimootori kasutamine?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Selle keele puhul on kõnesünteesi väljundi jaoks vaja toimivat võrguühendust."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"See on kõnesünteesi näide"</string>

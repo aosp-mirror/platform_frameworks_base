@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Tidak dapat memindai jaringan"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Tidak Ada"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Tidak ada"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Disimpan"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Nonaktif"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Kegagalan Konfigurasi IP"</string>
@@ -87,11 +87,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"OS Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplikasi dihapus"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplikasi dan pengguna yang dihapus"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Penambatan USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Tethering USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Hotspot portabel"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Penambatan bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Tethering bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Menambatkan"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Menambatkan &amp; hotspot portabel"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Tethering &amp; hotspot portabel"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Semua aplikasi kerja"</string>
     <string name="user_guest" msgid="8475274842845401871">"Tamu"</string>
     <string name="unknown" msgid="1592123443519355854">"Tidak diketahui"</string>
@@ -110,8 +110,8 @@
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Menyetel suara spesifik bahasa untuk teks lisan"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Dengarkan contoh"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Putar demonstrasi singkat dari sintesis suara"</string>
-    <string name="tts_install_data_title" msgid="4264378440508149986">"Pasang data suara"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"Pasang data suara yang dibutuhkan untuk sintesis suara"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Instal data suara"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instal data suara yang dibutuhkan untuk sintesis suara"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Mesin sintesis suara ini mungkin dapat mengumpulkan semua teks yang akan diucapkan, termasuk di antaranya data pribadi seperti sandi dan nomor kartu kredit. Berasal dari <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> aplikasi. Gunakan metode masukan ini?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Bahasa ini perlu sambungan jaringan yang bekerja untuk keluaran text-to-speech."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Ini adalah contoh sintesis suara"</string>
@@ -208,7 +208,7 @@
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikasi yang di-debug menunggu debugger menempel sebelum berjalan"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Masukan"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Gambar"</string>
-    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Render yang dipercepat perangkat keras"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Render yang dipercepat hardware"</string>
     <string name="media_category" msgid="4388305075496848353">"Media"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Memantau"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Mode ketat diaktifkan"</string>
@@ -236,7 +236,7 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Paksa arah tata letak layar RTL untuk semua lokal"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Paksa perenderan GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Paksa penggunaan GPU untuk gambar 2d"</string>
-    <string name="force_msaa" msgid="7920323238677284387">"Force 4x MSAA"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Paksa 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktifkan 4x MSAA dalam aplikasi OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Debug operasi klip non-kotak"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Penguraian GPU profil"</string>

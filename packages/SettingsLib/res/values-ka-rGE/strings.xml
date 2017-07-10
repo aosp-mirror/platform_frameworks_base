@@ -296,7 +296,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"პროტოანომალია (წითელი-მწვანე)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ტრიტანომალია (ლურჯი-ყვითელი)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ფერის კორექცია"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ეს ფუნქცია საცდელია და შეიძლება გავლენა იქონიოს შესრულებაზე."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ეს ფუნქცია საცდელია და შეიძლება გავლენა იქონიოს ფუნქციონალობაზე."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"უკუგებულია <xliff:g id="TITLE">%1$s</xliff:g>-ის მიერ"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"დარჩენილია დაახლოებით <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"დარჩენილია <xliff:g id="TIME">%1$s</xliff:g>"</string>

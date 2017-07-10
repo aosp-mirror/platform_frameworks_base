@@ -30,7 +30,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"不在范围内"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"未检测到任何互联网连接，系统无法自动为您重新连接。"</string>
     <string name="wifi_no_internet" msgid="5011955173375805204">"无法连接到互联网。"</string>
-    <string name="saved_network" msgid="4352716707126620811">"已通过<xliff:g id="NAME">%1$s</xliff:g>保存"</string>
+    <string name="saved_network" msgid="4352716707126620811">"由<xliff:g id="NAME">%1$s</xliff:g>保存"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"已连接（通过 WLAN 助手）"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已通过%1$s连接"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"可通过%1$s连接"</string>
@@ -97,7 +97,7 @@
     <string name="unknown" msgid="1592123443519355854">"未知"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"用户：<xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"已设置部分默认选项"</string>
-    <string name="launch_defaults_none" msgid="4241129108140034876">"未设置任何默认选项"</string>
+    <string name="launch_defaults_none" msgid="4241129108140034876">"没有默认操作"</string>
     <string name="tts_settings" msgid="8186971894801348327">"文字转语音设置"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"文字转语音 (TTS) 输出"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"语速"</string>
@@ -147,9 +147,9 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"此用户无权修改VPN设置"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"此用户无权修改网络共享设置"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"此用户无权修改接入点名称设置"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"USB调试"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB 调试"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"连接USB后启用调试模式"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"撤消USB调试授权"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"撤消 USB 调试授权"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"错误报告快捷方式"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"在电源菜单中显示用于提交错误报告的按钮"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"不锁定屏幕"</string>
@@ -186,9 +186,9 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"允许模拟位置"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"启用视图属性检查功能"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"始终开启移动数据网络，即使 WLAN 网络已开启（便于快速切换网络）。"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"是否允许USB调试？"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"是否允许 USB 调试？"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB 调试仅用于开发目的。该功能可用于在您的计算机和设备之间复制数据、在您的设备上安装应用（事先不发通知）以及读取日志数据。"</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"是否针对您之前授权的所有计算机撤消USB调试的访问权限？"</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"是否针对您之前授权的所有计算机撤消 USB 调试的访问权限？"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"允许开发设置？"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"这些设置仅适用于开发工作。一旦启用，会导致您的设备以及设备上的应用崩溃或出现异常。"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"通过USB验证应用"</string>
@@ -204,7 +204,7 @@
     <string name="debug_app_set" msgid="2063077997870280017">"调试应用：<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"选择应用"</string>
     <string name="no_application" msgid="2813387563129153880">"无"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"等待调试器"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"等待调试程序"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"调试应用会在执行前等待附加调试器"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"输入"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"绘图"</string>
@@ -292,11 +292,11 @@
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"使用 sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"已停用"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"全色盲"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"绿色弱视（红绿色）"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"红色弱视（红绿色）"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"绿色弱视（红绿不分）"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"红色弱视（红绿不分）"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"蓝色弱视（蓝黄色）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"此功能为实验性功能，可能会影响性能。"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"这是实验性功能，性能可能不稳定。"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"还剩大约 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"还可用 <xliff:g id="TIME">%1$s</xliff:g>"</string>

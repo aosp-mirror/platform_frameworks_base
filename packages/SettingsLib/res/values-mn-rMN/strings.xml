@@ -161,7 +161,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM түгжээ тайлагчийг зөвшөөрөх үү?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"АНХААР: Энэ тохиргоо асаалттай байгаа үед тухайн төхөөрөмжийн хамгаалалтын функцүүд ажиллахгүй."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"Хуурамч байршлын апп сонгох"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"Хуурамч байршлын апп-ыг тохируулаагүй байна"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Хуурамч байршлын аппыг тохируулаагүй байна"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Хуурамч байршлын апп: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Сүлжээ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Утасгүй дэлгэцийн сертификат"</string>
@@ -187,10 +187,10 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Харах тохируулгын шалгалтыг идэвхжүүлэх"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi идэвхтэй байхад ч гэсэн гар утасны датаг идэвхтэй байлгадаг (сүлжээг түргэн солихын тулд)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB дебаг хийхийг зөвшөөрөх үү?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB дебаг нь зөвхөн хөгжүүлэлтийн зорилготой. Үүнийг өөрийн компьютер болон төхөөрөмжийн хооронд өгөгдөл хуулах, өөрийн төхөөрөмж дээр мэдэгдэлгүйгээр аппликешн суулгах, лог датаг унших зэрэгт ашиглаж болно."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB дебаг нь зөвхөн хөгжүүлэлтийн зорилготой. Үүнийг өөрийн компьютер болон төхөөрөмжийн хооронд өгөгдөл хуулах, өөрийн төхөөрөмж дээр мэдэгдэлгүйгээр аппликейшн суулгах, лог датаг унших зэрэгт ашиглаж болно."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Таны өмнө нь зөвшөөрөл өгсөн бүх компьютерээс USB дебаг хандалтыг нь хураах уу?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Хөгжлийн тохиргоог зөвшөөрөх үү?"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Эдгээр тохиргоо нь зөвхөн хөгжүүлэлтэд ашиглах зорилготой. Эдгээр нь таны төхөөрөмж буюу түүн дээрх аппликешнүүдийг эвдрэх, буруу ажиллах шалтгаан нь болж болно."</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Эдгээр тохиргоо нь зөвхөн хөгжүүлэлтэд ашиглах зорилготой. Эдгээр нь таны төхөөрөмж буюу түүн дээрх аппликейшнүүдийг эвдрэх, буруу ажиллах шалтгаан нь болж болно."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Апп-г USB-р тулгах"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT-р суулгасан апп-уудыг хорлонтой авиртай эсэхийг шалгах."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Хэт чанга дуугаралт эсвэл муу тохиргоо зэрэг алсын зайн төхөөрөмжийн дуугаралттай холбоотой асуудлын үед Bluetooth-ийн үнэмлэхүй дууны түвшинг идэвхгүй болго."</string>
@@ -200,19 +200,19 @@
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP шалгах авирыг тохируулах"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Согог хайх"</string>
     <string name="debug_app" msgid="8349591734751384446">"Согог засах апп сонгоно уу"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Дебаг аппликешн тохируулаагүй"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"Согог засах аппликешн: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="5156029161289091703">"Аппликешн сонгох"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Дебаг аппликейшн тохируулаагүй"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Согог засах аппликейшн: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"Аппликейшн сонгох"</string>
     <string name="no_application" msgid="2813387563129153880">"Юуг ч биш"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Согог засагчийг хүлээх"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Согог засагдсан аппликешн ажиллахын өмнө согог засагчийг хавсаргагдахыг хүлээнэ"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Согог засагдсан аппликейшн ажиллахын өмнө согог засагчийг хавсаргагдахыг хүлээнэ"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Оруулах"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Зураг"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Техник хангамжийн хурдатгалтай үзүүлэлт"</string>
     <string name="media_category" msgid="4388305075496848353">"Медиа"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Мониторинг"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Хатуу горимыг идэвхжүүлсэн"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Апп-ууд үндсэн хэлхээс дээр удаан хугацаанд үйлдлүүд хийх үед дэлгэцийг анивчуулах"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Аппууд үндсэн хэлхээс дээр удаан хугацаанд үйлдлүүд хийх үед дэлгэцийг анивчуулах"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Чиглүүлэгчийн байршил"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Дэлгэцийн давхаргаар одоогийн хүрэлтийн өгөгдлийг харуулж байна"</string>
     <string name="show_touches" msgid="2642976305235070316">"Товшилтыг харуулах"</string>
@@ -250,7 +250,7 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Далд процессын хязгаар"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Бүх ANRs харуулах"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Далд апп-уудад Апп Хариу Өгөхгүй байна гэснийг харуулах"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Апп-ыг гадаад санах ойд хадгалахыг зөвшөөрөх"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Аппыг гадаад санах ойд хадгалахыг зөвшөөрөх"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Манифест утгыг нь үл хамааран дурын апп-г гадаад санах ойд бичих боломжтой болгодог"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Үйл ажиллагааны хэмжээг өөрчилж болохуйц болгох"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Тодорхойлогч файлын утгыг үл хамааран, бүх үйл ажиллагааны хэмжээг олон цонхонд өөрчилж болохуйц болгоно уу."</string>

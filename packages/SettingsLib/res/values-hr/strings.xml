@@ -197,7 +197,7 @@
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Omogući aplikaciju terminala koja nudi pristup lokalnoj ovojnici"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP provjera"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Postav. ponaš. HDCP prov."</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Postavke HDCP provjere"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Otklanjanje pogrešaka"</string>
     <string name="debug_app" msgid="8349591734751384446">"Aplikacija za otklanjanje pogrešaka"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Nema aplikacije za otklanjanje pogrešaka"</string>

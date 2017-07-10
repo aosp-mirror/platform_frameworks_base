@@ -98,11 +98,11 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Mtumiaji: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Baadhi ya chaguo-msingi zimewekwa"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Hakuna chaguo-misingi zilizowekwa"</string>
-    <string name="tts_settings" msgid="8186971894801348327">"Mipangilio ya maandishi kwa hotuba"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Kubadilisha maandishi hadi usemi"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"Kiwango cha usemaji"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Mipangilio ya kusoma maandishi kwa sauti"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Kipengele cha kusoma maandishi kwa sauti"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Kasi ya kutamka"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Kasi ya kutamkwa kwa maneno"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Giza"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Uzito wa sauti"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Huathiri sauti ya matamshi yaliyounganishwa"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Lugha"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Tumia lugha ya mfumo"</string>
@@ -113,7 +113,7 @@
     <string name="tts_install_data_title" msgid="4264378440508149986">"Sakinisha data ya sauti"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Sakinisha data ya sauti inayohitajika kuunganisha usemi"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Hotuba hii inawezesha injini huenda ikaweza kukusanya maandishi ambayo yatazungumziwa, ikijumlisha data ya kibinafsi ya nenosiri na namba ya kaddi ya mkopo. Inatoka kwa injini ya <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> Wezesha matumizi ya hotuba hii iliyowezeshwa ya injini?"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"Lugha hii inahitaji muunganisho wa mtandao unaofanya kazi kwa towe ya maandishi hadi sauti."</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Lugha hii inahitaji muunganisho wa mtandao unaofanya kazi ili kipengele cha kusoma maandishi kwa sauti kifanye kazi."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Huu ni mfano wa usanisi usemaji"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Hali ya lugha chaguo-msingi"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> inaweza kutumiwa kikamilifu"</string>
@@ -213,7 +213,7 @@
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Ufuatiliaji"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modi makinifu imewezeshwa"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Mulika skrini wakati programu zinafanya uendeshaji mrefu kwenye mnyororo mkuu"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Mahali pa pointa"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Mahali pa kiashiria"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Kuegeshwa kwa skrini ikionyesha data ya mguso ya sasa"</string>
     <string name="show_touches" msgid="2642976305235070316">"Onyesha unapogonga"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Onyesha maoni ya picha unapogonga"</string>
@@ -286,7 +286,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Badilisha..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Tayari faili imesimbwa kwa njia fiche"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Inabadilisha kuwa usimbaji fiche unaotegemea faili"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Badilisha sehemu za data kuwa usimbaji unaotegemea faili.\n!!Onyo!! Hatua hii itafuta data yako yote.\nKipengele hiki ni cha alpha, na huenda kisifanye kazi vizuri.\nBonyeza \'Futa na ubadilishe...\'  ili uendelee."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Badilisha sehemu za data kuwa usimbaji unaotegemea faili.\n!!Onyo!! Hatua hii itafuta data yako yote.\nKipengele hiki ni cha alpha na huenda kisifanye kazi vizuri.\nBonyeza \'Futa na ubadilishe...\'  ili uendelee."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Futa na uibadilishe..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Hali ya rangi ya picha"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Tumia sRGB"</string>

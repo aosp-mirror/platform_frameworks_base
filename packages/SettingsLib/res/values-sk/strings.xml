@@ -30,7 +30,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Mimo dosah"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Nenašiel sa žiadny prístup k internetu, preto nedôjde k automatickému opätovnému pripojeniu."</string>
     <string name="wifi_no_internet" msgid="5011955173375805204">"Žiadny prístup k internetu."</string>
-    <string name="saved_network" msgid="4352716707126620811">"Uložil(a) <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Uložila aplikácia <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Pripojené pomocou Asistenta Wi-Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Pripojené prostredníctvom %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"K dispozícii prostredníctvom %1$s"</string>
@@ -87,10 +87,10 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"OS Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Odstránené aplikácie"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Odstránené aplikácie a používatelia"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Zdieľané pripojenie cez USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Pripojenie cez USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prenosný prístupový bod"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Pripojenie cez Bluetooth"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Zdieľanie dát. pripojenia"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Zdieľané pripojenie"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Zdieľané pripojenie a prenosný hotspot"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Všetky pracovné aplikácie"</string>
     <string name="user_guest" msgid="8475274842845401871">"Hosť"</string>
@@ -99,7 +99,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Predvolená pre niektoré akcie"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nie je predvolená pre žiadne akcie"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Nastavenia prevodu textu na reč"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Výstup prevodu textu na reč"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Prevod textu na reč"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Rýchlosť reči"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Rýchlosť hovoreného textu"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Výška"</string>
@@ -163,7 +163,7 @@
     <string name="mock_location_app" msgid="7966220972812881854">"Vybrať aplikáciu so simulovanou polohou"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Nemáte žiadnu aplikáciu so simulovanou polohou"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikácia so simulovanou polohou: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="debug_networking_category" msgid="7044075693643009662">"Možnosti siete"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Siete"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikácia bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Podrobné denníky Wi-Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Agres. odovzdávať Wi-Fi na mobilnú sieť"</string>
@@ -213,7 +213,7 @@
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitorovanie"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Povoliť prísny režim"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Blikať pri dlhých operáciách hlavného vlákna"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Umiestnenie ukazovateľa"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Umiestnenie kurzora"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Zobraziť prekryvnú vrstvu s aktuálnymi údajmi o klepnutiach"</string>
     <string name="show_touches" msgid="2642976305235070316">"Zobrazovať klepnutia"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Vizuálne znázorňovať klepnutia"</string>
@@ -279,14 +279,14 @@
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Zobrazenie a ovládanie aktuálne spustených služieb"</string>
     <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Viacprocesový prvok WebView"</string>
     <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Spúšťať vykresľovacie moduly WebView samostatne"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementácia komponenta WebView"</string>
-    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Nastavenie implementácie komponenta WebView"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementácia WebView"</string>
+    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Nastaviť implementáciu WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Táto voľba už nie je platná. Skúste to znova."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Konvertovať na šifrovanie súborov"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Prejsť na šifrovanie súborov"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konvertovať…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Súbory sú už šifrované"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Konvertovanie na šifrovanie založené na súboroch"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Chystáte sa konvertovať dátový oddiel na šifrovanie založené na súboroch.\n !!Upozornenie!! Týmto procesom vymažete všetky dáta.\n Táto funkcia je v alfa verzii a nemusí fungovať správne.\n Ak chcete pokračovať, stlačte tlačidlo „Vymazať a konvertovať…“."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Chystáte sa previesť dátový oddiel na šifrovanie založené na súboroch.\nPozor!!! Všetky vaše dáta budú vymazané.\nTáto funkcia je v alfa verzii a nemusí fungovať správne.\nAk chcete pokračovať, stlačte tlačidlo Vymazať a konvertovať…"</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Vymazať a konvertovať…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Farebný režim obrázka"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Použije sa sRGB"</string>
@@ -334,7 +334,7 @@
     <string name="charge_length_format" msgid="8978516217024434156">"pred <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Zostáva <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Malé"</string>
-    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Predvolená"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Predvolené"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Veľké"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Väčšie"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Najväčšie"</string>

@@ -99,10 +99,10 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Налаштовано деякі значення за умовчанням"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Немає значень за умовчанням"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Налашт. синтезу мовлення"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Вивід синтезу мовлення з тексту"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Синтез мовлення"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Темп мовлення"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Швидкість відтворення тексту"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Вис. зв."</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Тон"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Впливає на тон синтезованого мовлення"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Мова"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Використовувати мову системи"</string>
@@ -282,7 +282,7 @@
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Застосування WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Налаштувати застосування WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ця опція більше не дійсна. Повторіть спробу."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Конвертувати в зашифрований файл"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Перехід до шифрування файлів"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Конвертація…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Уже конвертовано в зашифрований файл"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Конвертація в зашифрований файл"</string>
@@ -312,7 +312,7 @@
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до повного з бездротового зарядження"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Невідомо"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Зарядж-ся"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Заряджається"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Заряджання з розетки"</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Заряджається"</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Заряджання через USB"</string>

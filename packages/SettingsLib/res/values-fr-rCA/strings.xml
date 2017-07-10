@@ -89,7 +89,7 @@
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Applications et utilisateurs supprimés"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"Partage de connexion par USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Point d\'accès Wi-Fi mobile"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Via Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Par Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Partage de connexion"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Partage de connexion"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Toutes les applis profess."</string>
@@ -107,7 +107,7 @@
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Langue"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Utiliser la langue du système"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Langue non sélectionnée"</string>
-    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Définit la langue utilisée par la syntèse vocale"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Définir la langue utilisée par la syntèse vocale"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Écouter un échantillon"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Lire une courte démonstration de la synthèse vocale"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Installer les données vocales"</string>
@@ -140,10 +140,10 @@
     <string name="choose_profile" msgid="8229363046053568878">"Sélectionnez un profil"</string>
     <string name="category_personal" msgid="1299663247844969448">"Personnel"</string>
     <string name="category_work" msgid="8699184680584175622">"Travail"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Options pour les développeurs"</string>
-    <string name="development_settings_enable" msgid="542530994778109538">"Activer les options pour les développeurs"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Options pour les concepteurs"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"Activer les options pour les concepteurs"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Définir les options pour le développement de l\'application"</string>
-    <string name="development_settings_not_available" msgid="4308569041701535607">"Les options proposées aux développeurs ne sont pas disponibles pour cet utilisateur."</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Les options proposées aux concepteurs ne sont pas disponibles pour cet utilisateur."</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Les paramètres de RPV ne sont pas disponibles pour cet utilisateur"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Les paramètres de partage de connexion ne sont pas disponibles pour cet utilisateur"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Les paramètres de point d\'accès ne sont pas disponibles pour cet utilisateur"</string>
@@ -197,7 +197,7 @@
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activer l\'application Terminal permettant l\'accès au shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Vérification HDCP"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Config. vérification HDCP"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Configurer vérification HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Débogage"</string>
     <string name="debug_app" msgid="8349591734751384446">"Sélectionner une application à déboguer"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Aucune application à déboguer définie"</string>
@@ -282,11 +282,11 @@
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Mise en œuvre WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Définir la mise en œuvre WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ce choix n\'est plus valide. Réessayez."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Convertir en chiffrement basé sur un fichier"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Convertir en chiffrement"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Convertir..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Déjà chiffré par un fichier"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Conversion en chiffrement basé sur un fichier en cours"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Convertir la partition de données en chiffrement basé sur un fichier.\n Avertissement! Cette opération supprimera toutes vos données. \nCette fonctionnalité est en version alpha et peut ne pas fonctionner correctement. \nTouchez « Effacer et convertir » pour continuer."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Convertir la partition de données en chiffrement basé sur un fichier.\nAvertissement! Cette opération supprimera toutes vos données.\nCette fonctionnalité est en version alpha et peut ne pas fonctionner correctement.\nTouchez « Effacer et convertir… » pour continuer."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Effacer et convertir..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Mode couleur des images"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Utiliser sRGB"</string>
@@ -312,7 +312,7 @@
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> %% (chargée à 100 %% avec chargeur sans fil dans <xliff:g id="TIME">%2$s</xliff:g>)"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Inconnu"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Batterie en charge"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Charge en cours…"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"En charge (c.a.)"</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Charge en cours..."</string>
     <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"En charge par USB"</string>

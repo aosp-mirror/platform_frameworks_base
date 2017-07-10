@@ -87,9 +87,9 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Hệ điều hành Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Ứng dụng đã xóa"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Ứng dụng và người dùng bị xóa"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Truy cập Internet qua USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Chia sẻ kết nối Internet qua USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Điểm phát sóng di động"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Truy cập Internet qua Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Chia sẻ kết nối Internet qua Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Đang dùng làm điểm truy cập Internet"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"USB Internet &amp; điểm truy cập di động"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Tất cả ứng dụng làm việc"</string>

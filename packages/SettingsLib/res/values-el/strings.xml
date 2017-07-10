@@ -99,7 +99,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Έχουν οριστεί κάποιες προεπιλογές"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Δεν έχουν οριστεί προεπιλογές"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Ρυθμίσεις μετατροπής κειμένου σε ομιλία"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Έξοδος μετατροπής κειμένου σε ομιλία"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Μετατρ. κειμ. σε ομιλία"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Ταχύτητα λόγου"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Ταχύτητα με την οποία εκφωνείται το κείμενο"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Τόνος"</string>

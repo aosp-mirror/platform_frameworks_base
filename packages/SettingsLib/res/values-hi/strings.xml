@@ -178,8 +178,8 @@
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"प्रति लॉग बफ़र लॉगर आकार चुनें"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"लॉगर सतत मेमोरी साफ़ करें?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"जब हम सतत लॉगर के साथ निगरानी करना बंद कर देते हैं, तो हमें आपके डिवाइस पर मौजूद लॉगर डेटा को मिटाने की आवश्यकता होती है."</string>
-    <string name="select_logpersist_title" msgid="7530031344550073166">"डिवाइस पर लॉगर डेटा सतत संग्रहीत करें"</string>
-    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"डिवाइस पर सतत रूप से संग्रहीत करने के लिए लॉग बफ़र चुनें"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"डिवाइस पर लॉगर डेटा सतत संग्रहित करें"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"डिवाइस पर सतत रूप से संग्रहित करने के लिए लॉग बफ़र चुनें"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB कॉन्फ़िगरेशन चुनें"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB कॉन्फ़िगरेशन चुनें"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"कृत्रिम स्‍थानों को अनुमति दें"</string>

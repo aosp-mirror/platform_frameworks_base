@@ -31,7 +31,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"No s\'ha detectat accés a Internet; no s\'hi tornarà a connectar automàticament."</string>
     <string name="wifi_no_internet" msgid="5011955173375805204">"No hi ha accés a Internet."</string>
     <string name="saved_network" msgid="4352716707126620811">"Desat per <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_via_wfa" msgid="3805736726317410714">"Connectat mitjançant l\'assistent de Wi‑Fi"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Connectat mitjançant l\'Assistent de Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Connectada mitjançant %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible mitjançant %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Connectada, sense Internet"</string>
@@ -282,7 +282,7 @@
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementació de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Configura la implementació de WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Aquesta opció ja no és vàlida. Torna-ho a provar."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Converteix en l\'encriptació de fitxers"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Converteix en encriptació de fitxers"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Converteix…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"El fitxer ja està encriptat"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"S\'està convertint en l\'encriptació basada en fitxers"</string>
@@ -337,7 +337,7 @@
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Predeterminat"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Gran"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Més gran"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Màxim"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Més grans possible"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Personalitzat (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Ajuda i suggeriments"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menú"</string>

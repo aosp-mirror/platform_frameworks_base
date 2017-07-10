@@ -87,7 +87,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"ប្រព័ន្ធ​ប្រតិបត្តិការ Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"កម្មវិធី​ដែល​បាន​លុប"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"បាន​លុប​កម្មវិធី និង​អ្នកប្រើ"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"ការ​ភ្ជាប់​យូអេសប៊ី"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"ការ​ភ្ជាប់តាម USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ហតស្ពត​ចល័ត"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ការ​ភ្ជាប់ប៊្លូធូស"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ការ​ភ្ជាប់"</string>
@@ -140,7 +140,7 @@
     <string name="choose_profile" msgid="8229363046053568878">"ជ្រើសប្រវត្តិរូប"</string>
     <string name="category_personal" msgid="1299663247844969448">"ផ្ទាល់ខ្លួន"</string>
     <string name="category_work" msgid="8699184680584175622">"កន្លែង​ធ្វើការ"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"ជម្រើស​អ្នក​អភិវឌ្ឍ"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"ជម្រើស​អ្នក​អភិវឌ្ឍន៍"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"បើកដំណើរការជម្រើសអ្នកអភិវឌ្ឍន៍"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"កំណត់​ជម្រើស​សម្រាប់​ការ​អភិវឌ្ឍ​កម្មវិធី"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"ជម្រើស​អ្នក​អភិវឌ្ឍ​មិន​អាច​ប្រើ​បាន​សម្រាប់​អ្នក​ប្រើ​នេះ"</string>
@@ -279,15 +279,15 @@
     <string name="runningservices_settings_summary" msgid="854608995821032748">"មើល និង​គ្រប់គ្រង​សេវាកម្ម​កំពុង​ដំណើរការ​បច្ចុប្បន្ន"</string>
     <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView ដែលមានអង្គដំណើរការច្រើន"</string>
     <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"ដំណើរការកម្មវិធីបម្លែង WebView ដោយឡែក"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"ការប្រតិបត្តិ WebView"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"ការអនុវត្ត WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"កំណត់ការប្រតិបត្តិ WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ជម្រើសនេះលែងមានសុពលភាពទៀតហើយ ព្យាយាមម្តងទៀត"</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"បម្លែងទៅជាការអ៊ីនគ្រីបឯកសារ"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"បំប្លែងទៅជាការអ៊ិនគ្រីបឯកសារ"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"បម្លែង…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"បានអ៊ីនគ្រីបឯកសាររួចហើយ"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"កំពុងបម្លែងទៅការអ៊ីនគ្រីបដែលផ្អែកលើឯកសារ"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"បម្លែងការបែងចែកទិន្នន័យទៅជាការអ៊ីនគ្រីបដែលផ្អែកលើឯកសារ។\n !!ព្រមាន!! សកម្មភាពនេះនឹងលុបទិន្នន័យរបស់អ្នកទាំងអស់។\n លក្ខណៈពិសេសនេះជាការសាកល្បងដំបូង ហើយអាចនឹងដំណើរការមិនប្រក្រតី។\n សូមចុច \'សម្អាត និងបម្លែង...\' ដើម្បីបន្ត។"</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"សម្អាត និងបម្លែង…"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"បំប្លែងការបែងចែកទិន្នន័យទៅជាការអ៊ិនគ្រីបដែលផ្អែកលើឯកសារ។\n !!ព្រមាន!! សកម្មភាពនេះនឹងលុបទិន្នន័យរបស់អ្នកទាំងអស់។\n មុខងារនេះសំខាន់ណាស់ ហើយអាចនឹងដំណើរការមិនប្រក្រតី។\n សូមចុច \'សម្អាត និងបំប្លែង...\' ដើម្បីបន្ត។"</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"សម្អាត និងបំប្លែង…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"របៀបនៃពណ៌រូបភាព"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"ប្រើ sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"បាន​បិទ"</string>
@@ -296,7 +296,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaly (ក្រហម​ពណ៌​បៃតង​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomaly (ពណ៌​ខៀវ​-លឿង​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ការ​កែ​ពណ៌"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"លក្ខណៈ​នេះ​គឺ​ជា​ការ​ពិសោធន៍ ហើយ​អាច​ប៉ះពាល់​ការ​អនុវត្ត។"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"មុខងារនេះ​គឺ​ជា​ការ​ពិសោធន៍ ហើយ​អាច​ប៉ះពាល់​ដំណើរការ​។"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"នៅសល់ប្រហែល <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"នៅសល់ <xliff:g id="TIME">%1$s</xliff:g>"</string>

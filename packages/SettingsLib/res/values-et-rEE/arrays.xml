@@ -51,7 +51,7 @@
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"Ära kunagi kontrolli"</item>
     <item msgid="6042769699089883931">"Kontrolli ainult DRM-sisu"</item>
-    <item msgid="9174900380056846820">"Pidev kontrollimine"</item>
+    <item msgid="9174900380056846820">"Kontrolli alati"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"Ära kunagi kasuta HDCP-kontrollimist"</item>

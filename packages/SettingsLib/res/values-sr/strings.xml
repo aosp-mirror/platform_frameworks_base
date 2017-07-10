@@ -123,7 +123,7 @@
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"Подешавања за <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Покрени подешавања машине"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Жељена машина"</string>
-    <string name="tts_general_section_title" msgid="4402572014604490502">"Опште"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Општа"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Ресетујте висину тона говора"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Ресетујте висину тона којом се текст изговара на подразумевану."</string>
   <string-array name="tts_rate_entries">
@@ -168,7 +168,7 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Омогући детаљнију евиденцију за Wi‑Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Агресиван прелаз са Wi‑Fi мреже на мобилну"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Увек дозволи скенирање Wi‑Fi-ја у ромингу"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"Подаци за мобилне уређаје су увек активни"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Мобилни подаци су увек активни"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Онемогући главно подешавање јачине звука"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Приказ опција за сертификацију бежичног екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Повећава ниво евидентирања за Wi‑Fi. Приказ по SSID RSSI-у у бирачу Wi‑Fi мреже"</string>
@@ -185,7 +185,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Дозволи лажне локације"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Дозволи лажне локације"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Омогући проверу атрибута за преглед"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Нека подаци за мобилне уређаје увек буду активни, чак и када је Wi‑Fi активан (ради брзе промене мреже)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Нека мобилни подаци увек буду активни, чак и када је Wi‑Fi активан (ради брзе промене мреже)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Дозволи отклањање USB грешака?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отклањање USB грешака намењено је само за сврхе програмирања. Користите га за копирање података са рачунара на уређај и обрнуто, инсталирање апликација на уређају без обавештења и читање података из евиденције."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Желите ли да опозовете приступ отклањању USB грешака са свих рачунара које сте претходно одобрили?"</string>
@@ -296,7 +296,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Протаномалија (црвено-зелено)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Тританомалија (плаво-жуто)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Корекција боја"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ова функција је експериментална и може да утиче на перформансе."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ова функција је експериментална и може да утиче на квалитет рада."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Замењује га <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"Још отприлике <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Преостало време: <xliff:g id="TIME">%1$s</xliff:g>"</string>

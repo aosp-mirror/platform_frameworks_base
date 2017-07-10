@@ -39,7 +39,7 @@
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Verbindung wird getrennt..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Verbindung wird hergestellt..."</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Verbunden"</string>
-    <string name="bluetooth_pairing" msgid="1426882272690346242">"Kopplung läuft…"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Verbindung wird hergestellt…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Verbunden (kein Telefon)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Verbunden (außer Audiomedien)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Verbunden (ohne Nachrichtenzugriff)"</string>
@@ -296,7 +296,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomalie (Rot-Grün-Sehschwäche)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomalie (Blau-Gelb-Sehschwäche)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Farbkorrektur"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Hierbei handelt es sich um eine experimentelle Funktion. Dies kann sich auf die Leistung auswirken."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Hierbei handelt es sich um eine experimentelle Funktion, die sich auf die Leistung auswirken kann."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Außer Kraft gesetzt von \"<xliff:g id="TITLE">%1$s</xliff:g>\""</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"Noch ca. <xliff:g id="TIME">%1$s</xliff:g> verbleibend"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Noch <xliff:g id="TIME">%1$s</xliff:g>"</string>

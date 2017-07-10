@@ -30,7 +30,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Fuera de rango"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"No se ha detectado acceso a Internet, por lo que no se volverá a conectar automáticamente."</string>
     <string name="wifi_no_internet" msgid="5011955173375805204">"No se ha detectado acceso a Internet."</string>
-    <string name="saved_network" msgid="4352716707126620811">"Guardadas por <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Guardada por <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Conectado a través del asistente de Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectado a través de %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible a través de %1$s"</string>
@@ -140,7 +140,7 @@
     <string name="choose_profile" msgid="8229363046053568878">"Seleccionar perfil"</string>
     <string name="category_personal" msgid="1299663247844969448">"Personal"</string>
     <string name="category_work" msgid="8699184680584175622">"Trabajo"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Opciones de desarrollo"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opciones para desarrolladores"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Habilitar opciones para desarrolladores"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Establecer opciones de desarrollo de aplicaciones"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Las opciones de desarrollador no están disponibles para este usuario"</string>
@@ -155,7 +155,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Pantalla activa"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"La pantalla nunca entra en modo de suspensión si el dispositivo se está cargando"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Registro de búsqueda de HCI Bluetooth"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Capturar todos los paquetes de HCI de Bluetooth HCI en un archivo"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Capturar todos los paquetes de Bluetooth HCI en un archivo"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Desbloqueo de OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Permitir desbloquear el bootloader"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"¿Permitir desbloqueo de OEM?"</string>
@@ -171,7 +171,7 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Datos móviles siempre activos"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inhabilitar volumen absoluto"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opciones para la certificación de la pantalla inalámbrica"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar el nivel de logging de Wi-Fi, mostrar por SSID RSSI en el selector Wi-Fi"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar el nivel de registro de Wi-Fi, mostrar por SSID RSSI en el selector Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Si está habilitada, la conexión Wi‑Fi será más agresiva al transferir la conexión de datos al móvil (si la señal Wi‑Fi no es estable)"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Permitir/No permitir búsquedas de Wi-Fi basadas en la cantidad de tráfico de datos presente en la interfaz"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños de búfer de registrador"</string>
@@ -212,7 +212,7 @@
     <string name="media_category" msgid="4388305075496848353">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Supervisión"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modo estricto"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Parpadear si las aplicaciones tardan mucho en el thread principal"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Parpadear si las aplicaciones tardan mucho en el subproceso principal"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Ubicación del puntero"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Superponer los datos de las pulsaciones en la pantalla"</string>
     <string name="show_touches" msgid="2642976305235070316">"Mostrar toques"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_apps_title" msgid="1317817863508274533">"Aplicaciones inactivas"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Inactiva. Toca para alternar."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Activa. Toca para alternar."</string>
-    <string name="runningservices_settings_title" msgid="8097287939865165213">"Servicios en ejecución"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Ver y controlar los servicios en ejecución"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Servicios en uso"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Ver y controlar los servicios en uso"</string>
     <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView multiproceso"</string>
     <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Ejecuta procesadores de WebView de forma independiente"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementación de WebView"</string>
@@ -286,7 +286,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Convertir…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Ya está cifrado"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Convirtiendo a un cifrado basado en archivos"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Convierte la partición de datos en un cifrado basado en archivos.\n Advertencia: Este proceso borrará todos los datos.\n Esta función es alpha y es posible que no funcione correctamente.\n Pulsa la opción Borrar y convertir… para continuar."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Convierte la partición de datos en un cifrado basado en archivos.\n Advertencia: Este proceso borrará todos los datos.\n Esta función es alfa y es posible que no funcione correctamente.\n Pulsa la opción Borrar y convertir… para continuar."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Borrar y convertir…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Modo de color de imagen"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Utiliza sRGB"</string>
@@ -295,7 +295,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteronomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomalía (azul-amarillo)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Corrección del color"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Corrección de color"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Esta función es experimental y puede afectar al rendimiento."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Anulado por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"Tiempo restante (aproximado): <xliff:g id="TIME">%1$s</xliff:g>"</string>
@@ -331,7 +331,7 @@
     <item msgid="8934126114226089439">"50%"</item>
     <item msgid="1286113608943010849">"100%"</item>
   </string-array>
-    <string name="charge_length_format" msgid="8978516217024434156">"Hace <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="charge_length_format" msgid="8978516217024434156">"hace <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Tiempo restante: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Pequeño"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Predeterminado"</string>

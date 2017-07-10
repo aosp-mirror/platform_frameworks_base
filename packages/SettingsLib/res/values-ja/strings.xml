@@ -97,7 +97,7 @@
     <string name="unknown" msgid="1592123443519355854">"不明"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ユーザー: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"一部デフォルトを設定"</string>
-    <string name="launch_defaults_none" msgid="4241129108140034876">"既定の設定なし"</string>
+    <string name="launch_defaults_none" msgid="4241129108140034876">"デフォルトの設定なし"</string>
     <string name="tts_settings" msgid="8186971894801348327">"テキスト読み上げの設定"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"テキスト読み上げの出力"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"音声の速度"</string>
@@ -154,7 +154,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"電源メニューにバグレポートを取得するボタンを表示する"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"スリープモードにしない"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"充電中に画面をスリープにしない"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCIスヌープログを有効にする"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCIスヌープログをON"</string>
     <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Bluetooth HCIパケットをすべてファイルにキャプチャする"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEMロック解除"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ブートローダーによるロック解除を許可する"</string>

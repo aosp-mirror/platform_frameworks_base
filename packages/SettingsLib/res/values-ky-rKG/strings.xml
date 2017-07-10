@@ -72,7 +72,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Киргизүү үчүн колдонулсун"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Жупташтыруу"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ЖУПТАШТЫРУУ"</string>
-    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Баш тартуу"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Жок"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Жупташканда байланыштарыңыз менен чалуу таржымалыңызды пайдалана аласыз."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен жупташуу мүмкүн эмес."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"PIN же код туура эмес болгондуктан <xliff:g id="DEVICE_NAME">%1$s</xliff:g> туташуу мүмкүн эмес."</string>
@@ -87,9 +87,9 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Алынып салынган колдонмолор"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Өчүрүлгөн колдонмолор жана колдонуучулар"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB жалгаштыруу"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB модем"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Ташыма кошулуу чекити"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth жалгаштыруу"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth модем"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Жалгаштыруу"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Жалгаштыруу жана ташыма чекит"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Жумуш профилинин колднмлр"</string>
@@ -107,7 +107,7 @@
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Тил"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Тутум тилин колдонуу"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Тил тандалган жок"</string>
-    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Айтылган текст боюнча тилге тиешелүү үндү коёт"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Текстти окуй турган тилди тандоо"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Үлгүнү угуу"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Кепти синтездөөнүн кыскача көргөзмөсүн ойнотуу"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Үн дайындарын орнотуу"</string>
@@ -197,7 +197,7 @@
     <string name="enable_terminal_title" msgid="95572094356054120">"Жергиликтүү терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Жергиликтүү буйрук кабыгын сунуштаган терминалга уруксат берүү"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP текшерүү"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP текшерүү арактн коюу"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP текшерүү тартиби"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Жөндөө"</string>
     <string name="debug_app" msgid="8349591734751384446">"Жөндөөчү колдонмону тандоо"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Эч бир жөндөөчү колдонмо орнотулган жок."</string>
@@ -279,15 +279,15 @@
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Учурда иштеп жаткан кызматтарды көрүү жана көзөмөлдөө"</string>
     <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Көп процесстүү WebView"</string>
     <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView рендерерлерин өзүнчө иштетүү"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView аткарылышы"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView кызматы"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView аткарылышын коюу"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Тандалган нерсе жараксыз болуп калган. Кайра аракет кылыңыз."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Файл шифрлөөсүнө айландыруу"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Файлдарды шифрлөөгө өтүү"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Айландыруу…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Файл мурунтан эле шифрленген"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Файл негизиндеги шифрлөөгө айландырылууда"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Дайындардын бөлүнүшүн файл негизиндеги шифрлөөгө айландыруу.\n !!Эскертүү!! Бул бардык дайындарыңызды тазалайт.\n Бул функция - альфа жана туура иштебеши мүмкүн.\n Улантуу үчүн \'Сүрүп салуу жана айландыруу…\' дегенди басыңыз."</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"Сүрүп салуу жана айландыруу…"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Айрым файлдарды шифрлөөгө өтөсүз.\n !!Эскертүү!! Ушуну менен бардык дайындар өчөт.\n Бул альфа версия болгондуктан, функция талаптагыдай иштебеши мүмкүн.\n Улантуу үчүн \'Өчүрүп туруп, кийинкиге өтүү…\' дегенди басыңыз."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Өчүрүп туруп, кийинкиге өтүү…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Сүрөт түсү режими"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB колдонуңуз"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Токтотулган"</string>
@@ -296,7 +296,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Протаномалия (кызыл-жашыл)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Тританомалия (көк-сары)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Түсүн тууралоо"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Бул сынамык мүмкүнчүлүк болгондуктан, иштин майнаптуулугуна таасир этиши мүмкүн."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Бул сынамык мүмкүнчүлүк болгондуктан, түзмөктүн иштешине таасир этиши мүмкүн."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> менен алмаштырылган"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"Болжол менен <xliff:g id="TIME">%1$s</xliff:g> калды"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> калды"</string>
@@ -339,7 +339,7 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Чоңураак"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Эң чоң"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Ыңгайлаштырылган (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"Жардам жана жооп пикир"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Жардам жана пикир билдирүү"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Меню"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Демо режиминде демейки жөндөөлөргө кайтаруу үчүн сырсөздү киргизиңиз"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Кийинки"</string>

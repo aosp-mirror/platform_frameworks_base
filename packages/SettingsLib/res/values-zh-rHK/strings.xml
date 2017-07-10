@@ -30,7 +30,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"超出可用範圍"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"無法偵測互聯網連線，未能自動重新連線。"</string>
     <string name="wifi_no_internet" msgid="5011955173375805204">"無法偵測互聯網連線。"</string>
-    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> 的儲存"</string>
+    <string name="saved_network" msgid="4352716707126620811">"由「<xliff:g id="NAME">%1$s</xliff:g>」儲存"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"已透過 Wi-Fi 小幫手連線"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已透過 %1$s 連線"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"可透過 %1$s 連線"</string>
@@ -49,8 +49,8 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"檔案傳輸"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"輸入裝置"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"互聯網連線"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"聯絡人共用"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"用於聯絡人共用"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"共用聯絡人"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"用於共用聯絡人"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"互聯網連線分享"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"訊息存取權"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM 卡存取"</string>
@@ -296,7 +296,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"紅色弱視 (紅綠)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"藍色弱視 (藍黃)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"這是一項實驗性功能，可能會影響效能。"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"這是實驗性功能，效能尚待改善。"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"已由「<xliff:g id="TITLE">%1$s</xliff:g>」覆寫"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"尚餘大約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"尚餘 <xliff:g id="TIME">%1$s</xliff:g>"</string>

@@ -197,7 +197,7 @@
     <string name="enable_terminal_title" msgid="95572094356054120">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Актив. на прил. за терминал с достъп до локалния команден ред"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверка с HDCP"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Повед. за проверка с HDCP"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Проверка с HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Отстраняване на грешки"</string>
     <string name="debug_app" msgid="8349591734751384446">"Избор на прил. за отстран. на грешки"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Няма зададено приложение за отстраняване на грешки"</string>

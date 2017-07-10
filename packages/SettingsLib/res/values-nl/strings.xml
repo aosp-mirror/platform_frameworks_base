@@ -111,7 +111,7 @@
     <string name="tts_play_example_title" msgid="7094780383253097230">"Luisteren naar een voorbeeld"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Een korte demonstratie van spraaksynthese afspelen"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Spraakgegevens installeren"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"De stemgegevens voor spraaksynthese installeren"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"De spraakgegevens voor spraaksynthese installeren"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Deze engine voor spraaksynthese kan mogelijk alle tekst verzamelen die wordt gesproken, waaronder persoonlijke gegevens zoals wachtwoorden en creditcardnummers. Deze engine is afkomstig van de <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>-engine. Het gebruik van deze engine voor spraaksynthese inschakelen?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Deze taal heeft een werkende netwerkverbinding nodig voor tekst-naar-spraak-uitvoer."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Dit is een voorbeeld van spraaksynthese"</string>

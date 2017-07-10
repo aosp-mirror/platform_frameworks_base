@@ -286,7 +286,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konvertér …"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Allerede kryptert og lagret som fil"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Konvertér til filbasert kryptering"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Konvertér datapartisjonen til filbasert kryptering.\n !!Advarsel!! Dette sletter alle dataene dine.\n Dette er en alfafunksjon og kommer kanskje ikke til å fungere skikkelig.\n Trykk på «Slett og konvertér …» for å fortsette."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Konvertér datapartisjonen til filbasert kryptering.\n !!Advarsel!! Dette gjør at alle dataene dine slettes.\n Dette er en alfafunksjon, som kanskje ikke fungerer som forventet.\n Trykk på «Slett og konvertér …» for å fortsette."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Slett og konvertér …"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Fargemodus for bilder"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Bruk sRGB"</string>
@@ -296,7 +296,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomali (rød-grønn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomali (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Fargekorrigering"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Denne funksjonen er eksperimentell og kan påvirke ytelsen."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Dette er en eksperimentell funksjon som kan gjøre at telefonen ikke fungerer optimalt."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Overstyres av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"Ca. <xliff:g id="TIME">%1$s</xliff:g> gjenstår"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> gjenstår"</string>
