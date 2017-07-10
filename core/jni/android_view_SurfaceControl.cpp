@@ -24,6 +24,7 @@
 #include "android/graphics/Region.h"
 #include "core_jni_helpers.h"
 
+#include <android-base/chrono_utils.h>
 #include <JNIHelp.h>
 #include <ScopedUtfChars.h>
 #include <android_runtime/android_view_Surface.h>
@@ -552,8 +553,9 @@ static void nativeSetDisplayPowerMode(JNIEnv* env, jclass clazz, jobject tokenOb
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
 
-    ALOGD_IF_SLOW(100, "Excessive delay in setPowerMode()");
+    android::base::Timer t;
     SurfaceComposerClient::setDisplayPowerMode(token, mode);
+    if (t.duration() > 100ms) ALOGD("Excessive delay in setPowerMode()");
 }
 
 static jboolean nativeClearContentFrameStats(JNIEnv* env, jclass clazz, jlong nativeObject) {
