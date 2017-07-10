@@ -146,12 +146,17 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         // and relays them to the tab content.
         mTabKeyListener = new OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (KeyEvent.isModifierKey(keyCode)) {
+                    return false;
+                }
                 switch (keyCode) {
                     case KeyEvent.KEYCODE_DPAD_CENTER:
                     case KeyEvent.KEYCODE_DPAD_LEFT:
                     case KeyEvent.KEYCODE_DPAD_RIGHT:
                     case KeyEvent.KEYCODE_DPAD_UP:
                     case KeyEvent.KEYCODE_DPAD_DOWN:
+                    case KeyEvent.KEYCODE_TAB:
+                    case KeyEvent.KEYCODE_SPACE:
                     case KeyEvent.KEYCODE_ENTER:
                         return false;
 
