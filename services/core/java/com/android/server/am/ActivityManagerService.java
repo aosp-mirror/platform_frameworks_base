@@ -21617,7 +21617,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         if (DEBUG_PSS) Slog.d(TAG_PSS,
                                                 "Requesting dump heap from "
                                                 + myProc + " to " + heapdumpFile);
-                                        thread.dumpHeap(true, heapdumpFile.toString(), fd);
+                                        thread.dumpHeap(/* managed=*/ true, /* runGc= */ false,
+                                                heapdumpFile.toString(), fd);
                                     } catch (RemoteException e) {
                                     }
                                 }
@@ -23348,7 +23349,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return proc;
     }
 
-    public boolean dumpHeap(String process, int userId, boolean managed,
+    public boolean dumpHeap(String process, int userId, boolean managed, boolean runGc,
             String path, ParcelFileDescriptor fd) throws RemoteException {
 
         try {
@@ -23377,7 +23378,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                proc.thread.dumpHeap(managed, path, fd);
+                proc.thread.dumpHeap(managed, runGc, path, fd);
                 fd = null;
                 return true;
             }

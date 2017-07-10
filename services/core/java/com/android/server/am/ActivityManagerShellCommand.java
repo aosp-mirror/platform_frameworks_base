@@ -785,6 +785,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PrintWriter err = getErrPrintWriter();
         boolean managed = true;
         int userId = UserHandle.USER_CURRENT;
+        boolean runGc = false;
 
         String opt;
         while ((opt=getNextOption()) != null) {
@@ -796,6 +797,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 }
             } else if (opt.equals("-n")) {
                 managed = false;
+            } else if (opt.equals("-g")) {
+                runGc = true;
             } else {
                 err.println("Error: Unknown option: " + opt);
                 return -1;
@@ -811,7 +814,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        if (!mInterface.dumpHeap(process, userId, managed, heapFile, fd)) {
+        if (!mInterface.dumpHeap(process, userId, managed, runGc, heapFile, fd)) {
             err.println("HEAP DUMP FAILED on process " + process);
             return -1;
         }
@@ -2555,10 +2558,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
             pw.println("          between samples");
             pw.println("      --streaming: stream the profiling output to the specified file");
-            pw.println("  dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>");
+            pw.println("  dumpheap [--user <USER_ID> current] [-n] [-g] <PROCESS> <FILE>");
             pw.println("      Dump the heap of a process.  The given <PROCESS> argument may");
             pw.println("        be either a process name or pid.  Options are:");
             pw.println("      -n: dump native heap instead of managed heap");
+            pw.println("      -g: force GC before dumping the heap");
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to dump; uses current user if not specified.");
             pw.println("  set-debug-app [-w] [--persistent] <PACKAGE>");
