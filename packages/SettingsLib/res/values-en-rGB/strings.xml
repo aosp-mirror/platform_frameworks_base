@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Aggressive Wi‑Fi to mobile handover"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Always allow Wi‑Fi Roam Scans"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobile data always active"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tethering hardware acceleration"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Disable absolute volume"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Enable in-band ringing"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP Version"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Allow mock locations"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Enable view attribute inspection"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Always keep mobile data active, even when Wi‑Fi is active (for fast network switching)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Use tethering hardware acceleration if available"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Allow USB debugging?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB debugging is intended for development purposes only. Use it to copy data between your computer and your device, install apps on your device without notification and read log data."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Revoke access to USB debugging from all computers you\'ve previously authorised?"</string>

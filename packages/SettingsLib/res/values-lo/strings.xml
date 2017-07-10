@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ສະຫຼັບເປັນ Wi-Fi ເມື່ອມືຖືສັນຍານອ່ອນ"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ອະ​ນຸ​ຍາດ​ການ​ສະ​ແກນ​ການ​ໂຣມ Wi‑Fi ​ສະ​ເໝີ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືຕະຫຼອດເວລາ"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ປິດໃຊ້ລະດັບສຽງສົມບູນ"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ເປີດສຽງເຕືອນແບບອິນແບນ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ເວີຊັນ Bluetooth AVRCP"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ອະນຸຍາດໃຫ້ຈຳລອງຕຳແໜ່ງ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ເປີດ​ນຳ​ໃຊ້​ການກວດ​ສອບ​ຄຸນ​ສົມ​ບັດ​ມຸມມອງ"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ໃຫ້​ຂໍ້​ມູນ​ມື​ຖື​ເປີດ​ຢູ່​ສະ​ເໝີ, ແມ້​ແຕ່​ເມື່ອ Wi‑Fi ເປີດ​ຢູ່ (ສຳ​ລັບ​ການ​ສະ​ຫຼັບ​ເຄືອ​ຂ່າຍ​ໄວ)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວຫາກວ່າສາມາດໃຊ້ໄດ້"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"ອະນຸຍາດໃຫ້ດີບັ໊ກຜ່ານ USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"ການດີບັ໊ກຜ່ານ USB ແມ່ນມີຈຸດປະສົງເພື່ອການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບຯໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະອ່ານຂໍ້ມູນການບັນທຶກ."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ຖອດຖອນການເຂົ້າເຖິງການດີບັ໊ກຜ່ານ USB ຈາກຄອມພິວເຕີທຸກເຄື່ອງ ທີ່ທ່ານເຄີຍອະນຸຍາດກ່ອນໜ້ານີ້?"</string>

@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Odločen prehod iz Wi-Fi-ja v mobil. omr."</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vedno omogoči iskanje omrežij Wi-Fi za gostovanje"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Prenos podatkov v mobilnem omrežju je vedno aktiven"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Strojno pospeševanje za internetno povezavo prek mobilnega telefona"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogočanje absolutnega praga glasnosti"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Omogoči zvonjenje iz telefona"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Različica profila AVRCP za Bluetooth"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dovoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogoči pregled atributa pogleda"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Prenos podatkov v mobilnih omrežjih je vedno aktiven – tudi ko je aktivna povezava Wi-Fi (za hiter preklop med omrežji)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Uporabi strojno pospeševanje za internetno povezavo prek mobilnega telefona, če je na voljo"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Ali dovolite odpravljanje težav s povezavo USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Odpravljanje težav s povezavo USB je namenjeno samo za razvoj. Lahko ga uporabljate za kopiranje podatkov med računalnikom in napravo, nameščanje aplikacij v napravo brez obveščanja in branje podatkov v dnevniku."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Ali želite preklicati dostop do odpravljanja težav prek povezave USB iz vseh računalnikov, ki ste jih pooblastili?"</string>

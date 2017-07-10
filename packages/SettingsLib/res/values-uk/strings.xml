@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Перемикатися з Wi-Fi на мобільну мережу"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Завжди шукати мережі Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Не вимикати мобільне передавання даних"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Апаратне прискорення під час використання телефона в режимі модема"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Вимкнути абсолютну гучність"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Увімкнути внутрішньосмугові сигнали"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версія Bluetooth AVRCP"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Дозв. фіктивні місцезн."</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Увімкнути оцінку атрибуції переглядів"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не вимикати мобільний Інтернет, навіть якщо ввімкнено Wi‑Fi (щоб швидше переходити між мережами)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Якщо доступно, вмикати апаратне прискорення під час використання телефона в режимі модема"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Дозвол. налагодж. USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Налагодження USB застосовується лише з метою розробки. Його можна використовувати для копіювання даних між комп’ютером і пристроєм, встановлення програм на вашому пристрої без сповіщення та читання даних журналу."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Скасувати доступ до налагодження USB для всіх комп’ютерів, які раніше отримали таке право?"</string>

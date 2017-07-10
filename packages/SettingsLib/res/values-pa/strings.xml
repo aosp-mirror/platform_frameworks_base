@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ਆਕਰਮਣਸ਼ੀਲ Wi‑Fi ਤੋਂ ਮੋਬਾਈਲ ਹੈਂਡਓਵਰ"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ਹਮੇਸ਼ਾਂ Wi‑Fi Roam Scans ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ਮੋਬਾਈਲ ਡੈਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਸ਼ਨ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ਪੂਰਨ ਵੌਲਿਊਮ ਨੂੰ ਅਯੋਗ ਬਣਾਓ"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ਇਨ-ਬੈਂਡ ਘੰਟੀ ਵੱਜਣ ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ਬਲੂਟੁੱਥ AVRCP ਰੂਪ"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ਗੁਣ ਛਾਣਬੀਣ ਦੇਖੋ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ਹਮੇਸ਼ਾ ਮੋਬਾਈਲ ਡੇਟਾ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਰੱਖੋ ਭਾਵੇਂ Wi‑Fi ਕਿਰਿਆਸ਼ੀਲ ਹੋਵੇ (ਤੇਜ਼ ਨੈੱਟਵਰਕ ਸਵਿੱਚਿੰਗ ਲਈ)।"</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ਉਪਲਬਧ ਹੋਣ \'ਤੇ ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਸ਼ਨ ਵਰਤੋ"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"ਕੀ USB ਡੀਬਗਿੰਗ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ਡੀਬਗਿੰਗ ਕੇਵਲ ਵਿਕਾਸ ਮੰਤਵਾਂ ਲਈ ਹੁੰਦੀ ਹੈ। ਇਸਨੂੰ ਆਪਣੇ ਕੰਪਿਊਟਰ ਅਤੇ ਆਪਣੀ ਡੀਵਾਈਸ ਵਿਚਕਾਰ ਡੈਟਾ ਕਾਪੀ ਕਰਨ ਲਈ ਵਰਤੋ, ਸੂਚਨਾ ਦੇ ਬਿਨਾਂ ਆਪਣੀ ਡੀਵਾਈਸ ਤੇ ਐਪਸ ਇੰਸਟੌਲ ਕਰੋ ਅਤੇ ਲੌਗ ਡੈਟਾ ਪੜ੍ਹੋ।"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ਕੀ ਉਹਨਾਂ ਸਾਰੇ ਕੰਪਿਊਟਰਾਂ ਤੋਂ USB ਡੀਬਗਿੰਗ ਤੱਕ ਪਹੁੰਚ ਰੱਦ ਕਰਨੀ ਹੈ, ਜਿਹਨਾਂ ਲਈ ਪਹਿਲਾਂ ਤੁਸੀਂ ਅਧਿਕਾਰਤ ਕੀਤਾ ਹੈ?"</string>

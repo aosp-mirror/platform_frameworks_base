@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Chuyển vùng Wi‑Fi tích cực sang mạng DĐ"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Luôn cho phép quét chuyển vùng Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dữ liệu di động luôn hiện hoạt"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tăng tốc phần cứng cho chia sẻ kết nối"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Vô hiệu hóa âm lượng tuyệt đối"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Bật đổ chuông trong dải"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth phiên bản AVRCP"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Cho phép vị trí mô phỏng"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Cho phép kiểm tra thuộc tính của chế độ xem"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Luôn giữ cho dữ liệu di động hoạt động, ngay cả khi Wi-Fi đang hoạt động (để chuyển đổi mạng nhanh)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Sử dụng tăng tốc phần cứng cho chia sẻ kết nối nếu được"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Cho phép gỡ lỗi USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Gỡ lỗi USB chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị của bạn mà không thông báo và đọc dữ liệu nhật ký."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Thu hồi quyền truy cập gỡ lỗi USB từ tất cả máy tính mà bạn đã ủy quyền trước đó?"</string>
