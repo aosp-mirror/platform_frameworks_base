@@ -23,6 +23,7 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -76,6 +77,8 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     @Mock android.media.IRingtonePlayer mRingtonePlayer;
     @Mock Light mLight;
     @Mock Handler mHandler;
+    @Mock
+    NotificationUsageStats mUsageStats;
 
     private NotificationManagerService mService;
     private String mPkg = "com.android.server.notification";
@@ -115,6 +118,8 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
 
+        when(mUsageStats.isAlertRateLimited(any())).thenReturn(false);
+
         mService = new NotificationManagerService(getContext());
         mService.setAudioManager(mAudioManager);
         mService.setVibrator(mVibrator);
@@ -123,6 +128,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         mService.setLights(mLight);
         mService.setScreenOn(false);
         mService.setFallbackVibrationPattern(FALLBACK_VIBRATION_PATTERN);
+        mService.setUsageStats(mUsageStats);
     }
 
     //
@@ -803,6 +809,39 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         mService.buzzBeepBlinkLocked(r);
 
+        verifyNeverBeep();
+    }
+
+    @Test
+    public void testRepeatedSoundOverLimitMuted() throws Exception {
+        when(mUsageStats.isAlertRateLimited(any())).thenReturn(true);
+
+        NotificationRecord r = getBeepyNotification();
+
+        mService.buzzBeepBlinkLocked(r);
+        verifyNeverBeep();
+    }
+
+    @Test
+    public void testPostingSilentNotificationDoesNotAffectRateLimiting() throws Exception {
+        NotificationRecord r = getQuietNotification();
+        mService.buzzBeepBlinkLocked(r);
+
+        verify(mUsageStats, never()).isAlertRateLimited(any());
+    }
+
+    @Test
+    public void testCrossUserSoundMuted() throws Exception {
+        final Notification n = new Builder(getContext(), "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon).build();
+
+        int userId = mUser.getIdentifier() + 1;
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 0, mTag, mUid,
+                mPid, n, UserHandle.of(userId), null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn,
+                new NotificationChannel("test", "test", IMPORTANCE_HIGH));
+
+        mService.buzzBeepBlinkLocked(r);
         verifyNeverBeep();
     }
 
