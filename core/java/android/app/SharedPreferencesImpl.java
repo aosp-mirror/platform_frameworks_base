@@ -778,7 +778,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             }
 
             long fsyncDuration = fsyncTime - writeTime;
-            mSyncTimes.add(Long.valueOf(fsyncDuration).intValue());
+            mSyncTimes.add((int) fsyncDuration);
             mNumSync++;
 
             if (DEBUG || mNumSync % 1024 == 0 || fsyncDuration > MAX_FSYNC_DURATION_MILLIS) {
