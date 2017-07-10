@@ -411,7 +411,8 @@
         <!-- started from PipUI -->
         <activity
             android:name=".pip.tv.PipMenuActivity"
-            android:exported="true"
+            android:permission="com.android.systemui.permission.SELF"
+            android:exported="false"
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
             android:taskAffinity=""
@@ -420,24 +421,10 @@
             android:supportsPictureInPicture="true"
             androidprv:alwaysFocusable="true"
             android:excludeFromRecents="true" />
-        <activity
-            android:name=".pip.tv.PipOverlayActivity"
-            android:exported="true"
-            android:theme="@style/PipTheme"
-            android:taskAffinity=""
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|locale|layoutDirection"
-            android:resizeableActivity="true"
-            android:supportsPictureInPicture="true"
-            android:excludeFromRecents="true" />
-        <activity
-            android:name=".pip.tv.PipOnboardingActivity"
-            android:exported="true"
-            android:theme="@style/PipTheme"
-            android:launchMode="singleTop"
-            android:excludeFromRecents="true" />
 
         <activity
             android:name=".pip.phone.PipMenuActivity"
+            android:permission="com.android.systemui.permission.SELF"
             android:theme="@style/PipPhoneOverlayControlTheme"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
             android:excludeFromRecents="true"

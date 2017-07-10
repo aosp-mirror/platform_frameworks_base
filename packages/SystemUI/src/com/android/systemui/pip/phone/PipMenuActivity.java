@@ -388,6 +388,11 @@ public class PipMenuActivity extends Activity {
 
     private void updateFromIntent(Intent intent) {
         mToControllerMessenger = intent.getParcelableExtra(EXTRA_CONTROLLER_MESSENGER);
+        if (mToControllerMessenger == null) {
+            Log.w(TAG, "Controller messenger is null. Stopping.");
+            finish();
+            return;
+        }
         notifyActivityCallback(mMessenger);
 
         // Register for HidePipMenuEvents once we notify the controller of this activity
@@ -567,6 +572,9 @@ public class PipMenuActivity extends Activity {
     }
 
     private void sendMessage(Message m, String errorMsg) {
+        if (mToControllerMessenger == null) {
+            return;
+        }
         try {
             mToControllerMessenger.send(m);
         } catch (RemoteException e) {
