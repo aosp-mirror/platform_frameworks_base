@@ -1,7 +1,7 @@
 <!--
-Copyright (C) 2014 The Android Open Source Project
+    Copyright (C) 2017 The Android Open Source Project
 
-   Licensed under the Apache License, Version 2.0 (the "License");
+    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
 
@@ -14,12 +14,12 @@ Copyright (C) 2014 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="32dp"
-        android:height="32dp"
+        android:width="24.0dp"
+        android:height="24.0dp"
         android:viewportWidth="24.0"
         android:viewportHeight="24.0"
         android:tint="?attr/colorControlNormal">
     <path
-        android:fillColor="@color/white"
-        android:pathData="M20.0,8.0l-2.8,0.0c-0.5,-0.8 -1.1,-1.5 -1.8,-2.0L17.0,4.4L15.6,3.0l-2.2,2.2C13.0,5.1 12.5,5.0 12.0,5.0s-1.0,0.1 -1.4,0.2L8.4,3.0L7.0,4.4L8.6,6.0C7.9,6.5 7.3,7.2 6.8,8.0L4.0,8.0l0.0,2.0l2.1,0.0C6.0,10.3 6.0,10.7 6.0,11.0l0.0,1.0L4.0,12.0l0.0,2.0l2.0,0.0l0.0,1.0c0.0,0.3 0.0,0.7 0.1,1.0L4.0,16.0l0.0,2.0l2.8,0.0c1.0,1.8 3.0,3.0 5.2,3.0s4.2,-1.2 5.2,-3.0L20.0,18.0l0.0,-2.0l-2.1,0.0c0.1,-0.3 0.1,-0.7 0.1,-1.0l0.0,-1.0l2.0,0.0l0.0,-2.0l-2.0,0.0l0.0,-1.0c0.0,-0.3 0.0,-0.7 -0.1,-1.0L20.0,10.0L20.0,8.0zM14.0,16.0l-4.0,0.0l0.0,-2.0l4.0,0.0L14.0,16.0zM14.0,12.0l-4.0,0.0l0.0,-2.0l4.0,0.0L14.0,12.0z"/>
+        android:fillColor="#FF000000"
+        android:pathData="M20.0,8.0l-2.81,0.0a5.985,5.985 0.0,0.0 0.0,-1.82 -1.96l0.93,-0.93a0.99,0.996 0.0,1.0 0.0,-1.41 -1.41l-1.47,1.47C12.96,5.06 12.49,5.0 12.0,5.0s-0.9,0.06 -1.4,0.17L9.12,3.7a0.99,0.996 0.0,1.0 0.0,-1.41 1.41l0.9,0.92C7.88,6.55 7.26,7.22 6.81,8.0L4.0,8.0c-0.55,0.0 -1.0,0.45 -1.0,1.0s0.45,1.0 1.0,1.0l2.09,0.0c0.0,0.33 0.0,0.66 -0.09,1.0l0.0,1.0L4.0,12.0c-0.55,0.0 -1.0,0.45 -1.0,1.0s0.45,1.0 1.0,1.0l2.0,0.0l0.0,1.0c0.0,0.3 0.0,0.6 0.09,1.0L4.0,16.0c-0.55,0.0 -1.0,0.45 -1.0,1.0s0.45,1.0 1.0,1.0l2.81,0.0c1.04,1.79 2.97,3.0 5.19,3.0s4.15,-1.21 5.19,-3.0L20.0,18.0c0.55,0.0 1.0,-0.45 1.0,-1.0s-0.45,-1.0 -1.0,-1.0l-2.09,0.0c0.05,-0.3 0.09,-0.6 0.09,-1.0l0.0,-1.0l2.0,0.0c0.55,0.0 1.0,-0.45 1.0,-1.0s-0.45,-1.0 -1.0,-1.0l-2.0,0.0l0.0,-1.0c0.0,-0.34 -0.04,-0.67 -0.09,-1.0L20.0,10.0c0.55,0.0 1.0,-0.45 1.0,-1.0s-0.45,-1.0 -1.0,-1.0zm-6.0,8.0l-4.0,0.0l0.0,-2.0l4.0,0.0l0.0,2.0zm0.0,-4.0l-4.0,0.0l0.0,-2.0l4.0,0.0l0.0,2.0z"/>
 </vector>
