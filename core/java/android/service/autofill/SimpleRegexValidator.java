@@ -19,12 +19,15 @@ package android.service.autofill;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.autofill.AutofillId;
 
 import com.android.internal.util.Preconditions;
+
+import java.util.regex.Pattern;
 
 /**
  * Defines if a field is valid based on a regular expression (regex).
@@ -36,32 +39,33 @@ public final class SimpleRegexValidator extends InternalValidator implements Par
     private static final String TAG = "SimpleRegexValidator";
 
     private final AutofillId mId;
-    private final String mRegex;
+    private final Pattern mRegex;
 
     /**
-      * Default constructor.
-      *
-      * @param id id of the field whose regex is applied to.
-      * @param regex regular expression that defines the result
-      * of the validator: if the regex matches the contents of
-      * the field identified by {@code id}, it returns {@code true}; otherwise, it
-      * returns {@code false}.
+     * Default constructor.
+     *
+     * @param id id of the field whose regex is applied to.
+     * @param regex regular expression that defines the result of the validator: if the regex
+     * matches the contents of the field identified by {@code id}, it returns {@code true};
+     * otherwise, it returns {@code false}. The pattern will be {@link Pattern#compile compiled}
+     * without setting any flags.
       */
     public SimpleRegexValidator(@NonNull AutofillId id, @NonNull String regex) {
         mId = Preconditions.checkNotNull(id);
-        //TODO(b/62534917): throw exception if regex is invalid
-        mRegex = Preconditions.checkNotNull(regex);
+        mRegex = Pattern.compile(regex);
     }
 
     /** @hide */
     @Override
+    @TestApi
     public boolean isValid(@NonNull ValueFinder finder) {
         final String value = finder.findByAutofillId(mId);
         if (value == null) {
             Log.w(TAG, "No view for id " + mId);
             return false;
         }
-        final boolean valid = value.matches(mRegex);
+
+        final boolean valid = mRegex.matcher(value).matches();
         if (sDebug) Log.d(TAG, "isValid(): " + valid);
         return valid;
     }
@@ -87,7 +91,7 @@ public final class SimpleRegexValidator extends InternalValidator implements Par
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mId, flags);
-        parcel.writeString(mRegex);
+        parcel.writeString(mRegex.pattern());
     }
 
     public static final Parcelable.Creator<SimpleRegexValidator> CREATOR =
