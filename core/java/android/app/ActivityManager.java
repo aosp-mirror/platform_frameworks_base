@@ -172,6 +172,9 @@ public class ActivityManager {
         @Override
         public void onUidIdle(int uid, boolean disabled) {
         }
+
+        @Override public void onUidCachedChanged(int uid, boolean cached) {
+        }
     }
 
     final ArrayMap<OnUidImportanceListener, UidObserver> mImportanceListeners = new ArrayMap<>();
@@ -562,6 +565,9 @@ public class ActivityManager {
 
     /** @hide Flag for registerUidObserver: report uid has become active. */
     public static final int UID_OBSERVER_ACTIVE = 1<<3;
+
+    /** @hide Flag for registerUidObserver: report uid cached state has changed. */
+    public static final int UID_OBSERVER_CACHED = 1<<4;
 
     /** @hide Mode for {@link IActivityManager#isAppStartModeDisabled}: normal free-to-run operation. */
     public static final int APP_START_MODE_NORMAL = 0;

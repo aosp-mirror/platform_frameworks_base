@@ -39,6 +39,7 @@ public final class UidRecord {
     boolean curWhitelist;
     boolean setWhitelist;
     boolean idle;
+    boolean setIdle;
     int numProcs;
 
     /**
@@ -79,10 +80,11 @@ public final class UidRecord {
     final Object networkStateLock = new Object();
 
     static final int CHANGE_PROCSTATE = 0;
-    static final int CHANGE_GONE = 1;
-    static final int CHANGE_GONE_IDLE = 2;
-    static final int CHANGE_IDLE = 3;
-    static final int CHANGE_ACTIVE = 4;
+    static final int CHANGE_GONE = 1<<0;
+    static final int CHANGE_IDLE = 1<<1;
+    static final int CHANGE_ACTIVE = 1<<2;
+    static final int CHANGE_CACHED = 1<<3;
+    static final int CHANGE_UNCACHED = 1<<4;
 
     static final class ChangeItem {
         UidRecord uidRecord;
@@ -94,6 +96,7 @@ public final class UidRecord {
     }
 
     ChangeItem pendingChange;
+    int lastReportedChange;
 
     public UidRecord(int _uid) {
         uid = _uid;
@@ -112,12 +115,12 @@ public final class UidRecord {
     }
 
     /**
-     * If the change being dispatched is neither CHANGE_GONE nor CHANGE_GONE_IDLE (not interested in
+     * If the change being dispatched is not CHANGE_GONE (not interested in
      * these changes), then update the {@link #lastDispatchedProcStateSeq} with
      * {@link #curProcStateSeq}.
      */
     public void updateLastDispatchedProcStateSeq(int changeToDispatch) {
-        if (changeToDispatch != CHANGE_GONE && changeToDispatch != CHANGE_GONE_IDLE) {
+        if ((changeToDispatch & CHANGE_GONE) == 0) {
             lastDispatchedProcStateSeq = curProcStateSeq;
         }
     }
@@ -145,6 +148,41 @@ public final class UidRecord {
         }
         if (idle) {
             sb.append(" idle");
+        }
+        if (lastReportedChange != 0) {
+            sb.append(" change:");
+            boolean printed = false;
+            if ((lastReportedChange & CHANGE_GONE) != 0) {
+                printed = true;
+                sb.append("gone");
+            }
+            if ((lastReportedChange & CHANGE_IDLE) != 0) {
+                if (printed) {
+                    sb.append("|");
+                }
+                printed = true;
+                sb.append("idle");
+            }
+            if ((lastReportedChange & CHANGE_ACTIVE) != 0) {
+                if (printed) {
+                    sb.append("|");
+                }
+                printed = true;
+                sb.append("active");
+            }
+            if ((lastReportedChange & CHANGE_CACHED) != 0) {
+                if (printed) {
+                    sb.append("|");
+                }
+                printed = true;
+                sb.append("cached");
+            }
+            if ((lastReportedChange & CHANGE_UNCACHED) != 0) {
+                if (printed) {
+                    sb.append("|");
+                }
+                sb.append("uncached");
+            }
         }
         sb.append(" procs:");
         sb.append(numProcs);

@@ -43,4 +43,14 @@ oneway interface IUidObserver {
      * a sufficient period of time, or all of its processes have gone away.
      */
     void onUidIdle(int uid, boolean disabled);
+
+    /**
+     * Report when the cached state of a uid has changed.
+     * If true, a uid has become cached -- that is, it has some active processes that are
+     * all in the cached state.  It should be doing as little as possible at this point.
+     * If false, that a uid is no longer cached.  This will only be called after
+     * onUidCached() has been reported true.  It will happen when either one of its actively
+     * running processes is no longer cached, or it no longer has any actively running processes.
+     */
+    void onUidCachedChanged(int uid, boolean cached);
 }
