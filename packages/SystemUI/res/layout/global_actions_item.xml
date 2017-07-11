@@ -18,10 +18,11 @@
      work around this for now with LinearLayouts. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/global_actions_panel_width"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_vertical"
-    android:minHeight="114dp"
+    android:layout_gravity="center"
+    android:minWidth="92dp"
+    android:minHeight="92dp"
     android:gravity="center"
     android:orientation="vertical"
     android:paddingEnd="8dip"
@@ -29,8 +30,8 @@
 
     <ImageView
         android:id="@*android:id/icon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_gravity="center"
         android:scaleType="center"/>
 
@@ -39,7 +40,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
+        android:paddingTop="10dp"
         android:gravity="center"
+        android:textSize="12sp"
         android:textAppearance="?android:attr/textAppearanceSmall"
         />
 
@@ -49,7 +52,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
         android:gravity="center"
-        android:minHeight="26dp"
         android:textColor="?android:attr/textColorTertiary"
         android:textAppearance="?android:attr/textAppearanceSmall"
         />

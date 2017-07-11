@@ -802,9 +802,9 @@
 
     <dimen name="hwui_edge_margin">16dp</dimen>
 
-    <dimen name="global_actions_panel_width">125dp</dimen>
+    <dimen name="global_actions_panel_width">120dp</dimen>
 
-    <dimen name="global_actions_top_padding">100dp</dimen>
+    <dimen name="global_actions_top_padding">120dp</dimen>
 
     <!-- the maximum offset in either direction that elements are moved horizontally to prevent
             burn-in on AOD -->

@@ -31,6 +31,8 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.volume.VolumeDialogMotion.LogAccelerateInterpolator;
 import com.android.systemui.volume.VolumeDialogMotion.LogDecelerateInterpolator;
 
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.WallpaperManager;
@@ -1325,6 +1327,13 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                     .translationX(getAnimTranslation())
                     .setDuration(300)
                     .setInterpolator(new LogAccelerateInterpolator())
+                    .setUpdateListener(animation -> {
+                        float frac = animation.getAnimatedFraction();
+                        float alpha = frac *(ScrimController.GRADIENT_SCRIM_ALPHA_BUSY
+                                        - ScrimController.GRADIENT_SCRIM_ALPHA)
+                                + ScrimController.GRADIENT_SCRIM_ALPHA;
+                        mGradientDrawable.setAlpha((int) (alpha * 255));
+                    })
                     .start();
         }
 
