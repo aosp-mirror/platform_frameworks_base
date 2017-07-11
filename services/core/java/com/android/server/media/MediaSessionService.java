@@ -108,6 +108,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
     private INotificationManager mNotificationManager;
+    private boolean mHasFeatureLeanback;
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -154,6 +155,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         mContentResolver = getContext().getContentResolver();
         mSettingsObserver = new SettingsObserver();
         mSettingsObserver.observe();
+        mHasFeatureLeanback = getContext().getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_LEANBACK);
 
         updateUser();
     }
@@ -1509,7 +1512,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private boolean isVoiceKey(int keyCode) {
             return keyCode == KeyEvent.KEYCODE_HEADSETHOOK
-                    || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
+                    || (!mHasFeatureLeanback && keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
         }
 
         private boolean isUserSetupComplete() {
