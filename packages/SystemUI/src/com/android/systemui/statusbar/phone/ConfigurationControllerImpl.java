@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.om.IOverlayManager;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -36,11 +37,13 @@ public class ConfigurationControllerImpl implements ConfigurationController,
     private final Configuration mLastConfig = new Configuration();
     private int mDensity;
     private float mFontScale;
+    private LocaleList mLocaleList;
 
     public ConfigurationControllerImpl(Context context) {
         Configuration currentConfig = context.getResources().getConfiguration();
         mFontScale = currentConfig.fontScale;
         mDensity = currentConfig.densityDpi;
+        mLocaleList = currentConfig.getLocales();
     }
 
     @Override
@@ -63,6 +66,16 @@ public class ConfigurationControllerImpl implements ConfigurationController,
             });
             mDensity = density;
             mFontScale = fontScale;
+        }
+
+        final LocaleList localeList = newConfig.getLocales();
+        if (!localeList.equals(mLocaleList)) {
+            mLocaleList = localeList;
+            listeners.forEach(l -> {
+                if (mListeners.contains(l)) {
+                    l.onLocaleListChanged();
+                }
+            });
         }
 
         if ((mLastConfig.updateFrom(newConfig) & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
