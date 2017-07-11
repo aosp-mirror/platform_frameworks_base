@@ -51,8 +51,8 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"檔案傳輸"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"輸入裝置"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"互聯網連線"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"聯絡人共用"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"用於聯絡人共用"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"共用聯絡人"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"用於共用聯絡人"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"互聯網連線分享"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"訊息存取權"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM 卡存取"</string>
