@@ -19,9 +19,9 @@ package android.service.autofill;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.autofill.AutofillId;
 
@@ -29,7 +29,7 @@ import com.android.internal.util.Preconditions;
 
 /**
  * Validator that returns {@code true} if the number created by concatenating all given fields
- * pass a Luhn algorithm checksum.
+ * pass a Luhn algorithm checksum. All non-digits are ignored.
  *
  * <p>See {@link SaveInfo.Builder#setValidator(Validator)} for examples.
  */
@@ -47,8 +47,41 @@ public final class LuhnChecksumValidator extends InternalValidator implements Pa
         mIds = Preconditions.checkArrayElementsNotNull(ids, "ids");
     }
 
+    /**
+     * Checks if the Luhn checksum is valid.
+     *
+     * @param number The number including the checksum
+     */
+    private static boolean isLuhnChecksumValid(@NonNull String number) {
+        int sum = 0;
+        boolean isDoubled = false;
+
+        for (int i = number.length() - 1; i >= 0; i--) {
+            final int digit = number.charAt(i) - '0';
+            if (digit < 0 || digit > 9) {
+                // Ignore non-digits
+                continue;
+            }
+
+            int addend;
+            if (isDoubled) {
+                addend = digit * 2;
+                if (addend > 9) {
+                    addend -= 9;
+                }
+            } else {
+                addend = digit;
+            }
+            sum += addend;
+            isDoubled = !isDoubled;
+        }
+
+        return sum % 10 == 0;
+    }
+
     /** @hide */
     @Override
+    @TestApi
     public boolean isValid(@NonNull ValueFinder finder) {
         if (mIds == null || mIds.length == 0) return false;
 
@@ -61,12 +94,8 @@ public final class LuhnChecksumValidator extends InternalValidator implements Pa
             }
             number.append(partialNumber);
         }
-        final boolean isValid = TextUtils.isDigitsOnly(number.toString());
-        if (sDebug) Log.d(TAG, "Is valid: " + isValid);
-        // TODO(b/62534917): proper implementation - copy & paste code from:
-        // PaymentUtils.java
-        // PaymentUtilsTest.java
-        return isValid;
+
+        return isLuhnChecksumValid(number.toString());
     }
 
     /////////////////////////////////////
