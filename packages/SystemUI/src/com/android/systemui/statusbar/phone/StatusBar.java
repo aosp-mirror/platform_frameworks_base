@@ -1157,7 +1157,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                             .build());
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
                     mIconController);
-            mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
+            mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow,
+                    mScrimController);
             fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
                 QS qs = (QS) f;
                 if (qs instanceof QSFragment) {
@@ -4282,7 +4283,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         releaseGestureWakeLock();
         runLaunchTransitionEndRunnable();
         mLaunchTransitionFadingAway = false;
-        mScrimController.forceHideScrims(false /* hide */);
+        mScrimController.forceHideScrims(false /* hide */, false /* animated */);
         updateMediaMetaData(true /* metaDataChanged */, true);
     }
 
@@ -4317,7 +4318,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (beforeFading != null) {
                     beforeFading.run();
                 }
-                mScrimController.forceHideScrims(true /* hide */);
+                mScrimController.forceHideScrims(true /* hide */, false /* animated */);
                 updateMediaMetaData(false, true);
                 mNotificationPanel.setAlpha(1);
                 mStackScroller.setParentNotFullyVisible(true);
