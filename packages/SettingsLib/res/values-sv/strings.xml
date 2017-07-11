@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Aggressiv överlämning fr. Wi-Fi t. mobil"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillåt alltid sökning efter Wi-Fi-roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata alltid aktiverad"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvaruacceleration för internetdelning"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inaktivera Absolute volume"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Aktivera samtal inom nätverket"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"AVRCP-version för Bluetooth"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Tillåt skenplatser"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Aktivera inspektion av visningsattribut"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Håll alltid mobildata aktiverad, även när Wi-Fi är aktiverat (så att du snabbt kan byta mellan nätverk)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Använd maskinvaruacceleration för internetdelning om tillgängligt"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Ska USB-felsökning tillåtas?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-felsökning ska endast användas i utvecklingssyfte. Använd den för att kopiera data mellan datorn och enheten, installera appar på enheten utan meddelanden och läsa loggdata."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vill du återkalla åtkomst till USB-felsökning för alla datorer som du tidigare har godkänt?"</string>

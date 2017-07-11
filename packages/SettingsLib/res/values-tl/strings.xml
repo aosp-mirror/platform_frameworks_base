@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Agresibong paglipat ng Wi‑Fi sa mobile"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Palaging payagan ang Mga Pag-scan sa Roaming ng Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Palaging aktibo ang mobile data"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardware acceleration para sa pag-tether"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"I-disable ang absolute volume"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"I-enable ang pag-ring na nasa band"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bersyon ng AVRCP ng Bluetooth"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Payagan ang mga kunwaring lokasyon"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"I-enable ang pagsisiyasat sa attribute na view"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Palaging panatilihing aktibo ang mobile data, kahit na aktibo ang Wi‑Fi (para sa mabilis na paglipat ng network)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Gamitin ang hardware acceleration para sa pag-tether kung available"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Payagan ang pag-debug ng USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Ang pag-debug ng USB ay para lang sa mga layuning pag-develop. Gamitin ito upang kumopya ng data sa pagitan ng iyong computer at iyong device, mag-install ng mga app sa iyong device nang walang notification, at magbasa ng data ng log."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Bawiin ang access sa pag-debug ng USB mula sa lahat ng computer na dati mong pinahintulutan?"</string>

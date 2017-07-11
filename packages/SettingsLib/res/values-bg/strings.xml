@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi-Fi към моб. мрежи: Агресивно предав."</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Сканирането за роуминг на Wi-Fi да е разрешено винаги"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Винаги активни мобилни данни"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Хардуерно ускорение за тетъринга"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Деактивиране на пълната сила на звука"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Активиране на звъненето в една и съща честотна лента"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия на AVRCP за Bluetooth"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Разрешаване на измислени местоположения"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Актив. на инспектирането на атрибутите за преглед"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Мобилните данни са активни винаги – дори когато функцията за Wi‑Fi е включена (за бързо превключване между мрежите)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Да се използва хардуерно ускорение на тетъринга, ако е налице"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Разрешаване на отстраняването на грешки през USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отстраняването на грешки през USB е предназначено само за програмни цели. Използвайте го за копиране на данни между компютъра и устройството си, за инсталиране на приложения на устройството си без известяване и за четене на регистрационни данни."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Да се отмени ли достъпът до отстраняването на грешки през USB от всички по-рано упълномощени от вас компютри?"</string>
