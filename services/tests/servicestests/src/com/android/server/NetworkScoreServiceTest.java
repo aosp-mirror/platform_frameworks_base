@@ -56,13 +56,11 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiSsid;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
@@ -515,6 +513,49 @@ public class NetworkScoreServiceTest {
         mNetworkScoreService.getActiveScorerPackage();
 
         verify(mServiceConnection).getPackageName();
+    }
+
+    @Test
+    public void testGetActiveScorerPackage_missingRequiredPermissions() throws Exception {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        when(mContext.checkCallingOrSelfPermission(permission.SCORE_NETWORKS))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        try {
+            mNetworkScoreService.getActiveScorerPackage();
+            fail("SecurityException expected");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void testGetActiveScorerPackage_noRequestScoresPermission() throws Exception {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        when(mContext.checkCallingOrSelfPermission(permission.SCORE_NETWORKS))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        try {
+            mNetworkScoreService.getActiveScorerPackage();
+        } catch (SecurityException e) {
+            fail("Unexpected SecurityException");
+        }
+    }
+
+    @Test
+    public void testGetActiveScorerPackage_noScoreNetworksPermission() throws Exception {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        when(mContext.checkCallingOrSelfPermission(permission.SCORE_NETWORKS))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        try {
+            mNetworkScoreService.getActiveScorerPackage();
+        } catch (SecurityException e) {
+            fail("Unexpected SecurityException");
+        }
     }
 
     @Test
