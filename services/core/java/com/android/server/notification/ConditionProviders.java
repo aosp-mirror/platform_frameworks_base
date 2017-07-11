@@ -35,6 +35,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
@@ -43,7 +44,8 @@ import java.util.Arrays;
 
 public class ConditionProviders extends ManagedServices {
 
-    private static final String TAG_ENABLED_DND_APPS = "dnd_apps";
+    @VisibleForTesting
+    static final String TAG_ENABLED_DND_APPS = "dnd_apps";
 
     private final ArrayList<ConditionRecord> mRecords = new ArrayList<>();
     private final ArraySet<String> mSystemConditionProviderNames;
@@ -84,7 +86,7 @@ public class ConditionProviders extends ManagedServices {
         c.caption = "condition provider";
         c.serviceInterface = ConditionProviderService.SERVICE_INTERFACE;
         c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES;
-        c.managedServiceTypeTag = TAG_ENABLED_DND_APPS;
+        c.xmlTag = TAG_ENABLED_DND_APPS;
         c.secondarySettingName = Settings.Secure.ENABLED_NOTIFICATION_LISTENERS;
         c.bindPermission = android.Manifest.permission.BIND_CONDITION_PROVIDER_SERVICE;
         c.settingsAction = Settings.ACTION_CONDITION_PROVIDER_SETTINGS;

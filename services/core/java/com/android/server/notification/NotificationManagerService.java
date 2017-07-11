@@ -55,7 +55,6 @@ import static android.service.notification.NotificationListenerService.TRIM_LIGH
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
-import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -162,6 +161,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -342,7 +342,7 @@ public class NotificationManagerService extends SystemService {
 
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
-    private NotificationAssistants mNotificationAssistants;
+    private NotificationAssistants mAssistants;
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
 
@@ -441,24 +441,38 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void readPolicyXml(InputStream stream, boolean forRestore)
+    void readPolicyXml(InputStream stream, boolean forRestore)
             throws XmlPullParserException, NumberFormatException, IOException {
         final XmlPullParser parser = Xml.newPullParser();
         parser.setInput(stream, StandardCharsets.UTF_8.name());
-
-        boolean saveXml = false;
-        while (parser.next() != END_DOCUMENT) {
-            mZenModeHelper.readXml(parser, forRestore);
-            mRankingHelper.readXml(parser, forRestore);
+        XmlUtils.beginDocument(parser, TAG_NOTIFICATION_POLICY);
+        boolean migratedManagedServices = false;
+        int outerDepth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+            if (ZenModeConfig.ZEN_TAG.equals(parser.getName())) {
+                mZenModeHelper.readXml(parser, forRestore);
+            } else if (RankingHelper.TAG_RANKING.equals(parser.getName())){
+                mRankingHelper.readXml(parser, forRestore);
+            }
             // No non-system managed services are allowed on low ram devices
             if (!ActivityManager.isLowRamDeviceStatic()) {
-                saveXml |= mListeners.readXml(parser);
-                saveXml |= mNotificationAssistants.readXml(parser);
-                saveXml |= mConditionProviders.readXml(parser);
+                if (mListeners.getConfig().xmlTag.equals(parser.getName())) {
+                    mListeners.readXml(parser);
+                    migratedManagedServices = true;
+                } else if (mAssistants.getConfig().xmlTag.equals(parser.getName())) {
+                    mAssistants.readXml(parser);
+                    migratedManagedServices = true;
+                } else if (mConditionProviders.getConfig().xmlTag.equals(parser.getName())) {
+                    mConditionProviders.readXml(parser);
+                    migratedManagedServices = true;
+                }
             }
         }
 
-        if (saveXml) {
+        if (!migratedManagedServices) {
+            mListeners.migrateToXml();
+            mAssistants.migrateToXml();
+            mConditionProviders.migrateToXml();
             savePolicyFile();
         }
     }
@@ -467,7 +481,7 @@ public class NotificationManagerService extends SystemService {
         if (DBG) Slog.d(TAG, "loadPolicyFile");
         synchronized (mPolicyFile) {
 
-            FileInputStream infile = null;
+            InputStream infile = null;
             try {
                 infile = mPolicyFile.openRead();
                 readPolicyXml(infile, false /*forRestore*/);
@@ -523,7 +537,7 @@ public class NotificationManagerService extends SystemService {
         mZenModeHelper.writeXml(out, forBackup);
         mRankingHelper.writeXml(out, forBackup);
         mListeners.writeXml(out, forBackup);
-        mNotificationAssistants.writeXml(out, forBackup);
+        mAssistants.writeXml(out, forBackup);
         mConditionProviders.writeXml(out, forBackup);
         out.endTag(null, TAG_NOTIFICATION_POLICY);
         out.endDocument();
@@ -898,7 +912,7 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
                 mListeners.onPackagesChanged(removingPackage, pkgList, uidList);
-                mNotificationAssistants.onPackagesChanged(removingPackage, pkgList, uidList);
+                mAssistants.onPackagesChanged(removingPackage, pkgList, uidList);
                 mConditionProviders.onPackagesChanged(removingPackage, pkgList, uidList);
                 mRankingHelper.onPackagesChanged(removingPackage, changeUserId, pkgList, uidList);
                 savePolicyFile();
@@ -970,7 +984,7 @@ public class NotificationManagerService extends SystemService {
                 // Refresh managed services
                 mConditionProviders.onUserSwitched(user);
                 mListeners.onUserSwitched(user);
-                mNotificationAssistants.onUserSwitched(user);
+                mAssistants.onUserSwitched(user);
                 mZenModeHelper.onUserSwitched(user);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
                 mUserProfiles.updateCache(context);
@@ -983,7 +997,7 @@ public class NotificationManagerService extends SystemService {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 mConditionProviders.onUserUnlocked(user);
                 mListeners.onUserUnlocked(user);
-                mNotificationAssistants.onUserUnlocked(user);
+                mAssistants.onUserUnlocked(user);
                 mZenModeHelper.onUserUnlocked(user);
             }
         }
@@ -1231,7 +1245,7 @@ public class NotificationManagerService extends SystemService {
         mListeners = notificationListeners;
 
         // This is a MangedServices object that keeps track of the assistant.
-        mNotificationAssistants = notificationAssistants;
+        mAssistants = notificationAssistants;
 
         mPolicyFile = policyFile;
         loadPolicyFile();
@@ -1400,7 +1414,7 @@ public class NotificationManagerService extends SystemService {
             // bind to listener services.
             mSettingsObserver.observe();
             mListeners.onBootPhaseAppsCanStart();
-            mNotificationAssistants.onBootPhaseAppsCanStart();
+            mAssistants.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
         }
     }
@@ -1569,7 +1583,6 @@ public class NotificationManagerService extends SystemService {
                 Slog.e(TAG, "Not doing toast. pkg=" + pkg + " callback=" + callback);
                 return ;
             }
-
             final boolean isSystemToast = isCallerSystemOrPhone() || ("android".equals(pkg));
             final boolean isPackageSuspended =
                     isPackageSuspendedForUser(pkg, Binder.getCallingUid());
@@ -1928,7 +1941,7 @@ public class NotificationManagerService extends SystemService {
 
             // Listener & assistant
             mListeners.onPackagesChanged(true, packages, uids);
-            mNotificationAssistants.onPackagesChanged(true, packages, uids);
+            mAssistants.onPackagesChanged(true, packages, uids);
 
             // Zen
             mConditionProviders.onPackagesChanged(true, packages, uids);
@@ -2134,8 +2147,8 @@ public class NotificationManagerService extends SystemService {
             long identity = Binder.clearCallingIdentity();
             try {
                 ManagedServices manager =
-                        mNotificationAssistants.isComponentEnabledForCurrentProfiles(component)
-                        ? mNotificationAssistants
+                        mAssistants.isComponentEnabledForCurrentProfiles(component)
+                        ? mAssistants
                         : mListeners;
                 manager.setComponentState(component, true);
             } finally {
@@ -2255,7 +2268,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info =
-                            mNotificationAssistants.checkServiceTokenLocked(token);
+                            mAssistants.checkServiceTokenLocked(token);
                     unsnoozeNotificationInt(key, info);
                 }
             } finally {
@@ -2788,7 +2801,7 @@ public class NotificationManagerService extends SystemService {
         public boolean isNotificationAssistantAccessGranted(ComponentName assistant) {
             Preconditions.checkNotNull(assistant);
             checkCallerIsSystemOrSameApp(assistant.getPackageName());
-            return mNotificationAssistants.isPackageOrComponentAllowed(assistant.flattenToString(),
+            return mAssistants.isPackageOrComponentAllowed(assistant.flattenToString(),
                     getCallingUserHandle().getIdentifier());
         }
 
@@ -2835,7 +2848,7 @@ public class NotificationManagerService extends SystemService {
             if (!mActivityManager.isLowRamDevice()) {
                 mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
                         userId, false, granted);
-                mNotificationAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
+                mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
                         userId, true, granted);
 
                 getContext().sendBroadcastAsUser(new Intent(
@@ -2854,7 +2867,7 @@ public class NotificationManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
-                    mNotificationAssistants.checkServiceTokenLocked(token);
+                    mAssistants.checkServiceTokenLocked(token);
                     int N = mEnqueuedNotifications.size();
                     for (int i = 0; i < N; i++) {
                         final NotificationRecord n = mEnqueuedNotifications.get(i);
@@ -2876,7 +2889,7 @@ public class NotificationManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
-                    mNotificationAssistants.checkServiceTokenLocked(token);
+                    mAssistants.checkServiceTokenLocked(token);
                     NotificationRecord n = mNotificationsByKey.get(adjustment.getKey());
                     applyAdjustment(n, adjustment);
                 }
@@ -2893,7 +2906,7 @@ public class NotificationManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
-                    mNotificationAssistants.checkServiceTokenLocked(token);
+                    mAssistants.checkServiceTokenLocked(token);
                     for (Adjustment adjustment : adjustments) {
                         NotificationRecord n = mNotificationsByKey.get(adjustment.getKey());
                         applyAdjustment(n, adjustment);
@@ -3273,7 +3286,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 pw.println(')');
                 pw.println("\n  Notification assistant services:");
-                mNotificationAssistants.dump(pw, filter);
+                mAssistants.dump(pw, filter);
             }
 
             if (!filter.filtered || zenOnly) {
@@ -3664,7 +3677,7 @@ public class NotificationManagerService extends SystemService {
             cancelNotificationLocked(r, false, REASON_SNOOZED, wasPosted);
             updateLightsLocked();
             if (mSnoozeCriterionId != null) {
-                mNotificationAssistants.notifyAssistantSnoozedLocked(r.sbn, mSnoozeCriterionId);
+                mAssistants.notifyAssistantSnoozedLocked(r.sbn, mSnoozeCriterionId);
                 mSnoozeHelper.snooze(r);
             } else {
                 mSnoozeHelper.snooze(r, mDuration);
@@ -3728,8 +3741,8 @@ public class NotificationManagerService extends SystemService {
                 mRankingHelper.extractSignals(r);
 
                 // tell the assistant service about the notification
-                if (mNotificationAssistants.isEnabled()) {
-                    mNotificationAssistants.onNotificationEnqueued(r);
+                if (mAssistants.isEnabled()) {
+                    mAssistants.onNotificationEnqueued(r);
                     mHandler.postDelayed(new PostNotificationRunnable(r.getKey()),
                             DELAY_FOR_ASSISTANT_TIME);
                 } else {
@@ -5238,7 +5251,7 @@ public class NotificationManagerService extends SystemService {
             Config c = new Config();
             c.caption = "notification assistant service";
             c.serviceInterface = NotificationAssistantService.SERVICE_INTERFACE;
-            c.managedServiceTypeTag = TAG_ENABLED_NOTIFICATION_ASSISTANTS;
+            c.xmlTag = TAG_ENABLED_NOTIFICATION_ASSISTANTS;
             c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT;
             c.bindPermission = Manifest.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE;
             c.settingsAction = Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS;
@@ -5350,7 +5363,7 @@ public class NotificationManagerService extends SystemService {
             Config c = new Config();
             c.caption = "notification listener";
             c.serviceInterface = NotificationListenerService.SERVICE_INTERFACE;
-            c.managedServiceTypeTag = TAG_ENABLED_NOTIFICATION_LISTENERS;
+            c.xmlTag = TAG_ENABLED_NOTIFICATION_LISTENERS;
             c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_LISTENERS;
             c.bindPermission = android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE;
             c.settingsAction = Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS;
