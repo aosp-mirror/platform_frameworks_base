@@ -29,6 +29,8 @@ import android.testing.AndroidTestingRunner;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -52,6 +54,7 @@ public class TileServicesTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        mDependency.injectMockDependency(BluetoothController.class);
         mManagers = new ArrayList<>();
         QSTileHost host = new QSTileHost(mContext, null,
                 mock(StatusBarIconController.class));
