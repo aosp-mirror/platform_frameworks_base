@@ -419,10 +419,16 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int TRANSPORT_WIFI_AWARE = 5;
 
+    /**
+     * Indicates this network uses a LoWPAN transport.
+     * @hide
+     */
+    public static final int TRANSPORT_LOWPAN = 6;
+
     /** @hide */
     public static final int MIN_TRANSPORT = TRANSPORT_CELLULAR;
     /** @hide */
-    public static final int MAX_TRANSPORT = TRANSPORT_WIFI_AWARE;
+    public static final int MAX_TRANSPORT = TRANSPORT_LOWPAN;
 
     /** @hide */
     public static boolean isValidTransport(int transportType) {
@@ -435,7 +441,8 @@ public final class NetworkCapabilities implements Parcelable {
         "BLUETOOTH",
         "ETHERNET",
         "VPN",
-        "WIFI_AWARE"
+        "WIFI_AWARE",
+        "LOWPAN"
     };
 
     /**
