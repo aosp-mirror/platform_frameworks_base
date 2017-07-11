@@ -130,7 +130,7 @@ import dalvik.system.VMRuntime;
  * caller of the read function must know what type to expect and pass in the
  * appropriate {@link Parcelable.Creator Parcelable.Creator} instead to
  * properly construct the new object and read its data.  (To more efficient
- * write and read a single Parceable object that is not null, you can directly
+ * write and read a single Parcelable object that is not null, you can directly
  * call {@link Parcelable#writeToParcel Parcelable.writeToParcel} and
  * {@link Parcelable.Creator#createFromParcel Parcelable.Creator.createFromParcel}
  * yourself.)</p>
