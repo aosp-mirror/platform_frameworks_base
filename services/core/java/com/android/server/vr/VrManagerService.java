@@ -56,6 +56,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.WindowManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
@@ -627,8 +628,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
             DisplayManager dm =
                     (DisplayManager) getContext().getSystemService(Context.DISPLAY_SERVICE);
-            ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
-            mVr2dDisplay = new Vr2dDisplay(dm, ami, mVrManager);
+            mVr2dDisplay = new Vr2dDisplay(
+                    dm,
+                    LocalServices.getService(ActivityManagerInternal.class),
+                    LocalServices.getService(WindowManagerInternal.class),
+                    mVrManager);
             mVr2dDisplay.init(getContext(), mBootsToVr);
 
             IntentFilter intentFilter = new IntentFilter();

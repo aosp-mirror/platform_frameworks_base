@@ -24,6 +24,7 @@ import android.service.vr.IPersistentVrStateCallbacks;
 import android.service.vr.IVrManager;
 import android.util.Log;
 import android.view.Surface;
+import android.view.WindowManagerInternal;
 
 import com.android.server.vr.VrManagerService;
 
@@ -74,6 +75,7 @@ class Vr2dDisplay {
     public static final int MIN_VR_DISPLAY_DPI = 1;
 
     private final ActivityManagerInternal mActivityManagerInternal;
+    private final WindowManagerInternal mWindowManagerInternal;
     private final DisplayManager mDisplayManager;
     private final IVrManager mVrManager;
     private final Object mVdLock = new Object();
@@ -103,9 +105,11 @@ class Vr2dDisplay {
     private boolean mBootsToVr = false;  // The device boots into VR (standalone VR device)
 
     public Vr2dDisplay(DisplayManager displayManager,
-           ActivityManagerInternal activityManagerInternal, IVrManager vrManager) {
+           ActivityManagerInternal activityManagerInternal,
+           WindowManagerInternal windowManagerInternal, IVrManager vrManager) {
         mDisplayManager = displayManager;
         mActivityManagerInternal = activityManagerInternal;
+        mWindowManagerInternal = windowManagerInternal;
         mVrManager = vrManager;
         mVirtualDisplayWidth = DEFAULT_VIRTUAL_DISPLAY_WIDTH;
         mVirtualDisplayHeight = DEFAULT_VIRTUAL_DISPLAY_HEIGHT;
@@ -296,18 +300,22 @@ class Vr2dDisplay {
                     UNIQUE_DISPLAY_ID);
 
             if (mVirtualDisplay != null) {
-                mActivityManagerInternal.setVr2dDisplayId(
-                    mVirtualDisplay.getDisplay().getDisplayId());
+                updateDisplayId(mVirtualDisplay.getDisplay().getDisplayId());
                 // Now create the ImageReader to supply a Surface to the new virtual display.
                 startImageReader();
             } else {
                 Log.w(TAG, "Virtual display id is null after createVirtualDisplay");
-                mActivityManagerInternal.setVr2dDisplayId(INVALID_DISPLAY);
+                updateDisplayId(INVALID_DISPLAY);
                 return;
             }
         }
 
         Log.i(TAG, "VD created: " + mVirtualDisplay);
+    }
+
+    private void updateDisplayId(int displayId) {
+        mActivityManagerInternal.setVr2dDisplayId(displayId);
+        mWindowManagerInternal.setVr2dDisplayId(displayId);
     }
 
     /**
@@ -325,7 +333,7 @@ class Vr2dDisplay {
                     } else {
                         Log.i(TAG, "Stopping Virtual Display");
                         synchronized (mVdLock) {
-                            mActivityManagerInternal.setVr2dDisplayId(INVALID_DISPLAY);
+                            updateDisplayId(INVALID_DISPLAY);
                             setSurfaceLocked(null); // clean up and release the surface first.
                             if (mVirtualDisplay != null) {
                                 mVirtualDisplay.release();
