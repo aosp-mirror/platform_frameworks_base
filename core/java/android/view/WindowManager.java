@@ -547,6 +547,25 @@ public interface WindowManager extends ViewManager {
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
 
+        /**
+         * Return true if the window type is an alert window.
+         *
+         * @param type The window type.
+         * @return If the window type is an alert window.
+         * @hide
+         */
+        public static boolean isSystemAlertWindowType(int type) {
+            switch (type) {
+                case TYPE_PHONE:
+                case TYPE_PRIORITY_PHONE:
+                case TYPE_SYSTEM_ALERT:
+                case TYPE_SYSTEM_ERROR:
+                case TYPE_SYSTEM_OVERLAY:
+                    return true;
+            }
+            return false;
+        }
+
         /** @deprecated this is ignored, this value is set automatically when needed. */
         @Deprecated
         public static final int MEMORY_TYPE_NORMAL = 0;
@@ -1085,6 +1104,15 @@ public interface WindowManager extends ViewManager {
          * becomes top-most.
          * {@hide} */
         public static final int PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR = 0x00000200;
+
+        /**
+         * Flag to indicate that any window added by an application process that is of type
+         * {@link #TYPE_TOAST} or that requires
+         * {@link android.app.AppOpsManager#OP_SYSTEM_ALERT_WINDOW} permission should be hidden when
+         * this window is visible.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
 
         /**
          * Control flags that are private to the platform.
