@@ -118,27 +118,28 @@ public class UsbDescriptorParser {
     /**
      * @hide
      */
-    public boolean parseDescriptors(byte[] descriptors) {
-        try {
-            mDescriptors.clear();
+    public void parseDescriptors(byte[] descriptors) {
+        mDescriptors.clear();
 
-            ByteStream stream = new ByteStream(descriptors);
-            while (stream.available() > 0) {
-                UsbDescriptor descriptor = allocDescriptor(stream);
-                if (descriptor != null) {
-                    // Parse
+        ByteStream stream = new ByteStream(descriptors);
+        while (stream.available() > 0) {
+            UsbDescriptor descriptor = allocDescriptor(stream);
+            if (descriptor != null) {
+                // Parse
+                try {
                     descriptor.parseRawDescriptors(stream);
-                    mDescriptors.add(descriptor);
-
-                    // Clean up
-                    descriptor.postParse(stream);
+                } catch (Exception ex) {
+                    Log.e(TAG, "Exception parsing USB descriptors.", ex);
                 }
+
+                // Its OK to add the invalid descriptor as the postParse()
+                // routine will mark it as invalid.
+                mDescriptors.add(descriptor);
+
+                // Clean up
+                descriptor.postParse(stream);
             }
-            return true;
-        } catch (Exception ex) {
-            Log.e(TAG, "Exception parsing USB descriptors.", ex);
         }
-        return false;
     }
 
     /**
@@ -146,7 +147,11 @@ public class UsbDescriptorParser {
      */
     public boolean parseDevice(String deviceAddr) {
         byte[] rawDescriptors = getRawDescriptors(deviceAddr);
-        return rawDescriptors != null && parseDescriptors(rawDescriptors);
+        if (rawDescriptors != null) {
+            parseDescriptors(rawDescriptors);
+            return true;
+        }
+        return false;
     }
 
     private native byte[] getRawDescriptors(String deviceAddr);
