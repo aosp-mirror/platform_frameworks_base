@@ -2881,10 +2881,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         transit = TRANSIT_TASK_OPEN_BEHIND;
                     } else {
                         // If a new task is being launched, then mark the existing top activity as
-                        // supporting picture-in-picture while pausing
+                        // supporting picture-in-picture while pausing only if the starting activity
+                        // would not be considered an overlay on top of the current activity
+                        // (eg. not fullscreen, or the assistant)
                         if (focusedTopActivity != null
                                 && focusedTopActivity.getStackId() != PINNED_STACK_ID
-                                && r.getStackId() != ASSISTANT_STACK_ID) {
+                                && r.getStackId() != ASSISTANT_STACK_ID
+                                && r.fullscreen) {
                             focusedTopActivity.supportsPictureInPictureWhilePausing = true;
                         }
                         transit = TRANSIT_TASK_OPEN;
@@ -4549,9 +4552,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
         }
         // If a new task is moved to the front, then mark the existing top activity as supporting
-        // picture-in-picture while paused
+        // picture-in-picture while paused only if the task would not be considered an oerlay on top
+        // of the current activity (eg. not fullscreen, or the assistant)
         if (topActivity != null && topActivity.getStackId() != PINNED_STACK_ID
-                && tr.getStackId() != ASSISTANT_STACK_ID) {
+                && tr.getStackId() != ASSISTANT_STACK_ID && tr.containsOnlyFullscreenActivities()) {
             topActivity.supportsPictureInPictureWhilePausing = true;
         }
 
