@@ -19,6 +19,7 @@ package android.content.res;
 import android.animation.Animator;
 import android.animation.StateListAnimator;
 import android.annotation.AnimRes;
+import android.annotation.AnimatorRes;
 import android.annotation.AnyRes;
 import android.annotation.ArrayRes;
 import android.annotation.AttrRes;
@@ -1162,7 +1163,7 @@ public class Resources {
      *         
      * @see #getXml
      */
-    public XmlResourceParser getAnimation(@AnimRes int id) throws NotFoundException {
+    public XmlResourceParser getAnimation(@AnimatorRes @AnimRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "anim");
     }
 
