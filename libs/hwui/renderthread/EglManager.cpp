@@ -79,6 +79,7 @@ static struct {
     bool noConfigContext = false;
     bool pixelFormatFloat = false;
     bool glColorSpace = false;
+    bool scRGB = false;
 } EglExtensions;
 
 EglManager::EglManager(RenderThread& thread)
@@ -161,6 +162,11 @@ void EglManager::initExtensions() {
     EglExtensions.glColorSpace = extensions.has("EGL_KHR_gl_colorspace");
     EglExtensions.noConfigContext = extensions.has("EGL_KHR_no_config_context");
     EglExtensions.pixelFormatFloat = extensions.has("EGL_EXT_pixel_format_float");
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb_linear");
+#else
+    EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb");
+#endif
 }
 
 bool EglManager::hasEglContext() {
@@ -249,7 +255,7 @@ void EglManager::createPBufferSurface() {
 EGLSurface EglManager::createSurface(EGLNativeWindowType window, bool wideColorGamut) {
     initialize();
 
-    wideColorGamut = wideColorGamut && EglExtensions.glColorSpace
+    wideColorGamut = wideColorGamut && EglExtensions.glColorSpace && EglExtensions.scRGB
             && EglExtensions.pixelFormatFloat && EglExtensions.noConfigContext;
 
     // The color space we want to use depends on whether linear blending is turned
@@ -289,9 +295,7 @@ EGLSurface EglManager::createSurface(EGLNativeWindowType window, bool wideColorG
         }
 #else
         if (wideColorGamut) {
-            // TODO: this should be using scRGB-nl, not scRGB, we need an extension for this
-            // TODO: in the meantime SurfaceFlinger just assumes that scRGB is scRGB-nl
-            attribs[1] = EGL_GL_COLORSPACE_SCRGB_LINEAR_EXT;
+            attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
         } else {
             attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;
         }
