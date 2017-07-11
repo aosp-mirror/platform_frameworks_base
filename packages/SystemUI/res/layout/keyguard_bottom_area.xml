@@ -91,6 +91,13 @@
         android:scaleType="center"
         android:tint="?attr/bgProtectTextColor" />
 
-    <include layout="@layout/keyguard_bottom_area_overlay" />
+    <FrameLayout
+        android:id="@+id/overlay_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include layout="@layout/keyguard_bottom_area_overlay" />
+
+    </FrameLayout>
 
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>
