@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
-public class MockGateKeeperService implements IGateKeeperService {
+public class FakeGateKeeperService implements IGateKeeperService {
     static class VerifyHandle {
         public byte[] password;
         public long sid;
@@ -92,7 +92,6 @@ public class MockGateKeeperService implements IGateKeeperService {
     @Override
     public GateKeeperResponse enroll(int uid, byte[] currentPasswordHandle, byte[] currentPassword,
             byte[] desiredPassword) throws android.os.RemoteException {
-
         if (currentPasswordHandle != null) {
             VerifyHandle handle = new VerifyHandle(currentPasswordHandle);
             if (Arrays.equals(currentPassword, handle.password)) {
@@ -101,17 +100,18 @@ public class MockGateKeeperService implements IGateKeeperService {
                 refreshSid(uid, handle.sid, false);
                 handleMap.put(uid, newHandle.toBytes());
                 return GateKeeperResponse.createOkResponse(newHandle.toBytes(), false);
-            } else {
+            } else if (currentPassword != null) {
+                // current password is provided but does not match handle, this is an error case.
                 return null;
             }
-        } else {
-            // Untrusted enroll
-            long newSid = new Random().nextLong();
-            VerifyHandle newHandle = new VerifyHandle(desiredPassword, newSid);
-            refreshSid(uid, newSid, true);
-            handleMap.put(uid, newHandle.toBytes());
-            return GateKeeperResponse.createOkResponse(newHandle.toBytes(), false);
+            // Fall through: password handle is provided, but no password
         }
+        // Untrusted/new enrollment: generate a new SID
+        long newSid = new Random().nextLong();
+        VerifyHandle newHandle = new VerifyHandle(desiredPassword, newSid);
+        refreshSid(uid, newSid, true);
+        handleMap.put(uid, newHandle.toBytes());
+        return GateKeeperResponse.createOkResponse(newHandle.toBytes(), false);
     }
 
     @Override

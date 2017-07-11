@@ -1931,7 +1931,8 @@ public class LockSettingsService extends ILockSettings.Stub {
      *     This is the untrusted credential reset, OR the user sets a new lockscreen password
      *     FOR THE FIRST TIME on a SP-enabled device. New credential and new SID will be created
      */
-    private AuthenticationToken initializeSyntheticPasswordLocked(byte[] credentialHash,
+    @VisibleForTesting
+    protected AuthenticationToken initializeSyntheticPasswordLocked(byte[] credentialHash,
             String credential, int credentialType, int requestedQuality,
             int userId) throws RemoteException {
         Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
@@ -1982,7 +1983,8 @@ public class LockSettingsService extends ILockSettings.Stub {
       return enabled != 0 && handle != SyntheticPasswordManager.DEFAULT_HANDLE;
     }
 
-    private boolean shouldMigrateToSyntheticPasswordLocked(int userId) throws RemoteException {
+    @VisibleForTesting
+    protected boolean shouldMigrateToSyntheticPasswordLocked(int userId) throws RemoteException {
         long handle = getSyntheticPasswordHandleLocked(userId);
         // This is a global setting
         long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY,
@@ -2017,6 +2019,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
                     getGateKeeperService(), handle, userCredential, userId);
 
+            if (authResult.credentialType != credentialType) {
+                Slog.e(TAG, "Credential type mismatch.");
+                return VerifyCredentialResponse.ERROR;
+            }
             response = authResult.gkResponse;
             // credential has matched
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
@@ -2136,6 +2142,14 @@ public class LockSettingsService extends ILockSettings.Stub {
                 getGateKeeperService(), handle, savedCredential, userId);
         VerifyCredentialResponse response = authResult.gkResponse;
         AuthenticationToken auth = authResult.authToken;
+
+        // If existing credential is provided, then it must match.
+        if (savedCredential != null && auth == null) {
+            throw new RemoteException("Failed to enroll " +
+                    (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD ? "password"
+                            : "pattern"));
+        }
+
         if (auth != null) {
             // We are performing a trusted credential change i.e. a correct existing credential
             // is provided
