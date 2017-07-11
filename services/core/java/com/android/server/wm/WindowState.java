@@ -1970,6 +1970,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
+        final boolean windowsAreFocusable = mAppToken != null && mAppToken.windowsAreFocusable();
+        if (!windowsAreFocusable) {
+            // This window can't be an IME target if the app's windows should not be focusable.
+            return false;
+        }
+
         final int fl = mAttrs.flags & (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
         final int type = mAttrs.type;
 
