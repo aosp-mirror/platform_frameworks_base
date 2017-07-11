@@ -261,12 +261,16 @@ public class UsbHostManager {
                 }
                 // deviceName is something like: "/dev/bus/usb/001/001"
                 UsbDescriptorParser parser = new UsbDescriptorParser();
+                boolean isInputHeadset = false;
+                boolean isOutputHeadset = false;
                 if (parser.parseDevice(mNewDevice.getDeviceName())) {
-                    Slog.i(TAG, "---- isHeadset[in:" + parser.isInputHeadset()
-                            + " , out:" + parser.isOutputHeadset() + "]");
-                    mUsbAlsaManager.usbDeviceAdded(mNewDevice,
-                            parser.isInputHeadset(), parser.isOutputHeadset());
+                    isInputHeadset = parser.isInputHeadset();
+                    isOutputHeadset = parser.isOutputHeadset();
+                    Slog.i(TAG, "---- isHeadset[in:" + isInputHeadset
+                            + " , out:" + isOutputHeadset + "]");
                 }
+                mUsbAlsaManager.usbDeviceAdded(mNewDevice,
+                        isInputHeadset, isOutputHeadset);
             } else {
                 Slog.e(TAG, "mNewDevice is null in endUsbDeviceAdded");
             }
