@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Agresivní předání z Wi-Fi na mobilní síť"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vždy povolit Wi-Fi roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilní data jsou vždy aktivní"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardwarová akcelerace tetheringu"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Zakázat absolutní hlasitost"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Povolit vyzvánění v hovorovém pásmu"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Verze profilu Bluetooth AVRCP"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Povolit simulované polohy"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Kontrola atributu zobrazení"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobilní data budou vždy ponechána aktivní, i když bude aktivní Wi-Fi (za účelem rychlého přepínání sítí)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Pokud je k dispozici hardwarová akceleraci tetheringu, použít ji"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Povolit ladění USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Ladění prostřednictvím rozhraní USB je určeno pouze pro účely vývoje. Použijte je ke kopírování dat mezi počítačem a zařízením, instalaci aplikací do zařízení bez upozornění a čtení dat protokolů."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Zrušit přístup k ladění USB ze všech počítačů, které jste v minulosti autorizovali?"</string>

@@ -61,7 +61,7 @@ public class PipTouchState {
     }
 
     /**
-     * Processess a given touch event and updates the state.
+     * Processes a given touch event and updates the state.
      */
     public void onTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {

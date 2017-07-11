@@ -7158,6 +7158,10 @@ public final class Settings {
             VR_DISPLAY_MODE,
             NOTIFICATION_BADGING,
             QS_AUTO_ADDED_TILES,
+            SCREENSAVER_ENABLED,
+            SCREENSAVER_COMPONENTS,
+            SCREENSAVER_ACTIVATE_ON_DOCK,
+            SCREENSAVER_ACTIVATE_ON_SLEEP,
         };
 
         /**
@@ -10670,7 +10674,7 @@ public final class Settings {
         /**
          * The maximum allowed notification enqueue rate in Hertz.
          *
-         * Should be a float, and includes both posts and updates.
+         * Should be a float, and includes updates only.
          * @hide
          */
         public static final String MAX_NOTIFICATION_ENQUEUE_RATE = "max_notification_enqueue_rate";

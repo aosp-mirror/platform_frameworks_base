@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Інтэнсіўны пераход з Wi‑Fi на маб. сетку"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Заўсёды дазваляць роўмінгавае сканіраванне Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мабільная перадача даных заўсёды актыўная"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Апаратнае паскарэнне ў рэжыме мадэма"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Адключыць абсалютны гук"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Уключыць унутрыпалосны празвон"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версія Bluetooth AVRCP"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Дазволіць несапраўдныя месцы"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Уключыць прагляд атрыбутаў"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Перадача даных мабільнай сувязі заўсёды актыўна, нават калі актыўна сетка Wi‑Fi (для хуткага пераключэння паміж сеткамі)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Выкарыстоўваць апаратнае паскарэнне ў рэжыме мадэма пры наяўнасці"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Дазволіць адладку USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Адладка USB прызначана толькі для мэтаў распрацоўкі. Яна можа выкарыстоўвацца, каб капіяваць дадзеныя паміж кампутарам і прыладай, усталёўваць прыкладанні на прыладзе без папярэдняга апавяшчэння і чытаць дадзеныя дзённiка."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Адклікаць доступ да адладкі USB з усіх камп\'ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
