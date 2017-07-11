@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Agres. „Wi‑Fi“ perd. į mob. r. tinklą"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Visada leisti „Wi-Fi“ tarptiklinio ryšio nuskaitymą"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobiliojo ryšio duomenys visada suaktyvinti"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Įrenginio kaip modemo naudojimo aparatinės įrangos spartinimas"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Išjungti didžiausią garsą"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Įgalinti diapazono skambėjimą"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"„Bluetooth“ AVRCP versija"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Leisti imituoti vietas"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Įgalinti peržiūros atributų tikrinimą"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Visada suaktyvinti mobiliojo ryšio duomenis, net kai aktyvus „Wi‑Fi“ ryšys (kad būtų galima greitai perjungti tinklą)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Naudoti įrenginio kaip modemo naudojimo aparatinės įrangos spartinimą, jei pasiekiama"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Leisti USB perkrovimą?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB derinimas skirtas naudoti tik kūrimo tikslais. Jis gali būti naudojamas norint kopijuoti duomenis iš kompiuterio į įrenginį ir atvirkščiai, įdiegti programas įrenginyje be pranešimo ir skaityti žurnalo duomenis."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Panaikinti visų kompiuterių, kuriems anksčiau suteikėte prieigos teisę, prieigą prie USB derinimo?"</string>

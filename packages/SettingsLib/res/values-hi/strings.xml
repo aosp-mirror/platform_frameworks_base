@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"वाई-फ़ाई से मोबाइल पर ज़्यादा तेज़ी से हैंडओवर"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"हमेशा वाई-फ़ाई रोम स्कैन करने दें"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा हमेशा सक्रिय"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"हार्डवेयर त्‍वरण को टेदर करना"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"पूर्ण वॉल्यूम अक्षम करें"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"इन-बैंड रिंग करना सक्षम करें"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ब्लूटूथ AVRCP वर्शन"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"कृत्रिम स्‍थानों को अनुमति दें"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"दृश्य विशेषता निरीक्षण सक्षम करें"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"वाई-फ़ाई के सक्रिय रहने पर भी, हमेशा मोबाइल डेटा सक्रिय रखें (तेज़ी से नेटवर्क स्विच करने के लिए)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"हार्डवेयर त्‍वरण को टेदर करना उपलब्ध होने पर उसका उपयोग करें"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB डीबग करने की अनुमति दें?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB डीबग डीबग करने का उद्देश्‍य केवल विकास है. इसका उपयोग आपके कंप्‍यूटर और आपके डिवाइस के बीच डेटा की प्रतिलिपि बनाने, बिना नोटिफिकेशन के आपके डिवाइस पर ऐप्स इंस्‍टॉल करने और लॉग डेटा पढ़ने के लिए करें."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"आपके द्वारा पूर्व में प्राधिकृत सभी कंप्यूटर से USB डीबगिंग की पहुंच निरस्त करें?"</string>

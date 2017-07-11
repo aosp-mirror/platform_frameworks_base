@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Kablosuzdan mobil ağa agresif geçiş"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Kablosuz Dolaşım Taramalarına daima izin ver"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil veri her zaman etkin"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tethering donanım hızlandırıcısı"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Mutlak sesi iptal et"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Bant içi zil çaldırmayı etkinleştir"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP Sürümü"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Sahte konumlara izin ver"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Görünüm özelliği incelemeyi etkinleştir"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Kablosuz bağlantı etkin bile olsa mobil veri kullanımını her zaman etkin tut (ağlar arasında hızlı geçiş yapmak için)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Mevcutsa, tethering donanım hızlandırıcısını kullan"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB hata ayıklamasına izin verilsin mi?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB hata ayıklaması yalnızca geliştirme amaçlıdır. Verileri bilgisayarınızla cihazınız arasında kopyalamak, bildirim göndermeksizin uygulamaları cihazınıza yüklemek ve günlük verilerini okumak için kullanın."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Daha önce yetki verdiğiniz tüm bilgisayarların USB hata ayıklama erişimini iptal etmek istiyor musunuz?"</string>

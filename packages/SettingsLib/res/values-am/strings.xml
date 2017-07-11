@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"አስገዳጅ ከWi‑Fi ወደ ሞባይል ማቀበል"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ሁልጊዜ የWi‑Fi ማንቀሳቀስ ቅኝቶችን ይፍቀዱ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"የተንቀሳቃሽ ስልክ ውሂብ ሁልጊዜ ገቢር ነው"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"የሃርድዌር ማቀላጠፊያን በማስተሳሰር ላይ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ፍጹማዊ ድምፅን አሰናክል"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"የውስጠ-ሞገድ ማስጮህን አንቃ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"የብሉቱዝ AVRCP ስሪት"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"አስቂኝ ሥፍራዎችን ፍቀድ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"የእይታ አይነታ ምርመራን አንቃ"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ምንም እንኳን Wi‑Fi ንቁ ቢሆንም የሞባይል ውሂብን ንቁ እንደሆነ አቆይ (ለፈጣን የአውታረ መረብ ቅይይር)።"</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"የሃርድዌር ማቀላጠፊያን ማስተሳሰርን የሚገኝ ከሆነ ይጠቀሙ"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"የUSB ማረሚያ ይፈቀድ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"የUSB አድስ ለግንባታ አላማ ብቻ የታሰበ ነው። ከኮምፒዩተርህ ወደ መሳሪያህ ውሂብ ለመገልበጥ፣ መሣሪያህ ላይ ያለ ማሳወቂያ መተግበሪያዎችን መጫን፣ እና ማስታወሻ ውሂብ ማንበብ ለመጠቀም ይቻላል።"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"የዩ ኤስ ቢ ማረም መዳረሻ ከዚህ ቀደም ፍቃድ ከሰጧቸው ኮምፒውተሮች ላይ ይሻሩ?"</string>

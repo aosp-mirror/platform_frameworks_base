@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Tvungen skift fra Wi-Fi til mobildata"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillad altid scanning af Wi-Fi-roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata er altid aktiveret"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardwareacceleration ved netdeling"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Deaktiver absolut lydstyrke"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Afspil ringetone via Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"AVRCP-version for Bluetooth"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Tillad imiterede placeringer"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Aktivér visning af attributinspektion"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Hold altid mobildata aktiveret, selv når Wi-Fi er aktiveret (for at skifte hurtigt mellem netværk)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Brug hardwareacceleration ved netdeling, hvis det er muligt"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Vil du tillade USB-fejlretning?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-fejlretning er kun beregnet til udvikling og kan bruges til at kopiere data mellem din computer og enheden, installere apps på enheden uden meddelelser og læse logdata."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vil du ophæve adgangen til USB-fejlfinding for alle computere, du tidligere har godkendt?"</string>

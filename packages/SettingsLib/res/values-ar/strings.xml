@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"‏تسليم Wi-Fi حاد إلى جوّال"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏السماح دائمًا بعمليات فحص Wi-Fi للتجوال"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"بيانات الجوّال نشطة دائمًا"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"تسريع الأجهزة للتوصيل"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"تعطيل مستوى الصوت المطلق"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"تمكين الرنين ضمن النطاق الأساسي"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏إصدار Bluetooth AVRCP"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"السماح بمواقع وهمية"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"تمكين فحص سمة العرض"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏اجعل بيانات الجوّال نشطة دائمًا، حتى عندما يكون اتصال Wi‑Fi نشطًا (لتبديل الشبكة بسرعة)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"استخدام إعداد تسريع الأجهزة للتوصيل إن كان متاحًا"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏تم تصميم تصحيح أخطاء USB لأغراض التطوير فقط. يمكن استخدامه لنسخ البيانات بين الكمبيوتر والجهاز، وتثبيت التطبيقات على جهازك بدون تنبيه، وقراءة بيانات السجل."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"‏هل تريد إلغاء إمكانية الدخول إلى تصحيح أخطاء USB من جميع أجهزة الكمبيوتر التي تم التصريح لها سابقًا؟"</string>
