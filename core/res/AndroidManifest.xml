@@ -1706,18 +1706,17 @@
     <!-- Allows an application to manage embedded subscriptions (those on a eUICC) through
          EuiccManager APIs.
          <p>Protection level: signature|privileged|development
-         TODO(b/35851809): Mark this as a SystemApi.
+         TODO(b/35851809): Mark this as a SystemApi and remove com. prefix.
          @hide -->
-    <permission android:name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS"
+    <permission android:name="com.android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS"
                 android:protectionLevel="signature|privileged|development" />
 
     <!-- Must be required by an EuiccService to ensure that only the system can bind to it.
          <p>Protection level: signature
-         TODO(b/35851809): Mark this as a SystemApi.
+         TODO(b/35851809): Mark this as a SystemApi and remove com. prefix.
          @hide -->
-    <permission android:name="android.permission.BIND_EUICC_SERVICE"
+    <permission android:name="com.android.permission.BIND_EUICC_SERVICE"
                 android:protectionLevel="signature" />
-
 
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
