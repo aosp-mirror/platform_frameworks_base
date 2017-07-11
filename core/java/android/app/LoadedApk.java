@@ -97,7 +97,6 @@ public final class LoadedApk {
     private String mAppDir;
     private String mResDir;
     private String[] mOverlayDirs;
-    private String[] mSharedLibraries;
     private String mDataDir;
     private String mLibDir;
     private File mDataDirFile;
@@ -116,6 +115,7 @@ public final class LoadedApk {
     private String[] mSplitNames;
     private String[] mSplitAppDirs;
     private String[] mSplitResDirs;
+    private String[] mSplitClassLoaderNames;
 
     private final ArrayMap<Context, ArrayMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
         = new ArrayMap<>();
@@ -125,8 +125,6 @@ public final class LoadedApk {
         = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
         = new ArrayMap<>();
-
-    int mClientCount = 0;
 
     Application getApplication() {
         return mApplication;
@@ -192,8 +190,8 @@ public final class LoadedApk {
         mResDir = null;
         mSplitAppDirs = null;
         mSplitResDirs = null;
+        mSplitClassLoaderNames = null;
         mOverlayDirs = null;
-        mSharedLibraries = null;
         mDataDir = null;
         mDataDirFile = null;
         mDeviceProtectedDataDirFile = null;
@@ -324,7 +322,6 @@ public final class LoadedApk {
         mAppDir = aInfo.sourceDir;
         mResDir = aInfo.uid == myUid ? aInfo.sourceDir : aInfo.publicSourceDir;
         mOverlayDirs = aInfo.resourceDirs;
-        mSharedLibraries = aInfo.sharedLibraryFiles;
         mDataDir = aInfo.dataDir;
         mLibDir = aInfo.nativeLibraryDir;
         mDataDirFile = FileUtils.newFileOrNull(aInfo.dataDir);
@@ -334,6 +331,7 @@ public final class LoadedApk {
         mSplitNames = aInfo.splitNames;
         mSplitAppDirs = aInfo.splitSourceDirs;
         mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
+        mSplitClassLoaderNames = aInfo.splitClassLoaderNames;
 
         if (aInfo.requestsIsolatedSplitLoading() && !ArrayUtils.isEmpty(mSplitNames)) {
             mSplitLoader = new SplitDependencyLoaderImpl(aInfo.splitDependencies);
@@ -530,7 +528,8 @@ public final class LoadedApk {
             // Since we handled the special base case above, parentSplitIdx is always valid.
             final ClassLoader parent = mCachedClassLoaders[parentSplitIdx];
             mCachedClassLoaders[splitIdx] = ApplicationLoaders.getDefault().getClassLoader(
-                    mSplitAppDirs[splitIdx - 1], getTargetSdkVersion(), false, null, null, parent);
+                    mSplitAppDirs[splitIdx - 1], getTargetSdkVersion(), false, null, null, parent,
+                    mSplitClassLoaderNames[splitIdx - 1]);
 
             Collections.addAll(splitPaths, mCachedResourcePaths[parentSplitIdx]);
             splitPaths.add(mSplitResDirs[splitIdx - 1]);
@@ -650,8 +649,9 @@ public final class LoadedApk {
             if (mClassLoader == null) {
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
                 mClassLoader = ApplicationLoaders.getDefault().getClassLoader(
-                    "" /* codePath */, mApplicationInfo.targetSdkVersion, isBundledApp,
-                    librarySearchPath, libraryPermittedPath, mBaseClassLoader);
+                        "" /* codePath */, mApplicationInfo.targetSdkVersion, isBundledApp,
+                        librarySearchPath, libraryPermittedPath, mBaseClassLoader,
+                        null /* classLoaderName */);
                 StrictMode.setThreadPolicy(oldPolicy);
             }
 
@@ -678,7 +678,8 @@ public final class LoadedApk {
 
             mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip,
                     mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
-                    libraryPermittedPath, mBaseClassLoader);
+                    libraryPermittedPath, mBaseClassLoader,
+                    mApplicationInfo.classLoaderName);
 
             StrictMode.setThreadPolicy(oldPolicy);
             // Setup the class loader paths for profiling.

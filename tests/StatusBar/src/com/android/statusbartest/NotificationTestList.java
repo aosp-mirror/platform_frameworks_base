@@ -62,16 +62,16 @@ public class NotificationTestList extends TestActivity
     boolean mProgressDone = true;
 
     final int[] kNumberedIconResIDs = {
-        R.drawable.notification0,
-        R.drawable.notification1,
-        R.drawable.notification2,
-        R.drawable.notification3,
-        R.drawable.notification4,
-        R.drawable.notification5,
-        R.drawable.notification6,
-        R.drawable.notification7,
-        R.drawable.notification8,
-        R.drawable.notification9
+            R.drawable.notification0,
+            R.drawable.notification1,
+            R.drawable.notification2,
+            R.drawable.notification3,
+            R.drawable.notification4,
+            R.drawable.notification5,
+            R.drawable.notification6,
+            R.drawable.notification7,
+            R.drawable.notification8,
+            R.drawable.notification9
     };
     final int kUnnumberedIconResID = R.drawable.notificationx;
 
@@ -438,85 +438,85 @@ public class NotificationTestList extends TestActivity
                     mNM.notify("cancel_madness", 7014, n);
                 }
             },
-        new Test("Off") {
-            public void run() {
-                PowerManager pm = (PowerManager) NotificationTestList.this.getSystemService(
-                        Context.POWER_SERVICE);
-                PowerManager.WakeLock wl = 
+            new Test("Off") {
+                public void run() {
+                    PowerManager pm = (PowerManager) NotificationTestList.this.getSystemService(
+                            Context.POWER_SERVICE);
+                    PowerManager.WakeLock wl =
                             pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "sound");
-                wl.acquire();
+                    wl.acquire();
 
-                pm.goToSleep(SystemClock.uptimeMillis());
+                    pm.goToSleep(SystemClock.uptimeMillis());
 
-                Notification n = new Notification.Builder(NotificationTestList.this, "default")
-                        .setSmallIcon(R.drawable.stat_sys_phone)
-                        .setContentTitle(name)
-                        .build();
-                Log.d(TAG, "n.sound=" + n.sound);
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.stat_sys_phone)
+                            .setContentTitle(name)
+                            .build();
+                    Log.d(TAG, "n.sound=" + n.sound);
 
-                mNM.notify(1, n);
+                    mNM.notify(1, n);
 
-                Log.d(TAG, "releasing wake lock");
-                wl.release();
-                Log.d(TAG, "released wake lock");
-            }
-        },
+                    Log.d(TAG, "releasing wake lock");
+                    wl.release();
+                    Log.d(TAG, "released wake lock");
+                }
+            },
 
-        new Test("Cancel #1") {
-            public void run()
-            {
-                mNM.cancel(1);
-            }
-        },
+            new Test("Cancel #1") {
+                public void run()
+                {
+                    mNM.cancel(1);
+                }
+            },
 
-        new Test("Custom Button") {
-            public void run() {
-                RemoteViews view = new RemoteViews(getPackageName(), R.layout.button_notification);
-                view.setOnClickPendingIntent(R.id.button, makeIntent2());
-                Notification n = new Notification.Builder(NotificationTestList.this, "default")
-                        .setSmallIcon(R.drawable.icon1)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle(name)
-                        .setOngoing(true)
-                        .setCustomContentView(view)
-                        .build();
+            new Test("Custom Button") {
+                public void run() {
+                    RemoteViews view = new RemoteViews(getPackageName(), R.layout.button_notification);
+                    view.setOnClickPendingIntent(R.id.button, makeIntent2());
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.icon1)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle(name)
+                            .setOngoing(true)
+                            .setCustomContentView(view)
+                            .build();
 
-                mNM.notify(1, n);
-            }
-        },
+                    mNM.notify(1, n);
+                }
+            },
 
-        new Test("Action Button") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "default")
-                        .setSmallIcon(R.drawable.icon1)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle(name)
-                        .setOngoing(true)
-                        .addAction(new Notification.Action.Builder(
-                                Icon.createWithResource(NotificationTestList.this,
-                                        R.drawable.ic_statusbar_chat),
-                                "Button", makeIntent2())
-                                .build())
-                        .build();
+            new Test("Action Button") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.icon1)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle(name)
+                            .setOngoing(true)
+                            .addAction(new Notification.Action.Builder(
+                                    Icon.createWithResource(NotificationTestList.this,
+                                            R.drawable.ic_statusbar_chat),
+                                    "Button", makeIntent2())
+                                    .build())
+                            .build();
 
-                mNM.notify(1, n);
-            }
-        },
+                    mNM.notify(1, n);
+                }
+            },
 
-        new Test("with intent") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "default")
-                        .setSmallIcon(R.drawable.icon1)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle("Persistent #1")
-                        .setContentText("This is a notification!!!")
-                        .setContentIntent(makeIntent2())
-                        .setOngoing(true)
-                        .build();
+            new Test("with intent") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.icon1)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle("Persistent #1")
+                            .setContentText("This is a notification!!!")
+                            .setContentIntent(makeIntent2())
+                            .setOngoing(true)
+                            .build();
 
-                mNM.notify(1, n);
-            }
-        },
+                    mNM.notify(1, n);
+                }
+            },
 
             new Test("Is blocked?") {
                 public void run() {
@@ -534,484 +534,484 @@ public class NotificationTestList extends TestActivity
                 }
             },
 
-        new Test("Whens") {
-            public void run()
-            {
-                Notification.Builder n = new Notification.Builder(
-                        NotificationTestList.this, "default")
-                        .setSmallIcon(R.drawable.icon1)
-                        .setContentTitle(name)
-                        .setOngoing(true);
+            new Test("Whens") {
+                public void run()
+                {
+                    Notification.Builder n = new Notification.Builder(
+                            NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.icon1)
+                            .setContentTitle(name)
+                            .setOngoing(true);
 
-                mNM.notify(1, n.setContentTitle("(453) 123-2328")
-                .setWhen(System.currentTimeMillis()-(1000*60*60*24))
-                .build());
+                    mNM.notify(1, n.setContentTitle("(453) 123-2328")
+                            .setWhen(System.currentTimeMillis()-(1000*60*60*24))
+                            .build());
 
-                mNM.notify(1, n.setContentTitle("Mark Willem, Me (2)")
-                .setWhen(System.currentTimeMillis())
-                .build());
+                    mNM.notify(1, n.setContentTitle("Mark Willem, Me (2)")
+                            .setWhen(System.currentTimeMillis())
+                            .build());
 
-                mNM.notify(1, n.setContentTitle("Sophia Winterlanden")
-                        .setWhen(System.currentTimeMillis() + (1000 * 60 * 60 * 24))
-                        .build());
-            }
-        },
-
-        new Test("Bad Icon #1 (when=create)") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(R.layout.chrono_notification /* not an icon */)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle("Persistent #1")
-                        .setContentText("This is the same notification!!")
-                        .setContentIntent(makeIntent())
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Bad Icon #1 (when=now)") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(R.layout.chrono_notification /* not an icon */)
-                        .setWhen(System.currentTimeMillis())
-                        .setContentTitle("Persistent #1")
-                        .setContentText("This is the same notification!!")
-                        .setContentIntent(makeIntent())
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Null Icon #1 (when=now)") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(0)
-                        .setWhen(System.currentTimeMillis())
-                        .setContentTitle("Persistent #1")
-                        .setContentText("This is the same notification!!")
-                        .setContentIntent(makeIntent())
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Bad resource #1 (when=create)") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(R.drawable.icon2)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle("Persistent #1")
-                        .setContentText("This is the same notification!!")
-                        .setContentIntent(makeIntent())
-                        .build();
-                n.contentView.setInt(1 /*bogus*/, "bogus method", 666);
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Bad resource #1 (when=now)") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(R.drawable.icon2)
-                        .setWhen(System.currentTimeMillis())
-                        .setContentTitle("Persistent #1")
-                        .setContentText("This is the same notification!!")
-                        .setContentIntent(makeIntent())
-                        .build();
-                n.contentView.setInt(1 /*bogus*/, "bogus method", 666);
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Times") {
-            public void run()
-            {
-                long now = System.currentTimeMillis();
-
-                timeNotification(7, "24 hours from now", now+(1000*60*60*24));
-                timeNotification(6, "12:01:00 from now", now+(1000*60*60*12)+(60*1000));
-                timeNotification(5, "12 hours from now", now+(1000*60*60*12));
-                timeNotification(4, "now", now);
-                timeNotification(3, "11:59:00 ago", now-((1000*60*60*12)-(60*1000)));
-                timeNotification(2, "12 hours ago", now-(1000*60*60*12));
-                timeNotification(1, "24 hours ago", now-(1000*60*60*24));
-            }
-        },
-        new StateStress("Stress - Ongoing / Latest", 100, 100, new Runnable[] {
-                new Runnable() {
-                    public void run() {
-                        Log.d(TAG, "Stress - Ongoing/Latest 0");
-                        Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                                .setSmallIcon(R.drawable.icon3)
-                                .setWhen(System.currentTimeMillis())
-                                .setContentTitle("Stress - Ongoing")
-                                .setContentText("Notify me!!!")
-                                .setOngoing(true)
-                                .build();
-                        mNM.notify(1, n);
-                    }
-                },
-                new Runnable() {
-                    public void run() {
-                        Log.d(TAG, "Stress - Ongoing/Latest 1");
-                        Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                                .setSmallIcon(R.drawable.icon4)
-                                .setWhen(System.currentTimeMillis())
-                                .setContentTitle("Stress - Latest")
-                                .setContentText("Notify me!!!")
-                                .build();
-                        mNM.notify(1, n);
-                    }
+                    mNM.notify(1, n.setContentTitle("Sophia Winterlanden")
+                            .setWhen(System.currentTimeMillis() + (1000 * 60 * 60 * 24))
+                            .build());
                 }
-            }),
+            },
 
-        new Test("Long") {
-            public void run()
-            {
-                NotificationChannel channel = new NotificationChannel("v. noisy",
-                        "channel for sound and a custom vibration", IMPORTANCE_DEFAULT);
-                channel.enableVibration(true);
-                channel.setVibrationPattern(new long[] {
-                        300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
-                        300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
-                        300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 });
-                mNM.createNotificationChannel(channel);
+            new Test("Bad Icon #1 (when=create)") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(R.layout.chrono_notification /* not an icon */)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle("Persistent #1")
+                            .setContentText("This is the same notification!!")
+                            .setContentIntent(makeIntent())
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
 
-                Notification n = new Notification.Builder(NotificationTestList.this, "v. noisy")
-                        .setSmallIcon(R.drawable.icon1)
-                        .setContentTitle(name)
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
+            new Test("Bad Icon #1 (when=now)") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(R.layout.chrono_notification /* not an icon */)
+                            .setWhen(System.currentTimeMillis())
+                            .setContentTitle("Persistent #1")
+                            .setContentText("This is the same notification!!")
+                            .setContentIntent(makeIntent())
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
 
-        new Test("Progress #1") {
-            public void run() {
-                final boolean PROGRESS_UPDATES_WHEN = true;
-                if (!mProgressDone) return;
-                mProgressDone = false;
-                Thread t = new Thread() {
-                    public void run() {
-                        int x = 0;
-                        final Notification.Builder n = new Notification.Builder(
-                                NotificationTestList.this, "low")
-                                .setSmallIcon(R.drawable.icon1)
-                                .setContentTitle(name)
-                                .setOngoing(true);
+            new Test("Null Icon #1 (when=now)") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(0)
+                            .setWhen(System.currentTimeMillis())
+                            .setContentTitle("Persistent #1")
+                            .setContentText("This is the same notification!!")
+                            .setContentIntent(makeIntent())
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
 
-                        while (!mProgressDone) {
-                            n.setWhen(PROGRESS_UPDATES_WHEN
-                                    ? System.currentTimeMillis()
-                                    : mActivityCreateTime);
-                            n.setProgress(100, x, false);
-                            n.setContentText("Progress: " + x + "%");
+            new Test("Bad resource #1 (when=create)") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle("Persistent #1")
+                            .setContentText("This is the same notification!!")
+                            .setContentIntent(makeIntent())
+                            .build();
+                    n.contentView.setInt(1 /*bogus*/, "bogus method", 666);
+                    mNM.notify(1, n);
+                }
+            },
 
-                            mNM.notify(500, n.build());
-                            x = (x + 7) % 100;
+            new Test("Bad resource #1 (when=now)") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setWhen(System.currentTimeMillis())
+                            .setContentTitle("Persistent #1")
+                            .setContentText("This is the same notification!!")
+                            .setContentIntent(makeIntent())
+                            .build();
+                    n.contentView.setInt(1 /*bogus*/, "bogus method", 666);
+                    mNM.notify(1, n);
+                }
+            },
 
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                break;
-                            }
+            new Test("Times") {
+                public void run()
+                {
+                    long now = System.currentTimeMillis();
+
+                    timeNotification(7, "24 hours from now", now+(1000*60*60*24));
+                    timeNotification(6, "12:01:00 from now", now+(1000*60*60*12)+(60*1000));
+                    timeNotification(5, "12 hours from now", now+(1000*60*60*12));
+                    timeNotification(4, "now", now);
+                    timeNotification(3, "11:59:00 ago", now-((1000*60*60*12)-(60*1000)));
+                    timeNotification(2, "12 hours ago", now-(1000*60*60*12));
+                    timeNotification(1, "24 hours ago", now-(1000*60*60*24));
+                }
+            },
+            new StateStress("Stress - Ongoing / Latest", 100, 100, new Runnable[] {
+                    new Runnable() {
+                        public void run() {
+                            Log.d(TAG, "Stress - Ongoing/Latest 0");
+                            Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                                    .setSmallIcon(R.drawable.icon3)
+                                    .setWhen(System.currentTimeMillis())
+                                    .setContentTitle("Stress - Ongoing")
+                                    .setContentText("Notify me!!!")
+                                    .setOngoing(true)
+                                    .build();
+                            mNM.notify(1, n);
+                        }
+                    },
+                    new Runnable() {
+                        public void run() {
+                            Log.d(TAG, "Stress - Ongoing/Latest 1");
+                            Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                                    .setSmallIcon(R.drawable.icon4)
+                                    .setWhen(System.currentTimeMillis())
+                                    .setContentTitle("Stress - Latest")
+                                    .setContentText("Notify me!!!")
+                                    .build();
+                            mNM.notify(1, n);
                         }
                     }
-                };
-                t.start();
-            }
-        },
+            }),
 
-        new Test("Stop Progress") {
-            public void run() {
-                mProgressDone = true;
-                mNM.cancel(500);
-            }
-        },
+            new Test("Long") {
+                public void run()
+                {
+                    NotificationChannel channel = new NotificationChannel("v. noisy",
+                            "channel for sound and a custom vibration", IMPORTANCE_DEFAULT);
+                    channel.enableVibration(true);
+                    channel.setVibrationPattern(new long[] {
+                            300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                            300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                            300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 });
+                    mNM.createNotificationChannel(channel);
 
-        new Test("Blue Lights") {
-            public void run()
-            {
-                NotificationChannel channel = new NotificationChannel("blue",
-                        "blue", IMPORTANCE_DEFAULT);
-                channel.enableLights(true);
-                channel.setLightColor(0xff0000ff);
-                mNM.createNotificationChannel(channel);
+                    Notification n = new Notification.Builder(NotificationTestList.this, "v. noisy")
+                            .setSmallIcon(R.drawable.icon1)
+                            .setContentTitle(name)
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
 
-                Notification n = new Notification.Builder(NotificationTestList.this, "blue")
-                        .setSmallIcon(R.drawable.icon2)
-                        .setContentTitle(name)
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
+            new Test("Progress #1") {
+                public void run() {
+                    final boolean PROGRESS_UPDATES_WHEN = true;
+                    if (!mProgressDone) return;
+                    mProgressDone = false;
+                    Thread t = new Thread() {
+                        public void run() {
+                            int x = 0;
+                            final Notification.Builder n = new Notification.Builder(
+                                    NotificationTestList.this, "low")
+                                    .setSmallIcon(R.drawable.icon1)
+                                    .setContentTitle(name)
+                                    .setOngoing(true);
 
-        new Test("Red Lights") {
-            public void run()
-            {
-                NotificationChannel channel = new NotificationChannel("red",
-                        "red", IMPORTANCE_DEFAULT);
-                channel.enableLights(true);
-                channel.setLightColor(0xffff0000);
-                mNM.createNotificationChannel(channel);
+                            while (!mProgressDone) {
+                                n.setWhen(PROGRESS_UPDATES_WHEN
+                                        ? System.currentTimeMillis()
+                                        : mActivityCreateTime);
+                                n.setProgress(100, x, false);
+                                n.setContentText("Progress: " + x + "%");
 
-                Notification n = new Notification.Builder(NotificationTestList.this, "red")
-                        .setSmallIcon(R.drawable.icon2)
-                        .setContentTitle(name)
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
+                                mNM.notify(500, n.build());
+                                x = (x + 7) % 100;
 
-        new Test("Lights off") {
-            public void run()
-            {
-                Notification n = new Notification.Builder(NotificationTestList.this, "default")
-                        .setSmallIcon(R.drawable.icon2)
-                        .setContentTitle(name)
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Alert once") {
-            public void run()
-            {
-                Notification n = new Notification.Builder(NotificationTestList.this, "high")
-                        .setSmallIcon(R.drawable.icon2)
-                        .setContentTitle(name)
-                        .setOnlyAlertOnce(true)
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Resource Sound") {
-            public void run()
-            {
-                NotificationChannel channel = new NotificationChannel("res_sound",
-                        "resource sound", IMPORTANCE_DEFAULT);
-                channel.setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                        getPackageName() + "/raw/ringer"), Notification.AUDIO_ATTRIBUTES_DEFAULT);
-                mNM.createNotificationChannel(channel);
-
-                Notification n = new Notification.Builder(NotificationTestList.this, "res_sound")
-                        .setSmallIcon(R.drawable.stat_sys_phone)
-                        .setContentTitle(name)
-                        .build();
-                Log.d(TAG, "n.sound=" + n.sound);
-
-                mNM.notify(1, n);
-            }
-        },
-
-        new Test("Sound and Cancel") {
-            public void run()
-            {
-                NotificationChannel channel = new NotificationChannel("res_sound",
-                        "resource sound", IMPORTANCE_DEFAULT);
-                channel.setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                        getPackageName() + "/raw/ringer"), Notification.AUDIO_ATTRIBUTES_DEFAULT);
-                mNM.createNotificationChannel(channel);
-
-                Notification n = new Notification.Builder(NotificationTestList.this, "res_sound")
-                        .setSmallIcon(R.drawable.stat_sys_phone)
-                        .setContentTitle(name)
-                        .build();
-
-                mNM.notify(1, n);
-                SystemClock.sleep(600);
-                mNM.cancel(1);
-            }
-        },
-
-        new Test("Vibrate and cancel") {
-            public void run()
-            {
-                NotificationChannel channel = new NotificationChannel("vibrate",
-                        "vibrate", IMPORTANCE_DEFAULT);
-                channel.enableVibration(true);
-                channel.setVibrationPattern(new long[] {0, 700, 500, 1000, 0, 700, 500, 1000,
-                        0, 700, 500, 1000, 0, 700, 500, 1000, 0, 700, 500, 1000, 0, 700, 500, 1000,
-                        0, 700, 500, 1000, 0, 700, 500, 1000});
-                mNM.createNotificationChannel(channel);
-
-                Notification n = new Notification.Builder(NotificationTestList.this, "vibrate")
-                        .setSmallIcon(R.drawable.stat_sys_phone)
-                        .setContentTitle(name)
-                        .build();
-
-                mNM.notify(1, n);
-                SystemClock.sleep(500);
-                mNM.cancel(1);
-            }
-        },
-
-        new Test("Vibrate pattern") {
-            public void run()
-            {
-                mVibrator.vibrate(new long[] { 250, 1000, 500, 2000 }, -1);
-            }
-        },
-
-        new Test("Vibrate pattern repeating") {
-            public void run()
-            {
-                mVibrator.vibrate(new long[] { 250, 1000, 500 }, 1);
-            }
-        },
-
-        new Test("Vibrate 3s") {
-            public void run()
-            {
-                mVibrator.vibrate(3000);
-            }
-        },
-
-        new Test("Vibrate 100s") {
-            public void run()
-            {
-                mVibrator.vibrate(100000);
-            }
-        },
-
-        new Test("Vibrate off") {
-            public void run()
-            {
-                mVibrator.cancel();
-            }
-        },
-
-        new Test("Cancel #1") {
-            public void run() {
-                mNM.cancel(1);
-            }
-        },
-
-        new Test("Cancel #1 in 3 sec") {
-            public void run() {
-                mHandler.postDelayed(new Runnable() {
-                            public void run() {
-                                Log.d(TAG, "Cancelling now...");
-                                mNM.cancel(1);
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    break;
+                                }
                             }
-                        }, 3000);
-            }
-        },
+                        }
+                    };
+                    t.start();
+                }
+            },
 
-        new Test("Cancel #2") {
-            public void run() {
-                mNM.cancel(2);
-            }
-        },
+            new Test("Stop Progress") {
+                public void run() {
+                    mProgressDone = true;
+                    mNM.cancel(500);
+                }
+            },
 
-        new Test("Persistent #1") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                        .setSmallIcon(R.drawable.icon1)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle(name)
-                        .setContentText("This is a notification!!!")
-                        .setContentIntent(makeIntent())
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
+            new Test("Blue Lights") {
+                public void run()
+                {
+                    NotificationChannel channel = new NotificationChannel("blue",
+                            "blue", IMPORTANCE_DEFAULT);
+                    channel.enableLights(true);
+                    channel.setLightColor(0xff0000ff);
+                    mNM.createNotificationChannel(channel);
 
-        new Test("Persistent #1 in 3 sec") {
-            public void run() {
-                mHandler.postDelayed(new Runnable() {
-                            public void run() {
-                                String message = "            "
-                                        + "tick tock tick tock\n\nSometimes notifications can "
-                                        + "be really long and wrap to more than one line.\n"
-                                        + "Sometimes."
-                                        + "Ohandwhathappensifwehaveonereallylongstringarewesure"
-                                        + "thatwesegmentitcorrectly?\n";
-                                Notification n = new Notification.Builder(
-                                        NotificationTestList.this, "low")
-                                        .setSmallIcon(R.drawable.icon1)
-                                        .setContentTitle(name)
-                                        .setContentText("This is still a notification!!!")
-                                        .setContentIntent(makeIntent())
-                                        .setStyle(new Notification.BigTextStyle().bigText(message))
-                                        .build();
-                                mNM.notify(1, n);
-                            }
-                        }, 3000);
-            }
-        },
+                    Notification n = new Notification.Builder(NotificationTestList.this, "blue")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle(name)
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
 
-        new Test("Persistent #2") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(R.drawable.icon1)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle(name)
-                        .setContentText("This is a notification!!!")
-                        .setContentIntent(makeIntent())
-                        .build();
-                mNM.notify(2, n);
-            }
-        },
+            new Test("Red Lights") {
+                public void run()
+                {
+                    NotificationChannel channel = new NotificationChannel("red",
+                            "red", IMPORTANCE_DEFAULT);
+                    channel.enableLights(true);
+                    channel.setLightColor(0xffff0000);
+                    mNM.createNotificationChannel(channel);
 
-        new Test("Persistent #3") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(R.drawable.icon1)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle(name)
-                        .setContentText("This is a notification!!!")
-                        .setContentIntent(makeIntent())
-                        .build();
-                mNM.notify(3, n);
-            }
-        },
+                    Notification n = new Notification.Builder(NotificationTestList.this, "red")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle(name)
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
 
-        new Test("Persistent #2 Vibrate") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(R.drawable.icon1)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle(name)
-                        .setContentText("This is a notification!!!")
-                        .setContentIntent(makeIntent())
-                        .setDefaults(Notification.DEFAULT_VIBRATE)
-                        .build();
-                mNM.notify(2, n);
-            }
-        },
+            new Test("Lights off") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "default")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle(name)
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
 
-        new Test("Persistent #1 - different icon") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(R.drawable.icon2)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle(name)
-                        .setContentText("This is a notification!!!")
-                        .setContentIntent(makeIntent())
-                        .build();
-                mNM.notify(1, n);
-            }
-        },
+            new Test("Alert once") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "high")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle(name)
+                            .setOnlyAlertOnce(true)
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
 
-        new Test("Chronometer Start") {
-            public void run() {
-                Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                        .setSmallIcon(R.drawable.icon1)
-                        .setWhen(System.currentTimeMillis())
-                        .setContentTitle(name)
-                        .setContentIntent(makeIntent())
-                        .setOngoing(true)
-                        .setUsesChronometer(true)
-                        .build();
-                mNM.notify(2, n);
-            }
-        },
+            new Test("Resource Sound") {
+                public void run()
+                {
+                    NotificationChannel channel = new NotificationChannel("res_sound",
+                            "resource sound", IMPORTANCE_DEFAULT);
+                    channel.setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                            getPackageName() + "/raw/ringer"), Notification.AUDIO_ATTRIBUTES_DEFAULT);
+                    mNM.createNotificationChannel(channel);
 
-        new Test("Chronometer Stop") {
-            public void run() {
-                mHandler.postDelayed(new Runnable() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "res_sound")
+                            .setSmallIcon(R.drawable.stat_sys_phone)
+                            .setContentTitle(name)
+                            .build();
+                    Log.d(TAG, "n.sound=" + n.sound);
+
+                    mNM.notify(1, n);
+                }
+            },
+
+            new Test("Sound and Cancel") {
+                public void run()
+                {
+                    NotificationChannel channel = new NotificationChannel("res_sound",
+                            "resource sound", IMPORTANCE_DEFAULT);
+                    channel.setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                            getPackageName() + "/raw/ringer"), Notification.AUDIO_ATTRIBUTES_DEFAULT);
+                    mNM.createNotificationChannel(channel);
+
+                    Notification n = new Notification.Builder(NotificationTestList.this, "res_sound")
+                            .setSmallIcon(R.drawable.stat_sys_phone)
+                            .setContentTitle(name)
+                            .build();
+
+                    mNM.notify(1, n);
+                    SystemClock.sleep(600);
+                    mNM.cancel(1);
+                }
+            },
+
+            new Test("Vibrate and cancel") {
+                public void run()
+                {
+                    NotificationChannel channel = new NotificationChannel("vibrate",
+                            "vibrate", IMPORTANCE_DEFAULT);
+                    channel.enableVibration(true);
+                    channel.setVibrationPattern(new long[] {0, 700, 500, 1000, 0, 700, 500, 1000,
+                            0, 700, 500, 1000, 0, 700, 500, 1000, 0, 700, 500, 1000, 0, 700, 500, 1000,
+                            0, 700, 500, 1000, 0, 700, 500, 1000});
+                    mNM.createNotificationChannel(channel);
+
+                    Notification n = new Notification.Builder(NotificationTestList.this, "vibrate")
+                            .setSmallIcon(R.drawable.stat_sys_phone)
+                            .setContentTitle(name)
+                            .build();
+
+                    mNM.notify(1, n);
+                    SystemClock.sleep(500);
+                    mNM.cancel(1);
+                }
+            },
+
+            new Test("Vibrate pattern") {
+                public void run()
+                {
+                    mVibrator.vibrate(new long[] { 250, 1000, 500, 2000 }, -1);
+                }
+            },
+
+            new Test("Vibrate pattern repeating") {
+                public void run()
+                {
+                    mVibrator.vibrate(new long[] { 250, 1000, 500 }, 1);
+                }
+            },
+
+            new Test("Vibrate 3s") {
+                public void run()
+                {
+                    mVibrator.vibrate(3000);
+                }
+            },
+
+            new Test("Vibrate 100s") {
+                public void run()
+                {
+                    mVibrator.vibrate(100000);
+                }
+            },
+
+            new Test("Vibrate off") {
+                public void run()
+                {
+                    mVibrator.cancel();
+                }
+            },
+
+            new Test("Cancel #1") {
+                public void run() {
+                    mNM.cancel(1);
+                }
+            },
+
+            new Test("Cancel #1 in 3 sec") {
+                public void run() {
+                    mHandler.postDelayed(new Runnable() {
+                        public void run() {
+                            Log.d(TAG, "Cancelling now...");
+                            mNM.cancel(1);
+                        }
+                    }, 3000);
+                }
+            },
+
+            new Test("Cancel #2") {
+                public void run() {
+                    mNM.cancel(2);
+                }
+            },
+
+            new Test("Persistent #1") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon1)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle(name)
+                            .setContentText("This is a notification!!!")
+                            .setContentIntent(makeIntent())
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
+
+            new Test("Persistent #1 in 3 sec") {
+                public void run() {
+                    mHandler.postDelayed(new Runnable() {
+                        public void run() {
+                            String message = "            "
+                                    + "tick tock tick tock\n\nSometimes notifications can "
+                                    + "be really long and wrap to more than one line.\n"
+                                    + "Sometimes."
+                                    + "Ohandwhathappensifwehaveonereallylongstringarewesure"
+                                    + "thatwesegmentitcorrectly?\n";
+                            Notification n = new Notification.Builder(
+                                    NotificationTestList.this, "low")
+                                    .setSmallIcon(R.drawable.icon1)
+                                    .setContentTitle(name)
+                                    .setContentText("This is still a notification!!!")
+                                    .setContentIntent(makeIntent())
+                                    .setStyle(new Notification.BigTextStyle().bigText(message))
+                                    .build();
+                            mNM.notify(1, n);
+                        }
+                    }, 3000);
+                }
+            },
+
+            new Test("Persistent #2") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(R.drawable.icon1)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle(name)
+                            .setContentText("This is a notification!!!")
+                            .setContentIntent(makeIntent())
+                            .build();
+                    mNM.notify(2, n);
+                }
+            },
+
+            new Test("Persistent #3") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(R.drawable.icon1)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle(name)
+                            .setContentText("This is a notification!!!")
+                            .setContentIntent(makeIntent())
+                            .build();
+                    mNM.notify(3, n);
+                }
+            },
+
+            new Test("Persistent #2 Vibrate") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(R.drawable.icon1)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle(name)
+                            .setContentText("This is a notification!!!")
+                            .setContentIntent(makeIntent())
+                            .setDefaults(Notification.DEFAULT_VIBRATE)
+                            .build();
+                    mNM.notify(2, n);
+                }
+            },
+
+            new Test("Persistent #1 - different icon") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(R.drawable.icon2)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle(name)
+                            .setContentText("This is a notification!!!")
+                            .setContentIntent(makeIntent())
+                            .build();
+                    mNM.notify(1, n);
+                }
+            },
+
+            new Test("Chronometer Start") {
+                public void run() {
+                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                            .setSmallIcon(R.drawable.icon1)
+                            .setWhen(System.currentTimeMillis())
+                            .setContentTitle(name)
+                            .setContentIntent(makeIntent())
+                            .setOngoing(true)
+                            .setUsesChronometer(true)
+                            .build();
+                    mNM.notify(2, n);
+                }
+            },
+
+            new Test("Chronometer Stop") {
+                public void run() {
+                    mHandler.postDelayed(new Runnable() {
                         public void run() {
                             Log.d(TAG, "Chronometer Stop");
                             Notification n = new Notification.Builder(
@@ -1024,121 +1024,121 @@ public class NotificationTestList extends TestActivity
                             mNM.notify(2, n);
                         }
                     }, 3000);
-            }
-        },
-
-        new Test("Sequential Persistent") {
-            public void run() {
-                mNM.notify(1, notificationWithNumbers(name, 1));
-                mNM.notify(2, notificationWithNumbers(name, 2));
-            }
-        },
-
-        new Test("Replace Persistent") {
-            public void run() {
-                mNM.notify(1, notificationWithNumbers(name, 1));
-                mNM.notify(1, notificationWithNumbers(name, 1));
-            }
-        },
-
-        new Test("Run and Cancel (n=1)") {
-            public void run() {
-                mNM.notify(1, notificationWithNumbers(name, 1));
-                mNM.cancel(1);
-            }
-        },
-
-        new Test("Run an Cancel (n=2)") {
-            public void run() {
-                mNM.notify(1, notificationWithNumbers(name, 1));
-                mNM.notify(2, notificationWithNumbers(name, 2));
-                mNM.cancel(2);
-            }
-        },
-
-        // Repeatedly notify and cancel -- triggers bug #670627
-        new Test("Bug 670627") {
-            public void run() {
-                for (int i = 0; i < 10; i++) {
-                  Log.d(TAG, "Add two notifications");
-                  mNM.notify(1, notificationWithNumbers(name, 1));
-                  mNM.notify(2, notificationWithNumbers(name, 2));
-                  Log.d(TAG, "Cancel two notifications");
-                  mNM.cancel(1);
-                  mNM.cancel(2);
                 }
-            }
-        },
+            },
 
-        new Test("Ten Notifications") {
-            public void run() {
-                for (int i = 0; i < 10; i++) {
-                    Notification n = new Notification.Builder(NotificationTestList.this, "low")
-                            .setSmallIcon(kNumberedIconResIDs[i])
-                            .setContentTitle("Persistent #" + i)
-                            .setContentText("Notify me!!!" + i)
-                            .setOngoing(i < 2)
-                            .setNumber(i)
-                            .build();
-                    mNM.notify((i+1)*10, n);
+            new Test("Sequential Persistent") {
+                public void run() {
+                    mNM.notify(1, notificationWithNumbers(name, 1));
+                    mNM.notify(2, notificationWithNumbers(name, 2));
                 }
-            }
-        },
-        
-        new Test("Cancel eight notifications") {
-            public void run() {
-                for (int i = 1; i < 9; i++) {
-                    mNM.cancel((i+1)*10);
+            },
+
+            new Test("Replace Persistent") {
+                public void run() {
+                    mNM.notify(1, notificationWithNumbers(name, 1));
+                    mNM.notify(1, notificationWithNumbers(name, 1));
                 }
-            }
-        },
-        
-        new Test("Cancel the other two notifications") {
-            public void run() {
-                mNM.cancel(10);
-                mNM.cancel(100);
-            }
-        },
-        
-        new Test("Persistent with numbers 1") {
-            public void run() {
-                mNM.notify(1, notificationWithNumbers(name, 1));
-            }
-        },
+            },
 
-        new Test("Persistent with numbers 22") {
-            public void run() {
-                mNM.notify(1, notificationWithNumbers(name, 22));
-            }
-        },
+            new Test("Run and Cancel (n=1)") {
+                public void run() {
+                    mNM.notify(1, notificationWithNumbers(name, 1));
+                    mNM.cancel(1);
+                }
+            },
 
-        new Test("Persistent with numbers 333") {
-            public void run() {
-                mNM.notify(1, notificationWithNumbers(name, 333));
-            }
-        },
+            new Test("Run an Cancel (n=2)") {
+                public void run() {
+                    mNM.notify(1, notificationWithNumbers(name, 1));
+                    mNM.notify(2, notificationWithNumbers(name, 2));
+                    mNM.cancel(2);
+                }
+            },
 
-        new Test("Persistent with numbers 4444") {
-            public void run() {
-                mNM.notify(1, notificationWithNumbers(name, 4444));
-            }
-        },
+            // Repeatedly notify and cancel -- triggers bug #670627
+            new Test("Bug 670627") {
+                public void run() {
+                    for (int i = 0; i < 10; i++) {
+                        Log.d(TAG, "Add two notifications");
+                        mNM.notify(1, notificationWithNumbers(name, 1));
+                        mNM.notify(2, notificationWithNumbers(name, 2));
+                        Log.d(TAG, "Cancel two notifications");
+                        mNM.cancel(1);
+                        mNM.cancel(2);
+                    }
+                }
+            },
 
-        new Test("Crash") {
-            public void run()
-            {
-                PowerManager.WakeLock wl =
-                        ((PowerManager) NotificationTestList.this.getSystemService(Context.POWER_SERVICE))
-                                .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "crasher");
-                wl.acquire();
-                mHandler.postDelayed(new Runnable() {
-                            public void run() {
-                                throw new RuntimeException("Die!");
-                            }
-                        }, 10000);
+            new Test("Ten Notifications") {
+                public void run() {
+                    for (int i = 0; i < 10; i++) {
+                        Notification n = new Notification.Builder(NotificationTestList.this, "low")
+                                .setSmallIcon(kNumberedIconResIDs[i])
+                                .setContentTitle("Persistent #" + i)
+                                .setContentText("Notify me!!!" + i)
+                                .setOngoing(i < 2)
+                                .setNumber(i)
+                                .build();
+                        mNM.notify((i+1)*10, n);
+                    }
+                }
+            },
 
-            }
-        },
+            new Test("Cancel eight notifications") {
+                public void run() {
+                    for (int i = 1; i < 9; i++) {
+                        mNM.cancel((i+1)*10);
+                    }
+                }
+            },
+
+            new Test("Cancel the other two notifications") {
+                public void run() {
+                    mNM.cancel(10);
+                    mNM.cancel(100);
+                }
+            },
+
+            new Test("Persistent with numbers 1") {
+                public void run() {
+                    mNM.notify(1, notificationWithNumbers(name, 1));
+                }
+            },
+
+            new Test("Persistent with numbers 22") {
+                public void run() {
+                    mNM.notify(1, notificationWithNumbers(name, 22));
+                }
+            },
+
+            new Test("Persistent with numbers 333") {
+                public void run() {
+                    mNM.notify(1, notificationWithNumbers(name, 333));
+                }
+            },
+
+            new Test("Persistent with numbers 4444") {
+                public void run() {
+                    mNM.notify(1, notificationWithNumbers(name, 4444));
+                }
+            },
+
+            new Test("Crash") {
+                public void run()
+                {
+                    PowerManager.WakeLock wl =
+                            ((PowerManager) NotificationTestList.this.getSystemService(Context.POWER_SERVICE))
+                                    .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "crasher");
+                    wl.acquire();
+                    mHandler.postDelayed(new Runnable() {
+                        public void run() {
+                            throw new RuntimeException("Die!");
+                        }
+                    }, 10000);
+
+                }
+            },
 
     };
 
@@ -1212,4 +1212,3 @@ public class NotificationTestList extends TestActivity
         return Bitmap.createBitmap(bd.getBitmap());
     }
 }
-

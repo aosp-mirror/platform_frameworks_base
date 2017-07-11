@@ -414,7 +414,7 @@ public final class Pm {
                 try {
                     ApkLite baseApk = PackageParser.parseApkLite(file, 0);
                     PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
-                            null, null);
+                            null, null, null);
                     params.sessionParams.setSize(
                             PackageHelper.calculateInstalledSize(pkgLite, false,
                             params.sessionParams.abiOverride));

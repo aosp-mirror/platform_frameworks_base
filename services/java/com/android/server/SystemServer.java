@@ -171,6 +171,8 @@ public final class SystemServer {
             "com.android.server.wifi.aware.WifiAwareService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
+    private static final String LOWPAN_SERVICE_CLASS =
+            "com.android.server.lowpan.LowpanService";
     private static final String ETHERNET_SERVICE_CLASS =
             "com.android.server.ethernet.EthernetService";
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
@@ -1086,6 +1088,13 @@ public final class SystemServer {
                         PackageManager.FEATURE_WIFI_DIRECT)) {
                     traceBeginAndSlog("StartWifiP2P");
                     mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
+                    traceEnd();
+                }
+
+                if (context.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_LOWPAN)) {
+                    traceBeginAndSlog("StartLowpan");
+                    mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
                     traceEnd();
                 }
 

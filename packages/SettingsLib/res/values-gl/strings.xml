@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Transferencia agresiva de wifi a móbil"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permitir sempre buscas de itinerancia da wifi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datos móbiles sempre activados"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleración de hardware para conexión compartida"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desactivar volume absoluto"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Activar a función de soar na mesma banda"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión AVRCP de Bluetooth"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permite localizacións falsas"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Activar a inspección de atributos de visualización"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantén sempre os datos móbiles activos, aínda que a wifi estea activada (para un rápido cambio de rede)."</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Se está dispoñible, úsase a aceleración de hardware para conexión compartida"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Queres permitir a depuración USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"A depuración de erros USB está deseñada unicamente para fins de programación. Utilízaa para copiar datos entre o ordenador e o dispositivo, instalar aplicacións no dispositivo sen enviar notificacións e ler os datos do rexistro."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Queres revogar o acceso á depuración USB desde todos os ordenadores que autorizaches previamente?"</string>

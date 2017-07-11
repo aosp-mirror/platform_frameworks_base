@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -85,7 +86,6 @@ import com.android.server.lights.LightsManager;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class NotificationManagerServiceTest extends NotificationTestCase {
-    private static final long WAIT_FOR_IDLE_TIMEOUT = 2;
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private final int uid = Binder.getCallingUid();
     private NotificationManagerService mNotificationManagerService;
@@ -109,6 +109,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     private AudioManager mAudioManager;
     @Mock
     ActivityManager mActivityManager;
+
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
     @Mock
@@ -316,7 +317,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_HIGH);
-        channel.setImportance(NotificationManager.IMPORTANCE_NONE);
+        channel.setImportance(IMPORTANCE_NONE);
         NotificationRecord r = generateNotificationRecord(channel);
         assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
         verify(mUsageStats, times(1)).registerBlocked(eq(r));
@@ -479,6 +480,93 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testAppInitiatedCancelAllNotifications_CancelsNoClearFlag() throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        sbn.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllNotifications_CancelsNoClearFlag() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        notif.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        mNotificationManagerService.addNotification(notif);
+        mNotificationManagerService.cancelAllNotificationsInt(uid, 0, PKG, null, 0, 0, true,
+                notif.getUserId(), 0, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(notif.sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testUserInitiatedCancelAllOnClearAll_NoClearFlag() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        notif.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        mNotificationManagerService.addNotification(notif);
+
+        mNotificationManagerService.mNotificationDelegate.onClearAll(uid, Binder.getCallingPid(),
+                notif.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(notif.sbn.getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllCancelNotificationsFromListener_NoClearFlag() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mNotificationManagerService.addNotification(parent);
+        mNotificationManagerService.addNotification(child);
+        mNotificationManagerService.addNotification(child2);
+        mNotificationManagerService.addNotification(newGroup);
+        mNotificationManagerService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testUserInitiatedCancelAllWithGroup_NoClearFlag() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mNotificationManagerService.addNotification(parent);
+        mNotificationManagerService.addNotification(child);
+        mNotificationManagerService.addNotification(child2);
+        mNotificationManagerService.addNotification(newGroup);
+        mNotificationManagerService.mNotificationDelegate.onClearAll(uid, Binder.getCallingPid(),
+                parent.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
         assertEquals(1, notifs.length);
     }
 
@@ -1119,7 +1207,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     @Test
     public void testOnlyAutogroupIfGroupChanged_noGroupChanged_autogroups()
             throws Exception {
-        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "group", false);
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "group",
+                false);
         mNotificationManagerService.addNotification(r);
         mNotificationManagerService.addEnqueuedNotification(r);
 
@@ -1129,5 +1218,61 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         waitForIdle();
 
         verify(mGroupHelper, never()).onNotificationPosted(any());
+    }
+
+    @Test
+    public void testNoFakeColorizedPermission() throws Exception {
+        when(mPackageManagerClient.checkPermission(any(), any())).thenReturn(PERMISSION_DENIED);
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setColorized(true)
+                .setFlag(Notification.FLAG_CAN_COLORIZE, true)
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", uid, 0,
+                nb.build(), new UserHandle(uid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, null,
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        NotificationRecord posted = mNotificationManagerService.findNotificationLocked(
+                PKG, null, nr.sbn.getId(), nr.sbn.getUserId());
+
+        assertFalse(posted.getNotification().isColorized());
+    }
+
+    @Test
+    public void testGetNotificationCountLocked() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, null, false);
+            mNotificationManagerService.addEnqueuedNotification(r);
+        }
+        for (int i = 0; i < 20; i++) {
+            NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, i, null, false);
+            mNotificationManagerService.addNotification(r);
+        }
+
+        // another package
+        Notification n =
+                new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "tag", uid, 0,
+                n, new UserHandle(uid), null, 0);
+        NotificationRecord otherPackage =
+                new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+        mNotificationManagerService.addEnqueuedNotification(otherPackage);
+        mNotificationManagerService.addNotification(otherPackage);
+
+        // Same notifications are enqueued as posted, everything counts b/c id and tag don't match
+        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(PKG, new UserHandle(uid).getIdentifier(), 0, null));
+        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(PKG, new UserHandle(uid).getIdentifier(), 0, "tag2"));
+        assertEquals(2, mNotificationManagerService.getNotificationCountLocked("a", new UserHandle(uid).getIdentifier(), 0, "banana"));
+
+        // exclude a known notification - it's excluded from only the posted list, not enqueued
+        assertEquals(39, mNotificationManagerService.getNotificationCountLocked(PKG, new UserHandle(uid).getIdentifier(), 0, "tag"));
     }
 }

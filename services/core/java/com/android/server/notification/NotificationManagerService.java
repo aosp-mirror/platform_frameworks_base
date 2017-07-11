@@ -20,6 +20,7 @@ import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.notification.NotificationListenerService
         .NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
 import static android.service.notification.NotificationListenerService
@@ -210,7 +211,7 @@ public class NotificationManagerService extends SystemService {
             = SystemProperties.getBoolean("debug.child_notifs", true);
 
     static final int MAX_PACKAGE_NOTIFICATIONS = 50;
-    static final float DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE = 10f;
+    static final float DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE = 5f;
 
     // message codes
     static final int MESSAGE_TIMEOUT = 2;
@@ -573,7 +574,8 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private final NotificationDelegate mNotificationDelegate = new NotificationDelegate() {
+    @VisibleForTesting
+    final NotificationDelegate mNotificationDelegate = new NotificationDelegate() {
 
         @Override
         public void onSetDisabled(int status) {
@@ -3358,6 +3360,15 @@ public class NotificationManagerService extends SystemService {
                     pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                     (userId == UserHandle.USER_ALL) ? UserHandle.USER_SYSTEM : userId);
             Notification.addFieldsFromContext(ai, notification);
+
+            int canColorize = mPackageManagerClient.checkPermission(
+                    android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg);
+            if (canColorize == PERMISSION_GRANTED) {
+                notification.flags |= Notification.FLAG_CAN_COLORIZE;
+            } else {
+                notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
+            }
+
         } catch (NameNotFoundException e) {
             Slog.e(TAG, "Cannot create a context for sending app", e);
             return;
@@ -3461,8 +3472,19 @@ public class NotificationManagerService extends SystemService {
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
         if (!isSystemNotification && !isNotificationFromListener) {
             synchronized (mNotificationLock) {
-                if (mNotificationsByKey.get(r.sbn.getKey()) != null) {
-                    // this is an update, rate limit updates only
+                if (mNotificationsByKey.get(r.sbn.getKey()) == null && isCallerInstantApp(pkg)) {
+                    // Ephemeral apps have some special constraints for notifications.
+                    // They are not allowed to create new notifications however they are allowed to
+                    // update notifications created by the system (e.g. a foreground service
+                    // notification).
+                    throw new SecurityException("Instant app " + pkg
+                            + " cannot create notifications");
+                }
+
+                // rate limit updates that aren't completed progress notifications
+                if (mNotificationsByKey.get(r.sbn.getKey()) != null
+                        && !r.getNotification().hasCompletedProgress()) {
+
                     final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
                     if (appEnqueueRate > mMaxPackageEnqueueRate) {
                         mUsageStats.registerOverRateQuota(pkg);
@@ -3474,33 +3496,15 @@ public class NotificationManagerService extends SystemService {
                         }
                         return false;
                     }
-                } else if (isCallerInstantApp(pkg)) {
-                    // Ephemeral apps have some special constraints for notifications.
-                    // They are not allowed to create new notifications however they are allowed to
-                    // update notifications created by the system (e.g. a foreground service
-                    // notification).
-                    throw new SecurityException("Instant app " + pkg
-                            + " cannot create notifications");
                 }
 
-                int count = 0;
-                final int N = mNotificationList.size();
-                for (int i=0; i<N; i++) {
-                    final NotificationRecord existing = mNotificationList.get(i);
-                    if (existing.sbn.getPackageName().equals(pkg)
-                            && existing.sbn.getUserId() == userId) {
-                        if (existing.sbn.getId() == id
-                                && TextUtils.equals(existing.sbn.getTag(), tag)) {
-                            break;  // Allow updating existing notification
-                        }
-                        count++;
-                        if (count >= MAX_PACKAGE_NOTIFICATIONS) {
-                            mUsageStats.registerOverCountQuota(pkg);
-                            Slog.e(TAG, "Package has already posted " + count
-                                    + " notifications.  Not showing more.  package=" + pkg);
-                            return false;
-                        }
-                    }
+                // limit the number of outstanding notificationrecords an app can have
+                int count = getNotificationCountLocked(pkg, userId, id, tag);
+                if (count >= MAX_PACKAGE_NOTIFICATIONS) {
+                    mUsageStats.registerOverCountQuota(pkg);
+                    Slog.e(TAG, "Package has already posted or enqueued " + count
+                            + " notifications.  Not showing more.  package=" + pkg);
+                    return false;
                 }
             }
         }
@@ -3525,6 +3529,32 @@ public class NotificationManagerService extends SystemService {
         }
 
         return true;
+    }
+
+    protected int getNotificationCountLocked(String pkg, int userId, int excludedId,
+            String excludedTag) {
+        int count = 0;
+        final int N = mNotificationList.size();
+        for (int i = 0; i < N; i++) {
+            final NotificationRecord existing = mNotificationList.get(i);
+            if (existing.sbn.getPackageName().equals(pkg)
+                    && existing.sbn.getUserId() == userId) {
+                if (existing.sbn.getId() == excludedId
+                        && TextUtils.equals(existing.sbn.getTag(), excludedTag)) {
+                    continue;
+                }
+                count++;
+            }
+        }
+        final int M = mEnqueuedNotifications.size();
+        for (int i = 0; i < M; i++) {
+            final NotificationRecord existing = mEnqueuedNotifications.get(i);
+            if (existing.sbn.getPackageName().equals(pkg)
+                    && existing.sbn.getUserId() == userId) {
+                count++;
+            }
+        }
+        return count;
     }
 
     protected boolean isBlocked(NotificationRecord r, NotificationUsageStats usageStats) {
@@ -3830,7 +3860,8 @@ public class NotificationManagerService extends SystemService {
         // notification was a summary and the new one isn't, or when the old
         // notification was a summary and its group key changed.
         if (oldIsSummary && (!isSummary || !oldGroup.equals(group))) {
-            cancelGroupChildrenLocked(old, callingUid, callingPid, null, false /* sendDelete */);
+            cancelGroupChildrenLocked(old, callingUid, callingPid, null, false /* sendDelete */,
+                    null);
         }
     }
 
@@ -4581,7 +4612,7 @@ public class NotificationManagerService extends SystemService {
                         boolean wasPosted = removeFromNotificationListsLocked(r);
                         cancelNotificationLocked(r, sendDelete, reason, wasPosted);
                         cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
-                                sendDelete);
+                                sendDelete, null);
                         updateLightsLocked();
                     } else {
                         // No notification was found, assume that it is snoozed and cancel it.
@@ -4652,7 +4683,6 @@ public class NotificationManagerService extends SystemService {
                         }
                         return true;
                     };
-
                     cancelAllNotificationsByListLocked(mNotificationList, callingUid, callingPid,
                             pkg, true /*nullPkgIndicatesUserSwitch*/, channelId, flagChecker,
                             false /*includeCurrentProfiles*/, userId, false /*sendDelete*/, reason,
@@ -4700,7 +4730,6 @@ public class NotificationManagerService extends SystemService {
             if (channelId != null && !channelId.equals(r.getChannel().getId())) {
                 continue;
             }
-
             if (canceledNotifications == null) {
                 canceledNotifications = new ArrayList<>();
             }
@@ -4712,7 +4741,7 @@ public class NotificationManagerService extends SystemService {
             final int M = canceledNotifications.size();
             for (int i = 0; i < M; i++) {
                 cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,
-                        listenerName, false /* sendDelete */);
+                        listenerName, false /* sendDelete */, flagChecker);
             }
             updateLightsLocked();
         }
@@ -4779,7 +4808,7 @@ public class NotificationManagerService extends SystemService {
     // Warning: The caller is responsible for invoking updateLightsLocked().
     @GuardedBy("mNotificationLock")
     private void cancelGroupChildrenLocked(NotificationRecord r, int callingUid, int callingPid,
-            String listenerName, boolean sendDelete) {
+            String listenerName, boolean sendDelete, FlagChecker flagChecker) {
         Notification n = r.getNotification();
         if (!n.isGroupSummary()) {
             return;
@@ -4793,15 +4822,15 @@ public class NotificationManagerService extends SystemService {
         }
 
         cancelGroupChildrenByListLocked(mNotificationList, r, callingUid, callingPid, listenerName,
-                sendDelete, true);
+                sendDelete, true, flagChecker);
         cancelGroupChildrenByListLocked(mEnqueuedNotifications, r, callingUid, callingPid,
-                listenerName, sendDelete, false);
+                listenerName, sendDelete, false, flagChecker);
     }
 
     @GuardedBy("mNotificationLock")
     private void cancelGroupChildrenByListLocked(ArrayList<NotificationRecord> notificationList,
             NotificationRecord parentNotification, int callingUid, int callingPid,
-            String listenerName, boolean sendDelete, boolean wasPosted) {
+            String listenerName, boolean sendDelete, boolean wasPosted, FlagChecker flagChecker) {
         final String pkg = parentNotification.sbn.getPackageName();
         final int userId = parentNotification.getUserId();
         final int reason = REASON_GROUP_SUMMARY_CANCELED;
@@ -4810,7 +4839,8 @@ public class NotificationManagerService extends SystemService {
             final StatusBarNotification childSbn = childR.sbn;
             if ((childSbn.isGroup() && !childSbn.getNotification().isGroupSummary()) &&
                     childR.getGroupKey().equals(parentNotification.getGroupKey())
-                    && (childR.getFlags() & Notification.FLAG_FOREGROUND_SERVICE) == 0) {
+                    && (childR.getFlags() & Notification.FLAG_FOREGROUND_SERVICE) == 0
+                    && (flagChecker == null || flagChecker.apply(childR.getFlags()))) {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),
                         childSbn.getTag(), userId, 0, 0, reason, listenerName);
                 notificationList.remove(i);

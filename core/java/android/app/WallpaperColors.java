@@ -26,6 +26,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Size;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
 
@@ -50,6 +51,14 @@ public final class WallpaperColors implements Parcelable {
      */
     public static final int HINT_SUPPORTS_DARK_TEXT = 0x1;
 
+    /**
+     * Specifies that dark theme is preferred over the current wallpaper for best presentation.
+     * <p>
+     * eg. A launcher may set its drawer color to black if this flag is specified.
+     * @hide
+     */
+    public static final int HINT_SUPPORTS_DARK_THEME = 0x2;
+
     // Maximum size that a bitmap can have to keep our calculations sane
     private static final int MAX_BITMAP_SIZE = 112;
 
@@ -61,8 +70,10 @@ public final class WallpaperColors implements Parcelable {
     // present in at least MIN_COLOR_OCCURRENCE of the image
     private static final float MIN_COLOR_OCCURRENCE = 0.05f;
 
+    // Decides when dark theme is optimal for this wallpaper
+    private static final float DARK_THEME_MEAN_LUMINANCE = 0.25f;
     // Minimum mean luminosity that an image needs to have to support dark text
-    private static final float BRIGHT_IMAGE_MEAN_LUMINANCE = 0.9f;
+    private static final float BRIGHT_IMAGE_MEAN_LUMINANCE = 0.75f;
     // We also check if the image has dark pixels in it,
     // to avoid bright images with some dark spots.
     private static final float DARK_PIXEL_LUMINANCE = 0.45f;
@@ -169,10 +180,7 @@ public final class WallpaperColors implements Parcelable {
             }
         }
 
-        int hints = 0;
-        if (calculateDarkTextSupport(bitmap)) {
-            hints |= HINT_SUPPORTS_DARK_TEXT;
-        }
+        int hints = calculateHints(bitmap);
         return new WallpaperColors(primary, secondary, tertiary, hints);
     }
 
@@ -335,9 +343,9 @@ public final class WallpaperColors implements Parcelable {
      * @param source What to read.
      * @return Whether image supports dark text or not.
      */
-    private static boolean calculateDarkTextSupport(Bitmap source) {
+    private static int calculateHints(Bitmap source) {
         if (source == null) {
-            return false;
+            return 0;
         }
 
         int[] pixels = new int[source.getWidth() * source.getHeight()];
@@ -349,22 +357,29 @@ public final class WallpaperColors implements Parcelable {
 
         // This bitmap was already resized to fit the maximum allowed area.
         // Let's just loop through the pixels, no sweat!
+        float[] tmpHsl = new float[3];
         for (int i = 0; i < pixels.length; i++) {
-            final float luminance = Color.luminance(pixels[i]);
+            ColorUtils.colorToHSL(pixels[i], tmpHsl);
+            final float luminance = tmpHsl[2];
             final int alpha = Color.alpha(pixels[i]);
-
             // Make sure we don't have a dark pixel mass that will
             // make text illegible.
             if (luminance < DARK_PIXEL_LUMINANCE && alpha != 0) {
                 darkPixels++;
-                if (darkPixels > maxDarkPixels) {
-                    return false;
-                }
             }
-
             totalLuminance += luminance;
         }
-        return totalLuminance / pixels.length > BRIGHT_IMAGE_MEAN_LUMINANCE;
+
+        int hints = 0;
+        double meanLuminance = totalLuminance / pixels.length;
+        if (meanLuminance > BRIGHT_IMAGE_MEAN_LUMINANCE && darkPixels < maxDarkPixels) {
+            hints |= HINT_SUPPORTS_DARK_TEXT;
+        }
+        if (meanLuminance < DARK_THEME_MEAN_LUMINANCE) {
+            hints |= HINT_SUPPORTS_DARK_THEME;
+        }
+
+        return hints;
     }
 
     private static Size calculateOptimalSize(int width, int height) {

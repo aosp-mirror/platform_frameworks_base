@@ -19,6 +19,7 @@ package android.service.autofill;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -29,6 +30,8 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.util.Preconditions;
+
+import java.util.regex.Pattern;
 
 /**
  * Replaces a {@link TextView} child of a {@link CustomDescription} with the contents of one or
@@ -41,24 +44,20 @@ import com.android.internal.util.Preconditions;
  * be:
  *
  * <pre class="prettyprint">
- * new CharSequenceTransformation.Builder()
- *   .addField(ccNumberId, "^.*(\\d\\d\\d\\d)$", "...$1")
- *   .build();
+ * new CharSequenceTransformation.Builder(ccNumberId, "^.*(\\d\\d\\d\\d)$", "...$1").build();
  * </pre>
  *
- * <p>But a tranformation that generates a {@code Exp: MM / YYYY} credit expiration date from two
+ * <p>But a transformation that generates a {@code Exp: MM / YYYY} credit expiration date from two
  * fields (month and year) would be:
  *
  * <pre class="prettyprint">
- * new CharSequenceTransformation.Builder()
- *   .addField(ccExpMonthId, "^(\\d\\d)$", "Exp: $1")
+ * new CharSequenceTransformation.Builder(ccExpMonthId, "^(\\d\\d)$", "Exp: $1")
  *   .addField(ccExpYearId, "^(\\d\\d\\d\\d)$", " / $1");
  * </pre>
  */
-//TODO(b/62534917): add unit tests
 public final class CharSequenceTransformation extends InternalTransformation implements Parcelable {
     private static final String TAG = "CharSequenceTransformation";
-    private final ArrayMap<AutofillId, Pair<String, String>> mFields;
+    @NonNull private final ArrayMap<AutofillId, Pair<Pattern, String>> mFields;
 
     private CharSequenceTransformation(Builder builder) {
         mFields = builder.mFields;
@@ -66,6 +65,7 @@ public final class CharSequenceTransformation extends InternalTransformation imp
 
     /** @hide */
     @Override
+    @TestApi
     public void apply(@NonNull ValueFinder finder, @NonNull RemoteViews parentTemplate,
             int childViewId) {
         final StringBuilder converted = new StringBuilder();
@@ -73,14 +73,21 @@ public final class CharSequenceTransformation extends InternalTransformation imp
         if (sDebug) Log.d(TAG, size + " multiple fields on id " + childViewId);
         for (int i = 0; i < size; i++) {
             final AutofillId id = mFields.keyAt(i);
-            final Pair<String, String> regex = mFields.valueAt(i);
+            final Pair<Pattern, String> regex = mFields.valueAt(i);
             final String value = finder.findByAutofillId(id);
             if (value == null) {
                 Log.w(TAG, "No value for id " + id);
                 return;
             }
-            final String convertedValue = value.replaceAll(regex.first, regex.second);
-            converted.append(convertedValue);
+            try {
+                // replaceAll throws an exception if the subst is invalid
+                final String convertedValue = regex.first.matcher(value).replaceAll(regex.second);
+                converted.append(convertedValue);
+            } catch (Exception e) {
+                // Do not log full exception to avoid leaks
+                Log.w(TAG, "Cannot apply " + regex.first.pattern() + "->" + regex.second + " to "
+                        + "field with autofill id" + id + ": " + e.getClass());
+            }
         }
         parentTemplate.setCharSequence(childViewId, "setText", converted);
     }
@@ -89,18 +96,32 @@ public final class CharSequenceTransformation extends InternalTransformation imp
      * Builder for {@link CharSequenceTransformation} objects.
      */
     public static class Builder {
-        private ArrayMap<AutofillId, Pair<String, String>> mFields;
+        @NonNull private final ArrayMap<AutofillId, Pair<Pattern, String>> mFields =
+                new ArrayMap<>();
         private boolean mDestroyed;
 
-        //TODO(b/62534917): add constructor that takes a field so we force it to have at least one
-        // (and then remove the check for empty from build())
+        /**
+         * Creates a new builder and adds the first transformed contents of a field to the overall
+         * result of this transformation.
+         *
+         * @param id id of the screen field.
+         * @param regex regular expression with groups (delimited by {@code (} and {@code (}) that
+         * are used to substitute parts of the value. The pattern will be {@link Pattern#compile
+         * compiled} without setting any flags.
+         * @param subst the string that substitutes the matched regex, using {@code $} for
+         * group substitution ({@code $1} for 1st group match, {@code $2} for 2nd, etc).
+         */
+        public Builder(@NonNull AutofillId id, @NonNull String regex, @NonNull String subst) {
+            addField(id, regex, subst);
+        }
 
         /**
          * Adds the transformed contents of a field to the overall result of this transformation.
          *
          * @param id id of the screen field.
          * @param regex regular expression with groups (delimited by {@code (} and {@code (}) that
-         * are used to substitute parts of the value.
+         * are used to substitute parts of the value. The pattern will be {@link Pattern#compile
+         * compiled} without setting any flags.
          * @param subst the string that substitutes the matched regex, using {@code $} for
          * group substitution ({@code $1} for 1st group match, {@code $2} for 2nd, etc).
          *
@@ -108,28 +129,23 @@ public final class CharSequenceTransformation extends InternalTransformation imp
          */
         public Builder addField(@NonNull AutofillId id, @NonNull String regex,
                 @NonNull String subst) {
-            //TODO(b/62534917): throw exception if regex /subts are invalid
             throwIfDestroyed();
             Preconditions.checkNotNull(id);
             Preconditions.checkNotNull(regex);
             Preconditions.checkNotNull(subst);
-            if (mFields == null) {
-                mFields = new ArrayMap<>();
-            }
-            mFields.put(id, new Pair<>(regex, subst));
+
+            // Check if the regex is valid
+            Pattern pattern = Pattern.compile(regex);
+
+            mFields.put(id, new Pair<>(pattern, subst));
             return this;
         }
 
         /**
          * Creates a new {@link CharSequenceTransformation} instance.
-         *
-         * @throws IllegalStateException if no call to {@link #addField(AutofillId, String, String)}
-         * was made.
          */
         public CharSequenceTransformation build() {
             throwIfDestroyed();
-            Preconditions.checkState(mFields != null && !mFields.isEmpty(),
-                    "Must add at least one field");
             mDestroyed = true;
             return new CharSequenceTransformation(this);
         }
@@ -163,11 +179,11 @@ public final class CharSequenceTransformation extends InternalTransformation imp
         final AutofillId[] ids = new AutofillId[size];
         final String[] regexs = new String[size];
         final String[] substs = new String[size];
-        Pair<String, String> pair;
+        Pair<Pattern, String> pair;
         for (int i = 0; i < size; i++) {
             ids[i] = mFields.keyAt(i);
             pair = mFields.valueAt(i);
-            regexs[i] = pair.first;
+            regexs[i] = pair.first.pattern();
             substs[i] = pair.second;
         }
         parcel.writeParcelableArray(ids, flags);
@@ -179,16 +195,18 @@ public final class CharSequenceTransformation extends InternalTransformation imp
             new Parcelable.Creator<CharSequenceTransformation>() {
         @Override
         public CharSequenceTransformation createFromParcel(Parcel parcel) {
+            final AutofillId[] ids = parcel.readParcelableArray(null, AutofillId.class);
+            final String[] regexs = parcel.createStringArray();
+            final String[] substs = parcel.createStringArray();
+
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
             final CharSequenceTransformation.Builder builder =
-                    new CharSequenceTransformation.Builder();
-            final AutofillId[] ids = parcel.readParcelableArray(null, AutofillId.class);
-            final String[] regexs = parcel.createStringArray();
-            final String[] substs = parcel.createStringArray();
+                    new CharSequenceTransformation.Builder(ids[0], regexs[0], substs[0]);
+
             final int size = ids.length;
-            for (int i = 0; i < size; i++) {
+            for (int i = 1; i < size; i++) {
                 builder.addField(ids[i], regexs[i], substs[i]);
             }
             return builder.build();

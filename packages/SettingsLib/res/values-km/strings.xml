@@ -186,8 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ប្តូរទៅប្រើបណ្តាញចល័តពេល Wi‑Fi មានរលកសញ្ញាខ្លាំងពេក"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"តែងតែ​អនុញ្ញាត​​​ការវិភាគ​រ៉ូម​វ៉ាយហ្វាយ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ទិន្នន័យទូរសព្ទចល័តដំណើរការជានិច្ច"</string>
-    <!-- no translation found for tethering_hardware_offload (7470077827090325814) -->
-    <skip />
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ការ​បង្កើនល្បឿន​ផ្នែករឹងសម្រាប់​ការភ្ជាប់"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"បិទកម្រិតសំឡេងលឺខ្លាំង"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"បើក​ការ​រោទ៍​ក្នុងបណ្តាញ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"កំណែប្ល៊ូធូស AVRCP"</string>
@@ -219,8 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"អនុញ្ញាត​ទីតាំង​ក្លែងក្លាយ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"បើក​ការ​ត្រួតពិនិត្យ​គុណ​លក្ខណៈ​ទិដ្ឋភាព"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"រក្សាទិន្នន័យចល័តឲ្យសកម្មជានិច្ច បើទោះបីជា Wi‑Fi សកម្មក៏ដោយ (សម្រាប់ការប្តូរបណ្តាញដែលមានល្បឿនលឿន)។"</string>
-    <!-- no translation found for tethering_hardware_offload_summary (7726082075333346982) -->
-    <skip />
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ប្រើការ​បង្កើនល្បឿន​ផ្នែករឹងសម្រាប់​ការភ្ជាប់​ ប្រសិន​បើអាច​ប្រើបាន"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"អនុញ្ញាត​ការ​កែ​កំហុស​យូអេសប៊ី?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"ការ​កែ​កំហុស​​យូអេសប៊ី​គឺ​សម្រាប់​តែ​ការ​អភិវឌ្ឍ​ប៉ុណ្ណោះ។ ប្រើ​វា​ដើម្បី​ចម្លង​ទិន្នន័យ​រវាង​កុំព្យូទ័រ និង​ឧបករណ៍​របស់​អ្នក ដំឡើង​កម្មវិធី​ក្នុង​ឧបករណ៍​របស់​អ្នក​ដោយ​មិន​ជូន​ដំណឹង និង​អាន​ទិន្នន័យ​កំណត់ហេតុ។"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ដក​សិទ្ធិ​ចូល​ការ​កែ​កំហុស​តាម​យូអេសប៊ី​ពី​គ្រប់​កុំព្យូទ័រ​ដែល​អ្នក​បាន​ផ្ដល់​សិទ្ធិ​ពី​មុន?"</string>

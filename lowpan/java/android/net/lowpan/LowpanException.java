@@ -16,8 +16,6 @@
 
 package android.net.lowpan;
 
-import android.os.DeadObjectException;
-import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.AndroidException;
 
@@ -49,92 +47,76 @@ public class LowpanException extends AndroidException {
     public static final int LOWPAN_JOIN_FAILED_AT_AUTH = 16;
     public static final int LOWPAN_FORM_FAILED_AT_SCAN = 17;
 
-    /**
-     * Convert ServiceSpecificExceptions and Binder RemoteExceptions from LoWPAN binder interfaces
-     * into the correct public exceptions.
-     *
-     * @hide
-     */
-    public static void throwAsPublicException(Throwable t) throws LowpanException {
-        if (t instanceof ServiceSpecificException) {
-            ServiceSpecificException e = (ServiceSpecificException) t;
-            int reason;
-            switch (e.errorCode) {
-                case ILowpanInterface.ERROR_INVALID_ARGUMENT:
-                case ILowpanInterface.ERROR_INVALID_TYPE:
-                case ILowpanInterface.ERROR_INVALID_VALUE:
-                    throw new IllegalArgumentException(e.getMessage(), e);
+    public static LowpanException rethrowAsLowpanException(ServiceSpecificException e)
+            throws LowpanException {
+        int reason;
+        switch (e.errorCode) {
+            case ILowpanInterface.ERROR_INVALID_ARGUMENT:
+            case ILowpanInterface.ERROR_INVALID_TYPE:
+            case ILowpanInterface.ERROR_INVALID_VALUE:
+                throw new IllegalArgumentException(e.getMessage(), e);
 
-                case ILowpanInterface.ERROR_PERMISSION_DENIED:
-                    throw new SecurityException(e.getMessage(), e);
+            case ILowpanInterface.ERROR_PERMISSION_DENIED:
+                throw new SecurityException(e.getMessage(), e);
 
-                case ILowpanInterface.ERROR_DISABLED:
-                    reason = LowpanException.LOWPAN_DISABLED;
-                    break;
+            case ILowpanInterface.ERROR_DISABLED:
+                reason = LowpanException.LOWPAN_DISABLED;
+                break;
 
-                case ILowpanInterface.ERROR_WRONG_STATE:
-                    reason = LowpanException.LOWPAN_WRONG_STATE;
-                    break;
+            case ILowpanInterface.ERROR_WRONG_STATE:
+                reason = LowpanException.LOWPAN_WRONG_STATE;
+                break;
 
-                case ILowpanInterface.ERROR_BUSY:
-                    reason = LowpanException.LOWPAN_BUSY;
-                    break;
+            case ILowpanInterface.ERROR_BUSY:
+                reason = LowpanException.LOWPAN_BUSY;
+                break;
 
-                case ILowpanInterface.ERROR_ALREADY:
-                    reason = LowpanException.LOWPAN_ALREADY;
-                    break;
+            case ILowpanInterface.ERROR_ALREADY:
+                reason = LowpanException.LOWPAN_ALREADY;
+                break;
 
-                case ILowpanInterface.ERROR_CANCELED:
-                    reason = LowpanException.LOWPAN_CANCELED;
-                    break;
+            case ILowpanInterface.ERROR_CANCELED:
+                reason = LowpanException.LOWPAN_CANCELED;
+                break;
 
-                case ILowpanInterface.ERROR_CREDENTIAL_NEEDED:
-                    reason = LowpanException.LOWPAN_CREDENTIAL_NEEDED;
-                    break;
+            case ILowpanInterface.ERROR_CREDENTIAL_NEEDED:
+                reason = LowpanException.LOWPAN_CREDENTIAL_NEEDED;
+                break;
 
-                case ILowpanInterface.ERROR_FEATURE_NOT_SUPPORTED:
-                    reason = LowpanException.LOWPAN_FEATURE_NOT_SUPPORTED;
-                    break;
+            case ILowpanInterface.ERROR_FEATURE_NOT_SUPPORTED:
+                reason = LowpanException.LOWPAN_FEATURE_NOT_SUPPORTED;
+                break;
 
-                case ILowpanInterface.ERROR_PROPERTY_NOT_FOUND:
-                    reason = LowpanException.LOWPAN_PROPERTY_NOT_FOUND;
-                    break;
+            case ILowpanInterface.ERROR_PROPERTY_NOT_FOUND:
+                reason = LowpanException.LOWPAN_PROPERTY_NOT_FOUND;
+                break;
 
-                case ILowpanInterface.ERROR_JOIN_FAILED_UNKNOWN:
-                    reason = LowpanException.LOWPAN_JOIN_FAILED_UNKNOWN;
-                    break;
+            case ILowpanInterface.ERROR_JOIN_FAILED_UNKNOWN:
+                reason = LowpanException.LOWPAN_JOIN_FAILED_UNKNOWN;
+                break;
 
-                case ILowpanInterface.ERROR_JOIN_FAILED_AT_SCAN:
-                    reason = LowpanException.LOWPAN_JOIN_FAILED_AT_SCAN;
-                    break;
+            case ILowpanInterface.ERROR_JOIN_FAILED_AT_SCAN:
+                reason = LowpanException.LOWPAN_JOIN_FAILED_AT_SCAN;
+                break;
 
-                case ILowpanInterface.ERROR_JOIN_FAILED_AT_AUTH:
-                    reason = LowpanException.LOWPAN_JOIN_FAILED_AT_AUTH;
-                    break;
+            case ILowpanInterface.ERROR_JOIN_FAILED_AT_AUTH:
+                reason = LowpanException.LOWPAN_JOIN_FAILED_AT_AUTH;
+                break;
 
-                case ILowpanInterface.ERROR_FORM_FAILED_AT_SCAN:
-                    reason = LowpanException.LOWPAN_FORM_FAILED_AT_SCAN;
-                    break;
+            case ILowpanInterface.ERROR_FORM_FAILED_AT_SCAN:
+                reason = LowpanException.LOWPAN_FORM_FAILED_AT_SCAN;
+                break;
 
-                case ILowpanInterface.ERROR_TIMEOUT:
-                case ILowpanInterface.ERROR_NCP_PROBLEM:
-                    reason = LowpanException.LOWPAN_NCP_PROBLEM;
-                    break;
-                case ILowpanInterface.ERROR_UNSPECIFIED:
-                default:
-                    reason = LOWPAN_ERROR;
-                    break;
-            }
-            throw new LowpanException(reason, e.getMessage(), e);
-        } else if (t instanceof DeadObjectException) {
-            throw new LowpanException(LOWPAN_DEAD, t);
-        } else if (t instanceof RemoteException) {
-            throw new UnsupportedOperationException(
-                    "An unknown RemoteException was thrown" + " which should never happen.", t);
-        } else if (t instanceof RuntimeException) {
-            RuntimeException e = (RuntimeException) t;
-            throw e;
+            case ILowpanInterface.ERROR_TIMEOUT:
+            case ILowpanInterface.ERROR_NCP_PROBLEM:
+                reason = LowpanException.LOWPAN_NCP_PROBLEM;
+                break;
+            case ILowpanInterface.ERROR_UNSPECIFIED:
+            default:
+                reason = LOWPAN_ERROR;
+                break;
         }
+        throw new LowpanException(reason, e.getMessage(), e);
     }
 
     private final int mReason;

@@ -18,6 +18,7 @@ package android.app;
 
 import static com.android.internal.util.NotificationColorUtil.satisfiesTextContrast;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -25,8 +26,6 @@ import android.media.session.MediaSession;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-
-import com.android.internal.util.NotificationColorUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,9 +43,51 @@ public class NotificationTest {
     }
 
     @Test
+    public void testColorizedByPermission() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setFlag(Notification.FLAG_CAN_COLORIZE, true)
+                .setColorized(true)
+                .build();
+        assertTrue(n.isColorized());
+
+        n = new Notification.Builder(mContext, "test")
+                .setFlag(Notification.FLAG_CAN_COLORIZE, true)
+                .build();
+        assertFalse(n.isColorized());
+
+        n = new Notification.Builder(mContext, "test")
+                .setFlag(Notification.FLAG_CAN_COLORIZE, false)
+                .setColorized(true)
+                .build();
+        assertFalse(n.isColorized());
+    }
+
+    @Test
+    public void testColorizedByForeground() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .setColorized(true)
+                .build();
+        assertTrue(n.isColorized());
+
+        n = new Notification.Builder(mContext, "test")
+                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .build();
+        assertFalse(n.isColorized());
+
+        n = new Notification.Builder(mContext, "test")
+                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, false)
+                .setColorized(true)
+                .build();
+        assertFalse(n.isColorized());
+    }
+
+    @Test
     public void testColorSatisfiedWhenBgDarkTextDarker() {
         Notification.Builder builder = getMediaNotification();
-        builder.build();
+        Notification n = builder.build();
+
+        assertTrue(n.isColorized());
 
         // An initial guess where the foreground color is actually darker than an already dark bg
         int backgroundColor = 0xff585868;
@@ -56,6 +97,45 @@ public class NotificationTest {
         assertTrue(satisfiesTextContrast(primaryTextColor, backgroundColor));
         int secondaryTextColor = builder.getSecondaryTextColor();
         assertTrue(satisfiesTextContrast(secondaryTextColor, backgroundColor));
+    }
+
+    @Test
+    public void testHasCompletedProgress_noProgress() {
+        Notification n = new Notification.Builder(mContext).build();
+
+        assertFalse(n.hasCompletedProgress());
+    }
+
+    @Test
+    public void testHasCompletedProgress_complete() {
+        Notification n = new Notification.Builder(mContext)
+                .setProgress(100, 100, true)
+                .build();
+        Notification n2 = new Notification.Builder(mContext)
+                .setProgress(10, 10, false)
+                .build();
+        assertTrue(n.hasCompletedProgress());
+        assertTrue(n2.hasCompletedProgress());
+    }
+
+    @Test
+    public void testHasCompletedProgress_notComplete() {
+        Notification n = new Notification.Builder(mContext)
+                .setProgress(100, 99, true)
+                .build();
+        Notification n2 = new Notification.Builder(mContext)
+                .setProgress(10, 4, false)
+                .build();
+        assertFalse(n.hasCompletedProgress());
+        assertFalse(n2.hasCompletedProgress());
+    }
+
+    @Test
+    public void testHasCompletedProgress_zeroMax() {
+        Notification n = new Notification.Builder(mContext)
+                .setProgress(0, 0, true)
+                .build();
+        assertFalse(n.hasCompletedProgress());
     }
 
     private Notification.Builder getMediaNotification() {

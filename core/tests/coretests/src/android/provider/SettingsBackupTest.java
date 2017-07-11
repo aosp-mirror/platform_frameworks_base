@@ -465,11 +465,7 @@ public class SettingsBackupTest {
                  Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
                  Settings.Secure.PAYMENT_SERVICE_SEARCH_URI,
                  Settings.Secure.PRINT_SERVICE_SEARCH_URI,
-                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, // Candidate?
-                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, // Candidate?
-                 Settings.Secure.SCREENSAVER_COMPONENTS,
                  Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT, // Candidate?
-                 Settings.Secure.SCREENSAVER_ENABLED, // Candidate?
                  Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY,
                  Settings.Secure.SEARCH_MAX_RESULTS_PER_SOURCE,
                  Settings.Secure.SEARCH_MAX_RESULTS_TO_DISPLAY,

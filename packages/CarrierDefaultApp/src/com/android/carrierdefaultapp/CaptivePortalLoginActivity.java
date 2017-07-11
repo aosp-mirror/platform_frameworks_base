@@ -226,7 +226,8 @@ public class CaptivePortalLoginActivity extends Activity {
                 int httpResponseCode = 500;
                 int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
                 try {
-                    urlConnection = (HttpURLConnection) mNetwork.openConnection(mUrl);
+                    urlConnection = (HttpURLConnection) mNetwork.openConnection(
+                            new URL(mCm.getCaptivePortalServerUrl()));
                     urlConnection.setInstanceFollowRedirects(false);
                     urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
                     urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
@@ -234,6 +235,7 @@ public class CaptivePortalLoginActivity extends Activity {
                     urlConnection.getInputStream();
                     httpResponseCode = urlConnection.getResponseCode();
                 } catch (IOException e) {
+                    loge(e.getMessage());
                 } finally {
                     if (urlConnection != null) urlConnection.disconnect();
                     TrafficStats.setThreadStatsTag(oldTag);

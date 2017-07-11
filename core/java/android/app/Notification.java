@@ -561,6 +561,11 @@ public class Notification implements Parcelable
     @SystemApi
     public static final int FLAG_AUTOGROUP_SUMMARY  = 0x00000400;
 
+    /**
+     * @hide
+     */
+    public static final int FLAG_CAN_COLORIZE = 0x00000800;
+
     public int flags;
 
     /** @hide */
@@ -2536,6 +2541,22 @@ public class Notification implements Parcelable
             default:
                 return "UNKNOWN(" + String.valueOf(pri) + ")";
         }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasCompletedProgress() {
+        // not a progress notification; can't be complete
+        if (!extras.containsKey(EXTRA_PROGRESS)
+                || !extras.containsKey(EXTRA_PROGRESS_MAX)) {
+            return false;
+        }
+        // many apps use max 0 for 'indeterminate'; not complete
+        if (extras.getInt(EXTRA_PROGRESS_MAX) == 0) {
+            return false;
+        }
+        return extras.getInt(EXTRA_PROGRESS) == extras.getInt(EXTRA_PROGRESS_MAX);
     }
 
     /** @removed */
@@ -5174,7 +5195,16 @@ public class Notification implements Parcelable
         if (isColorizedMedia()) {
             return true;
         }
-        return extras.getBoolean(EXTRA_COLORIZED) && isForegroundService();
+        return extras.getBoolean(EXTRA_COLORIZED)
+                && (hasColorizedPermission() || isForegroundService());
+    }
+
+    /**
+     * Returns whether an app can colorize due to the android.permission.USE_COLORIZED_NOTIFICATIONS
+     * permission. The permission is checked when a notification is enqueued.
+     */
+    private boolean hasColorizedPermission() {
+        return (flags & Notification.FLAG_CAN_COLORIZE) != 0;
     }
 
     /**
@@ -5234,7 +5264,7 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @hide
+     * @removed
      */
     @SystemApi
     public static Class<? extends Style> getNotificationStyleClass(String templateClass) {
