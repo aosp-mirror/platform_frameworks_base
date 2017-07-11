@@ -5981,6 +5981,13 @@ public class DevicePolicyManager {
     public static final int MAKE_USER_EPHEMERAL = 0x0002;
 
     /**
+     * Flag used by {@link #createAndManageUser} to specify that the user should be created as a
+     * demo user.
+     * @hide
+     */
+    public static final int MAKE_USER_DEMO = 0x0004;
+
+    /**
      * Called by a device owner to create a user with the specified name and a given component of
      * the calling package as profile owner. The UserHandle returned by this method should not be
      * persisted as user handles are recycled as users are removed and created. If you need to
