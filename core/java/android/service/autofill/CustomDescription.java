@@ -78,7 +78,6 @@ import com.android.internal.util.Preconditions;
  * <p>See {@link ImageTransformation}, {@link CharSequenceTransformation} for more info about these
  * transformations.
  */
-// TODO(b/62534917): add integration tests
 public final class CustomDescription implements Parcelable {
 
     private static final String TAG = "CustomDescription";
@@ -93,7 +92,6 @@ public final class CustomDescription implements Parcelable {
 
     /** @hide */
     public RemoteViews getPresentation(ValueFinder finder) {
-        // TODO(b/62534917): need to handler errors, like not finding the ID
         if (mTransformations != null) {
             final int size = mTransformations.size();
             if (sDebug) Log.d(TAG, "getPresentation(): applying " + size + " transformations");
@@ -101,7 +99,13 @@ public final class CustomDescription implements Parcelable {
                 final int id = mTransformations.keyAt(i);
                 final InternalTransformation transformation = mTransformations.valueAt(i);
                 if (sDebug) Log.d(TAG, "#" + i + ": " + transformation);
-                transformation.apply(finder, mPresentation, id);
+
+                try {
+                    transformation.apply(finder, mPresentation, id);
+                } catch (Exception e) {
+                    Log.e(TAG, "Could not apply transformation " + transformation + ". "
+                            + e.getClass());
+                }
             }
         }
         return mPresentation;

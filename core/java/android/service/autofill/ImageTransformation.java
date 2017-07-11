@@ -51,7 +51,8 @@ import java.util.regex.Pattern;
  * <p>There is no imposed limit in the number of options, but keep in mind that regexs are
  * expensive to evaluate, so use the minimum number of regexs.
  */
-public final class ImageTransformation extends InternalTransformation implements Parcelable {
+public final class ImageTransformation extends InternalTransformation implements Transformation,
+        Parcelable {
     private static final String TAG = "ImageTransformation";
 
     private final AutofillId mId;

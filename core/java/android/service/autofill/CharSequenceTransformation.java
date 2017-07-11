@@ -55,7 +55,8 @@ import java.util.regex.Pattern;
  *   .addField(ccExpYearId, "^(\\d\\d\\d\\d)$", " / $1");
  * </pre>
  */
-public final class CharSequenceTransformation extends InternalTransformation implements Parcelable {
+public final class CharSequenceTransformation extends InternalTransformation implements
+        Transformation, Parcelable {
     private static final String TAG = "CharSequenceTransformation";
     @NonNull private final ArrayMap<AutofillId, Pair<Pattern, String>> mFields;
 

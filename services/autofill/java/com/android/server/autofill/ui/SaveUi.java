@@ -144,15 +144,19 @@ final class SaveUi {
         final CustomDescription customDescription = info.getCustomDescription();
 
         if (customDescription != null) {
-            // TODO(b/62534917): add CTS test
             if (sDebug) Slog.d(TAG, "Using custom description");
 
             final RemoteViews presentation = customDescription.getPresentation(valueFinder);
             if (presentation != null) {
-                final View remote = presentation.apply(context, null);
-                final LinearLayout layout = view.findViewById(R.id.autofill_save_custom_subtitle);
-                layout.addView(remote);
-                layout.setVisibility(View.VISIBLE);
+                try {
+                    final View remote = presentation.apply(context, null);
+                    final LinearLayout layout = view.findViewById(
+                            R.id.autofill_save_custom_subtitle);
+                    layout.addView(remote);
+                    layout.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Could not inflate custom description. ", e);
+                }
             } else {
                 Slog.w(TAG, "could not create remote presentation for custom title");
             }
