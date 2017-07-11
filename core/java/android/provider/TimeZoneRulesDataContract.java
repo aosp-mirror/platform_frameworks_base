@@ -40,75 +40,96 @@ public final class TimeZoneRulesDataContract {
     private static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
-     * The content:// style URI for determining what type of update is available.
-     *
-     * <p>The URI can be queried using
-     * {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)};
-     * the result will be a cursor with a single row. If the {@link #COLUMN_OPERATION}
-     * column is {@link #OPERATION_INSTALL} then see {@link #DATA_URI} for how to obtain the
-     * binary data.
+     * Defines fields exposed through the {@link Operation#CONTENT_URI} for describing a time zone
+     * distro operation.
      */
-    public static final Uri OPERATION_URI = Uri.withAppendedPath(AUTHORITY_URI, "operation");
+    public static final class Operation {
+
+        /** Not instantiable. */
+        private Operation() {
+        }
+
+        /**
+         * The content:// style URI for determining what type of update is available.
+         *
+         * <p>The URI can be queried using
+         * {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)};
+         * the result will be a cursor with a single row. If the {@link Operation#TYPE}
+         * column is {@link Operation#TYPE_INSTALL} then see {@link Data#CONTENT_URI} for how
+         * to obtain the binary data.
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "operation");
+
+        /**
+         * The {@code String} column of the {@link #CONTENT_URI} that provides an int specifying
+         * the type of operation to perform. See {@link #TYPE_NO_OP},
+         * {@link #TYPE_UNINSTALL} and {@link #TYPE_INSTALL}.
+         */
+        public static final String TYPE = "type";
+
+        /**
+         * An operation type used when the current time zone rules on device should be replaced by
+         * a new set obtained via the {@link android.content.ContentProvider#openFile(Uri, String)}
+         * method.
+         */
+        public static final String TYPE_INSTALL = "INSTALL";
+
+        /**
+         * An operation type used when the current time zone rules on device should be uninstalled,
+         * returning to the values held in the system partition.
+         */
+        public static final String TYPE_UNINSTALL = "UNINSTALL";
+
+        /**
+         * An operation type used when the time zone rules on device should be left as they are.
+         * This is not expected to be used in normal operation but a safe result in the event of an
+         * error that cannot be recovered from.
+         */
+        public static final String TYPE_NO_OP = "NOOP";
+
+        /**
+         * The {@code nullable int} column of the {@link #CONTENT_URI} that describes the major
+         * version of the distro to be installed.
+         * Only non-null if {@link #TYPE} contains {@link #TYPE_INSTALL}.
+         */
+        public static final String DISTRO_MAJOR_VERSION = "distro_major_version";
+
+        /**
+         * The {@code nullable int} column of the {@link #CONTENT_URI} that describes the minor
+         * version of the distro to be installed.
+         * Only non-null if {@link #TYPE} contains {@link #TYPE_INSTALL}.
+         */
+        public static final String DISTRO_MINOR_VERSION = "distro_minor_version";
+
+        /**
+         * The {@code nullable String} column of the {@link #CONTENT_URI} that describes the IANA
+         * rules version of the distro to be installed.
+         * Only non-null if {@link #TYPE} contains {@link #TYPE_INSTALL}.
+         */
+        public static final String RULES_VERSION = "rules_version";
+
+        /**
+         * The {@code nullable int} column of the {@link #CONTENT_URI} that describes the revision
+         * number of the distro to be installed.
+         * Only non-null if {@link #TYPE} contains {@link #TYPE_INSTALL}.
+         */
+        public static final String REVISION = "revision";
+    }
 
     /**
-     * The {@code String} column of the {@link #OPERATION_URI} that provides an int specifying the
-     * type of operation to perform. See {@link #OPERATION_NO_OP}, {@link #OPERATION_UNINSTALL} and
-     * {@link #OPERATION_INSTALL}.
+     * Defines the {@link Data#CONTENT_URI} for obtaining time zone distro binary data.
      */
-    public static final String COLUMN_OPERATION = "operation";
+    public static final class Data {
 
-    /**
-     * An operation type used when the time zone rules on device should be left as they are.
-     * This is not expected to be used in normal operation but a safe result in the event of an
-     * error that cannot be recovered from.
-     */
-    public static final String OPERATION_NO_OP = "NOOP";
+        /** Not instantiable. */
+        private Data() {
+        }
 
-    /**
-     * An operation type used when the current time zone rules on device should be uninstalled,
-     * returning to the values held in the system partition.
-     */
-    public static final String OPERATION_UNINSTALL = "UNINSTALL";
-
-    /**
-     * An operation type used when the current time zone rules on device should be replaced by
-     * a new set obtained via the {@link android.content.ContentProvider#openFile(Uri, String)}
-     * method.
-     */
-    public static final String OPERATION_INSTALL = "INSTALL";
-
-    /**
-     * The {@code nullable int} column of the {@link #OPERATION_URI} that describes the major
-     * version of the distro to be installed.
-     * Only non-null if {@link #COLUMN_OPERATION} contains {@link #OPERATION_INSTALL}.
-     */
-    public static final String COLUMN_DISTRO_MAJOR_VERSION = "distro_major_version";
-
-    /**
-     * The {@code nullable int} column of the {@link #OPERATION_URI} that describes the minor
-     * version of the distro to be installed.
-     * Only non-null if {@link #COLUMN_OPERATION} contains {@link #OPERATION_INSTALL}.
-     */
-    public static final String COLUMN_DISTRO_MINOR_VERSION = "distro_minor_version";
-
-    /**
-     * The {@code nullable String} column of the {@link #OPERATION_URI} that describes the IANA
-     * rules version of the distro to be installed.
-     * Only non-null if {@link #COLUMN_OPERATION} contains {@link #OPERATION_INSTALL}.
-     */
-    public static final String COLUMN_RULES_VERSION = "rules_version";
-
-    /**
-     * The {@code nullable int} column of the {@link #OPERATION_URI} that describes the revision
-     * number of the distro to be installed.
-     * Only non-null if {@link #COLUMN_OPERATION} contains {@link #OPERATION_INSTALL}.
-     */
-    public static final String COLUMN_REVISION = "revision";
-
-    /**
-     * The content:// style URI for obtaining time zone bundle data.
-     *
-     * <p>Use {@link android.content.ContentProvider#openFile(Uri, String)} with "r" mode.
-     */
-    public static final Uri DATA_URI = Uri.withAppendedPath(AUTHORITY_URI, "data");
+        /**
+         * The content:// style URI for obtaining time zone bundle data.
+         *
+         * <p>Use {@link android.content.ContentProvider#openFile(Uri, String)} with "r" mode.
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "data");
+    }
 }
