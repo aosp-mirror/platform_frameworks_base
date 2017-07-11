@@ -246,13 +246,6 @@ public class WebViewClient {
     /** The resource was blocked because it contains unwanted software */
     public static final int SAFE_BROWSING_THREAT_UNWANTED_SOFTWARE = 3;
 
-    /** Display the default interstitial */
-    public static final int SAFE_BROWSING_ACTION_SHOW_INTERSTITIAL = 0;
-    /** Act as if the user clicked "visit this unsafe site" */
-    public static final int SAFE_BROWSING_ACTION_PROCEED = 1;
-    /** Act as if the user clicked "Back to safety" */
-    public static final int SAFE_BROWSING_ACTION_BACK_TO_SAFETY = 2;
-
     /**
      * Report an error to the host application. These errors are unrecoverable
      * (i.e. the main resource is unavailable). The errorCode parameter
@@ -517,20 +510,19 @@ public class WebViewClient {
      * Notify the host application that a loading URL has been flagged by Safe Browsing.
      *
      * The application must invoke the callback to indicate the preferred response. The default
-     * behavior is to show an interstitial to the user (SAFE_BROWSING_ACTION_SHOW_INTERSTITIAL).
+     * behavior is to show an interstitial to the user, with the reporting checkbox visible.
      *
      * If the application needs to show its own custom interstitial UI, the callback can be invoked
-     * asynchronously with SAFE_BROWSING_ACTION_BACK_TO_SAFETY or SAFE_BROWSING_ACTION_PROCEED,
-     * depending on user response.
+     * asynchronously with backToSafety() or proceed(), depending on user response.
      *
      * @param view The WebView that hit the malicious resource.
      * @param request Object containing the details of the request.
      * @param threatType The reason the resource was caught by Safe Browsing, corresponding to a
      *                   SAFE_BROWSING_THREAT_* value.
-     * @param callback Applications must invoke this callback with one of SAFE_BROWSING_ACTION_*.
+     * @param callback Applications must invoke one of the callback methods.
      */
     public void onSafeBrowsingHit(WebView view, WebResourceRequest request, int threatType,
-            ValueCallback<Integer> callback) {
-        callback.onReceiveValue(SAFE_BROWSING_ACTION_SHOW_INTERSTITIAL);
+            SafeBrowsingResponse callback) {
+        callback.showInterstitial(/* allowReporting */ true);
     }
 }
