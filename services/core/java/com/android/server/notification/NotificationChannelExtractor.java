@@ -19,9 +19,9 @@ import android.content.Context;
 import android.util.Slog;
 
 /**
- * Determines whether a badge should be shown for this notification
+ * Stores the latest notification channel information for this notification
  */
-public class BadgeExtractor implements NotificationSignalExtractor {
+public class NotificationChannelExtractor implements NotificationSignalExtractor {
     private static final String TAG = "BadgeExtractor";
     private static final boolean DBG = false;
 
@@ -41,18 +41,9 @@ public class BadgeExtractor implements NotificationSignalExtractor {
             if (DBG) Slog.d(TAG, "missing config");
             return null;
         }
-        boolean userWantsBadges = mConfig.badgingEnabled(record.sbn.getUser());
-        boolean appCanShowBadge =
-                mConfig.canShowBadge(record.sbn.getPackageName(), record.sbn.getUid());
-        if (!userWantsBadges || !appCanShowBadge) {
-            record.setShowBadge(false);
-        } else {
-            if (record.getChannel() != null) {
-                record.setShowBadge(record.getChannel().canShowBadge() && appCanShowBadge);
-            } else {
-                record.setShowBadge(appCanShowBadge);
-            }
-        }
+
+        record.updateNotificationChannel(mConfig.getNotificationChannel(record.sbn.getPackageName(),
+                record.sbn.getUid(), record.getChannel().getId(), false));
 
         return null;
     }

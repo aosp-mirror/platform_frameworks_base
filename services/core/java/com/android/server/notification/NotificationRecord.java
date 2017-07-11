@@ -35,8 +35,10 @@ import android.media.AudioSystem;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRecordProto;
 import android.service.notification.SnoozeCriterion;
@@ -57,6 +59,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -132,6 +135,8 @@ public final class NotificationRecord {
     private String mGroupLogTag;
     private String mChannelIdLogTag;
 
+    private final List<Adjustment> mAdjustments;
+
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel)
@@ -150,6 +155,7 @@ public final class NotificationRecord {
         mAttributes = calculateAttributes();
         mImportance = calculateImportance();
         mLight = calculateLights();
+        mAdjustments = new ArrayList<>();
     }
 
     private boolean isPreChannelsNotification() {
@@ -504,6 +510,7 @@ public final class NotificationRecord {
         if (getSnoozeCriteria() != null) {
             pw.println(prefix + "snoozeCriteria=" + TextUtils.join(",", getSnoozeCriteria()));
         }
+        pw.println(prefix + "mAdjustments=" + mAdjustments);
     }
 
 
@@ -537,6 +544,36 @@ public final class NotificationRecord {
                 this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
                 this.sbn.getTag(), this.mImportance, this.sbn.getKey(),
                 this.sbn.getNotification());
+    }
+
+    public void addAdjustment(Adjustment adjustment) {
+        synchronized (mAdjustments) {
+            mAdjustments.add(adjustment);
+        }
+    }
+
+    public void applyAdjustments() {
+        synchronized (mAdjustments) {
+            for (Adjustment adjustment: mAdjustments) {
+                Bundle signals = adjustment.getSignals();
+                if (signals.containsKey(Adjustment.KEY_PEOPLE)) {
+                    final ArrayList<String> people =
+                            adjustment.getSignals().getStringArrayList(Adjustment.KEY_PEOPLE);
+                    setPeopleOverride(people);
+                }
+                if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
+                    final ArrayList<SnoozeCriterion> snoozeCriterionList =
+                            adjustment.getSignals().getParcelableArrayList(
+                                    Adjustment.KEY_SNOOZE_CRITERIA);
+                    setSnoozeCriteria(snoozeCriterionList);
+                }
+                if (signals.containsKey(Adjustment.KEY_GROUP_KEY)) {
+                    final String groupOverrideKey =
+                            adjustment.getSignals().getString(Adjustment.KEY_GROUP_KEY);
+                    setOverrideGroupKey(groupOverrideKey);
+                }
+            }
+        }
     }
 
     public void setContactAffinity(float contactAffinity) {

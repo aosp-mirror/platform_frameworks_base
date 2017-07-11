@@ -278,7 +278,7 @@ public class NotificationManagerService extends SystemService {
     private ICompanionDeviceManager mCompanionManager;
 
     final IBinder mForegroundToken = new Binder();
-    private Handler mHandler;
+    private WorkerHandler mHandler;
     private final HandlerThread mRankingThread = new HandlerThread("ranker",
             Process.THREAD_PRIORITY_BACKGROUND);
 
@@ -295,8 +295,8 @@ public class NotificationManagerService extends SystemService {
     private String mVibrateNotificationKey;
 
     private final SparseArray<ArraySet<ManagedServiceInfo>> mListenersDisablingEffects =
-            new SparseArray<ArraySet<ManagedServiceInfo>>();
-    private List<ComponentName> mEffectsSuppressors = new ArrayList<ComponentName>();
+            new SparseArray<>();
+    private List<ComponentName> mEffectsSuppressors = new ArrayList<>();
     private int mListenerHints;  // right now, all hints are global
     private int mInterruptionFilter = NotificationListenerService.INTERRUPTION_FILTER_UNKNOWN;
 
@@ -312,16 +312,14 @@ public class NotificationManagerService extends SystemService {
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
     @GuardedBy("mNotificationLock")
-    final ArrayList<NotificationRecord> mNotificationList =
-            new ArrayList<NotificationRecord>();
+    final ArrayList<NotificationRecord> mNotificationList = new ArrayList<>();
     @GuardedBy("mNotificationLock")
-    final ArrayMap<String, NotificationRecord> mNotificationsByKey =
-            new ArrayMap<String, NotificationRecord>();
+    final ArrayMap<String, NotificationRecord> mNotificationsByKey = new ArrayMap<>();
     @GuardedBy("mNotificationLock")
     final ArrayList<NotificationRecord> mEnqueuedNotifications = new ArrayList<>();
     @GuardedBy("mNotificationLock")
     final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
-    final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
+    final ArrayList<ToastRecord> mToastQueue = new ArrayList<>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
 
     // The last key in this list owns the hardware.
@@ -1093,12 +1091,19 @@ public class NotificationManagerService extends SystemService {
                     count--;
                 }
                 if (posted.sbn.isGroup() && posted.getNotification().isGroupSummary()) {
-                    count --;
+                    count--;
                 }
             }
 
             return count;
         }
+    }
+
+    void clearNotifications() {
+        mEnqueuedNotifications.clear();
+        mNotificationList.clear();
+        mNotificationsByKey.clear();
+        mSummaryByGroupKey.clear();
     }
 
     @VisibleForTesting
@@ -1121,7 +1126,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void setHandler(Handler handler) {
+    void setHandler(WorkerHandler handler) {
         mHandler = handler;
     }
 
@@ -1141,6 +1146,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void setRankingHandler(RankingHandler rankingHandler) {
+        mRankingHandler = rankingHandler;
+    }
+
+    @VisibleForTesting
     void setIsTelevision(boolean isTelevision) {
         mIsTelevision = isTelevision;
     }
@@ -1152,7 +1162,8 @@ public class NotificationManagerService extends SystemService {
 
     // TODO: Tests should call onStart instead once the methods above are removed.
     @VisibleForTesting
-    void init(Looper looper, IPackageManager packageManager, PackageManager packageManagerClient,
+    void init(Looper looper, IPackageManager packageManager,
+            PackageManager packageManagerClient,
             LightsManager lightsManager, NotificationListeners notificationListeners,
             NotificationAssistants notificationAssistants, ConditionProviders conditionProviders,
             ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
@@ -1323,7 +1334,8 @@ public class NotificationManagerService extends SystemService {
 
         final File systemDir = new File(Environment.getDataDirectory(), "system");
 
-        init(Looper.myLooper(), AppGlobals.getPackageManager(), getContext().getPackageManager(),
+        init(Looper.myLooper(),
+                AppGlobals.getPackageManager(), getContext().getPackageManager(),
                 getLocalService(LightsManager.class),
                 new NotificationListeners(AppGlobals.getPackageManager()),
                 new NotificationAssistants(AppGlobals.getPackageManager()),
@@ -1343,7 +1355,6 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationLock) {
                     addAutogroupKeyLocked(key);
                 }
-                mRankingHandler.requestSort(false);
             }
 
             @Override
@@ -1351,7 +1362,6 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationLock) {
                     removeAutogroupKeyLocked(key);
                 }
-                mRankingHandler.requestSort(false);
             }
 
             @Override
@@ -1424,28 +1434,14 @@ public class NotificationManagerService extends SystemService {
         }
         mRankingHelper.updateNotificationChannel(pkg, uid, channel);
 
-        final NotificationChannel modifiedChannel =
-                mRankingHelper.getNotificationChannel(pkg, uid, channel.getId(), false);
-
         if (!fromListener) {
+            final NotificationChannel modifiedChannel =
+                    mRankingHelper.getNotificationChannel(pkg, uid, channel.getId(), false);
             mListeners.notifyNotificationChannelChanged(
                     pkg, UserHandle.getUserHandleForUid(uid),
                     modifiedChannel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
         }
 
-        synchronized (mNotificationLock) {
-            final int N = mNotificationList.size();
-            for (int i = N - 1; i >= 0; --i) {
-                NotificationRecord r = mNotificationList.get(i);
-                if (r.sbn.getPackageName().equals(pkg)
-                        && r.sbn.getUid() == uid
-                        && channel.getId() != null
-                        && channel.getId().equals(r.getChannel().getId())) {
-                    r.updateNotificationChannel(modifiedChannel);
-                }
-            }
-        }
-        mRankingHandler.requestSort(true);
         savePolicyFile();
     }
 
@@ -2883,7 +2879,7 @@ public class NotificationManagerService extends SystemService {
                     NotificationRecord n = mNotificationsByKey.get(adjustment.getKey());
                     applyAdjustment(n, adjustment);
                 }
-                mRankingHandler.requestSort(true);
+                mRankingHandler.requestSort();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2902,7 +2898,7 @@ public class NotificationManagerService extends SystemService {
                         applyAdjustment(n, adjustment);
                     }
                 }
-                mRankingHandler.requestSort(true);
+                mRankingHandler.requestSort();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2976,39 +2972,44 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
-    private void applyAdjustment(NotificationRecord n, Adjustment adjustment) {
-        if (n == null) {
+    private void applyAdjustment(NotificationRecord r, Adjustment adjustment) {
+        if (r == null) {
             return;
         }
         if (adjustment.getSignals() != null) {
             Bundle.setDefusable(adjustment.getSignals(), true);
-            final ArrayList<String> people =
-                    adjustment.getSignals().getStringArrayList(Adjustment.KEY_PEOPLE);
-            final ArrayList<SnoozeCriterion> snoozeCriterionList =
-                    adjustment.getSignals().getParcelableArrayList(Adjustment.KEY_SNOOZE_CRITERIA);
-            n.setPeopleOverride(people);
-            n.setSnoozeCriteria(snoozeCriterionList);
+            r.addAdjustment(adjustment);
         }
     }
 
     @GuardedBy("mNotificationLock")
-    private void addAutogroupKeyLocked(String key) {
-        NotificationRecord n = mNotificationsByKey.get(key);
-        if (n == null) {
+    void addAutogroupKeyLocked(String key) {
+        NotificationRecord r = mNotificationsByKey.get(key);
+        if (r == null) {
             return;
         }
-        n.setOverrideGroupKey(GroupHelper.AUTOGROUP_KEY);
+        addAutoGroupAdjustment(r, GroupHelper.AUTOGROUP_KEY);
         EventLogTags.writeNotificationAutogrouped(key);
+        mRankingHandler.requestSort();
     }
 
     @GuardedBy("mNotificationLock")
-    private void removeAutogroupKeyLocked(String key) {
-        NotificationRecord n = mNotificationsByKey.get(key);
-        if (n == null) {
+    void removeAutogroupKeyLocked(String key) {
+        NotificationRecord r = mNotificationsByKey.get(key);
+        if (r == null) {
             return;
         }
-        n.setOverrideGroupKey(null);
+        addAutoGroupAdjustment(r, null);
         EventLogTags.writeNotificationUnautogrouped(key);
+        mRankingHandler.requestSort();
+    }
+
+    private void addAutoGroupAdjustment(NotificationRecord r, String overrideGroupKey) {
+        Bundle signals = new Bundle();
+        signals.putString(Adjustment.KEY_GROUP_KEY, overrideGroupKey);
+        Adjustment adjustment =
+                new Adjustment(r.sbn.getPackageName(), r.getKey(), signals, "", r.sbn.getUserId());
+        r.addAdjustment(adjustment);
     }
 
     // Clears the 'fake' auto-group summary.
@@ -4267,39 +4268,44 @@ public class NotificationManagerService extends SystemService {
             }
         }
         if (changed) {
-            scheduleSendRankingUpdate();
+            mHandler.scheduleSendRankingUpdate();
         }
     }
 
-    private void handleRankingSort(Message msg) {
-        if (!(msg.obj instanceof Boolean)) return;
+    void handleRankingSort() {
         if (mRankingHelper == null) return;
-        boolean forceUpdate = ((Boolean) msg.obj == null) ? false : (boolean) msg.obj;
         synchronized (mNotificationLock) {
             final int N = mNotificationList.size();
-            // Any field that can change via one of the extractors or by the assistant
-            // needs to be added here.
-            ArrayList<String> orderBefore = new ArrayList<String>(N);
-            ArrayList<String> groupOverrideBefore = new ArrayList<>(N);
+            // Any field that can change via one of the extractors needs to be added here.
+            ArrayList<String> orderBefore = new ArrayList<>(N);
             int[] visibilities = new int[N];
             boolean[] showBadges = new boolean[N];
+            ArrayList<NotificationChannel> channelBefore = new ArrayList<>(N);
+            ArrayList<String> groupKeyBefore = new ArrayList<>(N);
+            ArrayList<ArrayList<String>> overridePeopleBefore = new ArrayList<>(N);
+            ArrayList<ArrayList<SnoozeCriterion>> snoozeCriteriaBefore = new ArrayList<>(N);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
-                groupOverrideBefore.add(r.sbn.getGroupKey());
                 visibilities[i] = r.getPackageVisibilityOverride();
                 showBadges[i] = r.canShowBadge();
+                channelBefore.add(r.getChannel());
+                groupKeyBefore.add(r.getGroupKey());
+                overridePeopleBefore.add(r.getPeopleOverride());
+                snoozeCriteriaBefore.add(r.getSnoozeCriteria());
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
-                if (forceUpdate
-                        || !orderBefore.get(i).equals(r.getKey())
+                if (!orderBefore.get(i).equals(r.getKey())
                         || visibilities[i] != r.getPackageVisibilityOverride()
-                        || !groupOverrideBefore.get(i).equals(r.sbn.getGroupKey())
-                        || showBadges[i] != r.canShowBadge()) {
-                    scheduleSendRankingUpdate();
+                        || showBadges[i] != r.canShowBadge()
+                        || !Objects.equals(channelBefore.get(i), r.getChannel())
+                        || !Objects.equals(groupKeyBefore.get(i), r.getGroupKey())
+                        || !Objects.equals(overridePeopleBefore.get(i), r.getPeopleOverride())
+                        || !Objects.equals(snoozeCriteriaBefore.get(i), r.getSnoozeCriteria())) {
+                    mHandler.scheduleSendRankingUpdate();
                     return;
                 }
             }
@@ -4333,13 +4339,6 @@ public class NotificationManagerService extends SystemService {
         return mRankingHelper.indexOf(mNotificationList, target);
     }
 
-    private void scheduleSendRankingUpdate() {
-        if (!mHandler.hasMessages(MESSAGE_SEND_RANKING_UPDATE)) {
-            Message m = Message.obtain(mHandler, MESSAGE_SEND_RANKING_UPDATE);
-            mHandler.sendMessage(m);
-        }
-    }
-
     private void handleSendRankingUpdate() {
         synchronized (mNotificationLock) {
             mListeners.notifyRankingUpdateLocked();
@@ -4371,7 +4370,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private final class WorkerHandler extends Handler
+    protected class WorkerHandler extends Handler
     {
         public WorkerHandler(Looper looper) {
             super(looper);
@@ -4400,6 +4399,13 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        protected void scheduleSendRankingUpdate() {
+            if (!hasMessages(MESSAGE_SEND_RANKING_UPDATE)) {
+                Message m = Message.obtain(this, MESSAGE_SEND_RANKING_UPDATE);
+                sendMessage(m);
+            }
+        }
+
     }
 
     private final class RankingHandlerWorker extends Handler implements RankingHandler
@@ -4415,16 +4421,15 @@ public class NotificationManagerService extends SystemService {
                     handleRankingReconsideration(msg);
                     break;
                 case MESSAGE_RANKING_SORT:
-                    handleRankingSort(msg);
+                    handleRankingSort();
                     break;
             }
         }
 
-        public void requestSort(boolean forceUpdate) {
+        public void requestSort() {
             removeMessages(MESSAGE_RANKING_SORT);
             Message msg = Message.obtain();
             msg.what = MESSAGE_RANKING_SORT;
-            msg.obj = forceUpdate;
             sendMessage(msg);
         }
 
@@ -5741,6 +5746,8 @@ public class NotificationManagerService extends SystemService {
         public static final String USAGE = "help\n"
                 + "allow_listener COMPONENT\n"
                 + "disallow_listener COMPONENT\n"
+                + "set_assistant COMPONENT\n"
+                + "remove_assistant COMPONENT\n"
                 + "allow_dnd PACKAGE\n"
                 + "disallow_dnd PACKAGE";
 
@@ -5776,6 +5783,24 @@ public class NotificationManagerService extends SystemService {
                             return -1;
                         }
                         getBinderService().setNotificationListenerAccessGranted(cn, false);
+                    }
+                    break;
+                    case "allow_assistant": {
+                        ComponentName cn = ComponentName.unflattenFromString(getNextArgRequired());
+                        if (cn == null) {
+                            pw.println("Invalid assistant - must be a ComponentName");
+                            return -1;
+                        }
+                        getBinderService().setNotificationAssistantAccessGranted(cn, true);
+                    }
+                    break;
+                    case "disallow_assistant": {
+                        ComponentName cn = ComponentName.unflattenFromString(getNextArgRequired());
+                        if (cn == null) {
+                            pw.println("Invalid assistant - must be a ComponentName");
+                            return -1;
+                        }
+                        getBinderService().setNotificationAssistantAccessGranted(cn, false);
                     }
                     break;
 

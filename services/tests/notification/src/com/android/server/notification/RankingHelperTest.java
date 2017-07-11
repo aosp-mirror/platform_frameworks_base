@@ -78,6 +78,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SmallTest
@@ -630,6 +633,8 @@ public class RankingHelperTest extends NotificationTestCase {
 
         // all fields should be changed
         assertEquals(channel2, mHelper.getNotificationChannel(PKG, UID, channel.getId(), false));
+
+        verify(mHandler, times(1)).requestSort();
     }
 
     @Test
@@ -712,6 +717,8 @@ public class RankingHelperTest extends NotificationTestCase {
         assertFalse(savedChannel.canBypassDnd());
         assertFalse(Notification.VISIBILITY_SECRET == savedChannel.getLockscreenVisibility());
         assertEquals(channel.canShowBadge(), savedChannel.canShowBadge());
+
+        verify(mHandler, never()).requestSort();
     }
 
     @Test
@@ -1058,6 +1065,8 @@ public class RankingHelperTest extends NotificationTestCase {
 
         // notDeleted
         assertEquals(1, mHelper.getNotificationChannelGroups(PKG, UID).size());
+
+        verify(mHandler, never()).requestSort();
     }
 
     @Test
@@ -1159,6 +1168,7 @@ public class RankingHelperTest extends NotificationTestCase {
         NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
         mHelper.createNotificationChannelGroup(PKG, UID, ncg, true);
         assertEquals(ncg, mHelper.getNotificationChannelGroups(PKG, UID).iterator().next());
+        verify(mHandler, never()).requestSort();
     }
 
     @Test
@@ -1275,6 +1285,8 @@ public class RankingHelperTest extends NotificationTestCase {
         actual = mHelper.getNotificationChannel(PKG, UID, "id", false);
         assertEquals("goodbye", actual.getName());
         assertEquals(IMPORTANCE_DEFAULT, actual.getImportance());
+
+        verify(mHandler, times(1)).requestSort();
     }
 
     @Test
