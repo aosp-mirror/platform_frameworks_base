@@ -28,7 +28,6 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
@@ -40,9 +39,9 @@ import android.widget.RemoteViews;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationTestHelper;
-import com.android.systemui.statusbar.InflationTask;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -150,6 +149,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore
     public void testInflationIsRetriedIfAsyncFails() throws Exception {
         NotificationInflater.InflationProgress result =
                 new NotificationInflater.InflationProgress();
