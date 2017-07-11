@@ -23,14 +23,15 @@ import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 import android.view.autofill.AutofillId;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 /**
@@ -54,7 +55,7 @@ public final class ImageTransformation extends InternalTransformation implements
     private static final String TAG = "ImageTransformation";
 
     private final AutofillId mId;
-    private final ArrayMap<Pattern, Integer> mOptions;
+    private final ArrayList<Pair<Pattern, Integer>> mOptions;
 
     private ImageTransformation(Builder builder) {
         mId = builder.mId;
@@ -78,10 +79,10 @@ public final class ImageTransformation extends InternalTransformation implements
         }
 
         for (int i = 0; i < size; i++) {
-            final Pattern regex = mOptions.keyAt(i);
-            if (regex.matcher(value).matches()) {
+            Pair<Pattern, Integer> regex = mOptions.get(i);
+            if (regex.first.matcher(value).matches()) {
                 Log.d(TAG, "Found match at " + i + ": " + regex);
-                parentTemplate.setImageViewResource(childViewId, mOptions.valueAt(i));
+                parentTemplate.setImageViewResource(childViewId, regex.second);
                 return;
             }
         }
@@ -93,7 +94,7 @@ public final class ImageTransformation extends InternalTransformation implements
      */
     public static class Builder {
         private final AutofillId mId;
-        private final ArrayMap<Pattern, Integer> mOptions = new ArrayMap<>();
+        private final ArrayList<Pair<Pattern, Integer>> mOptions = new ArrayList<>();
         private boolean mDestroyed;
 
         /**
@@ -128,7 +129,7 @@ public final class ImageTransformation extends InternalTransformation implements
             // Check regex
             Pattern pattern = Pattern.compile(regex);
 
-            mOptions.put(pattern, resId);
+            mOptions.add(new Pair<>(pattern, resId));
             return this;
         }
 
@@ -175,8 +176,9 @@ public final class ImageTransformation extends InternalTransformation implements
         final String[] regexs = new String[size];
         final int[] resIds = new int[size];
         for (int i = 0; i < size; i++) {
-            regexs[i] = mOptions.keyAt(i).pattern();
-            resIds[i] = mOptions.valueAt(i);
+            Pair<Pattern, Integer> regex = mOptions.get(i);
+            regexs[i] = regex.first.pattern();
+            resIds[i] = regex.second;
         }
         parcel.writeStringArray(regexs);
         parcel.writeIntArray(resIds);
