@@ -34,6 +34,7 @@ import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.reset;
@@ -53,6 +54,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.PasswordMetrics;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -338,7 +340,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Next, add one more admin.
         // Before doing so, update the application info, now it's enabled.
         setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_UID,
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
+                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT);
 
         dpm.setActiveAdmin(admin2, /* replace =*/ false);
 
@@ -378,6 +380,74 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm.getActiveAdminsAsUser(DpmMockContext.CALLER_USER_HANDLE + 1)));
 
         mContext.callerPermissions.remove("android.permission.INTERACT_ACROSS_USERS_FULL");
+    }
+
+    public void testCreateAndManageUser_demoUserSystemApp() throws Exception {
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+
+        setDeviceOwner();
+
+        final int id = UserHandle.getUserId(DpmMockContext.CALLER_UID);
+
+        final UserInfo demoUserInfo = mock(UserInfo.class);
+        demoUserInfo.id = id;
+        doReturn(UserHandle.of(id)).when(demoUserInfo).getUserHandle();
+        doReturn(true).when(demoUserInfo).isDemo();
+        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        doReturn(demoUserInfo).when(um).getUserInfo(id);
+        doReturn(demoUserInfo).when(mContext.getUserManagerInternal())
+                .createUserEvenWhenDisallowed(anyString(), anyInt());
+
+        final ApplicationInfo applicationInfo = getServices().ipackageManager.getApplicationInfo(
+                admin2.getPackageName(), PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS, id);
+        applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
+        doReturn(applicationInfo).when(getServices().ipackageManager).getApplicationInfo(
+                anyString(), anyInt(), anyInt());
+
+        final UserHandle userHandle = dpm.createAndManageUser(admin1, "", admin2, null, 0);
+
+        verify(getServices().ipackageManager, times(1)).setApplicationEnabledSetting(
+                eq(admin2.getPackageName()),
+                eq(PackageManager.COMPONENT_ENABLED_STATE_ENABLED),
+                eq(PackageManager.DONT_KILL_APP),
+                eq(id),
+                anyString());
+
+        assertNotNull(userHandle);
+    }
+
+    public void testCreateAndManageUser_demoUserSystemUpdatedApp() throws Exception {
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+
+        setDeviceOwner();
+
+        final int id = UserHandle.getUserId(DpmMockContext.CALLER_UID);
+
+        final UserInfo demoUserInfo = mock(UserInfo.class);
+        demoUserInfo.id = id;
+        doReturn(UserHandle.of(id)).when(demoUserInfo).getUserHandle();
+        doReturn(true).when(demoUserInfo).isDemo();
+        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        doReturn(demoUserInfo).when(um).getUserInfo(id);
+        doReturn(demoUserInfo).when(mContext.getUserManagerInternal())
+                .createUserEvenWhenDisallowed(anyString(), anyInt());
+
+        final ApplicationInfo applicationInfo = getServices().ipackageManager.getApplicationInfo(
+                admin2.getPackageName(), PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS, id);
+        applicationInfo.flags = ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+        doReturn(applicationInfo).when(getServices().ipackageManager).getApplicationInfo(
+                anyString(), anyInt(), anyInt());
+
+        final UserHandle userHandle = dpm.createAndManageUser(admin1, "", admin2, null, 0);
+
+        verify(getServices().ipackageManager, times(1)).setApplicationEnabledSetting(
+                eq(admin2.getPackageName()),
+                eq(PackageManager.COMPONENT_ENABLED_STATE_ENABLED),
+                eq(PackageManager.DONT_KILL_APP),
+                eq(id),
+                anyString());
+
+        assertNotNull(userHandle);
     }
 
     public void testSetActiveAdmin_multiUsers() throws Exception {

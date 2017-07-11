@@ -526,7 +526,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // TODO(b/35385311): Keep track of metadata in TrustedCertificateStore instead.
         Set<String> mOwnerInstalledCaCerts = new ArraySet<>();
 
-        // Used for initialization of users created by createAndManageUsers.
+        // Used for initialization of users created by createAndManageUser.
         boolean mAdminBroadcastPending = false;
         PersistableBundle mInitBundle = null;
 
@@ -4255,6 +4255,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mInjector.binderRestoreCallingIdentity(token);
         }
     }
+
     @Override
     public boolean resetPassword(String passwordOrNull, int flags) throws RemoteException {
         final int callingUid = mInjector.binderGetCallingUid();
@@ -7375,9 +7376,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void enableIfNecessary(String packageName, int userId) {
         try {
-            ApplicationInfo ai = mIPackageManager.getApplicationInfo(packageName,
-                    PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
-                    userId);
+            final ApplicationInfo ai = mIPackageManager.getApplicationInfo(packageName,
+                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS, userId);
             if (ai.enabledSetting
                     == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
                 mIPackageManager.setApplicationEnabledSetting(packageName,
@@ -8131,8 +8131,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mInjector.binderGetCallingUserHandle().isSystem()) {
             throw new SecurityException("createAndManageUser was called from non-system user");
         }
-        if (!mInjector.userManagerIsSplitSystemUser()
-                && (flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0) {
+        final boolean ephemeral = (flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0;
+        final boolean demo = (flags & DevicePolicyManager.MAKE_USER_DEMO) != 0
+                && UserManager.isDeviceInDemoMode(mContext);
+        if (ephemeral && !mInjector.userManagerIsSplitSystemUser() && !demo) {
             throw new IllegalArgumentException(
                     "Ephemeral users are only supported on systems with a split system user.");
         }
@@ -8144,8 +8146,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final long id = mInjector.binderClearCallingIdentity();
             try {
                 int userInfoFlags = 0;
-                if ((flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0) {
+                if (ephemeral) {
                     userInfoFlags |= UserInfo.FLAG_EPHEMERAL;
+                }
+                if (demo) {
+                    userInfoFlags |= UserInfo.FLAG_DEMO;
                 }
                 UserInfo userInfo = mUserManagerInternal.createUserEvenWhenDisallowed(name,
                         userInfoFlags);
@@ -8176,6 +8181,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         + "removing created user", e);
                 mUserManager.removeUser(user.getIdentifier());
                 return null;
+            }
+
+            final UserInfo userInfo = getUserInfo(userHandle);
+            if (userInfo != null && userInfo.isDemo()) {
+                try {
+                    final ApplicationInfo ai = mIPackageManager.getApplicationInfo(adminPkg,
+                            PackageManager.MATCH_DISABLED_COMPONENTS, userHandle);
+                    final boolean isSystemApp =
+                            ai != null && (ai.flags & (ApplicationInfo.FLAG_SYSTEM
+                                    | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
+                    if (isSystemApp) {
+                        mIPackageManager.setApplicationEnabledSetting(adminPkg,
+                                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                                PackageManager.DONT_KILL_APP, userHandle, "DevicePolicyManager");
+                    }
+                } catch (RemoteException e) {
+                }
             }
 
             setActiveAdmin(profileOwner, true, userHandle);
