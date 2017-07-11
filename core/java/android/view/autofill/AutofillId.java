@@ -15,6 +15,7 @@
  */
 package android.view.autofill;
 
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
@@ -29,6 +30,7 @@ public final class AutofillId implements Parcelable {
     private final int mVirtualId;
 
     /** @hide */
+    @TestApi
     public AutofillId(int id) {
         mVirtual = false;
         mViewId = id;

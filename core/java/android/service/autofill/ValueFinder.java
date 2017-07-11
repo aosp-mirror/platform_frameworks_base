@@ -17,6 +17,7 @@ package android.service.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.view.autofill.AutofillId;
 
 /**
@@ -24,6 +25,7 @@ import android.view.autofill.AutofillId;
  *
  * @hide
  */
+@TestApi
 public interface ValueFinder {
 
     /**
