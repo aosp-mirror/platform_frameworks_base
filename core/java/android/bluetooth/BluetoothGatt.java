@@ -53,6 +53,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     private Boolean mDeviceBusy = false;
     private int mTransport;
     private int mPhy;
+    private boolean mOpportunistic;
 
     private static final int AUTH_RETRY_STATE_IDLE = 0;
     private static final int AUTH_RETRY_STATE_NO_MITM = 1;
@@ -172,7 +173,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 }
                 try {
                     mService.clientConnect(mClientIf, mDevice.getAddress(),
-                                           !mAutoConnect, mTransport, mPhy); // autoConnect is inverse of "isDirect"
+                                           !mAutoConnect, mTransport, mOpportunistic, mPhy); // autoConnect is inverse of "isDirect"
                 } catch (RemoteException e) {
                     Log.e(TAG,"",e);
                 }
@@ -628,11 +629,12 @@ public final class BluetoothGatt implements BluetoothProfile {
         };
 
     /*package*/ BluetoothGatt(IBluetoothGatt iGatt, BluetoothDevice device,
-                                int transport, int phy) {
+                                int transport, boolean opportunistic, int phy) {
         mService = iGatt;
         mDevice = device;
         mTransport = transport;
         mPhy = phy;
+        mOpportunistic = opportunistic;
         mServices = new ArrayList<BluetoothGattService>();
 
         mConnState = CONN_STATE_IDLE;
@@ -839,8 +841,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      */
     public boolean connect() {
         try {
-            mService.clientConnect(mClientIf, mDevice.getAddress(),
-                                   false, mTransport, mPhy); // autoConnect is inverse of "isDirect"
+            mService.clientConnect(mClientIf, mDevice.getAddress(), false, mTransport,
+                    mOpportunistic, mPhy); // autoConnect is inverse of "isDirect"
             return true;
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
