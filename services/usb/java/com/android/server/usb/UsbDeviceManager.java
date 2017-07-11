@@ -1032,7 +1032,9 @@ public class UsbDeviceManager {
                     if (DEBUG) {
                         Slog.v(TAG, "Accessory mode enter timeout: " + mConnected);
                     }
-                    if (!mConnected) {
+                    if (!mConnected || !UsbManager.containsFunction(
+                            mCurrentFunctions,
+                            UsbManager.USB_FUNCTION_ACCESSORY)) {
                         notifyAccessoryModeExit();
                     }
                     break;
