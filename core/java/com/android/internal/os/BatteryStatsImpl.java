@@ -4852,7 +4852,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private void noteBluetoothScanStoppedLocked(int uid) {
+    private void noteBluetoothScanStoppedLocked(int uid, boolean isUnoptimized) {
         uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
@@ -4864,13 +4864,13 @@ public class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothScanTimer.stopRunningLocked(elapsedRealtime);
         }
-        getUidStatsLocked(uid).noteBluetoothScanStoppedLocked(elapsedRealtime);
+        getUidStatsLocked(uid).noteBluetoothScanStoppedLocked(elapsedRealtime, isUnoptimized);
     }
 
-    public void noteBluetoothScanStoppedFromSourceLocked(WorkSource ws) {
+    public void noteBluetoothScanStoppedFromSourceLocked(WorkSource ws, boolean isUnoptimized) {
         final int N = ws.size();
         for (int i = 0; i < N; i++) {
-            noteBluetoothScanStoppedLocked(ws.get(i));
+            noteBluetoothScanStoppedLocked(ws.get(i), isUnoptimized);
         }
     }
 
@@ -6121,14 +6121,11 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        public void noteBluetoothScanStoppedLocked(long elapsedRealtimeMs) {
+        public void noteBluetoothScanStoppedLocked(long elapsedRealtimeMs, boolean isUnoptimized) {
             if (mBluetoothScanTimer != null) {
                 mBluetoothScanTimer.stopRunningLocked(elapsedRealtimeMs);
             }
-            // In the ble code, a scan cannot change types and nested starts are not possible.
-            // So if an unoptimizedScan is running, it is now being stopped.
-            if (mBluetoothUnoptimizedScanTimer != null
-                    && mBluetoothUnoptimizedScanTimer.isRunningLocked()) {
+            if (isUnoptimized && mBluetoothUnoptimizedScanTimer != null) {
                 mBluetoothUnoptimizedScanTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }

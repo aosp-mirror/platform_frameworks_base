@@ -217,10 +217,6 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
         bi.updateTimeBasesLocked(false, false, curr, curr); // off battery
 
-        // Stop timer
-        curr = 1000 * (clocks.realtime = clocks.uptime = 409);
-        bi.noteBluetoothScanStoppedFromSourceLocked(ws);
-
         // Start timer (unoptimized)
         curr = 1000 * (clocks.realtime = clocks.uptime = 1000);
         bi.noteBluetoothScanStartedFromSourceLocked(ws, true);
@@ -233,9 +229,13 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
         curr = 1000 * (clocks.realtime = clocks.uptime = 3004);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
 
-        // Stop timer
+        // Stop timer (optimized)
+        curr = 1000 * (clocks.realtime = clocks.uptime = 3409);
+        bi.noteBluetoothScanStoppedFromSourceLocked(ws, false);
+
+        // Stop timer (unoptimized)
         curr = 1000 * (clocks.realtime = clocks.uptime = 4008);
-        bi.noteBluetoothScanStoppedFromSourceLocked(ws);
+        bi.noteBluetoothScanStoppedFromSourceLocked(ws, true);
 
         // Test
         curr = 1000 * (clocks.realtime = clocks.uptime = 5000);
