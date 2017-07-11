@@ -20,7 +20,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.support.v4.util.LongSparseArray;
+import android.util.LongSparseArray;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pools.Pool;
