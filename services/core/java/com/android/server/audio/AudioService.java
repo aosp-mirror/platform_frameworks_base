@@ -1908,6 +1908,7 @@ public class AudioService extends IAudioService.Stub
             streamType = getActiveStreamType(streamType);
         }
         synchronized (VolumeStreamState.class) {
+            ensureValidStreamType(streamType);
             return mStreamStates[streamType].mIsMuted;
         }
     }
