@@ -126,6 +126,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private TextView mEnterpriseDisclosure;
     private TextView mIndicationText;
     private ViewGroup mPreviewContainer;
+    private ViewGroup mOverlayContainer;
 
     private View mLeftPreview;
     private View mCameraPreview;
@@ -229,6 +230,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onFinishInflate();
         mLockPatternUtils = new LockPatternUtils(mContext);
         mPreviewContainer = findViewById(R.id.preview_container);
+        mOverlayContainer = findViewById(R.id.overlay_container);
         mRightAffordanceView = findViewById(R.id.camera_button);
         mLeftAffordanceView = findViewById(R.id.left_button);
         mLockIcon = findViewById(R.id.lock_icon);
@@ -821,8 +823,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         if (dozing) {
             mLockIcon.setVisibility(INVISIBLE);
+            mOverlayContainer.setVisibility(INVISIBLE);
         } else {
             mLockIcon.setVisibility(VISIBLE);
+            mOverlayContainer.setVisibility(VISIBLE);
             if (animate) {
                 startFinishDozeAnimation();
             }

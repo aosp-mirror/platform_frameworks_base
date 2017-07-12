@@ -314,6 +314,7 @@
     <style name="LockPatternStyle">
         <item name="*android:regularColor">?android:attr/textColorPrimaryInverse</item>
         <item name="*android:successColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="*android:errorColor">?android:attr/colorError</item>
     </style>
 
     <!-- Overlay manager may replace this theme -->

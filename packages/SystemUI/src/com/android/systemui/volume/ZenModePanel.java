@@ -144,7 +144,7 @@ public class ZenModePanel extends FrameLayout {
         super(context, attrs);
         mContext = context;
         mPrefs = new ZenPrefs();
-        mInflater = LayoutInflater.from(mContext.getApplicationContext());
+        mInflater = LayoutInflater.from(mContext);
         mForeverId = Condition.newId(mContext).appendPath("forever").build();
         mConfigurableTexts = new ConfigurableTexts(mContext);
         mVoiceCapable = Util.isVoiceCapable(mContext);
