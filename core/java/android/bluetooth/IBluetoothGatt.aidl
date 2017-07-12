@@ -74,7 +74,7 @@ interface IBluetoothGatt {
     void registerClient(in ParcelUuid appId, in IBluetoothGattCallback callback);
 
     void unregisterClient(in int clientIf);
-    void clientConnect(in int clientIf, in String address, in boolean isDirect, in int transport, in int phy);
+    void clientConnect(in int clientIf, in String address, in boolean isDirect, in int transport, in boolean opportunistic, in int phy);
     void clientDisconnect(in int clientIf, in String address);
     void clientSetPreferredPhy(in int clientIf, in String address, in int txPhy, in int rxPhy, in int phyOptions);
     void clientReadPhy(in int clientIf, in String address);
