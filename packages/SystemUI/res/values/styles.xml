@@ -308,6 +308,7 @@
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
         <item name="bgProtectTextColor">?android:attr/textColorPrimaryInverse</item>
         <item name="bgProtectSecondaryTextColor">?android:attr/textColorSecondaryInverse</item>
+        <item name="android:colorControlHighlight">?android:attr/textColorSecondaryInverse</item>
         <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
     </style>
 
