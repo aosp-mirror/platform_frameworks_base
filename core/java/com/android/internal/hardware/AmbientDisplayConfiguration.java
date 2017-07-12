@@ -53,13 +53,17 @@ public class AmbientDisplayConfiguration {
     }
 
     public boolean pulseOnPickupEnabled(int user) {
-        return boolSettingDefaultOn(Settings.Secure.DOZE_PULSE_ON_PICK_UP, user)
-                && pulseOnPickupAvailable();
+        boolean settingEnabled = boolSettingDefaultOn(Settings.Secure.DOZE_PULSE_ON_PICK_UP, user);
+        return (settingEnabled || alwaysOnEnabled(user)) && pulseOnPickupAvailable();
     }
 
     public boolean pulseOnPickupAvailable() {
         return mContext.getResources().getBoolean(R.bool.config_dozePulsePickup)
                 && ambientDisplayAvailable();
+    }
+
+    public boolean pulseOnPickupCanBeModified(int user) {
+        return !alwaysOnEnabled(user);
     }
 
     public boolean pulseOnDoubleTapEnabled(int user) {
