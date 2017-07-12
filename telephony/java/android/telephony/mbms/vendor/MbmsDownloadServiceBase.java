@@ -18,7 +18,7 @@ package android.telephony.mbms.vendor;
 
 import android.os.RemoteException;
 import android.telephony.mbms.DownloadRequest;
-import android.telephony.mbms.DownloadStatus;
+import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.IDownloadCallback;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsException;
@@ -73,9 +73,15 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * Sets the temp file root directory for this app/subscriptionId combination. The middleware
      * should persist {@code rootDirectoryPath} and send it back when sending intents to the
      * app's {@link android.telephony.mbms.MbmsDownloadReceiver}.
+     *
+     * If the calling app (as identified by the calling UID) currently has any pending download
+     * requests that have not been canceled, the middleware must return
+     * {@link MbmsException#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT} here.
+     *
      * @param subscriptionId The subscription id the download is operating under.
      * @param rootDirectoryPath The path to the app's temp file root directory.
-     * @return {@link MbmsException#ERROR_MIDDLEWARE_NOT_YET_READY},
+     * @return {@link MbmsException#SUCCESS},
+     *         {@link MbmsException#ERROR_MIDDLEWARE_NOT_YET_READY},
      *         {@link MbmsException#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT},
      *         or {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
      */
@@ -87,6 +93,11 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
 
     /**
      * Issues a request to download a set of files.
+     *
+     * The middleware should expect that {@link #setTempFileRootDirectory(int, String)} has been
+     * called for this app between when the app was installed and when this method is called. If
+     * this is not the case, an {@link IllegalStateException} may be thrown.
+     *
      * @param downloadRequest An object describing the set of files to be downloaded.
      * @param listener A listener through which the middleware can provide progress updates to
      *                 the app while both are still running.
@@ -122,9 +133,9 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     }
 
     @Override
-    public DownloadStatus getDownloadStatus(DownloadRequest downloadRequest)
+    public int getDownloadStatus(DownloadRequest downloadRequest, FileInfo fileInfo)
             throws RemoteException {
-        return null;
+        return 0;
     }
 
     @Override

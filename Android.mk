@@ -550,7 +550,6 @@ include $(CLEAR_VARS)
 
 aidl_files := \
         frameworks/base/telephony/java/android/telephony/mbms/DownloadRequest.aidl \
-        frameworks/base/telephony/java/android/telephony/mbms/DownloadStatus.aidl \
         frameworks/base/telephony/java/android/telephony/mbms/FileInfo.aidl \
         frameworks/base/telephony/java/android/telephony/mbms/FileServiceInfo.aidl \
         frameworks/base/telephony/java/android/telephony/mbms/ServiceInfo.aidl \
