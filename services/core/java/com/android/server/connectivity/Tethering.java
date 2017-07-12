@@ -252,6 +252,12 @@ public class Tethering extends BaseNetworkObserver {
         mUpstreamNetworkMonitor.updateMobileRequiresDun(mConfig.isDunRequired);
     }
 
+    private void maybeUpdateConfiguration() {
+        final int dunCheck = TetheringConfiguration.checkDunRequired(mContext);
+        if (dunCheck == mConfig.dunCheck) return;
+        updateConfiguration();
+    }
+
     @Override
     public void interfaceStatusChanged(String iface, boolean up) {
         // Never called directly: only called from interfaceLinkStateChanged.
@@ -1273,7 +1279,9 @@ public class Tethering extends BaseNetworkObserver {
         }
 
         protected void chooseUpstreamType(boolean tryCell) {
-            updateConfiguration(); // TODO - remove?
+            // We rebuild configuration on ACTION_CONFIGURATION_CHANGED, but we
+            // do not currently know how to watch for changes in DUN settings.
+            maybeUpdateConfiguration();
 
             final NetworkState ns = mUpstreamNetworkMonitor.selectPreferredUpstreamType(
                     mConfig.preferredUpstreamIfaceTypes);
