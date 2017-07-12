@@ -181,7 +181,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void setBouncerShowing(boolean showing) {
         mBouncerShowing = showing;
-        mAnimateChange = !mTracking && !mDontAnimateBouncerChanges;
+        mAnimateChange = !mTracking && !mDontAnimateBouncerChanges && !mKeyguardFadingOutInProgress;
         scheduleUpdate();
     }
 
