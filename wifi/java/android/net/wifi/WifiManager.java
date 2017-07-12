@@ -1411,6 +1411,8 @@ public class WifiManager {
     public static final int WIFI_FEATURE_IE_WHITELIST     = 0x1000000; // Probe IE white listing
     /** @hide */
     public static final int WIFI_FEATURE_SCAN_RAND        = 0x2000000; // Random MAC & Probe seq
+    /** @hide */
+    public static final int WIFI_FEATURE_TX_POWER_LIMIT   = 0x4000000; // Set Tx power limit
 
 
     private int getSupportedFeatures() {
