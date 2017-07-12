@@ -1,34 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2015 The Android Open Source Project
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License
-  -->
+Copyright (C) 2017 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
 <vector
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:name="lockscreen_fingerprint_fp_to_error_state"
+    android:name="ic_fingerprint_toerror"
     android:width="32dp"
-    android:viewportWidth="32"
+    android:viewportWidth="24"
     android:height="32dp"
-    android:viewportHeight="32" >
+    android:viewportHeight="24" >
     <group
-        android:name="white_fingerprint_ridges"
-        android:translateX="16.125"
-        android:translateY="19.75" >
+        android:name="fingerprintwhite"
+        android:translateX="12"
+        android:translateY="12.4"
+        android:scaleX="0.738"
+        android:scaleY="0.738" >
         <group
-            android:name="white_fingerprint_ridges_pivot"
-            android:translateX="33.2085"
-            android:translateY="30.91685" >
+            android:name="fingerprintwhite_pivot"
+            android:translateX="33"
+            android:translateY="34" >
             <group
                 android:name="ridge_5" >
                 <path
@@ -84,13 +86,15 @@
         </group>
     </group>
     <group
-        android:name="fingerprint_ridges"
-        android:translateX="16.125"
-        android:translateY="19.75" >
+        android:name="fingerprinterror"
+        android:translateX="12"
+        android:translateY="12.4"
+        android:scaleX="0.738"
+        android:scaleY="0.738" >
         <group
-            android:name="fingerprint_ridges_pivot"
-            android:translateX="33.2085"
-            android:translateY="30.91685" >
+            android:name="fingerprinterror_pivot"
+            android:translateX="33"
+            android:translateY="34" >
             <group
                 android:name="ridge_6" >
                 <path
@@ -146,39 +150,40 @@
         </group>
     </group>
     <group
-        android:name="exclamation"
-        android:translateX="16"
-        android:translateY="16" >
+        android:name="errorcircle"
+        android:translateX="12"
+        android:translateY="12"
+        android:rotation="190" >
         <group
-            android:name="group_2"
-            android:scaleX="0.63838"
-            android:scaleY="0.63838"
-            android:rotation="184" >
+            android:name="circle" >
             <path
-                android:name="path_2"
-                android:pathData="M -1.3705291748,4.06730651855 c 0.0,0.0 0.036376953125,-0.0102386474609 0.036376953125,-0.0102386474609 c 0.0,0.0 -0.00682067871094,0.0040283203125 -0.00682067871093,0.0040283203125 c 0.0,0.0 -0.0161437988281,0.00479125976562 -0.0161437988281,0.00479125976563 c 0.0,0.0 -0.0134124755859,0.00141906738281 -0.0134124755859,0.00141906738281 Z"
-                android:fillColor="?android:attr/colorError" />
-            <path
-                android:name="path_1"
-                android:pathData="M -1.3737487793,-6.77532958984 c 0.0,0.0 0.00604248046875,0.0166625976562 0.00604248046876,0.0166625976562 c 0.0,0.0 0.0213623046875,0.0250244140625 0.0213623046875,0.0250244140625 c 0.0,0.0 -0.00604248046875,-0.0166625976562 -0.00604248046876,-0.0166625976562 c 0.0,0.0 -0.0213623046875,-0.0250244140625 -0.0213623046875,-0.0250244140625 Z"
-                android:fillColor="?android:attr/colorError" />
+                android:name="circlepath"
+                android:strokeColor="?android:attr/colorError"
+                android:strokeWidth="2"
+                android:strokeLineCap="round"
+                android:trimPathStart="1"
+                android:pathData="M 0.0,-9.0 c 4.9705627482,0.0 9.0,4.0294372518 9.0,9.0 c 0.0,4.9705627482 -4.0294372518,9.0 -9.0,9.0 c -4.9705627482,0.0 -9.0,-4.0294372518 -9.0,-9.0 c 0.0,-4.9705627482 4.0294372518,-9.0 9.0,-9.0 Z" />
         </group>
     </group>
     <group
-        android:name="circle_outline"
-        android:translateX="16"
-        android:translateY="16" >
+        android:name="errorexclamation"
+        android:translateX="12"
+        android:translateY="12"
+        android:rotation="180" >
         <group
-            android:name="group_1"
-            android:scaleX="1.12734"
-            android:scaleY="1.12734"
-            android:rotation="231" >
+            android:name="exclamationbottom"
+            android:translateY="4" >
             <path
-                android:name="path_3"
-                android:pathData="M 0.0101470947266,10.8087768555 c -5.96701049805,0.0 -10.8000183105,-4.8330078125 -10.8000183105,-10.8000488281 c 0.0,-5.96691894531 4.8330078125,-10.7999267578 10.8000183105,-10.7999267578 c 5.96697998047,0.0 10.799987793,4.8330078125 10.799987793,10.7999267578 c 0.0,5.96704101562 -4.8330078125,10.8000488281 -10.799987793,10.8000488281 Z"
-                android:strokeColor="?android:attr/colorError"
-                android:strokeWidth="2"
-                android:trimPathStart="1" />
+                android:name="bottompath"
+                android:fillColor="?android:attr/colorError"
+                android:pathData="M 0.0,0.0 l 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
+        </group>
+        <group
+            android:name="exclamationtop" >
+            <path
+                android:name="toppath"
+                android:fillColor="?android:attr/colorError"
+                android:pathData="M -1.0,0.0 l 2.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l -2.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 l 0.0,0.0 c 0.0,0.0 0.0,0.0 0.0,0.0 Z" />
         </group>
     </group>
 </vector>
