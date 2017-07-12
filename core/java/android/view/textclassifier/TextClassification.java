@@ -50,11 +50,11 @@ public final class TextClassification {
     private int mLogType;
 
     private TextClassification(
-            @NonNull String text,
-            Drawable icon,
-            String label,
-            Intent intent,
-            OnClickListener onClickListener,
+            @Nullable String text,
+            @Nullable Drawable icon,
+            @Nullable String label,
+            @Nullable Intent intent,
+            @Nullable OnClickListener onClickListener,
             @NonNull EntityConfidence<String> entityConfidence,
             int logType) {
         mText = text;
@@ -70,7 +70,7 @@ public final class TextClassification {
     /**
      * Gets the classified text.
      */
-    @NonNull
+    @Nullable
     public String getText() {
         return mText;
     }
@@ -183,8 +183,8 @@ public final class TextClassification {
         /**
          * Sets the classified text.
          */
-        public Builder setText(@NonNull String text) {
-            mText = Preconditions.checkNotNull(text);
+        public Builder setText(@Nullable String text) {
+            mText = text;
             return this;
         }
 
@@ -197,7 +197,7 @@ public final class TextClassification {
          */
         public Builder setEntityType(
                 @NonNull @EntityType String type,
-                @FloatRange(from = 0.0, to = 1.0)float confidenceScore) {
+                @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
             mEntityConfidence.setEntityType(type, confidenceScore);
             return this;
         }
