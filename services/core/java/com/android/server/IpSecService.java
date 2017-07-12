@@ -343,7 +343,7 @@ public class IpSecService extends IIpSecService.Stub {
         public void setOwnedByTransform() {
             if (mOwnedByTransform) {
                 // Programming error
-                new IllegalStateException("Cannot own an SPI twice!");
+                throw new IllegalStateException("Cannot own an SPI twice!");
             }
 
             mOwnedByTransform = true;
