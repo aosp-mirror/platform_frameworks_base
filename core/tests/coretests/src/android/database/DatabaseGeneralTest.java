@@ -265,7 +265,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
      * @throws Exception
      */
     @SmallTest
-    public void testPhoneNumbersEqualInternationl() throws Exception {
+    public void testPhoneNumbersEqualInternational() throws Exception {
         assertPhoneNumberEqual("1", "1");
         assertPhoneNumberEqual("123123", "123123");
         assertPhoneNumberNotEqual("123123", "923123");
@@ -285,6 +285,16 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
 
         // French trunk digit
         assertPhoneNumberEqual("+33123456789", "0123456789");
+
+        // Hungarian two digit trunk (currently only works for loose comparison)
+        assertPhoneNumberEqual("+36 1 234 5678", "06 1234-5678", false);
+
+        // Mexican two digit trunk (currently only works for loose comparison)
+        assertPhoneNumberEqual("+52 55 1234 5678", "01 55 1234 5678", false);
+
+        // Mongolian two digit trunk (currently only works for loose comparison)
+        assertPhoneNumberEqual("+976 1 123 4567", "01 1 23 4567", false);
+        assertPhoneNumberEqual("+976 2 234 5678", "02 2 34 5678", false);
 
         // Trunk digit for city codes in the Netherlands
         assertPhoneNumberEqual("+31771234567", "0771234567");
@@ -315,9 +325,22 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         assertPhoneNumberEqual("008001231234", "8001231234", false);
         assertPhoneNumberNotEqual("008001231234", "8001231234", true);
 
-        // Confirm that the bug found before does not re-appear in the strict compalation
-        assertPhoneNumberEqual("080-1234-5678", "+819012345678", false);
-        assertPhoneNumberNotEqual("080-1234-5678", "+819012345678", true);
+        // Confirm that the bug found before does not re-appear
+        assertPhoneNumberNotEqual("080-1234-5678", "+819012345678");
+
+        // Wrong prefix for Japan (currently only works for loose comparison)
+        assertPhoneNumberNotEqual("290-1234-5678", "+819012345678", false);
+        assertPhoneNumberNotEqual("+819012345678", "290-1234-5678", false);
+
+        // Wrong prefix for USA
+        assertPhoneNumberNotEqual("550-450-3605", "+14504503605");
+        assertPhoneNumberNotEqual("550-450-3605", "+15404503605");
+        assertPhoneNumberNotEqual("550-450-3605", "+15514503605");
+        assertPhoneNumberNotEqual("5504503605", "+14504503605");
+        assertPhoneNumberNotEqual("+14504503605", "550-450-3605");
+        assertPhoneNumberNotEqual("+15404503605", "550-450-3605");
+        assertPhoneNumberNotEqual("+15514503605", "550-450-3605");
+        assertPhoneNumberNotEqual("+14504503605", "5504503605");
     }
 
     @MediumTest
