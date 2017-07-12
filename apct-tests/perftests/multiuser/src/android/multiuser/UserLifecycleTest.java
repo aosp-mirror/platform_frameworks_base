@@ -95,7 +95,7 @@ public class UserLifecycleTest {
     }
 
     @Test
-    public void createAndStartUserPerf() throws Exception {
+    public void createAndStartUser() throws Exception {
         while (mRunner.keepRunning()) {
             final UserInfo userInfo = mUm.createUser("TestUser", 0);
 
@@ -111,7 +111,7 @@ public class UserLifecycleTest {
     }
 
     @Test
-    public void switchUserPerf() throws Exception {
+    public void switchUser() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
@@ -128,7 +128,7 @@ public class UserLifecycleTest {
     }
 
     @Test
-    public void stopUserPerf() throws Exception {
+    public void stopUser() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final UserInfo userInfo = mUm.createUser("TestUser", 0);
@@ -147,7 +147,7 @@ public class UserLifecycleTest {
     }
 
     @Test
-    public void lockedBootCompletedPerf() throws Exception {
+    public void lockedBootCompleted() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
@@ -167,7 +167,7 @@ public class UserLifecycleTest {
     }
 
     @Test
-    public void managedProfileUnlockPerf() throws Exception {
+    public void managedProfileUnlock() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final UserInfo userInfo = mUm.createProfileForUser("TestUser",
@@ -186,7 +186,7 @@ public class UserLifecycleTest {
     }
 
     @Test
-    public void ephemeralUserStoppedPerf() throws Exception {
+    public void ephemeralUserStopped() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
@@ -218,7 +218,7 @@ public class UserLifecycleTest {
     }
 
     @Test
-    public void managedProfileStoppedPerf() throws Exception {
+    public void managedProfileStopped() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final UserInfo userInfo = mUm.createProfileForUser("TestUser",
