@@ -136,7 +136,7 @@ public:
             : mScale(scale), mSize(size) {
     }
 
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable*) {
         // accounts for scale in final allocation, using eventual size and config
         const int bytesPerPixel = SkColorTypeBytesPerPixel(bitmap->colorType());
         const int requestedSize = bytesPerPixel *
@@ -147,7 +147,7 @@ public:
                     mSize, requestedSize);
             return false;
         }
-        return SkBitmap::HeapAllocator::allocPixelRef(bitmap, ctable);
+        return SkBitmap::HeapAllocator::allocPixelRef(bitmap, nullptr);
     }
 private:
     const float mScale;
@@ -163,7 +163,7 @@ public:
     ~RecyclingPixelAllocator() {
     }
 
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable*) {
         const SkImageInfo& info = bitmap->info();
         if (info.colorType() == kUnknown_SkColorType) {
             ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
@@ -183,7 +183,7 @@ public:
             return false;
         }
 
-        mBitmap->reconfigure(info, bitmap->rowBytes(), sk_ref_sp(ctable));
+        mBitmap->reconfigure(info, bitmap->rowBytes());
         bitmap->setPixelRef(sk_ref_sp(mBitmap), 0, 0);
         return true;
     }

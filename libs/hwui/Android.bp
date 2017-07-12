@@ -302,7 +302,6 @@ cc_test {
         "tests/unit/BakedOpDispatcherTests.cpp",
         "tests/unit/BakedOpRendererTests.cpp",
         "tests/unit/BakedOpStateTests.cpp",
-        "tests/unit/BitmapTests.cpp",
         "tests/unit/CacheManagerTests.cpp",
         "tests/unit/CanvasContextTests.cpp",
         "tests/unit/CanvasStateTests.cpp",
