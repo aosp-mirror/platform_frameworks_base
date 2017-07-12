@@ -2302,12 +2302,20 @@ public class WifiManager {
      */
     @SystemApi
     public interface ActionListener {
-        /** The operation succeeded */
+        /**
+         * The operation succeeded.
+         * This is called when the scan request has been validated and ready
+         * to sent to driver.
+         */
         public void onSuccess();
         /**
-         * The operation failed
-         * @param reason The reason for failure could be one of
-         * {@link #ERROR}, {@link #IN_PROGRESS} or {@link #BUSY}
+         * The operation failed.
+         * This is called when the scan request failed.
+         * @param reason The reason for failure could be one of the following:
+         * {@link #REASON_INVALID_REQUEST}} is specified when scan request parameters are invalid.
+         * {@link #REASON_NOT_AUTHORIZED} is specified when requesting app doesn't have the required
+         * permission to request a scan.
+         * {@link #REASON_UNSPECIFIED} is specified when driver reports a scan failure.
          */
         public void onFailure(int reason);
     }
