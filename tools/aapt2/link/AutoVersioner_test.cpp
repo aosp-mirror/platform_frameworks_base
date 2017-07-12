@@ -42,8 +42,8 @@ TEST(AutoVersionerTest, GenerateVersionedResourceWhenHigherVersionExists) {
 
   ResourceEntry entry("foo");
   entry.values.push_back(util::make_unique<ResourceConfigValue>(ConfigDescription::DefaultConfig(), ""));
-  entry.values.push_back(util::make_unique<ResourceConfigValue>(v21_config, ""));
   entry.values.push_back(util::make_unique<ResourceConfigValue>(sw600dp_v13_config, ""));
+  entry.values.push_back(util::make_unique<ResourceConfigValue>(v21_config, ""));
 
   EXPECT_TRUE(ShouldGenerateVersionedResource(&entry, ConfigDescription::DefaultConfig(), 17));
   EXPECT_FALSE(ShouldGenerateVersionedResource(&entry, ConfigDescription::DefaultConfig(), 22));

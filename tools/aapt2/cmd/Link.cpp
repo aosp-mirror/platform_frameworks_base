@@ -60,7 +60,6 @@
 #include "unflatten/BinaryResourceParser.h"
 #include "util/Files.h"
 #include "xml/XmlDom.h"
-#include "xml/XmlUtil.h"
 
 using android::StringPiece;
 using android::base::StringPrintf;
@@ -343,18 +342,16 @@ class ResourceFileFlattener {
     ConfigDescription config;
 
     // The entry this file came from.
-    ResourceEntry* entry = nullptr;
+    ResourceEntry* entry;
 
     // The file to copy as-is.
-    io::IFile* file_to_copy = nullptr;
+    io::IFile* file_to_copy;
 
     // The XML to process and flatten.
     std::unique_ptr<xml::XmlResource> xml_to_flatten;
 
     // The destination to write this file to.
     std::string dst_path;
-
-    bool skip_versioning = false;
   };
 
   uint32_t GetCompressionFlags(const StringPiece& str);
@@ -434,6 +431,19 @@ uint32_t ResourceFileFlattener::GetCompressionFlags(const StringPiece& str) {
   return ArchiveEntry::kCompress;
 }
 
+static bool IsTransitionElement(const std::string& name) {
+  return name == "fade" || name == "changeBounds" || name == "slide" || name == "explode" ||
+         name == "changeImageTransform" || name == "changeTransform" ||
+         name == "changeClipBounds" || name == "autoTransition" || name == "recolor" ||
+         name == "changeScroll" || name == "transitionSet" || name == "transition" ||
+         name == "transitionManager";
+}
+
+static bool IsVectorElement(const std::string& name) {
+  return name == "vector" || name == "animated-vector" || name == "pathInterpolator" ||
+         name == "objectAnimator";
+}
+
 template <typename T>
 std::vector<T> make_singleton_vec(T&& val) {
   std::vector<T> vec;
@@ -466,8 +476,19 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
     }
   }
 
-  if (options_.no_auto_version || file_op->skip_versioning) {
+  if (options_.no_auto_version) {
     return make_singleton_vec(std::move(file_op->xml_to_flatten));
+  }
+
+  if (options_.no_version_vectors || options_.no_version_transitions) {
+    // Skip this if it is a vector or animated-vector.
+    xml::Element* el = xml::FindRootElement(doc);
+    if (el && el->namespace_uri.empty()) {
+      if ((options_.no_version_vectors && IsVectorElement(el->name)) ||
+          (options_.no_version_transitions && IsTransitionElement(el->name))) {
+        return make_singleton_vec(std::move(file_op->xml_to_flatten));
+      }
+    }
   }
 
   const ConfigDescription& config = file_op->config;
@@ -483,26 +504,15 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
   bool error = false;
   std::map<std::pair<ConfigDescription, StringPiece>, FileOperation> config_sorted_files;
 
-  int tag_version_options = 0;
-  if (options_.no_version_vectors) {
-    tag_version_options |= xml::kNoVersionVector;
-  }
-
-  if (options_.no_version_transitions) {
-    tag_version_options |= xml::kNoVersionTransition;
-  }
-
   for (auto& pkg : table->packages) {
     for (auto& type : pkg->types) {
       // Sort by config and name, so that we get better locality in the zip file.
       config_sorted_files.clear();
+      std::queue<FileOperation> file_operations;
 
       // Populate the queue with all files in the ResourceTable.
       for (auto& entry : type->entries) {
-        const auto values_end = entry->values.end();
-        for (auto values_iter = entry->values.begin(); values_iter != values_end; ++values_iter) {
-          ResourceConfigValue* config_value = values_iter->get();
-
+        for (auto& config_value : entry->values) {
           // WARNING! Do not insert or remove any resources while executing in this scope. It will
           // corrupt the iteration order.
 
@@ -544,44 +554,6 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
             file_op.xml_to_flatten->file.config = config_value->config;
             file_op.xml_to_flatten->file.source = file_ref->GetSource();
             file_op.xml_to_flatten->file.name = ResourceName(pkg->name, type->type, entry->name);
-
-            // Check if this file needs to be versioned based on tag rules.
-            xml::Element* root_el = xml::FindRootElement(file_op.xml_to_flatten.get());
-            if (root_el == nullptr) {
-              context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
-                                                << "failed to find the root XML element");
-              return false;
-            }
-
-            if (root_el->namespace_uri.empty()) {
-              if (Maybe<xml::TagApiVersionResult> result =
-                      xml::GetXmlTagApiVersion(root_el->name, tag_version_options)) {
-                file_op.skip_versioning = result.value().skip_version;
-                if (result.value().api_version && config_value->config.sdkVersion == 0u) {
-                  const ApiVersion min_tag_version = result.value().api_version.value();
-                  // Only version it if it doesn't specify its own version and the version is
-                  // greater than the minSdk.
-                  const util::Range<ApiVersion> valid_range{
-                      context_->GetMinSdkVersion() + 1,
-                      FindNextApiVersionForConfigInSortedVector(values_iter, values_end)};
-                  if (valid_range.Contains(min_tag_version)) {
-                    // Update the configurations. The iteration order will not be affected
-                    // since sdkVersions in ConfigDescriptions are the last property compared
-                    // in the sort function.
-                    if (context_->IsVerbose()) {
-                      context_->GetDiagnostics()->Note(DiagMessage(config_value->value->GetSource())
-                                                       << "auto-versioning XML resource to API "
-                                                       << min_tag_version);
-                    }
-                    const_cast<ConfigDescription&>(config_value->config).sdkVersion =
-                        static_cast<uint16_t>(min_tag_version);
-                    file_op.config.sdkVersion = static_cast<uint16_t>(min_tag_version);
-                    file_op.xml_to_flatten->file.config.sdkVersion =
-                        static_cast<uint16_t>(min_tag_version);
-                  }
-                }
-              }
-            }
           }
 
           // NOTE(adamlesinski): Explicitly construct a StringPiece here, or

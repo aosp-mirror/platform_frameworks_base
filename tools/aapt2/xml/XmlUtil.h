@@ -20,16 +20,18 @@
 #include <string>
 
 #include "ResourceValues.h"
-#include "SdkConstants.h"
 #include "util/Maybe.h"
 
 namespace aapt {
 namespace xml {
 
 constexpr const char* kSchemaAuto = "http://schemas.android.com/apk/res-auto";
-constexpr const char* kSchemaPublicPrefix = "http://schemas.android.com/apk/res/";
-constexpr const char* kSchemaPrivatePrefix = "http://schemas.android.com/apk/prv/res/";
-constexpr const char* kSchemaAndroid = "http://schemas.android.com/apk/res/android";
+constexpr const char* kSchemaPublicPrefix =
+    "http://schemas.android.com/apk/res/";
+constexpr const char* kSchemaPrivatePrefix =
+    "http://schemas.android.com/apk/prv/res/";
+constexpr const char* kSchemaAndroid =
+    "http://schemas.android.com/apk/res/android";
 constexpr const char* kSchemaTools = "http://schemas.android.com/tools";
 constexpr const char* kSchemaAapt = "http://schemas.android.com/aapt";
 
@@ -99,24 +101,6 @@ struct IPackageDeclStack {
  */
 void TransformReferenceFromNamespace(IPackageDeclStack* decl_stack,
                                      const android::StringPiece& local_package, Reference* in_ref);
-
-struct TagApiVersionResult {
-  // If set, the API version to apply.
-  Maybe<ApiVersion> api_version;
-
-  // Whether to skip any auto-versioning.
-  bool skip_version;
-};
-
-enum TagVersionOptions : int {
-  // Skip versioning XML resources that deal with vector drawables.
-  kNoVersionVector,
-
-  // Skip versioning XML resources that deal with transitions.
-  kNoVersionTransition,
-};
-
-Maybe<TagApiVersionResult> GetXmlTagApiVersion(const android::StringPiece& tag_name, int options);
 
 }  // namespace xml
 }  // namespace aapt
