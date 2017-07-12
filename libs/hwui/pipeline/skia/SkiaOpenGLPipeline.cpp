@@ -27,6 +27,8 @@
 #include "SkiaProfileRenderer.h"
 #include "utils/TraceUtils.h"
 
+#include <GrBackendSurface.h>
+
 #include <cutils/properties.h>
 #include <strings.h>
 
@@ -69,20 +71,17 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty,
     mEglManager.damageFrame(frame, dirty);
 
     // setup surface for fbo0
-    GrBackendRenderTargetDesc renderTargetDesc;
-    renderTargetDesc.fWidth = frame.width();
-    renderTargetDesc.fHeight = frame.height();
-    renderTargetDesc.fConfig = kRGBA_8888_GrPixelConfig;
-    renderTargetDesc.fOrigin = kBottomLeft_GrSurfaceOrigin;
-    renderTargetDesc.fSampleCnt = 0;
-    renderTargetDesc.fStencilBits = STENCIL_BUFFER_SIZE;
-    renderTargetDesc.fRenderTargetHandle = 0;
+    GrGLFramebufferInfo fboInfo;
+    fboInfo.fFBOID = 0;
+
+    GrBackendRenderTarget backendRT(frame.width(), frame.height(), 0, STENCIL_BUFFER_SIZE,
+            kRGBA_8888_GrPixelConfig, fboInfo);
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
     SkASSERT(mRenderThread.getGrContext() != nullptr);
     sk_sp<SkSurface> surface(SkSurface::MakeFromBackendRenderTarget(
-            mRenderThread.getGrContext(), renderTargetDesc, &props));
+            mRenderThread.getGrContext(), backendRT, kBottomLeft_GrSurfaceOrigin, nullptr, &props));
 
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, wideColorGamut,
