@@ -21,6 +21,7 @@ import static com.android.internal.util.BitUtils.uint16;
 import android.hardware.tetheroffload.control.V1_0.IOffloadControl;
 import android.hardware.tetheroffload.control.V1_0.ITetheringOffloadCallback;
 import android.hardware.tetheroffload.control.V1_0.NatTimeoutUpdate;
+import android.hardware.tetheroffload.control.V1_0.OffloadCallbackEvent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.net.util.SharedLog;
@@ -53,7 +54,11 @@ public class OffloadHardwareInterface {
     private ControlCallback mControlCallback;
 
     public static class ControlCallback {
-        public void onOffloadEvent(int event) {}
+        public void onStarted() {}
+        public void onStoppedError() {}
+        public void onStoppedUnsupported() {}
+        public void onSupportAvailable() {}
+        public void onStoppedLimitReached() {}
 
         public void onNatTimeoutUpdate(int proto,
                                        String srcAddr, int srcPort,
@@ -108,7 +113,7 @@ public class OffloadHardwareInterface {
                 (controlCb == null) ? "null"
                         : "0x" + Integer.toHexString(System.identityHashCode(controlCb)));
 
-        mTetheringOffloadCallback = new TetheringOffloadCallback(mHandler, mControlCallback);
+        mTetheringOffloadCallback = new TetheringOffloadCallback(mHandler, mControlCallback, mLog);
         final CbResults results = new CbResults();
         try {
             mOffloadControl.initOffload(
@@ -206,15 +211,37 @@ public class OffloadHardwareInterface {
     private static class TetheringOffloadCallback extends ITetheringOffloadCallback.Stub {
         public final Handler handler;
         public final ControlCallback controlCb;
+        public final SharedLog log;
 
-        public TetheringOffloadCallback(Handler h, ControlCallback cb) {
+        public TetheringOffloadCallback(Handler h, ControlCallback cb, SharedLog sharedLog) {
             handler = h;
             controlCb = cb;
+            log = sharedLog;
         }
 
         @Override
         public void onEvent(int event) {
-            handler.post(() -> { controlCb.onOffloadEvent(event); });
+            handler.post(() -> {
+                switch (event) {
+                    case OffloadCallbackEvent.OFFLOAD_STARTED:
+                        controlCb.onStarted();
+                        break;
+                    case OffloadCallbackEvent.OFFLOAD_STOPPED_ERROR:
+                        controlCb.onStoppedError();
+                        break;
+                    case OffloadCallbackEvent.OFFLOAD_STOPPED_UNSUPPORTED:
+                        controlCb.onStoppedUnsupported();
+                        break;
+                    case OffloadCallbackEvent.OFFLOAD_SUPPORT_AVAILABLE:
+                        controlCb.onSupportAvailable();
+                        break;
+                    case OffloadCallbackEvent.OFFLOAD_STOPPED_LIMIT_REACHED:
+                        controlCb.onStoppedLimitReached();
+                        break;
+                    default:
+                        log.e("Unsupported OffloadCallbackEvent: " + event);
+                }
+            });
         }
 
         @Override
