@@ -16,6 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.view.IWindowId;
 import android.view.IWindowSessionCallback;
 import com.android.internal.view.IInputContext;
@@ -61,6 +65,8 @@ final class Session extends IWindowSession.Stub
     final int mUid;
     final int mPid;
     final String mStringName;
+    final boolean mCanAddInternalSystemWindow;
+    final boolean mCanHideNonSystemOverlayWindows;
     SurfaceSession mSurfaceSession;
     int mNumWindow = 0;
     boolean mClientDead = false;
@@ -74,6 +80,10 @@ final class Session extends IWindowSession.Stub
         mInputContext = inputContext;
         mUid = Binder.getCallingUid();
         mPid = Binder.getCallingPid();
+        mCanAddInternalSystemWindow = service.mContext.checkCallingOrSelfPermission(
+                INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
+        mCanHideNonSystemOverlayWindows = service.mContext.checkCallingOrSelfPermission(
+                HIDE_NON_SYSTEM_OVERLAY_WINDOWS) == PERMISSION_GRANTED;
         mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
         StringBuilder sb = new StringBuilder();
         sb.append("Session{");
