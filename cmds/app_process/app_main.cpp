@@ -235,6 +235,9 @@ int main(int argc, char* const argv[])
     for (i = 0; i < argc; i++) {
         if (known_command == true) {
           runtime.addOption(strdup(argv[i]));
+          // The static analyzer gets upset that we don't ever free the above
+          // string. Since the allocation is from main, leaking it doesn't seem
+          // problematic. NOLINTNEXTLINE
           ALOGV("app_process main add known option '%s'", argv[i]);
           known_command = false;
           continue;
@@ -258,6 +261,9 @@ int main(int argc, char* const argv[])
         }
 
         runtime.addOption(strdup(argv[i]));
+        // The static analyzer gets upset that we don't ever free the above
+        // string. Since the allocation is from main, leaking it doesn't seem
+        // problematic. NOLINTNEXTLINE
         ALOGV("app_process main add option '%s'", argv[i]);
     }
 
