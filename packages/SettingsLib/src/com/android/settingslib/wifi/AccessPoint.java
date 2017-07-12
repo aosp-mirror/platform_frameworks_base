@@ -729,7 +729,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
 
-        if (WifiTracker.sVerboseLogging > 0) {
+        if (WifiTracker.sVerboseLogging) {
             // Add RSSI/band information for this config, what was seen up to 6 seconds ago
             // verbose WiFi Logging is only turned on thru developers settings
             if (mInfo != null && mNetworkInfo != null) { // This is the active connection
