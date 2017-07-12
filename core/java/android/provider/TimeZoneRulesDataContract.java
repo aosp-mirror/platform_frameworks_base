@@ -54,8 +54,9 @@ public final class TimeZoneRulesDataContract {
          *
          * <p>The URI can be queried using
          * {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)};
-         * the result will be a cursor with a single row. If the {@link Operation#TYPE}
-         * column is {@link Operation#TYPE_INSTALL} then see {@link Data#CONTENT_URI} for how
+         * the result will be a cursor with a single row. If the {@link Operation#COLUMN_TYPE}
+         * column is {@link Operation#TYPE_INSTALL} then
+         * {@link android.content.ContentProvider#openFile(Uri, String)} can be used with "r" mode
          * to obtain the binary data.
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "operation");
@@ -65,7 +66,7 @@ public final class TimeZoneRulesDataContract {
          * the type of operation to perform. See {@link #TYPE_NO_OP},
          * {@link #TYPE_UNINSTALL} and {@link #TYPE_INSTALL}.
          */
-        public static final String TYPE = "type";
+        public static final String COLUMN_TYPE = "type";
 
         /**
          * An operation type used when the current time zone rules on device should be replaced by
@@ -90,46 +91,29 @@ public final class TimeZoneRulesDataContract {
         /**
          * The {@code nullable int} column of the {@link #CONTENT_URI} that describes the major
          * version of the distro to be installed.
-         * Only non-null if {@link #TYPE} contains {@link #TYPE_INSTALL}.
+         * Only non-null if {@link #COLUMN_TYPE} contains {@link #TYPE_INSTALL}.
          */
-        public static final String DISTRO_MAJOR_VERSION = "distro_major_version";
+        public static final String COLUMN_DISTRO_MAJOR_VERSION = "distro_major_version";
 
         /**
          * The {@code nullable int} column of the {@link #CONTENT_URI} that describes the minor
          * version of the distro to be installed.
-         * Only non-null if {@link #TYPE} contains {@link #TYPE_INSTALL}.
+         * Only non-null if {@link #COLUMN_TYPE} contains {@link #TYPE_INSTALL}.
          */
-        public static final String DISTRO_MINOR_VERSION = "distro_minor_version";
+        public static final String COLUMN_DISTRO_MINOR_VERSION = "distro_minor_version";
 
         /**
          * The {@code nullable String} column of the {@link #CONTENT_URI} that describes the IANA
          * rules version of the distro to be installed.
-         * Only non-null if {@link #TYPE} contains {@link #TYPE_INSTALL}.
+         * Only non-null if {@link #COLUMN_TYPE} contains {@link #TYPE_INSTALL}.
          */
-        public static final String RULES_VERSION = "rules_version";
+        public static final String COLUMN_RULES_VERSION = "rules_version";
 
         /**
          * The {@code nullable int} column of the {@link #CONTENT_URI} that describes the revision
          * number of the distro to be installed.
-         * Only non-null if {@link #TYPE} contains {@link #TYPE_INSTALL}.
+         * Only non-null if {@link #COLUMN_TYPE} contains {@link #TYPE_INSTALL}.
          */
-        public static final String REVISION = "revision";
-    }
-
-    /**
-     * Defines the {@link Data#CONTENT_URI} for obtaining time zone distro binary data.
-     */
-    public static final class Data {
-
-        /** Not instantiable. */
-        private Data() {
-        }
-
-        /**
-         * The content:// style URI for obtaining time zone bundle data.
-         *
-         * <p>Use {@link android.content.ContentProvider#openFile(Uri, String)} with "r" mode.
-         */
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "data");
+        public static final String COLUMN_REVISION = "revision";
     }
 }
