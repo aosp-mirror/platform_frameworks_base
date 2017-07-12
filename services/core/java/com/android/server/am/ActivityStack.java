@@ -745,6 +745,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return null;
     }
 
+    final TaskRecord bottomTask() {
+        if (mTaskHistory.isEmpty()) {
+            return null;
+        }
+        return mTaskHistory.get(0);
+    }
+
     TaskRecord taskForIdLocked(int id) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
@@ -1902,7 +1909,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         // the recents activity from an app.
                         behindFullscreenActivity = true;
                     }
-
+                } else if (mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Skipping after task=" + task
+                            + " returning to non-application type=" + task.getTaskToReturnTo());
+                    // Once we reach a fullscreen task that should return to another task, then no
+                    // other activities behind that one should be visible.
+                    if (task.getTaskToReturnTo() != APPLICATION_ACTIVITY_TYPE) {
+                        behindFullscreenActivity = true;
+                    }
                 }
             }
 
@@ -3375,6 +3389,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * @param allowFocusSelf Is the focus allowed to remain on the same stack.
      */
     private boolean adjustFocusToNextFocusableStackLocked(String reason, boolean allowFocusSelf) {
+        if (isAssistantStack() && bottomTask() != null &&
+                bottomTask().getTaskToReturnTo() == HOME_ACTIVITY_TYPE) {
+            // If the current stack is the assistant stack, then use the return-to type to determine
+            // whether to return to the home screen. This is needed to workaround an issue where
+            // launching a fullscreen task (and subequently returning from that task) will cause
+            // the fullscreen stack to be found as the next focusable stack below, even if the
+            // assistant was launched over home.
+            return mStackSupervisor.moveHomeStackTaskToTop(reason);
+        }
+
         final ActivityStack stack = mStackSupervisor.getNextFocusableStackLocked(
                 allowFocusSelf ? null : this);
         final String myReason = reason + " adjustFocusToNextFocusableStack";
