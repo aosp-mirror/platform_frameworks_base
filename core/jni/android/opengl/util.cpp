@@ -623,9 +623,6 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 static int checkFormat(SkColorType colorType, int format, int type)
 {
     switch(colorType) {
-        case kIndex_8_SkColorType:
-            if (format == GL_PALETTE8_RGBA8_OES)
-                return 0;
         case kN32_SkColorType:
         case kAlpha_8_SkColorType:
             if (type == GL_UNSIGNED_BYTE)
@@ -657,8 +654,6 @@ static int getInternalFormat(SkColorType colorType)
             return GL_RGBA;
         case kN32_SkColorType:
             return GL_RGBA;
-        case kIndex_8_SkColorType:
-            return GL_PALETTE8_RGBA8_OES;
         case kRGB_565_SkColorType:
             return GL_RGB;
         default:
@@ -675,8 +670,6 @@ static int getType(SkColorType colorType)
             return GL_UNSIGNED_SHORT_4_4_4_4;
         case kN32_SkColorType:
             return GL_UNSIGNED_BYTE;
-        case kIndex_8_SkColorType:
-            return -1; // No type for compressed data.
         case kRGB_565_SkColorType:
             return GL_UNSIGNED_SHORT_5_6_5;
         default:
