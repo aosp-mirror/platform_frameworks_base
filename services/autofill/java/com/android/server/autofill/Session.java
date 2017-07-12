@@ -877,10 +877,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final ValueFinder valueFinder = (id) -> {return getValueAsString(id);};
 
                 final InternalValidator validator = saveInfo.getValidator();
-                if (validator != null && !validator.isValid(valueFinder)) {
-                    // TODO(b/62534917): add CTS test
-                    Slog.i(TAG, "not showing save UI because fields failed validation");
-                    return true;
+                if (validator != null) {
+                    boolean isValid;
+                    try {
+                        isValid = validator.isValid(valueFinder);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Not showing save UI because of exception during validation "
+                                + e.getClass());
+                        return true;
+                    }
+
+                    if (!isValid) {
+                        Slog.i(TAG, "not showing save UI because fields failed validation");
+                        return true;
+                    }
                 }
 
                 if (sDebug) Slog.d(TAG, "Good news, everyone! All checks passed, show save UI!");
