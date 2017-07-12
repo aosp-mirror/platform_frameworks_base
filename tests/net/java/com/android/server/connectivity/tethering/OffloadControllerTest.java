@@ -16,26 +16,38 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.TAG_NONE;
+import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
+import static com.android.server.connectivity.tethering.OffloadHardwareInterface.ForwardedStats;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.net.ITetheringStatsProvider;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.util.SharedLog;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.INetworkManagementService;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 
@@ -66,11 +78,14 @@ public class OffloadControllerTest {
     @Mock private OffloadHardwareInterface mHardware;
     @Mock private ApplicationInfo mApplicationInfo;
     @Mock private Context mContext;
+    @Mock private INetworkManagementService mNMService;
     private final ArgumentCaptor<ArrayList> mStringArrayCaptor =
             ArgumentCaptor.forClass(ArrayList.class);
+    private final ArgumentCaptor<ITetheringStatsProvider.Stub> mTetherStatsProviderCaptor =
+            ArgumentCaptor.forClass(ITetheringStatsProvider.Stub.class);
     private MockContentResolver mContentResolver;
 
-    @Before public void setUp() throws Exception {
+    @Before public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mContext.getApplicationInfo()).thenReturn(mApplicationInfo);
         when(mContext.getPackageName()).thenReturn("OffloadControllerTest");
@@ -90,15 +105,24 @@ public class OffloadControllerTest {
         when(mHardware.initOffloadConfig()).thenReturn(true);
         when(mHardware.initOffloadControl(any(OffloadHardwareInterface.ControlCallback.class)))
                 .thenReturn(true);
+        when(mHardware.getForwardedStats(any())).thenReturn(new ForwardedStats());
     }
 
     private void enableOffload() {
         Settings.Global.putInt(mContentResolver, TETHER_OFFLOAD_DISABLED, 0);
     }
 
+    private OffloadController makeOffloadController() throws Exception {
+        OffloadController offload = new OffloadController(new Handler(Looper.getMainLooper()),
+                mHardware, mContentResolver, mNMService, new SharedLog("test"));
+        verify(mNMService).registerTetheringStatsProvider(
+                mTetherStatsProviderCaptor.capture(), anyString());
+        return offload;
+    }
+
     // TODO: Restore when FakeSettingsProvider.clearSettingsProvider() is available.
     // @Test
-    public void testNoSettingsValueDefaultDisabledDoesNotStart() {
+    public void testNoSettingsValueDefaultDisabledDoesNotStart() throws Exception {
         setupFunctioningHardwareInterface();
         when(mHardware.getDefaultTetherOffloadDisabled()).thenReturn(1);
         try {
@@ -106,8 +130,7 @@ public class OffloadControllerTest {
             fail();
         } catch (SettingNotFoundException expected) {}
 
-        final OffloadController offload =
-                new OffloadController(null, mHardware, mContentResolver, new SharedLog("test"));
+        final OffloadController offload = makeOffloadController();
         offload.start();
 
         final InOrder inOrder = inOrder(mHardware);
@@ -120,7 +143,7 @@ public class OffloadControllerTest {
 
     // TODO: Restore when FakeSettingsProvider.clearSettingsProvider() is available.
     // @Test
-    public void testNoSettingsValueDefaultEnabledDoesStart() {
+    public void testNoSettingsValueDefaultEnabledDoesStart() throws Exception {
         setupFunctioningHardwareInterface();
         when(mHardware.getDefaultTetherOffloadDisabled()).thenReturn(0);
         try {
@@ -128,8 +151,7 @@ public class OffloadControllerTest {
             fail();
         } catch (SettingNotFoundException expected) {}
 
-        final OffloadController offload =
-                new OffloadController(null, mHardware, mContentResolver, new SharedLog("test"));
+        final OffloadController offload = makeOffloadController();
         offload.start();
 
         final InOrder inOrder = inOrder(mHardware);
@@ -141,12 +163,11 @@ public class OffloadControllerTest {
     }
 
     @Test
-    public void testSettingsAllowsStart() {
+    public void testSettingsAllowsStart() throws Exception {
         setupFunctioningHardwareInterface();
         Settings.Global.putInt(mContentResolver, TETHER_OFFLOAD_DISABLED, 0);
 
-        final OffloadController offload =
-                new OffloadController(null, mHardware, mContentResolver, new SharedLog("test"));
+        final OffloadController offload = makeOffloadController();
         offload.start();
 
         final InOrder inOrder = inOrder(mHardware);
@@ -158,12 +179,11 @@ public class OffloadControllerTest {
     }
 
     @Test
-    public void testSettingsDisablesStart() {
+    public void testSettingsDisablesStart() throws Exception {
         setupFunctioningHardwareInterface();
         Settings.Global.putInt(mContentResolver, TETHER_OFFLOAD_DISABLED, 1);
 
-        final OffloadController offload =
-                new OffloadController(null, mHardware, mContentResolver, new SharedLog("test"));
+        final OffloadController offload = makeOffloadController();
         offload.start();
 
         final InOrder inOrder = inOrder(mHardware);
@@ -178,8 +198,7 @@ public class OffloadControllerTest {
         setupFunctioningHardwareInterface();
         enableOffload();
 
-        final OffloadController offload =
-                new OffloadController(null, mHardware, mContentResolver, new SharedLog("test"));
+        final OffloadController offload = makeOffloadController();
         offload.start();
 
         final InOrder inOrder = inOrder(mHardware);
@@ -244,6 +263,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, never()).setLocalPrefixes(mStringArrayCaptor.capture());
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
                 eq(testIfName), eq(ipv4Addr), eq(null), eq(null));
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(testIfName));
         inOrder.verifyNoMoreInteractions();
 
         final String ipv4Gateway = "192.0.2.1";
@@ -253,6 +273,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, never()).setLocalPrefixes(mStringArrayCaptor.capture());
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
                 eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), eq(null));
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(testIfName));
         inOrder.verifyNoMoreInteractions();
 
         final String ipv6Gw1 = "fe80::cafe";
@@ -262,6 +283,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, never()).setLocalPrefixes(mStringArrayCaptor.capture());
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
                 eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), mStringArrayCaptor.capture());
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(testIfName));
         ArrayList<String> v6gws = mStringArrayCaptor.getValue();
         assertEquals(1, v6gws.size());
         assertTrue(v6gws.contains(ipv6Gw1));
@@ -274,6 +296,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, never()).setLocalPrefixes(mStringArrayCaptor.capture());
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
                 eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), mStringArrayCaptor.capture());
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(testIfName));
         v6gws = mStringArrayCaptor.getValue();
         assertEquals(2, v6gws.size());
         assertTrue(v6gws.contains(ipv6Gw1));
@@ -291,6 +314,7 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, never()).setLocalPrefixes(mStringArrayCaptor.capture());
         inOrder.verify(mHardware, times(1)).setUpstreamParameters(
                 eq(testIfName), eq(ipv4Addr), eq(ipv4Gateway), mStringArrayCaptor.capture());
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(testIfName));
         v6gws = mStringArrayCaptor.getValue();
         assertEquals(2, v6gws.size());
         assertTrue(v6gws.contains(ipv6Gw1));
@@ -325,6 +349,7 @@ public class OffloadControllerTest {
         assertEquals(2, v6gws.size());
         assertTrue(v6gws.contains(ipv6Gw1));
         assertTrue(v6gws.contains(ipv6Gw2));
+        inOrder.verify(mHardware, times(1)).getForwardedStats(eq(testIfName));
         inOrder.verifyNoMoreInteractions();
 
         // Completely identical LinkProperties updates are de-duped.
@@ -334,5 +359,66 @@ public class OffloadControllerTest {
         inOrder.verify(mHardware, never()).setUpstreamParameters(
                 anyObject(), anyObject(), anyObject(), anyObject());
         inOrder.verifyNoMoreInteractions();
+    }
+
+    private void assertNetworkStats(String iface, ForwardedStats stats, NetworkStats.Entry entry) {
+        assertEquals(iface, entry.iface);
+        assertEquals(stats.rxBytes, entry.rxBytes);
+        assertEquals(stats.txBytes, entry.txBytes);
+        assertEquals(SET_DEFAULT, entry.set);
+        assertEquals(TAG_NONE, entry.tag);
+        assertEquals(UID_TETHERING, entry.uid);
+    }
+
+    @Test
+    public void testGetForwardedStats() throws Exception {
+        setupFunctioningHardwareInterface();
+        enableOffload();
+
+        final OffloadController offload = makeOffloadController();
+        offload.start();
+
+        final String ethernetIface = "eth1";
+        final String mobileIface = "rmnet_data0";
+
+        ForwardedStats ethernetStats = new ForwardedStats();
+        ethernetStats.rxBytes = 12345;
+        ethernetStats.txBytes = 54321;
+
+        ForwardedStats mobileStats = new ForwardedStats();
+        mobileStats.rxBytes = 999;
+        mobileStats.txBytes = 99999;
+
+        when(mHardware.getForwardedStats(eq(ethernetIface))).thenReturn(ethernetStats);
+        when(mHardware.getForwardedStats(eq(mobileIface))).thenReturn(mobileStats);
+
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(ethernetIface);
+        offload.setUpstreamLinkProperties(lp);
+
+        lp.setInterfaceName(mobileIface);
+        offload.setUpstreamLinkProperties(lp);
+
+        lp.setInterfaceName(ethernetIface);
+        offload.setUpstreamLinkProperties(lp);
+
+        ethernetStats.rxBytes = 100000;
+        ethernetStats.txBytes = 100000;
+        offload.setUpstreamLinkProperties(null);
+
+        NetworkStats stats = mTetherStatsProviderCaptor.getValue().getTetherStats();
+        assertEquals(2, stats.size());
+
+        NetworkStats.Entry entry = null;
+        int ethernetPosition = ethernetIface.equals(stats.getValues(0, entry).iface) ? 0 : 1;
+        int mobilePosition = 1 - ethernetPosition;
+
+        entry = stats.getValues(mobilePosition, entry);
+        assertNetworkStats(mobileIface, mobileStats, entry);
+
+        ethernetStats.rxBytes = 12345 + 100000;
+        ethernetStats.txBytes = 54321 + 100000;
+        entry = stats.getValues(ethernetPosition, entry);
+        assertNetworkStats(ethernetIface, ethernetStats, entry);
     }
 }
