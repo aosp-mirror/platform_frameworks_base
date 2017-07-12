@@ -206,6 +206,7 @@ extern int register_com_android_internal_net_NetworkStatsFactory(JNIEnv *env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
 extern int register_com_android_internal_os_Zygote(JNIEnv *env);
+extern int register_com_android_internal_os_ZygoteInit(JNIEnv *env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
@@ -245,7 +246,7 @@ int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
         methods, NELEM(methods));
 }
 
-int register_com_android_internal_os_ZygoteInit(JNIEnv* env)
+int register_com_android_internal_os_ZygoteInit_nativeZygoteInit(JNIEnv* env)
 {
     const JNINativeMethod methods[] = {
         { "nativeZygoteInit", "()V",
@@ -1301,7 +1302,7 @@ static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env
 
 static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_com_android_internal_os_RuntimeInit),
-    REG_JNI(register_com_android_internal_os_ZygoteInit),
+    REG_JNI(register_com_android_internal_os_ZygoteInit_nativeZygoteInit),
     REG_JNI(register_android_os_SystemClock),
     REG_JNI(register_android_util_EventLog),
     REG_JNI(register_android_util_Log),
@@ -1404,6 +1405,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_SharedMemory),
     REG_JNI(register_com_android_internal_os_ClassLoaderFactory),
     REG_JNI(register_com_android_internal_os_Zygote),
+    REG_JNI(register_com_android_internal_os_ZygoteInit),
     REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),
     REG_JNI(register_android_hardware_Camera),
     REG_JNI(register_android_hardware_camera2_CameraMetadata),
