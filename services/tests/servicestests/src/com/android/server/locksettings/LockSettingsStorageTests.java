@@ -347,11 +347,11 @@ public class LockSettingsStorageTests extends AndroidTestCase {
     }
 
     public void testPersistentData_serializeUnserialize() {
-        byte[] serialized = PersistentData.toBytes(PersistentData.TYPE_GATEKEEPER, SOME_USER_ID,
+        byte[] serialized = PersistentData.toBytes(PersistentData.TYPE_SP, SOME_USER_ID,
                 DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, PAYLOAD);
         PersistentData deserialized = PersistentData.fromBytes(serialized);
 
-        assertEquals(PersistentData.TYPE_GATEKEEPER, deserialized.type);
+        assertEquals(PersistentData.TYPE_SP, deserialized.type);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, deserialized.qualityForUi);
         assertArrayEquals(PAYLOAD, deserialized.payload);
     }
@@ -371,7 +371,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         // the wire format in the future.
         byte[] serializedVersion1 = new byte[] {
                 1, /* PersistentData.VERSION_1 */
-                2, /* PersistentData.TYPE_SP */
+                1, /* PersistentData.TYPE_SP */
                 0x00, 0x00, 0x04, 0x0A,  /* SOME_USER_ID */
                 0x00, 0x03, 0x00, 0x00,  /* PASSWORD_NUMERIC_COMPLEX */
                 1, 2, -1, -2, 33, /* PAYLOAD */
@@ -385,9 +385,8 @@ public class LockSettingsStorageTests extends AndroidTestCase {
 
         // Make sure the constants we use on the wire do not change.
         assertEquals(0, PersistentData.TYPE_NONE);
-        assertEquals(1, PersistentData.TYPE_GATEKEEPER);
-        assertEquals(2, PersistentData.TYPE_SP);
-        assertEquals(3, PersistentData.TYPE_SP_WEAVER);
+        assertEquals(1, PersistentData.TYPE_SP);
+        assertEquals(2, PersistentData.TYPE_SP_WEAVER);
     }
 
     public void testCredentialHash_serializeUnserialize() {
