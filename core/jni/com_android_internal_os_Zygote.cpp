@@ -678,6 +678,22 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   }
   return pid;
 }
+
+static uint64_t GetEffectiveCapabilityMask(JNIEnv* env) {
+    __user_cap_header_struct capheader;
+    memset(&capheader, 0, sizeof(capheader));
+    capheader.version = _LINUX_CAPABILITY_VERSION_3;
+    capheader.pid = 0;
+
+    __user_cap_data_struct capdata[2];
+    if (capget(&capheader, &capdata[0]) == -1) {
+        ALOGE("capget failed: %s", strerror(errno));
+        RuntimeAbort(env, __LINE__, "capget failed");
+    }
+
+    return capdata[0].effective |
+           (static_cast<uint64_t>(capdata[1].effective) << 32);
+}
 }  // anonymous namespace
 
 namespace android {
@@ -727,6 +743,10 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     if (gid_wakelock_found) {
       capabilities |= (1LL << CAP_BLOCK_SUSPEND);
     }
+
+    // Containers run without some capabilities, so drop any caps that are not
+    // available.
+    capabilities &= GetEffectiveCapabilityMask(env);
 
     return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
             rlimits, capabilities, capabilities, mount_external, se_info,
