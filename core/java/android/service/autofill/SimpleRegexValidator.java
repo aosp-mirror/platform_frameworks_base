@@ -31,7 +31,7 @@ import com.android.internal.util.Preconditions;
  *
  * <p>See {@link SaveInfo.Builder#setValidator(Validator)} for examples.
  */
-public final class SimpleRegexValidator extends InternalValidator implements Parcelable {
+public final class SimpleRegexValidator extends InternalValidator implements Validator, Parcelable {
 
     private static final String TAG = "SimpleRegexValidator";
 

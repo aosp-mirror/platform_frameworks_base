@@ -18,7 +18,12 @@ package android.service.autofill;
 import android.annotation.NonNull;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * Superclass of all validators the system understands. As this is not public all public subclasses
+ * have to implement {@link Validator} again.
+ *
+ * @hide
+ */
 public abstract class InternalValidator implements Validator, Parcelable {
 
     /**

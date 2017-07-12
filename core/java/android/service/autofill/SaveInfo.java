@@ -486,10 +486,10 @@ public final class SaveInfo implements Parcelable {
          *
          * Validator validator =
          *   and(
-         *     new SimpleRegexValidator.(ccNumberId1, "^\\d{4}$"),
-         *     new SimpleRegexValidator.(ccNumberId2, "^\\d{4}$"),
-         *     new SimpleRegexValidator.(ccNumberId3, "^\\d{4}$"),
-         *     new SimpleRegexValidator.(ccNumberId4, "^\\d{4}$")
+         *     new SimpleRegexValidator(ccNumberId1, "^\\d{4}$"),
+         *     new SimpleRegexValidator(ccNumberId2, "^\\d{4}$"),
+         *     new SimpleRegexValidator(ccNumberId3, "^\\d{4}$"),
+         *     new SimpleRegexValidator(ccNumberId4, "^\\d{4}$")
          *   );
          * </pre>
          *

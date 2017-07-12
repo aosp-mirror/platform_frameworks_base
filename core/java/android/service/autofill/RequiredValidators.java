@@ -34,7 +34,7 @@ import com.android.internal.util.Preconditions;
  */
 final class RequiredValidators extends InternalValidator {
 
-    private final InternalValidator[] mValidators;
+    @NonNull private final InternalValidator[] mValidators;
 
     RequiredValidators(@NonNull InternalValidator[] validators) {
         mValidators = Preconditions.checkArrayElementsNotNull(validators, "validators");
@@ -42,10 +42,6 @@ final class RequiredValidators extends InternalValidator {
 
     @Override
     public boolean isValid(@NonNull ValueFinder finder) {
-        if (mValidators == null) {
-            return true;
-        }
-        // TODO(b/62534917): handle errors, like not finding the ID
         for (InternalValidator validator : mValidators) {
             final boolean valid = validator.isValid(finder);
             if (!valid) return false;
