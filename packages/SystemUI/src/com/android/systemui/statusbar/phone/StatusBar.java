@@ -5567,6 +5567,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private Set<String> mNonBlockablePkgs;
 
+    public boolean isDeviceInteractive() {
+        return mDeviceInteractive;
+    }
+
     @Override  // NotificationData.Environment
     public boolean isDeviceProvisioned() {
         return mDeviceProvisionedController.isDeviceProvisioned();
