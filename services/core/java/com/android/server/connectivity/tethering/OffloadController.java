@@ -36,6 +36,8 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 
+import com.android.internal.util.IndentingPrintWriter;
+
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -347,5 +349,17 @@ public class OffloadController {
         final HashSet<String> localPrefixStrs = new HashSet<>();
         for (IpPrefix pfx : prefixSet) localPrefixStrs.add(pfx.toString());
         return localPrefixStrs;
+    }
+
+    public void dump(IndentingPrintWriter pw) {
+        if (isOffloadDisabled()) {
+            pw.println("Offload disabled");
+            return;
+        }
+        pw.println("Offload HALs " + (started() ? "started" : "not started"));
+        LinkProperties lp = mUpstreamLinkProperties;
+        String upstream = (lp != null) ? lp.getInterfaceName() : null;
+        pw.println("Current upstream: " + upstream);
+        pw.println("Exempt prefixes: " + mLastLocalPrefixStrs);
     }
 }
