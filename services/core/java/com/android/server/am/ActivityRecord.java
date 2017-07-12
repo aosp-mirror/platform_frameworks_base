@@ -167,6 +167,7 @@ import com.android.server.AttributeCache.Entry;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.AppWindowContainerListener;
+import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.TaskWindowContainerController;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -2223,7 +2224,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     @Override
-    void onOverrideConfigurationChanged(Configuration newConfig) {
+    public void onOverrideConfigurationChanged(Configuration newConfig) {
         final Configuration currentConfig = getOverrideConfiguration();
         if (currentConfig.equals(newConfig)) {
             return;

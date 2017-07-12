@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.am;
+package com.android.server.wm;
 
 import android.content.res.Configuration;
 
@@ -22,9 +22,7 @@ import android.content.res.Configuration;
  * Contains common logic for classes that have override configurations and are organized in a
  * hierarchy.
  */
-// TODO(b/36505427): Move to wm package and have WindowContainer use this instead of having its own
-// implementation for merging configuration.
-abstract class ConfigurationContainer<E extends ConfigurationContainer> {
+public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     /** Contains override configuration settings applied to this configuration container. */
     private Configuration mOverrideConfiguration = new Configuration();
@@ -47,7 +45,7 @@ abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * This method should be used for getting settings applied in each particular level of the
      * hierarchy.
      */
-    Configuration getConfiguration() {
+    public Configuration getConfiguration() {
         return mFullConfiguration;
     }
 
@@ -55,7 +53,7 @@ abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * Notify that parent config changed and we need to update full configuration.
      * @see #mFullConfiguration
      */
-    void onConfigurationChanged(Configuration newParentConfig) {
+    public void onConfigurationChanged(Configuration newParentConfig) {
         mFullConfiguration.setTo(newParentConfig);
         mFullConfiguration.updateFrom(mOverrideConfiguration);
         for (int i = getChildCount() - 1; i >= 0; --i) {
@@ -65,7 +63,7 @@ abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /** Returns override configuration applied to this configuration container. */
-    Configuration getOverrideConfiguration() {
+    public Configuration getOverrideConfiguration() {
         return mOverrideConfiguration;
     }
 
@@ -74,7 +72,7 @@ abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * @see #mOverrideConfiguration
      * @see #mFullConfiguration
      */
-    void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
         mOverrideConfiguration.setTo(overrideConfiguration);
         // Update full configuration of this container and all its children.
         final ConfigurationContainer parent = getParent();
@@ -87,7 +85,7 @@ abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * Get merged override configuration from the top of the hierarchy down to this particular
      * instance. This should be reported to client as override config.
      */
-    Configuration getMergedOverrideConfiguration() {
+    public Configuration getMergedOverrideConfiguration() {
         return mMergedOverrideConfiguration;
     }
 
@@ -97,7 +95,7 @@ abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * override config.
      * @see #mMergedOverrideConfiguration
      */
-    private void onMergedOverrideConfigurationChanged() {
+    void onMergedOverrideConfigurationChanged() {
         final ConfigurationContainer parent = getParent();
         if (parent != null) {
             mMergedOverrideConfiguration.setTo(parent.getMergedOverrideConfiguration());
@@ -114,7 +112,7 @@ abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     /**
      * Must be called when new parent for the container was set.
      */
-    void onParentChanged() {
+    protected void onParentChanged() {
         final ConfigurationContainer parent = getParent();
         // Removing parent usually means that we've detached this entity to destroy it or to attach
         // to another parent. In both cases we don't need to update the configuration now.
