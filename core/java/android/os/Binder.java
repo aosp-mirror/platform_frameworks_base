@@ -687,13 +687,6 @@ public class Binder implements IBinder {
                 reply.writeException(e);
             }
             res = true;
-        } catch (OutOfMemoryError e) {
-            // Unconditionally log this, since this is generally unrecoverable.
-            Log.e(TAG, "Caught an OutOfMemoryError from the binder stub implementation.", e);
-            RuntimeException re = new RuntimeException("Out of memory", e);
-            reply.setDataPosition(0);
-            reply.writeException(re);
-            res = true;
         } finally {
             if (tracingEnabled) {
                 Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
