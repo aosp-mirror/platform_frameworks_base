@@ -38,7 +38,6 @@ namespace aapt {
 
 DEFINE_HAS_BINARY_OP_TRAIT(has_eq_op, ==);
 DEFINE_HAS_BINARY_OP_TRAIT(has_lt_op, <);
-DEFINE_HAS_BINARY_OP_TRAIT(has_lte_op, <=);
 
 /**
  * Type trait that checks if two types can be equated (==) and compared (<).
