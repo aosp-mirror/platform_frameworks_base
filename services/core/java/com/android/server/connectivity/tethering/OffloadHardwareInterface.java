@@ -35,6 +35,7 @@ import java.util.ArrayList;
  */
 public class OffloadHardwareInterface {
     private static final String TAG = OffloadHardwareInterface.class.getSimpleName();
+    private static final String YIELDS = " -> ";
     // Change this value to control whether tether offload is enabled or
     // disabled by default in the absence of an explicit Settings value.
     // See accompanying unittest to distinguish 0 from non-0 values.
@@ -57,6 +58,25 @@ public class OffloadHardwareInterface {
         public void onNatTimeoutUpdate(int proto,
                                        String srcAddr, int srcPort,
                                        String dstAddr, int dstPort) {}
+    }
+
+    public static class ForwardedStats {
+        public long rxBytes;
+        public long txBytes;
+
+        public ForwardedStats() {
+            rxBytes = 0;
+            txBytes = 0;
+        }
+
+        public void add(ForwardedStats other) {
+            rxBytes += other.rxBytes;
+            txBytes += other.txBytes;
+        }
+
+        public String toString() {
+            return String.format("rx:%s tx:%s", rxBytes, txBytes);
+        }
     }
 
     public OffloadHardwareInterface(Handler h, SharedLog log) {
@@ -123,6 +143,26 @@ public class OffloadHardwareInterface {
         mLog.log("stopOffloadControl()");
     }
 
+    public ForwardedStats getForwardedStats(String upstream) {
+        final String logmsg = String.format("getForwardedStats(%s)",  upstream);
+
+        final ForwardedStats stats = new ForwardedStats();
+        try {
+            mOffloadControl.getForwardedStats(
+                    upstream,
+                    (long rxBytes, long txBytes) -> {
+                        stats.rxBytes = (rxBytes > 0) ? rxBytes : 0;
+                        stats.txBytes = (txBytes > 0) ? txBytes : 0;
+                    });
+        } catch (RemoteException e) {
+            record(logmsg, e);
+            return stats;
+        }
+
+        mLog.log(logmsg + YIELDS + stats);
+        return stats;
+    }
+
     public boolean setUpstreamParameters(
             String iface, String v4addr, String v4gateway, ArrayList<String> v6gws) {
         iface = (iface != null) ? iface : NO_INTERFACE_NAME;
@@ -151,11 +191,11 @@ public class OffloadHardwareInterface {
     }
 
     private void record(String msg, Throwable t) {
-        mLog.e(msg + " -> exception: " + t);
+        mLog.e(msg + YIELDS + "exception: " + t);
     }
 
     private void record(String msg, CbResults results) {
-        final String logmsg = msg + " -> " + results;
+        final String logmsg = msg + YIELDS + results;
         if (!results.success) {
             mLog.e(logmsg);
         } else {
