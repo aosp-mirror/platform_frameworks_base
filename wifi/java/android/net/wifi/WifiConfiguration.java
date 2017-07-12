@@ -245,6 +245,7 @@ public class WifiConfiguration implements Parcelable {
      * (e.g., {@code 01a243f405}).
      */
     public String SSID;
+
     /**
      * When set, this network configuration entry should only be used when
      * associating with the AP having the specified BSSID. The value is
@@ -740,22 +741,58 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
+     * Indicates if the creator of this configuration has expressed that it
+     * should be considered metered.
+     *
+     * @see #isMetered(WifiConfiguration, WifiInfo)
      * @hide
-     * A hint about whether or not the network represented by this WifiConfiguration
-     * is metered. This is hinted at via the meteredHint bit on DHCP results set in
-     * {@link com.android.server.wifi.WifiStateMachine}, or via a network score in
-     * {@link com.android.server.wifi.ExternalScoreEvaluator}.
      */
     @SystemApi
     public boolean meteredHint;
 
+    /** {@hide} */
+    public static final int METERED_OVERRIDE_NONE = 0;
+    /** {@hide} */
+    public static final int METERED_OVERRIDE_METERED = 1;
+    /** {@hide} */
+    public static final int METERED_OVERRIDE_NOT_METERED = 2;
+
     /**
+     * Indicates if the end user has expressed an explicit opinion about the
+     * meteredness of this network, such as through the Settings app.
+     * <p>
+     * This should always override any values from {@link #meteredHint} or
+     * {@link WifiInfo#getMeteredHint()}.
+     *
+     * @see #isMetered(WifiConfiguration, WifiInfo)
      * @hide
-     * Indicates if a user has specified the WifiConfiguration to be metered. Users
-     * can toggle if a network is metered within Settings -> Data Usage -> Network
-     * Restrictions.
      */
-    public boolean meteredOverride;
+    public int meteredOverride = METERED_OVERRIDE_NONE;
+
+    /**
+     * Blend together all the various opinions to decide if the given network
+     * should be considered metered or not.
+     *
+     * @hide
+     */
+    public static boolean isMetered(WifiConfiguration config, WifiInfo info) {
+        boolean metered = false;
+        if (info != null && info.getMeteredHint()) {
+            metered = true;
+        }
+        if (config != null && config.meteredHint) {
+            metered = true;
+        }
+        if (config != null
+                && config.meteredOverride == WifiConfiguration.METERED_OVERRIDE_METERED) {
+            metered = true;
+        }
+        if (config != null
+                && config.meteredOverride == WifiConfiguration.METERED_OVERRIDE_NOT_METERED) {
+            metered = false;
+        }
+        return metered;
+    }
 
     /**
      * @hide
@@ -1426,7 +1463,7 @@ public class WifiConfiguration implements Parcelable {
         didSelfAdd = false;
         ephemeral = false;
         meteredHint = false;
-        meteredOverride = false;
+        meteredOverride = METERED_OVERRIDE_NONE;
         useExternalScores = false;
         validatedInternetAccess = false;
         mIpConfiguration = new IpConfiguration();
@@ -1520,22 +1557,23 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append(this.numNoInternetAccessReports).append("\n");
         }
         if (this.updateTime != null) {
-            sbuf.append("update ").append(this.updateTime).append("\n");
+            sbuf.append(" update ").append(this.updateTime).append("\n");
         }
         if (this.creationTime != null) {
-            sbuf.append("creation").append(this.creationTime).append("\n");
+            sbuf.append(" creation ").append(this.creationTime).append("\n");
         }
         if (this.didSelfAdd) sbuf.append(" didSelfAdd");
         if (this.selfAdded) sbuf.append(" selfAdded");
         if (this.validatedInternetAccess) sbuf.append(" validatedInternetAccess");
         if (this.ephemeral) sbuf.append(" ephemeral");
         if (this.meteredHint) sbuf.append(" meteredHint");
-        if (this.meteredOverride) sbuf.append(" meteredOverride");
         if (this.useExternalScores) sbuf.append(" useExternalScores");
         if (this.didSelfAdd || this.selfAdded || this.validatedInternetAccess
-            || this.ephemeral || this.meteredHint || this.meteredOverride
-            || this.useExternalScores) {
+            || this.ephemeral || this.meteredHint || this.useExternalScores) {
             sbuf.append("\n");
+        }
+        if (this.meteredOverride != METERED_OVERRIDE_NONE) {
+            sbuf.append(" meteredOverride ").append(meteredOverride).append("\n");
         }
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
@@ -2062,7 +2100,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(isLegacyPasspointConfig ? 1 : 0);
         dest.writeInt(ephemeral ? 1 : 0);
         dest.writeInt(meteredHint ? 1 : 0);
-        dest.writeInt(meteredOverride ? 1 : 0);
+        dest.writeInt(meteredOverride);
         dest.writeInt(useExternalScores ? 1 : 0);
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
@@ -2129,7 +2167,7 @@ public class WifiConfiguration implements Parcelable {
                 config.isLegacyPasspointConfig = in.readInt() != 0;
                 config.ephemeral = in.readInt() != 0;
                 config.meteredHint = in.readInt() != 0;
-                config.meteredOverride = in.readInt() != 0;
+                config.meteredOverride = in.readInt();
                 config.useExternalScores = in.readInt() != 0;
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();

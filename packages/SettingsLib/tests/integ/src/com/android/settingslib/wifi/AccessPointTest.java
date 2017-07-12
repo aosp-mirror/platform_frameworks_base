@@ -298,23 +298,6 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testIsMetered_returnTrueWhenNetworkInfoIsMetered() {
-        WifiConfiguration configuration = createWifiConfiguration();
-
-        NetworkInfo networkInfo =
-                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 2, "WIFI", "WIFI_SUBTYPE");
-        networkInfo.setMetered(true);
-        AccessPoint accessPoint = new AccessPoint(mContext, configuration);
-        WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(configuration.SSID));
-        wifiInfo.setBSSID(configuration.BSSID);
-        wifiInfo.setNetworkId(configuration.networkId);
-        accessPoint.update(configuration, wifiInfo, networkInfo);
-
-        assertThat(accessPoint.isMetered()).isTrue();
-    }
-
-    @Test
     public void testIsMetered_returnTrueWhenScoredNetworkIsMetered() {
         AccessPoint ap = createAccessPointWithScanResultCache();
 

@@ -459,7 +459,13 @@ public class WifiInfo implements Parcelable {
         return mMacAddress != null && !DEFAULT_MAC_ADDRESS.equals(mMacAddress);
     }
 
-    /** {@hide} */
+    /**
+     * Indicates if we've dynamically detected this active network connection as
+     * being metered.
+     *
+     * @see WifiConfiguration#isMetered(WifiConfiguration, WifiInfo)
+     * @hide
+     */
     public void setMeteredHint(boolean meteredHint) {
         mMeteredHint = meteredHint;
     }

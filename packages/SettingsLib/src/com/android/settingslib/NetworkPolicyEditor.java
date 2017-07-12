@@ -21,6 +21,7 @@ import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkTemplate.MATCH_WIFI;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.net.NetworkPolicy;
@@ -202,53 +203,6 @@ public class NetworkPolicyEditor {
         policy.inferred = false;
         policy.clearSnooze();
         writeAsync();
-    }
-
-    public boolean getPolicyMetered(NetworkTemplate template) {
-        NetworkPolicy policy = getPolicy(template);
-        if (policy != null) {
-            return policy.metered;
-        } else {
-            return false;
-        }
-    }
-
-    public void setPolicyMetered(NetworkTemplate template, boolean metered) {
-        boolean modified = false;
-
-        NetworkPolicy policy = getPolicy(template);
-        if (metered) {
-            if (policy == null) {
-                policy = buildDefaultPolicy(template);
-                policy.metered = true;
-                policy.inferred = false;
-                mPolicies.add(policy);
-                modified = true;
-            } else if (!policy.metered) {
-                policy.metered = true;
-                policy.inferred = false;
-                modified = true;
-            }
-
-        } else {
-            if (policy == null) {
-                // ignore when policy doesn't exist
-            } else if (policy.metered) {
-                policy.metered = false;
-                policy.inferred = false;
-                modified = true;
-            }
-        }
-
-        // Remove legacy unquoted policies while we're here
-        final NetworkTemplate unquoted = buildUnquotedNetworkTemplate(template);
-        final NetworkPolicy unquotedPolicy = getPolicy(unquoted);
-        if (unquotedPolicy != null) {
-            mPolicies.remove(unquotedPolicy);
-            modified = true;
-        }
-
-        if (modified) writeAsync();
     }
 
     /**

@@ -552,15 +552,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /**
-     * Returns if the network is marked metered. Metering can be marked through its config in
-     * {@link WifiConfiguration}, after connection in {@link WifiInfo}, or from a score config in
-     * {@link ScoredNetwork}.
+     * Returns if the network should be considered metered.
      */
     public boolean isMetered() {
         return mIsScoredNetworkMetered
-                || (mConfig != null && mConfig.meteredHint)
-                || (mInfo != null && mInfo.getMeteredHint()
-                || (mNetworkInfo != null && mNetworkInfo.isMetered()));
+                || WifiConfiguration.isMetered(mConfig, mInfo);
     }
 
     public NetworkInfo getNetworkInfo() {

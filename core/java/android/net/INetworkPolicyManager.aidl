@@ -63,9 +63,9 @@ interface INetworkPolicyManager {
     int getRestrictBackgroundByCaller();
 
     void setDeviceIdleMode(boolean enabled);
+    void setWifiMeteredOverride(String networkId, int meteredOverride);
 
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
-    boolean isNetworkMetered(in NetworkState state);
 
     void factoryReset(String subscriber);
 }
