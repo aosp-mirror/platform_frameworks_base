@@ -14,8 +14,10 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -26,6 +28,7 @@ public class SlashImageView extends ImageView {
 
     @VisibleForTesting
     protected SlashDrawable mSlash;
+    private boolean mAnimationEnabled = true;
 
     public SlashImageView(Context context) {
         super(context);
@@ -34,6 +37,7 @@ public class SlashImageView extends ImageView {
     private void ensureSlashDrawable() {
         if (mSlash == null) {
             mSlash = new SlashDrawable(getDrawable());
+            mSlash.setAnimationEnabled(mAnimationEnabled);
             super.setImageDrawable(mSlash);
         }
     }
@@ -46,13 +50,28 @@ public class SlashImageView extends ImageView {
         } else if (mSlash == null) {
             super.setImageDrawable(drawable);
         } else {
+            mSlash.setAnimationEnabled(mAnimationEnabled);
             mSlash.setDrawable(drawable);
         }
     }
 
-    public void setState(SlashState slashState) {
+    public void setAnimationEnabled(boolean enabled) {
+        mAnimationEnabled = enabled;
+    }
+
+    private void setSlashState(@NonNull SlashState slashState) {
         ensureSlashDrawable();
         mSlash.setRotation(slashState.rotation);
         mSlash.setSlashed(slashState.isSlashed);
+    }
+
+    public void setState(@Nullable SlashState state, @Nullable Drawable drawable) {
+        if (state != null) {
+            setImageDrawable(drawable);
+            setSlashState(state);
+        } else {
+            mSlash = null;
+            setImageDrawable(drawable);
+        }
     }
 }
