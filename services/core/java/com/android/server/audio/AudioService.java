@@ -28,6 +28,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.IUidObserver;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
@@ -624,6 +625,32 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        }
+
+        @Override public void onUidGone(int uid, boolean disabled) {
+            // Once the uid is no longer running, no need to keep trying to disable its audio.
+            disableAudioForUid(false, uid);
+        }
+
+        @Override public void onUidActive(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidIdle(int uid, boolean disabled) {
+        }
+
+        @Override public void onUidCachedChanged(int uid, boolean cached) {
+            disableAudioForUid(cached, uid);
+        }
+
+        private void disableAudioForUid(boolean disable, int uid) {
+            queueMsgUnderWakeLock(mAudioHandler, MSG_DISABLE_AUDIO_FOR_UID,
+                    disable ? 1 : 0 /* arg1 */,  uid /* arg2 */,
+                    null /* obj */,  0 /* delay */);
+        }
+    };
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -692,7 +719,6 @@ public class AudioService extends IAudioService.Stub
         // the mcc is read by onConfigureSafeVolume()
         mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_safe_media_volume_index) * 10;
-        mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
 
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
@@ -704,6 +730,10 @@ public class AudioService extends IAudioService.Stub
         readUserRestrictions();
         mSettingsObserver = new SettingsObserver();
         createStreamStates();
+
+        // mSafeUsbMediaVolumeIndex must be initialized after createStreamStates() because it
+        // relies on audio policy having correct ranges for volume indexes.
+        mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
 
         mMediaFocusControl = new MediaFocusControl(mContext, mPlaybackMonitor);
 
@@ -757,6 +787,13 @@ public class AudioService extends IAudioService.Stub
     public void systemReady() {
         sendMsg(mAudioHandler, MSG_SYSTEM_READY, SENDMSG_QUEUE,
                 0, 0, null, 0);
+        try {
+            ActivityManager.getService().registerUidObserver(mUidObserver,
+                    ActivityManager.UID_OBSERVER_CACHED | ActivityManager.UID_OBSERVER_GONE,
+                    ActivityManager.PROCESS_STATE_UNKNOWN, null);
+        } catch (RemoteException e) {
+            // ignored; both services live in system_server
+        }
     }
 
     public void onSystemReady() {
@@ -1908,6 +1945,7 @@ public class AudioService extends IAudioService.Stub
             streamType = getActiveStreamType(streamType);
         }
         synchronized (VolumeStreamState.class) {
+            ensureValidStreamType(streamType);
             return mStreamStates[streamType].mIsMuted;
         }
     }
@@ -3467,13 +3505,13 @@ public class AudioService extends IAudioService.Stub
             int index = (max + min) / 2;
             float gainDB = AudioSystem.getStreamVolumeDB(
                     AudioSystem.STREAM_MUSIC, index, AudioSystem.DEVICE_OUT_USB_HEADSET);
-            if (gainDB == Float.NaN) {
+            if (Float.isNaN(gainDB)) {
                 //keep last min in case of read error
                 break;
-            } else if (gainDB == SAVE_VOLUME_GAIN_DBFS) {
+            } else if (gainDB == SAFE_VOLUME_GAIN_DBFS) {
                 min = index;
                 break;
-            } else if (gainDB < SAVE_VOLUME_GAIN_DBFS) {
+            } else if (gainDB < SAFE_VOLUME_GAIN_DBFS) {
                 min = index;
             } else {
                 max = index;
@@ -5998,11 +6036,14 @@ public class AudioService extends IAudioService.Stub
     private int mMcc = 0;
     // mSafeMediaVolumeIndex is the cached value of config_safe_media_volume_index property
     private int mSafeMediaVolumeIndex;
-    // mSafeUsbMediaVolumeIndex is used for USB Headsets and is to the music volume
-    // UI index corresponding to a gain of -15 dBFS. This corresponds to a loudness of 85 dB SPL
-    // if the headset is compliant to EN 60950 with a max loudness of 100dB SPL.
+    // mSafeUsbMediaVolumeIndex is used for USB Headsets and is the music volume UI index
+    // corresponding to a gain of -30 dBFS in audio flinger mixer.
+    // We remove -15 dBs from the theoretical -15dB to account for the EQ boost when bands are set
+    // to max gain.
+    // This level corresponds to a loudness of 85 dB SPL for the warning to be displayed when
+    // the headset is compliant to EN 60950 with a max loudness of 100dB SPL.
     private int mSafeUsbMediaVolumeIndex;
-    private static final float SAVE_VOLUME_GAIN_DBFS = -15;
+    private static final float SAFE_VOLUME_GAIN_DBFS = -30.0f;
     // mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced,
     private final int mSafeMediaVolumeDevices = AudioSystem.DEVICE_OUT_WIRED_HEADSET |
                                                 AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
@@ -6601,13 +6642,6 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
             }
-        }
-
-        @Override
-        public void disableAudioForUid(boolean disable, int uid) {
-            queueMsgUnderWakeLock(mAudioHandler, MSG_DISABLE_AUDIO_FOR_UID,
-                    disable ? 1 : 0 /* arg1 */,  uid /* arg2 */,
-                    null /* obj */,  0 /* delay */);
         }
     }
 

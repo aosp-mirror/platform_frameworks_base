@@ -603,12 +603,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
-        @Override public void onUidStateChanged(int uid, int procState,
-                long procStateSeq) throws RemoteException {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
             updateUidState(uid, procState);
         }
 
-        @Override public void onUidGone(int uid, boolean disabled) throws RemoteException {
+        @Override public void onUidGone(int uid, boolean disabled) {
             updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
             if (disabled) {
                 cancelJobsForUid(uid, "uid gone");
@@ -618,10 +617,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
         @Override public void onUidActive(int uid) throws RemoteException {
         }
 
-        @Override public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+        @Override public void onUidIdle(int uid, boolean disabled) {
             if (disabled) {
                 cancelJobsForUid(uid, "app uid idle");
             }
+        }
+
+        @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
     };
 

@@ -271,20 +271,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.category"
-                    android:value="com.android.settings.category.system" />
+                    android:value="com.android.settings.category.ia.system" />
         </activity>
-
-        <activity-alias android:name=".tuner.TunerSettingLink"
-                        android:targetActivity=".tuner.TunerActivity"
-                        android:enabled="false"
-                        android:process=":tuner">
-            <intent-filter android:priority="1">
-                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data android:name="com.android.settings.category"
-                       android:value="com.android.settings.category.ia.system" />
-        </activity-alias>
 
         <activity-alias android:name=".DemoMode"
                   android:targetActivity=".tuner.TunerActivity"

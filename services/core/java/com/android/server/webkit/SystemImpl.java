@@ -296,7 +296,10 @@ public class SystemImpl implements SystemInterface {
 
     @Override
     public boolean isMultiProcessDefaultEnabled() {
-        return true;
+        // Multiprocess is enabled for all 64-bit devices, since the ability to run the renderer
+        // process in 32-bit when it's a separate process typically results in a net memory saving.
+        // Multiprocess is also enabled for 32-bit devices unless they report they are "low ram".
+        return Build.SUPPORTED_64_BIT_ABIS.length > 0 || !ActivityManager.isLowRamDeviceStatic();
     }
 
     // flags declaring we want extra info from the package manager for webview providers

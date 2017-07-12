@@ -35,6 +35,10 @@ import java.util.ArrayList;
  */
 public class OffloadHardwareInterface {
     private static final String TAG = OffloadHardwareInterface.class.getSimpleName();
+    // Change this value to control whether tether offload is enabled or
+    // disabled by default in the absence of an explicit Settings value.
+    // See accompanying unittest to distinguish 0 from non-0 values.
+    private static final int DEFAULT_TETHER_OFFLOAD_DISABLED = 0;
     private static final String NO_INTERFACE_NAME = "";
     private static final String NO_IPV4_ADDRESS = "";
     private static final String NO_IPV4_GATEWAY = "";
@@ -58,6 +62,10 @@ public class OffloadHardwareInterface {
     public OffloadHardwareInterface(Handler h, SharedLog log) {
         mHandler = h;
         mLog = log.forSubComponent(TAG);
+    }
+
+    public int getDefaultTetherOffloadDisabled() {
+        return DEFAULT_TETHER_OFFLOAD_DISABLED;
     }
 
     public boolean initOffloadConfig() {

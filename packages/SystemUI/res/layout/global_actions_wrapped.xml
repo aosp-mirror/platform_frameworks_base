@@ -13,13 +13,9 @@
         android:layout_width="@dimen/global_actions_panel_width"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_marginBottom="@dimen/volume_dialog_margin_bottom"
+        android:gravity="center"
         android:orientation="vertical"
-        android:paddingTop="@dimen/volume_dialog_padding_top"
-        android:divider="@null"
-        android:dividerHeight="0dp"
-        android:translationZ="8dp">
-
-    </LinearLayout>
+        android:padding="12dp"
+        android:translationZ="8dp" />
 
 </com.android.systemui.HardwareUiLayout>

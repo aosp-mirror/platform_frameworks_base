@@ -314,6 +314,7 @@
     <style name="LockPatternStyle">
         <item name="*android:regularColor">?android:attr/textColorPrimaryInverse</item>
         <item name="*android:successColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="*android:errorColor">?android:attr/colorError</item>
     </style>
 
     <!-- Overlay manager may replace this theme -->
@@ -434,8 +435,7 @@
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
     </style>
 
-    <style name="TunerPreferenceTheme" parent="@android:style/Theme.DeviceDefault.Settings">
-        <item name="dropdownPreferenceStyle">@style/Preference.DropDown.Material</item>
+    <style name="TunerPreferenceTheme" parent="@style/PreferenceThemeOverlay.SettingsBase">
     </style>
 
     <style name="TextAppearance.NotificationInfo">

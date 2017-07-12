@@ -29,6 +29,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
 
@@ -194,6 +195,10 @@ public class DpmMockContext extends MockContext {
     @Override
     public PackageManager getPackageManager() {
         return mMockSystemServices.packageManager;
+    }
+
+    public UserManagerInternal getUserManagerInternal() {
+        return mMockSystemServices.userManagerInternal;
     }
 
     @Override

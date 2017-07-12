@@ -193,8 +193,8 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
     private void swapOrder(LinearLayout linearLayout) {
         ArrayList<View> children = new ArrayList<>();
         for (int i = 0; i < linearLayout.getChildCount(); i++) {
-            children.add(0, linearLayout.getChildAt(i));
-            linearLayout.removeViewAt(i);
+            children.add(0, linearLayout.getChildAt(0));
+            linearLayout.removeViewAt(0);
         }
         children.forEach(v -> linearLayout.addView(v));
     }

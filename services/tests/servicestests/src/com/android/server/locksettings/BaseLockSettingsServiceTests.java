@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.pm.UserInfo;
 import android.os.FileUtils;
@@ -38,6 +39,7 @@ import android.os.storage.IStorageManager;
 import android.security.KeyStore;
 import android.test.AndroidTestCase;
 
+import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -67,7 +69,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     LockSettingsStorageTestable mStorage;
 
     LockPatternUtils mLockPatternUtils;
-    MockGateKeeperService mGateKeeperService;
+    FakeGateKeeperService mGateKeeperService;
     NotificationManager mNotificationManager;
     UserManager mUserManager;
     FakeStorageManager mStorageManager;
@@ -80,8 +82,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        mLockPatternUtils = mock(LockPatternUtils.class);
-        mGateKeeperService = new MockGateKeeperService();
+        mGateKeeperService = new FakeGateKeeperService();
         mNotificationManager = mock(NotificationManager.class);
         mUserManager = mock(UserManager.class);
         mStorageManager = new FakeStorageManager();
@@ -89,7 +90,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mDevicePolicyManager = mock(DevicePolicyManager.class);
 
         mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
-                mDevicePolicyManager, mock(StorageManager.class));
+                mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class));
         mStorage = new LockSettingsStorageTestable(mContext,
                 new File(getContext().getFilesDir(), "locksettings"));
         File storageDir = mStorage.mStorageDir;
@@ -99,6 +100,12 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
             storageDir.mkdirs();
         }
 
+        mLockPatternUtils = new LockPatternUtils(mContext) {
+            @Override
+            public ILockSettings getLockSettings() {
+                return mService;
+            }
+        };
         mSpManager = new MockSyntheticPasswordManager(mStorage, mGateKeeperService, mUserManager);
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
@@ -121,8 +128,6 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
                 return true;
             }
         });
-
-        when(mLockPatternUtils.getLockSettings()).thenReturn(mService);
 
         // Adding a fake Device Owner app which will enable escrow token support in LSS.
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(

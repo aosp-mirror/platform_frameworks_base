@@ -103,12 +103,10 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         public int binderGetCallingUid() {
             return Process.SYSTEM_UID;
         }
-
-
     }
 
     protected LockSettingsServiceTestable(Context context, LockPatternUtils lockPatternUtils,
-            LockSettingsStorage storage, MockGateKeeperService gatekeeper, KeyStore keystore,
+            LockSettingsStorage storage, FakeGateKeeperService gatekeeper, KeyStore keystore,
             IStorageManager storageManager, IActivityManager mActivityManager,
             SyntheticPasswordManager spManager) {
         super(new MockInjector(context, storage, keystore, mActivityManager, lockPatternUtils,
@@ -137,4 +135,5 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
         return new String(storedData);
     }
+
 }
