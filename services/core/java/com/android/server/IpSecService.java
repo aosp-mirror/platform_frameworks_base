@@ -605,38 +605,33 @@ public class IpSecService extends IIpSecService.Stub {
             spis[direction] = mSpiRecords.get(c.getSpiResourceId(direction));
             int spi = spis[direction].getSpi();
             try {
-                int result =
-                        getNetdInstance()
-                                .ipSecAddSecurityAssociation(
-                                        resourceId,
-                                        c.getMode(),
-                                        direction,
-                                        (c.getLocalAddress() != null)
-                                                ? c.getLocalAddress().getHostAddress()
-                                                : "",
-                                        (c.getRemoteAddress() != null)
-                                                ? c.getRemoteAddress().getHostAddress()
-                                                : "",
-                                        (c.getNetwork() != null)
-                                                ? c.getNetwork().getNetworkHandle()
-                                                : 0,
-                                        spi,
-                                        (auth != null) ? auth.getName() : "",
-                                        (auth != null) ? auth.getKey() : null,
-                                        (auth != null) ? auth.getTruncationLengthBits() : 0,
-                                        (crypt != null) ? crypt.getName() : "",
-                                        (crypt != null) ? crypt.getKey() : null,
-                                        (crypt != null) ? crypt.getTruncationLengthBits() : 0,
-                                        encapType,
-                                        encapLocalPort,
-                                        encapRemotePort);
-                if (result != spi) {
-                    // TODO: cleanup the first SA if creation of second SA fails
-                    return new IpSecTransformResponse(
-                            IpSecManager.Status.SPI_UNAVAILABLE, INVALID_RESOURCE_ID);
-                }
+                getNetdInstance()
+                        .ipSecAddSecurityAssociation(
+                                resourceId,
+                                c.getMode(),
+                                direction,
+                                (c.getLocalAddress() != null)
+                                        ? c.getLocalAddress().getHostAddress()
+                                        : "",
+                                (c.getRemoteAddress() != null)
+                                        ? c.getRemoteAddress().getHostAddress()
+                                        : "",
+                                (c.getNetwork() != null)
+                                        ? c.getNetwork().getNetworkHandle()
+                                        : 0,
+                                spi,
+                                (auth != null) ? auth.getName() : "",
+                                (auth != null) ? auth.getKey() : null,
+                                (auth != null) ? auth.getTruncationLengthBits() : 0,
+                                (crypt != null) ? crypt.getName() : "",
+                                (crypt != null) ? crypt.getKey() : null,
+                                (crypt != null) ? crypt.getTruncationLengthBits() : 0,
+                                encapType,
+                                encapLocalPort,
+                                encapRemotePort);
             } catch (ServiceSpecificException e) {
                 // FIXME: get the error code and throw is at an IOException from Errno Exception
+                return new IpSecTransformResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE);
             }
         }
         // Both SAs were created successfully, time to construct a record and lock it away
