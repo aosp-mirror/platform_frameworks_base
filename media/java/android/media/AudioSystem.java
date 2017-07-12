@@ -806,14 +806,14 @@ public class AudioSystem
         4,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         5,  // STREAM_RING
-        11, // STREAM_MUSIC
+        5, // STREAM_MUSIC
         6,  // STREAM_ALARM
         5,  // STREAM_NOTIFICATION
         7,  // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
-        11, // STREAM_DTMF
-        11, // STREAM_TTS
-        11, // STREAM_ACCESSIBILITY
+        5, // STREAM_DTMF
+        5, // STREAM_TTS
+        5, // STREAM_ACCESSIBILITY
     };
 
     public static String streamToString(int stream) {
