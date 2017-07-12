@@ -1759,6 +1759,11 @@ public class Tethering extends BaseNetworkObserver {
             pw.decreaseIndent();
         }
 
+        pw.println("Hardware offload:");
+        pw.increaseIndent();
+        mOffloadController.dump(pw);
+        pw.decreaseIndent();
+
         pw.println("Log:");
         pw.increaseIndent();
         if (argsContain(args, SHORT_ARG)) {
