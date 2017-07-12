@@ -217,7 +217,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     fillContextWithAllowedValues(mContexts.get(i), flags);
                 }
 
-                request = new FillRequest(requestId, mContexts, mClientState, flags);
+                // Dispatch a snapshot of the current contexts list since it may change
+                // until the dispatch happens. The items in the list don't need to be cloned
+                // since we don't hold on them anywhere else. The client state is not touched
+                // by us, so no need to copy.
+                request = new FillRequest(requestId, new ArrayList<>(mContexts),
+                        mClientState, flags);
             }
 
             mRemoteFillService.onFillRequest(request);
@@ -932,7 +937,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // Remove pending fill requests as the session is finished.
         cancelCurrentRequestLocked();
 
-        final SaveRequest saveRequest = new SaveRequest(mContexts, mClientState);
+        // Dispatch a snapshot of the current contexts list since it may change
+        // until the dispatch happens. The items in the list don't need to be cloned
+        // since we don't hold on them anywhere else. The client state is not touched
+        // by us, so no need to copy.
+        final SaveRequest saveRequest = new SaveRequest(new ArrayList<>(mContexts), mClientState);
         mRemoteFillService.onSaveRequest(saveRequest);
     }
 
