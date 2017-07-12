@@ -31,6 +31,7 @@ import android.net.NetworkRequest;
 import android.net.Proxy;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -57,6 +58,7 @@ import java.net.URL;
 import java.lang.InterruptedException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -286,6 +288,18 @@ public class CaptivePortalLoginActivity extends Activity {
         return null;
     }
 
+    private static String host(URL url) {
+        if (url == null) {
+            return null;
+        }
+        return url.getHost();
+    }
+
+    private static String sanitizeURL(URL url) {
+        // In non-Debug build, only show host to avoid leaking private info.
+        return Build.IS_DEBUGGABLE ? Objects.toString(url) : host(url);
+    }
+
     private void testForCaptivePortal() {
         // TODO: reuse NetworkMonitor facilities for consistent captive portal detection.
         new Thread(new Runnable() {
@@ -339,6 +353,8 @@ public class CaptivePortalLoginActivity extends Activity {
                     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1,
                     getResources().getDisplayMetrics());
         private int mPagesLoaded;
+        // the host of the page that this webview is currently loading. Can be null when undefined.
+        private String mHostname;
 
         // If we haven't finished cleaning up the history, don't allow going back.
         public boolean allowBack() {
@@ -346,8 +362,8 @@ public class CaptivePortalLoginActivity extends Activity {
         }
 
         @Override
-        public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            if (url.contains(mBrowserBailOutToken)) {
+        public void onPageStarted(WebView view, String urlString, Bitmap favicon) {
+            if (urlString.contains(mBrowserBailOutToken)) {
                 mLaunchBrowser = true;
                 done(Result.WANTED_AS_IS);
                 return;
@@ -355,11 +371,17 @@ public class CaptivePortalLoginActivity extends Activity {
             // The first page load is used only to cause the WebView to
             // fetch the proxy settings.  Don't update the URL bar, and
             // don't check if the captive portal is still there.
-            if (mPagesLoaded == 0) return;
+            if (mPagesLoaded == 0) {
+                return;
+            }
+            final URL url = makeURL(urlString);
+            Log.d(TAG, "onPageSarted: " + sanitizeURL(url));
+            mHostname = host(url);
             // For internally generated pages, leave URL bar listing prior URL as this is the URL
             // the page refers to.
-            if (!url.startsWith(INTERNAL_ASSETS)) {
-                getActionBar().setSubtitle(getHeaderSubtitle(url));
+            if (!urlString.startsWith(INTERNAL_ASSETS)) {
+                String subtitle = (url != null) ? getHeaderSubtitle(url) : urlString;
+                getActionBar().setSubtitle(subtitle);
             }
             getProgressBar().setVisibility(View.VISIBLE);
             testForCaptivePortal();
@@ -401,15 +423,18 @@ public class CaptivePortalLoginActivity extends Activity {
 
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-            logMetricsEvent(MetricsEvent.CAPTIVE_PORTAL_LOGIN_ACTIVITY_SSL_ERROR);
-            Log.w(TAG, "SSL error (error: " + error.getPrimaryError() + " host: " +
-                    // Only show host to avoid leaking private info.
-                    Uri.parse(error.getUrl()).getHost() + " certificate: " +
-                    error.getCertificate() + "); displaying SSL warning.");
-            final String sslErrorPage = makeSslErrorPage();
-            if (VDBG) {
-                Log.d(TAG, sslErrorPage);
+            final URL url = makeURL(error.getUrl());
+            final String host = host(url);
+            Log.d(TAG, String.format("SSL error: %s, url: %s, certificate: %s",
+                    error.getPrimaryError(), sanitizeURL(url), error.getCertificate()));
+            if (url == null || !Objects.equals(host, mHostname)) {
+                // Ignore ssl errors for resources coming from a different hostname than the page
+                // that we are currently loading, and only cancel the request.
+                handler.cancel();
+                return;
             }
+            logMetricsEvent(MetricsEvent.CAPTIVE_PORTAL_LOGIN_ACTIVITY_SSL_ERROR);
+            final String sslErrorPage = makeSslErrorPage();
             view.loadDataWithBaseURL(INTERNAL_ASSETS, sslErrorPage, "text/HTML", "UTF-8", null);
         }
 
@@ -502,16 +527,13 @@ public class CaptivePortalLoginActivity extends Activity {
         return getString(R.string.action_bar_title, info.getExtraInfo().replaceAll("^\"|\"$", ""));
     }
 
-    private String getHeaderSubtitle(String urlString) {
-        URL url = makeURL(urlString);
-        if (url == null) {
-            return urlString;
-        }
+    private String getHeaderSubtitle(URL url) {
+        String host = host(url);
         final String https = "https";
         if (https.equals(url.getProtocol())) {
-            return https + "://" + url.getHost();
+            return https + "://" + host;
         }
-        return url.getHost();
+        return host;
     }
 
     private void logMetricsEvent(int event) {
