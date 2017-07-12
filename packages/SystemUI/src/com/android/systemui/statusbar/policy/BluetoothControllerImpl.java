@@ -75,6 +75,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     @Override
     public boolean canConfigBluetooth() {
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_BLUETOOTH,
+                UserHandle.of(mCurrentUser))
+            && !mUserManager.hasUserRestriction(UserManager.DISALLOW_BLUETOOTH,
                 UserHandle.of(mCurrentUser));
     }
 
