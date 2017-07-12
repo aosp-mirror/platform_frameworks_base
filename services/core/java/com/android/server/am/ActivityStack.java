@@ -1658,14 +1658,20 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
         final int stackBehindTopId = (stackBehindTopIndex >= 0)
                 ? mStacks.get(stackBehindTopIndex).mStackId : INVALID_STACK_ID;
-        if ((topStackId == DOCKED_STACK_ID || topStackId == PINNED_STACK_ID)
-                && (stackIndex == stackBehindTopIndex
-                || (stackBehindTopId == DOCKED_STACK_ID
-                && stackIndex == stackBehindTopIndex - 1))) {
-            // Stacks directly behind the docked or pinned stack are always visible.
-            // Also this stack is visible if behind docked stack and the docked stack is behind the
-            // top-most pinned stack
-            return STACK_VISIBLE;
+        if (topStackId == DOCKED_STACK_ID || StackId.isAlwaysOnTop(topStackId)) {
+            if (stackIndex == stackBehindTopIndex) {
+                // Stacks directly behind the docked or pinned stack are always visible.
+                return STACK_VISIBLE;
+            } else if (StackId.isAlwaysOnTop(topStackId) && stackIndex == stackBehindTopIndex - 1) {
+                // Otherwise, this stack can also be visible if it is directly behind a docked stack
+                // or translucent assistant stack behind an always-on-top top-most stack
+                if (stackBehindTopId == DOCKED_STACK_ID) {
+                    return STACK_VISIBLE;
+                } else if (stackBehindTopId == ASSISTANT_STACK_ID) {
+                    return mStacks.get(stackBehindTopIndex).isStackTranslucent(starting, mStackId)
+                            ? STACK_VISIBLE : STACK_INVISIBLE;
+                }
+            }
         }
 
         if (StackId.isBackdropToTranslucentActivity(topStackId)
