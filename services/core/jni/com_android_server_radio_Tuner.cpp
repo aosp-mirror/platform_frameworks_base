@@ -22,12 +22,13 @@
 #include "com_android_server_radio_convert.h"
 #include "com_android_server_radio_TunerCallback.h"
 
+#include <JNIHelp.h>
+#include <Utils.h>
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
 #include <binder/IPCThreadState.h>
 #include <core_jni_helpers.h>
 #include <media/AudioSystem.h>
 #include <utils/Log.h>
-#include <JNIHelp.h>
 
 namespace android {
 namespace server {
@@ -41,6 +42,7 @@ using hardware::hidl_vec;
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
 
+using V1_0::Band;
 using V1_0::BandConfig;
 using V1_0::MetaData;
 using V1_0::Result;
@@ -79,6 +81,7 @@ struct TunerContext {
     bool mIsClosed = false;
     HalRevision mHalRev;
     bool mWithAudio;
+    Band mBand;
     sp<V1_0::ITuner> mHalTuner;
     sp<V1_1::ITuner> mHalTuner11;
     sp<HalDeathRecipient> mHalDeathRecipient;
@@ -100,13 +103,14 @@ static TunerContext& getNativeContext(JNIEnv *env, JavaRef<jobject> const &jTune
     return getNativeContext(env->GetLongField(jTuner.get(), gjni.Tuner.nativeContext));
 }
 
-static jlong nativeInit(JNIEnv *env, jobject obj, jint halRev, bool withAudio) {
+static jlong nativeInit(JNIEnv *env, jobject obj, jint halRev, bool withAudio, jint band) {
     ALOGV("nativeInit()");
     AutoMutex _l(gContextMutex);
 
     auto ctx = new TunerContext();
     ctx->mHalRev = static_cast<HalRevision>(halRev);
     ctx->mWithAudio = withAudio;
+    ctx->mBand = static_cast<Band>(band);
 
     static_assert(sizeof(jlong) >= sizeof(ctx), "jlong is smaller than a pointer");
     return reinterpret_cast<jlong>(ctx);
@@ -170,11 +174,15 @@ void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner, sp<V1_0::ITuner> h
     notifyAudioService(ctx, true);
 }
 
-sp<V1_0::ITuner> getHalTuner(jlong nativeContext) {
-    AutoMutex _l(gContextMutex);
-    auto tuner = getNativeContext(nativeContext).mHalTuner;
+static sp<V1_0::ITuner> getHalTuner(const TunerContext& ctx) {
+    auto tuner = ctx.mHalTuner;
     LOG_ALWAYS_FATAL_IF(tuner == nullptr, "HAL tuner is not open");
     return tuner;
+}
+
+sp<V1_0::ITuner> getHalTuner(jlong nativeContext) {
+    AutoMutex _l(gContextMutex);
+    return getHalTuner(getNativeContext(nativeContext));
 }
 
 sp<V1_1::ITuner> getHalTuner11(jlong nativeContext) {
@@ -215,13 +223,17 @@ static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
 
 static void nativeSetConfiguration(JNIEnv *env, jobject obj, jlong nativeContext, jobject config) {
     ALOGV("nativeSetConfiguration()");
-    auto halTuner = getHalTuner(nativeContext);
+    AutoMutex _l(gContextMutex);
+    auto& ctx = getNativeContext(nativeContext);
+    auto halTuner = getHalTuner(ctx);
     if (halTuner == nullptr) return;
 
     Region region_unused;
     BandConfig bandConfigHal = convert::BandConfigToHal(env, config, region_unused);
 
-    convert::ThrowIfFailed(env, halTuner->setConfiguration(bandConfigHal));
+    if (convert::ThrowIfFailed(env, halTuner->setConfiguration(bandConfigHal))) return;
+
+    ctx.mBand = bandConfigHal.type;
 }
 
 static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeContext,
@@ -263,13 +275,26 @@ static void nativeScan(JNIEnv *env, jobject obj, jlong nativeContext,
     convert::ThrowIfFailed(env, halTuner->scan(dir, skipSubChannel));
 }
 
-static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext,
-        jint channel, jint subChannel) {
-    ALOGV("nativeTune(%d, %d)", channel, subChannel);
-    auto halTuner = getHalTuner(nativeContext);
-    if (halTuner == nullptr) return;
+static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext, jobject jSelector) {
+    ALOGV("nativeTune()");
+    AutoMutex _l(gContextMutex);
+    auto& ctx = getNativeContext(nativeContext);
+    auto halTuner10 = getHalTuner(ctx);
+    auto halTuner11 = ctx.mHalTuner11;
+    if (halTuner10 == nullptr) return;
 
-    convert::ThrowIfFailed(env, halTuner->tune(channel, subChannel));
+    auto selector = convert::ProgramSelectorToHal(env, jSelector);
+    if (halTuner11 != nullptr) {
+        convert::ThrowIfFailed(env, halTuner11->tune_1_1(selector));
+    } else {
+        uint32_t channel, subChannel;
+        if (!V1_1::utils::getLegacyChannel(selector, &channel, &subChannel)) {
+            jniThrowException(env, "java/lang/IllegalArgumentException",
+                    "Can't tune to non-AM/FM channel with HAL<1.1");
+            return;
+        }
+        convert::ThrowIfFailed(env, halTuner10->tune(channel, subChannel));
+    }
 }
 
 static void nativeCancel(JNIEnv *env, jobject obj, jlong nativeContext) {
@@ -282,8 +307,10 @@ static void nativeCancel(JNIEnv *env, jobject obj, jlong nativeContext) {
 
 static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativeContext) {
     ALOGV("nativeGetProgramInformation()");
-    auto halTuner10 = getHalTuner(nativeContext);
-    auto halTuner11 = getHalTuner11(nativeContext);
+    AutoMutex _l(gContextMutex);
+    auto& ctx = getNativeContext(nativeContext);
+    auto halTuner10 = getHalTuner(ctx);
+    auto halTuner11 = ctx.mHalTuner11;
     if (halTuner10 == nullptr) return nullptr;
 
     JavaRef<jobject> jInfo;
@@ -301,7 +328,7 @@ static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativ
                 const V1_0::ProgramInfo& info) {
             halResult = result;
             if (result != Result::OK) return;
-            jInfo = convert::ProgramInfoFromHal(env, info);
+            jInfo = convert::ProgramInfoFromHal(env, info, ctx.mBand);
         });
     }
 
@@ -402,7 +429,7 @@ static bool nativeIsAntennaConnected(JNIEnv *env, jobject obj, jlong nativeConte
 }
 
 static const JNINativeMethod gTunerMethods[] = {
-    { "nativeInit", "(IZ)J", (void*)nativeInit },
+    { "nativeInit", "(IZI)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
     { "nativeClose", "(J)V", (void*)nativeClose },
     { "nativeSetConfiguration", "(JLandroid/hardware/radio/RadioManager$BandConfig;)V",
@@ -411,7 +438,7 @@ static const JNINativeMethod gTunerMethods[] = {
             (void*)nativeGetConfiguration },
     { "nativeStep", "(JZZ)V", (void*)nativeStep },
     { "nativeScan", "(JZZ)V", (void*)nativeScan },
-    { "nativeTune", "(JII)V", (void*)nativeTune },
+    { "nativeTune", "(JLandroid/hardware/radio/ProgramSelector;)V", (void*)nativeTune },
     { "nativeCancel", "(J)V", (void*)nativeCancel },
     { "nativeGetProgramInformation", "(J)Landroid/hardware/radio/RadioManager$ProgramInfo;",
             (void*)nativeGetProgramInformation },

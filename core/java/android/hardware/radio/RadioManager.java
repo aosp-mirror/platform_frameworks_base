@@ -16,6 +16,7 @@
 
 package android.hardware.radio;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -29,6 +30,8 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,7 +73,7 @@ public class RadioManager {
     /** Radio module class supporting Digital terrestrial radio */
     public static final int CLASS_DT = 2;
 
-    // keep in sync with radio_band_t in /system/core/incluse/system/radio.h
+    public static final int BAND_INVALID = -1;
     /** AM radio band (LW/MW/SW).
      * @see BandDescriptor */
     public static final int BAND_AM = 0;
@@ -83,6 +86,15 @@ public class RadioManager {
     /** AM HD radio or DRM band.
      * @see BandDescriptor */
     public static final int BAND_AM_HD = 3;
+    @IntDef(prefix = { "BAND_" }, value = {
+        BAND_INVALID,
+        BAND_AM,
+        BAND_FM,
+        BAND_AM_HD,
+        BAND_FM_HD,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Band {}
 
     // keep in sync with radio_region_t in /system/core/incluse/system/radio.h
     /** Africa, Europe.
@@ -1258,8 +1270,7 @@ public class RadioManager {
         private final static int FLAG_LIVE = 1 << 0;
         private final static int FLAG_MUTED = 1 << 1;
 
-        private final int mChannel;
-        private final int mSubChannel;
+        @NonNull private final ProgramSelector mSelector;
         private final boolean mTuned;
         private final boolean mStereo;
         private final boolean mDigital;
@@ -1268,11 +1279,10 @@ public class RadioManager {
         private final RadioMetadata mMetadata;
         private final String mVendorExension;
 
-        ProgramInfo(int channel, int subChannel, boolean tuned, boolean stereo,
+        ProgramInfo(@NonNull ProgramSelector selector, boolean tuned, boolean stereo,
                 boolean digital, int signalStrength, RadioMetadata metadata, int flags,
                 String vendorExension) {
-            mChannel = channel;
-            mSubChannel = subChannel;
+            mSelector = selector;
             mTuned = tuned;
             mStereo = stereo;
             mDigital = digital;
@@ -1282,19 +1292,45 @@ public class RadioManager {
             mVendorExension = vendorExension;
         }
 
+        /**
+         * Program selector, necessary for tuning to a program.
+         *
+         * @return the program selector.
+         */
+        public @NonNull ProgramSelector getSelector() {
+            return mSelector;
+        }
+
         /** Main channel expressed in units according to band type.
          * Currently all defined band types express channels as frequency in kHz
          * @return the program channel
+         * @deprecated Use {@link getSelector()} instead.
          */
+        @Deprecated
         public int getChannel() {
-            return mChannel;
+            try {
+                return (int) mSelector.getFirstId(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY);
+            } catch (IllegalArgumentException ex) {
+                Log.w(TAG, "Not an AM/FM program");
+                return 0;
+            }
         }
+
         /** Sub channel ID. E.g 1 for HD radio HD1
          * @return the program sub channel
+         * @deprecated Use {@link getSelector()} instead.
          */
+        @Deprecated
         public int getSubChannel() {
-            return mSubChannel;
+            try {
+                return (int) mSelector.getFirstId(
+                        ProgramSelector.IDENTIFIER_TYPE_HD_SUBCHANNEL) + 1;
+            } catch (IllegalArgumentException ex) {
+                // this is a normal behavior for analog AM/FM selector
+                return 0;
+            }
         }
+
         /** {@code true} if the tuner is currently tuned on a valid station
          * @return {@code true} if currently tuned, {@code false} otherwise.
          */
@@ -1362,8 +1398,7 @@ public class RadioManager {
         }
 
         private ProgramInfo(Parcel in) {
-            mChannel = in.readInt();
-            mSubChannel = in.readInt();
+            mSelector = in.readParcelable(null);
             mTuned = in.readByte() == 1;
             mStereo = in.readByte() == 1;
             mDigital = in.readByte() == 1;
@@ -1390,8 +1425,7 @@ public class RadioManager {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mChannel);
-            dest.writeInt(mSubChannel);
+            dest.writeParcelable(mSelector, 0);
             dest.writeByte((byte)(mTuned ? 1 : 0));
             dest.writeByte((byte)(mStereo ? 1 : 0));
             dest.writeByte((byte)(mDigital ? 1 : 0));
@@ -1413,7 +1447,7 @@ public class RadioManager {
 
         @Override
         public String toString() {
-            return "ProgramInfo [mChannel=" + mChannel + ", mSubChannel=" + mSubChannel
+            return "ProgramInfo [mSelector=" + mSelector
                     + ", mTuned=" + mTuned + ", mStereo=" + mStereo + ", mDigital=" + mDigital
                     + ", mFlags=" + mFlags + ", mSignalStrength=" + mSignalStrength
                     + ((mMetadata == null) ? "" : (", mMetadata=" + mMetadata.toString()))
@@ -1424,8 +1458,7 @@ public class RadioManager {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + mChannel;
-            result = prime * result + mSubChannel;
+            result = prime * result + mSelector.hashCode();
             result = prime * result + (mTuned ? 1 : 0);
             result = prime * result + (mStereo ? 1 : 0);
             result = prime * result + (mDigital ? 1 : 0);
@@ -1443,10 +1476,7 @@ public class RadioManager {
             if (!(obj instanceof ProgramInfo))
                 return false;
             ProgramInfo other = (ProgramInfo) obj;
-            if (mChannel != other.getChannel())
-                return false;
-            if (mSubChannel != other.getSubChannel())
-                return false;
+            if (!mSelector.equals(other.getSelector())) return false;
             if (mTuned != other.isTuned())
                 return false;
             if (mStereo != other.isStereo())
@@ -1541,7 +1571,7 @@ public class RadioManager {
             Log.e(TAG, "Failed to open tuner");
             return null;
         }
-        return new TunerAdapter(tuner);
+        return new TunerAdapter(tuner, config != null ? config.getType() : BAND_INVALID);
     }
 
     @NonNull private final Context mContext;
