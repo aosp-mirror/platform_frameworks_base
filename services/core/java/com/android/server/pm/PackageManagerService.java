@@ -2699,7 +2699,16 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Remove any shared userIDs that have no associated packages
             mSettings.pruneSharedUsersLPw();
-
+            final long systemScanTime = SystemClock.uptimeMillis() - startTime;
+            final int systemPackagesCount = mPackages.size();
+            Slog.i(TAG, "Finished scanning system apps. Time: " + systemScanTime
+                    + " ms, packageCount: " + systemPackagesCount
+                    + " ms, timePerPackage: "
+                    + (systemPackagesCount == 0 ? 0 : systemScanTime / systemPackagesCount));
+            if (mIsUpgrade && systemPackagesCount > 0) {
+                MetricsLogger.histogram(null, "ota_package_manager_system_app_avg_scan_time",
+                        ((int) systemScanTime) / systemPackagesCount);
+            }
             if (!mOnlyCore) {
                 EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                         SystemClock.uptimeMillis());
@@ -2779,6 +2788,16 @@ public class PackageManagerService extends IPackageManager.Stub
                                     + e.getMessage());
                         }
                     }
+                }
+                final long dataScanTime = SystemClock.uptimeMillis() - systemScanTime - startTime;
+                final int dataPackagesCount = mPackages.size() - systemPackagesCount;
+                Slog.i(TAG, "Finished scanning non-system apps. Time: " + dataScanTime
+                        + " ms, packageCount: " + dataPackagesCount
+                        + " ms, timePerPackage: "
+                        + (dataPackagesCount == 0 ? 0 : dataScanTime / dataPackagesCount));
+                if (mIsUpgrade && dataPackagesCount > 0) {
+                    MetricsLogger.histogram(null, "ota_package_manager_data_app_avg_scan_time",
+                            ((int) dataScanTime) / dataPackagesCount);
                 }
             }
             mExpectingBetter.clear();
@@ -3009,6 +3028,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 userPackages.put(userId, getInstalledPackages(/*flags*/ 0, userId).getList());
             }
             mDexManager.load(userPackages);
+            if (mIsUpgrade) {
+                MetricsLogger.histogram(null, "ota_package_manager_init_time",
+                        (int) (SystemClock.uptimeMillis() - startTime));
+            }
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
 
