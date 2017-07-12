@@ -20,16 +20,17 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.WakeupMessage;
 
 import android.content.Context;
-import android.net.apf.ApfCapabilities;
-import android.net.apf.ApfFilter;
 import android.net.DhcpResults;
+import android.net.INetd;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
+import android.net.LinkProperties;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
+import android.net.apf.ApfCapabilities;
+import android.net.apf.ApfFilter;
 import android.net.dhcp.DhcpClient;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
@@ -39,7 +40,9 @@ import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
+import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
@@ -320,6 +323,16 @@ public class IpManager extends StateMachine {
                 return this;
             }
 
+            public Builder withIPv6AddrGenModeEUI64() {
+                mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_EUI64;
+                return this;
+            }
+
+            public Builder withIPv6AddrGenModeStablePrivacy() {
+                mConfig.mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_STABLE_PRIVACY;
+                return this;
+            }
+
             public ProvisioningConfiguration build() {
                 return new ProvisioningConfiguration(mConfig);
             }
@@ -332,6 +345,7 @@ public class IpManager extends StateMachine {
         /* package */ StaticIpConfiguration mStaticIpConfig;
         /* package */ ApfCapabilities mApfCapabilities;
         /* package */ int mProvisioningTimeoutMs = DEFAULT_TIMEOUT_MS;
+        /* package */ int mIPv6AddrGenMode = INetd.IPV6_ADDR_GEN_MODE_STABLE_PRIVACY;
 
         public ProvisioningConfiguration() {}
 
@@ -355,6 +369,7 @@ public class IpManager extends StateMachine {
                     .add("mStaticIpConfig: " + mStaticIpConfig)
                     .add("mApfCapabilities: " + mApfCapabilities)
                     .add("mProvisioningTimeoutMs: " + mProvisioningTimeoutMs)
+                    .add("mIPv6AddrGenMode: " + mIPv6AddrGenMode)
                     .toString();
         }
     }
@@ -1045,16 +1060,25 @@ public class IpManager extends StateMachine {
         return true;
     }
 
+    private void setIPv6AddrGenModeIfSupported() throws RemoteException {
+        try {
+            mNwService.setIPv6AddrGenMode(mInterfaceName, mConfiguration.mIPv6AddrGenMode);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode != OsConstants.EOPNOTSUPP) {
+                throw e;
+            }
+        }
+    }
+
     private boolean startIPv6() {
         // Set privacy extensions.
         try {
             mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
+
+            setIPv6AddrGenModeIfSupported();
             mNwService.enableIpv6(mInterfaceName);
-        } catch (RemoteException re) {
-            logError("Unable to change interface settings: %s", re);
-            return false;
-        } catch (IllegalStateException ie) {
-            logError("Unable to change interface settings: %s", ie);
+        } catch (IllegalStateException | RemoteException | ServiceSpecificException e) {
+            logError("Unable to change interface settings: %s", e);
             return false;
         }
 
