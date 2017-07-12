@@ -4595,11 +4595,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             try {
                 mOverlayManager.setEnabled("com.android.systemui.theme.lightwallpaper",
                         useDarkText, mCurrentUserId);
-                mStatusBarWindowManager.setKeyguardDark(useDarkText);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't change theme", e);
             }
         }
+
+        // Make sure we have the correct navbar/statusbar colors.
+        mStatusBarWindowManager.setKeyguardDark(useDarkText);
     }
 
     private void updateDozingState() {
