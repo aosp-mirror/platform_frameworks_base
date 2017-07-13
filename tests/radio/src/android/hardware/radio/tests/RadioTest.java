@@ -83,7 +83,8 @@ public class RadioTest {
 
         // check if radio is supported and skip the test if it's not
         PackageManager packageManager = mContext.getPackageManager();
-        boolean isRadioSupported = packageManager.hasSystemFeature(PackageManager.FEATURE_RADIO);
+        boolean isRadioSupported = packageManager.hasSystemFeature(
+                PackageManager.FEATURE_BROADCAST_RADIO);
         assumeTrue(isRadioSupported);
 
         // Check radio access permission

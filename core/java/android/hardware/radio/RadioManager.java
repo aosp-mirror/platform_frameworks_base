@@ -153,8 +153,6 @@ public class RadioManager {
         /**
          * Module service (driver) name as registered with HIDL.
          * @return the module service name.
-         *
-         * @hide FutureFeature
          */
         public @NonNull String getServiceName() {
             return mServiceName;
@@ -229,8 +227,6 @@ public class RadioManager {
          *
          * @return {@code true} if background scanning is supported (not necessary available
          * at a given time), {@code false} otherwise.
-         *
-         * @hide FutureFeature
          */
         public boolean isBackgroundScanningSupported() {
             return mIsBgScanSupported;
@@ -245,8 +241,6 @@ public class RadioManager {
          *
          * Client application MUST verify vendor/product name from the
          * ModuleProperties class before doing any interpretation of this value.
-         *
-         * @hide FutureFeature
          */
         public @NonNull String getVendorExension() {
             return mVendorExension == null ? "" : mVendorExension;
@@ -1324,8 +1318,6 @@ public class RadioManager {
          * {@code true} if the program is currently playing live stream.
          * This may result in a slightly altered reception parameters,
          * usually targetted at reduced latency.
-         *
-         * @hide FutureFeature
          */
         public boolean isLive() {
             return (mFlags & FLAG_LIVE) != 0;
@@ -1336,8 +1328,6 @@ public class RadioManager {
          * conditions or buffering. In this state volume knob MAY be disabled to
          * prevent user increasing volume too much.
          * It does NOT mean the user has muted audio.
-         *
-         * @hide FutureFeature
          */
         public boolean isMuted() {
             return (mFlags & FLAG_MUTED) != 0;
@@ -1366,8 +1356,6 @@ public class RadioManager {
          *
          * Client application MUST verify vendor/product name from the
          * ModuleProperties class before doing any interpretation of this value.
-         *
-         * @hide FutureFeature
          */
         public @NonNull String getVendorExension() {
             return mVendorExension == null ? "" : mVendorExension;

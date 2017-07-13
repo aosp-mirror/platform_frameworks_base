@@ -1213,8 +1213,8 @@ public final class SystemServer {
             mSystemServiceManager.startService(AudioService.Lifecycle.class);
             traceEnd();
 
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_RADIO)) {
-                traceBeginAndSlog("StartRadioService");
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BROADCAST_RADIO)) {
+                traceBeginAndSlog("StartBroadcastRadioService");
                 mSystemServiceManager.startService(RadioService.class);
                 traceEnd();
             }

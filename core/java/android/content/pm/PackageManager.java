@@ -54,7 +54,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
-import android.provider.Settings;
 import android.util.AndroidException;
 import android.util.Log;
 
@@ -1901,12 +1900,13 @@ public abstract class PackageManager {
     public static final String FEATURE_VULKAN_HARDWARE_VERSION = "android.hardware.vulkan.version";
 
     /**
-     * The device includes broadcast radio tuner.
-     *
-     * @hide FutureFeature
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes broadcast radio tuner.
+     * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_RADIO = "android.hardware.radio";
+    public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
