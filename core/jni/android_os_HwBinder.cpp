@@ -36,6 +36,7 @@
 #include <hwbinder/ProcessState.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <vintf/parse_string.h>
+#include <utils/misc.h>
 
 #include "core_jni_helpers.h"
 
@@ -403,6 +404,11 @@ void JHwBinder_native_joinRpcThreadpool() {
     IPCThreadState::self()->joinThreadPool();
 }
 
+static void JHwBinder_report_sysprop_change(JNIEnv /**env*/, jobject /*clazz*/)
+{
+    report_sysprop_change();
+}
+
 static JNINativeMethod gMethods[] = {
     { "native_init", "()J", (void *)JHwBinder_native_init },
     { "native_setup", "()V", (void *)JHwBinder_native_setup },
@@ -422,6 +428,9 @@ static JNINativeMethod gMethods[] = {
 
     { "joinRpcThreadpool", "()V",
         (void *)JHwBinder_native_joinRpcThreadpool },
+
+    { "native_report_sysprop_change", "()V",
+        (void *)JHwBinder_report_sysprop_change },
 };
 
 namespace android {
