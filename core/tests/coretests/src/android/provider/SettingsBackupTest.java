@@ -430,6 +430,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
                  Settings.Secure.DISPLAY_DENSITY_FORCED,
                  Settings.Secure.DOZE_ALWAYS_ON,
+                 Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
                  Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,

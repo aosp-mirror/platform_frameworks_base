@@ -6515,6 +6515,12 @@ public final class Settings {
         public static final String DOZE_PULSE_ON_PICK_UP = "doze_pulse_on_pick_up";
 
         /**
+         * Whether the device should pulse on long press gesture.
+         * @hide
+         */
+        public static final String DOZE_PULSE_ON_LONG_PRESS = "doze_pulse_on_long_press";
+
+        /**
          * Whether the device should pulse on double tap gesture.
          * @hide
          */
