@@ -34,6 +34,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.util.NetworkConstants;
+import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
 import android.util.Log;
 
@@ -72,16 +73,11 @@ public class UpstreamNetworkMonitor {
     private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
-    private static final IpPrefix[] MINIMUM_LOCAL_PREFIXES_SET = {
-            prefix("127.0.0.0/8"), prefix("169.254.0.0/16"),
-            prefix("::/3"), prefix("fe80::/64"), prefix("fc00::/7"), prefix("ff00::/8"),
-    };
-
     public static final int EVENT_ON_AVAILABLE      = 1;
     public static final int EVENT_ON_CAPABILITIES   = 2;
     public static final int EVENT_ON_LINKPROPERTIES = 3;
     public static final int EVENT_ON_LOST           = 4;
-    public static final int NOTIFY_EXEMPT_PREFIXES  = 10;
+    public static final int NOTIFY_LOCAL_PREFIXES   = 10;
 
     private static final int CALLBACK_LISTEN_ALL = 1;
     private static final int CALLBACK_TRACK_DEFAULT = 2;
@@ -93,7 +89,7 @@ public class UpstreamNetworkMonitor {
     private final Handler mHandler;
     private final int mWhat;
     private final HashMap<Network, NetworkState> mNetworkMap = new HashMap<>();
-    private HashSet<IpPrefix> mOffloadExemptPrefixes;
+    private HashSet<IpPrefix> mLocalPrefixes;
     private ConnectivityManager mCM;
     private NetworkCallback mListenAllCallback;
     private NetworkCallback mDefaultNetworkCallback;
@@ -107,7 +103,7 @@ public class UpstreamNetworkMonitor {
         mHandler = mTarget.getHandler();
         mLog = log.forSubComponent(TAG);
         mWhat = what;
-        mOffloadExemptPrefixes = allOffloadExemptPrefixes(mNetworkMap.values());
+        mLocalPrefixes = new HashSet<>();
     }
 
     @VisibleForTesting
@@ -223,8 +219,8 @@ public class UpstreamNetworkMonitor {
         return typeStatePair.ns;
     }
 
-    public Set<IpPrefix> getOffloadExemptPrefixes() {
-        return (Set<IpPrefix>) mOffloadExemptPrefixes.clone();
+    public Set<IpPrefix> getLocalPrefixes() {
+        return (Set<IpPrefix>) mLocalPrefixes.clone();
     }
 
     private void handleAvailable(int callbackType, Network network) {
@@ -360,11 +356,11 @@ public class UpstreamNetworkMonitor {
         notifyTarget(EVENT_ON_LOST, mNetworkMap.remove(network));
     }
 
-    private void recomputeOffloadExemptPrefixes() {
-        final HashSet<IpPrefix> exemptPrefixes = allOffloadExemptPrefixes(mNetworkMap.values());
-        if (!mOffloadExemptPrefixes.equals(exemptPrefixes)) {
-            mOffloadExemptPrefixes = exemptPrefixes;
-            notifyTarget(NOTIFY_EXEMPT_PREFIXES, exemptPrefixes.clone());
+    private void recomputeLocalPrefixes() {
+        final HashSet<IpPrefix> localPrefixes = allLocalPrefixes(mNetworkMap.values());
+        if (!mLocalPrefixes.equals(localPrefixes)) {
+            mLocalPrefixes = localPrefixes;
+            notifyTarget(NOTIFY_LOCAL_PREFIXES, localPrefixes.clone());
         }
     }
 
@@ -402,7 +398,7 @@ public class UpstreamNetworkMonitor {
         @Override
         public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
             handleLinkProp(network, newLp);
-            recomputeOffloadExemptPrefixes();
+            recomputeLocalPrefixes();
         }
 
         // TODO: Handle onNetworkSuspended();
@@ -411,7 +407,7 @@ public class UpstreamNetworkMonitor {
         @Override
         public void onLost(Network network) {
             handleLost(mCallbackType, network);
-            recomputeOffloadExemptPrefixes();
+            recomputeLocalPrefixes();
         }
     }
 
@@ -460,35 +456,15 @@ public class UpstreamNetworkMonitor {
         return result;
     }
 
-    private static HashSet<IpPrefix> allOffloadExemptPrefixes(Iterable<NetworkState> netStates) {
+    private static HashSet<IpPrefix> allLocalPrefixes(Iterable<NetworkState> netStates) {
         final HashSet<IpPrefix> prefixSet = new HashSet<>();
 
-        addDefaultLocalPrefixes(prefixSet);
-
         for (NetworkState ns : netStates) {
-            addOffloadExemptPrefixes(prefixSet, ns.linkProperties);
+            final LinkProperties lp = ns.linkProperties;
+            if (lp == null) continue;
+            prefixSet.addAll(PrefixUtils.localPrefixesFrom(lp));
         }
 
         return prefixSet;
-    }
-
-    private static void addDefaultLocalPrefixes(Set<IpPrefix> prefixSet) {
-        Collections.addAll(prefixSet, MINIMUM_LOCAL_PREFIXES_SET);
-    }
-
-    private static void addOffloadExemptPrefixes(Set<IpPrefix> prefixSet, LinkProperties lp) {
-        if (lp == null) return;
-
-        for (LinkAddress linkAddr : lp.getAllLinkAddresses()) {
-            prefixSet.add(new IpPrefix(linkAddr.getAddress(), linkAddr.getPrefixLength()));
-        }
-
-        // TODO: Consider adding other non-default routes associated with this
-        // network. Traffic to these destinations should perhaps not go through
-        // the Internet (upstream).
-    }
-
-    private static IpPrefix prefix(String prefixStr) {
-        return new IpPrefix(prefixStr);
     }
 }

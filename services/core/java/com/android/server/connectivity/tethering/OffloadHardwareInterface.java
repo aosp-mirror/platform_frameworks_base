@@ -168,6 +168,26 @@ public class OffloadHardwareInterface {
         return stats;
     }
 
+    public boolean setLocalPrefixes(ArrayList<String> localPrefixes) {
+        final String logmsg = String.format("setLocalPrefixes([%s])",
+                String.join(",", localPrefixes));
+
+        final CbResults results = new CbResults();
+        try {
+            mOffloadControl.setLocalPrefixes(localPrefixes,
+                    (boolean success, String errMsg) -> {
+                        results.success = success;
+                        results.errMsg = errMsg;
+                    });
+        } catch (RemoteException e) {
+            record(logmsg, e);
+            return false;
+        }
+
+        record(logmsg, results);
+        return results.success;
+    }
+
     public boolean setUpstreamParameters(
             String iface, String v4addr, String v4gateway, ArrayList<String> v6gws) {
         iface = (iface != null) ? iface : NO_INTERFACE_NAME;

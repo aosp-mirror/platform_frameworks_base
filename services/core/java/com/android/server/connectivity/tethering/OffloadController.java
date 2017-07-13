@@ -20,6 +20,7 @@ import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
 import android.content.ContentResolver;
 import android.net.IpPrefix;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.RouteInfo;
 import android.net.util.SharedLog;
@@ -27,8 +28,11 @@ import android.os.Handler;
 import android.provider.Settings;
 
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -47,7 +51,13 @@ public class OffloadController {
     private boolean mConfigInitialized;
     private boolean mControlInitialized;
     private LinkProperties mUpstreamLinkProperties;
+    // The complete set of offload-exempt prefixes passed in via Tethering from
+    // all upstream and downstream sources.
     private Set<IpPrefix> mExemptPrefixes;
+    // A strictly "smaller" set of prefixes, wherein offload-approved prefixes
+    // (e.g. downstream on-link prefixes) have been removed and replaced with
+    // prefixes representing only the locally-assigned IP addresses.
+    private Set<String> mLastLocalPrefixStrs;
 
     public OffloadController(Handler h, OffloadHardwareInterface hwi,
             ContentResolver contentResolver, SharedLog log) {
@@ -55,6 +65,8 @@ public class OffloadController {
         mHwInterface = hwi;
         mContentResolver = contentResolver;
         mLog = log.forSubComponent(TAG);
+        mExemptPrefixes = new HashSet<>();
+        mLastLocalPrefixStrs = new HashSet<>();
     }
 
     public void start() {
@@ -134,25 +146,22 @@ public class OffloadController {
     }
 
     public void setUpstreamLinkProperties(LinkProperties lp) {
-        if (!started()) return;
+        if (!started() || Objects.equals(mUpstreamLinkProperties, lp)) return;
 
         mUpstreamLinkProperties = (lp != null) ? new LinkProperties(lp) : null;
         // TODO: examine return code and decide what to do if programming
         // upstream parameters fails (probably just wait for a subsequent
         // onOffloadEvent() callback to tell us offload is available again and
         // then reapply all state).
+        computeAndPushLocalPrefixes();
         pushUpstreamParameters();
     }
 
-    public void updateExemptPrefixes(Set<IpPrefix> exemptPrefixes) {
+    public void setLocalPrefixes(Set<IpPrefix> localPrefixes) {
         if (!started()) return;
 
-        mExemptPrefixes = exemptPrefixes;
-        // TODO:
-        //     - add IP addresses from all downstream link properties
-        //     - add routes from all non-tethering downstream link properties
-        //     - remove any 64share prefixes
-        //     - push this to the HAL
+        mExemptPrefixes = localPrefixes;
+        computeAndPushLocalPrefixes();
     }
 
     public void notifyDownstreamLinkProperties(LinkProperties lp) {
@@ -214,5 +223,43 @@ public class OffloadController {
 
         return mHwInterface.setUpstreamParameters(
                 iface, v4addr, v4gateway, (v6gateways.isEmpty() ? null : v6gateways));
+    }
+
+    private boolean computeAndPushLocalPrefixes() {
+        final Set<String> localPrefixStrs = computeLocalPrefixStrings(
+                mExemptPrefixes, mUpstreamLinkProperties);
+        if (mLastLocalPrefixStrs.equals(localPrefixStrs)) return true;
+
+        mLastLocalPrefixStrs = localPrefixStrs;
+        return mHwInterface.setLocalPrefixes(new ArrayList<>(localPrefixStrs));
+    }
+
+    // TODO: Factor in downstream LinkProperties once that information is available.
+    private static Set<String> computeLocalPrefixStrings(
+            Set<IpPrefix> localPrefixes, LinkProperties upstreamLinkProperties) {
+        // Create an editable copy.
+        final Set<IpPrefix> prefixSet = new HashSet<>(localPrefixes);
+
+        // TODO: If a downstream interface (not currently passed in) is reusing
+        // the /64 of the upstream (64share) then:
+        //
+        //     [a] remove that /64 from the local prefixes
+        //     [b] add in /128s for IP addresses on the downstream interface
+        //     [c] add in /128s for IP addresses on the upstream interface
+        //
+        // Until downstream information is available here, simply add /128s from
+        // the upstream network; they'll just be redundant with their /64.
+        if (upstreamLinkProperties != null) {
+            for (LinkAddress linkAddr : upstreamLinkProperties.getLinkAddresses()) {
+                if (!linkAddr.isGlobalPreferred()) continue;
+                final InetAddress ip = linkAddr.getAddress();
+                if (!(ip instanceof Inet6Address)) continue;
+                prefixSet.add(new IpPrefix(ip, 128));
+            }
+        }
+
+        final HashSet<String> localPrefixStrs = new HashSet<>();
+        for (IpPrefix pfx : prefixSet) localPrefixStrs.add(pfx.toString());
+        return localPrefixStrs;
     }
 }
