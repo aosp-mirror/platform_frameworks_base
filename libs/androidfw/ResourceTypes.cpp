@@ -1901,6 +1901,8 @@ int ResTable_config::compare(const ResTable_config& o) const {
     if (diff != 0) return diff;
     diff = (int32_t)(screenSize - o.screenSize);
     if (diff != 0) return diff;
+    diff = (int32_t)(version - o.version);
+    if (diff != 0) return diff;
     diff = (int32_t)(screenLayout - o.screenLayout);
     if (diff != 0) return diff;
     diff = (int32_t)(screenLayout2 - o.screenLayout2);
@@ -1912,11 +1914,6 @@ int ResTable_config::compare(const ResTable_config& o) const {
     diff = (int32_t)(smallestScreenWidthDp - o.smallestScreenWidthDp);
     if (diff != 0) return diff;
     diff = (int32_t)(screenSizeDp - o.screenSizeDp);
-    if (diff != 0) return diff;
-
-    // Version MUST be last to ensure that a sorted list of configurations will always have the
-    // versions beside each other.
-    diff = (int32_t)(version - o.version);
     return (int)diff;
 }
 

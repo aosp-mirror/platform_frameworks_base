@@ -48,11 +48,6 @@ template <typename T>
 struct Range {
   T start;
   T end;
-
-  typename std::enable_if<has_lte_op<const T, const T>::value, bool>::type Contains(
-      const T& t) const {
-    return start <= t && t < end;
-  }
 };
 
 std::vector<std::string> Split(const android::StringPiece& str, char sep);

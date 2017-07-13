@@ -40,7 +40,7 @@ public abstract class LowpanCommissioningSession {
      * @hide
      */
     // @SystemApi
-    public class Callback {
+    public static abstract class Callback {
         public void onReceiveFromCommissioner(@NonNull byte[] packet) {};
 
         public void onClosed() {};

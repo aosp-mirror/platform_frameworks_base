@@ -34,19 +34,6 @@ bool ShouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDes
   return sdk_version_to_generate < FindNextApiVersionForConfig(entry, config);
 }
 
-ApiVersion FindNextApiVersionForConfigInSortedVector(
-    std::vector<std::unique_ptr<ResourceConfigValue>>::const_iterator start,
-    std::vector<std::unique_ptr<ResourceConfigValue>>::const_iterator end) {
-  const ConfigDescription start_config = (*start)->config.CopyWithoutSdkVersion();
-  ++start;
-  if (start != end) {
-    if ((*start)->config.CopyWithoutSdkVersion() == start_config) {
-      return static_cast<ApiVersion>((*start)->config.sdkVersion);
-    }
-  }
-  return std::numeric_limits<ApiVersion>::max();
-}
-
 ApiVersion FindNextApiVersionForConfig(const ResourceEntry* entry,
                                        const ConfigDescription& config) {
   const auto end_iter = entry->values.end();
@@ -59,7 +46,25 @@ ApiVersion FindNextApiVersionForConfig(const ResourceEntry* entry,
 
   // The source config came from this list, so it should be here.
   CHECK(iter != entry->values.end());
-  return FindNextApiVersionForConfigInSortedVector(iter, end_iter);
+  ++iter;
+
+  // The next configuration either only varies in sdkVersion, or it is completely different
+  // and therefore incompatible. If it is incompatible, we must generate the versioned resource.
+
+  // NOTE: The ordering of configurations takes sdkVersion as higher precedence than other
+  // qualifiers, so we need to iterate through the entire list to be sure there
+  // are no higher sdk level versions of this resource.
+  ConfigDescription temp_config(config);
+  for (; iter != end_iter; ++iter) {
+    temp_config.sdkVersion = (*iter)->config.sdkVersion;
+    if (temp_config == (*iter)->config) {
+      // The two configs are the same, return the sdkVersion.
+      return (*iter)->config.sdkVersion;
+    }
+  }
+
+  // Didn't find another config with a different sdk version, so return the highest possible value.
+  return std::numeric_limits<ApiVersion>::max();
 }
 
 bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {

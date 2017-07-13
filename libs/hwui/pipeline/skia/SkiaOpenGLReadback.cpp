@@ -20,6 +20,7 @@
 #include "Properties.h"
 #include <SkCanvas.h>
 #include <SkSurface.h>
+#include <GrBackendSurface.h>
 #include <gl/GrGLInterface.h>
 #include <gl/GrGLTypes.h>
 #include <GLES2/gl2.h>
@@ -53,15 +54,11 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     externalTexture.fTarget = GL_TEXTURE_EXTERNAL_OES;
     externalTexture.fID = sourceTexId;
 
-    GrBackendTextureDesc textureDescription;
-    textureDescription.fWidth = imgWidth;
-    textureDescription.fHeight = imgHeight;
-    textureDescription.fConfig = kRGBA_8888_GrPixelConfig;
-    textureDescription.fOrigin = kTopLeft_GrSurfaceOrigin;
-    textureDescription.fTextureHandle = reinterpret_cast<GrBackendObject>(&externalTexture);
+    GrBackendTexture backendTexture(imgWidth, imgHeight, kRGBA_8888_GrPixelConfig, externalTexture);
 
     CopyResult copyResult = CopyResult::UnknownError;
-    sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), textureDescription));
+    sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), backendTexture,
+            kTopLeft_GrSurfaceOrigin));
     if (image) {
         // convert to Skia data structures
         const SkRect bufferRect = SkRect::MakeIWH(imgWidth, imgHeight);

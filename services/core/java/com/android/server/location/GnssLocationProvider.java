@@ -1651,6 +1651,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 mSvAzimuths,
                 mSvCarrierFreqs);
 
+        // Log CN0 as part of GNSS metrics
+        mGnssMetrics.logCn0(mCn0s, svCount);
+
         if (VERBOSE) {
             Log.v(TAG, "SV count: " + svCount);
         }

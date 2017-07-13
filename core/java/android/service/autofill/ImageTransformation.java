@@ -51,7 +51,8 @@ import java.util.regex.Pattern;
  * <p>There is no imposed limit in the number of options, but keep in mind that regexs are
  * expensive to evaluate, so use the minimum number of regexs.
  */
-public final class ImageTransformation extends InternalTransformation implements Parcelable {
+public final class ImageTransformation extends InternalTransformation implements Transformation,
+        Parcelable {
     private static final String TAG = "ImageTransformation";
 
     private final AutofillId mId;
@@ -102,7 +103,8 @@ public final class ImageTransformation extends InternalTransformation implements
          *
          * @param id id of the screen field that will be used to evaluate whether the image should
          * be used.
-         * @param regex regular expression defining what should be matched to use this image.
+         * @param regex regular expression defining what should be matched to use this image. The
+         * pattern will be {@link Pattern#compile compiled} without setting any flags.
          * @param resId resource id of the image (in the autofill service's package). The
          * {@link RemoteViews presentation} must contain a {@link ImageView} child with that id.
          */
@@ -115,7 +117,8 @@ public final class ImageTransformation extends InternalTransformation implements
         /**
          * Adds an option to replace the child view with a different image when the regex matches.
          *
-         * @param regex regular expression defining what should be matched to use this image.
+         * @param regex regular expression defining what should be matched to use this image. The
+         * pattern will be {@link Pattern#compile compiled} without setting any flags.
          * @param resId resource id of the image (in the autofill service's package). The
          * {@link RemoteViews presentation} must contain a {@link ImageView} child with that id.
          *

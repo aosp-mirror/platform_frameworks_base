@@ -17,13 +17,14 @@
 package com.android.server.wm;
 
 import android.util.Slog;
-import android.view.Display;
 
 import java.util.ArrayDeque;
 import java.util.function.Consumer;
 
+import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -56,7 +57,6 @@ class WindowLayersController {
         mService = service;
     }
 
-    private int mHighestApplicationLayer = 0;
     private ArrayDeque<WindowState> mPinnedWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mDockedWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mAssistantWindows = new ArrayDeque<>();
@@ -66,6 +66,8 @@ class WindowLayersController {
     private int mCurBaseLayer;
     private int mCurLayer;
     private boolean mAnyLayerChanged;
+    private int mHighestApplicationLayer;
+    private int mHighestDockedAffectedLayer;
     private int mHighestLayerInImeTargetBaseLayer;
     private WindowState mImeTarget;
     private boolean mAboveImeTarget;
@@ -96,6 +98,10 @@ class WindowLayersController {
         }
         if (mImeTarget != null && w.mBaseLayer == mImeTarget.mBaseLayer) {
             mHighestLayerInImeTargetBaseLayer = Math.max(mHighestLayerInImeTargetBaseLayer,
+                    w.mWinAnimator.mAnimLayer);
+        }
+        if (w.getAppToken() != null && StackId.isResizeableByDockedStack(w.getStackId())) {
+            mHighestDockedAffectedLayer = Math.max(mHighestDockedAffectedLayer,
                     w.mWinAnimator.mAnimLayer);
         }
 
@@ -135,7 +141,6 @@ class WindowLayersController {
     }
 
     private void reset() {
-        mHighestApplicationLayer = 0;
         mPinnedWindows.clear();
         mInputMethodWindows.clear();
         mDockedWindows.clear();
@@ -147,8 +152,10 @@ class WindowLayersController {
         mCurLayer = 0;
         mAnyLayerChanged = false;
 
-        mImeTarget = mService.mInputMethodTarget;
+        mHighestApplicationLayer = 0;
+        mHighestDockedAffectedLayer = 0;
         mHighestLayerInImeTargetBaseLayer = (mImeTarget != null) ? mImeTarget.mBaseLayer : 0;
+        mImeTarget = mService.mInputMethodTarget;
         mAboveImeTarget = false;
         mAboveImeTargetAppWindows.clear();
     }
@@ -179,44 +186,47 @@ class WindowLayersController {
             }
         }
 
-        final Task task = w.getTask();
-        if (task == null) {
-            return;
-        }
-        final TaskStack stack = task.mStack;
-        if (stack == null) {
-            return;
-        }
-        if (stack.mStackId == PINNED_STACK_ID) {
+        final int stackId = w.getAppToken() != null ? w.getStackId() : INVALID_STACK_ID;
+        if (stackId == PINNED_STACK_ID) {
             mPinnedWindows.add(w);
-        } else if (stack.mStackId == DOCKED_STACK_ID) {
+        } else if (stackId == DOCKED_STACK_ID) {
             mDockedWindows.add(w);
-        } else if (stack.mStackId == ASSISTANT_STACK_ID) {
+        } else if (stackId == ASSISTANT_STACK_ID) {
             mAssistantWindows.add(w);
         }
     }
 
     private void adjustSpecialWindows() {
-        int layer = mHighestApplicationLayer + WINDOW_LAYER_MULTIPLIER;
-        // For pinned and docked stack window, we want to make them above other windows also when
-        // these windows are animating.
-        while (!mDockedWindows.isEmpty()) {
-            layer = assignAndIncreaseLayerIfNeeded(mDockedWindows.remove(), layer);
+        // The following adjustments are beyond the highest docked-affected layer
+        int layer = mHighestDockedAffectedLayer +  WINDOW_LAYER_MULTIPLIER;
+
+        // Adjust the docked stack windows and dock divider above only the windows that are affected
+        // by the docked stack. When this happens, also boost the assistant window layers, otherwise
+        // the docked stack windows & divider would be promoted above the assistant.
+        if (!mDockedWindows.isEmpty() && mHighestDockedAffectedLayer > 0) {
+            while (!mDockedWindows.isEmpty()) {
+                final WindowState window = mDockedWindows.remove();
+                layer = assignAndIncreaseLayerIfNeeded(window, layer);
+            }
+
+            layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
+
+            while (!mAssistantWindows.isEmpty()) {
+                final WindowState window = mAssistantWindows.remove();
+                if (window.mLayer > mHighestDockedAffectedLayer) {
+                    layer = assignAndIncreaseLayerIfNeeded(window, layer);
+                }
+            }
         }
 
-        layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
+        // The following adjustments are beyond the highest app layer or boosted layer
+        layer = Math.max(layer, mHighestApplicationLayer + WINDOW_LAYER_MULTIPLIER);
 
         // We know that we will be animating a relaunching window in the near future, which will
         // receive a z-order increase. We want the replaced window to immediately receive the same
         // treatment, e.g. to be above the dock divider.
         while (!mReplacingWindows.isEmpty()) {
             layer = assignAndIncreaseLayerIfNeeded(mReplacingWindows.remove(), layer);
-        }
-
-        // Adjust the assistant stack windows to be above the docked and fullscreen stack windows,
-        // but under the pinned stack windows
-        while (!mAssistantWindows.isEmpty()) {
-            layer = assignAndIncreaseLayerIfNeeded(mAssistantWindows.remove(), layer);
         }
 
         while (!mPinnedWindows.isEmpty()) {

@@ -5796,7 +5796,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // orientation.
         if (!okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Changing surface while display frozen: " + w);
-            w.mOrientationChanging = true;
+            w.setOrientationChanging(true);
             w.mLastFreezeDuration = 0;
             mRoot.mOrientationChangeComplete = false;
             if (mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_NONE) {
@@ -6296,6 +6296,22 @@ public class WindowManagerService extends IWindowManager.Stub
             if (updateStatusBarVisibilityLocked(visibility)) {
                 mWindowPlacerLocked.requestTraversal();
             }
+        }
+    }
+
+    /**
+     * Used by ActivityManager to determine where to position an app with aspect ratio shorter then
+     * the screen is.
+     * @see WindowManagerPolicy#getNavBarPosition()
+     */
+    public int getNavBarPosition() {
+        synchronized (mWindowMap) {
+            // Perform layout if it was scheduled before to make sure that we get correct nav bar
+            // position when doing rotations.
+            final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
+            defaultDisplayContent.performLayout(false /* initial */,
+                    false /* updateInputWindows */);
+            return mPolicy.getNavBarPosition();
         }
     }
 

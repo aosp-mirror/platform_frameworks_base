@@ -21,6 +21,7 @@ import static com.android.internal.util.BitUtils.uint16;
 import android.hardware.tetheroffload.control.V1_0.IOffloadControl;
 import android.hardware.tetheroffload.control.V1_0.ITetheringOffloadCallback;
 import android.hardware.tetheroffload.control.V1_0.NatTimeoutUpdate;
+import android.hardware.tetheroffload.control.V1_0.OffloadCallbackEvent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.net.util.SharedLog;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
  */
 public class OffloadHardwareInterface {
     private static final String TAG = OffloadHardwareInterface.class.getSimpleName();
+    private static final String YIELDS = " -> ";
     // Change this value to control whether tether offload is enabled or
     // disabled by default in the absence of an explicit Settings value.
     // See accompanying unittest to distinguish 0 from non-0 values.
@@ -52,11 +54,34 @@ public class OffloadHardwareInterface {
     private ControlCallback mControlCallback;
 
     public static class ControlCallback {
-        public void onOffloadEvent(int event) {}
+        public void onStarted() {}
+        public void onStoppedError() {}
+        public void onStoppedUnsupported() {}
+        public void onSupportAvailable() {}
+        public void onStoppedLimitReached() {}
 
         public void onNatTimeoutUpdate(int proto,
                                        String srcAddr, int srcPort,
                                        String dstAddr, int dstPort) {}
+    }
+
+    public static class ForwardedStats {
+        public long rxBytes;
+        public long txBytes;
+
+        public ForwardedStats() {
+            rxBytes = 0;
+            txBytes = 0;
+        }
+
+        public void add(ForwardedStats other) {
+            rxBytes += other.rxBytes;
+            txBytes += other.txBytes;
+        }
+
+        public String toString() {
+            return String.format("rx:%s tx:%s", rxBytes, txBytes);
+        }
     }
 
     public OffloadHardwareInterface(Handler h, SharedLog log) {
@@ -88,7 +113,7 @@ public class OffloadHardwareInterface {
                 (controlCb == null) ? "null"
                         : "0x" + Integer.toHexString(System.identityHashCode(controlCb)));
 
-        mTetheringOffloadCallback = new TetheringOffloadCallback(mHandler, mControlCallback);
+        mTetheringOffloadCallback = new TetheringOffloadCallback(mHandler, mControlCallback, mLog);
         final CbResults results = new CbResults();
         try {
             mOffloadControl.initOffload(
@@ -123,6 +148,26 @@ public class OffloadHardwareInterface {
         mLog.log("stopOffloadControl()");
     }
 
+    public ForwardedStats getForwardedStats(String upstream) {
+        final String logmsg = String.format("getForwardedStats(%s)",  upstream);
+
+        final ForwardedStats stats = new ForwardedStats();
+        try {
+            mOffloadControl.getForwardedStats(
+                    upstream,
+                    (long rxBytes, long txBytes) -> {
+                        stats.rxBytes = (rxBytes > 0) ? rxBytes : 0;
+                        stats.txBytes = (txBytes > 0) ? txBytes : 0;
+                    });
+        } catch (RemoteException e) {
+            record(logmsg, e);
+            return stats;
+        }
+
+        mLog.log(logmsg + YIELDS + stats);
+        return stats;
+    }
+
     public boolean setUpstreamParameters(
             String iface, String v4addr, String v4gateway, ArrayList<String> v6gws) {
         iface = (iface != null) ? iface : NO_INTERFACE_NAME;
@@ -151,11 +196,11 @@ public class OffloadHardwareInterface {
     }
 
     private void record(String msg, Throwable t) {
-        mLog.e(msg + " -> exception: " + t);
+        mLog.e(msg + YIELDS + "exception: " + t);
     }
 
     private void record(String msg, CbResults results) {
-        final String logmsg = msg + " -> " + results;
+        final String logmsg = msg + YIELDS + results;
         if (!results.success) {
             mLog.e(logmsg);
         } else {
@@ -166,15 +211,37 @@ public class OffloadHardwareInterface {
     private static class TetheringOffloadCallback extends ITetheringOffloadCallback.Stub {
         public final Handler handler;
         public final ControlCallback controlCb;
+        public final SharedLog log;
 
-        public TetheringOffloadCallback(Handler h, ControlCallback cb) {
+        public TetheringOffloadCallback(Handler h, ControlCallback cb, SharedLog sharedLog) {
             handler = h;
             controlCb = cb;
+            log = sharedLog;
         }
 
         @Override
         public void onEvent(int event) {
-            handler.post(() -> { controlCb.onOffloadEvent(event); });
+            handler.post(() -> {
+                switch (event) {
+                    case OffloadCallbackEvent.OFFLOAD_STARTED:
+                        controlCb.onStarted();
+                        break;
+                    case OffloadCallbackEvent.OFFLOAD_STOPPED_ERROR:
+                        controlCb.onStoppedError();
+                        break;
+                    case OffloadCallbackEvent.OFFLOAD_STOPPED_UNSUPPORTED:
+                        controlCb.onStoppedUnsupported();
+                        break;
+                    case OffloadCallbackEvent.OFFLOAD_SUPPORT_AVAILABLE:
+                        controlCb.onSupportAvailable();
+                        break;
+                    case OffloadCallbackEvent.OFFLOAD_STOPPED_LIMIT_REACHED:
+                        controlCb.onStoppedLimitReached();
+                        break;
+                    default:
+                        log.e("Unsupported OffloadCallbackEvent: " + event);
+                }
+            });
         }
 
         @Override

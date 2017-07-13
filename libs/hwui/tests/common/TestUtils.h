@@ -189,7 +189,7 @@ public:
     static sk_sp<Bitmap> createBitmap(int width, int height, SkBitmap* outBitmap) {
         SkImageInfo info = SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType);
         outBitmap->setInfo(info);
-        return Bitmap::allocateHeapBitmap(outBitmap, nullptr);
+        return Bitmap::allocateHeapBitmap(outBitmap);
     }
 
     static sp<DeferredLayerUpdater> createTextureLayerUpdater(

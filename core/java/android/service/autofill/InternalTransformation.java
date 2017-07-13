@@ -19,11 +19,17 @@ import android.annotation.NonNull;
 import android.os.Parcelable;
 import android.widget.RemoteViews;
 
-/** @hide */
+/**
+ * Superclass of all transformation the system understands. As this is not public all
+ * subclasses have to implement {@link Transformation} again.
+ *
+ * @hide
+ */
 abstract class InternalTransformation implements Transformation, Parcelable {
 
     /**
-     * Applies this transformation to a child view of a {@link RemoteViews presentation template}.
+     * Applies this transformation to a child view of a {@link android.widget.RemoteViews
+     * presentation template}.
      *
      * @param finder object used to find the value of a field in the screen.
      * @param template the {@link RemoteViews presentation template}.

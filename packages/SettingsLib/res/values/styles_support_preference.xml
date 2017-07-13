@@ -26,7 +26,7 @@
     </style>
 
     <!-- Preferences -->
-    <style name="Preference.SettingsBase" parent="@*android:style/Preference.Material">
+    <style name="Preference.SettingsBase" parent="@style/Preference.Material">
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">true</item>
         <item name="singleLineTitle">false</item>
