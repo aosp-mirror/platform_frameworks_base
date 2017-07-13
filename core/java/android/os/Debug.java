@@ -1814,6 +1814,13 @@ public final class Debug
     public static native void dumpNativeHeap(FileDescriptor fd);
 
     /**
+     * Writes malloc info data to the specified file descriptor.
+     *
+     * @hide
+     */
+    public static native void dumpNativeMallocInfo(FileDescriptor fd);
+
+    /**
       * Returns a count of the extant instances of a class.
      *
      * @hide

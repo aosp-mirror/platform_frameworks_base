@@ -48,10 +48,14 @@
 namespace android
 {
 
-using UniqueFile = std::unique_ptr<FILE, decltype(&fclose)>;
+static void safeFclose(FILE* fp) {
+  if (fp) fclose(fp);
+}
+
+using UniqueFile = std::unique_ptr<FILE, decltype(&safeFclose)>;
 
 static inline UniqueFile MakeUniqueFile(const char* path, const char* mode) {
-    return UniqueFile(fopen(path, mode), fclose);
+    return UniqueFile(fopen(path, mode), safeFclose);
 }
 
 enum {
@@ -972,21 +976,16 @@ static void dumpNativeHeap(FILE* fp)
     fprintf(fp, "END\n");
 }
 
-/*
- * Dump the native heap, writing human-readable output to the specified
- * file descriptor.
- */
-static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
-    jobject fileDescriptor)
+static bool openFile(JNIEnv* env, jobject fileDescriptor, UniqueFile& fp)
 {
     if (fileDescriptor == NULL) {
         jniThrowNullPointerException(env, "fd == null");
-        return;
+        return false;
     }
     int origFd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (origFd < 0) {
         jniThrowRuntimeException(env, "Invalid file descriptor");
-        return;
+        return false;
     }
 
     /* dup() the descriptor so we don't close the original with fclose() */
@@ -994,20 +993,49 @@ static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
     if (fd < 0) {
         ALOGW("dup(%d) failed: %s\n", origFd, strerror(errno));
         jniThrowRuntimeException(env, "dup() failed");
-        return;
+        return false;
     }
 
-    UniqueFile fp(fdopen(fd, "w"), fclose);
+    fp.reset(fdopen(fd, "w"));
     if (fp == nullptr) {
         ALOGW("fdopen(%d) failed: %s\n", fd, strerror(errno));
         close(fd);
         jniThrowRuntimeException(env, "fdopen() failed");
+        return false;
+    }
+    return true;
+}
+
+/*
+ * Dump the native heap, writing human-readable output to the specified
+ * file descriptor.
+ */
+static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject,
+    jobject fileDescriptor)
+{
+    UniqueFile fp(nullptr, safeFclose);
+    if (!openFile(env, fileDescriptor, fp)) {
         return;
     }
 
     ALOGD("Native heap dump starting...\n");
     dumpNativeHeap(fp.get());
     ALOGD("Native heap dump complete.\n");
+}
+
+/*
+ * Dump the native malloc info, writing xml output to the specified
+ * file descriptor.
+ */
+static void android_os_Debug_dumpNativeMallocInfo(JNIEnv* env, jobject,
+    jobject fileDescriptor)
+{
+    UniqueFile fp(nullptr, safeFclose);
+    if (!openFile(env, fileDescriptor, fp)) {
+        return;
+    }
+
+    malloc_info(0, fp.get());
 }
 
 static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs,
@@ -1070,6 +1098,8 @@ static const JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getMemInfo },
     { "dumpNativeHeap",         "(Ljava/io/FileDescriptor;)V",
             (void*) android_os_Debug_dumpNativeHeap },
+    { "dumpNativeMallocInfo",   "(Ljava/io/FileDescriptor;)V",
+            (void*) android_os_Debug_dumpNativeMallocInfo },
     { "getBinderSentTransactions", "()I",
             (void*) android_os_Debug_getBinderSentTransactions },
     { "getBinderReceivedTransactions", "()I",

@@ -784,6 +784,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runDumpHeap(PrintWriter pw) throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
         boolean managed = true;
+        boolean mallocInfo = false;
         int userId = UserHandle.USER_CURRENT;
         boolean runGc = false;
 
@@ -799,6 +800,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 managed = false;
             } else if (opt.equals("-g")) {
                 runGc = true;
+            } else if (opt.equals("-m")) {
+                managed = false;
+                mallocInfo = true;
             } else {
                 err.println("Error: Unknown option: " + opt);
                 return -1;
@@ -814,7 +818,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        if (!mInterface.dumpHeap(process, userId, managed, runGc, heapFile, fd)) {
+        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, heapFile, fd)) {
             err.println("HEAP DUMP FAILED on process " + process);
             return -1;
         }
