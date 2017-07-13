@@ -56,12 +56,6 @@ public class CameraServiceProxy extends SystemService
 
     public static final String CAMERA_SERVICE_PROXY_BINDER_NAME = "media.camera.proxy";
 
-    // State arguments to use with the notifyCameraState call from camera service:
-    public static final int CAMERA_STATE_OPEN = 0;
-    public static final int CAMERA_STATE_ACTIVE = 1;
-    public static final int CAMERA_STATE_IDLE = 2;
-    public static final int CAMERA_STATE_CLOSED = 3;
-
     // Flags arguments to NFC adapter to enable/disable NFC
     public static final int DISABLE_POLLING_FLAGS = 0x1000;
     public static final int ENABLE_POLLING_FLAGS = 0x0000;
@@ -123,9 +117,11 @@ public class CameraServiceProxy extends SystemService
         }
 
         @Override
-        public void notifyCameraState(String cameraId, int newCameraState) {
+        public void notifyCameraState(String cameraId, int newCameraState, int facing,
+                String clientName) {
             String state = cameraStateToString(newCameraState);
-            if (DEBUG) Slog.v(TAG, "Camera " + cameraId + " state now " + state);
+            if (DEBUG) Slog.v(TAG, "Camera " + cameraId + " facing " + facing + " state now " +
+                    state + " for client " + clientName);
 
             updateActivityCount(cameraId, newCameraState);
         }
@@ -282,13 +278,13 @@ public class CameraServiceProxy extends SystemService
         synchronized(mLock) {
             boolean wasEmpty = mActiveCameraIds.isEmpty();
             switch (newCameraState) {
-                case CAMERA_STATE_OPEN:
+                case ICameraServiceProxy.CAMERA_STATE_OPEN:
                     break;
-                case CAMERA_STATE_ACTIVE:
+                case ICameraServiceProxy.CAMERA_STATE_ACTIVE:
                     mActiveCameraIds.add(cameraId);
                     break;
-                case CAMERA_STATE_IDLE:
-                case CAMERA_STATE_CLOSED:
+                case ICameraServiceProxy.CAMERA_STATE_IDLE:
+                case ICameraServiceProxy.CAMERA_STATE_CLOSED:
                     mActiveCameraIds.remove(cameraId);
                     break;
             }
@@ -328,10 +324,10 @@ public class CameraServiceProxy extends SystemService
 
     private static String cameraStateToString(int newCameraState) {
         switch (newCameraState) {
-            case CAMERA_STATE_OPEN: return "CAMERA_STATE_OPEN";
-            case CAMERA_STATE_ACTIVE: return "CAMERA_STATE_ACTIVE";
-            case CAMERA_STATE_IDLE: return "CAMERA_STATE_IDLE";
-            case CAMERA_STATE_CLOSED: return "CAMERA_STATE_CLOSED";
+            case ICameraServiceProxy.CAMERA_STATE_OPEN: return "CAMERA_STATE_OPEN";
+            case ICameraServiceProxy.CAMERA_STATE_ACTIVE: return "CAMERA_STATE_ACTIVE";
+            case ICameraServiceProxy.CAMERA_STATE_IDLE: return "CAMERA_STATE_IDLE";
+            case ICameraServiceProxy.CAMERA_STATE_CLOSED: return "CAMERA_STATE_CLOSED";
             default: break;
         }
         return "CAMERA_STATE_UNKNOWN";
