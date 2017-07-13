@@ -805,7 +805,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private float getAppearStartPosition() {
         if (mTrackingHeadsUp && mFirstVisibleBackgroundChild != null) {
-            if (mFirstVisibleBackgroundChild.isAboveShelf()) {
+            if (mAmbientState.isAboveShelf(mFirstVisibleBackgroundChild)) {
                 // If we ever expanded beyond the first notification, it's allowed to merge into
                 // the shelf
                 return mFirstVisibleBackgroundChild.getPinnedHeadsUpHeight();
@@ -823,7 +823,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         int notGoneChildCount = getNotGoneChildCount();
         if (mEmptyShadeView.getVisibility() == GONE && notGoneChildCount != 0) {
             int minNotificationsForShelf = 1;
-            if (mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()) {
+            if (mTrackingHeadsUp
+                    || (mHeadsUpManager.hasPinnedHeadsUp() && !mAmbientState.isDark())) {
                 appearPosition = mHeadsUpManager.getTopHeadsUpPinnedHeight();
                 minNotificationsForShelf = 2;
             } else {
@@ -2008,12 +2009,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private boolean isPulsing(NotificationData.Entry entry) {
-        for (HeadsUpManager.HeadsUpEntry e : mPulsing) {
-            if (e.entry == entry) {
-                return true;
-            }
-        }
-        return false;
+        return mAmbientState.isPulsing(entry);
     }
 
     public boolean hasPulsingNotifications() {
@@ -4148,7 +4144,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             return;
         }
         mPulsing = pulsing;
-        mAmbientState.setHasPulsingNotifications(hasPulsingNotifications());
+        mAmbientState.setPulsing(pulsing);
         updateNotificationAnimationStates();
         updateContentHeight();
         notifyHeightChangeListener(mShelf);
