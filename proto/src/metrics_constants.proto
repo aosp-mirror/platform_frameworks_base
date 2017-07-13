@@ -4218,6 +4218,22 @@ message MetricsEvent {
     // OS: O MR
     ACTION_SETTINGS_SMS_MIRRORING = 1084;
 
+    // ACTION: Chooser picked a ranked target.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O MR
+    ACTION_TARGET_SELECTED = 1085;
+
+    // FIELD - is category used in Chooser: 1.
+    // Type: int encoded boolean
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O MR
+    FIELD_IS_CATEGORY_USED = 1086;
+
+    // FIELD - ranked position of selected target for Chooser.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O MR
+    FIELD_RANKED_POSITION = 1087;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

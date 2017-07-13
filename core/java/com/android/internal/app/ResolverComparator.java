@@ -30,6 +30,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.SharedPreferences;
 import android.content.ServiceConnection;
+import android.metrics.LogMaker;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -46,6 +47,8 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.io.File;
 import java.lang.InterruptedException;
@@ -99,6 +102,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     private String mContentType;
     private String[] mAnnotations;
     private String mAction;
+    private ComponentName mResolvedRankerName;
+    private ComponentName mRankerServiceName;
     private IResolverRankerService mRanker;
     private ResolverRankerServiceConnection mConnection;
     private AfterCompute mAfterCompute;
@@ -119,9 +124,17 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                             if (receivedTargets != null && mTargets != null
                                     && receivedTargets.size() == mTargets.size()) {
                                 final int size = mTargets.size();
+                                boolean isUpdated = false;
                                 for (int i = 0; i < size; ++i) {
-                                    mTargets.get(i).setSelectProbability(
-                                            receivedTargets.get(i).getSelectProbability());
+                                    final float predictedProb =
+                                            receivedTargets.get(i).getSelectProbability();
+                                    if (predictedProb != mTargets.get(i).getSelectProbability()) {
+                                        mTargets.get(i).setSelectProbability(predictedProb);
+                                        isUpdated = true;
+                                    }
+                                }
+                                if (isUpdated) {
+                                    mRankerServiceName = mResolvedRankerName;
                                 }
                             } else {
                                 Log.e(TAG, "Sizes of sent and received ResolverTargets diff.");
@@ -170,6 +183,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         mContentType = intent.getType();
         getContentAnnotations(intent);
         mAction = intent.getAction();
+        mRankerServiceName = new ComponentName(mContext, this.getClass());
     }
 
     // get annotations of content from intent.
@@ -361,6 +375,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                 try {
                     int selectedPos = new ArrayList<ComponentName>(mTargetsDict.keySet())
                             .indexOf(componentName);
+                    logMetrics(selectedPos);
                     if (selectedPos > 0) {
                         mRanker.train(mTargets, selectedPos);
                     } else {
@@ -389,6 +404,19 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         }
         if (DEBUG) {
             Log.d(TAG, "Unbinded Resolver Ranker.");
+        }
+    }
+
+    // records metrics for evaluation.
+    private void logMetrics(int selectedPos) {
+        if (mRankerServiceName != null) {
+            MetricsLogger metricsLogger = new MetricsLogger();
+            LogMaker log = new LogMaker(MetricsEvent.ACTION_TARGET_SELECTED);
+            log.setComponentName(mRankerServiceName);
+            int isCategoryUsed = (mAnnotations == null) ? 0 : 1;
+            log.addTaggedData(MetricsEvent.FIELD_IS_CATEGORY_USED, isCategoryUsed);
+            log.addTaggedData(MetricsEvent.FIELD_RANKED_POSITION, selectedPos);
+            metricsLogger.write(log);
         }
     }
 
@@ -454,6 +482,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
             if (DEBUG) {
                 Log.d(TAG, "Succeeded to retrieve a ranker: " + componentName);
             }
+            mResolvedRankerName = componentName;
             intent.setComponent(componentName);
             return intent;
         }
@@ -523,6 +552,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     private void reset() {
         mTargetsDict.clear();
         mTargets = null;
+        mRankerServiceName = new ComponentName(mContext, this.getClass());
+        mResolvedRankerName = null;
         startWatchDog(WATCHDOG_TIMEOUT_MILLIS);
         initRanker(mContext);
     }
