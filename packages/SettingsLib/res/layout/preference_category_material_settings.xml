@@ -51,6 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@android:style/TextAppearance.Material.Body2"
+            android:textAlignment="viewStart"
             android:textColor="?android:attr/colorAccent"
             android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"/>
         <TextView
