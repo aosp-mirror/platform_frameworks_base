@@ -30,6 +30,7 @@ import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 
+import static android.view.Display.INVALID_DISPLAY;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_APP;
@@ -124,7 +125,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
-import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.StackWindowListener;
 import com.android.server.wm.WindowManagerService;
@@ -205,7 +205,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     @Override
     protected ConfigurationContainer getParent() {
-        return mActivityContainer.mActivityDisplay;
+        return getDisplay();
     }
 
     @Override
@@ -336,8 +336,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     int mCurrentUser;
 
     final int mStackId;
-    final ActivityContainer mActivityContainer;
     /** The other stacks, in order, on the attached display. Updated at attach/detach time. */
+    // TODO: This list doesn't belong here...
     ArrayList<ActivityStack> mStacks;
     /** The attached Display's unique identifier, or -1 if detached */
     int mDisplayId;
@@ -447,24 +447,21 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return count;
     }
 
-    ActivityStack(ActivityStackSupervisor.ActivityContainer activityContainer,
-            RecentTasks recentTasks, boolean onTop) {
-        mActivityContainer = activityContainer;
-        mStackSupervisor = activityContainer.getOuter();
-        mService = mStackSupervisor.mService;
+    ActivityStack(ActivityStackSupervisor.ActivityDisplay display, int stackId,
+            ActivityStackSupervisor supervisor, RecentTasks recentTasks, boolean onTop) {
+        mStackSupervisor = supervisor;
+        mService = supervisor.mService;
         mHandler = new ActivityStackHandler(mService.mHandler.getLooper());
         mWindowManager = mService.mWindowManager;
-        mStackId = activityContainer.mStackId;
+        mStackId = stackId;
         mCurrentUser = mService.mUserController.getCurrentUserIdLocked();
         mRecentTasks = recentTasks;
         mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
                 ? new LaunchingTaskPositioner() : null;
-        final ActivityStackSupervisor.ActivityDisplay display = mActivityContainer.mActivityDisplay;
         mTmpRect2.setEmpty();
         mWindowContainerController = createStackWindowController(display.mDisplayId, onTop,
                 mTmpRect2);
-        activityContainer.mStack = this;
-        mStackSupervisor.mActivityContainers.put(mStackId, activityContainer);
+        mStackSupervisor.mStacks.put(mStackId, this);
         postAddToDisplay(display, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
     }
 
@@ -521,7 +518,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * either destroyed completely or re-parented.
      */
     private void removeFromDisplay() {
-        mDisplayId = Display.INVALID_DISPLAY;
+        final ActivityStackSupervisor.ActivityDisplay display = getDisplay();
+        if (display != null) {
+            display.detachStack(this);
+        }
+        mDisplayId = INVALID_DISPLAY;
         mStacks = null;
         if (mTaskPositioner != null) {
             mTaskPositioner.reset();
@@ -537,14 +538,18 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     /** Removes the stack completely. Also calls WindowManager to do the same on its side. */
     void remove() {
         removeFromDisplay();
-        mStackSupervisor.deleteActivityContainerRecord(mStackId);
+        mStackSupervisor.mStacks.remove(mStackId);
         mWindowContainerController.removeContainer();
         mWindowContainerController = null;
         onParentChanged();
     }
 
+    ActivityStackSupervisor.ActivityDisplay getDisplay() {
+        return mStackSupervisor.getActivityDisplay(mDisplayId);
+    }
+
     void getDisplaySize(Point out) {
-        mActivityContainer.mActivityDisplay.mDisplay.getSize(out);
+        getDisplay().mDisplay.getSize(out);
     }
 
     /**
@@ -822,8 +827,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     final boolean isOnHomeDisplay() {
-        return isAttached() &&
-                mActivityContainer.mActivityDisplay.mDisplayId == DEFAULT_DISPLAY;
+        return isAttached() && mDisplayId == DEFAULT_DISPLAY;
     }
 
     void moveToFront(String reason) {
@@ -1248,12 +1252,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
             return false;
-        }
-
-        if (mActivityContainer.mParentActivity == null) {
-            // Top level stack, not a child. Look for child stacks.
-            mStackSupervisor.pauseChildStacks(prev, userLeaving, uiSleeping, resuming,
-                    pauseImmediately);
         }
 
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSING: " + prev);
@@ -1951,8 +1949,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * {@link Display#FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD} applied.
      */
     private boolean canShowWithInsecureKeyguard() {
-        final ActivityStackSupervisor.ActivityDisplay activityDisplay
-                = mActivityContainer.mActivityDisplay;
+        final ActivityStackSupervisor.ActivityDisplay activityDisplay = getDisplay();
         if (activityDisplay == null) {
             throw new IllegalStateException("Stack is not attached to any display, stackId="
                     + mStackId);
@@ -2094,7 +2091,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * occurred and the activity will be notified immediately.
      */
     void notifyActivityDrawnLocked(ActivityRecord r) {
-        mActivityContainer.setDrawn();
         if ((r == null)
                 || (mUndrawnActivitiesBelowTopTranslucent.remove(r) &&
                         mUndrawnActivitiesBelowTopTranslucent.isEmpty())) {
@@ -2222,12 +2218,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         final boolean hasRunningActivity = next != null;
 
-        final ActivityRecord parent = mActivityContainer.mParentActivity;
-        final boolean isParentNotResumed = parent != null && parent.state != ActivityState.RESUMED;
-        if (hasRunningActivity
-                && (isParentNotResumed || !mActivityContainer.isAttachedLocked())) {
-            // Do not resume this stack if its parent is not resumed.
-            // TODO: If in a loop, make sure that parent stack resumeTopActivity is called 1st.
+        // TODO: Maybe this entire condition can get removed?
+        if (hasRunningActivity && getDisplay() == null) {
             return false;
         }
 
@@ -3785,7 +3777,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         }
         if (noActivitiesInStack) {
-            mActivityContainer.onTaskListEmptyLocked();
+            remove();
         }
     }
 
@@ -3896,7 +3888,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             destIntent, null /*ephemeralIntent*/, null, aInfo, null /*rInfo*/, null,
                             null, parent.appToken, null, 0, -1, parent.launchedFromUid,
                             parent.launchedFromPackage, -1, parent.launchedFromUid, 0, null,
-                            false, true, null, null, null, "navigateUpTo");
+                            false, true, null, null, "navigateUpTo");
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
                 } catch (RemoteException e) {
                     foundParentInTask = false;
@@ -3981,7 +3973,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     private void removeActivityFromHistoryLocked(ActivityRecord r, String reason) {
-        mStackSupervisor.removeChildActivityContainers(r);
         finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
         r.makeFinishingLocked();
         if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
@@ -4596,7 +4587,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * focus may be on another display.
      */
     private ActivityStack getTopStackOnDisplay() {
-        final ArrayList<ActivityStack> stacks = mActivityContainer.mActivityDisplay.mStacks;
+        final ArrayList<ActivityStack> stacks = getDisplay().mStacks;
         return stacks.isEmpty() ? null : stacks.get(stacks.size() - 1);
     }
 
@@ -5073,7 +5064,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStacks.add(0, this);
             }
             if (!isHomeOrRecentsStack()) {
-                mActivityContainer.onTaskListEmptyLocked();
+                remove();
             }
         }
 

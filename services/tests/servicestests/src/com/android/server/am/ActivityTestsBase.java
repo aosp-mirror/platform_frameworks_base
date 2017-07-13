@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.any;
@@ -78,7 +79,7 @@ public class ActivityTestsBase {
             int stackId, int displayId, boolean onTop) {
         if (service.mStackSupervisor instanceof TestActivityStackSupervisor) {
             return ((TestActivityStackSupervisor) service.mStackSupervisor)
-                    .createTestStack(service, stackId, onTop);
+                    .createTestStack(stackId, onTop);
         }
 
         return null;
@@ -96,8 +97,7 @@ public class ActivityTestsBase {
                 0 /* launchedFromPid */, 0, null, intent, null,
                 aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
                 0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,
-                service.mStackSupervisor, null /* container */, null /* options */,
-                null /* sourceRecord */);
+                service.mStackSupervisor, null /* options */, null /* sourceRecord */);
         activity.mWindowContainerController = mock(AppWindowContainerController.class);
 
         if (task != null) {
@@ -186,12 +186,24 @@ public class ActivityTestsBase {
                 boolean preserveWindows) {
         }
 
-        public <T extends ActivityStack> T createTestStack(ActivityManagerService service,
-                int stackId, boolean onTop) {
-            final TestActivityContainer container =
-                    new TestActivityContainer(service, stackId, mDisplay, onTop);
-            mActivityContainers.put(stackId, container);
-            return (T) container.getStack();
+        <T extends ActivityStack> T createTestStack(int stackId, boolean onTop) {
+            return (T) createStack(stackId, mDisplay, onTop);
+        }
+
+        @Override
+        ActivityStack createStack(int stackId, ActivityDisplay display, boolean onTop) {
+            final RecentTasks recents =
+                    new RecentTasks(mService, mService.mStackSupervisor);
+            if (stackId == PINNED_STACK_ID) {
+                return new PinnedActivityStack(display, stackId, this, recents, onTop) {
+                    @Override
+                    Rect getDefaultPictureInPictureBounds(float aspectRatio) {
+                        return new Rect(50, 50, 100, 100);
+                    }
+                };
+            } else {
+                return new TestActivityStack(display, stackId, this, recents, onTop);
+            }
         }
 
         @Override
@@ -203,49 +215,7 @@ public class ActivityTestsBase {
                 return stack;
             }
 
-            return createTestStack(mService, stackId, createOnTop);
-        }
-
-        private class TestActivityContainer extends ActivityContainer {
-            private final ActivityManagerService mService;
-
-            private boolean mOnTop;
-            private int mStackId;
-            private ActivityStack mStack;
-
-            TestActivityContainer(ActivityManagerService service, int stackId,
-                    ActivityDisplay activityDisplay, boolean onTop) {
-                super(stackId, activityDisplay, onTop);
-                mService = service;
-            }
-
-            @Override
-            protected void createStack(int stackId, boolean onTop) {
-                // normally stack creation is done here. However we need to do it on demand since
-                // we cannot set {@link mService} by the time the super constructor calling this
-                // method is invoked.
-                mOnTop = onTop;
-                mStackId = stackId;
-            }
-
-            public ActivityStack getStack() {
-                if (mStack == null) {
-                    final RecentTasks recents =
-                            new RecentTasks(mService, mService.mStackSupervisor);
-                    if (mStackId == ActivityManager.StackId.PINNED_STACK_ID) {
-                        mStack = new PinnedActivityStack(this, recents, mOnTop) {
-                            @Override
-                            Rect getDefaultPictureInPictureBounds(float aspectRatio) {
-                                return new Rect(50, 50, 100, 100);
-                            }
-                        };
-                    } else {
-                        mStack = new TestActivityStack(this, recents, mOnTop);
-                    }
-                }
-
-                return mStack;
-            }
+            return createTestStack(stackId, createOnTop);
         }
     }
 
@@ -276,9 +246,9 @@ public class ActivityTestsBase {
             extends ActivityStack<T> implements ActivityStackReporter {
         private int mOnActivityRemovedFromStackCount = 0;
         private T mContainerController;
-        TestActivityStack(ActivityStackSupervisor.ActivityContainer activityContainer,
-                RecentTasks recentTasks, boolean onTop) {
-            super(activityContainer, recentTasks, onTop);
+        TestActivityStack(ActivityStackSupervisor.ActivityDisplay display, int stackId,
+                ActivityStackSupervisor supervisor, RecentTasks recentTasks, boolean onTop) {
+            super(display, stackId, supervisor, recentTasks, onTop);
         }
 
         @Override

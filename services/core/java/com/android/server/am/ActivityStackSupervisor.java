@@ -36,8 +36,6 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
-import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
@@ -50,7 +48,6 @@ import static android.view.Display.TYPE_VIRTUAL;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
@@ -72,7 +69,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
@@ -112,7 +108,6 @@ import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
-import android.app.IActivityContainerCallback;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
@@ -120,7 +115,6 @@ import android.app.WaitResult;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -132,10 +126,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
-import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.display.VirtualDisplay;
-import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
@@ -151,7 +142,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
@@ -168,9 +158,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
-import android.view.InputEvent;
-import android.view.Surface;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.TransferPipe;
@@ -194,7 +183,6 @@ import java.util.Set;
 
 public class ActivityStackSupervisor extends ConfigurationContainer implements DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
-    private static final String TAG_CONTAINERS = TAG + POSTFIX_CONTAINERS;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_IDLE = TAG + POSTFIX_IDLE;
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
@@ -205,7 +193,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     static final String TAG_TASKS = TAG + POSTFIX_TASKS;
-    private static final String TAG_VISIBLE_BEHIND = TAG + POSTFIX_VISIBLE_BEHIND;
 
     /** How long we wait until giving up on the last activity telling us it is idle. */
     static final int IDLE_TIMEOUT = 10 * 1000;
@@ -224,10 +211,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     static final int HANDLE_DISPLAY_ADDED = FIRST_SUPERVISOR_STACK_MSG + 5;
     static final int HANDLE_DISPLAY_CHANGED = FIRST_SUPERVISOR_STACK_MSG + 6;
     static final int HANDLE_DISPLAY_REMOVED = FIRST_SUPERVISOR_STACK_MSG + 7;
-    static final int CONTAINER_CALLBACK_VISIBILITY = FIRST_SUPERVISOR_STACK_MSG + 8;
     static final int LOCK_TASK_START_MSG = FIRST_SUPERVISOR_STACK_MSG + 9;
     static final int LOCK_TASK_END_MSG = FIRST_SUPERVISOR_STACK_MSG + 10;
-    static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
     static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
     static final int SHOW_LOCK_TASK_ESCAPE_MESSAGE_MSG = FIRST_SUPERVISOR_STACK_MSG + 13;
     static final int REPORT_MULTI_WINDOW_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 14;
@@ -414,7 +399,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     // TODO: Add listener for removal of references.
     /** Mapping from (ActivityStack/TaskStack).mStackId to their current state */
-    SparseArray<ActivityContainer> mActivityContainers = new SparseArray<>();
+    SparseArray<ActivityStack> mStacks = new SparseArray<>();
 
     // TODO: There should be an ActivityDisplayController coordinating am/wm interaction.
     /** Mapping from displayId to display current state */
@@ -680,31 +665,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     boolean isFocusedStack(ActivityStack stack) {
-        if (stack == null) {
-            return false;
-        }
-
-        final ActivityRecord parent = stack.mActivityContainer.mParentActivity;
-        if (parent != null) {
-            stack = parent.getStack();
-        }
-        return stack == mFocusedStack;
+        return stack != null && stack == mFocusedStack;
     }
 
     /** The top most stack on its display. */
     boolean isFrontStackOnDisplay(ActivityStack stack) {
-        return isFrontOfStackList(stack, stack.mActivityContainer.mActivityDisplay.mStacks);
+        return isFrontOfStackList(stack, stack.getDisplay().mStacks);
     }
 
     private boolean isFrontOfStackList(ActivityStack stack, List<ActivityStack> stackList) {
-        if (stack == null) {
-            return false;
-        }
-
-        final ActivityRecord parent = stack.mActivityContainer.mParentActivity;
-        if (parent != null) {
-            stack = parent.getStack();
-        }
         return stack == stackList.get((stackList.size() - 1));
     }
 
@@ -1095,21 +1064,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
         return pausing;
-    }
-
-    void pauseChildStacks(ActivityRecord parent, boolean userLeaving, boolean uiSleeping,
-            ActivityRecord resuming, boolean dontWait) {
-        // TODO: Put all stacks in supervisor and iterate through them instead.
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
-            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = stacks.get(stackNdx);
-                if (stack.mResumedActivity != null &&
-                        stack.mActivityContainer.mParentActivity == parent) {
-                    stack.startPausingLocked(userLeaving, uiSleeping, resuming, dontWait);
-                }
-            }
-        }
     }
 
     void cancelInitializingActivities() {
@@ -2210,9 +2164,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     protected <T extends ActivityStack> T getStack(int stackId, boolean createStaticStackIfNeeded,
             boolean createOnTop) {
-        final ActivityContainer activityContainer = mActivityContainers.get(stackId);
-        if (activityContainer != null) {
-            return (T) activityContainer.mStack;
+        final ActivityStack stack = mStacks.get(stackId);
+        if (stack != null) {
+            return (T) stack;
         }
         if (!createStaticStackIfNeeded || !StackId.isStaticStack(stackId)) {
             return null;
@@ -2353,33 +2307,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     boolean isStackDockedInEffect(int stackId) {
         return stackId == DOCKED_STACK_ID ||
                 (StackId.isResizeableByDockedStack(stackId) && getStack(DOCKED_STACK_ID) != null);
-    }
-
-    ActivityContainer createVirtualActivityContainer(ActivityRecord parentActivity,
-            IActivityContainerCallback callback) {
-        ActivityContainer activityContainer =
-                new VirtualActivityContainer(parentActivity, callback);
-        mActivityContainers.put(activityContainer.mStackId, activityContainer);
-        if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS,
-                "createActivityContainer: " + activityContainer);
-        parentActivity.mChildContainers.add(activityContainer);
-        return activityContainer;
-    }
-
-    void removeChildActivityContainers(ActivityRecord parentActivity) {
-        final ArrayList<ActivityContainer> childStacks = parentActivity.mChildContainers;
-        for (int containerNdx = childStacks.size() - 1; containerNdx >= 0; --containerNdx) {
-            ActivityContainer container = childStacks.remove(containerNdx);
-            if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS, "removeChildActivityContainers: removing "
-                    + container);
-            container.release();
-        }
-    }
-
-    void deleteActivityContainerRecord(int stackId) {
-        if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS,
-                "deleteActivityContainerRecord: callers=" + Debug.getCallers(4));
-        mActivityContainers.remove(stackId);
     }
 
     void resizeStackLocked(int stackId, Rect bounds, Rect tempTaskBounds, Rect tempTaskInsetBounds,
@@ -2646,12 +2573,18 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (activityDisplay == null) {
             return null;
         }
+        return createStack(stackId, activityDisplay, onTop);
 
-        final ActivityContainer activityContainer =
-                new ActivityContainer(stackId, activityDisplay, onTop);
-        return activityContainer.mStack;
     }
 
+    ActivityStack createStack(int stackId, ActivityDisplay display, boolean onTop) {
+        switch (stackId) {
+            case PINNED_STACK_ID:
+                return new PinnedActivityStack(display, stackId, this, mRecentTasks, onTop);
+            default:
+                return new ActivityStack(display, stackId, this, mRecentTasks, onTop);
+        }
+    }
 
     void removeStackInSurfaceTransaction(int stackId) {
         final ActivityStack stack = getStack(stackId);
@@ -2879,23 +2812,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             throw new IllegalArgumentException("moveStackToDisplayLocked: Unknown displayId="
                     + displayId);
         }
-        final ActivityContainer activityContainer = mActivityContainers.get(stackId);
-        if (activityContainer != null) {
-            if (activityContainer.isAttachedLocked()) {
-                if (activityContainer.getDisplayId() == displayId) {
-                    throw new IllegalArgumentException("Trying to move stackId=" + stackId
-                            + " to its current displayId=" + displayId);
-                }
-
-                activityContainer.moveToDisplayLocked(activityDisplay, onTop);
-            } else {
-                throw new IllegalStateException("moveStackToDisplayLocked: Stack with stackId="
-                        + stackId + " is not attached to any display.");
-            }
-        } else {
+        final ActivityStack stack = mStacks.get(stackId);
+        if (stack == null) {
             throw new IllegalArgumentException("moveStackToDisplayLocked: Unknown stackId="
                     + stackId);
         }
+
+        final ActivityDisplay currentDisplay = stack.getDisplay();
+        if (currentDisplay == null) {
+            throw new IllegalStateException("moveStackToDisplayLocked: Stack with stack=" + stack
+                    + " is not attached to any display.");
+        }
+
+        if (currentDisplay.mDisplayId == displayId) {
+            throw new IllegalArgumentException("Trying to move stack=" + stack
+                    + " to its current displayId=" + displayId);
+        }
+
+        stack.reparent(activityDisplay, onTop);
         // TODO(multi-display): resize stacks properly if moved from split-screen.
     }
 
@@ -2923,7 +2857,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Ensure that we're not moving a task to a dynamic stack if device doesn't support
         // multi-display.
         // TODO(multi-display): Support non-dynamic stacks on secondary displays.
-        // TODO: Check ActivityView after fixing b/35349678.
         if (StackId.isDynamicStack(stackId) && !mService.mSupportsMultiDisplay) {
             throw new IllegalArgumentException("Device doesn't support multi-display, can not"
                     + " reparent task=" + task + " to stackId=" + stackId);
@@ -3105,11 +3038,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 if (!checkActivityBelongsInStack(r, stack)) {
                     if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping stack: (mismatch activity/stack) "
                             + stack);
-                    continue;
-                }
-                if (!stack.mActivityContainer.isEligibleForNewTasks()) {
-                    if (DEBUG_TASKS) Slog.d(TAG_TASKS,
-                            "Skipping stack: (new task not allowed) " + stack);
                     continue;
                 }
                 stack.findTaskLocked(r, mTmpFindTaskResult);
@@ -3626,7 +3554,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         pw.print(prefix);
         pw.println("mCurTaskIdForUser=" + mCurTaskIdForUser);
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
-        pw.print(prefix); pw.println("mActivityContainers=" + mActivityContainers);
+        pw.print(prefix); pw.println("mStacks=" + mStacks);
         pw.print(prefix); pw.print("mLockTaskModeState=" + lockTaskModeToString());
         final SparseArray<String[]> packages = mService.mLockTaskPackages;
         if (packages.size() > 0) {
@@ -3918,6 +3846,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** Check if display with specified id is added to the list. */
     boolean isDisplayAdded(int displayId) {
         return getActivityDisplayOrCreateLocked(displayId) != null;
+    }
+
+    ActivityDisplay getActivityDisplay(int displayId) {
+        return mActivityDisplays.get(displayId);
     }
 
     /**
@@ -4481,16 +4413,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 case HANDLE_DISPLAY_REMOVED: {
                     handleDisplayRemoved(msg.arg1);
                 } break;
-                case CONTAINER_CALLBACK_VISIBILITY: {
-                    final ActivityContainer container = (ActivityContainer) msg.obj;
-                    final IActivityContainerCallback callback = container.mCallback;
-                    if (callback != null) {
-                        try {
-                            callback.setVisible(container.asBinder(), msg.arg1 == 1);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                } break;
                 case LOCK_TASK_START_MSG: {
                     // When lock task starts, we disable the status bars.
                     try {
@@ -4563,16 +4485,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     }
                     mLockTaskNotify.showToast(LOCK_TASK_MODE_PINNED);
                 } break;
-                case CONTAINER_CALLBACK_TASK_LIST_EMPTY: {
-                    final ActivityContainer container = (ActivityContainer) msg.obj;
-                    final IActivityContainerCallback callback = container.mCallback;
-                    if (callback != null) {
-                        try {
-                            callback.onAllActivitiesComplete(container.asBinder());
-                        } catch (RemoteException e) {
-                        }
-                    }
-                } break;
                 case LAUNCH_TASK_BEHIND_COMPLETE: {
                     synchronized (mService) {
                         ActivityRecord r = ActivityRecord.forTokenLocked((IBinder) msg.obj);
@@ -4586,340 +4498,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    class ActivityContainer extends android.app.IActivityContainer.Stub {
-        final static int FORCE_NEW_TASK_FLAGS = FLAG_ACTIVITY_NEW_TASK |
-                FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION;
-        final int mStackId;
-        IActivityContainerCallback mCallback = null;
-        ActivityStack mStack;
-        ActivityRecord mParentActivity = null;
-        String mIdString;
-
-        boolean mVisible = true;
-
-        /** Display this ActivityStack is currently on. Null if not attached to a Display. */
-        ActivityDisplay mActivityDisplay;
-
-        final static int CONTAINER_STATE_HAS_SURFACE = 0;
-        final static int CONTAINER_STATE_NO_SURFACE = 1;
-        final static int CONTAINER_STATE_FINISHING = 2;
-        int mContainerState = CONTAINER_STATE_HAS_SURFACE;
-
-        ActivityContainer(int stackId, ActivityDisplay activityDisplay, boolean onTop) {
-            synchronized (mService) {
-                mStackId = stackId;
-                mActivityDisplay = activityDisplay;
-                mIdString = "ActivtyContainer{" + mStackId + "}";
-
-                createStack(stackId, onTop);
-                if (DEBUG_STACK) Slog.d(TAG_STACK, "Creating " + this);
-            }
-        }
-
-        protected void createStack(int stackId, boolean onTop) {
-            switch (stackId) {
-                case PINNED_STACK_ID:
-                    new PinnedActivityStack(this, mRecentTasks, onTop);
-                    break;
-                default:
-                    new ActivityStack(this, mRecentTasks, onTop);
-                    break;
-            }
-        }
-
-        /**
-         * Adds the stack to specified display. Also calls WindowManager to do the same from
-         * {@link ActivityStack#reparent(ActivityDisplay, boolean)}.
-         * @param activityDisplay The display to add the stack to.
-         */
-        void addToDisplayLocked(ActivityDisplay activityDisplay) {
-            if (DEBUG_STACK) Slog.d(TAG_STACK, "addToDisplayLocked: " + this
-                    + " to display=" + activityDisplay);
-            if (mActivityDisplay != null) {
-                throw new IllegalStateException("ActivityContainer is already attached, " +
-                        "displayId=" + mActivityDisplay.mDisplayId);
-            }
-            mActivityDisplay = activityDisplay;
-            mStack.reparent(activityDisplay, true /* onTop */);
-        }
-
-        @Override
-        public void addToDisplay(int displayId) {
-            synchronized (mService) {
-                final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
-                if (activityDisplay == null) {
-                    return;
-                }
-                addToDisplayLocked(activityDisplay);
-            }
-        }
-
-        @Override
-        public int getDisplayId() {
-            synchronized (mService) {
-                if (mActivityDisplay != null) {
-                    return mActivityDisplay.mDisplayId;
-                }
-            }
-            return -1;
-        }
-
-        @Override
-        public int getStackId() {
-            synchronized (mService) {
-                return mStackId;
-            }
-        }
-
-        @Override
-        public boolean injectEvent(InputEvent event) {
-            final long origId = Binder.clearCallingIdentity();
-            try {
-                synchronized (mService) {
-                    if (mActivityDisplay != null) {
-                        return mInputManagerInternal.injectInputEvent(event,
-                                mActivityDisplay.mDisplayId,
-                                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-                    }
-                }
-                return false;
-            } finally {
-                Binder.restoreCallingIdentity(origId);
-            }
-        }
-
-        @Override
-        public void release() {
-            synchronized (mService) {
-                if (mContainerState == CONTAINER_STATE_FINISHING) {
-                    return;
-                }
-                mContainerState = CONTAINER_STATE_FINISHING;
-
-                long origId = Binder.clearCallingIdentity();
-                try {
-                    mStack.finishAllActivitiesLocked(false);
-                    mService.mActivityStarter.removePendingActivityLaunchesLocked(mStack);
-                } finally {
-                    Binder.restoreCallingIdentity(origId);
-                }
-            }
-        }
-
-        /**
-         * Remove the stack completely. Must be called only when there are no tasks left in it,
-         * as this method does not finish running activities.
-         */
-        void removeLocked() {
-            if (DEBUG_STACK) Slog.d(TAG_STACK, "removeLocked: " + this + " from display="
-                    + mActivityDisplay + " Callers=" + Debug.getCallers(2));
-            if (mActivityDisplay != null) {
-                removeFromDisplayLocked();
-            }
-            mStack.remove();
-        }
-
-        /**
-         * Remove the stack from its current {@link ActivityDisplay}, so it can be either destroyed
-         * completely or re-parented.
-         */
-        private void removeFromDisplayLocked() {
-            if (DEBUG_STACK) Slog.d(TAG_STACK, "removeFromDisplayLocked: " + this
-                    + " current displayId=" + mActivityDisplay.mDisplayId);
-
-            mActivityDisplay.detachStack(mStack);
-            mActivityDisplay = null;
-        }
-
-        /**
-         * Move the stack to specified display.
-         * @param activityDisplay Target display to move the stack to.
-         * @param onTop Indicates whether container should be place on top or on bottom.
-         */
-        void moveToDisplayLocked(ActivityDisplay activityDisplay, boolean onTop) {
-            if (DEBUG_STACK) Slog.d(TAG_STACK, "moveToDisplayLocked: " + this + " from display="
-                    + mActivityDisplay + " to display=" + activityDisplay
-                    + " Callers=" + Debug.getCallers(2));
-
-            removeFromDisplayLocked();
-
-            mActivityDisplay = activityDisplay;
-            mStack.reparent(activityDisplay, onTop);
-        }
-
-        @Override
-        public final int startActivity(Intent intent) {
-            return mService.startActivity(intent, this);
-        }
-
-        @Override
-        public final int startActivityIntentSender(IIntentSender intentSender)
-                throws TransactionTooLargeException {
-            mService.enforceNotIsolatedCaller("ActivityContainer.startActivityIntentSender");
-
-            if (!(intentSender instanceof PendingIntentRecord)) {
-                throw new IllegalArgumentException("Bad PendingIntent object");
-            }
-
-            final int userId = mService.mUserController.handleIncomingUser(Binder.getCallingPid(),
-                    Binder.getCallingUid(), mCurrentUser, false,
-                    ActivityManagerService.ALLOW_FULL_ONLY, "ActivityContainer", null);
-
-            final PendingIntentRecord pendingIntent = (PendingIntentRecord) intentSender;
-            checkEmbeddedAllowedInner(userId, pendingIntent.key.requestIntent,
-                    pendingIntent.key.requestResolvedType);
-
-            return pendingIntent.sendInner(0, null, null, null, null, null, null, null, 0,
-                    FORCE_NEW_TASK_FLAGS, FORCE_NEW_TASK_FLAGS, null, this);
-        }
-
-        void checkEmbeddedAllowedInner(int userId, Intent intent, String resolvedType) {
-            ActivityInfo aInfo = resolveActivity(intent, resolvedType, 0, null, userId);
-            if (aInfo != null && (aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
-                throw new SecurityException(
-                        "Attempt to embed activity that has not set allowEmbedded=\"true\"");
-            }
-        }
-
-        @Override
-        public IBinder asBinder() {
-            return this;
-        }
-
-        @Override
-        public void setSurface(Surface surface, int width, int height, int density) {
-            mService.enforceNotIsolatedCaller("ActivityContainer.attachToSurface");
-        }
-
-        ActivityStackSupervisor getOuter() {
-            return ActivityStackSupervisor.this;
-        }
-
-        boolean isAttachedLocked() {
-            return mActivityDisplay != null;
-        }
-
-        // TODO: Make sure every change to ActivityRecord.visible results in a call to this.
-        void setVisible(boolean visible) {
-            if (mVisible != visible) {
-                mVisible = visible;
-                if (mCallback != null) {
-                    mHandler.obtainMessage(CONTAINER_CALLBACK_VISIBILITY, visible ? 1 : 0,
-                            0 /* unused */, this).sendToTarget();
-                }
-            }
-        }
-
-        void setDrawn() {
-        }
-
-        // You can always start a new task on a regular ActivityStack.
-        boolean isEligibleForNewTasks() {
-            return true;
-        }
-
-        void onTaskListEmptyLocked() {
-            removeLocked();
-            mHandler.obtainMessage(CONTAINER_CALLBACK_TASK_LIST_EMPTY, this).sendToTarget();
-        }
-
-        @Override
-        public String toString() {
-            return mIdString + (mActivityDisplay == null ? "N" : "A");
-        }
-    }
-
-    private class VirtualActivityContainer extends ActivityContainer {
-        Surface mSurface;
-        boolean mDrawn = false;
-
-        VirtualActivityContainer(ActivityRecord parent, IActivityContainerCallback callback) {
-            super(getNextStackId(), parent.getStack().mActivityContainer.mActivityDisplay,
-                    true /* onTop */);
-            mParentActivity = parent;
-            mCallback = callback;
-            mContainerState = CONTAINER_STATE_NO_SURFACE;
-            mIdString = "VirtualActivityContainer{" + mStackId + ", parent=" + mParentActivity + "}";
-        }
-
-        @Override
-        public void setSurface(Surface surface, int width, int height, int density) {
-            super.setSurface(surface, width, height, density);
-
-            synchronized (mService) {
-                final long origId = Binder.clearCallingIdentity();
-                try {
-                    setSurfaceLocked(surface, width, height, density);
-                } finally {
-                    Binder.restoreCallingIdentity(origId);
-                }
-            }
-        }
-
-        private void setSurfaceLocked(Surface surface, int width, int height, int density) {
-            if (mContainerState == CONTAINER_STATE_FINISHING) {
-                return;
-            }
-            VirtualActivityDisplay virtualActivityDisplay =
-                    (VirtualActivityDisplay) mActivityDisplay;
-            if (virtualActivityDisplay == null) {
-                virtualActivityDisplay =
-                        new VirtualActivityDisplay(width, height, density);
-                mActivityDisplay = virtualActivityDisplay;
-                mActivityDisplays.put(virtualActivityDisplay.mDisplayId, virtualActivityDisplay);
-                addToDisplayLocked(virtualActivityDisplay);
-            }
-
-            if (mSurface != null) {
-                mSurface.release();
-            }
-
-            mSurface = surface;
-            if (surface != null) {
-                resumeFocusedStackTopActivityLocked();
-            } else {
-                mContainerState = CONTAINER_STATE_NO_SURFACE;
-                ((VirtualActivityDisplay) mActivityDisplay).setSurface(null);
-                if (mStack.mPausingActivity == null && mStack.mResumedActivity != null) {
-                    mStack.startPausingLocked(false, true, null, false);
-                }
-            }
-
-            setSurfaceIfReadyLocked();
-
-            if (DEBUG_STACK) Slog.d(TAG_STACK,
-                    "setSurface: " + this + " to display=" + virtualActivityDisplay);
-        }
-
-        @Override
-        boolean isAttachedLocked() {
-            return mSurface != null && super.isAttachedLocked();
-        }
-
-        @Override
-        void setDrawn() {
-            synchronized (mService) {
-                mDrawn = true;
-                setSurfaceIfReadyLocked();
-            }
-        }
-
-        // Never start a new task on an ActivityView if it isn't explicitly specified.
-        @Override
-        boolean isEligibleForNewTasks() {
-            return false;
-        }
-
-        private void setSurfaceIfReadyLocked() {
-            if (DEBUG_STACK) Slog.v(TAG_STACK, "setSurfaceIfReadyLocked: mDrawn=" + mDrawn +
-                    " mContainerState=" + mContainerState + " mSurface=" + mSurface);
-            if (mDrawn && mSurface != null && mContainerState == CONTAINER_STATE_NO_SURFACE) {
-                ((VirtualActivityDisplay) mActivityDisplay).setSurface(mSurface);
-                mContainerState = CONTAINER_STATE_HAS_SURFACE;
-            }
-        }
-    }
-
+    // TODO: Move to its own file.
     /** Exactly one of these classes per Display in the system. Capable of holding zero or more
      * attached {@link ActivityStack}s */
     class ActivityDisplay extends ConfigurationContainer {
@@ -4934,7 +4513,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         /** Array of all UIDs that are present on the display. */
         private IntArray mDisplayAccessUIDs = new IntArray();
 
+        @VisibleForTesting
         ActivityDisplay() {
+            mActivityDisplays.put(mDisplayId, this);
         }
 
         // After instantiation, check that mDisplay is not null before using this. The alternative
@@ -5008,43 +4589,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         boolean shouldDestroyContentOnRemove() {
             return mDisplay.getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT;
-        }
-    }
-
-    class VirtualActivityDisplay extends ActivityDisplay {
-        VirtualDisplay mVirtualDisplay;
-
-        VirtualActivityDisplay(int width, int height, int density) {
-            DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-            mVirtualDisplay = dm.createVirtualDisplay(mService.mContext, null /* projection */,
-                    VIRTUAL_DISPLAY_BASE_NAME, width, height, density, null /* surface */,
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY, null /* callback */,
-                    null /* handler */, null /* uniqueId */);
-
-            init(mVirtualDisplay.getDisplay());
-
-            mWindowManager.onDisplayAdded(mDisplayId);
-        }
-
-        void setSurface(Surface surface) {
-            if (mVirtualDisplay != null) {
-                mVirtualDisplay.setSurface(surface);
-            }
-        }
-
-        @Override
-        void detachStack(ActivityStack stack) {
-            super.detachStack(stack);
-            if (mVirtualDisplay != null) {
-                mVirtualDisplay.release();
-                mVirtualDisplay = null;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "VirtualActivityDisplay={" + mDisplayId + "}";
         }
     }
 
@@ -5154,7 +4698,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
             userId = task.userId;
             int result = mService.startActivityInPackage(callingUid, callingPackage, intent, null,
-                    null, null, 0, 0, bOptions, userId, null, task, "startActivityFromRecents");
+                    null, null, 0, 0, bOptions, userId, task, "startActivityFromRecents");
             if (launchStackId == DOCKED_STACK_ID) {
                 setResizingDuringAnimation(task);
             }

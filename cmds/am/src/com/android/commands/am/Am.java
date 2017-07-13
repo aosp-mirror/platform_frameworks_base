@@ -16,70 +16,25 @@
 
 package com.android.commands.am;
 
-import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityManager.RESIZE_MODE_USER;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackInfo;
-import android.app.IActivityContainer;
-import android.app.IActivityController;
 import android.app.IActivityManager;
-import android.app.IInstrumentationWatcher;
-import android.app.Instrumentation;
-import android.app.IStopUserCallback;
-import android.app.ProfilerInfo;
-import android.app.UiAutomationConnection;
-import android.app.usage.ConfigurationStats;
-import android.app.usage.IUsageStatsManager;
-import android.app.usage.UsageStatsManager;
-import android.content.ComponentCallbacks2;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.IIntentReceiver;
-import android.content.Intent;
 import android.content.pm.IPackageManager;
-import android.content.pm.InstrumentationInfo;
-import android.content.pm.ParceledListSlice;
-import android.content.pm.UserInfo;
-import android.content.res.Configuration;
-import android.graphics.Rect;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
-import android.os.ShellCommand;
-import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.text.TextUtils;
 import android.util.AndroidException;
-import android.util.ArrayMap;
-import android.util.Log;
-import android.view.IWindowManager;
 
 import com.android.internal.os.BaseCommand;
-import com.android.internal.util.HexDump;
-import com.android.internal.util.Preconditions;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class Am extends BaseCommand {
 

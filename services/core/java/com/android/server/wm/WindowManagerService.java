@@ -3584,7 +3584,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void updateCircularDisplayMaskIfNeeded() {
-        // we're fullscreen and not hosted in an ActivityView
         if (mContext.getResources().getConfiguration().isScreenRound()
                 && mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_windowShowCircularMask)) {
