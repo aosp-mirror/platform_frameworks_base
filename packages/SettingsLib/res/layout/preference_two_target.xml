@@ -18,6 +18,7 @@
 <!-- Based off preference_material_settings.xml except that ripple on only on the left side. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:settings="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
@@ -50,8 +51,8 @@
                 android:id="@android:id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxWidth="48dp"
-                android:maxHeight="48dp" />
+                settings:maxWidth="48dp"
+                settings:maxHeight="48dp" />
         </LinearLayout>
 
         <RelativeLayout
