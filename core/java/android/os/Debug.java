@@ -221,28 +221,69 @@ public final class Debug
         /** @hide */
         public static final int OTHER_OTHER_MEMTRACK = 16;
 
+        // Needs to be declared here for the DVK_STAT ranges below.
+        /** @hide */
+        public static final int NUM_OTHER_STATS = 17;
+
+        // Dalvik subsections.
         /** @hide */
         public static final int OTHER_DALVIK_NORMAL = 17;
         /** @hide */
         public static final int OTHER_DALVIK_LARGE = 18;
         /** @hide */
-        public static final int OTHER_DALVIK_LINEARALLOC = 19;
+        public static final int OTHER_DALVIK_ZYGOTE = 19;
         /** @hide */
-        public static final int OTHER_DALVIK_ACCOUNTING = 20;
+        public static final int OTHER_DALVIK_NON_MOVING = 20;
+        // Section begins and ends for dumpsys, relative to the DALVIK categories.
         /** @hide */
-        public static final int OTHER_DALVIK_CODE_CACHE = 21;
+        public static final int OTHER_DVK_STAT_DALVIK_START =
+                OTHER_DALVIK_NORMAL - NUM_OTHER_STATS;
         /** @hide */
-        public static final int OTHER_DALVIK_ZYGOTE = 22;
+        public static final int OTHER_DVK_STAT_DALVIK_END =
+                OTHER_DALVIK_NON_MOVING - NUM_OTHER_STATS;
+
+        // Dalvik Other subsections.
         /** @hide */
-        public static final int OTHER_DALVIK_NON_MOVING = 23;
+        public static final int OTHER_DALVIK_OTHER_LINEARALLOC = 21;
         /** @hide */
-        public static final int OTHER_DALVIK_INDIRECT_REFERENCE_TABLE = 24;
+        public static final int OTHER_DALVIK_OTHER_ACCOUNTING = 22;
+        /** @hide */
+        public static final int OTHER_DALVIK_OTHER_CODE_CACHE = 23;
+        /** @hide */
+        public static final int OTHER_DALVIK_OTHER_COMPILER_METADATA = 24;
+        /** @hide */
+        public static final int OTHER_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE = 25;
+        /** @hide */
+        public static final int OTHER_DVK_STAT_DALVIK_OTHER_START =
+                OTHER_DALVIK_OTHER_LINEARALLOC - NUM_OTHER_STATS;
+        /** @hide */
+        public static final int OTHER_DVK_STAT_DALVIK_OTHER_END =
+                OTHER_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE - NUM_OTHER_STATS;
+
+        // Dex subsections (Boot vdex, App dex, and App vdex).
+        /** @hide */
+        public static final int OTHER_DEX_BOOT_VDEX = 26;
+        /** @hide */
+        public static final int OTHER_DEX_APP_DEX = 27;
+        /** @hide */
+        public static final int OTHER_DEX_APP_VDEX = 28;
+        /** @hide */
+        public static final int OTHER_DVK_STAT_DEX_START = OTHER_DEX_BOOT_VDEX - NUM_OTHER_STATS;
+        /** @hide */
+        public static final int OTHER_DVK_STAT_DEX_END = OTHER_DEX_APP_VDEX - NUM_OTHER_STATS;
+
+        // Art subsections (App image, boot image).
+        /** @hide */
+        public static final int OTHER_ART_APP = 29;
+        /** @hide */
+        public static final int OTHER_ART_BOOT = 30;
+        /** @hide */
+        public static final int OTHER_DVK_STAT_ART_START = OTHER_ART_APP - NUM_OTHER_STATS;
+        /** @hide */
+        public static final int OTHER_DVK_STAT_ART_END = OTHER_ART_BOOT - NUM_OTHER_STATS;
 
         /** @hide */
-        public static final int NUM_OTHER_STATS = 17;
-
-        /** @hide */
-        public static final int NUM_DVK_STATS = 8;
+        public static final int NUM_DVK_STATS = 14;
 
         /** @hide */
         public static final int NUM_CATEGORIES = 8;
@@ -406,12 +447,18 @@ public final class Debug
                 case OTHER_OTHER_MEMTRACK: return "Other mtrack";
                 case OTHER_DALVIK_NORMAL: return ".Heap";
                 case OTHER_DALVIK_LARGE: return ".LOS";
-                case OTHER_DALVIK_LINEARALLOC: return ".LinearAlloc";
-                case OTHER_DALVIK_ACCOUNTING: return ".GC";
-                case OTHER_DALVIK_CODE_CACHE: return ".JITCache";
                 case OTHER_DALVIK_ZYGOTE: return ".Zygote";
                 case OTHER_DALVIK_NON_MOVING: return ".NonMoving";
-                case OTHER_DALVIK_INDIRECT_REFERENCE_TABLE: return ".IndirectRef";
+                case OTHER_DALVIK_OTHER_LINEARALLOC: return ".LinearAlloc";
+                case OTHER_DALVIK_OTHER_ACCOUNTING: return ".GC";
+                case OTHER_DALVIK_OTHER_CODE_CACHE: return ".JITCache";
+                case OTHER_DALVIK_OTHER_COMPILER_METADATA: return ".CompilerMetadata";
+                case OTHER_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE: return ".IndirectRef";
+                case OTHER_DEX_BOOT_VDEX: return ".Boot vdex";
+                case OTHER_DEX_APP_DEX: return ".App dex";
+                case OTHER_DEX_APP_VDEX: return ".App vdex";
+                case OTHER_ART_APP: return ".App art";
+                case OTHER_ART_BOOT: return ".Boot art";
                 default: return "????";
             }
         }
