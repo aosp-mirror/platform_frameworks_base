@@ -690,7 +690,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * Returns whether this {@link WindowState} has been considered for drawing by its parent.
      */
-    boolean getDrawnStatedEvaluated() {
+    boolean getDrawnStateEvaluated() {
         return mDrawnStateEvaluated;
     }
 
@@ -3392,7 +3392,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
                 pw.print(prefix); pw.print(" isAnimatingWithSavedSurface()=");
                 pw.print(isAnimatingWithSavedSurface());
-                pw.print(" mAppDied=");pw.println(mAppDied);
+                pw.print(" mAppDied=");pw.print(mAppDied);
+                pw.print(prefix); pw.print("drawnStateEvaluated=");
+                        pw.print(getDrawnStateEvaluated());
+                pw.print(prefix); pw.print("mightAffectAllDrawn=");
+                        pw.println(mightAffectAllDrawn(false /*visibleOnly*/));
             }
             pw.print(prefix); pw.print("mViewVisibility=0x");
             pw.print(Integer.toHexString(mViewVisibility));
@@ -3537,6 +3541,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (computeDragResizing()) {
             pw.print(prefix); pw.println("computeDragResizing=" + computeDragResizing());
         }
+        pw.print(prefix); pw.println("isOnScreen=" + isOnScreen());
+        pw.print(prefix); pw.println("isVisible=" + isVisible());
     }
 
     @Override
