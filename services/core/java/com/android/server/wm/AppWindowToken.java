@@ -1357,8 +1357,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      * @return {@code true} If all children have been considered, {@code false}.
      */
     private boolean allDrawnStatesConsidered() {
-        for (WindowState child : mChildren) {
-            if (!child.getDrawnStatedEvaluated()) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowState child = mChildren.get(i);
+            if (child.mightAffectAllDrawn(false /*visibleOnly*/ )
+                    && !child.getDrawnStateEvaluated()) {
                 return false;
             }
         }

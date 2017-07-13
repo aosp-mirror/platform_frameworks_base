@@ -77,8 +77,36 @@ public class OffloadController {
         mControlInitialized = mHwInterface.initOffloadControl(
                 new OffloadHardwareInterface.ControlCallback() {
                     @Override
-                    public void onOffloadEvent(int event) {
-                        mLog.log("got offload event: " + event);
+                    public void onStarted() {
+                        mLog.log("onStarted");
+                    }
+
+                    @Override
+                    public void onStoppedError() {
+                        mLog.log("onStoppedError");
+                    }
+
+                    @Override
+                    public void onStoppedUnsupported() {
+                        mLog.log("onStoppedUnsupported");
+                    }
+
+                    @Override
+                    public void onSupportAvailable() {
+                        mLog.log("onSupportAvailable");
+
+                        // [1] Poll for statistics and notify NetworkStats
+                        // [2] (Re)Push all state:
+                        //     [a] push local prefixes
+                        //     [b] push downstreams
+                        //     [c] push upstream parameters
+                        pushUpstreamParameters();
+                    }
+
+                    @Override
+                    public void onStoppedLimitReached() {
+                        mLog.log("onStoppedLimitReached");
+                        // Poll for statistics and notify NetworkStats
                     }
 
                     @Override

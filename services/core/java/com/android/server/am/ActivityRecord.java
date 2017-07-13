@@ -74,6 +74,7 @@ import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
@@ -154,6 +155,7 @@ import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.util.XmlUtils;
@@ -2319,10 +2321,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         outBounds.setEmpty();
         final float maxAspectRatio = info.maxAspectRatio;
         final ActivityStack stack = getStack();
-        if (task == null || stack == null || !task.mFullscreen || maxAspectRatio == 0) {
+        if (task == null || stack == null || !task.mFullscreen || maxAspectRatio == 0
+                || isInVrUiMode(getConfiguration())) {
             // We don't set override configuration if that activity task isn't fullscreen. I.e. the
             // activity is in multi-window mode. Or, there isn't a max aspect ratio specified for
-            // the activity. This is indicated by an empty {@link outBounds}.
+            // the activity. This is indicated by an empty {@link outBounds}. We also don't set it
+            // if we are in VR mode.
             return;
         }
 
@@ -2358,6 +2362,17 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         // Compute configuration based on max supported width and height.
         outBounds.set(0, 0, maxActivityWidth, maxActivityHeight);
+        // Position the activity frame on the opposite side of the nav bar.
+        final int navBarPosition = service.mWindowManager.getNavBarPosition();
+        final int left = navBarPosition == NAV_BAR_LEFT
+                ? configuration.appBounds.right - outBounds.width() : 0;
+        outBounds.offsetTo(left, 0 /* top */);
+    }
+
+    /** Get bounds of the activity. */
+    @VisibleForTesting
+    Rect getBounds() {
+        return new Rect(mBounds);
     }
 
     /**

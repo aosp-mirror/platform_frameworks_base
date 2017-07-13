@@ -33,4 +33,13 @@ message GnssLog {
 
   // Standard deviation of position accuracy (in meters)
   optional int32 standard_deviation_position_accuracy_meters = 8;
+
+  // Number of top 4 average CN0 processed
+  optional int32 num_top_four_average_cn0_processed = 9;
+
+  // Mean of top 4 average CN0 (dB-Hz)
+  optional double mean_top_four_average_cn0_db_hz = 10;
+
+  // Standard deviation of top 4 average CN0 (dB-Hz)
+  optional double standard_deviation_top_four_average_cn0_db_hz = 11;
 }

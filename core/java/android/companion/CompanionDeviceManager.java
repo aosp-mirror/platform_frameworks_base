@@ -280,12 +280,24 @@ public final class CompanionDeviceManager {
 
         @Override
         public void onSuccess(PendingIntent launcher) {
-            mHandler.post(() -> mCallback.onDeviceFound(launcher.getIntentSender()));
+            Handler handler = mHandler;
+            if (handler == null) return;
+            handler.post(() -> {
+                Callback callback = mCallback;
+                if (callback == null) return;
+                callback.onDeviceFound(launcher.getIntentSender());
+            });
         }
 
         @Override
         public void onFailure(CharSequence reason) {
-            mHandler.post(() -> mCallback.onFailure(reason));
+            Handler handler = mHandler;
+            if (handler == null) return;
+            handler.post(() -> {
+                Callback callback = mCallback;
+                if (callback == null) return;
+                callback.onFailure(reason);
+            });
         }
 
         @Override

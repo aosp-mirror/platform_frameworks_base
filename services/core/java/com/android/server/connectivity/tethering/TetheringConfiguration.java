@@ -70,6 +70,7 @@ public class TetheringConfiguration {
     public final String[] tetherableUsbRegexs;
     public final String[] tetherableWifiRegexs;
     public final String[] tetherableBluetoothRegexs;
+    public final int dunCheck;
     public final boolean isDunRequired;
     public final Collection<Integer> preferredUpstreamIfaceTypes;
     public final String[] dhcpRanges;
@@ -88,7 +89,7 @@ public class TetheringConfiguration {
         tetherableBluetoothRegexs = ctx.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_bluetooth_regexs);
 
-        final int dunCheck = checkDunRequired(ctx);
+        dunCheck = checkDunRequired(ctx);
         configLog.log("DUN check returned: " + dunCheckString(dunCheck));
 
         preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(ctx, dunCheck);
@@ -175,7 +176,7 @@ public class TetheringConfiguration {
         return upstreamNames;
     }
 
-    private static int checkDunRequired(Context ctx) {
+    public static int checkDunRequired(Context ctx) {
         final TelephonyManager tm = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
         return (tm != null) ? tm.getTetherApnRequired() : DUN_UNSPECIFIED;
     }

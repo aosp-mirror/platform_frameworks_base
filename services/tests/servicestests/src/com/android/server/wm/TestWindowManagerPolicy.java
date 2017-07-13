@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -611,6 +612,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean isNavBarForcedShownLw(WindowState win) {
         return false;
+    }
+
+    @Override
+    public int getNavBarPosition() {
+        return NAV_BAR_BOTTOM;
     }
 
     @Override

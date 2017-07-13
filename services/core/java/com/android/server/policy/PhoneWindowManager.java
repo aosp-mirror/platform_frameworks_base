@@ -358,10 +358,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final String SYSUI_SCREENSHOT_ERROR_RECEIVER =
             "com.android.systemui.screenshot.ScreenshotServiceErrorReceiver";
 
-    private static final int NAV_BAR_BOTTOM = 0;
-    private static final int NAV_BAR_RIGHT = 1;
-    private static final int NAV_BAR_LEFT = 2;
-
     /**
      * Keyguard stuff
      */
@@ -6940,6 +6936,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public boolean isNavBarForcedShownLw(WindowState windowState) {
         return mForceShowSystemBars;
+    }
+
+    @Override
+    public int getNavBarPosition() {
+        // TODO(multi-display): Support system decor on secondary displays.
+        return mNavigationBarPosition;
     }
 
     @Override

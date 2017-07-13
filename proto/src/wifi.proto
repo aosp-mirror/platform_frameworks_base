@@ -258,6 +258,24 @@ message WifiLog {
 
   // Wi-Fi Aware metrics
   optional WifiAwareLog wifi_aware_log = 57;
+
+  // Number of saved Passpoint providers in user profile.
+  optional int32 num_passpoint_providers = 58;
+
+  // Count of times Passpoint provider being installed.
+  optional int32 num_passpoint_provider_installation = 59;
+
+  // Count of times Passpoint provivider is installed successfully.
+  optional int32 num_passpoint_provider_install_success = 60;
+
+  // Count of times Passpoint provider is being uninstalled.
+  optional int32 num_passpoint_provider_uninstallation = 61;
+
+  // Count of times Passpoint provider is uninstalled successfully.
+  optional int32 num_passpoint_provider_uninstall_success = 62;
+
+  // Count of saved Passpoint providers device has ever connected to.
+  optional int32 num_passpoint_providers_successfully_connected = 63;
 }
 
 // Information that gets logged for every WiFi connection.

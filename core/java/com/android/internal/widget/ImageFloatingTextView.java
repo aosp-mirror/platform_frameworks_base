@@ -22,6 +22,7 @@ import android.text.BoringLayout;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextUtils;
+import android.text.method.TransformationMethod;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.widget.RemoteViews;
@@ -68,7 +69,12 @@ public class ImageFloatingTextView extends TextView {
     protected Layout makeSingleLayout(int wantWidth, BoringLayout.Metrics boring, int ellipsisWidth,
             Layout.Alignment alignment, boolean shouldEllipsize,
             TextUtils.TruncateAt effectiveEllipsize, boolean useSaved) {
-        CharSequence text = getText() == null ? "" : getText();
+        TransformationMethod transformationMethod = getTransformationMethod();
+        CharSequence text = getText();
+        if (transformationMethod != null) {
+            text = transformationMethod.getTransformation(text, this);
+        }
+        text = text == null ? "" : text;
         StaticLayout.Builder builder = StaticLayout.Builder.obtain(text, 0, text.length(),
                 getPaint(), wantWidth)
                 .setAlignment(alignment)

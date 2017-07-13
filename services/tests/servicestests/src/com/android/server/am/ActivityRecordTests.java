@@ -16,10 +16,15 @@
 
 package com.android.server.am;
 
+import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
+import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
+import static android.view.WindowManagerPolicy.NAV_BAR_RIGHT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -93,5 +98,37 @@ public class ActivityRecordTests extends ActivityTestsBase {
         }
 
         return -1;
+    }
+
+    @Test
+    public void testPositionLimitedAspectRatioNavBarBottom() throws Exception {
+        verifyPositionWithLimitedAspectRatio(NAV_BAR_BOTTOM, new Rect(0, 0, 1000, 2000), 1.5f,
+                new Rect(0, 0, 1000, 1500));
+    }
+
+    @Test
+    public void testPositionLimitedAspectRatioNavBarLeft() throws Exception {
+        verifyPositionWithLimitedAspectRatio(NAV_BAR_LEFT, new Rect(0, 0, 2000, 1000), 1.5f,
+                new Rect(500, 0, 2000, 1000));
+    }
+
+    @Test
+    public void testPositionLimitedAspectRatioNavBarRight() throws Exception {
+        verifyPositionWithLimitedAspectRatio(NAV_BAR_RIGHT, new Rect(0, 0, 2000, 1000), 1.5f,
+                new Rect(0, 0, 1500, 1000));
+    }
+
+    private void verifyPositionWithLimitedAspectRatio(int navBarPosition, Rect taskBounds,
+            float aspectRatio, Rect expectedActivityBounds) {
+        final ActivityManagerService service = createActivityManagerService();
+        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
+        final ActivityRecord record = createActivity(service, testActivityComponent, task);
+
+        // Verify with nav bar on the right.
+        when(service.mWindowManager.getNavBarPosition()).thenReturn(navBarPosition);
+        task.getConfiguration().setAppBounds(taskBounds);
+        record.info.maxAspectRatio = aspectRatio;
+        record.ensureActivityConfigurationLocked(0 /* globalChanges */, false /* preserveWindow */);
+        assertEquals(expectedActivityBounds, record.getBounds());
     }
 }
