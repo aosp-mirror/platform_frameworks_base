@@ -164,33 +164,29 @@ public class PackageTracker implements IntentHelper.Listener {
         }
 
         // Validate the updater application package.
-        // TODO(nfuller) Uncomment or remove the code below. Currently an app stops being a priv-app
-        // after it is replaced by one in data so this check fails. http://b/35995024
-        // try {
-        //     if (!mPackageManagerHelper.isPrivilegedApp(mUpdateAppPackageName)) {
-        //         throw failWithException(
-        //                 "Update app " + mUpdateAppPackageName + " must be a priv-app.", null);
-        //     }
-        // } catch (PackageManager.NameNotFoundException e) {
-        //     throw failWithException("Could not determine update app package details for "
-        //             + mUpdateAppPackageName, e);
-        // }
+        try {
+            if (!mPackageManagerHelper.isPrivilegedApp(mUpdateAppPackageName)) {
+                throw logAndThrowRuntimeException(
+                        "Update app " + mUpdateAppPackageName + " must be a priv-app.", null);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            throw logAndThrowRuntimeException("Could not determine update app package details for "
+                    + mUpdateAppPackageName, e);
+        }
         // TODO(nfuller) Consider permission checks. While an updated system app retains permissions
         // obtained by the system version it's not clear how to check them.
         Slog.d(TAG, "Update app " + mUpdateAppPackageName + " is valid.");
 
         // Validate the data application package.
-        // TODO(nfuller) Uncomment or remove the code below. Currently an app stops being a priv-app
-        // after it is replaced by one in data. http://b/35995024
-        // try {
-        //     if (!mPackageManagerHelper.isPrivilegedApp(mDataAppPackageName)) {
-        //         throw failWithException(
-        //                 "Data app " + mDataAppPackageName + " must be a priv-app.", null);
-        //     }
-        // } catch (PackageManager.NameNotFoundException e) {
-        //     throw failWithException("Could not determine data app package details for "
-        //             + mDataAppPackageName, e);
-        // }
+        try {
+            if (!mPackageManagerHelper.isPrivilegedApp(mDataAppPackageName)) {
+                throw logAndThrowRuntimeException(
+                        "Data app " + mDataAppPackageName + " must be a priv-app.", null);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            throw logAndThrowRuntimeException("Could not determine data app package details for "
+                    + mDataAppPackageName, e);
+        }
         // TODO(nfuller) Consider permission checks. While an updated system app retains permissions
         // obtained by the system version it's not clear how to check them.
         Slog.d(TAG, "Data app " + mDataAppPackageName + " is valid.");
