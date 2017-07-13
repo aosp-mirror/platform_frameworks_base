@@ -16,6 +16,15 @@
 
 package android.net;
 
+import static android.system.OsConstants.IFA_F_DADFAILED;
+import static android.system.OsConstants.IFA_F_DEPRECATED;
+import static android.system.OsConstants.IFA_F_OPTIMISTIC;
+import static android.system.OsConstants.IFA_F_TENTATIVE;
+import static android.system.OsConstants.RT_SCOPE_HOST;
+import static android.system.OsConstants.RT_SCOPE_LINK;
+import static android.system.OsConstants.RT_SCOPE_SITE;
+import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
@@ -25,15 +34,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.UnknownHostException;
-
-import static android.system.OsConstants.IFA_F_DADFAILED;
-import static android.system.OsConstants.IFA_F_DEPRECATED;
-import static android.system.OsConstants.IFA_F_OPTIMISTIC;
-import static android.system.OsConstants.IFA_F_TENTATIVE;
-import static android.system.OsConstants.RT_SCOPE_HOST;
-import static android.system.OsConstants.RT_SCOPE_LINK;
-import static android.system.OsConstants.RT_SCOPE_SITE;
-import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
 /**
  * Identifies an IP address on a network link.
@@ -101,7 +101,7 @@ public class LinkAddress implements Parcelable {
      * Per RFC 4193 section 8, fc00::/7 identifies these addresses.
      */
     private boolean isIPv6ULA() {
-        if (address != null && address instanceof Inet6Address) {
+        if (address instanceof Inet6Address) {
             byte[] bytes = address.getAddress();
             return ((bytes[0] & (byte)0xfe) == (byte)0xfc);
         }
