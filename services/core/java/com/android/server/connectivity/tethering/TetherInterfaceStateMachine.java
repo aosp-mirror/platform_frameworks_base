@@ -161,6 +161,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     public int lastError() { return mLastError; }
 
+    public LinkProperties linkProperties() { return new LinkProperties(mLinkProperties); }
+
     public void stop() { sendMessage(CMD_INTERFACE_DOWN); }
 
     public void unwanted() { sendMessage(CMD_TETHER_UNREQUESTED); }
