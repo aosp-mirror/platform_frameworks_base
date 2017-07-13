@@ -23,8 +23,7 @@ import android.hardware.radio.RadioMetadata;
 oneway interface ITunerCallback {
     void onError(int status);
     void onConfigurationChanged(in RadioManager.BandConfig config);
-    void onProgramInfoChanged(in RadioManager.ProgramInfo info);
-    void onMetadataChanged(in RadioMetadata metadata);
+    void onProgramInfoChanged();
     void onTrafficAnnouncement(boolean active);
     void onEmergencyAnnouncement(boolean active);
     void onAntennaState(boolean connected);
