@@ -66,8 +66,9 @@
         <item>@drawable/ic_find_previous_material</item>
         <item>@drawable/ic_go</item>
         <item>@drawable/ic_go_search_api_material</item>
-        <item>@drawable/ic_media_route_connecting_material</item>
-        <item>@drawable/ic_media_route_material</item>
+        <item>@drawable/ic_media_route_connecting_dark_material</item>
+        <item>@drawable/ic_media_route_dark_material</item>
+        <item>@drawable/ic_media_route_light_material</item>
         <item>@drawable/ic_menu_close_clear_cancel</item>
         <item>@drawable/ic_menu_copy_material</item>
         <item>@drawable/ic_menu_cut_material</item>
