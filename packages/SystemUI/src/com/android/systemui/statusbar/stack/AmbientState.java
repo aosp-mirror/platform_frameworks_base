@@ -21,11 +21,15 @@ import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * A global state to track all input states for the algorithm.
@@ -59,7 +63,7 @@ public class AmbientState {
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
     private boolean mPanelFullWidth;
-    private boolean mHasPulsingNotifications;
+    private Collection<HeadsUpManager.HeadsUpEntry> mPulsing;
     private boolean mUnlockHintRunning;
     private boolean mQsCustomizerShowing;
     private int mIntrinsicPadding;
@@ -290,11 +294,23 @@ public class AmbientState {
     }
 
     public boolean hasPulsingNotifications() {
-        return mHasPulsingNotifications;
+        return mPulsing != null;
     }
 
-    public void setHasPulsingNotifications(boolean hasPulsing) {
-        mHasPulsingNotifications = hasPulsing;
+    public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> hasPulsing) {
+        mPulsing = hasPulsing;
+    }
+
+    public boolean isPulsing(NotificationData.Entry entry) {
+        if (mPulsing == null) {
+            return false;
+        }
+        for (HeadsUpManager.HeadsUpEntry e : mPulsing) {
+            if (e.entry == entry) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isPanelTracking() {
@@ -331,5 +347,35 @@ public class AmbientState {
 
     public int getIntrinsicPadding() {
         return mIntrinsicPadding;
+    }
+
+    /**
+     * Similar to the normal is above shelf logic but doesn't allow it to be above in AOD1.
+     *
+     * @param expandableView the view to check
+     */
+    public boolean isAboveShelf(ExpandableView expandableView) {
+        if (!(expandableView instanceof ExpandableNotificationRow)) {
+            return expandableView.isAboveShelf();
+        }
+        ExpandableNotificationRow row = (ExpandableNotificationRow) expandableView;
+        return row.isAboveShelf() && !isDozingAndNotPulsing(row);
+    }
+
+    /**
+     * @return whether a view is dozing and not pulsing right now
+     */
+    public boolean isDozingAndNotPulsing(ExpandableView view) {
+        if (view instanceof ExpandableNotificationRow) {
+            return isDozingAndNotPulsing((ExpandableNotificationRow) view);
+        }
+        return false;
+    }
+
+    /**
+     * @return whether a row is dozing and not pulsing right now
+     */
+    public boolean isDozingAndNotPulsing(ExpandableNotificationRow row) {
+        return isDark() && !isPulsing(row.getEntry());
     }
 }
