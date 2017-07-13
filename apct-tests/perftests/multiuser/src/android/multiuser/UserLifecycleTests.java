@@ -49,19 +49,21 @@ import java.util.concurrent.TimeUnit;
  * make MultiUserPerfTests &&
  * adb install -r \
  *     ${ANDROID_PRODUCT_OUT}/data/app/MultiUserPerfTests/MultiUserPerfTests.apk &&
- * adb shell am instrument -e class android.multiuser.UserLifecycleTest \
+ * adb shell am instrument -e class android.multiuser.UserLifecycleTests \
  *     -w com.android.perftests.multiuser/android.support.test.runner.AndroidJUnitRunner
  *
  * or
  *
- * bit MultiUserPerfTests:android.multiuser.UserLifecycleTest
+ * bit MultiUserPerfTests:android.multiuser.UserLifecycleTests
  *
  * Note: If you use bit for running the tests, benchmark results won't be printed on the host side.
- * But in either case, results can be checked on the device side 'adb logcat -s UserLifecycleTest'
+ * But in either case, results can be checked on the device side 'adb logcat -s UserLifecycleTests'
  */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class UserLifecycleTest {
+public class UserLifecycleTests {
+    private static final String TAG = UserLifecycleTests.class.getSimpleName();
+
     private final int TIMEOUT_IN_SECOND = 30;
     private final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
 
@@ -276,7 +278,7 @@ public class UserLifecycleTest {
                             bootCompleteLatch.countDown();
                         }
                     }
-                }, "UserLifecycleTest");
+                }, TAG);
     }
 
     private void registerBroadcastReceiver(final String action, final CountDownLatch latch,

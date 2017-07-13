@@ -28,7 +28,13 @@ public class BenchmarkResults {
         mResults.add(TimeUnit.NANOSECONDS.toMillis(duration));
     }
 
-    public Bundle getStats() {
+    public Bundle getStatsToReport() {
+        final Bundle stats = new Bundle();
+        stats.putDouble("Mean (ms)", mean());
+        return stats;
+    }
+
+    public Bundle getStatsToLog() {
         final Bundle stats = new Bundle();
         stats.putDouble("Mean (ms)", mean());
         stats.putDouble("Median (ms)", median());
