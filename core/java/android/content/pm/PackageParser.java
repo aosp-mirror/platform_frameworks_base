@@ -202,6 +202,8 @@ public class PackageParser {
     // Temporary workaround; allow meta-data to expose components to instant apps
     private static final String META_DATA_INSTANT_APPS = "instantapps.clients.allowed";
 
+    private static final String METADATA_MAX_ASPECT_RATIO = "android.max_aspect";
+
     /**
      * Bit mask of all the valid bits that can be set in recreateOnConfigChanges.
      * @hide
@@ -3662,6 +3664,7 @@ public class PackageParser {
         // getting added to the wrong package.
         final CachedComponentArgs cachedArgs = new CachedComponentArgs();
         int type;
+
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -3838,6 +3841,10 @@ public class PackageParser {
                 }
             }
         }
+
+        // Must be ran after the entire {@link ApplicationInfo} has been fully processed and after
+        // every activity info has had a chance to set it from its attributes.
+        setMaxAspectRatio(owner);
 
         modifySharedLibrariesForBackwardCompatibility(owner);
 
@@ -4286,7 +4293,12 @@ public class PackageParser {
                 a.info.flags |= FLAG_ALWAYS_FOCUSABLE;
             }
 
-            setActivityMaxAspectRatio(a.info, sa, owner);
+            if (sa.hasValue(R.styleable.AndroidManifestActivity_maxAspectRatio)
+                    && sa.getType(R.styleable.AndroidManifestActivity_maxAspectRatio)
+                    == TypedValue.TYPE_FLOAT) {
+                a.setMaxAspectRatio(sa.getFloat(R.styleable.AndroidManifestActivity_maxAspectRatio,
+                        0 /*default*/));
+            }
 
             a.info.lockTaskLaunchMode =
                     sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0);
@@ -4533,28 +4545,40 @@ public class PackageParser {
         }
     }
 
-    private void setActivityMaxAspectRatio(ActivityInfo aInfo, TypedArray sa, Package owner) {
-        if (aInfo.resizeMode == RESIZE_MODE_RESIZEABLE
-                || aInfo.resizeMode == RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION) {
-            // Resizeable activities can be put in any aspect ratio.
-            aInfo.maxAspectRatio = 0;
-            return;
-        }
-
+    /**
+     * Sets every the max aspect ratio of every child activity that doesn't already have an aspect
+     * ratio set.
+     */
+    private void setMaxAspectRatio(Package owner) {
         // Default to (1.86) 16.7:9 aspect ratio for pre-O apps and unset for O and greater.
         // NOTE: 16.7:9 was the max aspect ratio Android devices can support pre-O per the CDD.
-        float defaultMaxAspectRatio = owner.applicationInfo.targetSdkVersion < O
+        float maxAspectRatio = owner.applicationInfo.targetSdkVersion < O
                 ? DEFAULT_PRE_O_MAX_ASPECT_RATIO : 0;
-        if (owner.applicationInfo.maxAspectRatio != 0 ) {
+
+        if (owner.applicationInfo.maxAspectRatio != 0) {
             // Use the application max aspect ration as default if set.
-            defaultMaxAspectRatio = owner.applicationInfo.maxAspectRatio;
+            maxAspectRatio = owner.applicationInfo.maxAspectRatio;
+        } else if (owner.mAppMetaData != null
+                && owner.mAppMetaData.containsKey(METADATA_MAX_ASPECT_RATIO)) {
+            maxAspectRatio = owner.mAppMetaData.getFloat(METADATA_MAX_ASPECT_RATIO, maxAspectRatio);
         }
 
-        aInfo.maxAspectRatio = sa.getFloat(
-                R.styleable.AndroidManifestActivity_maxAspectRatio, defaultMaxAspectRatio);
-        if (aInfo.maxAspectRatio < 1.0f && aInfo.maxAspectRatio != 0) {
-            // Ignore any value lesser than 1.0.
-            aInfo.maxAspectRatio = 0;
+        for (Activity activity : owner.activities) {
+            // If the max aspect ratio for the activity has already been set, skip.
+            if (activity.hasMaxAspectRatio()) {
+                continue;
+            }
+
+            // By default we prefer to use a values defined on the activity directly than values
+            // defined on the application. We do not check the styled attributes on the activity
+            // as it would have already been set when we processed the activity. We wait to process
+            // the meta data here since this method is called at the end of processing the
+            // application and all meta data is guaranteed.
+            final float activityAspectRatio = activity.metaData != null
+                    ? activity.metaData.getFloat(METADATA_MAX_ASPECT_RATIO, maxAspectRatio)
+                    : maxAspectRatio;
+
+            activity.setMaxAspectRatio(activityAspectRatio);
         }
     }
 
@@ -4696,6 +4720,7 @@ public class PackageParser {
         info.windowLayout = target.info.windowLayout;
         info.resizeMode = target.info.resizeMode;
         info.maxAspectRatio = target.info.maxAspectRatio;
+
         info.encryptionAware = info.directBootAware = target.info.directBootAware;
 
         Activity a = new Activity(cachedArgs.mActivityAliasArgs, info);
@@ -6980,6 +7005,11 @@ public class PackageParser {
 
     public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
         public final ActivityInfo info;
+        private boolean mHasMaxAspectRatio;
+
+        private boolean hasMaxAspectRatio() {
+            return mHasMaxAspectRatio;
+        }
 
         public Activity(final ParseComponentArgs args, final ActivityInfo _info) {
             super(args, _info);
@@ -6990,6 +7020,23 @@ public class PackageParser {
         public void setPackageName(String packageName) {
             super.setPackageName(packageName);
             info.packageName = packageName;
+        }
+
+
+        private void setMaxAspectRatio(float maxAspectRatio) {
+            if (info.resizeMode == RESIZE_MODE_RESIZEABLE
+                    || info.resizeMode == RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION) {
+                // Resizeable activities can be put in any aspect ratio.
+                return;
+            }
+
+            if (maxAspectRatio < 1.0f && maxAspectRatio != 0) {
+                // Ignore any value lesser than 1.0.
+                return;
+            }
+
+            info.maxAspectRatio = maxAspectRatio;
+            mHasMaxAspectRatio = true;
         }
 
         public String toString() {
@@ -7011,11 +7058,13 @@ public class PackageParser {
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
             dest.writeParcelable(info, flags | Parcelable.PARCELABLE_ELIDE_DUPLICATES);
+            dest.writeBoolean(mHasMaxAspectRatio);
         }
 
         private Activity(Parcel in) {
             super(in);
             info = in.readParcelable(Object.class.getClassLoader());
+            mHasMaxAspectRatio = in.readBoolean();
 
             for (ActivityIntentInfo aii : intents) {
                 aii.activity = this;
