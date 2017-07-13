@@ -123,8 +123,9 @@ public class DozeTriggers implements DozeMachine.Part {
             float screenX, float screenY) {
         boolean isDoubleTap = pulseReason == DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP;
         boolean isPickup = pulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
+        boolean isLongPress = pulseReason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS;
 
-        if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
+        if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT) && !isLongPress) {
             proximityCheckThenCall((result) -> {
                 if (result == ProximityCheck.RESULT_NEAR) {
                     // In pocket, drop event.

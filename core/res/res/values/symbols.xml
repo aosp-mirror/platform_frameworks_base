@@ -3044,6 +3044,8 @@
 
   <java-symbol type="array" name="config_hideWhenDisabled_packageNames" />
 
+  <java-symbol type="string" name="config_dozeLongPressSensorType" />
+
   <java-symbol type="array" name="config_allowedGlobalInstantAppSettings" />
   <java-symbol type="array" name="config_allowedSystemInstantAppSettings" />
   <java-symbol type="array" name="config_allowedSecureInstantAppSettings" />
