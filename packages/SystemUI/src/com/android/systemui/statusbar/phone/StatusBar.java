@@ -5347,6 +5347,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void pulseWhileDozing(@NonNull PulseCallback callback, int reason) {
+            if (reason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS) {
+                mPowerManager.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:NODOZE");
+                startAssist(new Bundle());
+                return;
+            }
+
             mDozeScrimController.pulse(new PulseCallback() {
 
                 @Override
