@@ -1713,6 +1713,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
                     if (!mHasAttachedDbsLocked) {
                         mHasAttachedDbsLocked = true;
                         disableWal = true;
+                        mConnectionPoolLocked.disableIdleConnectionHandler();
                     }
                 }
                 if (disableWal) {

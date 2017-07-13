@@ -19,11 +19,18 @@ package android.database.sqlite;
 import android.app.ActivityManager;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.OperationCanceledException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.PrefixPrinter;
 import android.util.Printer;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import dalvik.system.CloseGuard;
 
@@ -77,6 +84,15 @@ public final class SQLiteConnectionPool implements Closeable {
     // and logging a message about the connection pool being busy.
     private static final long CONNECTION_POOL_BUSY_MILLIS = 30 * 1000; // 30 seconds
 
+    // TODO b/63398887 Move to SQLiteGlobal
+    private static final long IDLE_CONNECTION_CLOSE_DELAY_MILLIS = SystemProperties
+            .getInt("persist.debug.sqlite.idle_connection_close_delay", 30000);
+
+    // TODO b/63398887 STOPSHIP.
+    // Temporarily enabled for testing across a broader set of dogfood devices.
+    private static final boolean CLOSE_IDLE_CONNECTIONS = SystemProperties
+            .getBoolean("persist.debug.sqlite.close_idle_connections", true);
+
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     private final Object mLock = new Object();
@@ -93,6 +109,9 @@ public final class SQLiteConnectionPool implements Closeable {
     private final ArrayList<SQLiteConnection> mAvailableNonPrimaryConnections =
             new ArrayList<SQLiteConnection>();
     private SQLiteConnection mAvailablePrimaryConnection;
+
+    @GuardedBy("mLock")
+    private IdleConnectionHandler mIdleConnectionHandler;
 
     // Describes what should happen to an acquired connection when it is returned to the pool.
     enum AcquiredConnectionStatus {
@@ -154,6 +173,11 @@ public final class SQLiteConnectionPool implements Closeable {
             mConfiguration.lookasideSlotSize = 0;
         }
         setMaxConnectionPoolSizeLocked();
+
+        // Do not close idle connections for in-memory databases
+        if (CLOSE_IDLE_CONNECTIONS && !configuration.isInMemoryDb()) {
+            setupIdleConnectionHandler(Looper.getMainLooper(), IDLE_CONNECTION_CLOSE_DELAY_MILLIS);
+        }
     }
 
     @Override
@@ -351,7 +375,13 @@ public final class SQLiteConnectionPool implements Closeable {
      */
     public SQLiteConnection acquireConnection(String sql, int connectionFlags,
             CancellationSignal cancellationSignal) {
-        return waitForConnection(sql, connectionFlags, cancellationSignal);
+        SQLiteConnection con = waitForConnection(sql, connectionFlags, cancellationSignal);
+        synchronized (mLock) {
+            if (mIdleConnectionHandler != null) {
+                mIdleConnectionHandler.connectionAcquired(con);
+            }
+        }
+        return con;
     }
 
     /**
@@ -368,6 +398,9 @@ public final class SQLiteConnectionPool implements Closeable {
      */
     public void releaseConnection(SQLiteConnection connection) {
         synchronized (mLock) {
+            if (mIdleConnectionHandler != null) {
+                mIdleConnectionHandler.connectionReleased(connection);
+            }
             AcquiredConnectionStatus status = mAcquiredConnections.remove(connection);
             if (status == null) {
                 throw new IllegalStateException("Cannot perform this operation "
@@ -510,6 +543,27 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Can't throw.
+    private boolean closeAvailableConnectionLocked(int connectionId) {
+        final int count = mAvailableNonPrimaryConnections.size();
+        for (int i = count - 1; i >= 0; i--) {
+            SQLiteConnection c = mAvailableNonPrimaryConnections.get(i);
+            if (c.getConnectionId() == connectionId) {
+                closeConnectionAndLogExceptionsLocked(c);
+                mAvailableNonPrimaryConnections.remove(i);
+                return true;
+            }
+        }
+
+        if (mAvailablePrimaryConnection != null
+                && mAvailablePrimaryConnection.getConnectionId() == connectionId) {
+            closeConnectionAndLogExceptionsLocked(mAvailablePrimaryConnection);
+            mAvailablePrimaryConnection = null;
+            return true;
+        }
+        return false;
+    }
+
+    // Can't throw.
     private void closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked() {
         final int count = mAvailableNonPrimaryConnections.size();
         for (int i = 0; i < count; i++) {
@@ -532,6 +586,9 @@ public final class SQLiteConnectionPool implements Closeable {
     private void closeConnectionAndLogExceptionsLocked(SQLiteConnection connection) {
         try {
             connection.close(); // might throw
+            if (mIdleConnectionHandler != null) {
+                mIdleConnectionHandler.connectionClosed(connection);
+            }
         } catch (RuntimeException ex) {
             Log.e(TAG, "Failed to close connection, its fate is now in the hands "
                     + "of the merciful GC: " + connection, ex);
@@ -963,6 +1020,22 @@ public final class SQLiteConnectionPool implements Closeable {
         }
     }
 
+    /**
+     * Set up the handler based on the provided looper and delay.
+     */
+    @VisibleForTesting
+    public void setupIdleConnectionHandler(Looper looper, long delayMs) {
+        synchronized (mLock) {
+            mIdleConnectionHandler = new IdleConnectionHandler(looper, delayMs);
+        }
+    }
+
+    void disableIdleConnectionHandler() {
+        synchronized (mLock) {
+            mIdleConnectionHandler = null;
+        }
+    }
+
     private void throwIfClosedLocked() {
         if (!mIsOpen) {
             throw new IllegalStateException("Cannot perform this operation "
@@ -1077,5 +1150,43 @@ public final class SQLiteConnectionPool implements Closeable {
         public SQLiteConnection mAssignedConnection;
         public RuntimeException mException;
         public int mNonce;
+    }
+
+    private class IdleConnectionHandler extends Handler {
+        private final long mDelay;
+
+        IdleConnectionHandler(Looper looper, long delay) {
+            super(looper);
+            mDelay = delay;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            // Skip the (obsolete) message if the handler has changed
+            synchronized (mLock) {
+                if (this != mIdleConnectionHandler) {
+                    return;
+                }
+                if (closeAvailableConnectionLocked(msg.what)) {
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Closed idle connection " + mConfiguration.label + " " + msg.what
+                                + " after " + mDelay);
+                    }
+                }
+            }
+        }
+
+        void connectionReleased(SQLiteConnection con) {
+            sendEmptyMessageDelayed(con.getConnectionId(), mDelay);
+        }
+
+        void connectionAcquired(SQLiteConnection con) {
+            // Remove any pending close operations
+            removeMessages(con.getConnectionId());
+        }
+
+        void connectionClosed(SQLiteConnection con) {
+            removeMessages(con.getConnectionId());
+        }
     }
 }
