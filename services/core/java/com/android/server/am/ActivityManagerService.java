@@ -12499,10 +12499,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         switch (mWakefulness) {
             case PowerManagerInternal.WAKEFULNESS_AWAKE:
             case PowerManagerInternal.WAKEFULNESS_DREAMING:
-            case PowerManagerInternal.WAKEFULNESS_DOZING:
                 // Pause applications whenever the lock screen is shown or any sleep
                 // tokens have been acquired.
                 return mKeyguardController.isKeyguardShowing() || !mSleepTokens.isEmpty();
+            case PowerManagerInternal.WAKEFULNESS_DOZING:
             case PowerManagerInternal.WAKEFULNESS_ASLEEP:
             default:
                 // If we're asleep then pause applications unconditionally.
