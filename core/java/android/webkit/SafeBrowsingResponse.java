@@ -29,19 +29,19 @@ public abstract class SafeBrowsingResponse {
      *
      * @param allowReporting True if the interstitial should show a reporting checkbox.
      */
-    abstract void showInterstitial(boolean allowReporting);
+    public abstract void showInterstitial(boolean allowReporting);
 
     /**
      * Act as if the user clicked "visit this unsafe site."
      *
      * @param report True to enable Safe Browsing reporting.
      */
-    abstract void proceed(boolean report);
+    public abstract void proceed(boolean report);
 
     /**
      * Act as if the user clicked "back to safety."
      *
      * @param report True to enable Safe Browsing reporting.
      */
-    abstract void backToSafety(boolean report);
+    public abstract void backToSafety(boolean report);
 }
