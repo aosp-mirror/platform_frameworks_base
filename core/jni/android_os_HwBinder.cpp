@@ -42,6 +42,8 @@
 using android::AndroidRuntime;
 using android::hardware::hidl_vec;
 using android::hardware::hidl_string;
+using android::hardware::IPCThreadState;
+using android::hardware::ProcessState;
 template<typename T>
 using Return = android::hardware::Return<T>;
 
@@ -393,6 +395,15 @@ static jobject JHwBinder_native_getService(
     return JHwRemoteBinder::NewObject(env, service);
 }
 
+void JHwBinder_native_configureRpcThreadpool(jlong maxThreads, jboolean callerWillJoin) {
+    CHECK(maxThreads > 0);
+    ProcessState::self()->setThreadPoolConfiguration(maxThreads, callerWillJoin /*callerJoinsPool*/);
+}
+
+void JHwBinder_native_joinRpcThreadpool() {
+    IPCThreadState::self()->joinThreadPool();
+}
+
 static JNINativeMethod gMethods[] = {
     { "native_init", "()J", (void *)JHwBinder_native_init },
     { "native_setup", "()V", (void *)JHwBinder_native_setup },
@@ -406,6 +417,12 @@ static JNINativeMethod gMethods[] = {
 
     { "getService", "(Ljava/lang/String;Ljava/lang/String;)L" PACKAGE_PATH "/IHwBinder;",
         (void *)JHwBinder_native_getService },
+
+    { "configureRpcThreadpool", "(JZ)V",
+        (void *)JHwBinder_native_configureRpcThreadpool },
+
+    { "joinRpcThreadpool", "()V",
+        (void *)JHwBinder_native_joinRpcThreadpool },
 };
 
 namespace android {
