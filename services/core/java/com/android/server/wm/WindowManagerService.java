@@ -6299,6 +6299,22 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Used by ActivityManager to determine where to position an app with aspect ratio shorter then
+     * the screen is.
+     * @see WindowManagerPolicy#getNavBarPosition()
+     */
+    public int getNavBarPosition() {
+        synchronized (mWindowMap) {
+            // Perform layout if it was scheduled before to make sure that we get correct nav bar
+            // position when doing rotations.
+            final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
+            defaultDisplayContent.performLayout(false /* initial */,
+                    false /* updateInputWindows */);
+            return mPolicy.getNavBarPosition();
+        }
+    }
+
     @Override
     public WindowManagerPolicy.InputConsumer createInputConsumer(Looper looper, String name,
             InputEventReceiver.Factory inputEventReceiverFactory) {
