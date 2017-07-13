@@ -7233,6 +7233,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mAccessibilityManager.isTouchExplorationEnabled()) {
                 if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
                 return false;
+            } else if (mDozing) {
+                // We never want heads up when we are dozing.
+                return false;
             } else {
                 // we only allow head-up on the lockscreen if it doesn't have a fullscreen intent
                 return !mStatusBarKeyguardViewManager.isShowing()

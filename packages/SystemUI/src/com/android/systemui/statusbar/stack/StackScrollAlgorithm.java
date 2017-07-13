@@ -413,7 +413,7 @@ public class StackScrollAlgorithm {
             if (mIsExpanded) {
                 // Ensure that the heads up is always visible even when scrolled off
                 clampHunToTop(ambientState, row, childState);
-                if (i == 0 && row.isAboveShelf()) {
+                if (i == 0 && ambientState.isAboveShelf(row)) {
                     // the first hun can't get off screen.
                     clampHunToMaxTranslation(ambientState, row, childState);
                     childState.hidden = false;
@@ -515,7 +515,7 @@ public class StackScrollAlgorithm {
         ExpandableViewState childViewState = resultState.getViewStateForView(child);
         int zDistanceBetweenElements = ambientState.getZDistanceBetweenElements();
         float baseZ = ambientState.getBaseZHeight();
-        if (child.mustStayOnScreen()
+        if (child.mustStayOnScreen() && !ambientState.isDozingAndNotPulsing(child)
                 && childViewState.yTranslation < ambientState.getTopPadding()
                 + ambientState.getStackTranslation()) {
             if (childrenOnTop != 0.0f) {
@@ -527,7 +527,7 @@ public class StackScrollAlgorithm {
             }
             childViewState.zTranslation = baseZ
                     + childrenOnTop * zDistanceBetweenElements;
-        } else if (i == 0 && child.isAboveShelf()) {
+        } else if (i == 0 && ambientState.isAboveShelf(child)) {
             // In case this is a new view that has never been measured before, we don't want to
             // elevate if we are currently expanded more then the notification
             int shelfHeight = ambientState.getShelf().getIntrinsicHeight();
