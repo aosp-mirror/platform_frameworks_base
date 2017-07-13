@@ -852,6 +852,23 @@ public class Paint {
     }
 
     /**
+     * Distance from top of the strike-through line to the baseline. Negative values mean above the
+     * baseline. This method returns where the strike-through line should be drawn independent of if
+     * the strikeThruText bit is set at the moment.
+     * @hide
+     */
+    public float getStrikeThruPosition() {
+        return nGetStrikeThruPosition(mNativePaint, mNativeTypeface);
+    }
+
+    /**
+     * @hide
+     */
+    public float getStrikeThruThickness() {
+        return nGetStrikeThruThickness(mNativePaint, mNativeTypeface);
+    }
+
+    /**
      * Helper for setFlags(), setting or clearing the STRIKE_THRU_TEXT_FLAG bit
      *
      * @param strikeThruText true to set the strikeThruText bit in the paint's
@@ -2996,6 +3013,10 @@ public class Paint {
     private static native float nGetUnderlinePosition(long paintPtr, long typefacePtr);
     @CriticalNative
     private static native float nGetUnderlineThickness(long paintPtr, long typefacePtr);
+    @CriticalNative
+    private static native float nGetStrikeThruPosition(long paintPtr, long typefacePtr);
+    @CriticalNative
+    private static native float nGetStrikeThruThickness(long paintPtr, long typefacePtr);
     @CriticalNative
     private static native void nSetTextSize(long paintPtr, float textSize);
 }
