@@ -38,16 +38,29 @@ public class SlashImageViewTest extends SysuiTestCase {
     private TestableSlashImageView mSlashView;
 
     @Test
-    public void testSetSlashStateCreatesSlashDrawable() {
+    public void testSetNonNullSlashStateCreatesSlashDrawable() {
         SlashState mockState = mock(SlashState.class);
         Drawable mockDrawable = mock(Drawable.class);
         mSlashView = new TestableSlashImageView(mContext);
         assertTrue(mSlashView.getSlashDrawable() == null);
 
-        mSlashView.setImageDrawable(mockDrawable);
-        mSlashView.setState(mockState);
+        mSlashView.setState(mockState, mockDrawable);
 
         assertTrue(mSlashView.getSlashDrawable() != null);
+    }
+
+    @Test
+    public void testSetNullSlashStateRemovesSlashDrawable() {
+        SlashState mockState = mock(SlashState.class);
+        Drawable mockDrawable = mock(Drawable.class);
+        mSlashView = new TestableSlashImageView(mContext);
+        mSlashView.setState(mockState, mockDrawable);
+
+        assertTrue(mSlashView.getSlashDrawable() != null);
+
+        mSlashView.setState(null, mockDrawable);
+
+        assertTrue(mSlashView.getSlashDrawable() == null);
     }
 
     @Test
@@ -57,7 +70,7 @@ public class SlashImageViewTest extends SysuiTestCase {
 
         mSlashView = new TestableSlashImageView(mContext);
         mSlashView.setImageDrawable(mockDrawable);
-        mSlashView.setState(mockState);
+        mSlashView.setState(mockState, mockDrawable);
         mSlashView.setImageDrawable(null);
 
         assertTrue(mSlashView.getSlashDrawable() == null);
