@@ -67,6 +67,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -1644,7 +1645,7 @@ public class WebView extends AbsoluteLayout
      *
      * @param urls the list of URLs
      */
-    public static void setSafeBrowsingWhiteList(@Nullable String[] urls) {
+    public static void setSafeBrowsingWhiteList(@Nullable List<String> urls) {
         getFactory().getStatics().setSafeBrowsingWhiteList(urls);
     }
 
