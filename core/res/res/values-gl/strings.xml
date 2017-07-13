@@ -1770,8 +1770,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Abandona de inmediato rexións costeiras e situadas na beira de ríos para dirixirte a un lugar máis seguro, como un terreo elevado."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantén a calma e busca refuxio cerca."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Proba de mensaxes de emerxencia"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Responder"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Non se admite a tarxeta SIM"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Non se introduciu ningunha tarxeta SIM"</string>
