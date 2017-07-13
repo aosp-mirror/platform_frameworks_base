@@ -849,7 +849,7 @@
     <string name="save_password_remember" msgid="6491879678996749466">"याद रखें"</string>
     <string name="save_password_never" msgid="8274330296785855105">"कभी नहीं"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"आपके पास इस पेज को खोलने की अनुमति नहीं है."</string>
-    <string name="text_copied" msgid="4985729524670131385">"लेख की क्‍लिपबोर्ड पर प्रतिलिपि बनाई गई."</string>
+    <string name="text_copied" msgid="4985729524670131385">"लेख को क्‍लिपबोर्ड पर कॉपी किया गया."</string>
     <string name="more_item_label" msgid="4650918923083320495">"अधिक"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"मेनू+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
@@ -966,12 +966,12 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"सभी को चुनें"</string>
     <string name="cut" msgid="3092569408438626261">"काटें"</string>
-    <string name="copy" msgid="2681946229533511987">"प्रतिलिपि बनाएं"</string>
+    <string name="copy" msgid="2681946229533511987">"कॉपी करें"</string>
     <string name="paste" msgid="5629880836805036433">"चिपकाएं"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"सादे पाठ के रूप में चिपकाएं"</string>
     <string name="replace" msgid="5781686059063148930">"बदलें•"</string>
     <string name="delete" msgid="6098684844021697789">"हटाएं"</string>
-    <string name="copyUrl" msgid="2538211579596067402">"URL की प्रतिलिपि बनाएं"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"URL को कॉपी करें"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"लेख को चुनें"</string>
     <string name="undo" msgid="7905788502491742328">"वापस लाएं"</string>
     <string name="redo" msgid="7759464876566803888">"फिर से करें"</string>
