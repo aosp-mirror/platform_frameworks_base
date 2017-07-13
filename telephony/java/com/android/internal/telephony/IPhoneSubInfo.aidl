@@ -166,33 +166,33 @@ interface IPhoneSubInfo {
      * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.
      * @return the IMPI, or null if not present or not loaded
      */
-    String getIsimImpi();
+    String getIsimImpi(int subId);
 
     /**
      * Returns the IMS home network domain name that was loaded from the ISIM.
      * @return the IMS domain name, or null if not present or not loaded
      */
-    String getIsimDomain();
+    String getIsimDomain(int subId);
 
     /**
      * Returns the IMS public user identities (IMPU) that were loaded from the ISIM.
      * @return an array of IMPU strings, with one IMPU per string, or null if
      *      not present or not loaded
      */
-    String[] getIsimImpu();
+    String[] getIsimImpu(int subId);
 
     /**
      * Returns the IMS Service Table (IST) that was loaded from the ISIM.
      * @return IMS Service Table or null if not present or not loaded
      */
-    String getIsimIst();
+    String getIsimIst(int subId);
 
     /**
      * Returns the IMS Proxy Call Session Control Function(PCSCF) that were loaded from the ISIM.
      * @return an array of PCSCF strings with one PCSCF per string, or null if
      *      not present or not loaded
      */
-    String[] getIsimPcscf();
+    String[] getIsimPcscf(int subId);
 
     /**
      * TODO: Deprecate and remove this interface. Superceded by getIccsimChallengeResponse.
