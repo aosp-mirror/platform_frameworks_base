@@ -1621,8 +1621,9 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Starts Safe Browsing initialization. This should only be called once.
-     * @param context is the activity context the WebView will be used in.
+     * Starts Safe Browsing initialization. This should only be called once. This does not require
+     * an Activity Context, and will always use the application Context to do its work.
+     * @param context Application Context.
      * @param callback will be called with the value true if initialization is
      * successful. The callback will be run on the UI thread.
      */
