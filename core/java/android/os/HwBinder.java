@@ -51,6 +51,11 @@ public abstract class HwBinder implements IHwBinder {
             String serviceName)
         throws RemoteException, NoSuchElementException;
 
+    public static native final void configureRpcThreadpool(
+            long maxThreads, boolean callerWillJoin);
+
+    public static native final void joinRpcThreadpool();
+
     // Returns address of the "freeFunction".
     private static native final long native_init();
 
