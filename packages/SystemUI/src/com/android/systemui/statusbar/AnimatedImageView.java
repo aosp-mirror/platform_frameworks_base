@@ -32,7 +32,7 @@ public class AnimatedImageView extends ImageView {
     private final boolean mHasOverlappingRendering;
     AnimationDrawable mAnim;
     boolean mAttached;
-    private boolean mAllowAnimation;
+    private boolean mAllowAnimation = true;
 
     // Tracks the last image that was set, so that we don't refresh the image if it is exactly
     // the same as the previous one. If this is a resid, we track that. If it's a drawable, we
