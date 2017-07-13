@@ -151,7 +151,7 @@ public class NetworkPolicyEditor {
 
     public int getPolicyCycleDay(NetworkTemplate template) {
         final NetworkPolicy policy = getPolicy(template);
-        return (policy != null) ? policy.cycleDay : -1;
+        return (policy != null) ? policy.cycleDay : CYCLE_NONE;
     }
 
     public void setPolicyCycleDay(NetworkTemplate template, int cycleDay, String cycleTimezone) {

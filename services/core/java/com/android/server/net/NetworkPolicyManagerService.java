@@ -18,6 +18,7 @@ package com.android.server.net;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
+import static android.Manifest.permission.MANAGE_FALLBACK_SUBSCRIPTION_PLANS;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
@@ -27,6 +28,7 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
@@ -53,7 +55,6 @@ import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
-import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
 import static android.net.NetworkPolicyManager.resolveNetworkId;
@@ -118,9 +119,11 @@ import android.net.INetworkStatsService;
 import android.net.LinkProperties;
 import android.net.NetworkIdentity;
 import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
 import android.net.NetworkTemplate;
+import android.net.TrafficStats;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
@@ -141,12 +144,15 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.Formatter;
@@ -198,6 +204,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -997,8 +1004,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (!isTemplateRelevant(policy.template)) continue;
             if (!policy.hasCycle()) continue;
 
-            final long start = computeLastCycleBoundary(currentTime, policy);
-            final long end = currentTime;
+            final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
+                    .cycleIterator(policy).next();
+            final long start = cycle.first.toInstant().toEpochMilli();
+            final long end = cycle.second.toInstant().toEpochMilli();
             final long totalBytes = getTotalBytes(policy.template, start, end);
 
             if (policy.isOverLimit(totalBytes)) {
@@ -1455,8 +1464,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 continue;
             }
 
-            final long start = computeLastCycleBoundary(currentTime, policy);
-            final long end = currentTime;
+            final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
+                    .cycleIterator(policy).next();
+            final long start = cycle.first.toInstant().toEpochMilli();
+            final long end = cycle.second.toInstant().toEpochMilli();
             final long totalBytes = getTotalBytes(policy.template, start, end);
 
             // disable data connection when over limit and not snoozed
@@ -1566,15 +1577,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final NetworkPolicy policy = mNetworkRules.keyAt(i);
             final String[] ifaces = mNetworkRules.valueAt(i);
 
-            final long start;
-            final long totalBytes;
-            if (policy.hasCycle()) {
-                start = computeLastCycleBoundary(currentTime, policy);
-                totalBytes = getTotalBytes(policy.template, start, currentTime);
-            } else {
-                start = Long.MAX_VALUE;
-                totalBytes = 0;
-            }
+            final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
+                    .cycleIterator(policy).next();
+            final long start = cycle.first.toInstant().toEpochMilli();
+            final long end = cycle.second.toInstant().toEpochMilli();
+            final long totalBytes = getTotalBytes(policy.template, start, end);
 
             if (LOGD) {
                 Slog.d(TAG, "applying policy " + policy + " to ifaces " + Arrays.toString(ifaces));
@@ -2477,6 +2484,178 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         Log.w(TAG, "Shame on UID " + Binder.getCallingUid()
                 + " for calling the hidden API getNetworkQuotaInfo(). Shame!");
         return new NetworkQuotaInfo();
+    }
+
+    private void enforceSubscriptionPlanAccess(int subId, int callingUid, String callingPackage) {
+        // Verify they're not lying about package name
+        mAppOps.checkPackage(callingUid, callingPackage);
+
+        // Verify they have phone permission from user
+        mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, TAG);
+        if (mAppOps.checkOp(AppOpsManager.OP_READ_PHONE_STATE, callingUid,
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            throw new SecurityException(
+                    "Calling package " + callingPackage + " does not hold " + READ_PHONE_STATE);
+        }
+
+        final SubscriptionInfo si;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            si = mContext.getSystemService(SubscriptionManager.class)
+                    .getActiveSubscriptionInfo(subId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        // First check: does caller have carrier access?
+        if (si.isEmbedded() && si.canManageSubscription(mContext, callingPackage)) {
+            Slog.v(TAG, "Granting access because " + callingPackage + " is carrier");
+            return;
+        }
+
+        // Second check: was caller first to claim this HNI?
+        // TODO: extend to support external data sources
+
+        // Final check: does caller have fallback permission?
+        if (mContext.checkCallingOrSelfPermission(
+                MANAGE_FALLBACK_SUBSCRIPTION_PLANS) == PERMISSION_GRANTED) {
+            Slog.v(TAG, "Granting access because " + callingPackage + " is fallback");
+            return;
+        }
+
+        throw new SecurityException("Calling package " + callingPackage
+                + " has no access to subscription plans for " + subId);
+    }
+
+    @Override
+    public SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage) {
+        enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
+
+        // TODO: extend to support external data sources
+        if (!"com.android.settings".equals(callingPackage)) {
+            throw new UnsupportedOperationException();
+        }
+
+        final String fake = SystemProperties.get("fw.fake_plan");
+        if (!TextUtils.isEmpty(fake)) {
+            final List<SubscriptionPlan> plans = new ArrayList<>();
+            if ("month_hard".equals(fake)) {
+                plans.add(SubscriptionPlan.Builder
+                        .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
+                        .setTitle("G-Mobile")
+                        .setDataWarning(2 * TrafficStats.GB_IN_BYTES)
+                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                                SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
+                        .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
+                                ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
+                        .build());
+            } else if ("month_soft".equals(fake)) {
+                plans.add(SubscriptionPlan.Builder
+                        .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
+                        .setTitle("G-Mobile is the carriers name who this plan belongs to")
+                        .setSummary("Crazy unlimited bandwidth plan with incredibly long title "
+                                + "that should be cut off to prevent UI from looking terrible")
+                        .setDataWarning(2 * TrafficStats.GB_IN_BYTES)
+                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                                SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
+                        .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
+                                ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
+                        .build());
+            } else if ("month_none".equals(fake)) {
+                plans.add(SubscriptionPlan.Builder
+                        .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
+                        .setTitle("G-Mobile")
+                        .build());
+            } else if ("prepaid".equals(fake)) {
+                plans.add(SubscriptionPlan.Builder
+                        .createNonrecurring(ZonedDateTime.now().minusDays(20),
+                                ZonedDateTime.now().plusDays(10))
+                        .setTitle("G-Mobile")
+                        .setDataLimit(512 * TrafficStats.MB_IN_BYTES,
+                                SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
+                        .setDataUsage(100 * TrafficStats.MB_IN_BYTES,
+                                ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
+                        .build());
+            } else if ("prepaid_crazy".equals(fake)) {
+                plans.add(SubscriptionPlan.Builder
+                        .createNonrecurring(ZonedDateTime.now().minusDays(20),
+                                ZonedDateTime.now().plusDays(10))
+                        .setTitle("G-Mobile Anytime")
+                        .setDataLimit(512 * TrafficStats.MB_IN_BYTES,
+                                SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
+                        .setDataUsage(100 * TrafficStats.MB_IN_BYTES,
+                                ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
+                        .build());
+                plans.add(SubscriptionPlan.Builder
+                        .createNonrecurring(ZonedDateTime.now().minusDays(10),
+                                ZonedDateTime.now().plusDays(20))
+                        .setTitle("G-Mobile Nickel Nights")
+                        .setSummary("5¢/GB between 1-5AM")
+                        .setDataUsage(15 * TrafficStats.MB_IN_BYTES,
+                                ZonedDateTime.now().minusHours(30).toInstant().toEpochMilli())
+                        .build());
+                plans.add(SubscriptionPlan.Builder
+                        .createNonrecurring(ZonedDateTime.now().minusDays(10),
+                                ZonedDateTime.now().plusDays(20))
+                        .setTitle("G-Mobile Bonus 3G")
+                        .setSummary("Unlimited 3G data")
+                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                                SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
+                        .setDataUsage(300 * TrafficStats.MB_IN_BYTES,
+                                ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
+                        .build());
+            }
+            return plans.toArray(new SubscriptionPlan[plans.size()]);
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+            final NetworkTemplate template = NetworkTemplate
+                    .buildTemplateMobileAll(tm.getSubscriberId(subId));
+            final NetworkPolicy policy = mNetworkPolicy.get(template);
+            if (policy != null) {
+                return new SubscriptionPlan[] { SubscriptionPlan.convert(policy) };
+            } else {
+                return new SubscriptionPlan[0];
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void setSubscriptionPlans(int subId, SubscriptionPlan[] plans, String callingPackage) {
+        enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
+
+        // TODO: extend to support external data sources
+        if (!"com.android.settings".equals(callingPackage)) {
+            throw new UnsupportedOperationException();
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+            final NetworkTemplate template = NetworkTemplate
+                    .buildTemplateMobileAll(tm.getSubscriberId(subId));
+            if (ArrayUtils.isEmpty(plans)) {
+                mNetworkPolicy.remove(template);
+            } else {
+                final NetworkPolicy policy = SubscriptionPlan.convert(plans[0]);
+                policy.template = template;
+                mNetworkPolicy.put(template, policy);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public String getSubscriptionPlanOwner(int subId) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        // TODO: extend to support external data sources
+        return "com.android.settings";
     }
 
     @Override
