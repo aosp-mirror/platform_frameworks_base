@@ -1782,8 +1782,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ebakuatu kostaldeak eta ibaialdeak berehala eta joan toki seguru batera, adibidez, toki garai batera."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Ez larritu eta bilatu babesleku bat inguruan."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Larrialdi-mezuen proba"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Erantzun"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Ez da onartzen SIM txartela"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Ez dago SIM txartelik"</string>

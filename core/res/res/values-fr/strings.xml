@@ -1432,7 +1432,7 @@
     <string name="media_route_button_content_description" msgid="591703006349356016">"Caster"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Connexion à l\'appareil"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Caster l\'écran sur l\'appareil"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Recherche d\'appareils en cours…"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Recherche d\'appareils…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Paramètres"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Déconnecter"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Analyse en cours..."</string>

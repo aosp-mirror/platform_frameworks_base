@@ -1011,7 +1011,7 @@
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"使用%1$s分享"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"分享"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"通过以下应用发送"</string>
-    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"通过1$s发送"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"通过%1$s发送"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"发送"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"选择主屏幕应用"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"将“%1$s”设为主屏幕应用"</string>
@@ -1781,8 +1781,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"请立即从沿海和河滨区域撤离到高地等较安全的地方。"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"请保持冷静，并寻找附近的避难地点。"</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"紧急消息测试"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"回复"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"不受允许的 SIM 卡"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"未配置的 SIM 卡"</string>
