@@ -28,9 +28,11 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
+import android.net.NetworkKey;
 import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppData;
 import android.net.ScoredNetwork;
+import android.net.WifiKey;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
@@ -125,6 +127,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     static final String KEY_SCANRESULT = "key_scanresult";
     static final String KEY_SSID = "key_ssid";
     static final String KEY_SECURITY = "key_security";
+    static final String KEY_SPEED = "key_speed";
     static final String KEY_PSKTYPE = "key_psktype";
     static final String KEY_SCANRESULTCACHE = "key_scanresultcache";
     static final String KEY_CONFIG = "key_config";
@@ -200,10 +203,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (savedState.containsKey(KEY_SECURITY)) {
             security = savedState.getInt(KEY_SECURITY);
         }
+        if (savedState.containsKey(KEY_SPEED)) {
+            mSpeed = savedState.getInt(KEY_SPEED);
+        }
         if (savedState.containsKey(KEY_PSKTYPE)) {
             pskType = savedState.getInt(KEY_PSKTYPE);
         }
-        mInfo = (WifiInfo) savedState.getParcelable(KEY_WIFIINFO);
+        mInfo = savedState.getParcelable(KEY_WIFIINFO);
         if (savedState.containsKey(KEY_NETWORKINFO)) {
             mNetworkInfo = savedState.getParcelable(KEY_NETWORKINFO);
         }
@@ -407,17 +413,34 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mSpeed = Speed.NONE;
         mRankingScore = Integer.MIN_VALUE;
 
-        for (ScanResult result : mScanResultCache.values()) {
-            ScoredNetwork score = scoreCache.getScoredNetwork(result);
-            if (score == null) {
-                continue;
+        if (isActive() && mInfo != null) {
+            NetworkKey key = new NetworkKey(new WifiKey(
+                    AccessPoint.convertToQuotedString(ssid), mInfo.getBSSID()));
+            ScoredNetwork score = scoreCache.getScoredNetwork(key);
+            if (score != null) {
+                mSpeed = score.calculateBadge(mInfo.getRssi());
+                if (score.hasRankingScore()) {
+                    mRankingScore = score.calculateRankingScore(mInfo.getRssi());
+                }
             }
+        } else {
+            for (ScanResult result : mScanResultCache.values()) {
+                ScoredNetwork score = scoreCache.getScoredNetwork(result);
+                if (score == null) {
+                    continue;
+                }
 
-            if (score.hasRankingScore()) {
-                mRankingScore = Math.max(mRankingScore, score.calculateRankingScore(result.level));
+                if (score.hasRankingScore()) {
+                    mRankingScore =
+                            Math.max(mRankingScore, score.calculateRankingScore(result.level));
+                }
+                // TODO(sghuman): Rename calculateBadge API
+                mSpeed = Math.max(mSpeed, score.calculateBadge(result.level));
             }
-            // TODO(sghuman): Rename calculateBadge API
-            mSpeed = Math.max(mSpeed, score.calculateBadge(result.level));
+        }
+
+        if(WifiTracker.sVerboseLogging) {
+            Log.i(TAG, String.format("%s: Set speed to %d", ssid, mSpeed));
         }
 
         return (oldSpeed != mSpeed || oldRankingScore != mRankingScore);
@@ -430,12 +453,22 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private boolean updateMetered(WifiNetworkScoreCache scoreCache) {
         boolean oldMetering = mIsScoredNetworkMetered;
         mIsScoredNetworkMetered = false;
-        for (ScanResult result : mScanResultCache.values()) {
-            ScoredNetwork score = scoreCache.getScoredNetwork(result);
-            if (score == null) {
-                continue;
+
+        if (isActive() && mInfo != null) {
+            NetworkKey key = new NetworkKey(new WifiKey(
+                    AccessPoint.convertToQuotedString(ssid), mInfo.getBSSID()));
+            ScoredNetwork score = scoreCache.getScoredNetwork(key);
+            if (score != null) {
+                mIsScoredNetworkMetered |= score.meteredHint;
             }
-            mIsScoredNetworkMetered |= score.meteredHint;
+        } else {
+            for (ScanResult result : mScanResultCache.values()) {
+                ScoredNetwork score = scoreCache.getScoredNetwork(result);
+                if (score == null) {
+                    continue;
+                }
+                mIsScoredNetworkMetered |= score.meteredHint;
+            }
         }
         return oldMetering == mIsScoredNetworkMetered;
     }
@@ -1004,6 +1037,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public void saveWifiState(Bundle savedState) {
         if (ssid != null) savedState.putString(KEY_SSID, getSsidStr());
         savedState.putInt(KEY_SECURITY, security);
+        savedState.putInt(KEY_SPEED, mSpeed);
         savedState.putInt(KEY_PSKTYPE, pskType);
         if (mConfig != null) savedState.putParcelable(KEY_CONFIG, mConfig);
         savedState.putParcelable(KEY_WIFIINFO, mInfo);

@@ -19,9 +19,12 @@ package com.android.settingslib.wifi;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
+
+import java.util.ArrayList;
 
 /**
 * Build and return a valid AccessPoint.
@@ -48,6 +51,7 @@ public class TestAccessPointBuilder {
     private WifiInfo mWifiInfo;
 
     Context mContext;
+    private ArrayList<ScanResult> mScanResultCache;
 
     public TestAccessPointBuilder(Context context) {
         mContext = context;
@@ -69,6 +73,9 @@ public class TestAccessPointBuilder {
         }
         if (mProviderFriendlyName != null) {
             bundle.putString(AccessPoint.KEY_PROVIDER_FRIENDLY_NAME, mProviderFriendlyName);
+        }
+        if (mScanResultCache != null) {
+            bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, mScanResultCache);
         }
         bundle.putInt(AccessPoint.KEY_SECURITY, mSecurity);
 
@@ -184,6 +191,11 @@ public class TestAccessPointBuilder {
 
     public TestAccessPointBuilder setBssid(String bssid) {
         mBssid = bssid;
+        return this;
+    }
+
+    public TestAccessPointBuilder setScanResultCache(ArrayList<ScanResult> scanResultCache) {
+        mScanResultCache = scanResultCache;
         return this;
     }
 }
