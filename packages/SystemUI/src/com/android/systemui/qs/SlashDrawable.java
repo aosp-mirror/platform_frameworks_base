@@ -61,6 +61,7 @@ public class SlashDrawable extends Drawable {
     private boolean mSlashed;
     private Mode mTintMode;
     private ColorStateList mTintList;
+    private boolean mAnimationEnabled = true;
 
     public SlashDrawable(Drawable d) {
         mDrawable = d;
@@ -97,6 +98,10 @@ public class SlashDrawable extends Drawable {
         invalidateSelf();
     }
 
+    public void setAnimationEnabled(boolean enabled) {
+        mAnimationEnabled = enabled;
+    }
+
     // Animate this value on change
     private float mCurrentSlashLength;
     private final FloatProperty mSlashLengthProp = new FloatProperty<SlashDrawable>("slashLength") {
@@ -119,12 +124,15 @@ public class SlashDrawable extends Drawable {
         final float end = mSlashed ? SLASH_HEIGHT / SCALE : 0f;
         final float start = mSlashed ? 0f : SLASH_HEIGHT / SCALE;
 
-        ObjectAnimator anim = ObjectAnimator.ofFloat(this, mSlashLengthProp, start, end);
-        anim.addUpdateListener((ValueAnimator valueAnimator) -> {
+        if (mAnimationEnabled) {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(this, mSlashLengthProp, start, end);
+            anim.addUpdateListener((ValueAnimator valueAnimator) -> invalidateSelf());
+            anim.setDuration(QS_ANIM_LENGTH);
+            anim.start();
+        } else {
+            mCurrentSlashLength = end;
             invalidateSelf();
-        });
-        anim.setDuration(QS_ANIM_LENGTH);
-        anim.start();
+        }
     }
 
     @Override
