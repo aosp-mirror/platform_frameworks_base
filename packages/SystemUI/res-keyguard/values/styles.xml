@@ -38,7 +38,7 @@
         <item name="android:paddingBottom">-16dp</item>
     </style>
     <style name="Keyguard.ImageButton.NumPadEnter" parent="@android:style/Widget.ImageButton">
-        <item name="android:tint">?attr/bgProtectTextColor</item>
+        <item name="android:tint">@color/background_protected</item>
     </style>
     <style name="Widget.TextView.NumPadKey.Klondike" parent="Widget.TextView.NumPadKey">
         <item name="android:textSize">12sp</item>

@@ -38,9 +38,8 @@ public interface ExtractionType {
      * @param outGradientColorsNormal object that should receive normal colors
      * @param outGradientColorsDark object that should receive dark colors
      * @param outGradientColorsExtraDark object that should receive extra dark colors
-     * @return true if successful.
      */
-    boolean extractInto(WallpaperColors inWallpaperColors,
+    void extractInto(WallpaperColors inWallpaperColors,
             ColorExtractor.GradientColors outGradientColorsNormal,
             ColorExtractor.GradientColors outGradientColorsDark,
             ColorExtractor.GradientColors outGradientColorsExtraDark);
