@@ -36,7 +36,7 @@
     <string name="wifi_no_internet" msgid="3880396223819116454">"No hi ha accés a Internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"Desat per <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Connectada automàticament a través de: %1$s"</string>
-    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Connectada automàticament a través d\'un proveïdor de valoració de la xarxa"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Connectada automàticament a través d\'un proveïdor de valoració de xarxes"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Connectada mitjançant %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible mitjançant %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Connectada, sense Internet"</string>
@@ -186,7 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Transferència agressiva de Wi-Fi a mòbil"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permet sempre cerca de Wi-Fi en ininerància"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dades mòbils sempre actives"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Acceleració per maquinari per a la compartició de xarxa"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Acceleració per maquinari per compartir la xarxa"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desactiva el volum absolut"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Activa el so al mateix canal"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versió AVRCP de Bluetooth"</string>
@@ -218,7 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permet les ubicacions simulades"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspecció d\'atributs de visualització"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantén les dades mòbils sempre actives, fins i tot quan la Wi‑Fi està activada (per canviar de xarxa ràpidament)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Fes servir l\'acceleració per maquinari per a la compartició de xarxa, si està disponible"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Fes servir l\'acceleració per maquinari per compartir la xarxa, si està disponible"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Voleu permetre la depuració USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"La depuració USB només està indicada per a activitats de desenvolupament. Fes-la servir intercanviar dades entre l\'ordinador i el dispositiu, per instal·lar aplicacions al dispositiu sense rebre notificacions i per llegir dades de registre."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vols revocar l\'accés a la depuració d\'USB dels ordinadors que has autoritzat anteriorment?"</string>
