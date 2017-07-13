@@ -16,12 +16,12 @@
 
 package com.prefabulated.touchlatency;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.CountDownTimer;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.Touch;
 import android.util.AttributeSet;
@@ -173,7 +173,7 @@ class TouchLatencyView extends View implements View.OnTouchListener {
     private float mVelocityX, mVelocityY;
 }
 
-public class TouchLatencyActivity extends AppCompatActivity {
+public class TouchLatencyActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
