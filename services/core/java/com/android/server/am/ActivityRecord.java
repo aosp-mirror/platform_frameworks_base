@@ -2303,10 +2303,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         outBounds.setEmpty();
         final float maxAspectRatio = info.maxAspectRatio;
         final ActivityStack stack = getStack();
-        if (task == null || stack == null || !task.mFullscreen || maxAspectRatio == 0) {
+        if (task == null || stack == null || !task.mFullscreen || maxAspectRatio == 0
+                || isInVrUiMode(getConfiguration())) {
             // We don't set override configuration if that activity task isn't fullscreen. I.e. the
             // activity is in multi-window mode. Or, there isn't a max aspect ratio specified for
-            // the activity. This is indicated by an empty {@link outBounds}.
+            // the activity. This is indicated by an empty {@link outBounds}. We also don't set it
+            // if we are in VR mode.
             return;
         }
 
