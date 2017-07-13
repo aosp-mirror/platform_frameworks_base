@@ -19,7 +19,6 @@ package com.android.server.am;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
-import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
@@ -1959,9 +1958,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
             throw new RuntimeException(e.getMessage(), e);
         }
 
-        IActivityContainer container = mInterface.createStackOnDisplay(displayId);
-        if (container != null) {
-            container.startActivity(intent);
+        final int stackId = mInterface.createStackOnDisplay(displayId);
+        if (stackId != INVALID_STACK_ID) {
+            // TODO: Need proper support if this is used by test...
+//            container.startActivity(intent);
+//            ActivityOptions options = ActivityOptions.makeBasic();
+//            options.setLaunchDisplayId(displayId);
+//            options.setLaunchStackId(stackId);
+//            mInterface.startAct
+//            mInterface.startActivityAsUser(null, null, intent, mimeType,
+//                    null, null, 0, mStartFlags, profilerInfo,
+//                    options != null ? options.toBundle() : null, mUserId);
         }
         return 0;
     }

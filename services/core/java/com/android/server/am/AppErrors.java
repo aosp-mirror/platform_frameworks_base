@@ -409,10 +409,9 @@ class AppErrors {
                         final Set<String> cats = task.intent.getCategories();
                         if (cats != null && cats.contains(Intent.CATEGORY_LAUNCHER)) {
                             mService.startActivityInPackage(task.mCallingUid,
-                                    task.mCallingPackage, task.intent,
-                                    null, null, null, 0, 0,
-                                    ActivityOptions.makeBasic().toBundle(),
-                                    task.userId, null, null, "AppErrors");
+                                    task.mCallingPackage, task.intent, null, null, null, 0, 0,
+                                    ActivityOptions.makeBasic().toBundle(), task.userId, null,
+                                    "AppErrors");
                         }
                     }
                 }
