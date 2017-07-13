@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Datos móviles"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Datos móviles activados"</string>
     <string name="accessibility_cell_data_off" msgid="443267573897409704">"Datos móviles desactivados"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartir por Bluetooth"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartir conexión por Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"La red VPN está activada."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No hay tarjeta SIM."</string>
@@ -314,7 +314,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"Conectado"</string>
     <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Conectado (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería)"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Conectando..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Compartir Internet"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Compartir conexión"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Zona Wi-Fi"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notificaciones"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Linterna"</string>
@@ -407,7 +407,7 @@
     <string name="user_remove_user_message" msgid="1453218013959498039">"Se eliminarán todas las aplicaciones y todos los datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Quitar"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Ahorro de batería activado"</string>
-    <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce el rendimiento y el envío de datos en segundo plano"</string>
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce el rendimiento y los datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desactivar ahorro de batería"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> empezará a capturar todo lo que aparezca en la pantalla."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No volver a mostrar"</string>
@@ -589,7 +589,7 @@
     <string name="battery_panel_title" msgid="7944156115535366613">"Uso de la batería"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ahorro de batería no disponible mientras se carga el dispositivo"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ahorro de batería"</string>
-    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce el rendimiento y las conexiones automáticas"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce el rendimiento y los datos en segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Inicio"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"Atrás"</string>
