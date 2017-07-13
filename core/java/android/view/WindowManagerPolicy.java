@@ -150,6 +150,11 @@ public interface WindowManagerPolicy {
     public final static int PRESENCE_INTERNAL = 1 << 0;
     public final static int PRESENCE_EXTERNAL = 1 << 1;
 
+    // Navigation bar position values
+    int NAV_BAR_LEFT = 1 << 0;
+    int NAV_BAR_RIGHT = 1 << 1;
+    int NAV_BAR_BOTTOM = 1 << 2;
+
     public final static boolean WATCH_POINTER = false;
 
     /**
@@ -1674,6 +1679,14 @@ public interface WindowManagerPolicy {
      * @return true if the navigation bar is forced to stay visible
      */
     public boolean isNavBarForcedShownLw(WindowState win);
+
+    /**
+     * @return The side of the screen where navigation bar is positioned.
+     * @see #NAV_BAR_LEFT
+     * @see #NAV_BAR_RIGHT
+     * @see #NAV_BAR_BOTTOM
+     */
+    int getNavBarPosition();
 
     /**
      * Calculates the insets for the areas that could never be removed in Honeycomb, i.e. system
