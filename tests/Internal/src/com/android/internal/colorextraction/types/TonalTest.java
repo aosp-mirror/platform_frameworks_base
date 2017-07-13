@@ -40,6 +40,31 @@ import java.util.Arrays;
 public class TonalTest {
 
     @Test
+    public void extractInto_usesFallback() {
+        GradientColors normal = new GradientColors();
+        Tonal tonal = new Tonal();
+        tonal.extractInto(null, normal, new GradientColors(),
+                new GradientColors());
+        assertFalse("Should use fallback color if WallpaperColors is null.",
+                normal.getMainColor() == Tonal.MAIN_COLOR_LIGHT);
+    }
+
+    @Test
+    public void extractInto_usesFallbackWhenTooLightOrDark() {
+        GradientColors normal = new GradientColors();
+        Tonal tonal = new Tonal();
+        tonal.extractInto(new WallpaperColors(Color.valueOf(0xff000000), null, null, 0),
+                normal, new GradientColors(), new GradientColors());
+        assertTrue("Should use fallback color if WallpaperColors is too dark.",
+                normal.getMainColor() == Tonal.MAIN_COLOR_DARK);
+
+        tonal.extractInto(new WallpaperColors(Color.valueOf(0xffffffff), null, null, 0),
+                normal, new GradientColors(), new GradientColors());
+        assertTrue("Should use fallback color if WallpaperColors is too light.",
+                normal.getMainColor() == Tonal.MAIN_COLOR_LIGHT);
+    }
+
+    @Test
     public void colorRange_containsColor() {
         Tonal.ColorRange colorRange = new Tonal.ColorRange(new Range<>(0f, 50f),
                 new Range<>(0f, 1f), new Range<>(0f, 1f));
@@ -72,8 +97,10 @@ public class TonalTest {
 
         // Make sure that palette generation will fail
         Tonal tonal = new Tonal();
-        boolean success = tonal.extractInto(colors, new GradientColors(), new GradientColors(),
+        GradientColors normal = new GradientColors();
+        tonal.extractInto(colors, normal, new GradientColors(),
                 new GradientColors());
-        assertFalse("Cannot generate a tonal palette from blacklisted colors ", success);
+        assertFalse("Cannot generate a tonal palette from blacklisted colors.",
+                normal.getMainColor() == Tonal.MAIN_COLOR_LIGHT);
     }
 }
