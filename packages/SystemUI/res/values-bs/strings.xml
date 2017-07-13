@@ -97,7 +97,7 @@
     <string name="phone_label" msgid="2320074140205331708">"otvori telefon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otvori glasovnu pomoć"</string>
     <string name="camera_label" msgid="7261107956054836961">"otvori kameru"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Izaberite novi raspored zadataka"</string>
+    <string name="recents_caption_resize" msgid="3517056471774958200">"Odaberite novi raspored zadataka"</string>
     <string name="cancel" msgid="6442560571259935130">"Otkaži"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Dugme za uvećavanje u slučaju nekompatibilnosti."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Uvećani prikaz manjeg ekrana na većem ekranu."</string>
@@ -355,8 +355,8 @@
     <string name="description_target_search" msgid="3091587249776033139">"Pretraživanje"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Povucite gore za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Povucite lijevo za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Neće vas ometati zvukovi i vibracije, osim alarma, podsjetnika, događaja i pozivalaca koje odredite. I dalje ćete čuti sve što ste izabrali za reprodukciju, uključujući muziku, videozapise i igre."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Neće vas ometati zvukovi i vibracije, osim alarma. I dalje ćete čuti sve što ste izabrali za reprodukciju, uključujući muziku, videozapise i igre."</string>
+    <string name="zen_priority_introduction" msgid="7577965386868311310">"Neće vas ometati zvukovi i vibracije, osim alarma, podsjetnika, događaja i pozivalaca koje odredite. I dalje ćete čuti sve što ste odabrali za reprodukciju, uključujući muziku, videozapise i igre."</string>
+    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Neće vas ometati zvukovi i vibracije, osim alarma. I dalje ćete čuti sve što ste odabrali za reprodukciju, uključujući muziku, videozapise i igre."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prilagodi"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ovim se blokiraju SVI zvukovi i vibracije, uključujući alarme, muziku, videozapise i igre. I dalje ćete moći obavljati pozive."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ovim se blokiraju SVI zvukovi i vibracije, uključujući alarme, muziku, video zapise i igre."</string>
