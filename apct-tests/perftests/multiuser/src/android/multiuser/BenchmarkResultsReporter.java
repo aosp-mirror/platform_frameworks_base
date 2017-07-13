@@ -40,9 +40,11 @@ public class BenchmarkResultsReporter implements TestRule {
             @Override
             public void evaluate() throws Throwable {
                 base.evaluate();
-                final Bundle stats = mRunner.getStats();
-                final String summary = getSummaryString(description.getMethodName(), stats);
-                logSummary(description.getTestClass().getSimpleName(), summary, mRunner.getAllDurations());
+                final Bundle stats = mRunner.getStatsToReport();
+                final String summary = getSummaryString(description.getMethodName(),
+                        mRunner.getStatsToLog());
+                logSummary(description.getTestClass().getSimpleName(), summary,
+                        mRunner.getAllDurations());
                 stats.putString(Instrumentation.REPORT_KEY_STREAMRESULT, summary);
                 InstrumentationRegistry.getInstrumentation().sendStatus(
                         Activity.RESULT_OK, stats);

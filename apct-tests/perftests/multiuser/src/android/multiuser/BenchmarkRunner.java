@@ -93,8 +93,12 @@ public class BenchmarkRunner {
         mState = RUNNING;
     }
 
-    public Bundle getStats() {
-        return mResults.getStats();
+    public Bundle getStatsToReport() {
+        return mResults.getStatsToReport();
+    }
+
+    public Bundle getStatsToLog() {
+        return mResults.getStatsToLog();
     }
 
     public ArrayList<Long> getAllDurations() {
