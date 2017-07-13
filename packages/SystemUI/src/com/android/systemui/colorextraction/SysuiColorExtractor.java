@@ -16,6 +16,7 @@
 
 package com.android.systemui.colorextraction;
 
+import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.os.Handler;
@@ -47,10 +48,10 @@ public class SysuiColorExtractor extends ColorExtractor {
     @VisibleForTesting
     public SysuiColorExtractor(Context context, ExtractionType type, boolean registerVisibility) {
         super(context, type);
-
         mWpHiddenColors = new GradientColors();
-        mWpHiddenColors.setMainColor(FALLBACK_COLOR);
-        mWpHiddenColors.setSecondaryColor(FALLBACK_COLOR);
+
+        WallpaperColors systemColors = getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
+        updateDefaultGradients(systemColors);
 
         if (registerVisibility) {
             try {
@@ -69,6 +70,24 @@ public class SysuiColorExtractor extends ColorExtractor {
                 Log.w(TAG, "Can't listen to wallpaper visibility changes", e);
             }
         }
+    }
+
+    private void updateDefaultGradients(WallpaperColors colors) {
+        Tonal.applyFallback(colors, mWpHiddenColors);
+    }
+
+    @Override
+    public void onColorsChanged(WallpaperColors colors, int which) {
+        super.onColorsChanged(colors, which);
+
+        if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
+            updateDefaultGradients(colors);
+        }
+    }
+
+    @VisibleForTesting
+    GradientColors getFallbackColors() {
+        return mWpHiddenColors;
     }
 
     /**

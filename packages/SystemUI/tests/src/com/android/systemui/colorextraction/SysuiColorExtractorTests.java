@@ -48,13 +48,11 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
 
     @Test
     public void getColors_usesGreyIfWallpaperNotVisible() {
-        ColorExtractor.GradientColors fallbackColors = new ColorExtractor.GradientColors();
-        fallbackColors.setMainColor(ColorExtractor.FALLBACK_COLOR);
-        fallbackColors.setSecondaryColor(ColorExtractor.FALLBACK_COLOR);
-
         SysuiColorExtractor extractor = new SysuiColorExtractor(getContext(), new Tonal(), false);
         simulateEvent(extractor);
         extractor.setWallpaperVisible(false);
+
+        ColorExtractor.GradientColors fallbackColors = extractor.getFallbackColors();
 
         for (int which : sWhich) {
             for (int type : sTypes) {
@@ -76,7 +74,6 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
                     outGradientColorsNormal.set(colors);
                     outGradientColorsDark.set(colors);
                     outGradientColorsExtraDark.set(colors);
-                    return true;
                 }, false);
         simulateEvent(extractor);
         extractor.setWallpaperVisible(true);
@@ -91,7 +88,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
 
     private void simulateEvent(SysuiColorExtractor extractor) {
         // Let's fake a color event
-        extractor.onColorsChanged(new WallpaperColors(Color.valueOf(Color.BLACK), null, null, 0),
+        extractor.onColorsChanged(new WallpaperColors(Color.valueOf(Color.GREEN), null, null, 0),
                 WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
     }
 }

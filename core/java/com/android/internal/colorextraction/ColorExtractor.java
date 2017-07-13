@@ -43,10 +43,6 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
 
     private static final String TAG = "ColorExtractor";
 
-    public static final int FALLBACK_COLOR = 0xff83888d;
-
-    private int mMainFallbackColor = FALLBACK_COLOR;
-    private int mSecondaryFallbackColor = FALLBACK_COLOR;
     private final SparseArray<GradientColors[]> mGradientColors;
     private final ArrayList<OnColorsChangedListener> mOnColorsChangedListeners;
     private final Context mContext;
@@ -73,6 +69,9 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         }
 
         mOnColorsChangedListeners = new ArrayList<>();
+        GradientColors[] systemColors = mGradientColors.get(WallpaperManager.FLAG_SYSTEM);
+        GradientColors[] lockColors = mGradientColors.get(WallpaperManager.FLAG_LOCK);
+
         WallpaperManager wallpaperManager = mContext.getSystemService(WallpaperManager.class);
         if (wallpaperManager == null) {
             Log.w(TAG, "Can't listen to color changes!");
@@ -83,23 +82,18 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
             Trace.beginSection("ColorExtractor#getWallpaperColors");
             mSystemColors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
             mLockColors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_LOCK);
-
-            GradientColors[] systemColors = mGradientColors.get(
-                    WallpaperManager.FLAG_SYSTEM);
-            extractInto(mSystemColors,
-                    systemColors[TYPE_NORMAL],
-                    systemColors[TYPE_DARK],
-                    systemColors[TYPE_EXTRA_DARK]);
-
-            GradientColors[] lockColors = mGradientColors.get(WallpaperManager.FLAG_LOCK);
-            extractInto(mLockColors,
-                    lockColors[TYPE_NORMAL],
-                    lockColors[TYPE_DARK],
-                    lockColors[TYPE_EXTRA_DARK]);
-            triggerColorsChanged(WallpaperManager.FLAG_SYSTEM
-                    | WallpaperManager.FLAG_LOCK);
             Trace.endSection();
         }
+
+        // Initialize all gradients with the current colors
+        extractInto(mSystemColors,
+                systemColors[TYPE_NORMAL],
+                systemColors[TYPE_DARK],
+                systemColors[TYPE_EXTRA_DARK]);
+        extractInto(mLockColors,
+                lockColors[TYPE_NORMAL],
+                lockColors[TYPE_DARK],
+                lockColors[TYPE_EXTRA_DARK]);
     }
 
     /**
@@ -181,25 +175,8 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     private void extractInto(WallpaperColors inWallpaperColors,
             GradientColors outGradientColorsNormal, GradientColors outGradientColorsDark,
             GradientColors outGradientColorsExtraDark) {
-        if (inWallpaperColors == null) {
-            applyFallback(outGradientColorsNormal);
-            applyFallback(outGradientColorsDark);
-            applyFallback(outGradientColorsExtraDark);
-            return;
-        }
-        boolean success = mExtractionType.extractInto(inWallpaperColors, outGradientColorsNormal,
+        mExtractionType.extractInto(inWallpaperColors, outGradientColorsNormal,
                 outGradientColorsDark, outGradientColorsExtraDark);
-        if (!success) {
-            applyFallback(outGradientColorsNormal);
-            applyFallback(outGradientColorsDark);
-            applyFallback(outGradientColorsExtraDark);
-        }
-    }
-
-    private void applyFallback(GradientColors outGradientColors) {
-        outGradientColors.setMainColor(mMainFallbackColor);
-        outGradientColors.setSecondaryColor(mSecondaryFallbackColor);
-        outGradientColors.setSupportsDarkText(false);
     }
 
     public void destroy() {
@@ -218,8 +195,8 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     }
 
     public static class GradientColors {
-        private int mMainColor = FALLBACK_COLOR;
-        private int mSecondaryColor = FALLBACK_COLOR;
+        private int mMainColor;
+        private int mSecondaryColor;
         private boolean mSupportsDarkText;
 
         public void setMainColor(int mainColor) {
