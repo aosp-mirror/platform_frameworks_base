@@ -76,7 +76,7 @@ public class SyncJobService extends JobService {
         m.what = SyncManager.SyncHandler.MESSAGE_START_SYNC;
         SyncOperation op = SyncOperation.maybeCreateFromJobExtras(params.getExtras());
 
-        mLogger.log("onStopJob() jobid=", params.getJobId(), " op=", op);
+        mLogger.log("onStartJob() jobid=", params.getJobId(), " op=", op);
 
         if (op == null) {
             Slog.e(TAG, "Got invalid job " + params.getJobId());
