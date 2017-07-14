@@ -118,9 +118,13 @@ import com.android.server.backup.restore.PerformUnifiedRestoreTask;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
+import com.android.server.backup.utils.PasswordUtils;
+import com.android.server.backup.utils.SparseArrayUtils;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import libcore.io.IoUtils;
+
+import com.google.android.collect.Sets;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -2300,21 +2304,13 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
 
         // a caller with full permission can ask to back up any participating app
-        HashSet<String> targets = new HashSet<>();
         if (PACKAGE_MANAGER_SENTINEL.equals(packageName)) {
-            targets.add(PACKAGE_MANAGER_SENTINEL);
+            return Sets.newHashSet(PACKAGE_MANAGER_SENTINEL);
         } else {
             synchronized (mBackupParticipants) {
-                int N = mBackupParticipants.size();
-                for (int i = 0; i < N; i++) {
-                    HashSet<String> s = mBackupParticipants.valueAt(i);
-                    if (s != null) {
-                        targets.addAll(s);
-                    }
-                }
+                return SparseArrayUtils.union(mBackupParticipants);
             }
         }
-        return targets;
     }
 
     private void writeToJournalLocked(String str) {
@@ -2398,14 +2394,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             // a caller with full permission can ask to back up any participating app
             // !!! TODO: allow data-clear of ANY app?
             if (MORE_DEBUG) Slog.v(TAG, "Privileged caller, allowing clear of other apps");
-            apps = new HashSet<>();
-            int N = mBackupParticipants.size();
-            for (int i = 0; i < N; i++) {
-                HashSet<String> s = mBackupParticipants.valueAt(i);
-                if (s != null) {
-                    apps.addAll(s);
-                }
-            }
+            apps = SparseArrayUtils.union(mBackupParticipants);
         }
 
         // Is the given app an available participant?
