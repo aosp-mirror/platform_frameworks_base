@@ -16,9 +16,12 @@
 
 package android.net.lowpan;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.android.internal.util.HexDump;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Objects;
 import java.util.TreeSet;
 
 /**
@@ -27,69 +30,92 @@ import java.util.TreeSet;
  * @hide
  */
 // @SystemApi
-public class LowpanBeaconInfo extends LowpanIdentity {
+public class LowpanBeaconInfo implements Parcelable {
+    public static final int UNKNOWN_RSSI = Integer.MAX_VALUE;
+    public static final int UNKNOWN_LQI = 0;
 
-    private int mRssi = UNKNOWN;
-    private int mLqi = UNKNOWN;
+    private LowpanIdentity mIdentity;
+    private int mRssi = UNKNOWN_RSSI;
+    private int mLqi = UNKNOWN_LQI;
     private byte[] mBeaconAddress = null;
     private final TreeSet<Integer> mFlags = new TreeSet<>();
 
     public static final int FLAG_CAN_ASSIST = 1;
 
-    static class Builder extends LowpanIdentity.Builder {
-        private final LowpanBeaconInfo identity = new LowpanBeaconInfo();
+    /** @hide */
+    public static class Builder {
+        final LowpanIdentity.Builder mIdentityBuilder = new LowpanIdentity.Builder();
+        final LowpanBeaconInfo mBeaconInfo = new LowpanBeaconInfo();
+
+        public Builder setLowpanIdentity(LowpanIdentity x) {
+            mIdentityBuilder.setLowpanIdentity(x);
+            return this;
+        }
+
+        public Builder setName(String x) {
+            mIdentityBuilder.setName(x);
+            return this;
+        }
+
+        public Builder setXpanid(byte x[]) {
+            mIdentityBuilder.setXpanid(x);
+            return this;
+        }
+
+        public Builder setPanid(int x) {
+            mIdentityBuilder.setPanid(x);
+            return this;
+        }
+
+        public Builder setChannel(int x) {
+            mIdentityBuilder.setChannel(x);
+            return this;
+        }
+
+        public Builder setType(String x) {
+            mIdentityBuilder.setType(x);
+            return this;
+        }
 
         public Builder setRssi(int x) {
-            identity.mRssi = x;
+            mBeaconInfo.mRssi = x;
             return this;
         }
 
         public Builder setLqi(int x) {
-            identity.mLqi = x;
+            mBeaconInfo.mLqi = x;
             return this;
         }
 
         public Builder setBeaconAddress(byte x[]) {
-            identity.mBeaconAddress = x.clone();
+            mBeaconInfo.mBeaconAddress = (x != null ? x.clone() : null);
             return this;
         }
 
         public Builder setFlag(int x) {
-            identity.mFlags.add(x);
+            mBeaconInfo.mFlags.add(x);
             return this;
         }
 
         public Builder setFlags(Collection<Integer> x) {
-            identity.mFlags.addAll(x);
-            return this;
-        }
-
-        /** @hide */
-        Builder updateFromMap(Map map) {
-            if (map.containsKey(LowpanProperties.KEY_RSSI.getName())) {
-                setRssi(LowpanProperties.KEY_RSSI.getFromMap(map));
-            }
-            if (map.containsKey(LowpanProperties.KEY_LQI.getName())) {
-                setLqi(LowpanProperties.KEY_LQI.getFromMap(map));
-            }
-            if (map.containsKey(LowpanProperties.KEY_BEACON_ADDRESS.getName())) {
-                setBeaconAddress(LowpanProperties.KEY_BEACON_ADDRESS.getFromMap(map));
-            }
-            identity.mFlags.clear();
-            if (map.containsKey(LowpanProperties.KEY_BEACON_CAN_ASSIST.getName())
-                    && LowpanProperties.KEY_BEACON_CAN_ASSIST.getFromMap(map).booleanValue()) {
-                setFlag(FLAG_CAN_ASSIST);
-            }
-            super.updateFromMap(map);
+            mBeaconInfo.mFlags.addAll(x);
             return this;
         }
 
         public LowpanBeaconInfo build() {
-            return identity;
+            mBeaconInfo.mIdentity = mIdentityBuilder.build();
+            if (mBeaconInfo.mBeaconAddress == null) {
+                mBeaconInfo.mBeaconAddress = new byte[0];
+            }
+            return mBeaconInfo;
         }
     }
 
     private LowpanBeaconInfo() {}
+
+    public LowpanIdentity getLowpanIdentity() {
+        return mIdentity;
+    }
 
     public int getRssi() {
         return mRssi;
@@ -112,26 +138,21 @@ public class LowpanBeaconInfo extends LowpanIdentity {
     }
 
     @Override
-    void addToMap(Map<String, Object> parameters) {
-        super.addToMap(parameters);
-    }
-
-    @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
 
-        sb.append(super.toString());
+        sb.append(mIdentity.toString());
 
-        if (mRssi != UNKNOWN) {
-            sb.append(", RSSI: ").append(mRssi);
+        if (mRssi != UNKNOWN_RSSI) {
+            sb.append(", RSSI:").append(mRssi).append("dBm");
         }
 
-        if (mLqi != UNKNOWN) {
-            sb.append(", LQI: ").append(mLqi);
+        if (mLqi != UNKNOWN_LQI) {
+            sb.append(", LQI:").append(mLqi);
         }
 
-        if (mBeaconAddress != null) {
-            sb.append(", BeaconAddress: ").append(HexDump.toHexString(mBeaconAddress));
+        if (mBeaconAddress.length > 0) {
+            sb.append(", BeaconAddress:").append(HexDump.toHexString(mBeaconAddress));
         }
 
         for (Integer flag : mFlags) {
@@ -147,4 +168,67 @@ public class LowpanBeaconInfo extends LowpanIdentity {
 
         return sb.toString();
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mIdentity, mRssi, mLqi, Arrays.hashCode(mBeaconAddress), mFlags);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof LowpanBeaconInfo)) {
+            return false;
+        }
+        LowpanBeaconInfo rhs = (LowpanBeaconInfo) obj;
+        return mIdentity.equals(rhs.mIdentity)
+                && Arrays.equals(mBeaconAddress, rhs.mBeaconAddress)
+                && mRssi == rhs.mRssi
+                && mLqi == rhs.mLqi
+                && mFlags.equals(rhs.mFlags);
+    }
+
+    /** Implement the Parcelable interface. */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /** Implement the Parcelable interface. */
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        mIdentity.writeToParcel(dest, flags);
+        dest.writeInt(mRssi);
+        dest.writeInt(mLqi);
+        dest.writeByteArray(mBeaconAddress);
+
+        dest.writeInt(mFlags.size());
+        for (Integer val : mFlags) {
+            dest.writeInt(val);
+        }
+    }
+
+    /** Implement the Parcelable interface. */
+    public static final Creator<LowpanBeaconInfo> CREATOR =
+            new Creator<LowpanBeaconInfo>() {
+                public LowpanBeaconInfo createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
+
+                    builder.setLowpanIdentity(LowpanIdentity.CREATOR.createFromParcel(in));
+
+                    builder.setRssi(in.readInt());
+                    builder.setLqi(in.readInt());
+
+                    builder.setBeaconAddress(in.createByteArray());
+
+                    for (int i = in.readInt(); i > 0; i--) {
+                        builder.setFlag(in.readInt());
+                    }
+
+                    return builder.build();
+                }
+
+                public LowpanBeaconInfo[] newArray(int size) {
+                    return new LowpanBeaconInfo[size];
+                }
+            };
 }
