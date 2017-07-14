@@ -894,8 +894,9 @@ public abstract class SensorManager {
      * to free up resource in sensor system associated with the direct channel.
      *
      * @param mem A {@link android.os.MemoryFile} shared memory object.
-     * @return A {@link android.hardware.SensorDirectChannel} object if successful, null otherwise.
+     * @return A {@link android.hardware.SensorDirectChannel} object.
      * @throws NullPointerException when mem is null.
+     * @throws UncheckedIOException if not able to create channel.
      * @see SensorDirectChannel#close()
      * @see #configureDirectChannel(SensorDirectChannel, Sensor, int)
      */
@@ -916,9 +917,9 @@ public abstract class SensorManager {
      * to free up resource in sensor system associated with the direct channel.
      *
      * @param mem A {@link android.hardware.HardwareBuffer} shared memory object.
-     * @return A {@link android.hardware.SensorDirectChannel} object if successful,
-     *         null otherwise.
+     * @return A {@link android.hardware.SensorDirectChannel} object.
      * @throws NullPointerException when mem is null.
+     * @throws UncheckedIOException if not able to create channel.
      * @see SensorDirectChannel#close()
      * @see #configureDirectChannel(SensorDirectChannel, Sensor, int)
      */
