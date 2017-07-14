@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
 
 import com.android.systemui.Dependency;
@@ -84,12 +85,15 @@ public class GarbageMonitor {
         // TODO(b/35345376): Turn this back on for debuggable builds after known leak fixed.
         private static final boolean ENABLED = Build.IS_DEBUGGABLE
                 && SystemProperties.getBoolean("debug.enable_leak_reporting", false);
+        private static final String FORCE_ENABLE = "sysui_force_garbage_monitor";
 
         private GarbageMonitor mGarbageMonitor;
 
         @Override
         public void start() {
-            if (!ENABLED) {
+            boolean forceEnable = Settings.Secure.getInt(mContext.getContentResolver(),
+                    FORCE_ENABLE, 0) != 0;
+            if (!ENABLED && !forceEnable) {
                 return;
             }
             mGarbageMonitor = Dependency.get(GarbageMonitor.class);
