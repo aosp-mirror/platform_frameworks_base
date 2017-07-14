@@ -818,6 +818,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (mFocusedInCluster != child) {
             return;
         }
+        clearFocusedInCluster();
+    }
+
+    /**
+     * Removes the focusedInCluster chain from this up to the cluster containing it.
+     */
+    void clearFocusedInCluster() {
         View top = findKeyboardNavigationCluster();
         ViewParent parent = this;
         do {
