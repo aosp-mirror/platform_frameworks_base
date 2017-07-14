@@ -22,6 +22,7 @@ import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -44,6 +45,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     private static final int[] sGradientTypes = new int[]{TYPE_NORMAL, TYPE_DARK, TYPE_EXTRA_DARK};
 
     private static final String TAG = "ColorExtractor";
+    private static final boolean DEBUG = false;
 
     protected final SparseArray<GradientColors[]> mGradientColors;
     private final ArrayList<WeakReference<OnColorsChangedListener>> mOnColorsChangedListeners;
@@ -147,6 +149,9 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
 
     @Override
     public void onColorsChanged(WallpaperColors colors, int which) {
+        if (DEBUG) {
+            Log.d(TAG, "New wallpaper colors for " + which + ": " + colors);
+        }
         boolean changed = false;
         if ((which & WallpaperManager.FLAG_LOCK) != 0) {
             mLockColors = colors;
