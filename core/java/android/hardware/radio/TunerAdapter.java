@@ -180,6 +180,15 @@ class TunerAdapter extends RadioTuner {
     }
 
     @Override
+    public void cancelAnnouncement() {
+        try {
+            mTuner.cancelAnnouncement();
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
     public int getProgramInformation(RadioManager.ProgramInfo[] info) {
         if (info == null || info.length != 1) {
             throw new IllegalArgumentException("The argument must be an array of length 1");

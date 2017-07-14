@@ -79,6 +79,8 @@ class Tuner extends ITuner.Stub {
     private native void nativeTune(long nativeContext, @NonNull ProgramSelector selector);
     private native void nativeCancel(long nativeContext);
 
+    private native void nativeCancelAnnouncement(long nativeContext);
+
     private native RadioManager.ProgramInfo nativeGetProgramInformation(long nativeContext);
     private native boolean nativeStartBackgroundScan(long nativeContext);
     private native List<RadioManager.ProgramInfo> nativeGetProgramList(long nativeContext,
@@ -191,6 +193,14 @@ class Tuner extends ITuner.Stub {
         synchronized (mLock) {
             checkNotClosedLocked();
             nativeCancel(mNativeContext);
+        }
+    }
+
+    @Override
+    public void cancelAnnouncement() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            nativeCancelAnnouncement(mNativeContext);
         }
     }
 

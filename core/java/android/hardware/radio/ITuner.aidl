@@ -60,6 +60,8 @@ interface ITuner {
      */
     void cancel();
 
+    void cancelAnnouncement();
+
     RadioManager.ProgramInfo getProgramInformation();
 
     /**

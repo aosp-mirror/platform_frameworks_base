@@ -305,6 +305,17 @@ static void nativeCancel(JNIEnv *env, jobject obj, jlong nativeContext) {
     convert::ThrowIfFailed(env, halTuner->cancel());
 }
 
+static void nativeCancelAnnouncement(JNIEnv *env, jobject obj, jlong nativeContext) {
+    ALOGV("%s", __func__);
+    auto halTuner = getHalTuner11(nativeContext);
+    if (halTuner == nullptr) {
+        ALOGI("cancelling announcements is not supported with HAL < 1.1");
+        return;
+    }
+
+    convert::ThrowIfFailed(env, halTuner->cancelAnnouncement());
+}
+
 static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativeContext) {
     ALOGV("nativeGetProgramInformation()");
     AutoMutex _l(gContextMutex);
@@ -440,6 +451,7 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeScan", "(JZZ)V", (void*)nativeScan },
     { "nativeTune", "(JLandroid/hardware/radio/ProgramSelector;)V", (void*)nativeTune },
     { "nativeCancel", "(J)V", (void*)nativeCancel },
+    { "nativeCancelAnnouncement", "(J)V", (void*)nativeCancelAnnouncement },
     { "nativeGetProgramInformation", "(J)Landroid/hardware/radio/RadioManager$ProgramInfo;",
             (void*)nativeGetProgramInformation },
     { "nativeStartBackgroundScan", "(J)Z", (void*)nativeStartBackgroundScan },
