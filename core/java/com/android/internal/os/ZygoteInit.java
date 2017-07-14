@@ -132,6 +132,9 @@ public class ZygoteInit {
         bootTimingsTraceLog.traceBegin("PreloadResources");
         preloadResources();
         bootTimingsTraceLog.traceEnd(); // PreloadResources
+        Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadAppProcessHALs");
+        nativePreloadAppProcessHALs();
+        Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
         Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadOpenGL");
         preloadOpenGL();
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
@@ -183,6 +186,8 @@ public class ZygoteInit {
         System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
     }
+
+    native private static void nativePreloadAppProcessHALs();
 
     private static void preloadOpenGL() {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
