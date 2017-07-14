@@ -32,6 +32,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_CLEAR;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACKUP_PACKAGE;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
@@ -476,11 +477,11 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mDataDir = dataDir;
     }
 
-    public File getJournal() {
+    public DataChangedJournal getJournal() {
         return mJournal;
     }
 
-    public void setJournal(File journal) {
+    public void setJournal(@Nullable DataChangedJournal journal) {
         mJournal = journal;
     }
 
@@ -624,7 +625,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private File mBaseStateDir;
     private File mDataDir;
     private File mJournalDir;
-    private File mJournal;
+    @Nullable private DataChangedJournal mJournal;
 
     private final SecureRandom mRng = new SecureRandom();
 
@@ -1043,35 +1044,17 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     private void parseLeftoverJournals() {
-        for (File f : mJournalDir.listFiles()) {
-            if (mJournal == null || f.compareTo(mJournal) != 0) {
-                // This isn't the current journal, so it must be a leftover.  Read
-                // out the package names mentioned there and schedule them for
-                // backup.
-                DataInputStream in = null;
+        ArrayList<DataChangedJournal> journals = DataChangedJournal.listJournals(mJournalDir);
+        for (DataChangedJournal journal : journals) {
+            if (!journal.equals(mJournal)) {
                 try {
-                    Slog.i(TAG, "Found stale backup journal, scheduling");
-                    // Journals will tend to be on the order of a few kilobytes(around 4k), hence,
-                    // setting the buffer size to 8192.
-                    InputStream bufferedInputStream = new BufferedInputStream(
-                            new FileInputStream(f), 8192);
-                    in = new DataInputStream(bufferedInputStream);
-                    while (true) {
-                        String packageName = in.readUTF();
+                    journal.forEach(packageName -> {
+                        Slog.i(TAG, "Found stale backup journal, scheduling");
                         if (MORE_DEBUG) Slog.i(TAG, "  " + packageName);
                         dataChangedImpl(packageName);
-                    }
-                } catch (EOFException e) {
-                    // no more data; we're done
-                } catch (Exception e) {
-                    Slog.e(TAG, "Can't read " + f, e);
-                } finally {
-                    // close/delete the file
-                    try {
-                        if (in != null) in.close();
-                    } catch (IOException e) {
-                    }
-                    f.delete();
+                    });
+                } catch (IOException e) {
+                    Slog.e(TAG, "Can't read " + journal, e);
                 }
             }
         }
@@ -2335,20 +2318,12 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     private void writeToJournalLocked(String str) {
-        RandomAccessFile out = null;
         try {
-            if (mJournal == null) mJournal = File.createTempFile("journal", null, mJournalDir);
-            out = new RandomAccessFile(mJournal, "rws");
-            out.seek(out.length());
-            out.writeUTF(str);
+            if (mJournal == null) mJournal = DataChangedJournal.newJournal(mJournalDir);
+            mJournal.addPackage(str);
         } catch (IOException e) {
             Slog.e(TAG, "Can't write " + str + " to backup journal", e);
             mJournal = null;
-        } finally {
-            try {
-                if (out != null) out.close();
-            } catch (IOException e) {
-            }
         }
     }
 
