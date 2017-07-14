@@ -28,7 +28,7 @@ import android.telephony.mbms.IDownloadCallback;
  */
 interface IMbmsDownloadService
 {
-    void initialize(int subId, IMbmsDownloadManagerCallback listener);
+    int initialize(int subId, IMbmsDownloadManagerCallback listener);
 
     int getFileServices(int subId, in List<String> serviceClasses);
 
