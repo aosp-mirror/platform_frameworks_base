@@ -547,7 +547,9 @@ public abstract class AbstractAccountAuthenticator {
      * @param authTokenType the type of auth token to retrieve after adding the account, may be null
      * @param requiredFeatures a String array of authenticator-specific features that the added
      * account must support, may be null
-     * @param options a Bundle of authenticator-specific options, may be null
+     * @param options a Bundle of authenticator-specific options. It always contains
+     * {@link AccountManager#KEY_CALLER_PID} and {@link AccountManager#KEY_CALLER_UID}
+     * fields which will let authenticator know the identity of the caller.
      * @return a Bundle result or null if the result is to be returned via the response. The result
      * will contain either:
      * <ul>
@@ -603,21 +605,24 @@ public abstract class AbstractAccountAuthenticator {
      * addition {@link AbstractAccountAuthenticator} implementations that declare themselves
      * {@code android:customTokens=true} may also provide a non-negative {@link
      * #KEY_CUSTOM_TOKEN_EXPIRY} long value containing the expiration timestamp of the expiration
-     * time (in millis since the unix epoch).
+     * time (in millis since the unix epoch), tokens will be cached in memory based on
+     * application's packageName/signature for however long that was specified.
      * <p>
      * Implementers should assume that tokens will be cached on the basis of account and
      * authTokenType. The system may ignore the contents of the supplied options Bundle when
      * determining to re-use a cached token. Furthermore, implementers should assume a supplied
      * expiration time will be treated as non-binding advice.
      * <p>
-     * Finally, note that for android:customTokens=false authenticators, tokens are cached
+     * Finally, note that for {@code android:customTokens=false} authenticators, tokens are cached
      * indefinitely until some client calls {@link
      * AccountManager#invalidateAuthToken(String,String)}.
      *
      * @param response to send the result back to the AccountManager, will never be null
      * @param account the account whose credentials are to be retrieved, will never be null
      * @param authTokenType the type of auth token to retrieve, will never be null
-     * @param options a Bundle of authenticator-specific options, may be null
+     * @param options a Bundle of authenticator-specific options. It always contains
+     * {@link AccountManager#KEY_CALLER_PID} and {@link AccountManager#KEY_CALLER_UID}
+     * fields which will let authenticator know the identity of the caller.
      * @return a Bundle result or null if the result is to be returned via the response.
      * @throws NetworkErrorException if the authenticator could not honor the request due to a
      * network error
