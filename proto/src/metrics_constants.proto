@@ -138,6 +138,18 @@ message MetricsEvent {
     REASON_TIMEOUT = 19;
   }
 
+  // Subtypes of camera events for ACTION_CAMERA_EVENT
+  enum CameraEvent {
+    // A back-facing camera was used
+    CAMERA_BACK_USED = 0;
+
+    // A front-facing camera was used
+    CAMERA_FRONT_USED = 1;
+
+    // An external camera was used
+    CAMERA_EXTERNAL_USED = 2;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -4195,6 +4207,12 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: O DR
     DIALOG_BLUETOOTH_PAIRED_DEVICE_FORGET = 1031;
+
+    // An event from the camera service
+    // CATEGORY: OTHER
+    //  SUBTYPE: CameraEvent
+    // OS: O DR
+    ACTION_CAMERA_EVENT = 1032;
 
     // ---- End O-DR1 Constants, all O-DR1 constants go above this line ----
 
