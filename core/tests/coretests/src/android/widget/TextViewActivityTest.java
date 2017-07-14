@@ -786,7 +786,7 @@ public class TextViewActivityTest {
 
     @Test
     public void testAssistItemIsAtIndexZero() throws Throwable {
-        mActivity.getSystemService(TextClassificationManager.class).setTextClassifier(null);
+        useSystemDefaultTextClassifier();
         final TextView textView = mActivity.findViewById(R.id.textview);
         mActivityRule.runOnUiThread(() -> textView.setCustomSelectionActionModeCallback(
                 new ActionMode.Callback() {
@@ -822,6 +822,23 @@ public class TextViewActivityTest {
     }
 
     @Test
+    public void testNoAssistItemForPasswordField() throws Throwable {
+        useSystemDefaultTextClassifier();
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        mActivityRule.runOnUiThread(() -> {
+            textView.setInputType(
+                    InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        });
+        mInstrumentation.waitForIdleSync();
+        final String password = "afigbo@android.com";
+
+        onView(withId(R.id.textview)).perform(replaceText(password));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(password.indexOf('@')));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarDoesNotContainItem(android.R.id.textAssist);
+    }
+
+    @Test
     public void testPastePlainText_menuAction() {
         initializeClipboardWithText(TextStyle.STYLED);
 
@@ -846,6 +863,10 @@ public class TextViewActivityTest {
 
         assertFloatingToolbarDoesNotContainItem(
                 mActivity.getString(com.android.internal.R.string.paste_as_plain_text));
+    }
+
+    private void useSystemDefaultTextClassifier() {
+        mActivity.getSystemService(TextClassificationManager.class).setTextClassifier(null);
     }
 
     private void initializeClipboardWithText(TextStyle textStyle) {
