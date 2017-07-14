@@ -143,7 +143,6 @@ public class BootReceiver extends BroadcastReceiver {
         try {
             return FileUtils.readTextFile(lastHeaderFile, 0, null);
         } catch (IOException e) {
-            Slog.e(TAG, "Error reading " + lastHeaderFile, e);
             return null;
         }
     }
