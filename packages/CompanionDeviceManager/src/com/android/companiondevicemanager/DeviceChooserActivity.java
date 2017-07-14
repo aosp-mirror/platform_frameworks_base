@@ -55,6 +55,8 @@ public class DeviceChooserActivity extends Activity {
             Log.e(LOG_TAG, "About to show UI, but no devices to show");
         }
 
+        mPairButton = findViewById(R.id.button_pair);
+
         if (getService().mRequest.isSingleDevice()) {
             setContentView(R.layout.device_confirmation);
             final DeviceFilterPair selectedDevice = getService().mDevicesFound.get(0);
@@ -62,9 +64,12 @@ public class DeviceChooserActivity extends Activity {
                     R.string.confirmation_title,
                     getCallingAppName(),
                     selectedDevice.getDisplayName()), 0));
+            mPairButton.setOnClickListener(v -> onDeviceConfirmed(getService().mSelectedDevice));
             getService().mSelectedDevice = selectedDevice;
+            onSelectionUpdate();
         } else {
             setContentView(R.layout.device_chooser);
+            mPairButton.setVisibility(View.GONE);
             setTitle(Html.fromHtml(getString(R.string.chooser_title, getCallingAppName()), 0));
             mDeviceListView = findViewById(R.id.device_list);
             final DeviceDiscoveryService.DevicesAdapter adapter = getService().mDevicesAdapter;
@@ -72,15 +77,11 @@ public class DeviceChooserActivity extends Activity {
             adapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
-                    updatePairButtonEnabled();
+                    onSelectionUpdate();
                 }
             });
             mDeviceListView.addFooterView(getProgressBar(), null, false);
         }
-
-        mPairButton = findViewById(R.id.button_pair);
-        mPairButton.setOnClickListener(v -> onPairTapped(getService().mSelectedDevice));
-        updatePairButtonEnabled();
 
         mCancelButton = findViewById(R.id.button_cancel);
         mCancelButton.setOnClickListener(v -> cancel());
@@ -134,15 +135,20 @@ public class DeviceChooserActivity extends Activity {
         return r.getDimensionPixelSize(R.dimen.padding);
     }
 
-    private void updatePairButtonEnabled() {
-        mPairButton.setEnabled(getService().mSelectedDevice != null);
+    private void onSelectionUpdate() {
+        DeviceFilterPair selectedDevice = getService().mSelectedDevice;
+        if (mPairButton.getVisibility() != View.VISIBLE && selectedDevice != null) {
+            onDeviceConfirmed(selectedDevice);
+        } else {
+            mPairButton.setEnabled(selectedDevice != null);
+        }
     }
 
     private DeviceDiscoveryService getService() {
         return DeviceDiscoveryService.sInstance;
     }
 
-   protected void onPairTapped(DeviceFilterPair selectedDevice) {
+   protected void onDeviceConfirmed(DeviceFilterPair selectedDevice) {
         getService().onDeviceSelected(
                 getCallingPackage(), getDeviceMacAddress(selectedDevice.device));
         setResult(RESULT_OK,
