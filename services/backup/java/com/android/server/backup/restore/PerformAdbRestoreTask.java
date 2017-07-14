@@ -16,6 +16,8 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.BackupPasswordManager.PBKDF_CURRENT;
+import static com.android.server.backup.BackupPasswordManager.PBKDF_FALLBACK;
 import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_FILE_HEADER_MAGIC;
 import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_FILE_VERSION;
 import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME;
@@ -23,8 +25,6 @@ import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_ME
 import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
 import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT;
-import static com.android.server.backup.RefactoredBackupManagerService.PBKDF_CURRENT;
-import static com.android.server.backup.RefactoredBackupManagerService.PBKDF_FALLBACK;
 import static com.android.server.backup.RefactoredBackupManagerService.SETTINGS_PACKAGE;
 import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.RefactoredBackupManagerService.TAG;
