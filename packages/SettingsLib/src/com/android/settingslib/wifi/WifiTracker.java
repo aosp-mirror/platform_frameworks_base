@@ -68,11 +68,13 @@ public class WifiTracker {
     // TODO(b/36733768): Remove flag includeSaved and includePasspoints.
 
     private static final String TAG = "WifiTracker";
-    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DBG() {
+        return Log.isLoggable(TAG, Log.DEBUG);
+    }
 
     /** verbose logging flag. this flag is set thru developer debugging options
      * and used so as to assist with in-the-field WiFi connectivity debugging  */
-    public static int sVerboseLogging = 0;
+    public static boolean sVerboseLogging;
 
     // TODO: Allow control of this?
     // Combo scans can take 5-6s to complete - set to 10s.
@@ -193,7 +195,7 @@ public class WifiTracker {
         mConnectivityManager = connectivityManager;
 
         // check if verbose logging has been turned on or off
-        sVerboseLogging = mWifiManager.getVerboseLoggingLevel();
+        sVerboseLogging = (mWifiManager.getVerboseLoggingLevel() > 0);
 
         mFilter = new IntentFilter();
         mFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -251,16 +253,12 @@ public class WifiTracker {
             List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
             updateAccessPointsLocked(newScanResults, configs);
 
-            if (DBG) {
-                Log.d(TAG, "force update - internal access point list:\n" + mInternalAccessPoints);
-            }
-
             // Synchronously copy access points
             mMainHandler.removeMessages(MainHandler.MSG_ACCESS_POINT_CHANGED);
             mMainHandler.handleMessage(
                     Message.obtain(mMainHandler, MainHandler.MSG_ACCESS_POINT_CHANGED));
-            if (DBG) {
-                Log.d(TAG, "force update - external access point list:\n" + mAccessPoints);
+            if (sVerboseLogging) {
+                Log.i(TAG, "force update - external access point list:\n" + mAccessPoints);
             }
         }
     }
@@ -338,7 +336,7 @@ public class WifiTracker {
     private void requestScoresForNetworkKeys(Collection<NetworkKey> keys) {
         if (keys.isEmpty()) return;
 
-        if (DBG) {
+        if (DBG()) {
             Log.d(TAG, "Requesting scores for Network Keys: " + keys);
         }
         mNetworkScoreManager.requestScores(keys.toArray(new NetworkKey[keys.size()]));
@@ -443,19 +441,19 @@ public class WifiTracker {
         }
 
         if (mScanId > NUM_SCANS_TO_CONFIRM_AP_LOSS) {
-            if (DBG) Log.d(TAG, "------ Dumping SSIDs that were expired on this scan ------");
+            if (DBG()) Log.d(TAG, "------ Dumping SSIDs that were expired on this scan ------");
             Integer threshold = mScanId - NUM_SCANS_TO_CONFIRM_AP_LOSS;
             for (Iterator<Map.Entry<String, Integer>> it = mSeenBssids.entrySet().iterator();
                     it.hasNext(); /* nothing */) {
                 Map.Entry<String, Integer> e = it.next();
                 if (e.getValue() < threshold) {
                     ScanResult result = mScanResultCache.get(e.getKey());
-                    if (DBG) Log.d(TAG, "Removing " + e.getKey() + ":(" + result.SSID + ")");
+                    if (DBG()) Log.d(TAG, "Removing " + e.getKey() + ":(" + result.SSID + ")");
                     mScanResultCache.remove(e.getKey());
                     it.remove();
                 }
             }
-            if (DBG) Log.d(TAG, "---- Done Dumping SSIDs that were expired on this scan ----");
+            if (DBG()) Log.d(TAG, "---- Done Dumping SSIDs that were expired on this scan ----");
         }
 
         return mScanResultCache.values();
@@ -609,7 +607,7 @@ public class WifiTracker {
         Collections.sort(accessPoints);
 
         // Log accesspoints that were deleted
-        if (DBG) {
+        if (DBG()) {
             Log.d(TAG, "------ Dumping SSIDs that were not seen on this scan ------");
             for (AccessPoint prevAccessPoint : mInternalAccessPoints) {
                 if (prevAccessPoint.getSsid() == null)
@@ -1064,7 +1062,7 @@ public class WifiTracker {
             oldAccessPoints.put(accessPoint.mId, accessPoint);
         }
 
-        if (DBG) {
+        if (DBG()) {
             Log.d(TAG, "Starting to copy AP items on the MainHandler");
         }
         synchronized (mLock) {
