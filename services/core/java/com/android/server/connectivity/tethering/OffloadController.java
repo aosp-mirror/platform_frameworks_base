@@ -16,24 +16,38 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.TAG_NONE;
+import static android.net.TrafficStats.UID_TETHERING;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
 import android.content.ContentResolver;
+import android.net.ITetheringStatsProvider;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.util.SharedLog;
 import android.os.Handler;
+import android.os.INetworkManagementService;
+import android.os.RemoteException;
+import android.os.SystemClock;
 import android.provider.Settings;
+import android.text.TextUtils;
+
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A class to encapsulate the business logic of programming the tethering
@@ -43,6 +57,8 @@ import java.util.Set;
  */
 public class OffloadController {
     private static final String TAG = OffloadController.class.getSimpleName();
+
+    private static final int STATS_FETCH_TIMEOUT_MS = 1000;
 
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
@@ -59,14 +75,25 @@ public class OffloadController {
     // prefixes representing only the locally-assigned IP addresses.
     private Set<String> mLastLocalPrefixStrs;
 
+    // Maps upstream interface names to offloaded traffic statistics.
+    private HashMap<String, OffloadHardwareInterface.ForwardedStats>
+            mForwardedStats = new HashMap<>();
+
     public OffloadController(Handler h, OffloadHardwareInterface hwi,
-            ContentResolver contentResolver, SharedLog log) {
+            ContentResolver contentResolver, INetworkManagementService nms, SharedLog log) {
         mHandler = h;
         mHwInterface = hwi;
         mContentResolver = contentResolver;
         mLog = log.forSubComponent(TAG);
         mExemptPrefixes = new HashSet<>();
         mLastLocalPrefixStrs = new HashSet<>();
+
+        try {
+            nms.registerTetheringStatsProvider(
+                    new OffloadTetheringStatsProvider(), getClass().getSimpleName());
+        } catch (RemoteException e) {
+            mLog.e("Cannot register offload stats provider: " + e);
+        }
     }
 
     public void start() {
@@ -138,6 +165,7 @@ public class OffloadController {
 
     public void stop() {
         final boolean wasStarted = started();
+        updateStatsForCurrentUpstream();
         mUpstreamLinkProperties = null;
         mHwInterface.stopOffloadControl();
         mControlInitialized = false;
@@ -145,16 +173,76 @@ public class OffloadController {
         if (wasStarted) mLog.log("tethering offload stopped");
     }
 
+    private class OffloadTetheringStatsProvider extends ITetheringStatsProvider.Stub {
+        @Override
+        public NetworkStats getTetherStats() {
+            NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
+            CountDownLatch latch = new CountDownLatch(1);
+
+            mHandler.post(() -> {
+                try {
+                    NetworkStats.Entry entry = new NetworkStats.Entry();
+                    entry.set = SET_DEFAULT;
+                    entry.tag = TAG_NONE;
+                    entry.uid = UID_TETHERING;
+
+                    updateStatsForCurrentUpstream();
+
+                    for (String iface : mForwardedStats.keySet()) {
+                        entry.iface = iface;
+                        entry.rxBytes = mForwardedStats.get(iface).rxBytes;
+                        entry.txBytes = mForwardedStats.get(iface).txBytes;
+                        stats.addValues(entry);
+                    }
+                } finally {
+                    latch.countDown();
+                }
+            });
+
+            try {
+                latch.await(STATS_FETCH_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                mLog.e("Tethering stats fetch timed out after " + STATS_FETCH_TIMEOUT_MS + "ms");
+            }
+
+            return stats;
+        }
+    }
+
+    private void maybeUpdateStats(String iface) {
+        if (TextUtils.isEmpty(iface)) {
+            return;
+        }
+
+        if (!mForwardedStats.containsKey(iface)) {
+            mForwardedStats.put(iface, new OffloadHardwareInterface.ForwardedStats());
+        }
+        mForwardedStats.get(iface).add(mHwInterface.getForwardedStats(iface));
+    }
+
+    private void updateStatsForCurrentUpstream() {
+        if (mUpstreamLinkProperties != null) {
+            maybeUpdateStats(mUpstreamLinkProperties.getInterfaceName());
+        }
+    }
+
     public void setUpstreamLinkProperties(LinkProperties lp) {
         if (!started() || Objects.equals(mUpstreamLinkProperties, lp)) return;
 
+        String prevUpstream = (mUpstreamLinkProperties != null) ?
+                mUpstreamLinkProperties.getInterfaceName() : null;
+
         mUpstreamLinkProperties = (lp != null) ? new LinkProperties(lp) : null;
+
         // TODO: examine return code and decide what to do if programming
         // upstream parameters fails (probably just wait for a subsequent
         // onOffloadEvent() callback to tell us offload is available again and
         // then reapply all state).
         computeAndPushLocalPrefixes();
         pushUpstreamParameters();
+
+        // Update stats after we've told the hardware to change routing so we don't miss packets.
+        maybeUpdateStats(prevUpstream);
     }
 
     public void setLocalPrefixes(Set<IpPrefix> localPrefixes) {
@@ -261,5 +349,17 @@ public class OffloadController {
         final HashSet<String> localPrefixStrs = new HashSet<>();
         for (IpPrefix pfx : prefixSet) localPrefixStrs.add(pfx.toString());
         return localPrefixStrs;
+    }
+
+    public void dump(IndentingPrintWriter pw) {
+        if (isOffloadDisabled()) {
+            pw.println("Offload disabled");
+            return;
+        }
+        pw.println("Offload HALs " + (started() ? "started" : "not started"));
+        LinkProperties lp = mUpstreamLinkProperties;
+        String upstream = (lp != null) ? lp.getInterfaceName() : null;
+        pw.println("Current upstream: " + upstream);
+        pw.println("Exempt prefixes: " + mLastLocalPrefixStrs);
     }
 }
