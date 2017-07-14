@@ -72,8 +72,8 @@ class TextLine {
     private final SpanSet<ReplacementSpan> mReplacementSpanSpanSet =
             new SpanSet<ReplacementSpan>(ReplacementSpan.class);
 
-    private final UnderlineInfo mUnderlineInfo = new UnderlineInfo();
-    private final ArrayList<UnderlineInfo> mUnderlines = new ArrayList();
+    private final DecorationInfo mDecorationInfo = new DecorationInfo();
+    private final ArrayList<DecorationInfo> mDecorations = new ArrayList();
 
     private static final TextLine[] sCached = new TextLine[3];
 
@@ -704,9 +704,9 @@ class TextLine {
         fmi.leading = Math.max(fmi.leading, previousLeading);
     }
 
-    private static void drawUnderline(TextPaint wp, Canvas c, int color, float thickness,
-            float xleft, float xright, float baseline) {
-        final float underlineTop = baseline + wp.baselineShift + wp.getUnderlinePosition();
+    private static void drawStroke(TextPaint wp, Canvas c, int color, float position,
+            float thickness, float xleft, float xright, float baseline) {
+        final float strokeTop = baseline + wp.baselineShift + position;
 
         final int previousColor = wp.getColor();
         final Paint.Style previousStyle = wp.getStyle();
@@ -716,7 +716,7 @@ class TextLine {
         wp.setAntiAlias(true);
 
         wp.setColor(color);
-        c.drawRect(xleft, underlineTop, xright, underlineTop + thickness, wp);
+        c.drawRect(xleft, strokeTop, xright, strokeTop + thickness, wp);
 
         wp.setStyle(previousStyle);
         wp.setColor(previousColor);
@@ -750,7 +750,7 @@ class TextLine {
      * @param fmi receives metrics information, can be null
      * @param needWidth true if the width of the run is needed
      * @param offset the offset for the purpose of measuring
-     * @param underlines the list of locations and paremeters for drawing underlines
+     * @param decorations the list of locations and paremeters for drawing decorations
      * @return the signed width of the run based on the run direction; only
      * valid if needWidth is true
      */
@@ -758,7 +758,7 @@ class TextLine {
             int contextStart, int contextEnd, boolean runIsRtl,
             Canvas c, float x, int top, int y, int bottom,
             FontMetricsInt fmi, boolean needWidth, int offset,
-            @Nullable ArrayList<UnderlineInfo> underlines) {
+            @Nullable ArrayList<DecorationInfo> decorations) {
 
         wp.setWordSpacing(mAddedWidth);
         // Get metrics first (even for empty strings or "0" width runs)
@@ -773,8 +773,8 @@ class TextLine {
 
         float totalWidth = 0;
 
-        final int numUnderlines = underlines == null ? 0 : underlines.size();
-        if (needWidth || (c != null && (wp.bgColor != 0 || numUnderlines != 0 || runIsRtl))) {
+        final int numDecorations = decorations == null ? 0 : decorations.size();
+        if (needWidth || (c != null && (wp.bgColor != 0 || numDecorations != 0 || runIsRtl))) {
             totalWidth = getRunAdvance(wp, start, end, contextStart, contextEnd, runIsRtl, offset);
         }
 
@@ -800,37 +800,44 @@ class TextLine {
                 wp.setColor(previousColor);
             }
 
-            if (numUnderlines != 0) {
-                for (int i = 0; i < numUnderlines; i++) {
-                    final UnderlineInfo info = underlines.get(i);
+            if (numDecorations != 0) {
+                for (int i = 0; i < numDecorations; i++) {
+                    final DecorationInfo info = decorations.get(i);
 
-                    final int underlineStart = Math.max(info.start, start);
-                    final int underlineEnd = Math.min(info.end, offset);
-                    float underlineStartAdvance = getRunAdvance(
-                            wp, start, end, contextStart, contextEnd, runIsRtl, underlineStart);
-                    float underlineEndAdvance = getRunAdvance(
-                            wp, start, end, contextStart, contextEnd, runIsRtl, underlineEnd);
-                    final float underlineXLeft, underlineXRight;
+                    final int decorationStart = Math.max(info.start, start);
+                    final int decorationEnd = Math.min(info.end, offset);
+                    float decorationStartAdvance = getRunAdvance(
+                            wp, start, end, contextStart, contextEnd, runIsRtl, decorationStart);
+                    float decorationEndAdvance = getRunAdvance(
+                            wp, start, end, contextStart, contextEnd, runIsRtl, decorationEnd);
+                    final float decorationXLeft, decorationXRight;
                     if (runIsRtl) {
-                        underlineXLeft = rightX - underlineEndAdvance;
-                        underlineXRight = rightX - underlineStartAdvance;
+                        decorationXLeft = rightX - decorationEndAdvance;
+                        decorationXRight = rightX - decorationStartAdvance;
                     } else {
-                        underlineXLeft = leftX + underlineStartAdvance;
-                        underlineXRight = leftX + underlineEndAdvance;
+                        decorationXLeft = leftX + decorationStartAdvance;
+                        decorationXRight = leftX + decorationEndAdvance;
                     }
 
                     // Theoretically, there could be cases where both Paint's and TextPaint's
                     // setUnderLineText() are called. For backward compatibility, we need to draw
                     // both underlines, the one with custom color first.
                     if (info.underlineColor != 0) {
-                        drawUnderline(wp, c, info.underlineColor, info.underlineThickness,
-                                underlineXLeft, underlineXRight, y);
+                        drawStroke(wp, c, info.underlineColor, wp.getUnderlinePosition(),
+                                info.underlineThickness, decorationXLeft, decorationXRight, y);
                     }
                     if (info.isUnderlineText) {
                         final float thickness =
                                 Math.max(((Paint) wp).getUnderlineThickness(), 1.0f);
-                        drawUnderline(wp, c, wp.getColor(), thickness,
-                                underlineXLeft, underlineXRight, y);
+                        drawStroke(wp, c, wp.getColor(), wp.getUnderlinePosition(), thickness,
+                                decorationXLeft, decorationXRight, y);
+                    }
+
+                    if (info.isStrikeThruText) {
+                        final float thickness =
+                                Math.max(((Paint) wp).getStrikeThruThickness(), 1.0f);
+                        drawStroke(wp, c, wp.getColor(), wp.getStrikeThruPosition(), thickness,
+                                decorationXLeft, decorationXRight, y);
                     }
                 }
             }
@@ -919,20 +926,22 @@ class TextLine {
         return result;
     }
 
-    private static final class UnderlineInfo {
+    private static final class DecorationInfo {
+        public boolean isStrikeThruText;
         public boolean isUnderlineText;
         public int underlineColor;
         public float underlineThickness;
         public int start = -1;
         public int end = -1;
 
-        public boolean hasUnderline() {
-            return isUnderlineText || underlineColor != 0;
+        public boolean hasDecoration() {
+            return isStrikeThruText || isUnderlineText || underlineColor != 0;
         }
 
         // Copies the info, but not the start and end range.
-        public UnderlineInfo copyInfo() {
-            final UnderlineInfo copy = new UnderlineInfo();
+        public DecorationInfo copyInfo() {
+            final DecorationInfo copy = new DecorationInfo();
+            copy.isStrikeThruText = isStrikeThruText;
             copy.isUnderlineText = isUnderlineText;
             copy.underlineColor = underlineColor;
             copy.underlineThickness = underlineThickness;
@@ -940,7 +949,11 @@ class TextLine {
         }
     }
 
-    private void extractUnderlineInfo(@NonNull TextPaint paint, @NonNull UnderlineInfo info) {
+    private void extractDecorationInfo(@NonNull TextPaint paint, @NonNull DecorationInfo info) {
+        info.isStrikeThruText = paint.isStrikeThruText();
+        if (info.isStrikeThruText) {
+            paint.setStrikeThruText(false);
+        }
         info.isUnderlineText = paint.isUnderlineText();
         if (info.isUnderlineText) {
             paint.setUnderlineText(false);
@@ -1047,8 +1060,8 @@ class TextLine {
             activePaint.set(mPaint);
             int activeStart = i;
             int activeEnd = mlimit;
-            final UnderlineInfo underlineInfo = mUnderlineInfo;
-            mUnderlines.clear();
+            final DecorationInfo decorationInfo = mDecorationInfo;
+            mDecorations.clear();
             for (int j = i, jnext; j < mlimit; j = jnext) {
                 jnext = mCharacterStyleSpanSet.getNextTransition(mStart + j, mStart + inext) -
                         mStart;
@@ -1064,7 +1077,7 @@ class TextLine {
                     span.updateDrawState(wp);
                 }
 
-                extractUnderlineInfo(wp, underlineInfo);
+                extractDecorationInfo(wp, decorationInfo);
 
                 if (j == i) {
                     // First chunk of text. We can't handle it yet, since we may need to merge it
@@ -1079,24 +1092,24 @@ class TextLine {
                             activeStart, activeEnd, mPaint.getHyphenEdit()));
                     x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c, x,
                             top, y, bottom, fmi, needWidth || activeEnd < measureLimit,
-                            Math.min(activeEnd, mlimit), mUnderlines);
+                            Math.min(activeEnd, mlimit), mDecorations);
 
                     activeStart = j;
                     activePaint.set(wp);
-                    mUnderlines.clear();
+                    mDecorations.clear();
                 } else {
                     // The present TextPaint is substantially equal to the last TextPaint except
-                    // perhaps for underlines. We just need to expand the active piece of text to
+                    // perhaps for decorations. We just need to expand the active piece of text to
                     // include the present chunk, which we always do anyway. We don't need to save
                     // wp to activePaint, since they are already equal.
                 }
 
                 activeEnd = jnext;
-                if (underlineInfo.hasUnderline()) {
-                    final UnderlineInfo copy = underlineInfo.copyInfo();
+                if (decorationInfo.hasDecoration()) {
+                    final DecorationInfo copy = decorationInfo.copyInfo();
                     copy.start = j;
                     copy.end = jnext;
-                    mUnderlines.add(copy);
+                    mDecorations.add(copy);
                 }
             }
             // Handle the final piece of text.
@@ -1104,7 +1117,7 @@ class TextLine {
                     activeStart, activeEnd, mPaint.getHyphenEdit()));
             x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c, x,
                     top, y, bottom, fmi, needWidth || activeEnd < measureLimit,
-                    Math.min(activeEnd, mlimit), mUnderlines);
+                    Math.min(activeEnd, mlimit), mDecorations);
         }
 
         return x - originalX;

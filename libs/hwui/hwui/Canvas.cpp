@@ -35,6 +35,13 @@ Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::Rende
     return new uirenderer::RecordingCanvas(width, height);
 }
 
+static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,
+        const SkPaint& paint, Canvas* canvas) {
+    const SkScalar strokeWidth = fmax(thickness, 1.0f);
+    const SkScalar bottom = top + strokeWidth;
+    canvas->drawRect(left, top, right, bottom, paint);
+}
+
 void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& paint) {
     uint32_t flags;
     SkDrawFilter* drawFilter = getDrawFilter();
@@ -46,7 +53,6 @@ void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& 
         flags = paint.getFlags();
     }
     if (flags & (SkPaint::kUnderlineText_ReserveFlag | SkPaint::kStrikeThruText_ReserveFlag)) {
-
         const SkScalar left = x;
         const SkScalar right = x + length;
         if (flags & SkPaint::kUnderlineText_ReserveFlag) {
@@ -60,18 +66,15 @@ void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& 
             if (!metrics.hasUnderlineThickness(&thickness)) {
                 thickness = paint.getTextSize() * Paint::kStdUnderline_Thickness;
             }
-            const float strokeWidth = fmax(thickness, 1.0f);
             const SkScalar top = y + position;
-            const SkScalar bottom = top + strokeWidth;
-            drawRect(left, top, right, bottom, paint);
+            drawStroke(left, right, top, thickness, paint, this);
         }
         if (flags & SkPaint::kStrikeThruText_ReserveFlag) {
             const float textSize = paint.getTextSize();
-            const float position = textSize * Paint::kStdStrikeThru_Offset;
-            const float strokeWidth = fmax(textSize * Paint::kStdUnderline_Thickness, 1.0f);
-            const SkScalar top = y + position - 0.5f * strokeWidth;
-            const SkScalar bottom = y + position + 0.5f * strokeWidth;
-            drawRect(left, top, right, bottom, paint);
+            const float position = textSize * Paint::kStdStrikeThru_Top;
+            const SkScalar thickness = textSize * Paint::kStdStrikeThru_Thickness;
+            const SkScalar top = y + position;
+            drawStroke(left, right, top, thickness, paint, this);
         }
     }
 }
