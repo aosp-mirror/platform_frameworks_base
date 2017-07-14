@@ -178,7 +178,13 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
 
     @Override
     public void destroy() {
+        mAccessibility.destroy();
         mController.removeCallback(mControllerCallbackH);
+        if (mZenFooter != null) {
+            mZenFooter.cleanup();
+        }
+        Dependency.get(TunerService.class).removeTunable(this);
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     private void initDialog() {
@@ -1240,14 +1246,12 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 }
             });
             mDialogView.setAccessibilityDelegate(this);
-            mAccessibilityMgr.addAccessibilityStateChangeListener(
-                    new AccessibilityStateChangeListener() {
-                        @Override
-                        public void onAccessibilityStateChanged(boolean enabled) {
-                            updateFeedbackEnabled();
-                        }
-                    });
+            mAccessibilityMgr.addAccessibilityStateChangeListener(mListener);
             updateFeedbackEnabled();
+        }
+
+        public void destroy() {
+            mAccessibilityMgr.removeAccessibilityStateChangeListener(mListener);
         }
 
         @Override
@@ -1272,6 +1276,9 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             }
             return false;
         }
+
+        private final AccessibilityStateChangeListener mListener =
+                enabled -> updateFeedbackEnabled();
     }
 
     private static class VolumeRow {
