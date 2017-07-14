@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.WallpaperColors;
 import android.graphics.Color;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Range;
@@ -42,7 +43,7 @@ public class TonalTest {
     @Test
     public void extractInto_usesFallback() {
         GradientColors normal = new GradientColors();
-        Tonal tonal = new Tonal();
+        Tonal tonal = new Tonal(InstrumentationRegistry.getContext());
         tonal.extractInto(null, normal, new GradientColors(),
                 new GradientColors());
         assertFalse("Should use fallback color if WallpaperColors is null.",
@@ -52,13 +53,14 @@ public class TonalTest {
     @Test
     public void extractInto_usesFallbackWhenTooLightOrDark() {
         GradientColors normal = new GradientColors();
-        Tonal tonal = new Tonal();
+        Tonal tonal = new Tonal(InstrumentationRegistry.getContext());
         tonal.extractInto(new WallpaperColors(Color.valueOf(0xff000000), null, null, 0),
                 normal, new GradientColors(), new GradientColors());
         assertTrue("Should use fallback color if WallpaperColors is too dark.",
                 normal.getMainColor() == Tonal.MAIN_COLOR_DARK);
 
-        tonal.extractInto(new WallpaperColors(Color.valueOf(0xffffffff), null, null, 0),
+        tonal.extractInto(new WallpaperColors(Color.valueOf(0xffffffff), null, null,
+                        WallpaperColors.HINT_SUPPORTS_DARK_TEXT),
                 normal, new GradientColors(), new GradientColors());
         assertTrue("Should use fallback color if WallpaperColors is too light.",
                 normal.getMainColor() == Tonal.MAIN_COLOR_LIGHT);
@@ -89,18 +91,28 @@ public class TonalTest {
     }
 
     @Test
-    public void colorRange_excludeBlacklistedColor() {
-        // Creating a WallpaperColors object that contains *only* blacklisted colors
-        float[] hsl = Tonal.BLACKLISTED_COLORS[0].getCenter();
+    public void configParser_dataSanity() {
+        Tonal.ConfigParser config = new Tonal.ConfigParser(InstrumentationRegistry.getContext());
+        // 1 to avoid regression where only first item would be parsed.
+        assertTrue("Tonal palettes are empty", config.getTonalPalettes().size() > 1);
+        assertTrue("Blacklisted colors are empty", config.getBlacklistedColors().size() > 1);
+    }
+
+    @Test
+    public void tonal_excludeBlacklistedColor() {
+        // Make sure that palette generation will fail.
+        Tonal tonal = new Tonal(InstrumentationRegistry.getContext());
+
+        // Creating a WallpaperColors object that contains *only* blacklisted colors.
+        float[] hsl = tonal.getBlacklistedColors().get(0).getCenter();
         WallpaperColors colors = new WallpaperColors(Color.valueOf(ColorUtils.HSLToColor(hsl)),
                 null, null, 0);
 
         // Make sure that palette generation will fail
-        Tonal tonal = new Tonal();
         GradientColors normal = new GradientColors();
         tonal.extractInto(colors, normal, new GradientColors(),
                 new GradientColors());
-        assertFalse("Cannot generate a tonal palette from blacklisted colors.",
-                normal.getMainColor() == Tonal.MAIN_COLOR_LIGHT);
+        assertTrue("Cannot generate a tonal palette from blacklisted colors.",
+                normal.getMainColor() == Tonal.MAIN_COLOR_DARK);
     }
 }
