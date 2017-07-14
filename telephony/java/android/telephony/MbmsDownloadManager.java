@@ -288,13 +288,11 @@ public class MbmsDownloadManager {
      *
      * This may throw an {@link MbmsException} containing one of the following errors:
      * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
-     * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
-     * {@link MbmsException#ERROR_SERVICE_LOST}
+     * {@link MbmsException#ERROR_MIDDLEWARE_LOST}
      *
      * Asynchronous error codes via the {@link MbmsDownloadManagerCallback#error(int, String)}
      * callback can include any of the errors except:
-     * {@link MbmsException#ERROR_UNABLE_TO_START_SERVICE}
-     * {@link MbmsException#ERROR_END_OF_SESSION}
+     * {@link MbmsException.StreamingErrors#ERROR_UNABLE_TO_START_SERVICE}
      *
      * @param classList A list of service classes which the app wishes to receive
      *                  {@link IMbmsDownloadManagerCallback#fileServicesUpdated(List)} callbacks
@@ -315,7 +313,7 @@ public class MbmsDownloadManager {
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService.set(null);
-            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
         }
     }
 
@@ -334,7 +332,7 @@ public class MbmsDownloadManager {
      * Before calling this method, the app must cancel all of its pending
      * {@link DownloadRequest}s via {@link #cancelDownload(DownloadRequest)}. If this is not done,
      * an {@link MbmsException} will be thrown with code
-     * {@link MbmsException#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT}
+     * {@link MbmsException.DownloadErrors#ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT}
      *
      * The {@link File} supplied as a root temp file directory must already exist. If not, an
      * {@link IllegalArgumentException} will be thrown.
@@ -366,7 +364,7 @@ public class MbmsDownloadManager {
             }
         } catch (RemoteException e) {
             mService.set(null);
-            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
         }
 
         SharedPreferences prefs = mContext.getSharedPreferences(
@@ -417,29 +415,36 @@ public class MbmsDownloadManager {
             downloadService.download(request, callback);
         } catch (RemoteException e) {
             mService.set(null);
-            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
         }
     }
 
     /**
-     * Returns a list DownloadRequests that originated from this application (UID).
-     *
-     * May throw a RemoteException.
-     *
-     * Asynchronous errors through the listener include any of the errors except
-     * <li>ERROR_UNABLED_TO_START_SERVICE</li>
-     * <li>ERROR_MSDC_INVALID_SERVICE_ID</li>
-     * <li>ERROR_MSDC_END_OF_SESSION</li>
+     * Returns a list of pending {@link DownloadRequest}s that originated from this application.
+     * A pending request is one that was issued via
+     * {@link #download(DownloadRequest, IDownloadCallback)} but not cancelled through
+     * {@link #cancelDownload(DownloadRequest)}.
+     * @return A list, possibly empty, of {@link DownloadRequest}s
      */
-    public List<DownloadRequest> listPendingDownloads() {
-        return null;
+    public @NonNull List<DownloadRequest> listPendingDownloads() throws MbmsException {
+        IMbmsDownloadService downloadService = mService.get();
+        if (downloadService == null) {
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+        }
+
+        try {
+            return downloadService.listPendingDownloads(mSubscriptionId);
+        } catch (RemoteException e) {
+            mService.set(null);
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
+        }
     }
 
     /**
      * Attempts to cancel the specified {@link DownloadRequest}.
      *
      * If the middleware is not aware of the specified download request, an MbmsException will be
-     * thrown with error code {@link MbmsException#ERROR_UNKNOWN_DOWNLOAD_REQUEST}.
+     * thrown with error code {@link MbmsException.DownloadErrors#ERROR_UNKNOWN_DOWNLOAD_REQUEST}.
      *
      * If this method returns without throwing an exception, you may assume that cancellation
      * was successful.
@@ -458,7 +463,7 @@ public class MbmsDownloadManager {
             }
         } catch (RemoteException e) {
             mService.set(null);
-            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
         }
         deleteDownloadRequestToken(downloadRequest);
     }
@@ -486,27 +491,43 @@ public class MbmsDownloadManager {
             return downloadService.getDownloadStatus(downloadRequest, fileInfo);
         } catch (RemoteException e) {
             mService.set(null);
-            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
         }
     }
 
     /**
-     * Resets middleware knowledge regarding this download request.
+     * Resets the middleware's knowledge of previously-downloaded files in this download request.
      *
-     * This state consists of knowledge of what files have already been downloaded.
-     * Normally the middleware won't download files who's hash matches previously downloaded
-     * content, even if that content has since been deleted.  If this function is called
-     * repeated content will be downloaded again when available.  This does not interrupt
-     * in-progress downloads.
+     * Normally, the middleware keeps track of the hashes of downloaded files and won't re-download
+     * files whose server-reported hash matches one of the already-downloaded files. This means
+     * that if the file is accidentally deleted by the user or by the app, the middleware will
+     * not try to download it again.
+     * This method will reset the middleware's cache of hashes for the provided
+     * {@link DownloadRequest}, so that previously downloaded content will be downloaded again
+     * when available.
+     * This will not interrupt in-progress downloads.
      *
-     * May throw an IllegalArgumentException or RemoteException.
+     * If the middleware is not aware of the specified download request, an MbmsException will be
+     * thrown with error code {@link MbmsException.DownloadErrors#ERROR_UNKNOWN_DOWNLOAD_REQUEST}.
      *
-     * <li>SUCCESS</li>
-     * <li>ERROR_MSDC_CONCURRENT_SERVICE_LIMIT_REACHED</li>
-     * <li>ERROR_MSDC_UNKNOWN_REQUEST</li>
+     * May throw a {@link MbmsException} with error code
+     * @param downloadRequest The request to re-download files for.
      */
-    public int resetDownloadKnowledge(DownloadRequest downloadRequest) {
-        return 0;
+    public void resetDownloadKnowledge(DownloadRequest downloadRequest) throws MbmsException {
+        IMbmsDownloadService downloadService = mService.get();
+        if (downloadService == null) {
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_NOT_BOUND);
+        }
+
+        try {
+            int result = downloadService.resetDownloadKnowledge(downloadRequest);
+            if (result != MbmsException.SUCCESS) {
+                throw new MbmsException(result);
+            }
+        } catch (RemoteException e) {
+            mService.set(null);
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
+        }
     }
 
     public void dispose() {

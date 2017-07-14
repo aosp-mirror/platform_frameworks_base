@@ -55,7 +55,7 @@ public class MbmsDownloadManagerCallback extends IMbmsDownloadManagerCallback.St
      * Before this method is called, calling any method on an instance of
      * {@link android.telephony.MbmsDownloadManager} will result in an {@link MbmsException}
      * being thrown with error code {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
-     * or {@link MbmsException#ERROR_MIDDLEWARE_NOT_YET_READY}
+     * or {@link MbmsException.GeneralErrors#ERROR_MIDDLEWARE_NOT_YET_READY}
      */
     @Override
     public void middlewareReady() {
