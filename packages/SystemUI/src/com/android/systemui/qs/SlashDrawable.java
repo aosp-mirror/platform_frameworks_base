@@ -33,10 +33,11 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.util.FloatProperty;
 
 public class SlashDrawable extends Drawable {
+
+    public static final float CORNER_RADIUS = 1f;
 
     private final Path mPath = new Path();
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -141,8 +142,8 @@ public class SlashDrawable extends Drawable {
         Matrix m = new Matrix();
         final int width = getBounds().width();
         final int height = getBounds().height();
-        final float radiusX = scale(1f, width);
-        final float radiusY = scale(1f, height);
+        final float radiusX = scale(CORNER_RADIUS, width);
+        final float radiusY = scale(CORNER_RADIUS, height);
         updateRect(
                 scale(LEFT, width),
                 scale(TOP, height),
