@@ -163,7 +163,8 @@ public final class AutoFillUI {
             @Nullable String filterText, @NonNull String packageName,
             @NonNull AutoFillUiCallback callback) {
         if (sDebug) {
-            Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + filterText);
+            final int size = filterText == null ? 0 : filterText.length();
+            Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + size + " chars");
         }
         final LogMaker log = (new LogMaker(MetricsProto.MetricsEvent.AUTOFILL_FILL_UI))
                 .setPackageName(packageName)
