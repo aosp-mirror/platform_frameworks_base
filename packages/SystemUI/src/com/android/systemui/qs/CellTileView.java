@@ -16,12 +16,14 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.service.quicksettings.Tile;
 import android.widget.ImageView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.Icon;
 import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SignalDrawable;
 
 import java.util.Objects;
@@ -35,7 +37,8 @@ public class CellTileView extends SignalTileView {
     public CellTileView(Context context) {
         super(context);
         mSignalDrawable = new SignalDrawable(mContext);
-        mSignalDrawable.setDarkIntensity(isDark(mContext));
+        mSignalDrawable.setColors(QSTileImpl.getColorForState(context, Tile.STATE_UNAVAILABLE),
+                QSTileImpl.getColorForState(context, Tile.STATE_ACTIVE));
         mSignalDrawable.setIntrinsicSize(context.getResources().getDimensionPixelSize(
                 R.dimen.qs_tile_icon_size));
     }
@@ -46,10 +49,6 @@ public class CellTileView extends SignalTileView {
             iv.setImageDrawable(mSignalDrawable);
             iv.setTag(R.id.qs_icon_tag, state.icon);
         }
-    }
-
-    private static int isDark(Context context) {
-        return Utils.getColorAttr(context, android.R.attr.colorForeground) == 0xff000000 ? 1 : 0;
     }
 
     public static class SignalIcon extends Icon {
@@ -68,7 +67,8 @@ public class CellTileView extends SignalTileView {
         public Drawable getDrawable(Context context) {
             //TODO: Not the optimal solution to create this drawable
             SignalDrawable d = new SignalDrawable(context);
-            d.setDarkIntensity(isDark(context));
+            d.setColors(QSTileImpl.getColorForState(context, Tile.STATE_UNAVAILABLE),
+                    QSTileImpl.getColorForState(context, Tile.STATE_ACTIVE));
             d.setLevel(getState());
             return d;
         }
