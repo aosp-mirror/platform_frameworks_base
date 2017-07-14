@@ -36,6 +36,7 @@ import android.util.LayoutDirection;
 
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
+import com.android.systemui.qs.SlashDrawable;
 
 public class SignalDrawable extends Drawable {
 
@@ -333,10 +334,9 @@ public class SignalDrawable extends Drawable {
             mForegroundPath.reset();
             mFullPath.op(mCutPath, Path.Op.DIFFERENCE);
         } else if (mState == STATE_AIRPLANE) {
-            // Airplane mode is slashed, full-signal
-            mForegroundPath.set(mFullPath);
-            mFullPath.reset();
-            mSlash.draw((int) height, (int) width, canvas, mForegroundPaint);
+            // Airplane mode is slashed, fully drawn background
+            mForegroundPath.reset();
+            mSlash.draw((int) height, (int) width, canvas, mPaint);
         } else if (mState != STATE_CARRIER_CHANGE) {
             mForegroundPath.reset();
             int sigWidth = Math.round(calcFit(mLevel / (mNumLevels - 1)) * (width - 2 * padding));
@@ -473,6 +473,7 @@ public class SignalDrawable extends Drawable {
 
         void draw(int height, int width, @NonNull Canvas canvas, Paint paint) {
             Matrix m = new Matrix();
+            final float radius = scale(SlashDrawable.CORNER_RADIUS, width);
             updateRect(
                     scale(LEFT, width),
                     scale(TOP, height),
@@ -481,7 +482,7 @@ public class SignalDrawable extends Drawable {
 
             mPath.reset();
             // Draw the slash vertically
-            mPath.addRect(mSlashRect, Direction.CW);
+            mPath.addRoundRect(mSlashRect, radius, radius, Direction.CW);
             m.setRotate(ROTATION, width / 2, height / 2);
             mPath.transform(m);
             canvas.drawPath(mPath, paint);
@@ -491,7 +492,7 @@ public class SignalDrawable extends Drawable {
             mPath.transform(m);
             m.setTranslate(mSlashRect.width(), 0);
             mPath.transform(m);
-            mPath.addRect(mSlashRect, Direction.CW);
+            mPath.addRoundRect(mSlashRect, radius, radius, Direction.CW);
             m.setRotate(ROTATION, width / 2, height / 2);
             mPath.transform(m);
             canvas.clipOutPath(mPath);
