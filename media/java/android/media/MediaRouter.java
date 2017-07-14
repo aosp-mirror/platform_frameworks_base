@@ -753,6 +753,15 @@ public class MediaRouter {
     }
 
     /**
+     * Returns a Bluetooth route if available, otherwise the default route.
+     * @hide
+     */
+    public RouteInfo getFallbackRoute() {
+        return (sStatic.mBluetoothA2dpRoute != null)
+                ? sStatic.mBluetoothA2dpRoute : sStatic.mDefaultAudioVideo;
+    }
+
+    /**
      * @hide for use by framework routing UI
      */
     public RouteCategory getSystemCategory() {
@@ -934,6 +943,19 @@ public class MediaRouter {
                 (route == btRoute || route == sStatic.mDefaultAudioVideo)) {
             try {
                 sStatic.mAudioService.setBluetoothA2dpOn(route == btRoute);
+                // TODO: Remove the following logging when no longer needed.
+                if (route != btRoute) {
+                    StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
+                    StringBuffer sb = new StringBuffer();
+                    // callStack[3] is the caller of this method.
+                    for (int i = 3; i < callStack.length; i++) {
+                        StackTraceElement caller = callStack[i];
+                        sb.append(caller.getClassName() + "." + caller.getMethodName()
+                                + ":" + caller.getLineNumber()).append("  ");
+                    }
+                    Log.w(TAG, "Default route is selected while a BT route is available: pkgName="
+                            + sStatic.mPackageName + ", callers=" + sb.toString());
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Error changing Bluetooth A2DP state", e);
             }
@@ -2017,6 +2039,11 @@ public class MediaRouter {
         /** @hide */
         public boolean isDefault() {
             return this == sStatic.mDefaultAudioVideo;
+        }
+
+        /** @hide */
+        public boolean isBluetooth() {
+            return this == sStatic.mBluetoothA2dpRoute;
         }
 
         /** @hide */

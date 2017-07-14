@@ -142,7 +142,11 @@ public class MediaRouteControllerDialog extends AlertDialog {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int id) {
                         if (mRoute.isSelected()) {
-                            mRouter.getDefaultRoute().select();
+                            if (mRoute.isBluetooth()) {
+                                mRouter.getDefaultRoute().select();
+                            } else {
+                                mRouter.getFallbackRoute().select();
+                            }
                         }
                         dismiss();
                     }
