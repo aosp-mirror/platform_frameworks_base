@@ -19,9 +19,11 @@ package com.android.keyguard;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.UserHandle;
 import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
@@ -56,11 +58,14 @@ public class KeyguardStatusView extends GridLayout {
     private TextView mOwnerInfo;
     private ViewGroup mClockContainer;
     private ChargingView mBatteryDoze;
+    private View mKeyguardStatusArea;
 
     private View[] mVisibleInDoze;
     private boolean mPulsing;
-    private float mDarkAmount;
+    private float mDarkAmount = 0;
     private int mTextColor;
+    private int mDateTextColor;
+    private int mAlarmTextColor;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -126,8 +131,11 @@ public class KeyguardStatusView extends GridLayout {
         mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         mOwnerInfo = findViewById(R.id.owner_info);
         mBatteryDoze = findViewById(R.id.battery_doze);
-        mVisibleInDoze = new View[]{mBatteryDoze, mClockView};
+        mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
+        mVisibleInDoze = new View[]{mBatteryDoze, mClockView, mKeyguardStatusArea};
         mTextColor = mClockView.getCurrentTextColor();
+        mDateTextColor = mDateView.getCurrentTextColor();
+        mAlarmTextColor = mAlarmStatusView.getCurrentTextColor();
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -186,8 +194,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     public int getClockBottom() {
-        return mClockView.getBottom() +
-                ((MarginLayoutParams) mClockView.getLayoutParams()).bottomMargin;
+        return mKeyguardStatusArea.getBottom();
     }
 
     public float getClockTextSize() {
@@ -304,6 +311,10 @@ public class KeyguardStatusView extends GridLayout {
         updateDozeVisibleViews();
         mBatteryDoze.setDark(dark);
         mClockView.setTextColor(ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount));
+        mDateView.setTextColor(ColorUtils.blendARGB(mDateTextColor, Color.WHITE, darkAmount));
+        int blendedAlarmColor = ColorUtils.blendARGB(mAlarmTextColor, Color.WHITE, darkAmount);
+        mAlarmStatusView.setTextColor(blendedAlarmColor);
+        mAlarmStatusView.setCompoundDrawableTintList(ColorStateList.valueOf(blendedAlarmColor));
     }
 
     public void setPulsing(boolean pulsing) {
