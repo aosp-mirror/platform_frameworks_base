@@ -39,6 +39,8 @@
         android:layout_height="wrap_content"
         android:drawablePadding="6dp"
         android:drawableStart="@drawable/ic_access_alarms_big"
+        android:drawableTint="?attr/bgProtectSecondaryTextColor"
+        android:drawableTintMode="src_in"
         android:textColor="?attr/bgProtectSecondaryTextColor"
         android:letterSpacing="0.15"
         style="@style/widget_label"

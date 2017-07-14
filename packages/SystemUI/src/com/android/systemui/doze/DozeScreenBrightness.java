@@ -23,6 +23,9 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.R;
+
 /**
  * Controls the screen brightness when dozing.
  */
@@ -34,6 +37,9 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     private final Sensor mLightSensor;
     private boolean mRegistered;
 
+    private final int mHighBrightness;
+    private final int mLowBrightness;
+
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
             SensorManager sensorManager, Sensor lightSensor, Handler handler) {
         mContext = context;
@@ -41,6 +47,11 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
         mSensorManager = sensorManager;
         mLightSensor = lightSensor;
         mHandler = handler;
+
+        mLowBrightness = context.getResources().getInteger(
+                R.integer.config_doze_aod_brightness_low);
+        mHighBrightness = context.getResources().getInteger(
+                R.integer.config_doze_aod_brightness_high);
     }
 
     @Override
@@ -67,7 +78,17 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (mRegistered) {
-            mDozeService.setDozeScreenBrightness(Math.max(1, (int) event.values[0]));
+            mDozeService.setDozeScreenBrightness(computeBrightness((int) event.values[0]));
+        }
+    }
+
+    private int computeBrightness(int sensorValue) {
+        // The sensor reports 0 for off, 1 for low brightness and 2 for high brightness.
+        // We currently use DozeScreenState for screen off, so we treat off as low brightness.
+        if (sensorValue >= 2) {
+            return mHighBrightness;
+        } else {
+            return mLowBrightness;
         }
     }
 

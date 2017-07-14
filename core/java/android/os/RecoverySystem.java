@@ -751,7 +751,9 @@ public class RecoverySystem {
         // Block until the ordered broadcast has completed.
         condition.block();
 
-        wipeEuiccData(context, wipeEuicc);
+        // TODO(b/63693573): Uncomment this once the pSIM slot is restored as needed
+        // after the ensuing boot. Currently you end up stuck on the eSIM.
+        // wipeEuiccData(context, wipeEuicc);
 
         String shutdownArg = null;
         if (shutdown) {
