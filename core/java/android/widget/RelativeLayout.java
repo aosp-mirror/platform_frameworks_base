@@ -486,7 +486,7 @@ public class RelativeLayout extends ViewGroup {
                         if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
                             width = Math.max(width, myWidth - params.mLeft);
                         } else {
-                            width = Math.max(width, myWidth - params.mLeft - params.leftMargin);
+                            width = Math.max(width, myWidth - params.mLeft + params.leftMargin);
                         }
                     } else {
                         if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
