@@ -375,8 +375,15 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                 try {
                     int selectedPos = new ArrayList<ComponentName>(mTargetsDict.keySet())
                             .indexOf(componentName);
-                    logMetrics(selectedPos);
-                    if (selectedPos > 0) {
+                    if (selectedPos >= 0 && mTargets != null) {
+                        final float selectedProbability = getScore(componentName);
+                        int order = 0;
+                        for (ResolverTarget target : mTargets) {
+                            if (target.getSelectProbability() > selectedProbability) {
+                                order++;
+                            }
+                        }
+                        logMetrics(order);
                         mRanker.train(mTargets, selectedPos);
                     } else {
                         if (DEBUG) {
