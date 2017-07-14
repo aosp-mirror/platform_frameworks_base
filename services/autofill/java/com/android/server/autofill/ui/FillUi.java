@@ -204,7 +204,10 @@ final class FillUi {
                 return;
             }
             if (count <= 0) {
-                if (sDebug) Slog.d(TAG, "No dataset matches filter: " + mFilterText);
+                if (sDebug) {
+                    final int size = mFilterText == null ? 0 : mFilterText.length();
+                    Slog.d(TAG, "No dataset matches filter with " + size + " chars");
+                }
                 mCallback.requestHideFillUi();
             } else {
                 if (updateContentSize()) {
