@@ -597,8 +597,8 @@ public final class PendingIntent implements Parcelable {
     public static PendingIntent getService(Context context, int requestCode,
             @NonNull Intent intent, @Flags int flags) {
         String packageName = context.getPackageName();
-        String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
-                context.getContentResolver()) : null;
+        String resolvedType = intent.resolveTypeIfNeeded(
+                context.getContentResolver()) ;
         try {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
