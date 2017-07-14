@@ -28,7 +28,7 @@ public class LowpanEnergyScanResult {
     private int mChannel = UNKNOWN;
     private int mMaxRssi = UNKNOWN;
 
-    public LowpanEnergyScanResult() {}
+    LowpanEnergyScanResult() {}
 
     public int getChannel() {
         return mChannel;
@@ -38,11 +38,11 @@ public class LowpanEnergyScanResult {
         return mMaxRssi;
     }
 
-    public void setChannel(int x) {
+    void setChannel(int x) {
         mChannel = x;
     }
 
-    public void setMaxRssi(int x) {
+    void setMaxRssi(int x) {
         mMaxRssi = x;
     }
 
