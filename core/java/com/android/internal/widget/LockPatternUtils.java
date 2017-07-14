@@ -905,26 +905,48 @@ public class LockPatternUtils {
      */
     public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled,
             String managedUserPassword) {
-        UserInfo info = getUserManager().getUserInfo(userHandle);
-        if (info.isManagedProfile()) {
-            try {
-                getLockSettings().setSeparateProfileChallengeEnabled(userHandle, enabled,
-                        managedUserPassword);
-                onAfterChangingPassword(userHandle);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Couldn't update work profile challenge enabled");
-            }
+        if (!isManagedProfile(userHandle)) {
+            return;
+        }
+        try {
+            getLockSettings().setSeparateProfileChallengeEnabled(userHandle, enabled,
+                    managedUserPassword);
+            onAfterChangingPassword(userHandle);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't update work profile challenge enabled");
         }
     }
 
     /**
-     * Retrieves whether the Separate Profile Challenge is enabled for this {@param userHandle}.
+     * Returns true if {@param userHandle} is a managed profile with separate challenge.
      */
     public boolean isSeparateProfileChallengeEnabled(int userHandle) {
-        UserInfo info = getUserManager().getUserInfo(userHandle);
-        if (info == null || !info.isManagedProfile()) {
-            return false;
-        }
+        return isManagedProfile(userHandle) && hasSeparateChallenge(userHandle);
+    }
+
+    /**
+     * Returns true if {@param userHandle} is a managed profile with unified challenge.
+     */
+    public boolean isManagedProfileWithUnifiedChallenge(int userHandle) {
+        return isManagedProfile(userHandle) && !hasSeparateChallenge(userHandle);
+    }
+
+    /**
+     * Retrieves whether the current DPM allows use of the Profile Challenge.
+     */
+    public boolean isSeparateProfileChallengeAllowed(int userHandle) {
+        return isManagedProfile(userHandle)
+                && getDevicePolicyManager().isSeparateProfileChallengeAllowed(userHandle);
+    }
+
+    /**
+     * Retrieves whether the current profile and device locks can be unified.
+     */
+    public boolean isSeparateProfileChallengeAllowedToUnify(int userHandle) {
+        return getDevicePolicyManager().isProfileActivePasswordSufficientForParent(userHandle);
+    }
+
+    private boolean hasSeparateChallenge(int userHandle) {
         try {
             return getLockSettings().getSeparateProfileChallengeEnabled(userHandle);
         } catch (RemoteException e) {
@@ -934,22 +956,9 @@ public class LockPatternUtils {
         }
     }
 
-    /**
-     * Retrieves whether the current DPM allows use of the Profile Challenge.
-     */
-    public boolean isSeparateProfileChallengeAllowed(int userHandle) {
-        UserInfo info = getUserManager().getUserInfo(userHandle);
-        if (info == null || !info.isManagedProfile()) {
-            return false;
-        }
-        return getDevicePolicyManager().isSeparateProfileChallengeAllowed(userHandle);
-    }
-
-    /**
-     * Retrieves whether the current profile and device locks can be unified.
-     */
-    public boolean isSeparateProfileChallengeAllowedToUnify(int userHandle) {
-        return getDevicePolicyManager().isProfileActivePasswordSufficientForParent(userHandle);
+    private boolean isManagedProfile(int userHandle) {
+        final UserInfo info = getUserManager().getUserInfo(userHandle);
+        return info != null && info.isManagedProfile();
     }
 
     /**
