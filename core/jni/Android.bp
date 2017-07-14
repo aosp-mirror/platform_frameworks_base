@@ -188,6 +188,7 @@ cc_library_shared {
         "com_android_internal_os_FuseAppLoop.cpp",
         "com_android_internal_os_PathClassLoaderFactory.cpp",
         "com_android_internal_os_Zygote.cpp",
+        "com_android_internal_os_ZygoteInit.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
         "com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp",
         "hwbinder/EphemeralStorage.cpp",
