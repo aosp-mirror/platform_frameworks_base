@@ -18,27 +18,112 @@ package android.telephony.mbms;
 
 /** @hide */
 public class MbmsException extends Exception {
+    /** Indicates that the operation was successful. */
     public static final int SUCCESS = 0;
-    public static final int ERROR_NO_SERVICE_INSTALLED = 1;
-    public static final int ERROR_MULTIPLE_SERVICES_INSTALLED = 2;
-    public static final int ERROR_BIND_TIMEOUT_OR_FAILURE = 3;
-    public static final int ERROR_MIDDLEWARE_NOT_YET_READY = 4;
-    public static final int ERROR_ALREADY_INITIALIZED = 5;
-    public static final int ERROR_CONCURRENT_SERVICE_LIMIT_REACHED = 6;
-    public static final int ERROR_MIDDLEWARE_NOT_BOUND = 7;
-    public static final int ERROR_UNABLE_TO_START_SERVICE = 8;
-    public static final int ERROR_STREAM_ALREADY_STARTED = 9;
-    public static final int ERROR_END_OF_SESSION = 10;
-    public static final int ERROR_SERVICE_LOST = 11;
-    public static final int ERROR_APP_PERMISSIONS_NOT_GRANTED = 12;
-    public static final int ERROR_IN_E911 = 13;
-    public static final int ERROR_OUT_OF_MEMORY = 14;
-    public static final int ERROR_NOT_CONNECTED_TO_HOME_CARRIER_LTE = 15;
-    public static final int ERROR_UNABLE_TO_READ_SIM = 16;
-    public static final int ERROR_CARRIER_CHANGE_NOT_ALLOWED = 17;
-    public static final int ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT = 18;
-    public static final int ERROR_UNKNOWN_DOWNLOAD_REQUEST = 19;
-    public static final int ERROR_UNABLE_TO_INITIALIZE = 20;
+
+    // Following errors are generated in the manager and should not be returned from the
+    // middleware
+    /**
+     * Indicates that either no MBMS middleware app is installed on the device or multiple
+     * middleware apps are installed on the device.
+     */
+    public static final int ERROR_NO_UNIQUE_MIDDLEWARE = 1;
+
+    /**
+     * Indicates that the app attempted to perform an operation on an instance of
+     * {@link android.telephony.MbmsDownloadManager} or
+     * {@link android.telephony.MbmsStreamingManager} without being bound to the middleware.
+     */
+    public static final int ERROR_MIDDLEWARE_NOT_BOUND = 2;
+
+    /** Indicates that the middleware has died and the requested operation was not completed.*/
+    public static final int ERROR_MIDDLEWARE_LOST = 3;
+
+    /**
+     * Indicates errors that may be generated during initialization by the
+     * middleware. They are applicable to both streaming and file-download use-cases.
+     */
+    public static class InitializationErrors {
+        /**
+         * Indicates that the app tried to create more than one instance each of
+         * {@link android.telephony.MbmsStreamingManager} or
+         * {@link android.telephony.MbmsDownloadManager}.
+         */
+        public static final int ERROR_DUPLICATE_INITIALIZE = 101;
+        /** Indicates that the app is not authorized to access media via MBMS.*/
+        public static final int ERROR_APP_PERMISSIONS_NOT_GRANTED = 102;
+        /** Indicates that the middleware was unable to initialize for this app. */
+        public static final int ERROR_UNABLE_TO_INITIALIZE = 103;
+    }
+
+    /**
+     * Indicates the errors that may occur at any point and are applicable to both
+     * streaming and file-download.
+     */
+    public static class GeneralErrors {
+        /**
+         * Indicates that the app attempted to perform an operation before receiving notification
+         * that the middleware is ready via {@link MbmsStreamingManagerCallback#middlewareReady()}
+         * or {@link MbmsDownloadManagerCallback#middlewareReady()}.
+         */
+        public static final int ERROR_MIDDLEWARE_NOT_YET_READY = 201;
+        /**
+         * Indicates that the middleware ran out of memory and was unable to complete the requested
+         * operation.
+         */
+        public static final int ERROR_OUT_OF_MEMORY = 202;
+        /**
+         * Indicates that the requested operation failed due to the middleware being unavailable due
+         * to a transient condition. The app may retry the operation at a later time.
+         */
+        public static final int ERROR_MIDDLEWARE_TEMPORARILY_UNAVAILABLE = 203;
+        /**
+         * Indicates that the requested operation was not performed due to being in emergency
+         * callback mode.
+         */
+        public static final int ERROR_IN_E911 = 204;
+        /** Indicates that MBMS is not available due to the device being in roaming. */
+        public static final int ERROR_NOT_CONNECTED_TO_HOME_CARRIER_LTE = 205;
+        /** Indicates that MBMS is not available due to a SIM read error. */
+        public static final int ERROR_UNABLE_TO_READ_SIM = 206;
+        /**
+         * Indicates that MBMS is not available due to the inserted SIM being from an unsupported
+         * carrier.
+         */
+        public static final int ERROR_CARRIER_CHANGE_NOT_ALLOWED = 207;
+    }
+
+    /**
+     * Indicates the errors that are applicable only to the streaming use-case
+     */
+    public static class StreamingErrors {
+        /** Indicates that the middleware cannot start a stream due to too many ongoing streams */
+        public static final int ERROR_CONCURRENT_SERVICE_LIMIT_REACHED = 301;
+
+        /** Indicates that the middleware was unable to start the streaming service */
+        public static final int ERROR_UNABLE_TO_START_SERVICE = 302;
+
+        /**
+         * Indicates that the app called
+         * {@link android.telephony.MbmsStreamingManager#startStreaming(StreamingServiceInfo, StreamingServiceCallback)}
+         * more than once for the same {@link StreamingServiceInfo}.
+         */
+        public static final int ERROR_DUPLICATE_START_STREAM = 303;
+    }
+
+    /**
+     * Indicates the errors that are applicable only to the file-download use-case
+     */
+    public static class DownloadErrors {
+        /**
+         * Indicates that the app is not allowed to change the temp file root at this time due to
+         * outstanding download requests.
+         */
+        public static final int ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT = 401;
+
+        /** Indicates that the middleware has no record of the supplied {@link DownloadRequest}. */
+        public static final int ERROR_UNKNOWN_DOWNLOAD_REQUEST = 402;
+    }
 
     private final int mErrorCode;
 
