@@ -118,11 +118,8 @@ import com.android.server.backup.restore.PerformUnifiedRestoreTask;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
-import com.android.server.backup.utils.PasswordUtils;
 import com.android.server.backup.utils.SparseArrayUtils;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
-
-import libcore.io.IoUtils;
 
 import com.google.android.collect.Sets;
 
@@ -802,8 +799,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         // Remember our ancestral dataset
         mTokenFile = new File(mBaseStateDir, "ancestral");
-        try {
-            RandomAccessFile tf = new RandomAccessFile(mTokenFile, "r");
+        try (RandomAccessFile tf = new RandomAccessFile(mTokenFile, "r")) {
             int version = tf.readInt();
             if (version == CURRENT_ANCESTRAL_RECORD_VERSION) {
                 mAncestralToken = tf.readLong();
@@ -818,7 +814,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     }
                 }
             }
-            tf.close();
         } catch (FileNotFoundException fnf) {
             // Probably innocuous
             Slog.v(TAG, "No ancestral data");
@@ -842,13 +837,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         // If there are previous contents, parse them out then start a new
         // file to continue the recordkeeping.
         if (mEverStored.exists()) {
-            RandomAccessFile temp = null;
-            RandomAccessFile in = null;
-
-            try {
-                temp = new RandomAccessFile(tempProcessedFile, "rws");
-                in = new RandomAccessFile(mEverStored, "r");
-
+            try (RandomAccessFile temp = new RandomAccessFile(tempProcessedFile, "rws");
+                 RandomAccessFile in = new RandomAccessFile(mEverStored, "r")) {
                 // Loop until we hit EOF
                 while (true) {
                     String pkg = in.readUTF();
@@ -872,15 +862,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 }
             } catch (IOException e) {
                 Slog.e(TAG, "Error in processed file", e);
-            } finally {
-                try {
-                    if (temp != null) temp.close();
-                } catch (IOException e) {
-                }
-                try {
-                    if (in != null) in.close();
-                } catch (IOException e) {
-                }
             }
         }
 
@@ -911,14 +892,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 PackageManagerBackupAgent.getStorableApplications(mPackageManager);
 
         if (mFullBackupScheduleFile.exists()) {
-            FileInputStream fstream = null;
-            BufferedInputStream bufStream = null;
-            DataInputStream in = null;
-            try {
-                fstream = new FileInputStream(mFullBackupScheduleFile);
-                bufStream = new BufferedInputStream(fstream);
-                in = new DataInputStream(bufStream);
-
+            try (FileInputStream fstream = new FileInputStream(mFullBackupScheduleFile);
+                 BufferedInputStream bufStream = new BufferedInputStream(fstream);
+                 DataInputStream in = new DataInputStream(bufStream)) {
                 int version = in.readInt();
                 if (version != SCHEDULE_FILE_VERSION) {
                     Slog.e(TAG, "Unknown backup schedule version " + version);
@@ -979,10 +955,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 Slog.e(TAG, "Unable to read backup schedule", e);
                 mFullBackupScheduleFile.delete();
                 schedule = null;
-            } finally {
-                IoUtils.closeQuietly(in);
-                IoUtils.closeQuietly(bufStream);
-                IoUtils.closeQuietly(fstream);
             }
         }
 
@@ -1443,18 +1415,11 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         synchronized (mEverStoredApps) {
             if (!mEverStoredApps.add(packageName)) return;
 
-            RandomAccessFile out = null;
-            try {
-                out = new RandomAccessFile(mEverStored, "rws");
+            try (RandomAccessFile out = new RandomAccessFile(mEverStored, "rws")) {
                 out.seek(out.length());
                 out.writeUTF(packageName);
             } catch (IOException e) {
                 Slog.e(TAG, "Can't log backup of " + packageName + " to " + mEverStored);
-            } finally {
-                try {
-                    if (out != null) out.close();
-                } catch (IOException e) {
-                }
             }
         }
     }
@@ -1469,16 +1434,13 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             // we'll recognize on initialization time that the package no longer
             // exists and fix it up then.
             File tempKnownFile = new File(mBaseStateDir, "processed.new");
-            RandomAccessFile known = null;
-            try {
-                known = new RandomAccessFile(tempKnownFile, "rws");
+            try (RandomAccessFile known = new RandomAccessFile(tempKnownFile, "rws")) {
                 mEverStoredApps.remove(packageName);
                 for (String s : mEverStoredApps) {
                     known.writeUTF(s);
                     if (MORE_DEBUG) Slog.v(TAG, "    " + s);
                 }
                 known.close();
-                known = null;
                 if (!tempKnownFile.renameTo(mEverStored)) {
                     throw new IOException("Can't rename " + tempKnownFile + " to " + mEverStored);
                 }
@@ -1491,11 +1453,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 mEverStoredApps.clear();
                 tempKnownFile.delete();
                 mEverStored.delete();
-            } finally {
-                try {
-                    if (known != null) known.close();
-                } catch (IOException e) {
-                }
             }
         }
     }
@@ -1504,9 +1461,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // as the set of packages with data [supposedly] available in the
     // ancestral dataset.
     public void writeRestoreTokens() {
-        try {
-            RandomAccessFile af = new RandomAccessFile(mTokenFile, "rwd");
-
+        try (RandomAccessFile af = new RandomAccessFile(mTokenFile, "rwd")) {
             // First, the version number of this record, for futureproofing
             af.writeInt(CURRENT_ANCESTRAL_RECORD_VERSION);
 
@@ -1525,7 +1480,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     if (MORE_DEBUG) Slog.v(TAG, "   " + pkgName);
                 }
             }
-            af.close();
         } catch (IOException e) {
             Slog.w(TAG, "Unable to write token file:", e);
         }
@@ -2770,9 +2724,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         File base = new File(Environment.getDataDirectory(), "backup");
         File enableFile = new File(base, BACKUP_ENABLE_FILE);
         File stage = new File(base, BACKUP_ENABLE_FILE + "-stage");
-        FileOutputStream fout = null;
-        try {
-            fout = new FileOutputStream(stage);
+        try (FileOutputStream fout = new FileOutputStream(stage)) {
             fout.write(enable ? 1 : 0);
             fout.close();
             stage.renameTo(enableFile);
@@ -2788,8 +2740,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     Settings.Secure.BACKUP_ENABLED, null, userId);
             enableFile.delete();
             stage.delete();
-        } finally {
-            IoUtils.closeQuietly(fout);
         }
     }
 
