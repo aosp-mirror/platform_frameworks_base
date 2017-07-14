@@ -100,6 +100,11 @@ public class FakeExtensionController implements ExtensionController {
         }
 
         @Override
+        public void clearItem(boolean isDestroyed) {
+
+        }
+
+        @Override
         public Context getContext() {
             return null;
         }

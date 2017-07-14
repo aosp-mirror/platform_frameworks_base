@@ -38,6 +38,13 @@ public interface ExtensionController {
          * (like configuration) may have changed.
          */
         T reload();
+
+        /**
+         * Null out the cached item for the purpose of memory saving, should only be done
+         * when any other references are already gotten.
+         * @param isDestroyed
+         */
+        void clearItem(boolean isDestroyed);
     }
 
     interface ExtensionBuilder<T> {
