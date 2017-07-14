@@ -26,7 +26,7 @@ import android.telephony.mbms.StreamingServiceInfo;
  */
 interface IMbmsStreamingService
 {
-    void initialize(IMbmsStreamingManagerCallback listener, int subId);
+    int initialize(IMbmsStreamingManagerCallback listener, int subId);
 
     int getStreamingServices(int subId, in List<String> serviceClasses);
 
