@@ -42,7 +42,7 @@ public class SysuiColorExtractor extends ColorExtractor {
     private final GradientColors mWpHiddenColors;
 
     public SysuiColorExtractor(Context context) {
-        this(context, new Tonal(), true);
+        this(context, new Tonal(context), true);
     }
 
     @VisibleForTesting

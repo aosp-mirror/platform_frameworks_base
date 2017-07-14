@@ -48,7 +48,8 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
 
     @Test
     public void getColors_usesGreyIfWallpaperNotVisible() {
-        SysuiColorExtractor extractor = new SysuiColorExtractor(getContext(), new Tonal(), false);
+        SysuiColorExtractor extractor = new SysuiColorExtractor(getContext(),
+                new Tonal(getContext()), false);
         simulateEvent(extractor);
         extractor.setWallpaperVisible(false);
 
