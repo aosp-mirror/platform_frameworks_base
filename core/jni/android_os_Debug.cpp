@@ -81,14 +81,27 @@ enum {
     HEAP_GL,
     HEAP_OTHER_MEMTRACK,
 
+    // Dalvik extra sections (heap).
     HEAP_DALVIK_NORMAL,
     HEAP_DALVIK_LARGE,
-    HEAP_DALVIK_LINEARALLOC,
-    HEAP_DALVIK_ACCOUNTING,
-    HEAP_DALVIK_CODE_CACHE,
     HEAP_DALVIK_ZYGOTE,
     HEAP_DALVIK_NON_MOVING,
-    HEAP_DALVIK_INDIRECT_REFERENCE_TABLE,
+
+    // Dalvik other extra sections.
+    HEAP_DALVIK_OTHER_LINEARALLOC,
+    HEAP_DALVIK_OTHER_ACCOUNTING,
+    HEAP_DALVIK_OTHER_CODE_CACHE,
+    HEAP_DALVIK_OTHER_COMPILER_METADATA,
+    HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE,
+
+    // Boot vdex / app dex / app vdex
+    HEAP_DEX_BOOT_VDEX,
+    HEAP_DEX_APP_DEX,
+    HEAP_DEX_APP_VDEX,
+
+    // App art, boot art.
+    HEAP_ART_APP,
+    HEAP_ART_BOOT,
 
     _NUM_HEAP,
     _NUM_EXCLUSIVE_HEAP = HEAP_OTHER_MEMTRACK+1,
@@ -297,15 +310,30 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                 whichHeap = HEAP_TTF;
                 is_swappable = true;
             } else if ((nameLen > 4 && strstr(name, ".dex") != NULL) ||
-                       (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0) ||
-                       (nameLen > 5 && strcmp(name+nameLen-5, ".vdex") == 0)) {
+                       (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0)) {
                 whichHeap = HEAP_DEX;
+                subHeap = HEAP_DEX_APP_DEX;
+                is_swappable = true;
+            } else if (nameLen > 5 && strcmp(name+nameLen-5, ".vdex") == 0) {
+                whichHeap = HEAP_DEX;
+                // Handle system@framework@boot* and system/framework/boot*
+                if (strstr(name, "@boot") != NULL || strstr(name, "/boot") != NULL) {
+                    subHeap = HEAP_DEX_BOOT_VDEX;
+                } else {
+                    subHeap = HEAP_DEX_APP_VDEX;
+                }
                 is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".oat") == 0) {
                 whichHeap = HEAP_OAT;
                 is_swappable = true;
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".art") == 0) {
                 whichHeap = HEAP_ART;
+                // Handle system@framework@boot* and system/framework/boot*
+                if (strstr(name, "@boot") != NULL || strstr(name, "/boot") != NULL) {
+                    subHeap = HEAP_ART_BOOT;
+                } else {
+                    subHeap = HEAP_ART_APP;
+                }
                 is_swappable = true;
             } else if (strncmp(name, "/dev/", 5) == 0) {
                 if (strncmp(name, "/dev/kgsl-3d0", 13) == 0) {
@@ -314,7 +342,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                     if (strncmp(name, "/dev/ashmem/dalvik-", 19) == 0) {
                         whichHeap = HEAP_DALVIK_OTHER;
                         if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
-                            subHeap = HEAP_DALVIK_LINEARALLOC;
+                            subHeap = HEAP_DALVIK_OTHER_LINEARALLOC;
                         } else if ((strstr(name, "/dev/ashmem/dalvik-alloc space") == name) ||
                                    (strstr(name, "/dev/ashmem/dalvik-main space") == name)) {
                             // This is the regular Dalvik heap.
@@ -332,13 +360,14 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                             whichHeap = HEAP_DALVIK;
                             subHeap = HEAP_DALVIK_ZYGOTE;
                         } else if (strstr(name, "/dev/ashmem/dalvik-indirect ref") == name) {
-                            subHeap = HEAP_DALVIK_INDIRECT_REFERENCE_TABLE;
+                            subHeap = HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE;
                         } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name ||
-                                   strstr(name, "/dev/ashmem/dalvik-data-code-cache") == name ||
-                                   strstr(name, "/dev/ashmem/dalvik-CompilerMetadata") == name) {
-                            subHeap = HEAP_DALVIK_CODE_CACHE;
+                                   strstr(name, "/dev/ashmem/dalvik-data-code-cache") == name) {
+                            subHeap = HEAP_DALVIK_OTHER_CODE_CACHE;
+                        } else if (strstr(name, "/dev/ashmem/dalvik-CompilerMetadata") == name) {
+                            subHeap = HEAP_DALVIK_OTHER_COMPILER_METADATA;
                         } else {
-                            subHeap = HEAP_DALVIK_ACCOUNTING;  // Default to accounting.
+                            subHeap = HEAP_DALVIK_OTHER_ACCOUNTING;  // Default to accounting.
                         }
                     } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
                         whichHeap = HEAP_CURSOR;
@@ -423,7 +452,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
             stats[whichHeap].sharedClean += shared_clean;
             stats[whichHeap].swappedOut += swapped_out;
             stats[whichHeap].swappedOutPss += swapped_out_pss;
-            if (whichHeap == HEAP_DALVIK || whichHeap == HEAP_DALVIK_OTHER) {
+            if (whichHeap == HEAP_DALVIK || whichHeap == HEAP_DALVIK_OTHER ||
+                    whichHeap == HEAP_DEX || whichHeap == HEAP_ART) {
                 stats[subHeap].pss += pss;
                 stats[subHeap].swappablePss += swappable_pss;
                 stats[subHeap].privateDirty += private_dirty;
