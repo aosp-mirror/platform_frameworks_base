@@ -35,7 +35,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-/** @hide */
+/**
+ * This class provides functionality for streaming media over MBMS.
+ * @hide
+ */
 public class MbmsStreamingManager {
     private static final String LOG_TAG = "MbmsStreamingManager";
     public static final String MBMS_STREAMING_SERVICE_ACTION =
@@ -88,6 +91,8 @@ public class MbmsStreamingManager {
     /**
      * Terminates this instance, ending calls to the registered listener.  Also terminates
      * any streaming services spawned from this instance.
+     *
+     * May throw an {@link IllegalStateException}
      */
     public void dispose() {
         IMbmsStreamingService streamingService = mService.get();
@@ -111,15 +116,15 @@ public class MbmsStreamingManager {
      *
      * Multiple calls replace the list of serviceClasses of interest.
      *
-     * This may throw an {@link MbmsException} containing one of the following errors:
-     * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
-     * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
-     * {@link MbmsException#ERROR_SERVICE_LOST}
+     * This may throw an {@link MbmsException} containing any error in
+     * {@link android.telephony.mbms.MbmsException.GeneralErrors},
+     * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}, or
+     * {@link MbmsException#ERROR_MIDDLEWARE_LOST}.
      *
-     * Asynchronous error codes via the {@link MbmsStreamingManagerCallback#error(int, String)}
-     * callback can include any of the errors except:
-     * {@link MbmsException#ERROR_UNABLE_TO_START_SERVICE}
-     * {@link MbmsException#ERROR_END_OF_SESSION}
+     * May also throw an unchecked {@link IllegalArgumentException} or an
+     * {@link IllegalStateException}
+     *
+     * @param classList A list of streaming service classes that the app would like updates on.
      */
     public void getStreamingServices(List<String> classList) throws MbmsException {
         IMbmsStreamingService streamingService = mService.get();
@@ -134,7 +139,7 @@ public class MbmsStreamingManager {
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService.set(null);
-            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
         }
     }
 
@@ -145,14 +150,21 @@ public class MbmsStreamingManager {
      * reported via
      * {@link android.telephony.mbms.StreamingServiceCallback#streamStateUpdated(int, int)}
      *
-     * May throw an {@link MbmsException} containing any of the following error codes:
-     * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}
-     * {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
-     * {@link MbmsException#ERROR_SERVICE_LOST}
+     * May throw an
+     * {@link MbmsException} containing any of the error codes in
+     * {@link android.telephony.mbms.MbmsException.GeneralErrors},
+     * {@link MbmsException#ERROR_MIDDLEWARE_NOT_BOUND}, or
+     * {@link MbmsException#ERROR_MIDDLEWARE_LOST}.
      *
      * May also throw an {@link IllegalArgumentException} or an {@link IllegalStateException}
      *
-     * Asynchronous errors through the listener include any of the errors
+     * Asynchronous errors through the listener include any of the errors in
+     * {@link android.telephony.mbms.MbmsException.GeneralErrors} or
+     * {@link android.telephony.mbms.MbmsException.StreamingErrors}.
+     *
+     * @param serviceInfo The information about the service to stream.
+     * @param listener A listener that'll be called when something about the stream changes.
+     * @return An instance of {@link StreamingService} through which the stream can be controlled.
      */
     public StreamingService startStreaming(StreamingServiceInfo serviceInfo,
             StreamingServiceCallback listener) throws MbmsException {
@@ -170,7 +182,7 @@ public class MbmsStreamingManager {
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService.set(null);
-            throw new MbmsException(MbmsException.ERROR_SERVICE_LOST);
+            throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
         }
 
         return new StreamingService(mSubscriptionId, streamingService, serviceInfo, listener);
