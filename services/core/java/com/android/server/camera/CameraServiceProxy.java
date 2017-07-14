@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceProxy;
+import android.metrics.LogMaker;
 import android.nfc.INfcAdapter;
 import android.os.Binder;
 import android.os.Handler;
@@ -28,15 +29,23 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -65,6 +74,9 @@ public class CameraServiceProxy extends SystemService
 
     private static final int RETRY_DELAY_TIME = 20; //ms
 
+    // Maximum entries to keep in usage history before dumping out
+    private static final int MAX_USAGE_HISTORY = 100;
+
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final Handler mHandler;
@@ -76,14 +88,52 @@ public class CameraServiceProxy extends SystemService
 
     private ICameraService mCameraServiceRaw;
 
-    private final ArraySet<String> mActiveCameraIds = new ArraySet<>();
-
+    private final ArrayMap<String, CameraUsageEvent> mActiveCameraUsage = new ArrayMap<>();
+    private final List<CameraUsageEvent> mCameraUsageHistory = new ArrayList<>();
+    private final MetricsLogger mLogger = new MetricsLogger();
     private static final String NFC_NOTIFICATION_PROP = "ro.camera.notify_nfc";
     private static final String NFC_SERVICE_BINDER_NAME = "nfc";
     private static final IBinder nfcInterfaceToken = new Binder();
 
     private final boolean mNotifyNfc;
-    private int mActiveCameraCount = 0;
+
+    /**
+     * Structure to track camera usage
+     */
+    private static class CameraUsageEvent {
+        public final int mCameraFacing;
+        public final String mClientName;
+
+        private boolean mCompleted;
+        private long mDurationOrStartTimeMs;  // Either start time, or duration once completed
+
+        public CameraUsageEvent(int facing, String clientName) {
+            mCameraFacing = facing;
+            mClientName = clientName;
+            mDurationOrStartTimeMs = SystemClock.elapsedRealtime();
+            mCompleted = false;
+        }
+
+        public void markCompleted() {
+            if (mCompleted) {
+                return;
+            }
+            mCompleted = true;
+            mDurationOrStartTimeMs = SystemClock.elapsedRealtime() - mDurationOrStartTimeMs;
+            if (CameraServiceProxy.DEBUG) {
+                Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
+                        " was in use by " + mClientName + " for " +
+                        mDurationOrStartTimeMs + " ms");
+            }
+        }
+
+        /**
+         * Return duration of camera usage event, or 0 if the event is not done
+         */
+        public long getDuration() {
+            return mCompleted ? mDurationOrStartTimeMs : 0;
+        }
+    }
 
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -120,10 +170,11 @@ public class CameraServiceProxy extends SystemService
         public void notifyCameraState(String cameraId, int newCameraState, int facing,
                 String clientName) {
             String state = cameraStateToString(newCameraState);
-            if (DEBUG) Slog.v(TAG, "Camera " + cameraId + " facing " + facing + " state now " +
+            String facingStr = cameraFacingToString(facing);
+            if (DEBUG) Slog.v(TAG, "Camera " + cameraId + " facing " + facingStr + " state now " +
                     state + " for client " + clientName);
 
-            updateActivityCount(cameraId, newCameraState);
+            updateActivityCount(cameraId, newCameraState, facing, clientName);
         }
     };
 
@@ -169,6 +220,9 @@ public class CameraServiceProxy extends SystemService
         mContext.registerReceiver(mIntentReceiver, filter);
 
         publishBinderService(CAMERA_SERVICE_PROXY_BINDER_NAME, mCameraServiceProxy);
+        publishLocalService(CameraServiceProxy.class, this);
+
+        CameraStatsJobService.schedule(mContext);
     }
 
     @Override
@@ -198,13 +252,53 @@ public class CameraServiceProxy extends SystemService
             mCameraServiceRaw = null;
 
             // All cameras reset to idle on camera service death
-            boolean wasEmpty = mActiveCameraIds.isEmpty();
-            mActiveCameraIds.clear();
+            boolean wasEmpty = mActiveCameraUsage.isEmpty();
+            mActiveCameraUsage.clear();
 
             if ( mNotifyNfc && !wasEmpty ) {
                 notifyNfcService(/*enablePolling*/ true);
             }
         }
+    }
+
+    /**
+     * Dump camera usage events to log.
+     * Package-private
+     */
+    void dumpUsageEvents() {
+        synchronized(mLock) {
+            // Randomize order of events so that it's not meaningful
+            Collections.shuffle(mCameraUsageHistory);
+            for (CameraUsageEvent e : mCameraUsageHistory) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Camera: " + e.mClientName + " used a camera facing " +
+                            cameraFacingToString(e.mCameraFacing) + " for " +
+                            e.getDuration() + " ms");
+                }
+                int subtype = 0;
+                switch(e.mCameraFacing) {
+                    case ICameraServiceProxy.CAMERA_FACING_BACK:
+                        subtype = MetricsEvent.CAMERA_BACK_USED;
+                        break;
+                    case ICameraServiceProxy.CAMERA_FACING_FRONT:
+                        subtype = MetricsEvent.CAMERA_FRONT_USED;
+                        break;
+                    case ICameraServiceProxy.CAMERA_FACING_EXTERNAL:
+                        subtype = MetricsEvent.CAMERA_EXTERNAL_USED;
+                        break;
+                    default:
+                        continue;
+                }
+                LogMaker l = new LogMaker(MetricsEvent.ACTION_CAMERA_EVENT)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .setSubtype(subtype)
+                        .setLatency(e.getDuration())
+                        .setPackageName(e.mClientName);
+                mLogger.write(l);
+            }
+            mCameraUsageHistory.clear();
+        }
+        CameraStatsJobService.schedule(mContext);
     }
 
     private void switchUserLocked(int userHandle) {
@@ -274,21 +368,35 @@ public class CameraServiceProxy extends SystemService
         return true;
     }
 
-    private void updateActivityCount(String cameraId, int newCameraState) {
+    private void updateActivityCount(String cameraId, int newCameraState, int facing, String clientName) {
         synchronized(mLock) {
-            boolean wasEmpty = mActiveCameraIds.isEmpty();
+            // Update active camera list and notify NFC if necessary
+            boolean wasEmpty = mActiveCameraUsage.isEmpty();
             switch (newCameraState) {
                 case ICameraServiceProxy.CAMERA_STATE_OPEN:
                     break;
                 case ICameraServiceProxy.CAMERA_STATE_ACTIVE:
-                    mActiveCameraIds.add(cameraId);
+                    CameraUsageEvent newEvent = new CameraUsageEvent(facing, clientName);
+                    CameraUsageEvent oldEvent = mActiveCameraUsage.put(cameraId, newEvent);
+                    if (oldEvent != null) {
+                        Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
+                        oldEvent.markCompleted();
+                        mCameraUsageHistory.add(oldEvent);
+                    }
                     break;
                 case ICameraServiceProxy.CAMERA_STATE_IDLE:
                 case ICameraServiceProxy.CAMERA_STATE_CLOSED:
-                    mActiveCameraIds.remove(cameraId);
+                    CameraUsageEvent doneEvent = mActiveCameraUsage.remove(cameraId);
+                    if (doneEvent != null) {
+                        doneEvent.markCompleted();
+                        mCameraUsageHistory.add(doneEvent);
+                        if (mCameraUsageHistory.size() > MAX_USAGE_HISTORY) {
+                            dumpUsageEvents();
+                        }
+                    }
                     break;
             }
-            boolean isEmpty = mActiveCameraIds.isEmpty();
+            boolean isEmpty = mActiveCameraUsage.isEmpty();
             if ( mNotifyNfc && (wasEmpty != isEmpty) ) {
                 notifyNfcService(isEmpty);
             }
@@ -332,4 +440,15 @@ public class CameraServiceProxy extends SystemService
         }
         return "CAMERA_STATE_UNKNOWN";
     }
+
+    private static String cameraFacingToString(int cameraFacing) {
+        switch (cameraFacing) {
+            case ICameraServiceProxy.CAMERA_FACING_BACK: return "CAMERA_FACING_BACK";
+            case ICameraServiceProxy.CAMERA_FACING_FRONT: return "CAMERA_FACING_FRONT";
+            case ICameraServiceProxy.CAMERA_FACING_EXTERNAL: return "CAMERA_FACING_EXTERNAL";
+            default: break;
+        }
+        return "CAMERA_FACING_UNKNOWN";
+    }
+
 }
