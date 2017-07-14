@@ -137,22 +137,17 @@ interface ILowpanInterface {
     const int ERROR_INVALID_ARGUMENT = 2;
     const int ERROR_DISABLED = 3;
     const int ERROR_WRONG_STATE = 4;
-    const int ERROR_INVALID_TYPE = 5;
-    const int ERROR_INVALID_VALUE = 6;
-    const int ERROR_TIMEOUT = 7;
-    const int ERROR_IO_FAILURE = 8;
-    const int ERROR_BUSY = 9;
-    const int ERROR_ALREADY = 10;
-    const int ERROR_CANCELED = 11;
-    const int ERROR_CREDENTIAL_NEEDED = 12;
-    const int ERROR_FEATURE_NOT_SUPPORTED = 14;
-    const int ERROR_PROPERTY_NOT_FOUND = 16;
-    const int ERROR_JOIN_FAILED_UNKNOWN = 18;
-    const int ERROR_JOIN_FAILED_AT_SCAN = 19;
-    const int ERROR_JOIN_FAILED_AT_AUTH = 20;
-    const int ERROR_FORM_FAILED_AT_SCAN = 21;
-    const int ERROR_NCP_PROBLEM = 27;
-    const int ERROR_PERMISSION_DENIED = 28;
+    const int ERROR_TIMEOUT = 5;
+    const int ERROR_IO_FAILURE = 6;
+    const int ERROR_NCP_PROBLEM = 7;
+    const int ERROR_BUSY = 8;
+    const int ERROR_ALREADY = 9;
+    const int ERROR_CANCELED = 10;
+    const int ERROR_FEATURE_NOT_SUPPORTED = 11;
+    const int ERROR_JOIN_FAILED_UNKNOWN = 12;
+    const int ERROR_JOIN_FAILED_AT_SCAN = 13;
+    const int ERROR_JOIN_FAILED_AT_AUTH = 14;
+    const int ERROR_FORM_FAILED_AT_SCAN = 15;
 
     //////////////////////////////////////////////////////////////////////////
     // Methods
