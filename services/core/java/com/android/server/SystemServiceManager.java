@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Slog;
 
@@ -118,14 +119,14 @@ public class SystemServiceManager {
         // Register it.
         mServices.add(service);
         // Start it.
-        long time = System.currentTimeMillis();
+        long time = SystemClock.elapsedRealtime();
         try {
             service.onStart();
         } catch (RuntimeException ex) {
             throw new RuntimeException("Failed to start service " + service.getClass().getName()
                     + ": onStart threw an exception", ex);
         }
-        warnIfTooLong(System.currentTimeMillis() - time, service, "onStart");
+        warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onStart");
     }
 
     /**
@@ -146,7 +147,7 @@ public class SystemServiceManager {
             final int serviceLen = mServices.size();
             for (int i = 0; i < serviceLen; i++) {
                 final SystemService service = mServices.get(i);
-                long time = System.currentTimeMillis();
+                long time = SystemClock.elapsedRealtime();
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, service.getClass().getName());
                 try {
                     service.onBootPhase(mCurrentPhase);
@@ -156,7 +157,7 @@ public class SystemServiceManager {
                             + ": onBootPhase threw an exception during phase "
                             + mCurrentPhase, ex);
                 }
-                warnIfTooLong(System.currentTimeMillis() - time, service, "onBootPhase");
+                warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onBootPhase");
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
         } finally {
@@ -178,14 +179,14 @@ public class SystemServiceManager {
             final SystemService service = mServices.get(i);
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "onStartUser "
                     + service.getClass().getName());
-            long time = System.currentTimeMillis();
+            long time = SystemClock.elapsedRealtime();
             try {
                 service.onStartUser(userHandle);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting start of user " + userHandle
                         + " to service " + service.getClass().getName(), ex);
             }
-            warnIfTooLong(System.currentTimeMillis() - time, service, "onStartUser ");
+            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onStartUser ");
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         }
     }
@@ -197,14 +198,14 @@ public class SystemServiceManager {
             final SystemService service = mServices.get(i);
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "onUnlockUser "
                     + service.getClass().getName());
-            long time = System.currentTimeMillis();
+            long time = SystemClock.elapsedRealtime();
             try {
                 service.onUnlockUser(userHandle);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting unlock of user " + userHandle
                         + " to service " + service.getClass().getName(), ex);
             }
-            warnIfTooLong(System.currentTimeMillis() - time, service, "onUnlockUser ");
+            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onUnlockUser ");
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         }
     }
@@ -216,14 +217,14 @@ public class SystemServiceManager {
             final SystemService service = mServices.get(i);
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "onSwitchUser "
                     + service.getClass().getName());
-            long time = System.currentTimeMillis();
+            long time = SystemClock.elapsedRealtime();
             try {
                 service.onSwitchUser(userHandle);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting switch of user " + userHandle
                         + " to service " + service.getClass().getName(), ex);
             }
-            warnIfTooLong(System.currentTimeMillis() - time, service, "onSwitchUser");
+            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onSwitchUser");
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         }
     }
@@ -235,14 +236,14 @@ public class SystemServiceManager {
             final SystemService service = mServices.get(i);
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "onStopUser "
                     + service.getClass().getName());
-            long time = System.currentTimeMillis();
+            long time = SystemClock.elapsedRealtime();
             try {
                 service.onStopUser(userHandle);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting stop of user " + userHandle
                         + " to service " + service.getClass().getName(), ex);
             }
-            warnIfTooLong(System.currentTimeMillis() - time, service, "onStopUser");
+            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onStopUser");
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         }
     }
@@ -254,14 +255,14 @@ public class SystemServiceManager {
             final SystemService service = mServices.get(i);
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "onCleanupUser "
                     + service.getClass().getName());
-            long time = System.currentTimeMillis();
+            long time = SystemClock.elapsedRealtime();
             try {
                 service.onCleanupUser(userHandle);
             } catch (Exception ex) {
                 Slog.wtf(TAG, "Failure reporting cleanup of user " + userHandle
                         + " to service " + service.getClass().getName(), ex);
             }
-            warnIfTooLong(System.currentTimeMillis() - time, service, "onCleanupUser");
+            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onCleanupUser");
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         }
     }
