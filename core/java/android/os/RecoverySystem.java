@@ -808,7 +808,8 @@ public class RecoverySystem {
             HandlerThread euiccHandlerThread = new HandlerThread("euiccWipeFinishReceiverThread");
             euiccHandlerThread.start();
             Handler euiccHandler = new Handler(euiccHandlerThread.getLooper());
-            context.registerReceiver(euiccWipeFinishReceiver, filterConsent, null, euiccHandler);
+            context.getApplicationContext()
+                    .registerReceiver(euiccWipeFinishReceiver, filterConsent, null, euiccHandler);
             if (isWipeEuicc) {
                 euiccManager.eraseSubscriptions(callbackIntent);
             } else {
@@ -831,7 +832,7 @@ public class RecoverySystem {
                         Log.e(TAG, "Timeout retaining eUICC data.");
                     }
                 }
-                context.unregisterReceiver(euiccWipeFinishReceiver);
+                context.getApplicationContext().unregisterReceiver(euiccWipeFinishReceiver);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 if (isWipeEuicc) {
