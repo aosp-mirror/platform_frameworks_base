@@ -16,12 +16,16 @@
 
 package android.webkit;
 
+import android.annotation.IntDef;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Message;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.ViewRootImpl;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public class WebViewClient {
 
@@ -236,6 +240,16 @@ public class WebViewClient {
     public static final int ERROR_TOO_MANY_REQUESTS = -15;
     /** Resource load was cancelled by Safe Browsing */
     public static final int ERROR_UNSAFE_RESOURCE = -16;
+
+    /** @hide */
+    @IntDef({
+        SAFE_BROWSING_THREAT_UNKNOWN,
+        SAFE_BROWSING_THREAT_MALWARE,
+        SAFE_BROWSING_THREAT_PHISHING,
+        SAFE_BROWSING_THREAT_UNWANTED_SOFTWARE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SafeBrowsingThreat {}
 
     /** The resource was blocked for an unknown reason */
     public static final int SAFE_BROWSING_THREAT_UNKNOWN = 0;
@@ -521,8 +535,8 @@ public class WebViewClient {
      *                   SAFE_BROWSING_THREAT_* value.
      * @param callback Applications must invoke one of the callback methods.
      */
-    public void onSafeBrowsingHit(WebView view, WebResourceRequest request, int threatType,
-            SafeBrowsingResponse callback) {
+    public void onSafeBrowsingHit(WebView view, WebResourceRequest request,
+            @SafeBrowsingThreat int threatType, SafeBrowsingResponse callback) {
         callback.showInterstitial(/* allowReporting */ true);
     }
 }
