@@ -33,16 +33,17 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Initialize streaming service for this app and subId, registering the listener.
      *
-     * May throw an {@link IllegalArgumentException} or a {@link SecurityException}
+     * Exceptions should not be thrown through this method -- this method is called from within a
+     * {@link android.content.ServiceConnection} defined by the framework, so apps have no way of
+     * catching them. Call {@link IMbmsStreamingManagerCallback#error(int, String)} instead.
      *
      * @param listener The callback to use to communicate with the app.
      * @param subscriptionId The subscription ID to use.
-     * @return {@link MbmsException#SUCCESS} or {@link MbmsException#ERROR_ALREADY_INITIALIZED}
      */
     @Override
-    public int initialize(IMbmsStreamingManagerCallback listener, int subscriptionId)
+    public void initialize(IMbmsStreamingManagerCallback listener, int subscriptionId)
             throws RemoteException {
-        return 0;
+        return;
     }
 
     /**
@@ -59,9 +60,8 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @param serviceClasses The service classes that the app wishes to get info on. The strings
      *                       may contain arbitrary data as negotiated between the app and the
      *                       carrier.
-     * @return One of {@link MbmsException#SUCCESS},
-     *         {@link MbmsException#ERROR_MIDDLEWARE_NOT_YET_READY},
-     *         {@link MbmsException#ERROR_CONCURRENT_SERVICE_LIMIT_REACHED}
+     * @return {@link MbmsException#SUCCESS} or any of the errors in
+     * {@link android.telephony.mbms.MbmsException.GeneralErrors}
      */
     @Override
     public int getStreamingServices(int subscriptionId,
@@ -79,8 +79,7 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @param subscriptionId The subscription id to use.
      * @param serviceId The ID of the streaming service that the app has requested.
      * @param listener The listener object on which the app wishes to receive updates.
-     * @return {@link MbmsException#SUCCESS}, {@link MbmsException#ERROR_STREAM_ALREADY_STARTED},
-     *         or {@link MbmsException#ERROR_UNABLE_TO_START_SERVICE}.
+     * @return Any error in {@link android.telephony.mbms.MbmsException.GeneralErrors}
      */
     @Override
     public int startStreaming(int subscriptionId, String serviceId,
