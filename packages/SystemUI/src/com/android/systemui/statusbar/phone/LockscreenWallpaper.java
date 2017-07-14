@@ -158,7 +158,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     }
 
     @Override
-    public void onWallpaperColorsChanged(WallpaperColors colors, int which) {
+    public void onWallpaperColorsChanged(WallpaperColors colors, int which, int userId) {
 
     }
 
