@@ -24,7 +24,6 @@ import android.telephony.mbms.IMbmsDownloadManagerCallback;
 import android.telephony.mbms.IDownloadCallback;
 
 /**
- * The interface the opaque MbmsStreamingService will satisfy.
  * @hide
  */
 interface IMbmsDownloadService
@@ -43,12 +42,7 @@ interface IMbmsDownloadService
 
     int getDownloadStatus(in DownloadRequest downloadRequest, in FileInfo fileInfo);
 
-    /*
-     * named this for 2 reasons:
-     *  1 don't want 'State' here as it conflicts with 'Status' of the previous function
-     *  2 want to perfect typing 'Knowledge'
-     */
-    void resetDownloadKnowledge(in DownloadRequest downloadRequest);
+    int resetDownloadKnowledge(in DownloadRequest downloadRequest);
 
     void dispose(int subId);
 }

@@ -22,12 +22,11 @@ import android.telephony.mbms.IStreamingServiceCallback;
 import android.telephony.mbms.StreamingServiceInfo;
 
 /**
- * The interface the opaque MbmsStreamingService will satisfy.
  * @hide
  */
 interface IMbmsStreamingService
 {
-    int initialize(IMbmsStreamingManagerCallback listener, int subId);
+    void initialize(IMbmsStreamingManagerCallback listener, int subId);
 
     int getStreamingServices(int subId, in List<String> serviceClasses);
 
