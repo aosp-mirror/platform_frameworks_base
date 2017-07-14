@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.net.LinkAddress;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.test.TestLooper;
@@ -85,5 +86,67 @@ public class LowpanInterfaceTest {
         verify(mLowpanInterfaceCallback)
                 .onStateChanged(
                         argThat(stateString -> stateString.equals(LowpanInterface.STATE_OFFLINE)));
+    }
+
+    @Test
+    public void testLinkAddressCallback() throws Exception {
+        // Register our callback
+        mLowpanInterface.registerCallback(mLowpanInterfaceCallback);
+
+        // Verify a listener was added
+        verify(mLowpanInterfaceService)
+                .addListener(
+                        argThat(
+                                listener -> {
+                                    mInterfaceListener = listener;
+                                    return listener instanceof ILowpanInterfaceListener;
+                                }));
+
+        final LinkAddress linkAddress = new LinkAddress("fe80::1/64");
+
+        // Change some properties
+        mInterfaceListener.onLinkAddressAdded(linkAddress.toString());
+        mTestLooper.dispatchAll();
+
+        // Verify that the property was changed
+        verify(mLowpanInterfaceCallback)
+                .onLinkAddressAdded(argThat(addr -> addr.equals(linkAddress)));
+
+        // Change some properties
+        mInterfaceListener.onLinkAddressRemoved(linkAddress.toString());
+        mTestLooper.dispatchAll();
+
+        // Verify that the property was changed
+        verify(mLowpanInterfaceCallback)
+                .onLinkAddressRemoved(argThat(addr -> addr.equals(linkAddress)));
+    }
+
+    @Test
+    public void testBogusLinkAddressCallback() throws Exception {
+        // Register our callback
+        mLowpanInterface.registerCallback(mLowpanInterfaceCallback);
+
+        // Verify a listener was added
+        verify(mLowpanInterfaceService)
+                .addListener(
+                        argThat(
+                                listener -> {
+                                    mInterfaceListener = listener;
+                                    return listener instanceof ILowpanInterfaceListener;
+                                }));
+
+        // Change some properties
+        mInterfaceListener.onLinkAddressAdded("fe80:::1/640");
+        mTestLooper.dispatchAll();
+
+        // Verify that no callback was called.
+        verifyNoMoreInteractions(mLowpanInterfaceCallback);
+
+        // Change some properties
+        mInterfaceListener.onLinkAddressRemoved("fe80:::1/640");
+        mTestLooper.dispatchAll();
+
+        // Verify that no callback was called.
+        verifyNoMoreInteractions(mLowpanInterfaceCallback);
     }
 }

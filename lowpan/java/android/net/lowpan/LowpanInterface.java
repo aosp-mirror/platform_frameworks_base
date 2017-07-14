@@ -28,8 +28,6 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Class for managing a specific Low-power Wireless Personal Area Network (LoWPAN) interface.
@@ -41,13 +39,13 @@ public class LowpanInterface {
     private static final String TAG = LowpanInterface.class.getSimpleName();
 
     /** Detached role. The interface is not currently attached to a network. */
-    public static final String ROLE_DETACHED = "detached";
+    public static final String ROLE_DETACHED = ILowpanInterface.ROLE_DETACHED;
 
     /** End-device role. End devices do not route traffic for other nodes. */
-    public static final String ROLE_END_DEVICE = "end-device";
+    public static final String ROLE_END_DEVICE = ILowpanInterface.ROLE_END_DEVICE;
 
     /** Router role. Routers help route traffic around the mesh network. */
-    public static final String ROLE_ROUTER = "router";
+    public static final String ROLE_ROUTER = ILowpanInterface.ROLE_ROUTER;
 
     /**
      * Sleepy End-Device role.
@@ -57,7 +55,7 @@ public class LowpanInterface {
      * extraordinarilly low power consumption, but packet latency can be on the order of dozens of
      * seconds(depending on how the node is configured).
      */
-    public static final String ROLE_SLEEPY_END_DEVICE = "sleepy-end-device";
+    public static final String ROLE_SLEEPY_END_DEVICE = ILowpanInterface.ROLE_SLEEPY_END_DEVICE;
 
     /**
      * Sleepy-router role.
@@ -65,13 +63,13 @@ public class LowpanInterface {
      * <p>Routers with this role are nominally asleep, waking up periodically to check in with other
      * routers and their children.
      */
-    public static final String ROLE_SLEEPY_ROUTER = "sleepy-router";
+    public static final String ROLE_SLEEPY_ROUTER = ILowpanInterface.ROLE_SLEEPY_ROUTER;
 
     /** TODO: doc */
-    public static final String ROLE_LEADER = "leader";
+    public static final String ROLE_LEADER = ILowpanInterface.ROLE_LEADER;
 
     /** TODO: doc */
-    public static final String ROLE_COORDINATOR = "coordinator";
+    public static final String ROLE_COORDINATOR = ILowpanInterface.ROLE_COORDINATOR;
 
     /**
      * Offline state.
@@ -86,7 +84,7 @@ public class LowpanInterface {
      * @see #getState()
      * @see #STATE_FAULT
      */
-    public static final String STATE_OFFLINE = "offline";
+    public static final String STATE_OFFLINE = ILowpanInterface.STATE_OFFLINE;
 
     /**
      * Commissioning state.
@@ -98,7 +96,7 @@ public class LowpanInterface {
      * @see #getState()
      * @hide
      */
-    public static final String STATE_COMMISSIONING = "commissioning";
+    public static final String STATE_COMMISSIONING = ILowpanInterface.STATE_COMMISSIONING;
 
     /**
      * Attaching state.
@@ -116,7 +114,7 @@ public class LowpanInterface {
      * @see #STATE_ATTACHED
      * @see #getState()
      */
-    public static final String STATE_ATTACHING = "attaching";
+    public static final String STATE_ATTACHING = ILowpanInterface.STATE_ATTACHING;
 
     /**
      * Attached state.
@@ -127,7 +125,7 @@ public class LowpanInterface {
      * @see #STATE_ATTACHING
      * @see #getState()
      */
-    public static final String STATE_ATTACHED = "attached";
+    public static final String STATE_ATTACHED = ILowpanInterface.STATE_ATTACHED;
 
     /**
      * Fault state.
@@ -141,7 +139,7 @@ public class LowpanInterface {
      * @see #getState
      * @see #STATE_OFFLINE
      */
-    public static final String STATE_FAULT = "fault";
+    public static final String STATE_FAULT = ILowpanInterface.STATE_FAULT;
 
     /**
      * Network type for Thread 1.x networks.
@@ -150,23 +148,9 @@ public class LowpanInterface {
      * @see #getLowpanIdentity
      * @hide
      */
-    public static final String NETWORK_TYPE_THREAD = "org.threadgroup.thread.v1";
+    public static final String NETWORK_TYPE_THREAD_V1 = ILowpanInterface.NETWORK_TYPE_THREAD_V1;
 
-    /**
-     * Network type for ZigBeeIP 1.x networks.
-     *
-     * @see android.net.lowpan.LowpanIdentity#getType
-     * @see #getLowpanIdentity
-     * @hide
-     */
-    public static final String NETWORK_TYPE_ZIGBEE_IP = "org.zigbee.zigbeeip.v1";
-
-    private static final String NETWORK_PROPERTY_KEYS[] = {
-        LowpanProperties.KEY_NETWORK_NAME.getName(),
-        LowpanProperties.KEY_NETWORK_PANID.getName(),
-        LowpanProperties.KEY_NETWORK_XPANID.getName(),
-        LowpanProperties.KEY_CHANNEL.getName()
-    };
+    public static final String EMPTY_PARTITION_ID = "";
 
     /**
      * Callback base class for LowpanInterface
@@ -187,8 +171,13 @@ public class LowpanInterface {
 
         public void onLowpanIdentityChanged(@NonNull LowpanIdentity value) {}
 
-        /** @hide */
-        public void onPropertiesChanged(@NonNull Map properties) {}
+        public void onLinkNetworkAdded(IpPrefix prefix) {}
+
+        public void onLinkNetworkRemoved(IpPrefix prefix) {}
+
+        public void onLinkAddressAdded(LinkAddress address) {}
+
+        public void onLinkAddressRemoved(LinkAddress address) {}
     }
 
     private final ILowpanInterface mBinder;
@@ -222,74 +211,6 @@ public class LowpanInterface {
         return mBinder;
     }
 
-    // Private Property Helpers
-
-    void setProperties(Map properties) throws LowpanException {
-        try {
-            mBinder.setProperties(properties);
-
-        } catch (RemoteException x) {
-            throw x.rethrowAsRuntimeException();
-
-        } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
-        }
-    }
-
-    @NonNull
-    Map<String, Object> getProperties(String keys[]) throws LowpanException {
-        try {
-            return mBinder.getProperties(keys);
-
-        } catch (RemoteException x) {
-            throw x.rethrowAsRuntimeException();
-
-        } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
-        }
-    }
-
-    /** @hide */
-    public <T> void setProperty(LowpanProperty<T> key, T value) throws LowpanException {
-        HashMap<String, T> prop = new HashMap<>();
-        prop.put(key.getName(), value);
-        setProperties(prop);
-    }
-
-    /** @hide */
-    @Nullable
-    public <T> T getProperty(LowpanProperty<T> key) throws LowpanException {
-        Map<String, Object> map = getProperties(new String[] {key.getName()});
-        if (map != null && !map.isEmpty()) {
-            // We know there is only one value.
-            return (T) map.values().iterator().next();
-        }
-        return null;
-    }
-
-    @Nullable
-    <T> String getPropertyAsString(LowpanProperty<T> key) throws LowpanException {
-        try {
-            return mBinder.getPropertyAsString(key.getName());
-
-        } catch (RemoteException x) {
-            throw x.rethrowAsRuntimeException();
-
-        } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
-        }
-    }
-
-    int getPropertyAsInt(LowpanProperty<Integer> key) throws LowpanException {
-        Integer value = getProperty(key);
-        return (value != null) ? value : 0;
-    }
-
-    boolean getPropertyAsBoolean(LowpanProperty<Boolean> key) throws LowpanException {
-        Boolean value = getProperty(key);
-        return (value != null) ? value : false;
-    }
-
     // Public Actions
 
     /**
@@ -306,15 +227,13 @@ public class LowpanInterface {
      */
     public void form(@NonNull LowpanProvision provision) throws LowpanException {
         try {
-            Map<String, Object> parameters = new HashMap();
-            provision.addToMap(parameters);
-            mBinder.form(parameters);
+            mBinder.form(provision);
 
         } catch (RemoteException x) {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -328,15 +247,13 @@ public class LowpanInterface {
      */
     public void join(@NonNull LowpanProvision provision) throws LowpanException {
         try {
-            Map<String, Object> parameters = new HashMap();
-            provision.addToMap(parameters);
-            mBinder.join(parameters);
+            mBinder.join(provision);
 
         } catch (RemoteException x) {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -348,13 +265,14 @@ public class LowpanInterface {
      * <p>This method will block execution until the operation has completed.
      */
     public void attach(@NonNull LowpanProvision provision) throws LowpanException {
-        if (ROLE_DETACHED.equals(getRole())) {
-            Map<String, Object> parameters = new HashMap();
-            provision.addToMap(parameters);
-            setProperties(parameters);
-            setUp(true);
-        } else {
-            throw new LowpanException(LowpanException.LOWPAN_ALREADY);
+        try {
+            mBinder.attach(provision);
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -372,7 +290,7 @@ public class LowpanInterface {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -382,9 +300,17 @@ public class LowpanInterface {
      */
     public @NonNull LowpanCommissioningSession startCommissioningSession(
             @NonNull LowpanBeaconInfo beaconInfo) throws LowpanException {
+        try {
+            mBinder.startCommissioningSession(beaconInfo);
 
-        /* TODO: Implement startCommissioningSession */
-        throw new LowpanException(LowpanException.LOWPAN_FEATURE_NOT_SUPPORTED);
+            return new LowpanCommissioningSession(mBinder, beaconInfo, mLooper);
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
+            throw LowpanException.rethrowFromServiceSpecificException(x);
+        }
     }
 
     /**
@@ -403,7 +329,7 @@ public class LowpanInterface {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -414,6 +340,9 @@ public class LowpanInterface {
     public String getName() {
         try {
             return mBinder.getName();
+
+        } catch (DeadObjectException x) {
+            return "";
 
         } catch (RemoteException x) {
             throw x.rethrowAsRuntimeException();
@@ -428,9 +357,13 @@ public class LowpanInterface {
      */
     public boolean isEnabled() {
         try {
-            return getPropertyAsBoolean(LowpanProperties.KEY_INTERFACE_ENABLED);
-        } catch (LowpanException x) {
+            return mBinder.isEnabled();
+
+        } catch (DeadObjectException x) {
             return false;
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
         }
     }
 
@@ -444,7 +377,15 @@ public class LowpanInterface {
      * @hide
      */
     public void setEnabled(boolean enabled) throws LowpanException {
-        setProperty(LowpanProperties.KEY_INTERFACE_ENABLED, enabled);
+        try {
+            mBinder.setEnabled(enabled);
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
+            throw LowpanException.rethrowFromServiceSpecificException(x);
+        }
     }
 
     /**
@@ -454,22 +395,14 @@ public class LowpanInterface {
      */
     public boolean isUp() {
         try {
-            return getPropertyAsBoolean(LowpanProperties.KEY_INTERFACE_UP);
-        } catch (LowpanException x) {
-            return false;
-        }
-    }
+            return mBinder.isUp();
 
-    /**
-     * Bring up or shut down the network interface.
-     *
-     * <p>This method brings up or shuts down the network interface, attaching or (gracefully)
-     * detaching from the currently configured LoWPAN network as appropriate.
-     *
-     * @hide
-     */
-    public void setUp(boolean interfaceUp) throws LowpanException {
-        setProperty(LowpanProperties.KEY_INTERFACE_UP, interfaceUp);
+        } catch (DeadObjectException x) {
+            return false;
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+        }
     }
 
     /**
@@ -480,9 +413,13 @@ public class LowpanInterface {
      */
     public boolean isConnected() {
         try {
-            return getPropertyAsBoolean(LowpanProperties.KEY_INTERFACE_CONNECTED);
-        } catch (LowpanException x) {
+            return mBinder.isConnected();
+
+        } catch (DeadObjectException x) {
             return false;
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
         }
     }
 
@@ -492,9 +429,13 @@ public class LowpanInterface {
      */
     public boolean isCommissioned() {
         try {
-            return getPropertyAsBoolean(LowpanProperties.KEY_INTERFACE_COMMISSIONED);
-        } catch (LowpanException x) {
+            return mBinder.isCommissioned();
+
+        } catch (DeadObjectException x) {
             return false;
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
         }
     }
 
@@ -514,90 +455,89 @@ public class LowpanInterface {
      */
     public String getState() {
         try {
-            return getProperty(LowpanProperties.KEY_INTERFACE_STATE);
-        } catch (LowpanException x) {
-            Log.e(TAG, x.toString());
+            return mBinder.getState();
+
+        } catch (DeadObjectException x) {
             return STATE_FAULT;
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+        }
+    }
+
+    /** Get network partition/fragment identifier. */
+    public String getPartitionId() {
+        try {
+            return mBinder.getPartitionId();
+
+        } catch (DeadObjectException x) {
+            return EMPTY_PARTITION_ID;
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
         }
     }
 
     /** TODO: doc */
     public LowpanIdentity getLowpanIdentity() {
-        LowpanIdentity.Builder builder = new LowpanIdentity.Builder();
         try {
-            builder.updateFromMap(getProperties(NETWORK_PROPERTY_KEYS));
-        } catch (LowpanException x) {
-            // We ignore all LoWPAN-specitic exceptions here.
+            return mBinder.getLowpanIdentity();
+
+        } catch (DeadObjectException x) {
+            return new LowpanIdentity();
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
         }
-
-        return builder.build();
-    }
-
-    /**
-     * TODO: doc
-     *
-     * @hide
-     */
-    public void setLowpanIdentity(LowpanIdentity network) throws LowpanException {
-        Map<String, Object> map = new HashMap();
-        LowpanIdentity.addToMap(map, network);
-        setProperties(map);
     }
 
     /** TODO: doc */
     @NonNull
     public String getRole() {
-        String role = null;
-
         try {
-            role = getProperty(LowpanProperties.KEY_NETWORK_ROLE);
-        } catch (LowpanException x) {
-            // We ignore all LoWPAN-specitic exceptions here.
-            Log.e(TAG, x.toString());
-        }
+            return mBinder.getRole();
 
-        if (role == null) {
-            role = ROLE_DETACHED;
-        }
+        } catch (DeadObjectException x) {
+            return ROLE_DETACHED;
 
-        return role;
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+        }
     }
 
     /** TODO: doc */
     @Nullable
     public LowpanCredential getLowpanCredential() {
-        LowpanCredential credential = null;
-
         try {
-            Integer keyIndex = getProperty(LowpanProperties.KEY_NETWORK_MASTER_KEY_INDEX);
+            return mBinder.getLowpanCredential();
 
-            if (keyIndex == null) {
-                credential =
-                        LowpanCredential.createMasterKey(
-                                getProperty(LowpanProperties.KEY_NETWORK_MASTER_KEY));
-            } else {
-                credential =
-                        LowpanCredential.createMasterKey(
-                                getProperty(LowpanProperties.KEY_NETWORK_MASTER_KEY),
-                                keyIndex.intValue());
-            }
-        } catch (LowpanException x) {
-            // We ignore all LoWPAN-specitic exceptions here.
-            Log.e(TAG, x.toString());
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
         }
-
-        return credential;
     }
 
-    /**
-     * TODO: doc
-     *
-     * @hide
-     */
-    public void setLowpanCredential(LowpanCredential networkCredential) throws LowpanException {
-        Map<String, Object> map = new HashMap();
-        networkCredential.addToMap(map);
-        setProperties(map);
+    public @NonNull String[] getSupportedNetworkTypes() throws LowpanException {
+        try {
+            return mBinder.getSupportedNetworkTypes();
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
+            throw LowpanException.rethrowFromServiceSpecificException(x);
+        }
+    }
+
+    public @NonNull LowpanChannelInfo[] getSupportedChannels() throws LowpanException {
+        try {
+            return mBinder.getSupportedChannels();
+
+        } catch (RemoteException x) {
+            throw x.rethrowAsRuntimeException();
+
+        } catch (ServiceSpecificException x) {
+            throw LowpanException.rethrowFromServiceSpecificException(x);
+        }
     }
 
     // Listener Support
@@ -627,57 +567,80 @@ public class LowpanInterface {
                         }
                     }
 
-                    @Override public void onPropertiesChanged(Map properties) {
-                        Runnable runnable =
-                                () -> {
-                                    for (String key : (Set<String>) properties.keySet()) {
-                                        Object value = properties.get(key);
-                                        switch (key) {
-                                            case ILowpanInterface.KEY_INTERFACE_ENABLED:
-                                                cb.onEnabledChanged(
-                                                        ((Boolean) value).booleanValue());
-                                                break;
-                                            case ILowpanInterface.KEY_INTERFACE_UP:
-                                                cb.onUpChanged(((Boolean) value).booleanValue());
-                                                break;
-                                            case ILowpanInterface.KEY_INTERFACE_CONNECTED:
-                                                cb.onConnectedChanged(
-                                                        ((Boolean) value).booleanValue());
-                                                break;
-                                            case ILowpanInterface.KEY_INTERFACE_STATE:
-                                                cb.onStateChanged((String) value);
-                                                break;
-                                            case ILowpanInterface.KEY_NETWORK_NAME:
-                                            case ILowpanInterface.KEY_NETWORK_PANID:
-                                            case ILowpanInterface.KEY_NETWORK_XPANID:
-                                            case ILowpanInterface.KEY_CHANNEL:
-                                                cb.onLowpanIdentityChanged(getLowpanIdentity());
-                                                break;
-                                            case ILowpanInterface.KEY_NETWORK_ROLE:
-                                                cb.onRoleChanged(value.toString());
-                                                break;
-                                        }
-                                    }
-                                    cb.onPropertiesChanged(properties);
-                                };
-
-                        mHandler.post(runnable);
+                    @Override
+                    public void onEnabledChanged(boolean value) {
+                        mHandler.post(() -> cb.onEnabledChanged(value));
                     }
 
-                    @Override public void onLinkNetworkAdded(IpPrefix prefix) {
-                        // Support for this event isn't yet implemented.
+                    @Override
+                    public void onConnectedChanged(boolean value) {
+                        mHandler.post(() -> cb.onConnectedChanged(value));
                     }
 
-                    @Override public void onLinkNetworkRemoved(IpPrefix prefix) {
-                        // Support for this event isn't yet implemented.
+                    @Override
+                    public void onUpChanged(boolean value) {
+                        mHandler.post(() -> cb.onUpChanged(value));
                     }
 
-                    @Override public void onLinkAddressAdded(String address) {
-                        // Support for this event isn't yet implemented.
+                    @Override
+                    public void onRoleChanged(String value) {
+                        mHandler.post(() -> cb.onRoleChanged(value));
                     }
 
-                    @Override public void onLinkAddressRemoved(String address) {
-                        // Support for this event isn't yet implemented.
+                    @Override
+                    public void onStateChanged(String value) {
+                        mHandler.post(() -> cb.onStateChanged(value));
+                    }
+
+                    @Override
+                    public void onLowpanIdentityChanged(LowpanIdentity value) {
+                        mHandler.post(() -> cb.onLowpanIdentityChanged(value));
+                    }
+
+                    @Override
+                    public void onLinkNetworkAdded(IpPrefix value) {
+                        mHandler.post(() -> cb.onLinkNetworkAdded(value));
+                    }
+
+                    @Override
+                    public void onLinkNetworkRemoved(IpPrefix value) {
+                        mHandler.post(() -> cb.onLinkNetworkRemoved(value));
+                    }
+
+                    @Override
+                    public void onLinkAddressAdded(String value) {
+                        LinkAddress la;
+                        try {
+                            la = new LinkAddress(value);
+                        } catch (IllegalArgumentException x) {
+                            Log.e(
+                                    TAG,
+                                    "onLinkAddressAdded: Bad LinkAddress \"" + value + "\", " + x);
+                            return;
+                        }
+                        mHandler.post(() -> cb.onLinkAddressAdded(la));
+                    }
+
+                    @Override
+                    public void onLinkAddressRemoved(String value) {
+                        LinkAddress la;
+                        try {
+                            la = new LinkAddress(value);
+                        } catch (IllegalArgumentException x) {
+                            Log.e(
+                                    TAG,
+                                    "onLinkAddressRemoved: Bad LinkAddress \""
+                                            + value
+                                            + "\", "
+                                            + x);
+                            return;
+                        }
+                        mHandler.post(() -> cb.onLinkAddressRemoved(la));
+                    }
+
+                    @Override
+                    public void onReceiveFromCommissioner(byte[] packet) {
+                        // This is only used by the LowpanCommissioningSession.
                     }
                 };
         try {
@@ -752,9 +715,9 @@ public class LowpanInterface {
      *
      * @hide
      */
-    public LinkAddress[] copyLinkAddresses() throws LowpanException {
+    public LinkAddress[] getLinkAddresses() throws LowpanException {
         try {
-            String[] linkAddressStrings = mBinder.copyLinkAddresses();
+            String[] linkAddressStrings = mBinder.getLinkAddresses();
             LinkAddress[] ret = new LinkAddress[linkAddressStrings.length];
             int i = 0;
             for (String str : linkAddressStrings) {
@@ -766,7 +729,7 @@ public class LowpanInterface {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -775,15 +738,15 @@ public class LowpanInterface {
      *
      * @hide
      */
-    public IpPrefix[] copyLinkNetworks() throws LowpanException {
+    public IpPrefix[] getLinkNetworks() throws LowpanException {
         try {
-            return mBinder.copyLinkNetworks();
+            return mBinder.getLinkNetworks();
 
         } catch (RemoteException x) {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -800,7 +763,7 @@ public class LowpanInterface {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -837,7 +800,7 @@ public class LowpanInterface {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 

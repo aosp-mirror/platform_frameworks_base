@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
-import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,7 +36,7 @@ import java.util.Map;
  */
 // @SystemApi
 public class LowpanScanner {
-    private static final String TAG = LowpanInterface.class.getSimpleName();
+    private static final String TAG = LowpanScanner.class.getSimpleName();
 
     // Public Classes
 
@@ -174,7 +173,7 @@ public class LowpanScanner {
 
         ILowpanNetScanCallback binderListener =
                 new ILowpanNetScanCallback.Stub() {
-                    public void onNetScanBeacon(Map parameters) {
+                    public void onNetScanBeacon(LowpanBeaconInfo beaconInfo) {
                         Callback callback;
                         Handler handler;
 
@@ -187,12 +186,7 @@ public class LowpanScanner {
                             return;
                         }
 
-                        Runnable runnable =
-                                () ->
-                                        callback.onNetScanBeacon(
-                                                new LowpanBeaconInfo.Builder()
-                                                        .updateFromMap(parameters)
-                                                        .build());
+                        Runnable runnable = () -> callback.onNetScanBeacon(beaconInfo);
 
                         if (handler != null) {
                             handler.post(runnable);
@@ -231,7 +225,7 @@ public class LowpanScanner {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -246,9 +240,6 @@ public class LowpanScanner {
 
         } catch (RemoteException x) {
             throw x.rethrowAsRuntimeException();
-
-        } catch (ServiceSpecificException x) {
-            Log.e(TAG, x.toString());
         }
     }
 
@@ -315,7 +306,7 @@ public class LowpanScanner {
             throw x.rethrowAsRuntimeException();
 
         } catch (ServiceSpecificException x) {
-            throw LowpanException.rethrowAsLowpanException(x);
+            throw LowpanException.rethrowFromServiceSpecificException(x);
         }
     }
 
@@ -330,9 +321,6 @@ public class LowpanScanner {
 
         } catch (RemoteException x) {
             throw x.rethrowAsRuntimeException();
-
-        } catch (ServiceSpecificException x) {
-            Log.e(TAG, x.toString());
         }
     }
 }

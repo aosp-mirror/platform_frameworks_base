@@ -17,14 +17,29 @@
 package android.net.lowpan;
 
 import android.net.IpPrefix;
+import android.net.lowpan.LowpanIdentity;
 
 /** {@hide} */
 interface ILowpanInterfaceListener {
-    oneway void onPropertiesChanged(in Map properties);
+    oneway void onEnabledChanged(boolean value);
 
-    oneway void onLinkNetworkAdded(in IpPrefix prefix);
-    oneway void onLinkNetworkRemoved(in IpPrefix prefix);
+    oneway void onConnectedChanged(boolean value);
 
-    oneway void onLinkAddressAdded(in String address);
-    oneway void onLinkAddressRemoved(in String address);
+    oneway void onUpChanged(boolean value);
+
+    oneway void onRoleChanged(@utf8InCpp String value);
+
+    oneway void onStateChanged(@utf8InCpp String value);
+
+    oneway void onLowpanIdentityChanged(in LowpanIdentity value);
+
+    oneway void onLinkNetworkAdded(in IpPrefix value);
+
+    oneway void onLinkNetworkRemoved(in IpPrefix value);
+
+    oneway void onLinkAddressAdded(@utf8InCpp String value);
+
+    oneway void onLinkAddressRemoved(@utf8InCpp String value);
+
+    oneway void onReceiveFromCommissioner(in byte[] packet);
 }
