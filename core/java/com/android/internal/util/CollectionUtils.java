@@ -21,13 +21,16 @@ import static com.android.internal.util.ArrayUtils.isEmpty;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArraySet;
+import android.util.ExceptionUtils;
+
+import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 /**
@@ -58,6 +61,32 @@ public class CollectionUtils {
     }
 
     /**
+     * @see #filter(List, java.util.function.Predicate)
+     */
+    public static @NonNull <T> Set<T> filter(@Nullable Set<T> set,
+            java.util.function.Predicate<? super T> predicate) {
+        if (set == null || set.size() == 0) return Collections.emptySet();
+        ArraySet<T> result = null;
+        if (set instanceof ArraySet) {
+            ArraySet<T> arraySet = (ArraySet<T>) set;
+            int size = arraySet.size();
+            for (int i = 0; i < size; i++) {
+                final T item = arraySet.valueAt(i);
+                if (predicate.test(item)) {
+                    result = ArrayUtils.add(result, item);
+                }
+            }
+        } else {
+            for (T item : set) {
+                if (predicate.test(item)) {
+                    result = ArrayUtils.add(result, item);
+                }
+            }
+        }
+        return emptyIfNull(result);
+    }
+
+    /**
      * Returns a list of items resulting from applying the given function to each element of the
      * provided list.
      *
@@ -72,6 +101,27 @@ public class CollectionUtils {
         final ArrayList<O> result = new ArrayList<>();
         for (int i = 0; i < cur.size(); i++) {
             result.add(f.apply(cur.get(i)));
+        }
+        return result;
+    }
+
+    /**
+     * @see #map(List, Function)
+     */
+    public static @NonNull <I, O> Set<O> map(@Nullable Set<I> cur,
+            Function<? super I, ? extends O> f) {
+        if (isEmpty(cur)) return Collections.emptySet();
+        ArraySet<O> result = new ArraySet<>();
+        if (cur instanceof ArraySet) {
+            ArraySet<I> arraySet = (ArraySet<I>) cur;
+            int size = arraySet.size();
+            for (int i = 0; i < size; i++) {
+                result.add(f.apply(arraySet.valueAt(i)));
+            }
+        } else {
+            for (I item : cur) {
+                result.add(f.apply(item));
+            }
         }
         return result;
     }
@@ -180,6 +230,17 @@ public class CollectionUtils {
     }
 
     /**
+     * @see #add(List, Object)
+     */
+    public static @NonNull <T> Set<T> add(@Nullable Set<T> cur, T val) {
+        if (cur == null || cur == Collections.emptySet()) {
+            cur = new ArraySet<>();
+        }
+        cur.add(val);
+        return cur;
+    }
+
+    /**
      * Similar to {@link List#remove}, but with support for list values of {@code null} and
      * {@link Collections#emptyList}
      */
@@ -192,9 +253,52 @@ public class CollectionUtils {
     }
 
     /**
+     * @see #remove(List, Object)
+     */
+    public static @NonNull <T> Set<T> remove(@Nullable Set<T> cur, T val) {
+        if (isEmpty(cur)) {
+            return emptyIfNull(cur);
+        }
+        cur.remove(val);
+        return cur;
+    }
+
+    /**
      * @return a list that will not be affected by mutations to the given original list.
      */
     public static @NonNull <T> List<T> copyOf(@Nullable List<T> cur) {
         return isEmpty(cur) ? Collections.emptyList() : new ArrayList<>(cur);
+    }
+
+    /**
+     * @return a list that will not be affected by mutations to the given original list.
+     */
+    public static @NonNull <T> Set<T> copyOf(@Nullable Set<T> cur) {
+        return isEmpty(cur) ? Collections.emptySet() : new ArraySet<>(cur);
+    }
+
+    /**
+     * Applies {@code action} to each element in {@code cur}
+     *
+     * This avoids creating an iterator if the given set is an {@link ArraySet}
+     */
+    public static <T> void forEach(@Nullable Set<T> cur, @Nullable ThrowingConsumer<T> action) {
+        if (cur == null || action == null) return;
+        int size = cur.size();
+        if (size == 0) return;
+        try {
+            if (cur instanceof ArraySet) {
+                ArraySet<T> arraySet = (ArraySet<T>) cur;
+                for (int i = 0; i < size; i++) {
+                    action.accept(arraySet.valueAt(i));
+                }
+            } else {
+                for (T t : cur) {
+                    action.accept(t);
+                }
+            }
+        } catch (Exception e) {
+            throw ExceptionUtils.propagate(e);
+        }
     }
 }
