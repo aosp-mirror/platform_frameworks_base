@@ -760,13 +760,6 @@ public final class SystemServer {
 
             mContentResolver = context.getContentResolver();
 
-            if (!disableCameraService) {
-                Slog.i(TAG, "Camera Service Proxy");
-                traceBeginAndSlog("StartCameraServiceProxy");
-                mSystemServiceManager.startService(CameraServiceProxy.class);
-                traceEnd();
-            }
-
             // The AccountManager must come before the ContentService
             traceBeginAndSlog("StartAccountManagerService");
             mSystemServiceManager.startService(ACCOUNT_SERVICE_CLASS);
@@ -1499,6 +1492,12 @@ public final class SystemServer {
                 mSystemServiceManager.startService(WEAR_TIME_SERVICE_CLASS);
                 traceEnd();
             }
+        }
+
+        if (!disableCameraService) {
+            traceBeginAndSlog("StartCameraServiceProxy");
+            mSystemServiceManager.startService(CameraServiceProxy.class);
+            traceEnd();
         }
 
         // Before things start rolling, be sure we have decided whether
