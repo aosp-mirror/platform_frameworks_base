@@ -25,8 +25,14 @@ import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.internal.util.FastXmlSerializer;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -49,5 +55,16 @@ public class NotificationChannelTest extends NotificationTestCase {
         assertEquals(false, channel.isBlockableSystem());
         channel.setBlockableSystem(true);
         assertEquals(true, channel.isBlockableSystem());
+    }
+
+    @Test
+    public void testEmptyVibration_noException() throws Exception {
+        NotificationChannel channel = new NotificationChannel("a", "ab", IMPORTANCE_DEFAULT);
+        channel.setVibrationPattern(new long[0]);
+
+        XmlSerializer serializer = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        channel.writeXml(serializer);
     }
 }
