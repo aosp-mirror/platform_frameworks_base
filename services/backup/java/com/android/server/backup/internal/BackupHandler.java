@@ -36,6 +36,7 @@ import android.util.Slog;
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
@@ -107,7 +108,7 @@ public class BackupHandler extends Handler {
 
                 // snapshot the pending-backup set and work on that
                 ArrayList<BackupRequest> queue = new ArrayList<>();
-                File oldJournal = backupManagerService.getJournal();
+                DataChangedJournal oldJournal = backupManagerService.getJournal();
                 synchronized (backupManagerService.getQueueLock()) {
                     // Do we have any work to do?  Construct the work queue
                     // then release the synchronization lock to actually run
