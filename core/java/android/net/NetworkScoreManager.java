@@ -38,7 +38,8 @@ import java.util.List;
  *
  * <p>A network scorer is any application which:
  * <ul>
- * <li>Declares the {@link permission#SCORE_NETWORKS} permission.
+ * <li>Is granted the {@link permission#SCORE_NETWORKS} permission.
+ * <li>Is granted the {@link permission#ACCESS_COARSE_LOCATION} permission.
  * <li>Include a Service for the {@link #ACTION_RECOMMEND_NETWORKS} action
  *     protected by the {@link permission#BIND_NETWORK_RECOMMENDATION_SERVICE}
  *     permission.

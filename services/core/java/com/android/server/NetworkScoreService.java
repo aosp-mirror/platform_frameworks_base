@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
+import android.location.LocationManager;
 import android.net.INetworkRecommendationProvider;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
@@ -109,6 +110,16 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
             if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
                 onUserUnlocked(userId);
+            }
+        }
+    };
+
+    private BroadcastReceiver mLocationModeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (LocationManager.MODE_CHANGED_ACTION.equals(action)) {
+                refreshBinding();
             }
         }
     };
@@ -241,6 +252,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 mUserIntentReceiver, UserHandle.SYSTEM, filter, null /* broadcastPermission*/,
                 null /* scheduler */);
         mHandler = new ServiceHandler(looper);
+        IntentFilter locationModeFilter = new IntentFilter(LocationManager.MODE_CHANGED_ACTION);
+        mContext.registerReceiverAsUser(
+                mLocationModeReceiver, UserHandle.SYSTEM, locationModeFilter,
+                null /* broadcastPermission*/, mHandler);
         mContentObserver = new DispatchingContentObserver(context, mHandler);
         mServiceConnProducer = serviceConnProducer;
     }

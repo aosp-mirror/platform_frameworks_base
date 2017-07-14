@@ -1395,6 +1395,7 @@
     <!-- The package name of the default network recommendation app.
          A network recommendation provider must:
              * Be granted the SCORE_NETWORKS permission.
+             * Be granted the ACCESS_COARSE_LOCATION permission.
              * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action
                protected by the BIND_NETWORK_RECOMMENDATION_SERVICE permission.
 
