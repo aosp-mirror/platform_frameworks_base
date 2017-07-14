@@ -5180,6 +5180,28 @@ public class AccountManagerService
 
             fout.println();
             mAuthenticatorCache.dump(fd, fout, args, userAccounts.userId);
+
+            boolean isUserUnlocked;
+            synchronized (mUsers) {
+                isUserUnlocked = isLocalUnlockedUser(userAccounts.userId);
+            }
+            // Following logs are printed only when user is unlocked.
+            if (!isUserUnlocked) {
+                return;
+            }
+            fout.println();
+            synchronized (userAccounts.dbLock) {
+                Map<Account, Map<String, Integer>> allVisibilityValues =
+                        userAccounts.accountsDb.findAllVisibilityValues();
+                fout.println("Account visibility:");
+                for (Account account : allVisibilityValues.keySet()) {
+                    fout.println("  " + account.name);
+                    Map<String, Integer> visibilities = allVisibilityValues.get(account);
+                    for (Entry<String, Integer> entry : visibilities.entrySet()) {
+                        fout.println("    " + entry.getKey() + ", " + entry.getValue());
+                    }
+                }
+            }
         }
     }
 
