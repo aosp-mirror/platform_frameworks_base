@@ -2645,6 +2645,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.w(TAG, "User " + userId + " is no longer unlocked - exiting");
             return;
         }
+        long time = SystemClock.elapsedRealtime();
         synchronized (mLock) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "appwidget ensure");
             ensureGroupStateLoadedLocked(userId);
@@ -2673,6 +2674,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
         }
+        Slog.i(TAG, "Async processing of onUserUnlocked u" + userId + " took "
+                + (SystemClock.elapsedRealtime() - time) + " ms");
     }
 
     // only call from initialization -- it assumes that the data structures are all empty
