@@ -22,14 +22,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.*;
 import android.content.pm.ServiceInfo;
-import android.telephony.MbmsDownloadManager;
 import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @hide
@@ -78,7 +75,7 @@ public class MbmsUtils {
                 MbmsUtils.getMiddlewareServiceInfo(context, serviceAction);
 
         if (mbmsServiceInfo == null) {
-            throw new MbmsException(MbmsException.ERROR_NO_SERVICE_INSTALLED);
+            throw new MbmsException(MbmsException.ERROR_NO_UNIQUE_MIDDLEWARE);
         }
 
         bindIntent.setComponent(MbmsUtils.toComponentName(mbmsServiceInfo));
