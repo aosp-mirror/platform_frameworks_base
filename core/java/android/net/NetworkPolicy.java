@@ -52,7 +52,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     public long limitBytes;
     public long lastWarningSnooze;
     public long lastLimitSnooze;
-    public boolean metered;
+    @Deprecated public boolean metered;
     public boolean inferred;
 
     private static final long DEFAULT_MTU = 1500;

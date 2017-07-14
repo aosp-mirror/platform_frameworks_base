@@ -26,6 +26,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.DebugUtils;
@@ -399,5 +401,14 @@ public class NetworkPolicyManager {
      */
     public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState) {
         return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+    }
+
+    public static String resolveNetworkId(WifiConfiguration config) {
+        return WifiInfo.removeDoubleQuotes(config.isPasspoint()
+                ? config.providerFriendlyName : config.SSID);
+    }
+
+    public static String resolveNetworkId(String ssid) {
+        return WifiInfo.removeDoubleQuotes(ssid);
     }
 }
