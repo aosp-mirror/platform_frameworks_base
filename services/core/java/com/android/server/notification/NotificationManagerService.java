@@ -5746,6 +5746,9 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public int onCommand(String cmd) {
+            if (cmd == null) {
+                return handleDefaultCommands(cmd);
+            }
             final PrintWriter pw = getOutPrintWriter();
             try {
                 switch (cmd) {
