@@ -16,7 +16,6 @@
 
 package com.android.server.pm.dex;
 
-
 import android.content.pm.ApplicationInfo;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -24,6 +23,7 @@ import android.util.SparseArray;
 import com.android.internal.os.ClassLoaderFactory;
 
 import java.io.File;
+import java.util.List;
 
 public final class DexoptUtils {
     private static final String TAG = "DexoptUtils";
@@ -52,6 +52,11 @@ public final class DexoptUtils {
      *   - index 0 contains the context for the base apk
      *   - index 1 to n contain the context for the splits in the order determined by
      *     {@code info.getSplitCodePaths()}
+     *
+     * IMPORTANT: keep this logic in sync with the loading code in {@link android.app.LoadedApk}
+     * and pay attention to the way the classpath is created for the non isolated mode in:
+     * {@link android.app.LoadedApk#makePaths(
+     * android.app.ActivityThread, boolean, ApplicationInfo, List, List)}.
      */
     public static String[] getClassLoaderContexts(ApplicationInfo info, String[] sharedLibraries) {
         // The base class loader context contains only the shared library.
@@ -59,35 +64,36 @@ public final class DexoptUtils {
         String baseApkContextClassLoader = encodeClassLoader(
                 sharedLibrariesClassPath, info.classLoaderName);
 
-        String[] splitCodePaths = info.getSplitCodePaths();
-
-        if (splitCodePaths == null) {
+        if (info.getSplitCodePaths() == null) {
             // The application has no splits.
             return new String[] {baseApkContextClassLoader};
         }
 
         // The application has splits. Compute their class loader contexts.
 
+        // First, cache the relative paths of the splits and do some sanity checks
+        String[] splitRelativeCodePaths = getSplitRelativeCodePaths(info);
+
         // The splits have an implicit dependency on the base apk.
         // This means that we have to add the base apk file in addition to the shared libraries.
         String baseApkName = new File(info.getBaseCodePath()).getName();
-        String splitDependencyOnBase = encodeClassLoader(
-                encodeClasspath(sharedLibrariesClassPath, baseApkName),
-                info.classLoaderName);
+        String sharedLibrariesAndBaseClassPath =
+                encodeClasspath(sharedLibrariesClassPath, baseApkName);
 
         // The result is stored in classLoaderContexts.
         // Index 0 is the class loaded context for the base apk.
         // Index `i` is the class loader context encoding for split `i`.
-        String[] classLoaderContexts = new String[/*base apk*/ 1 + splitCodePaths.length];
+        String[] classLoaderContexts = new String[/*base apk*/ 1 + splitRelativeCodePaths.length];
         classLoaderContexts[0] = baseApkContextClassLoader;
 
-        SparseArray<int[]> splitDependencies = info.splitDependencies;
-
-        if (splitDependencies == null) {
-            // If there are no inter-split dependencies, populate the result with the implicit
-            // dependency on the base apk.
+        if (!info.requestsIsolatedSplitLoading() || info.splitDependencies == null) {
+            // If the app didn't request for the splits to be loaded in isolation or if it does not
+            // declare inter-split dependencies, then all the splits will be loaded in the base
+            // apk class loader (in the order of their definition).
+            String classpath = sharedLibrariesAndBaseClassPath;
             for (int i = 1; i < classLoaderContexts.length; i++) {
-                classLoaderContexts[i] = splitDependencyOnBase;
+                classLoaderContexts[i] = encodeClassLoader(classpath, info.classLoaderName);
+                classpath = encodeClasspath(classpath, splitRelativeCodePaths[i - 1]);
             }
         } else {
             // In case of inter-split dependencies, we need to walk the dependency chain of each
@@ -100,33 +106,27 @@ public final class DexoptUtils {
             // classLoaderContexts is that the later contains the full chain of class loaders for
             // a given split while splitClassLoaderEncodingCache only contains a single class loader
             // encoding.
-            String baseCodePath = new File(info.getBaseCodePath()).getParent();
-            String[] splitClassLoaderEncodingCache = new String[splitCodePaths.length];
-            for (int i = 0; i < splitCodePaths.length; i++) {
-                File pathFile = new File(splitCodePaths[i]);
-                String fileName = pathFile.getName();
-                splitClassLoaderEncodingCache[i] = encodeClassLoader(fileName,
+            String[] splitClassLoaderEncodingCache = new String[splitRelativeCodePaths.length];
+            for (int i = 0; i < splitRelativeCodePaths.length; i++) {
+                splitClassLoaderEncodingCache[i] = encodeClassLoader(splitRelativeCodePaths[i],
                         info.splitClassLoaderNames[i]);
-                // Sanity check that the base paths of the splits are all the same.
-                String basePath = pathFile.getParent();
-                if (!basePath.equals(baseCodePath)) {
-                    Slog.wtf(TAG, "Split paths have different base paths: " + basePath + " and " +
-                            baseCodePath);
-                }
             }
+            String splitDependencyOnBase = encodeClassLoader(
+                    sharedLibrariesAndBaseClassPath, info.classLoaderName);
+            SparseArray<int[]> splitDependencies = info.splitDependencies;
             for (int i = 1; i < splitDependencies.size(); i++) {
                 getParentDependencies(splitDependencies.keyAt(i), splitClassLoaderEncodingCache,
                         splitDependencies, classLoaderContexts, splitDependencyOnBase);
             }
-        }
 
-        // At this point classLoaderContexts contains only the parent dependencies.
-        // We also need to add the class loader of the current split which should
-        // come first in the context.
-        for (int i = 1; i < classLoaderContexts.length; i++) {
-            String splitClassLoader = encodeClassLoader("", info.splitClassLoaderNames[i - 1]);
-            classLoaderContexts[i] = encodeClassLoaderChain(
-                    splitClassLoader, classLoaderContexts[i]);
+            // At this point classLoaderContexts contains only the parent dependencies.
+            // We also need to add the class loader of the current split which should
+            // come first in the context.
+            for (int i = 1; i < classLoaderContexts.length; i++) {
+                String splitClassLoader = encodeClassLoader("", info.splitClassLoaderNames[i - 1]);
+                classLoaderContexts[i] = encodeClassLoaderChain(
+                        splitClassLoader, classLoaderContexts[i]);
+            }
         }
 
         return classLoaderContexts;
@@ -230,5 +230,26 @@ public final class DexoptUtils {
      */
     private static String encodeClassLoaderChain(String cl1, String cl2) {
         return cl1.isEmpty() ? cl2 : (cl1 + ";" + cl2);
+    }
+
+    /**
+     * Returns the relative paths of the splits declared by the application {@code info}.
+     * Assumes that the application declares a non-null array of splits.
+     */
+    private static String[] getSplitRelativeCodePaths(ApplicationInfo info) {
+        String baseCodePath = new File(info.getBaseCodePath()).getParent();
+        String[] splitCodePaths = info.getSplitCodePaths();
+        String[] splitRelativeCodePaths = new String[splitCodePaths.length];
+        for (int i = 0; i < splitCodePaths.length; i++) {
+            File pathFile = new File(splitCodePaths[i]);
+            splitRelativeCodePaths[i] = pathFile.getName();
+            // Sanity check that the base paths of the splits are all the same.
+            String basePath = pathFile.getParent();
+            if (!basePath.equals(baseCodePath)) {
+                Slog.wtf(TAG, "Split paths have different base paths: " + basePath + " and " +
+                        baseCodePath);
+            }
+        }
+        return splitRelativeCodePaths;
     }
 }

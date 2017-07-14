@@ -42,6 +42,7 @@ public class DexoptUtilsTest {
         String codeDir = "/data/app/mock.android.com";
         ai.setBaseCodePath(codeDir + "/base.dex");
         ai.classLoaderName = baseClassLoader;
+        ai.privateFlags = ai.privateFlags | ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING;
 
         if (addSplits) {
             ai.setSplitCodePaths(new String[]{
@@ -81,7 +82,8 @@ public class DexoptUtilsTest {
 
         assertEquals(7, contexts.length);
         assertEquals("PCL[a.dex:b.dex]", contexts[0]);
-        assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[1]);
+        assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]",
+                contexts[1]);
         assertEquals("DLC[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[2]);
         assertEquals("PCL[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[3]);
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[4]);
@@ -97,14 +99,35 @@ public class DexoptUtilsTest {
 
         assertEquals(7, contexts.length);
         assertEquals("PCL[a.dex:b.dex]", contexts[0]);
-        assertEquals("DLC[];PCL[a.dex:b.dex:base.dex]", contexts[1]);
-        assertEquals("DLC[];PCL[a.dex:b.dex:base.dex]", contexts[2]);
-        assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[3]);
-        assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[4]);
-        assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[5]);
-        assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[6]);
+        assertEquals("PCL[a.dex:b.dex:base.dex]", contexts[1]);
+        assertEquals("PCL[a.dex:b.dex:base.dex:base-1.dex]", contexts[2]);
+        assertEquals("PCL[a.dex:b.dex:base.dex:base-1.dex:base-2.dex]", contexts[3]);
+        assertEquals("PCL[a.dex:b.dex:base.dex:base-1.dex:base-2.dex:base-3.dex]", contexts[4]);
+        assertEquals(
+                "PCL[a.dex:b.dex:base.dex:base-1.dex:base-2.dex:base-3.dex:base-4.dex]",
+                contexts[5]);
+        assertEquals(
+                "PCL[a.dex:b.dex:base.dex:base-1.dex:base-2.dex:base-3.dex:base-4.dex:base-5.dex]",
+                contexts[6]);
     }
 
+    @Test
+    public void testSplitChainNoIsolationNoSharedLibrary() {
+        ApplicationInfo ai = createMockApplicationInfo(PATH_CLASS_LOADER_NAME, true, true);
+        ai.privateFlags = ai.privateFlags & (~ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING);
+        String[] contexts = DexoptUtils.getClassLoaderContexts(ai, null);
+
+        assertEquals(7, contexts.length);
+        assertEquals("PCL[]", contexts[0]);
+        assertEquals("PCL[base.dex]", contexts[1]);
+        assertEquals("PCL[base.dex:base-1.dex]", contexts[2]);
+        assertEquals("PCL[base.dex:base-1.dex:base-2.dex]", contexts[3]);
+        assertEquals("PCL[base.dex:base-1.dex:base-2.dex:base-3.dex]", contexts[4]);
+        assertEquals("PCL[base.dex:base-1.dex:base-2.dex:base-3.dex:base-4.dex]", contexts[5]);
+        assertEquals(
+                "PCL[base.dex:base-1.dex:base-2.dex:base-3.dex:base-4.dex:base-5.dex]",
+                contexts[6]);
+    }
     @Test
     public void testSplitChainNoSharedLibraries() {
         ApplicationInfo ai = createMockApplicationInfo(
