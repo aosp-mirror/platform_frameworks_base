@@ -84,6 +84,8 @@ public class ResourcesImpl {
     /** Used only when TRACE_FOR_DETAILED_PRELOAD is true. */
     private static int sPreloadTracingNumLoadedDrawables;
     private long mPreloadTracingPreloadStartTime;
+    private long mPreloadTracingStartBitmapSize;
+    private long mPreloadTracingStartBitmapCount;
 
     private static final int ID_OTHER = 0x01000004;
 
@@ -1167,6 +1169,8 @@ public class ResourcesImpl {
 
             if (TRACE_FOR_DETAILED_PRELOAD) {
                 mPreloadTracingPreloadStartTime = SystemClock.uptimeMillis();
+                mPreloadTracingStartBitmapSize = Bitmap.sPreloadTracingTotalBitmapsSize;
+                mPreloadTracingStartBitmapCount = Bitmap.sPreloadTracingNumInstantiatedBitmaps;
                 Log.d(TAG_PRELOAD, "Preload starting");
             }
         }
@@ -1180,7 +1184,12 @@ public class ResourcesImpl {
         if (mPreloading) {
             if (TRACE_FOR_DETAILED_PRELOAD) {
                 final long time = SystemClock.uptimeMillis() - mPreloadTracingPreloadStartTime;
-                Log.d(TAG_PRELOAD, "Preload finished in " + time + " ms");
+                final long size =
+                        Bitmap.sPreloadTracingTotalBitmapsSize - mPreloadTracingStartBitmapSize;
+                final long count = Bitmap.sPreloadTracingNumInstantiatedBitmaps
+                        - mPreloadTracingStartBitmapCount;
+                Log.d(TAG_PRELOAD, "Preload finished, "
+                        + count + " bitmaps of " + size + " bytes in " + time + " ms");
             }
 
             mPreloading = false;
