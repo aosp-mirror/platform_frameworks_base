@@ -17,7 +17,6 @@
 package android.net;
 
 import static android.content.pm.PackageManager.GET_SIGNATURES;
-import static android.net.NetworkPolicy.CYCLE_NONE;
 
 import android.annotation.SystemService;
 import android.app.ActivityManager;
@@ -30,13 +29,15 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.telephony.SubscriptionPlan;
 import android.util.DebugUtils;
+import android.util.Pair;
 
 import com.google.android.collect.Sets;
 
-import java.util.Calendar;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
-import java.util.TimeZone;
+import java.util.Iterator;
 
 /**
  * Manager for creating and modifying network policy rules.
@@ -251,73 +252,9 @@ public class NetworkPolicyManager {
         }
     }
 
-    /**
-     * Compute the last cycle boundary for the given {@link NetworkPolicy}. For
-     * example, if cycle day is 20th, and today is June 15th, it will return May
-     * 20th. When cycle day doesn't exist in current month, it snaps to the 1st
-     * of following month.
-     *
-     * @hide
-     */
-    public static long computeLastCycleBoundary(long currentTime, NetworkPolicy policy) {
-        if (policy.cycleDay == CYCLE_NONE) {
-            throw new IllegalArgumentException("Unable to compute boundary without cycleDay");
-        }
-
-        final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(policy.cycleTimezone));
-        cal.setTimeInMillis(currentTime);
-        snapToCycleDay(cal, policy.cycleDay);
-
-        if (cal.getTimeInMillis() >= currentTime) {
-            // Cycle boundary is beyond now, use last cycle boundary
-            cal.set(Calendar.DAY_OF_MONTH, 1);
-            cal.add(Calendar.MONTH, -1);
-            snapToCycleDay(cal, policy.cycleDay);
-        }
-
-        return cal.getTimeInMillis();
-    }
-
     /** {@hide} */
-    public static long computeNextCycleBoundary(long currentTime, NetworkPolicy policy) {
-        if (policy.cycleDay == CYCLE_NONE) {
-            throw new IllegalArgumentException("Unable to compute boundary without cycleDay");
-        }
-
-        final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(policy.cycleTimezone));
-        cal.setTimeInMillis(currentTime);
-        snapToCycleDay(cal, policy.cycleDay);
-
-        if (cal.getTimeInMillis() <= currentTime) {
-            // Cycle boundary is before now, use next cycle boundary
-            cal.set(Calendar.DAY_OF_MONTH, 1);
-            cal.add(Calendar.MONTH, 1);
-            snapToCycleDay(cal, policy.cycleDay);
-        }
-
-        return cal.getTimeInMillis();
-    }
-
-    /**
-     * Snap to the cycle day for the current month given; when cycle day doesn't
-     * exist, it snaps to last second of current month.
-     *
-     * @hide
-     */
-    public static void snapToCycleDay(Calendar cal, int cycleDay) {
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        if (cycleDay > cal.getActualMaximum(Calendar.DAY_OF_MONTH)) {
-            cal.add(Calendar.MONTH, 1);
-            cal.set(Calendar.DAY_OF_MONTH, 1);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.add(Calendar.SECOND, -1);
-        } else {
-            cal.set(Calendar.DAY_OF_MONTH, cycleDay);
-        }
+    public static Iterator<Pair<ZonedDateTime, ZonedDateTime>> cycleIterator(NetworkPolicy policy) {
+        return SubscriptionPlan.convert(policy).cycleIterator();
     }
 
     /**

@@ -46,16 +46,19 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     public static final long SNOOZE_NEVER = -1;
 
     public NetworkTemplate template;
-    public int cycleDay;
-    public String cycleTimezone;
-    public long warningBytes;
-    public long limitBytes;
-    public long lastWarningSnooze;
-    public long lastLimitSnooze;
-    @Deprecated public boolean metered;
-    public boolean inferred;
+    @Deprecated public int cycleDay = CYCLE_NONE;
+    @Deprecated public String cycleTimezone = "UTC";
+    public long warningBytes = WARNING_DISABLED;
+    public long limitBytes = LIMIT_DISABLED;
+    public long lastWarningSnooze = SNOOZE_NEVER;
+    public long lastLimitSnooze = SNOOZE_NEVER;
+    @Deprecated public boolean metered = true;
+    public boolean inferred = false;
 
     private static final long DEFAULT_MTU = 1500;
+
+    public NetworkPolicy() {
+    }
 
     @Deprecated
     public NetworkPolicy(NetworkTemplate template, int cycleDay, String cycleTimezone,

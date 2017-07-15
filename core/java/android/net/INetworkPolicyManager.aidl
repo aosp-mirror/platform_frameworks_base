@@ -21,6 +21,7 @@ import android.net.NetworkPolicy;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
 import android.net.NetworkTemplate;
+import android.telephony.SubscriptionPlan;
 
 /**
  * Interface that creates and modifies network policy rules.
@@ -66,6 +67,11 @@ interface INetworkPolicyManager {
     void setWifiMeteredOverride(String networkId, int meteredOverride);
 
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
+
+    SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);
+    void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, String callingPackage);
+
+    String getSubscriptionPlanOwner(int subId);
 
     void factoryReset(String subscriber);
 }
