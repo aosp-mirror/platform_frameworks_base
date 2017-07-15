@@ -28,7 +28,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import android.Manifest;
 import android.animation.LayoutTransition;
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ResourcesManager;
@@ -214,11 +213,8 @@ public final class ViewRootImpl implements ViewParent,
 
     /**
      * Always assign focus if a focusable View is available.
-     *
-     * @hide
      */
-    @TestApi
-    public static boolean sAlwaysAssignFocus;
+    private static boolean sAlwaysAssignFocus;
 
     /**
      * This list must only be modified by the main thread, so a lock is only needed when changing

@@ -10180,6 +10180,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @TestApi
     public final void setFocusedInCluster() {
         setFocusedInCluster(findKeyboardNavigationCluster());
     }
