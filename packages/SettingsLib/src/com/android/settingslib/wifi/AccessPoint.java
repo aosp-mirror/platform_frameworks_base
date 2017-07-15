@@ -1166,8 +1166,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
             if (nc != null) {
                 if (nc.hasCapability(nc.NET_CAPABILITY_CAPTIVE_PORTAL)) {
-                    return context.getString(
-                        com.android.internal.R.string.network_available_sign_in);
+                    int id = context.getResources()
+                            .getIdentifier("network_available_sign_in", "string", "android");
+                    return context.getString(id);
                 } else if (!nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
                     return context.getString(R.string.wifi_connected_no_internet);
                 }
