@@ -1065,7 +1065,7 @@ public class IpManager extends StateMachine {
             mNwService.setIPv6AddrGenMode(mInterfaceName, mConfiguration.mIPv6AddrGenMode);
         } catch (ServiceSpecificException e) {
             if (e.errorCode != OsConstants.EOPNOTSUPP) {
-                throw e;
+                logError("Unable to set IPv6 addrgen mode: %s", e);
             }
         }
     }
