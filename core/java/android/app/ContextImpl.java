@@ -60,12 +60,10 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
-import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -621,7 +619,8 @@ class ContextImpl extends Context {
     @Override
     public File getExternalFilesDir(String type) {
         // Operates on primary external storage
-        return getExternalFilesDirs(type)[0];
+        final File[] dirs = getExternalFilesDirs(type);
+        return (dirs != null && dirs.length > 0) ? dirs[0] : null;
     }
 
     @Override
@@ -638,7 +637,8 @@ class ContextImpl extends Context {
     @Override
     public File getObbDir() {
         // Operates on primary external storage
-        return getObbDirs()[0];
+        final File[] dirs = getObbDirs();
+        return (dirs != null && dirs.length > 0) ? dirs[0] : null;
     }
 
     @Override
@@ -672,7 +672,8 @@ class ContextImpl extends Context {
     @Override
     public File getExternalCacheDir() {
         // Operates on primary external storage
-        return getExternalCacheDirs()[0];
+        final File[] dirs = getExternalCacheDirs();
+        return (dirs != null && dirs.length > 0) ? dirs[0] : null;
     }
 
     @Override
