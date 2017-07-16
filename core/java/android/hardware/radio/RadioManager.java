@@ -34,6 +34,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The RadioManager class allows to control a broadcast radio tuner present on the device.
@@ -132,11 +134,15 @@ public class RadioManager {
         private final boolean mIsCaptureSupported;
         private final BandDescriptor[] mBands;
         private final boolean mIsBgScanSupported;
+        private final Set<Integer> mSupportedProgramTypes;
+        private final Set<Integer> mSupportedIdentifierTypes;
         private final String mVendorExension;
 
         ModuleProperties(int id, String serviceName, int classId, String implementor,
                 String product, String version, String serial, int numTuners, int numAudioSources,
                 boolean isCaptureSupported, BandDescriptor[] bands, boolean isBgScanSupported,
+                @ProgramSelector.ProgramType int[] supportedProgramTypes,
+                @ProgramSelector.IdentifierType int[] supportedIdentifierTypes,
                 String vendorExension) {
             mId = id;
             mServiceName = TextUtils.isEmpty(serviceName) ? "default" : serviceName;
@@ -150,9 +156,18 @@ public class RadioManager {
             mIsCaptureSupported = isCaptureSupported;
             mBands = bands;
             mIsBgScanSupported = isBgScanSupported;
+            mSupportedProgramTypes = arrayToSet(supportedProgramTypes);
+            mSupportedIdentifierTypes = arrayToSet(supportedIdentifierTypes);
             mVendorExension = vendorExension;
         }
 
+        private static Set<Integer> arrayToSet(int[] arr) {
+            return Arrays.stream(arr).boxed().collect(Collectors.toSet());
+        }
+
+        private static int[] setToArray(Set<Integer> set) {
+            return set.stream().mapToInt(Integer::intValue).toArray();
+        }
 
         /** Unique module identifier provided by the native service.
          * For use with {@link #openTuner(int, BandConfig, boolean, Callback, Handler)}.
@@ -245,6 +260,31 @@ public class RadioManager {
         }
 
         /**
+         * Checks, if a given program type is supported by this tuner.
+         *
+         * If a program type is supported by radio module, it means it can tune
+         * to ProgramSelector of a given type.
+         *
+         * @return {@code true} if a given program type is supported.
+         */
+        public boolean isProgramTypeSupported(@ProgramSelector.ProgramType int type) {
+            return mSupportedProgramTypes.contains(type);
+        }
+
+        /**
+         * Checks, if a given program identifier is supported by this tuner.
+         *
+         * If an identifier is supported by radio module, it means it can use it for
+         * tuning to ProgramSelector with either primary or secondary Identifier of
+         * a given type.
+         *
+         * @return {@code true} if a given program type is supported.
+         */
+        public boolean isProgramIdentifierSupported(@ProgramSelector.IdentifierType int type) {
+            return mSupportedIdentifierTypes.contains(type);
+        }
+
+        /**
          * Opaque vendor-specific string, passed from HAL without changes.
          * Format of this string can vary across vendors.
          *
@@ -283,6 +323,8 @@ public class RadioManager {
                 mBands[i] = (BandDescriptor) tmp[i];
             }
             mIsBgScanSupported = in.readInt() == 1;
+            mSupportedProgramTypes = arrayToSet(in.createIntArray());
+            mSupportedIdentifierTypes = arrayToSet(in.createIntArray());
             mVendorExension = in.readString();
         }
 
@@ -311,6 +353,8 @@ public class RadioManager {
             dest.writeInt(mIsCaptureSupported ? 1 : 0);
             dest.writeParcelableArray(mBands, flags);
             dest.writeInt(mIsBgScanSupported ? 1 : 0);
+            dest.writeIntArray(setToArray(mSupportedProgramTypes));
+            dest.writeIntArray(setToArray(mSupportedIdentifierTypes));
             dest.writeString(mVendorExension);
         }
 
