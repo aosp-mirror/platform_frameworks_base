@@ -22,6 +22,7 @@ import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
 import java.lang.reflect.Constructor;
@@ -54,6 +55,7 @@ import static org.testng.Assert.assertThrows;
  * A test for broadcast radio API.
  */
 @RunWith(AndroidJUnit4.class)
+@MediumTest
 public class RadioTest {
     private static final String TAG = "RadioTest";
 
@@ -81,7 +83,8 @@ public class RadioTest {
 
         // check if radio is supported and skip the test if it's not
         PackageManager packageManager = mContext.getPackageManager();
-        boolean isRadioSupported = packageManager.hasSystemFeature(PackageManager.FEATURE_RADIO);
+        boolean isRadioSupported = packageManager.hasSystemFeature(
+                PackageManager.FEATURE_BROADCAST_RADIO);
         assumeTrue(isRadioSupported);
 
         // Check radio access permission

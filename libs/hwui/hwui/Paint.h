@@ -37,6 +37,10 @@ public:
     constexpr static float kStdUnderline_Top =
             kStdUnderline_Offset - 0.5f * kStdUnderline_Thickness;
 
+    constexpr static float kStdStrikeThru_Thickness = kStdUnderline_Thickness;
+    constexpr static float kStdStrikeThru_Top =
+            kStdStrikeThru_Offset - 0.5f * kStdStrikeThru_Thickness;
+
     Paint();
     Paint(const Paint& paint);
     Paint(const SkPaint& paint);  // NOLINT(implicit)

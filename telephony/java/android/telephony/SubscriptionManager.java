@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.net.INetworkPolicyManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -37,6 +38,7 @@ import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -1538,5 +1540,40 @@ public class SubscriptionManager {
         } catch (RemoteException ex) {
         }
         return false;
+    }
+
+    /** {@pending} */
+    public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
+        final INetworkPolicyManager npm = INetworkPolicyManager.Stub
+                .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
+        try {
+            return Arrays.asList(npm.getSubscriptionPlans(subId,
+                    mContext.getOpPackageName()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@pending} */
+    public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
+        final INetworkPolicyManager npm = INetworkPolicyManager.Stub
+                .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
+        try {
+            npm.setSubscriptionPlans(subId, plans.toArray(new SubscriptionPlan[plans.size()]),
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public String getSubscriptionPlanOwner(int subId) {
+        final INetworkPolicyManager npm = INetworkPolicyManager.Stub
+                .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
+        try {
+            return npm.getSubscriptionPlanOwner(subId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

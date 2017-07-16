@@ -1387,7 +1387,7 @@ public class Editor {
         if (mTextActionMode != null) {
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_MOVE:
-                    hideFloatingToolbar();
+                    hideFloatingToolbar(ActionMode.DEFAULT_HIDE_DURATION);
                     break;
                 case MotionEvent.ACTION_UP:  // fall through
                 case MotionEvent.ACTION_CANCEL:
@@ -1396,10 +1396,10 @@ public class Editor {
         }
     }
 
-    private void hideFloatingToolbar() {
+    void hideFloatingToolbar(int duration) {
         if (mTextActionMode != null) {
             mTextView.removeCallbacks(mShowFloatingToolbar);
-            mTextActionMode.hide(ActionMode.DEFAULT_HIDE_DURATION);
+            mTextActionMode.hide(duration);
         }
     }
 

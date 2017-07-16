@@ -38,11 +38,13 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.utils.hardware.FakeSensorManager;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Ignore
 public class DozeScreenBrightnessTest extends SysuiTestCase {
 
     DozeServiceFake mServiceFake;

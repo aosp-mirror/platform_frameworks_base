@@ -1837,8 +1837,7 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Takoj se umaknite z obalnih območij in bregov rek na varnejše mesto, na primer na višje ležeča mesta."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Ostanite mirni in poiščite zavetje v bližini."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Preskus sporočil v sili"</string>
-    <!-- no translation found for notification_reply_button_accessibility (3621714652387814344) -->
-    <skip />
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Odgovor"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"Kartica SIM ni dovoljena"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Kartica SIM ni omogočena za uporabo"</string>

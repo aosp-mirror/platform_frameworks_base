@@ -18,9 +18,9 @@ package android.app;
 
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -36,8 +36,8 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.provider.Downloads;
-import android.provider.Settings;
 import android.provider.MediaStore.Images;
+import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -393,7 +393,6 @@ public class DownloadManager {
         private int mFlags = 0;
         private boolean mIsVisibleInDownloadsUi = true;
         private boolean mScannable = false;
-        private boolean mUseSystemCache = false;
         /** if a file is designated as a MediaScanner scannable file, the following value is
          * stored in the database column {@link Downloads.Impl#COLUMN_MEDIA_SCANNED}.
          */
@@ -470,24 +469,6 @@ public class DownloadManager {
          */
         public Request setDestinationUri(Uri uri) {
             mDestinationUri = uri;
-            return this;
-        }
-
-        /**
-         * Set the local destination for the downloaded file to the system cache dir (/cache).
-         * This is only available to System apps with the permission
-         * {@link android.Manifest.permission#ACCESS_CACHE_FILESYSTEM}.
-         * <p>
-         * The downloaded file is not scanned by MediaScanner.
-         * But it can be made scannable by calling {@link #allowScanningByMediaScanner()}.
-         * <p>
-         * Files downloaded to /cache may be deleted by the system at any time to reclaim space.
-         *
-         * @return this object
-         * @hide
-         */
-        public Request setDestinationToSystemCache() {
-            mUseSystemCache = true;
             return this;
         }
 
@@ -772,13 +753,13 @@ public class DownloadManager {
             values.put(Downloads.Impl.COLUMN_NOTIFICATION_PACKAGE, packageName);
 
             if (mDestinationUri != null) {
-                values.put(Downloads.Impl.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_FILE_URI);
-                values.put(Downloads.Impl.COLUMN_FILE_NAME_HINT, mDestinationUri.toString());
+                values.put(Downloads.Impl.COLUMN_DESTINATION,
+                        Downloads.Impl.DESTINATION_FILE_URI);
+                values.put(Downloads.Impl.COLUMN_FILE_NAME_HINT,
+                        mDestinationUri.toString());
             } else {
                 values.put(Downloads.Impl.COLUMN_DESTINATION,
-                           (this.mUseSystemCache) ?
-                                   Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION :
-                                   Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+                        Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
             }
             // is the file supposed to be media-scannable?
             values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (mScannable) ? SCANNABLE_VALUE_YES :

@@ -45,6 +45,7 @@ public class ExtensionFragmentListener<T extends FragmentBase> implements Consum
         mFragmentHostManager.getFragmentManager().beginTransaction()
                 .replace(id, (Fragment) mExtension.get(), mTag)
                 .commit();
+        mExtension.clearItem(false);
     }
 
     @Override
@@ -57,6 +58,7 @@ public class ExtensionFragmentListener<T extends FragmentBase> implements Consum
         } catch (ClassCastException e) {
             Log.e(TAG, extension.getClass().getName() + " must be a Fragment", e);
         }
+        mExtension.clearItem(true);
     }
 
     public static <T> void attachExtensonToFragment(View view, String tag, int id,

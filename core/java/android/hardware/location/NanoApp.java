@@ -56,10 +56,10 @@ public class NanoApp {
      * {@link #setAppBinary(byte[])} and {@link #setAppId(long)} must be called
      * prior to passing this object to any managers.
      *
-     * @see #NanoApp(int, byte[])
+     * @see #NanoApp(long, byte[])
      */
     public NanoApp() {
-        this(0, null);
+        this(0L, null);
         mAppIdSet = false;
     }
 

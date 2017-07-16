@@ -1884,6 +1884,9 @@
     <!-- Type of the double tap sensor. Empty if double tap is not supported. -->
     <string name="config_dozeDoubleTapSensorType" translatable="false"></string>
 
+    <!-- Type of the long press sensor. Empty if long press is not supported. -->
+    <string name="config_dozeLongPressSensorType" translatable="false"></string>
+
     <!-- Control whether the always on display mode is available. This should only be enabled on
          devices where the display has be tuned to be power efficient in DOZE and/or DOZE_SUSPEND
          states. -->
@@ -1986,6 +1989,10 @@
 
     <!-- Amount of time in ms the user needs to press the relevant key to bring up the global actions dialog -->
     <integer name="config_globalActionsKeyTimeout">500</integer>
+
+    <!-- Default width of a vertical scrollbar and height of a horizontal scrollbar.
+         Takes effect only if the scrollbar drawables have no intrinsic size. -->
+    <dimen name="config_scrollbarSize">4dp</dimen>
 
     <!-- Distance that should be scrolled, per axis value, in response to a horizontal
          {@link MotionEvent#ACTION_SCROLL} event. -->

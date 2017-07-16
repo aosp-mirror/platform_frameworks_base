@@ -73,11 +73,13 @@ Return<R> halCall(Return<R> (I::* fn)(Args0...), Args1&&... args1) {
         ret = (sHal == nullptr) ? NullptrStatus<R>()
                 : (*sHal.*fn)(std::forward<Args1>(args1)...);
 
-        if (!ret.isOk()) {
-            ALOGE("Failed to issue command to vibrator HAL. Retrying.");
-            // Restoring connection to the HAL.
-            sHal = I::tryGetService();
+        if (ret.isOk()) {
+            break;
         }
+
+        ALOGE("Failed to issue command to vibrator HAL. Retrying.");
+        // Restoring connection to the HAL.
+        sHal = I::tryGetService();
     }
     return ret;
 }

@@ -29,7 +29,7 @@ bool bootAnimationDisabled() {
     char value[PROPERTY_VALUE_MAX];
     property_get("debug.sf.nobootanimation", value, "0");
     if (atoi(value) > 0) {
-      return false;
+        return true;
     }
 
     property_get("ro.boot.quiescent", value, "0");

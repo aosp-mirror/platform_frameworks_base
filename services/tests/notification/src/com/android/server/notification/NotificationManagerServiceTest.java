@@ -341,9 +341,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
                 generateNotificationRecord(null).getNotification(), 0);
         waitForIdle();
-        StatusBarNotification[] notifs =
-                mBinderService.getActiveNotifications(PKG);
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifs.length);
+        assertEquals(1, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -355,6 +355,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(PKG);
         assertEquals(0, notifs.length);
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -369,6 +370,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(PKG);
         assertEquals(0, notifs.length);
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -381,6 +383,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -393,6 +396,43 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testUserInitiatedClearAll_noLeak() throws Exception {
+        final NotificationRecord n = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                n.sbn.getId(), n.sbn.getNotification(), n.sbn.getUserId());
+        waitForIdle();
+
+        mNotificationManagerService.mNotificationDelegate.onClearAll(uid, Binder.getCallingPid(),
+                n.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(n.sbn.getPackageName());
+        assertEquals(0, notifs.length);
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCancelAllNotificationsCancelsChildren() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group1", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group1", false);
+
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                parent.sbn.getId(), parent.sbn.getNotification(), parent.sbn.getUserId());
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                child.sbn.getId(), child.sbn.getNotification(), child.sbn.getUserId());
+        waitForIdle();
+
+        mBinderService.cancelAllNotifications(PKG, parent.sbn.getUserId());
+        waitForIdle();
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -404,6 +444,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         }
         mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
         waitForIdle();
+
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -430,6 +472,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 parentAsChild.sbn.getId(), parentAsChild.sbn.getNotification(),
                 parentAsChild.sbn.getUserId());
         waitForIdle();
+
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -443,6 +487,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(1, notifs.length);
+        assertEquals(1, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -456,6 +501,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(1, notifs.length);
+        assertEquals(1, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -468,6 +514,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -481,6 +528,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(1, notifs.length);
+        assertEquals(1, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test
@@ -597,6 +645,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
         waitForIdle();
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+        assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
     }
 
     @Test

@@ -295,6 +295,8 @@ public final class FloatingActionMode extends ActionMode {
      */
     private static final class FloatingToolbarVisibilityHelper {
 
+        private static final long MIN_SHOW_DURATION_FOR_MOVE_HIDE = 500;
+
         private final FloatingToolbar mToolbar;
 
         private boolean mHideRequested;
@@ -303,6 +305,8 @@ public final class FloatingActionMode extends ActionMode {
         private boolean mWindowFocused = true;
 
         private boolean mActive;
+
+        private long mLastShowTime;
 
         public FloatingToolbarVisibilityHelper(FloatingToolbar toolbar) {
             mToolbar = Preconditions.checkNotNull(toolbar);
@@ -327,7 +331,13 @@ public final class FloatingActionMode extends ActionMode {
         }
 
         public void setMoving(boolean moving) {
-            mMoving = moving;
+            // Avoid unintended flickering by allowing the toolbar to show long enough before
+            // triggering the 'moving' flag - which signals a hide.
+            final boolean showingLongEnough =
+                System.currentTimeMillis() - mLastShowTime > MIN_SHOW_DURATION_FOR_MOVE_HIDE;
+            if (!moving || showingLongEnough) {
+                mMoving = moving;
+            }
         }
 
         public void setOutOfBounds(boolean outOfBounds) {
@@ -347,6 +357,7 @@ public final class FloatingActionMode extends ActionMode {
                 mToolbar.hide();
             } else {
                 mToolbar.show();
+                mLastShowTime = System.currentTimeMillis();
             }
         }
     }

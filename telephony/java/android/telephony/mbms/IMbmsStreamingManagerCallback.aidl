@@ -30,7 +30,5 @@ oneway interface IMbmsStreamingManagerCallback
 
     void streamingServicesUpdated(in List<StreamingServiceInfo> services);
 
-    void activeStreamingServicesUpdated(in List<StreamingServiceInfo> services);
-
     void middlewareReady();
 }

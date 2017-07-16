@@ -782,6 +782,16 @@ public class ActivityInfo extends ComponentInfo
      * constant starts at the high bits.
      */
     public static final int CONFIG_FONT_SCALE = 0x40000000;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle changes to the rotation.  Set from the
+     * {@link android.R.attr#configChanges} attribute.  This is
+     * not a core resource configuration, but a higher-level value, so its
+     * constant starts at the high bits.
+     * @hide We do not want apps to handle this. It will eventually be moved out of
+     * {@link Configuration}.
+     */
+    public static final int CONFIG_ROTATION = 0x20000000;
 
     /** @hide
      * Unfortunately the constants for config changes in native code are

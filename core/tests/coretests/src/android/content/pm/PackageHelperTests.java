@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.os.storage.VolumeInfo.STATE_MOUNTED;
@@ -90,14 +91,20 @@ public class PackageHelperTests extends AndroidTestCase {
         File internalFile = new File(sInternalVolPath);
         File adoptedFile = new File(sAdoptedVolPath);
         File publicFile = new File(sPublicVolPath);
+        UUID internalUuid = UUID.randomUUID();
+        UUID adoptedUuid = UUID.randomUUID();
+        UUID publicUuid = UUID.randomUUID();
         Mockito.when(storageManager.getStorageBytesUntilLow(internalFile)).thenReturn(sInternalSize);
         Mockito.when(storageManager.getStorageBytesUntilLow(adoptedFile)).thenReturn(sAdoptedSize);
         Mockito.when(storageManager.getStorageBytesUntilLow(publicFile)).thenReturn(sPublicSize);
-        Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(internalFile), Mockito.anyInt()))
+        Mockito.when(storageManager.getUuidForPath(Mockito.eq(internalFile))).thenReturn(internalUuid);
+        Mockito.when(storageManager.getUuidForPath(Mockito.eq(adoptedFile))).thenReturn(adoptedUuid);
+        Mockito.when(storageManager.getUuidForPath(Mockito.eq(publicFile))).thenReturn(publicUuid);
+        Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(internalUuid), Mockito.anyInt()))
                 .thenReturn(sInternalSize);
-        Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(adoptedFile), Mockito.anyInt()))
+        Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(adoptedUuid), Mockito.anyInt()))
                 .thenReturn(sAdoptedSize);
-        Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(publicFile), Mockito.anyInt()))
+        Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(publicUuid), Mockito.anyInt()))
                 .thenReturn(sPublicSize);
         return storageManager;
     }

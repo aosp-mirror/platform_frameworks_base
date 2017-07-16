@@ -831,6 +831,9 @@
             burn-in on AOD -->
     <dimen name="burn_in_prevention_offset_y">50dp</dimen>
 
+    <!-- padding between the notification stack and the keyguard status view when dozing -->
+    <dimen name="dozing_stack_padding">10dp</dimen>
+
     <dimen name="corner_size">16dp</dimen>
     <dimen name="top_padding">0dp</dimen>
     <dimen name="bottom_padding">48dp</dimen>

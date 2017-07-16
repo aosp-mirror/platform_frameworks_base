@@ -64,17 +64,19 @@ public final class FontConfig {
         private final int mWeight;
         private final boolean mIsItalic;
         private Uri mUri;
+        private final String mFallbackFor;
 
         /**
          * @hide
          */
         public Font(@NonNull String fontName, int ttcIndex, @NonNull FontVariationAxis[] axes,
-                int weight, boolean isItalic) {
+                int weight, boolean isItalic, String fallbackFor) {
             mFontName = fontName;
             mTtcIndex = ttcIndex;
             mAxes = axes;
             mWeight = weight;
             mIsItalic = isItalic;
+            mFallbackFor = fallbackFor;
         }
 
         /**
@@ -124,6 +126,10 @@ public final class FontConfig {
 
         public void setUri(@NonNull Uri uri) {
             mUri = uri;
+        }
+
+        public String getFallbackFor() {
+            return mFallbackFor;
         }
     }
 

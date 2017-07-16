@@ -341,12 +341,14 @@ public class KeyStore {
         }
     }
 
-    public boolean grant(String key, int uid) {
+    public String grant(String key, int uid) {
         try {
-            return mBinder.grant(key, uid) == NO_ERROR;
+            String grantAlias =  mBinder.grant(key, uid);
+            if (grantAlias == "") return null;
+            return grantAlias;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
+            return null;
         }
     }
 

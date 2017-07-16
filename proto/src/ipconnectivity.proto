@@ -23,7 +23,7 @@ message NetworkId {
 // It is not intended to map one to one to the TRANSPORT_* constants defined in
 // android.net.NetworkCapabilities. Instead it is intended to be used as
 // a dimension field for metrics events and aggregated metrics.
-// Next tag: 7
+// Next tag: 10
 enum LinkLayer {
   // An unknown link layer technology.
   UNKNOWN   = 0;
@@ -32,6 +32,9 @@ enum LinkLayer {
   CELLULAR  = 2;
   ETHERNET  = 3;
   WIFI      = 4;
+  WIFI_P2P  = 7;
+  WIFI_NAN  = 8; // Also known as WiFi Aware
+  LOWPAN    = 9;
 
   // Indicates that the link layer dimension is not relevant for the metrics or
   // event considered.
@@ -47,16 +50,18 @@ message Pair {
   optional int32 value = 2;
 };
 
-// Logs changes in the system default network. Changes can be 1) acquiring a
-// default network with no previous default, 2) a switch of the system default
-// network to a new default network, 3) a loss of the system default network.
-// This message is associated to android.net.metrics.DefaultNetworkEvent.
+// An event record when the system default network disconnects or the system
+// switches to a new default network.
+// Next tag: 10.
 message DefaultNetworkEvent {
-  // A value of 0 means this is a loss of the system default network.
-  optional NetworkId network_id = 1;
 
-  // A value of 0 means there was no previous default network.
-  optional NetworkId previous_network_id = 2;
+  // Reason why this network stopped being the default.
+  enum LostReason {
+    UNKNOWN       = 0;
+    OUTSCORED     = 1;
+    INVALIDATION  = 2;
+    DISCONNECT    = 3;
+  };
 
   // Whether the network supports IPv4, IPv6, or both.
   enum IPSupport {
@@ -66,17 +71,52 @@ message DefaultNetworkEvent {
     DUAL = 3;
   };
 
+  // Duration in milliseconds when this network was the default.
+  // Since version 4
+  optional int64 default_network_duration_ms = 5;
+
+  // Duration in milliseconds without a default network before this network
+  // became the default.
+  // Since version 4
+  optional int64 no_default_network_duration_ms = 6;
+
+  // Network score of this network when it became the default network.
+  // Since version 4
+  optional int64 initial_score = 7;
+
+  // Network score of this network when it stopped being the default network.
+  // Since version 4
+  optional int64 final_score = 8;
+
+  // Best available information about IP support of this default network.
+  // Since version 4
+  optional IPSupport ip_support = 9;
+
+
+  // Deprecated fields
+
+  // A value of 0 means this is a loss of the system default network.
+  // Deprecated since version 3. Replaced by top level network_id.
+  optional NetworkId network_id = 1 [deprecated = true];
+
+  // A value of 0 means there was no previous default network.
+  // Deprecated since version 3. Replaced by previous_default_network_id.
+  optional NetworkId previous_network_id = 2 [deprecated = true];
+
   // Best available information about IP support of the previous network when
   // disconnecting or switching to a new default network.
-  optional IPSupport previous_network_ip_support = 3;
+  // Deprecated since version 3. Replaced by ip_support field.
+  optional IPSupport previous_network_ip_support = 3 [deprecated = true];
 
   // The transport types of the new default network, represented by
   // TRANSPORT_* constants as defined in NetworkCapabilities.
-  repeated int32 transport_types = 4;
+  // Deprecated since version 3. Replaced by top-level transports field.
+  repeated int32 transport_types = 4 [deprecated = true];
 };
 
 // Logs IpReachabilityMonitor probe events and NUD_FAILED events.
 // This message is associated to android.net.metrics.IpReachabilityEvent.
+// Next tag: 3.
 message IpReachabilityEvent {
   // The interface name (wlan, rmnet, lo, ...) on which the probe was sent.
   // Deprecated since version 2, to be replaced by link_layer field.
@@ -91,6 +131,7 @@ message IpReachabilityEvent {
 // Logs NetworkMonitor and ConnectivityService events related to the state of
 // a network: connection, evaluation, validation, lingering, and disconnection.
 // This message is associated to android.net.metrics.NetworkEvent.
+// Next tag: 4.
 message NetworkEvent {
   // The id of the network on which this event happened.
   // Deprecated since version 3.
@@ -108,6 +149,7 @@ message NetworkEvent {
 // Logs individual captive portal probing events that are performed when
 // evaluating or reevaluating networks for Internet connectivity.
 // This message is associated to android.net.metrics.ValidationProbeEvent.
+// Next tag: 5.
 message ValidationProbeEvent {
   // The id of the network for which the probe was sent.
   // Deprecated since version 3.
@@ -124,26 +166,64 @@ message ValidationProbeEvent {
   optional int32 probe_result = 4;
 }
 
-// Logs DNS lookup latencies. Repeated fields must have the same length.
+// Logs DNS lookup latencies.
 // This message is associated to android.net.metrics.DnsEvent.
-// Deprecated since version 2.
+// Next tag: 11
 message DNSLookupBatch {
+
+  // The time it took for successful DNS lookups to complete.
+  // The number of repeated values can be less than getaddrinfo_query_count
+  // + gethostbyname_query_count in case of event rate-limiting.
+  repeated int32 latencies_ms = 4;
+
+  // The total number of getaddrinfo queries.
+  // Since version 4.
+  optional int64 getaddrinfo_query_count = 5;
+
+  // The total number of gethostbyname queries.
+  // Since version 4.
+  optional int64 gethostbyname_query_count = 6;
+
+  // The total number of getaddrinfo errors.
+  // Since version 4.
+  optional int64 getaddrinfo_error_count = 7;
+
+  // The total number of gethostbyname errors.
+  // Since version 4.
+  optional int64 gethostbyname_error_count = 8;
+
+  // Counts of all errors returned by getaddrinfo.
+  // The Pair key field is the getaddrinfo error value.
+  // The value field is the count for that return value.
+  // Since version 4
+  repeated Pair getaddrinfo_errors = 9;
+
+  // Counts of all errors returned by gethostbyname.
+  // The Pair key field is the gethostbyname errno value.
+  // the Pair value field is the count for that errno code.
+  // Since version 4
+  repeated Pair gethostbyname_errors = 10;
+
+
+  // Deprecated fields
+
   // The id of the network on which the DNS lookups took place.
-  optional NetworkId network_id = 1;
+  // Deprecated since version 3.
+  optional NetworkId network_id = 1 [deprecated = true];
 
   // The types of the DNS lookups, as defined in android.net.metrics.DnsEvent.
-  repeated int32 event_types = 2;
+  // Deprecated since version 3.
+  repeated int32 event_types = 2 [deprecated = true];
 
   // The return values of the DNS resolver for each DNS lookups.
-  repeated int32 return_codes = 3;
-
-  // The time it took for each DNS lookups to complete.
-  repeated int32 latencies_ms = 4;
+  // Deprecated since version 3.
+  repeated int32 return_codes = 3 [deprecated = true];
 };
 
 // Represents a collections of DNS lookup latencies and counters for a
 // particular combination of DNS query type and return code.
 // Since version 2.
+// Next tag: 7.
 message DNSLatencies {
   // The type of the DNS lookups, as defined in android.net.metrics.DnsEvent.
   // Acts as a key for a set of DNS query results.
@@ -203,6 +283,7 @@ message ConnectStatistics {
 // state transition or a response packet parsing error.
 // This message is associated to android.net.metrics.DhcpClientEvent and
 // android.net.metrics.DhcpErrorEvent.
+// Next tag: 5
 message DHCPEvent {
   // The interface name (wlan, rmnet, lo, ...) on which the event happened.
   // Deprecated since version 2, to be replaced by link_layer field.
@@ -255,7 +336,7 @@ message ApfProgramEvent {
 // Represents Router Advertisement listening statistics for an interface with
 // Android Packet Filter enabled.
 // Since version 1.
-// Next tag: 12
+// Next tag: 15
 message ApfStatistics {
   // The time interval in milliseconds these stastistics cover.
   optional int64 duration_ms = 1;
@@ -288,12 +369,28 @@ message ApfStatistics {
 
   // The total number of APF program updates triggered when disabling the
   // multicast filter. Since version 3.
+  // Since version 4.
   optional int32 program_updates_allowing_multicast = 11;
+
+  // The total number of packets processed by the APF interpreter.
+  // Since version 4.
+  optional int32 total_packet_processed = 12;
+
+  // The total number of packets dropped by the APF interpreter.
+  // Since version 4.
+  optional int32 total_packet_dropped = 13;
+
+  // List of hardware counters collected by the APF interpreter.
+  // The Pair key is the counter id, defined in android.net.metrics.ApfStats.
+  // The Pair value is the counter value.
+  // Since version 4.
+  repeated Pair hardware_counters = 14;
 }
 
 // Represents the reception of a Router Advertisement packet for an interface
 // with Android Packet Filter enabled.
 // Since version 1.
+// Next tag: 7.
 message RaEvent {
   // All lifetime values are expressed in seconds. The default value for an
   // option lifetime that was not present in the RA option list is -1.
@@ -322,6 +419,7 @@ message RaEvent {
 // Represents an IP provisioning event in IpManager and how long the
 // provisioning action took.
 // This message is associated to android.net.metrics.IpManagerEvent.
+// Next tag: 4.
 message IpProvisioningEvent {
   // The interface name (wlan, rmnet, lo, ...) on which the probe was sent.
   // Deprecated since version 2, to be replaced by link_layer field.
@@ -335,8 +433,48 @@ message IpProvisioningEvent {
   optional int32 latency_ms = 3;
 }
 
+// Represents statistics from a single android Network.
+// Since version 4. Replace NetworkEvent.
+// Next tag: 9.
+message NetworkStats {
+
+  // Duration of this Network lifecycle in milliseconds.
+  optional int64 duration_ms = 1;
+
+  // Information about IP support of this network.
+  optional DefaultNetworkEvent.IPSupport ip_support = 2;
+
+  // True if the network was validated at least once.
+  optional bool ever_validated = 3;
+
+  // True if a captive portal was found at least once on this network.
+  optional bool portal_found = 4;
+
+  // Total number of times no connectivity was reported for this network.
+  optional int32 no_connectivity_reports = 5;
+
+  // Total number of validation attempts.
+  optional int32 validation_attempts = 6;
+
+  // Results from all validation attempts.
+  // The Pair key is the result:
+  //    0 -> unvalidated
+  //    1 -> validated
+  //    2 -> captive portal
+  // The Pair value is the duration of the validation attempts in milliseconds.
+  repeated Pair validation_events = 7;
+
+  // Time series of validation states in time order.
+  // The Pair key is the state:
+  //    0 -> unvalidated
+  //    1 -> validated
+  //    2 -> captive portal,
+  // The Pair value is the duration of that state in milliseconds.
+  repeated Pair validation_states = 8;
+}
+
 // Represents one of the IP connectivity event defined in this file.
-// Next tag: 19
+// Next tag: 20
 message IpConnectivityEvent {
   // Time in ms when the event was recorded.
   optional int64 time_ms = 1;
@@ -370,14 +508,13 @@ message IpConnectivityEvent {
   oneof event {
 
     // An event about the system default network.
-    // The link_layer field is not relevant for this event and set to NONE.
     DefaultNetworkEvent default_network_event = 2;
 
     // An IP reachability probe event.
     IpReachabilityEvent ip_reachability_event = 3;
 
     // A network lifecycle event.
-    NetworkEvent network_event = 4;
+    NetworkEvent network_event = 4 [deprecated = true];
 
     // A batch of DNS lookups.
     // Deprecated in the nyc-mr2 release since version 2,and replaced by
@@ -407,10 +544,14 @@ message IpConnectivityEvent {
 
     // An RA packet reception event.
     RaEvent ra_event = 11;
+
+    // Network statistics.
+    NetworkStats network_stats = 19;
   };
 };
 
 // The information about IP connectivity events.
+// Next tag: 4.
 message IpConnectivityLog {
   // An array of IP connectivity events.
   repeated IpConnectivityEvent events = 1;
@@ -424,5 +565,6 @@ message IpConnectivityLog {
   //  nyc-mr1: not populated, implicitly 1.
   //  nyc-mr2: 2.
   //  oc:      3.
+  //  oc-dr1:  4. (sailfish, marlin, walleye, taimen)
   optional int32 version = 3;
 };

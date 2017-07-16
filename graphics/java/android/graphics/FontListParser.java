@@ -111,6 +111,7 @@ public class FontListParser {
         String weightStr = parser.getAttributeValue(null, "weight");
         int weight = weightStr == null ? 400 : Integer.parseInt(weightStr);
         boolean isItalic = "italic".equals(parser.getAttributeValue(null, "style"));
+        String fallbackFor = parser.getAttributeValue(null, "fallbackFor");
         StringBuilder filename = new StringBuilder();
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() == XmlPullParser.TEXT) {
@@ -126,7 +127,7 @@ public class FontListParser {
         }
         String sanitizedName = FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
         return new FontConfig.Font(sanitizedName, index,
-                axes.toArray(new FontVariationAxis[axes.size()]), weight, isItalic);
+                axes.toArray(new FontVariationAxis[axes.size()]), weight, isItalic, fallbackFor);
     }
 
     private static FontVariationAxis readAxis(XmlPullParser parser)

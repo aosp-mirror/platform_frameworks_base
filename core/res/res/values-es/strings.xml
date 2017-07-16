@@ -1296,7 +1296,7 @@
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Se ha habilitado el modo coche"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Toca para salir del modo coche."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Compartir Internet/Zona Wi-Fi activado"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Compartir conexión/Zona Wi-Fi activada"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toca para configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Atrás"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Siguiente"</string>
@@ -1383,7 +1383,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Límite de datos móviles superado"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Límite de datos Wi-Fi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Límite superado en <xliff:g id="SIZE">%s</xliff:g>"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Conexiones automáticas restringidas"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Datos en segundo plano restringidos"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Toca para quitar la restricción."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificado de seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Este certificado es válido."</string>
@@ -1618,7 +1618,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado por el administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminado por el administrador"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Para mejorar la duración de la batería, la función de ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de batería se desactiva automáticamente cuando el dispositivo se está cargando."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Para mejorar la duración de la batería, la función de ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de los datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de batería se desactiva automáticamente cuando el dispositivo se está cargando."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se muestren hasta que no las toques."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>

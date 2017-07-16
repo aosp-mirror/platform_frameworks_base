@@ -32,6 +32,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_CLEAR;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACKUP_PACKAGE;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
@@ -118,12 +119,14 @@ import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
 import com.android.server.backup.utils.PasswordUtils;
+import com.android.server.backup.utils.SparseArrayUtils;
 import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import libcore.io.IoUtils;
 
+import com.google.android.collect.Sets;
+
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -135,7 +138,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.security.SecureRandom;
@@ -169,10 +171,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // with U+FF00 or higher for system use).
     public static final String KEY_WIDGET_STATE = "\uffed\uffedwidget";
 
-    // Historical and current algorithm names
-    public static final String PBKDF_CURRENT = "PBKDF2WithHmacSHA1";
-    public static final String PBKDF_FALLBACK = "PBKDF2WithHmacSHA1And8bit";
-
     // Name and current contents version of the full-backup manifest file
     //
     // Manifest version history:
@@ -190,7 +188,6 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // 5 : added support for key-value packages
     public static final int BACKUP_FILE_VERSION = 5;
     public static final String BACKUP_FILE_HEADER_MAGIC = "ANDROID BACKUP\n";
-    private static final int BACKUP_PW_FILE_VERSION = 2;
     public static final String BACKUP_METADATA_FILENAME = "_meta";
     public static final int BACKUP_METADATA_VERSION = 1;
     public static final int BACKUP_WIDGET_METADATA_TOKEN = 0x01FFED01;
@@ -282,6 +279,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // A similar synchronization mechanism around clearing apps' data for restore
     private final Object mClearDataLock = new Object();
     private volatile boolean mClearingData;
+
+    private final BackupPasswordManager mBackupPasswordManager;
 
     @GuardedBy("mPendingRestores")
     private boolean mIsRestoreInProgress;
@@ -482,11 +481,11 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mDataDir = dataDir;
     }
 
-    public File getJournal() {
+    public DataChangedJournal getJournal() {
         return mJournal;
     }
 
-    public void setJournal(File journal) {
+    public void setJournal(@Nullable DataChangedJournal journal) {
         mJournal = journal;
     }
 
@@ -630,20 +629,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private File mBaseStateDir;
     private File mDataDir;
     private File mJournalDir;
-    private File mJournal;
+    @Nullable private DataChangedJournal mJournal;
 
-    // Backup password, if any, and the file where it's saved.  What is stored is not the
-    // password text itself; it's the result of a PBKDF2 hash with a randomly chosen (but
-    // persisted) salt.  Validation is performed by running the challenge text through the
-    // same PBKDF2 cycle with the persisted salt; if the resulting derived key string matches
-    // the saved hash string, then the challenge text matches the originally supplied
-    // password text.
     private final SecureRandom mRng = new SecureRandom();
-    private String mPasswordHash;
-    private File mPasswordHashFile;
-    private int mPasswordVersion;
-    private File mPasswordVersionFile;
-    private byte[] mPasswordSalt;
 
     // Keep a log of all the apps we've ever backed up, and what the
     // dataset tokens are for both the current backup dataset and
@@ -745,52 +733,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         // This dir on /cache is managed directly in init.rc
         mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
 
-        mPasswordVersion = 1;       // unless we hear otherwise
-        mPasswordVersionFile = new File(mBaseStateDir, "pwversion");
-        if (mPasswordVersionFile.exists()) {
-            FileInputStream fin = null;
-            DataInputStream in = null;
-            try {
-                fin = new FileInputStream(mPasswordVersionFile);
-                in = new DataInputStream(fin);
-                mPasswordVersion = in.readInt();
-            } catch (IOException e) {
-                Slog.e(TAG, "Unable to read backup pw version");
-            } finally {
-                try {
-                    if (in != null) in.close();
-                    if (fin != null) fin.close();
-                } catch (IOException e) {
-                    Slog.w(TAG, "Error closing pw version files");
-                }
-            }
-        }
-
-        mPasswordHashFile = new File(mBaseStateDir, "pwhash");
-        if (mPasswordHashFile.exists()) {
-            FileInputStream fin = null;
-            DataInputStream in = null;
-            try {
-                fin = new FileInputStream(mPasswordHashFile);
-                in = new DataInputStream(new BufferedInputStream(fin));
-                // integer length of the salt array, followed by the salt,
-                // then the hex pw hash string
-                int saltLen = in.readInt();
-                byte[] salt = new byte[saltLen];
-                in.readFully(salt);
-                mPasswordHash = in.readUTF();
-                mPasswordSalt = salt;
-            } catch (IOException e) {
-                Slog.e(TAG, "Unable to read saved backup pw hash");
-            } finally {
-                try {
-                    if (in != null) in.close();
-                    if (fin != null) fin.close();
-                } catch (IOException e) {
-                    Slog.w(TAG, "Unable to close streams");
-                }
-            }
-        }
+        mBackupPasswordManager = new BackupPasswordManager(mContext, mBaseStateDir, mRng);
 
         // Alarm receivers for scheduled backups & initialization operations
         mRunBackupReceiver = new RunBackupReceiver(this);
@@ -1105,35 +1048,17 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     private void parseLeftoverJournals() {
-        for (File f : mJournalDir.listFiles()) {
-            if (mJournal == null || f.compareTo(mJournal) != 0) {
-                // This isn't the current journal, so it must be a leftover.  Read
-                // out the package names mentioned there and schedule them for
-                // backup.
-                DataInputStream in = null;
+        ArrayList<DataChangedJournal> journals = DataChangedJournal.listJournals(mJournalDir);
+        for (DataChangedJournal journal : journals) {
+            if (!journal.equals(mJournal)) {
                 try {
-                    Slog.i(TAG, "Found stale backup journal, scheduling");
-                    // Journals will tend to be on the order of a few kilobytes(around 4k), hence,
-                    // setting the buffer size to 8192.
-                    InputStream bufferedInputStream = new BufferedInputStream(
-                            new FileInputStream(f), 8192);
-                    in = new DataInputStream(bufferedInputStream);
-                    while (true) {
-                        String packageName = in.readUTF();
+                    journal.forEach(packageName -> {
+                        Slog.i(TAG, "Found stale backup journal, scheduling");
                         if (MORE_DEBUG) Slog.i(TAG, "  " + packageName);
                         dataChangedImpl(packageName);
-                    }
-                } catch (EOFException e) {
-                    // no more data; we're done
-                } catch (Exception e) {
-                    Slog.e(TAG, "Can't read " + f, e);
-                } finally {
-                    // close/delete the file
-                    try {
-                        if (in != null) in.close();
-                    } catch (IOException e) {
-                    }
-                    f.delete();
+                    });
+                } catch (IOException e) {
+                    Slog.e(TAG, "Can't read " + journal, e);
                 }
             }
         }
@@ -1146,128 +1071,18 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         return array;
     }
 
-    private boolean passwordMatchesSaved(String algorithm, String candidatePw, int rounds) {
-        if (mPasswordHash == null) {
-            // no current password case -- require that 'currentPw' be null or empty
-            if (candidatePw == null || "".equals(candidatePw)) {
-                return true;
-            } // else the non-empty candidate does not match the empty stored pw
-        } else {
-            // hash the stated current pw and compare to the stored one
-            if (candidatePw != null && candidatePw.length() > 0) {
-                String currentPwHash = PasswordUtils.buildPasswordHash(algorithm, candidatePw,
-                        mPasswordSalt,
-                        rounds);
-                if (mPasswordHash.equalsIgnoreCase(currentPwHash)) {
-                    // candidate hash matches the stored hash -- the password matches
-                    return true;
-                }
-            } // else the stored pw is nonempty but the candidate is empty; no match
-        }
-        return false;
-    }
-
     @Override
     public boolean setBackupPassword(String currentPw, String newPw) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "setBackupPassword");
-
-        // When processing v1 passwords we may need to try two different PBKDF2 checksum regimes
-        final boolean pbkdf2Fallback = (mPasswordVersion < BACKUP_PW_FILE_VERSION);
-
-        // If the supplied pw doesn't hash to the the saved one, fail.  The password
-        // might be caught in the legacy crypto mismatch; verify that too.
-        if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PasswordUtils.PBKDF2_HASH_ROUNDS)
-                && !(pbkdf2Fallback && passwordMatchesSaved(PBKDF_FALLBACK,
-                currentPw, PasswordUtils.PBKDF2_HASH_ROUNDS))) {
-            return false;
-        }
-
-        // Snap up to current on the pw file version
-        mPasswordVersion = BACKUP_PW_FILE_VERSION;
-        FileOutputStream pwFout = null;
-        DataOutputStream pwOut = null;
-        try {
-            pwFout = new FileOutputStream(mPasswordVersionFile);
-            pwOut = new DataOutputStream(pwFout);
-            pwOut.writeInt(mPasswordVersion);
-        } catch (IOException e) {
-            Slog.e(TAG, "Unable to write backup pw version; password not changed");
-            return false;
-        } finally {
-            try {
-                if (pwOut != null) pwOut.close();
-                if (pwFout != null) pwFout.close();
-            } catch (IOException e) {
-                Slog.w(TAG, "Unable to close pw version record");
-            }
-        }
-
-        // Clearing the password is okay
-        if (newPw == null || newPw.isEmpty()) {
-            if (mPasswordHashFile.exists()) {
-                if (!mPasswordHashFile.delete()) {
-                    // Unable to delete the old pw file, so fail
-                    Slog.e(TAG, "Unable to clear backup password");
-                    return false;
-                }
-            }
-            mPasswordHash = null;
-            mPasswordSalt = null;
-            return true;
-        }
-
-        try {
-            // Okay, build the hash of the new backup password
-            byte[] salt = randomBytes(PasswordUtils.PBKDF2_SALT_SIZE);
-            String newPwHash = PasswordUtils.buildPasswordHash(PBKDF_CURRENT, newPw, salt,
-                    PasswordUtils.PBKDF2_HASH_ROUNDS);
-
-            OutputStream pwf = null, buffer = null;
-            DataOutputStream out = null;
-            try {
-                pwf = new FileOutputStream(mPasswordHashFile);
-                buffer = new BufferedOutputStream(pwf);
-                out = new DataOutputStream(buffer);
-                // integer length of the salt array, followed by the salt,
-                // then the hex pw hash string
-                out.writeInt(salt.length);
-                out.write(salt);
-                out.writeUTF(newPwHash);
-                out.flush();
-                mPasswordHash = newPwHash;
-                mPasswordSalt = salt;
-                return true;
-            } finally {
-                if (out != null) out.close();
-                if (buffer != null) buffer.close();
-                if (pwf != null) pwf.close();
-            }
-        } catch (IOException e) {
-            Slog.e(TAG, "Unable to set backup password");
-        }
-        return false;
+        return mBackupPasswordManager.setBackupPassword(currentPw, newPw);
     }
 
     @Override
     public boolean hasBackupPassword() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "hasBackupPassword");
-
-        return mPasswordHash != null && mPasswordHash.length() > 0;
+        return mBackupPasswordManager.hasBackupPassword();
     }
 
     public boolean backupPasswordMatches(String currentPw) {
-        if (hasBackupPassword()) {
-            final boolean pbkdf2Fallback = (mPasswordVersion < BACKUP_PW_FILE_VERSION);
-            if (!passwordMatchesSaved(PBKDF_CURRENT, currentPw, PasswordUtils.PBKDF2_HASH_ROUNDS)
-                    && !(pbkdf2Fallback && passwordMatchesSaved(PBKDF_FALLBACK,
-                    currentPw, PasswordUtils.PBKDF2_HASH_ROUNDS))) {
-                if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
-                return false;
-            }
-        }
-        return true;
+        return mBackupPasswordManager.backupPasswordMatches(currentPw);
     }
 
     // Maintain persistent state around whether need to do an initialize operation.
@@ -2489,38 +2304,22 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
 
         // a caller with full permission can ask to back up any participating app
-        HashSet<String> targets = new HashSet<>();
         if (PACKAGE_MANAGER_SENTINEL.equals(packageName)) {
-            targets.add(PACKAGE_MANAGER_SENTINEL);
+            return Sets.newHashSet(PACKAGE_MANAGER_SENTINEL);
         } else {
             synchronized (mBackupParticipants) {
-                int N = mBackupParticipants.size();
-                for (int i = 0; i < N; i++) {
-                    HashSet<String> s = mBackupParticipants.valueAt(i);
-                    if (s != null) {
-                        targets.addAll(s);
-                    }
-                }
+                return SparseArrayUtils.union(mBackupParticipants);
             }
         }
-        return targets;
     }
 
     private void writeToJournalLocked(String str) {
-        RandomAccessFile out = null;
         try {
-            if (mJournal == null) mJournal = File.createTempFile("journal", null, mJournalDir);
-            out = new RandomAccessFile(mJournal, "rws");
-            out.seek(out.length());
-            out.writeUTF(str);
+            if (mJournal == null) mJournal = DataChangedJournal.newJournal(mJournalDir);
+            mJournal.addPackage(str);
         } catch (IOException e) {
             Slog.e(TAG, "Can't write " + str + " to backup journal", e);
             mJournal = null;
-        } finally {
-            try {
-                if (out != null) out.close();
-            } catch (IOException e) {
-            }
         }
     }
 
@@ -2595,14 +2394,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             // a caller with full permission can ask to back up any participating app
             // !!! TODO: allow data-clear of ANY app?
             if (MORE_DEBUG) Slog.v(TAG, "Privileged caller, allowing clear of other apps");
-            apps = new HashSet<>();
-            int N = mBackupParticipants.size();
-            for (int i = 0; i < N; i++) {
-                HashSet<String> s = mBackupParticipants.valueAt(i);
-                if (s != null) {
-                    apps.addAll(s);
-                }
-            }
+            apps = SparseArrayUtils.union(mBackupParticipants);
         }
 
         // Is the given app an available participant?

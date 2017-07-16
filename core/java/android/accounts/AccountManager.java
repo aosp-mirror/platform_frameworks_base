@@ -242,10 +242,13 @@ public class AccountManager {
     public static final String KEY_LAST_AUTHENTICATED_TIME = "lastAuthenticatedTime";
 
     /**
-     * Authenticators using 'customTokens' option will also get the UID of the
-     * caller
+     * The UID of caller app.
      */
     public static final String KEY_CALLER_UID = "callerUid";
+
+    /**
+     * The process id of caller app.
+     */
     public static final String KEY_CALLER_PID = "callerPid";
 
     /**

@@ -36,6 +36,7 @@ public class AmbientDisplayConfiguration {
         return pulseOnNotificationEnabled(user)
                 || pulseOnPickupEnabled(user)
                 || pulseOnDoubleTapEnabled(user)
+                || pulseOnLongPressEnabled(user)
                 || alwaysOnEnabled(user);
     }
 
@@ -77,6 +78,19 @@ public class AmbientDisplayConfiguration {
 
     public String doubleTapSensorType() {
         return mContext.getResources().getString(R.string.config_dozeDoubleTapSensorType);
+    }
+
+    public String longPressSensorType() {
+        return mContext.getResources().getString(R.string.config_dozeLongPressSensorType);
+    }
+
+    public boolean pulseOnLongPressEnabled(int user) {
+        return pulseOnLongPressAvailable() && boolSettingDefaultOff(
+                Settings.Secure.DOZE_PULSE_ON_LONG_PRESS, user);
+    }
+
+    private boolean pulseOnLongPressAvailable() {
+        return !TextUtils.isEmpty(longPressSensorType());
     }
 
     public boolean alwaysOnEnabled(int user) {

@@ -4607,11 +4607,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             try {
                 mOverlayManager.setEnabled("com.android.systemui.theme.lightwallpaper",
                         useDarkText, mCurrentUserId);
-                mStatusBarWindowManager.setKeyguardDark(useDarkText);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't change theme", e);
             }
         }
+
+        // Make sure we have the correct navbar/statusbar colors.
+        mStatusBarWindowManager.setKeyguardDark(useDarkText);
     }
 
     private void updateDozingState() {
@@ -5347,6 +5349,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void pulseWhileDozing(@NonNull PulseCallback callback, int reason) {
+            if (reason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS) {
+                mPowerManager.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:NODOZE");
+                startAssist(new Bundle());
+                return;
+            }
+
             mDozeScrimController.pulse(new PulseCallback() {
 
                 @Override
@@ -7245,6 +7253,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (sbn.getNotification().fullScreenIntent != null) {
             if (mAccessibilityManager.isTouchExplorationEnabled()) {
                 if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
+                return false;
+            } else if (mDozing) {
+                // We never want heads up when we are dozing.
                 return false;
             } else {
                 // we only allow head-up on the lockscreen if it doesn't have a fullscreen intent

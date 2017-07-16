@@ -78,6 +78,7 @@ public class KeyguardClockPositionAlgorithm {
     private AccelerateInterpolator mAccelerateInterpolator = new AccelerateInterpolator();
     private int mClockBottom;
     private float mDarkAmount;
+    private int mDozingStackPadding;
 
     /**
      * Refreshes the dimension values.
@@ -97,6 +98,7 @@ public class KeyguardClockPositionAlgorithm {
                 R.dimen.burn_in_prevention_offset_x);
         mBurnInPreventionOffsetY = res.getDimensionPixelSize(
                 R.dimen.burn_in_prevention_offset_y);
+        mDozingStackPadding = res.getDimensionPixelSize(R.dimen.dozing_stack_padding);
     }
 
     public void setup(int maxKeyguardNotifications, int maxPanelHeight, float expandedHeight,
@@ -135,7 +137,7 @@ public class KeyguardClockPositionAlgorithm {
 
         result.stackScrollerPadding = (int) interpolate(
                 result.stackScrollerPadding,
-                mClockBottom + y,
+                mClockBottom + y + mDozingStackPadding,
                 mDarkAmount);
 
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);

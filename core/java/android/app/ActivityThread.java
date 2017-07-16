@@ -658,6 +658,8 @@ public final class ActivityThread {
     }
 
     static final class DumpHeapData {
+        public boolean managed;
+        public boolean mallocInfo;
         public boolean runGc;
         String path;
         ParcelFileDescriptor fd;
@@ -1025,12 +1027,15 @@ public final class ActivityThread {
         }
 
         @Override
-        public void dumpHeap(boolean managed, boolean runGc, String path, ParcelFileDescriptor fd) {
+        public void dumpHeap(boolean managed, boolean mallocInfo, boolean runGc, String path,
+                ParcelFileDescriptor fd) {
             DumpHeapData dhd = new DumpHeapData();
+            dhd.managed = managed;
+            dhd.mallocInfo = mallocInfo;
             dhd.runGc = runGc;
             dhd.path = path;
             dhd.fd = fd;
-            sendMessage(H.DUMP_HEAP, dhd, managed ? 1 : 0, 0, true /*async*/);
+            sendMessage(H.DUMP_HEAP, dhd, 0, 0, true /*async*/);
         }
 
         public void attachAgent(String agent) {
@@ -1762,7 +1767,7 @@ public final class ActivityThread {
                 case SCHEDULE_CRASH:
                     throw new RemoteServiceException((String)msg.obj);
                 case DUMP_HEAP:
-                    handleDumpHeap(msg.arg1 != 0, (DumpHeapData)msg.obj);
+                    handleDumpHeap((DumpHeapData) msg.obj);
                     break;
                 case DUMP_ACTIVITY:
                     handleDumpActivity((DumpComponentInfo)msg.obj);
@@ -5173,13 +5178,13 @@ public final class ActivityThread {
         }
     }
 
-    static final void handleDumpHeap(boolean managed, DumpHeapData dhd) {
+    static void handleDumpHeap(DumpHeapData dhd) {
         if (dhd.runGc) {
             System.gc();
             System.runFinalization();
             System.gc();
         }
-        if (managed) {
+        if (dhd.managed) {
             try {
                 Debug.dumpHprofData(dhd.path, dhd.fd.getFileDescriptor());
             } catch (IOException e) {
@@ -5192,6 +5197,8 @@ public final class ActivityThread {
                     Slog.w(TAG, "Failure closing profile fd", e);
                 }
             }
+        } else if (dhd.mallocInfo) {
+            Debug.dumpNativeMallocInfo(dhd.fd.getFileDescriptor());
         } else {
             Debug.dumpNativeHeap(dhd.fd.getFileDescriptor());
         }
@@ -6416,9 +6423,9 @@ public final class ActivityThread {
     private <T> T instantiate(ClassLoader cl, String className, Context c,
             Instantiator<T> instantiator)
             throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        if (c.getApplicationContext() instanceof Application) {
-            T a = instantiator.instantiate((Application) c.getApplicationContext(),
-                    cl, className);
+        Application app = getApp(c);
+        if (app != null) {
+            T a = instantiator.instantiate(app, cl, className);
             if (a != null) return a;
         }
         return (T) cl.loadClass(className).newInstance();
@@ -6427,12 +6434,23 @@ public final class ActivityThread {
     private <T> T instantiate(ClassLoader cl, String className, Intent intent, Context c,
             IntentInstantiator<T> instantiator)
             throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        if (c.getApplicationContext() instanceof Application) {
-            T a = instantiator.instantiate((Application) c.getApplicationContext(),
-                    cl, className, intent);
+        Application app = getApp(c);
+        if (app != null) {
+            T a = instantiator.instantiate(app, cl, className, intent);
             if (a != null) return a;
         }
         return (T) cl.loadClass(className).newInstance();
+    }
+
+    private Application getApp(Context c) {
+        // We need this shortcut to avoid actually calling getApplicationContext() on an Application
+        // because the Application may not return itself for getApplicationContext() because the
+        // API doesn't enforce it.
+        if (c instanceof Application) return (Application) c;
+        if (c.getApplicationContext() instanceof Application) {
+            return (Application) c.getApplicationContext();
+        }
+        return null;
     }
 
     private interface Instantiator<T> {

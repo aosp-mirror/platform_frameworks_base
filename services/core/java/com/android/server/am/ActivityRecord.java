@@ -42,6 +42,7 @@ import static android.content.Intent.CATEGORY_LAUNCHER;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
+import static android.content.pm.ActivityInfo.CONFIG_ROTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
@@ -2579,6 +2580,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             if (!crossesSmallestSizeThreshold(oldSmallest, newSmallest)) {
                 changes &= ~CONFIG_SMALLEST_SCREEN_SIZE;
             }
+        }
+        // We don't want rotation to cause relaunches.
+        if ((changes & CONFIG_ROTATION) != 0) {
+            changes &= ~CONFIG_ROTATION;
         }
         return changes;
     }

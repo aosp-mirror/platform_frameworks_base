@@ -552,15 +552,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /**
-     * Returns if the network is marked metered. Metering can be marked through its config in
-     * {@link WifiConfiguration}, after connection in {@link WifiInfo}, or from a score config in
-     * {@link ScoredNetwork}.
+     * Returns if the network should be considered metered.
      */
     public boolean isMetered() {
         return mIsScoredNetworkMetered
-                || (mConfig != null && mConfig.meteredHint)
-                || (mInfo != null && mInfo.getMeteredHint()
-                || (mNetworkInfo != null && mNetworkInfo.isMetered()));
+                || WifiConfiguration.isMetered(mConfig, mInfo);
     }
 
     public NetworkInfo getNetworkInfo() {
@@ -729,7 +725,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
 
-        if (WifiTracker.sVerboseLogging > 0) {
+        if (WifiTracker.sVerboseLogging) {
             // Add RSSI/band information for this config, what was seen up to 6 seconds ago
             // verbose WiFi Logging is only turned on thru developers settings
             if (mInfo != null && mNetworkInfo != null) { // This is the active connection
@@ -1170,8 +1166,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
             if (nc != null) {
                 if (nc.hasCapability(nc.NET_CAPABILITY_CAPTIVE_PORTAL)) {
-                    return context.getString(
-                        com.android.internal.R.string.network_available_sign_in);
+                    int id = context.getResources()
+                            .getIdentifier("network_available_sign_in", "string", "android");
+                    return context.getString(id);
                 } else if (!nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
                     return context.getString(R.string.wifi_connected_no_internet);
                 }

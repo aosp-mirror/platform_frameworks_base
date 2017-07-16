@@ -157,8 +157,10 @@ int main()
 
         // create the boot animation object
         sp<BootAnimation> boot = new BootAnimation(new AudioAnimationCallbacks());
+        ALOGV("Boot animation set up. Joining pool.");
 
         IPCThreadState::self()->joinThreadPool();
     }
+    ALOGV("Boot animation exit");
     return 0;
 }

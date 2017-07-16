@@ -123,8 +123,7 @@ public class PasswordUtils {
             int rounds) {
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(algorithm);
-            KeySpec
-                    ks = new PBEKeySpec(pwArray, salt, rounds, PBKDF2_KEY_SIZE);
+            KeySpec ks = new PBEKeySpec(pwArray, salt, rounds, PBKDF2_KEY_SIZE);
             return keyFactory.generateSecret(ks);
         } catch (InvalidKeySpecException e) {
             Slog.e(TAG, "Invalid key spec for PBKDF2!");

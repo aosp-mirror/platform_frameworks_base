@@ -295,18 +295,8 @@ package android.os {
 package android.os.storage {
 
   public class StorageManager {
-    method public deprecated void allocateBytes(java.io.File, long, int) throws java.io.IOException;
-    method public deprecated long getAllocatableBytes(java.io.File, int) throws java.io.IOException;
-    method public deprecated long getCacheQuotaBytes(java.io.File) throws java.io.IOException;
-    method public deprecated long getCacheQuotaBytes() throws java.io.IOException;
-    method public deprecated long getCacheSizeBytes(java.io.File) throws java.io.IOException;
-    method public deprecated long getCacheSizeBytes() throws java.io.IOException;
-    method public deprecated long getExternalCacheQuotaBytes() throws java.io.IOException;
-    method public deprecated long getExternalCacheSizeBytes() throws java.io.IOException;
     method public android.os.storage.StorageVolume getPrimaryVolume();
     method public android.os.storage.StorageVolume[] getVolumeList();
-    method public deprecated boolean isCacheBehaviorAtomic(java.io.File) throws java.io.IOException;
-    method public deprecated void setCacheBehaviorAtomic(java.io.File, boolean) throws java.io.IOException;
   }
 
 }

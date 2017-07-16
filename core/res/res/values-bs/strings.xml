@@ -1509,7 +1509,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Koristi prečicu"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Prečica za pristupačnost je uključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Prečica za pristupačnost je isključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Izaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Odaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Da promijenite funkcije, dodirnite i držite dugme Pristupačnost."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Uvećanje"</string>
     <string name="user_switched" msgid="3768006783166984410">"Trenutni korisnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1736,7 +1736,7 @@
     <string name="user_creation_adding" msgid="4482658054622099197">"Da li dozvoljavate da <xliff:g id="APP">%1$s</xliff:g> kreira novog korisnika za <xliff:g id="ACCOUNT">%2$s</xliff:g> (Korisnik sa ovim nalogom već postoji)?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Dodaj jezik"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Izbor regije"</string>
-    <string name="search_language_hint" msgid="7042102592055108574">"Ukucajte ime jezika"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Upišite ime jezika"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Predloženo"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Svi jezici"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Sve regije"</string>

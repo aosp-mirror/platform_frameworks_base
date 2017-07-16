@@ -219,7 +219,6 @@ public abstract class RadioTuner {
      * is unavailable; ie. temporarily due to ongoing foreground playback in single-tuner device
      * or permanently if the feature is not supported
      * (see ModuleProperties#isBackgroundScanningSupported()).
-     * @hide FutureFeature
      */
     public abstract boolean startBackgroundScan();
 
@@ -234,7 +233,6 @@ public abstract class RadioTuner {
      * @throws IllegalStateException if the scan is in progress or has not been started,
      *         startBackgroundScan() call may fix it.
      * @throws IllegalArgumentException if the filter argument is not valid.
-     * @hide FutureFeature
      */
     public abstract @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter);
 
@@ -244,7 +242,6 @@ public abstract class RadioTuner {
      * @throws IllegalStateException if the switch is not supported at current
      *         configuration.
      * @return {@code true} if analog is forced, {@code false} otherwise.
-     * @hide FutureFeature
      */
     public abstract boolean isAnalogForced();
 
@@ -260,7 +257,6 @@ public abstract class RadioTuner {
      * @param isForced {@code true} to force analog, {@code false} for a default behaviour.
      * @throws IllegalStateException if the switch is not supported at current
      *         configuration.
-     * @hide FutureFeature
      */
     public abstract void setAnalogForced(boolean isForced);
 
@@ -298,15 +294,9 @@ public abstract class RadioTuner {
     public static final  int ERROR_SCAN_TIMEOUT = 3;
     /** The requested configuration could not be applied */
     public static final  int ERROR_CONFIG = 4;
-    /**
-     * Background scan was interrupted due to hardware becoming temporarily unavailable.
-     * @hide FutureFeature
-     */
+    /** Background scan was interrupted due to hardware becoming temporarily unavailable. */
     public static final int ERROR_BACKGROUND_SCAN_UNAVAILABLE = 5;
-    /**
-     * Background scan failed due to other error, ie. HW failure.
-     * @hide FutureFeature
-     */
+    /** Background scan failed due to other error, ie. HW failure. */
     public static final int ERROR_BACKGROUND_SCAN_FAILED = 6;
 
     /**
@@ -373,14 +363,11 @@ public abstract class RadioTuner {
          *
          * @param isAvailable true, if the tuner turned temporarily background-
          *                    capable, false in the other case.
-         * @hide FutureFeature
          */
         public void onBackgroundScanAvailabilityChange(boolean isAvailable) {}
 
         /**
          * Called when a background scan completes successfully.
-         *
-         * @hide FutureFeature
          */
         public void onBackgroundScanComplete() {}
 
@@ -388,8 +375,6 @@ public abstract class RadioTuner {
          * Called when available program list changed.
          *
          * Use getProgramList() to get the actual list.
-         *
-         * @hide FutureFeature
          */
         public void onProgramListChanged() {}
     }

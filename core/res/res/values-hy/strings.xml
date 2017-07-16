@@ -567,8 +567,8 @@
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Կարգավորել, որ սարքի համընդհանուր պրոքսի-սերվերն օգտագործվի, երբ քաղաքականությունը միացված է: Միայն սարքի սեփականատերը կարող է կարգավորել համընդհանուր պրոքսի-սերվերը:"</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"Նշել էկր կողպ գաղտնաբ սպառումը"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Փոխել էկրանի կողպման գաղտնաբառի, PIN-ի կամ նախշի փոփոխման հաճախականությունը:"</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Կարգավորել պահոցի կոդավորումը"</string>
-    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Պահանջել, որ պահվող հավելվածների տվյալները լինեն կոդավորված:"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Կարգավորել պահոցի գաղտնագրումը"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Պահանջել, որ պահվող հավելվածների տվյալները լինեն գաղտնագրված:"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Կասեցնել տեսախցիկները"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Կանխել բոլոր սարքերի ֆոտոխցիկների օգտագործումը:"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Անջատել կողպման գործառույթները"</string>
