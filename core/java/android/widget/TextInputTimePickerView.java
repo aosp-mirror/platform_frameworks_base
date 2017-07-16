@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.content.Context;
+import android.os.LocaleList;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -141,6 +142,9 @@ public class TextInputTimePickerView extends RelativeLayout {
                 new InputFilter.LengthFilter(maxCharLength)});
         mMinuteEditText.setFilters(new InputFilter[] {
                 new InputFilter.LengthFilter(maxCharLength)});
+        final LocaleList locales = mContext.getResources().getConfiguration().getLocales();
+        mHourEditText.setImeHintLocales(locales);
+        mMinuteEditText.setImeHintLocales(locales);
     }
 
     boolean validateInput() {

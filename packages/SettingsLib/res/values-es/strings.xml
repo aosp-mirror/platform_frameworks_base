@@ -104,11 +104,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"SO Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicaciones eliminadas"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Usuarios y aplicaciones eliminados"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Compartir por USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Compartir conexión por USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Zona Wi-Fi portátil"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Compartir por Bluetooth"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Compartir Internet"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Compartir Internet y zona Wi-Fi"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Compartir conexión por Bluetooth"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Compartir conexión"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Compartir conexión y zona Wi-Fi"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Todas las aplicaciones de trabajo"</string>
     <string name="user_guest" msgid="8475274842845401871">"Invitado"</string>
     <string name="unknown" msgid="1592123443519355854">"Desconocido"</string>
@@ -162,7 +162,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"Establecer opciones de desarrollo de aplicaciones"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Las opciones de desarrollador no están disponibles para este usuario"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Los ajustes de VPN no están disponibles para este usuario"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Los ajustes para compartir Internet no están disponibles para este usuario"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Los ajustes para compartir conexión no están disponibles para este usuario"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Los ajustes del nombre de punto de acceso no están disponibles para este usuario"</string>
     <string name="enable_adb" msgid="7982306934419797485">"Depuración por USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Activar el modo de depuración cuando el dispositivo esté conectado por USB"</string>
@@ -186,7 +186,7 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Transferencia agresiva de Wi-Fi a móvil"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permitir siempre búsquedas de Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datos móviles siempre activos"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleración por hardware para conexión mediante dispositivo portátil"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleración por hardware para conexión compartida"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inhabilitar volumen absoluto"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Habilitar tono de llamada por Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión AVRCP del Bluetooth"</string>
@@ -218,7 +218,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permitir ubicaciones simuladas"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspección de atributos de vista"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantén los datos móviles siempre activos, aunque la conexión Wi‑Fi esté activada (para cambiar de red rápidamente)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Usar la aceleración por hardware para conexión mediante dispositivo portátil si está disponible"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Usar la conexión compartida con aceleración por hardware si está disponible"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"¿Permitir depuración por USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"La depuración por USB solo está indicada para actividades de desarrollo. Puedes utilizarla para intercambiar datos entre el ordenador y el dispositivo, para instalar aplicaciones en el dispositivo sin recibir notificaciones y para leer datos de registro."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"¿Quieres revocar el acceso a la depuración por USB de todos los ordenadores que has autorizado?"</string>

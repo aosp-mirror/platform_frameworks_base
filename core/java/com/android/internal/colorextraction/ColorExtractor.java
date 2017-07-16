@@ -51,7 +51,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     private WallpaperColors mLockColors;
 
     public ColorExtractor(Context context) {
-        this(context, new Tonal());
+        this(context, new Tonal(context));
     }
 
     @VisibleForTesting

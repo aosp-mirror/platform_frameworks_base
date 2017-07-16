@@ -26,6 +26,7 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.leak.LeakDetector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -146,7 +147,18 @@ public class ExtensionControllerImpl implements ExtensionController {
             return get();
         }
 
+        @Override
+        public void clearItem(boolean isDestroyed) {
+            if (isDestroyed && mItem != null) {
+                Dependency.get(LeakDetector.class).trackGarbage(mItem);
+            }
+            mItem = null;
+        }
+
         private void notifyChanged() {
+            if (mItem != null) {
+                Dependency.get(LeakDetector.class).trackGarbage(mItem);
+            }
             mItem = null;
             for (int i = 0; i < mProducers.size(); i++) {
                 final T item = mProducers.get(i).get();
@@ -169,7 +181,7 @@ public class ExtensionControllerImpl implements ExtensionController {
         }
 
         public void addTunerFactory(TunerFactory<T> factory, String[] keys) {
-            mProducers.add(new TunerItem(factory, factory.keys()));
+            mProducers.add(new TunerItem(factory, keys));
         }
 
         public void addUiMode(int uiMode, Supplier<T> mode) {

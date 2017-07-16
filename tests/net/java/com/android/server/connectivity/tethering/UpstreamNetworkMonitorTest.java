@@ -324,19 +324,14 @@ public class UpstreamNetworkMonitorTest {
     }
 
     @Test
-    public void testOffloadExemptPrefixes() throws Exception {
+    public void testLocalPrefixes() throws Exception {
         mUNM.start();
 
-        // [0] Test minimum set of exempt prefixes.
-        Set<IpPrefix> exempt = mUNM.getOffloadExemptPrefixes();
-        final String[] MINSET = {
-                "127.0.0.0/8", "169.254.0.0/16",
-                "::/3", "fe80::/64", "fc00::/7", "ff00::/8",
-        };
-        assertPrefixSet(exempt, INCLUDES, MINSET);
+        // [0] Test minimum set of local prefixes.
+        Set<IpPrefix> local = mUNM.getLocalPrefixes();
+        assertTrue(local.isEmpty());
+
         final Set<String> alreadySeen = new HashSet<>();
-        Collections.addAll(alreadySeen, MINSET);
-        assertEquals(alreadySeen.size(), exempt.size());
 
         // [1] Pretend Wi-Fi connects.
         final TestNetworkAgent wifiAgent = new TestNetworkAgent(mCM, TRANSPORT_WIFI);
@@ -355,15 +350,15 @@ public class UpstreamNetworkMonitorTest {
         wifiAgent.fakeConnect();
         wifiAgent.sendLinkProperties(wifiLp);
 
-        exempt = mUNM.getOffloadExemptPrefixes();
-        assertPrefixSet(exempt, INCLUDES, alreadySeen);
+        local = mUNM.getLocalPrefixes();
+        assertPrefixSet(local, INCLUDES, alreadySeen);
         final String[] wifiLinkPrefixes = {
-                // Excludes link-local as that's already tested within MINSET.
+                // Link-local prefixes are excluded and dealt with elsewhere.
                 "100.112.96.0/20", "2001:db8:4:fd00::/64", "fd6a:a640:60bf:e985::/64",
         };
-        assertPrefixSet(exempt, INCLUDES, wifiLinkPrefixes);
+        assertPrefixSet(local, INCLUDES, wifiLinkPrefixes);
         Collections.addAll(alreadySeen, wifiLinkPrefixes);
-        assertEquals(alreadySeen.size(), exempt.size());
+        assertEquals(alreadySeen.size(), local.size());
 
         // [2] Pretend mobile connects.
         final TestNetworkAgent cellAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
@@ -379,12 +374,12 @@ public class UpstreamNetworkMonitorTest {
         cellAgent.fakeConnect();
         cellAgent.sendLinkProperties(cellLp);
 
-        exempt = mUNM.getOffloadExemptPrefixes();
-        assertPrefixSet(exempt, INCLUDES, alreadySeen);
+        local = mUNM.getLocalPrefixes();
+        assertPrefixSet(local, INCLUDES, alreadySeen);
         final String[] cellLinkPrefixes = { "10.102.211.32/27", "2001:db8:0:1::/64" };
-        assertPrefixSet(exempt, INCLUDES, cellLinkPrefixes);
+        assertPrefixSet(local, INCLUDES, cellLinkPrefixes);
         Collections.addAll(alreadySeen, cellLinkPrefixes);
-        assertEquals(alreadySeen.size(), exempt.size());
+        assertEquals(alreadySeen.size(), local.size());
 
         // [3] Pretend DUN connects.
         final TestNetworkAgent dunAgent = new TestNetworkAgent(mCM, TRANSPORT_CELLULAR);
@@ -401,21 +396,20 @@ public class UpstreamNetworkMonitorTest {
         dunAgent.fakeConnect();
         dunAgent.sendLinkProperties(dunLp);
 
-        exempt = mUNM.getOffloadExemptPrefixes();
-        assertPrefixSet(exempt, INCLUDES, alreadySeen);
+        local = mUNM.getLocalPrefixes();
+        assertPrefixSet(local, INCLUDES, alreadySeen);
         final String[] dunLinkPrefixes = { "192.0.2.32/27", "2001:db8:1:2::/64" };
-        assertPrefixSet(exempt, INCLUDES, dunLinkPrefixes);
+        assertPrefixSet(local, INCLUDES, dunLinkPrefixes);
         Collections.addAll(alreadySeen, dunLinkPrefixes);
-        assertEquals(alreadySeen.size(), exempt.size());
+        assertEquals(alreadySeen.size(), local.size());
 
         // [4] Pretend Wi-Fi disconnected.  It's addresses/prefixes should no
         // longer be included (should be properly removed).
         wifiAgent.fakeDisconnect();
-        exempt = mUNM.getOffloadExemptPrefixes();
-        assertPrefixSet(exempt, INCLUDES, MINSET);
-        assertPrefixSet(exempt, EXCLUDES, wifiLinkPrefixes);
-        assertPrefixSet(exempt, INCLUDES, cellLinkPrefixes);
-        assertPrefixSet(exempt, INCLUDES, dunLinkPrefixes);
+        local = mUNM.getLocalPrefixes();
+        assertPrefixSet(local, EXCLUDES, wifiLinkPrefixes);
+        assertPrefixSet(local, INCLUDES, cellLinkPrefixes);
+        assertPrefixSet(local, INCLUDES, dunLinkPrefixes);
     }
 
     private void assertSatisfiesLegacyType(int legacyType, NetworkState ns) {

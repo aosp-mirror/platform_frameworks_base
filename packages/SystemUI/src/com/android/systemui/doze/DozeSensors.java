@@ -98,7 +98,14 @@ public class DozeSensors {
                         Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
                         true /* configured */,
                         DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP,
-                        dozeParameters.doubleTapReportsTouchCoordinates())
+                        dozeParameters.doubleTapReportsTouchCoordinates()),
+                new TriggerSensor(
+                        findSensorWithType(config.longPressSensorType()),
+                        Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
+                        false /* settingDef */,
+                        true /* configured */,
+                        DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
+                        true /* reports touch coordinates */),
         };
 
         mProxSensor = new ProxSensor();
@@ -263,6 +270,7 @@ public class DozeSensors {
         final int mPulseReason;
         final String mSetting;
         final boolean mReportsTouchCoordinates;
+        final boolean mSettingDefault;
 
         private boolean mRequested;
         private boolean mRegistered;
@@ -270,8 +278,15 @@ public class DozeSensors {
 
         public TriggerSensor(Sensor sensor, String setting, boolean configured, int pulseReason,
                 boolean reportsTouchCoordinates) {
+            this(sensor, setting, true /* settingDef */, configured, pulseReason,
+                    reportsTouchCoordinates);
+        }
+
+        public TriggerSensor(Sensor sensor, String setting, boolean settingDef,
+                boolean configured, int pulseReason, boolean reportsTouchCoordinates) {
             mSensor = sensor;
             mSetting = setting;
+            mSettingDefault = settingDef;
             mConfigured = configured;
             mPulseReason = pulseReason;
             mReportsTouchCoordinates = reportsTouchCoordinates;
@@ -305,7 +320,7 @@ public class DozeSensors {
             if (TextUtils.isEmpty(mSetting)) {
                 return true;
             }
-            return Settings.Secure.getIntForUser(mResolver, mSetting, 1,
+            return Settings.Secure.getIntForUser(mResolver, mSetting, mSettingDefault ? 1 : 0,
                     UserHandle.USER_CURRENT) != 0;
         }
 

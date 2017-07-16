@@ -98,10 +98,14 @@ public class QSIconViewImpl extends QSIconView {
                 d.setAutoMirrored(false);
                 d.setLayoutDirection(getLayoutDirection());
             }
-            iv.setImageDrawable(d);
-            if (state.slash != null && iv instanceof SlashImageView) {
-                ((SlashImageView) iv).setState(state.slash);
+
+            if (iv instanceof SlashImageView) {
+                ((SlashImageView) iv).setAnimationEnabled(shouldAnimate);
+                ((SlashImageView) iv).setState(state.slash, d);
+            } else {
+                iv.setImageDrawable(d);
             }
+
             iv.setTag(R.id.qs_icon_tag, state.icon);
             iv.setTag(R.id.qs_slash_tag, state.slash);
             iv.setPadding(0, padding, 0, padding);

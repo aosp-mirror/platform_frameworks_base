@@ -520,7 +520,8 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private final NotificationDelegate mNotificationDelegate = new NotificationDelegate() {
+    @VisibleForTesting
+    final NotificationDelegate mNotificationDelegate = new NotificationDelegate() {
 
         @Override
         public void onSetDisabled(int status) {
@@ -1009,6 +1010,25 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void setScreenOn(boolean on) {
         mScreenOn = on;
+    }
+
+    @VisibleForTesting
+    int getNotificationRecordCount() {
+        synchronized (mNotificationLock) {
+            int count = mNotificationList.size() + mNotificationsByKey.size()
+                    + mSummaryByGroupKey.size() + mEnqueuedNotifications.size();
+            // subtract duplicates
+            for (NotificationRecord posted : mNotificationList) {
+                if (mNotificationsByKey.containsKey(posted.getKey())) {
+                    count--;
+                }
+                if (posted.sbn.isGroup() && posted.getNotification().isGroupSummary()) {
+                    count --;
+                }
+            }
+
+            return count;
+        }
     }
 
     @VisibleForTesting
@@ -4553,6 +4573,7 @@ public class NotificationManagerService extends SystemService {
                 canceledNotifications = new ArrayList<>();
             }
             notificationList.remove(i);
+            mNotificationsByKey.remove(r.getKey());
             canceledNotifications.add(r);
             cancelNotificationLocked(r, sendDelete, reason, wasPosted);
         }
@@ -4662,6 +4683,7 @@ public class NotificationManagerService extends SystemService {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),
                         childSbn.getTag(), userId, 0, 0, reason, listenerName);
                 notificationList.remove(i);
+                mNotificationsByKey.remove(childR.getKey());
                 cancelNotificationLocked(childR, sendDelete, reason, wasPosted);
             }
         }

@@ -6480,9 +6480,9 @@ public final class ActivityThread {
     private <T> T instantiate(ClassLoader cl, String className, Context c,
             Instantiator<T> instantiator)
             throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        if (c.getApplicationContext() instanceof Application) {
-            T a = instantiator.instantiate((Application) c.getApplicationContext(),
-                    cl, className);
+        Application app = getApp(c);
+        if (app != null) {
+            T a = instantiator.instantiate(app, cl, className);
             if (a != null) return a;
         }
         return (T) cl.loadClass(className).newInstance();
@@ -6491,12 +6491,23 @@ public final class ActivityThread {
     private <T> T instantiate(ClassLoader cl, String className, Intent intent, Context c,
             IntentInstantiator<T> instantiator)
             throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        if (c.getApplicationContext() instanceof Application) {
-            T a = instantiator.instantiate((Application) c.getApplicationContext(),
-                    cl, className, intent);
+        Application app = getApp(c);
+        if (app != null) {
+            T a = instantiator.instantiate(app, cl, className, intent);
             if (a != null) return a;
         }
         return (T) cl.loadClass(className).newInstance();
+    }
+
+    private Application getApp(Context c) {
+        // We need this shortcut to avoid actually calling getApplicationContext() on an Application
+        // because the Application may not return itself for getApplicationContext() because the
+        // API doesn't enforce it.
+        if (c instanceof Application) return (Application) c;
+        if (c.getApplicationContext() instanceof Application) {
+            return (Application) c.getApplicationContext();
+        }
+        return null;
     }
 
     private interface Instantiator<T> {

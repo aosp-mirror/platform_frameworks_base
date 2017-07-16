@@ -33,10 +33,11 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.util.FloatProperty;
 
 public class SlashDrawable extends Drawable {
+
+    public static final float CORNER_RADIUS = 1f;
 
     private final Path mPath = new Path();
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -61,6 +62,7 @@ public class SlashDrawable extends Drawable {
     private boolean mSlashed;
     private Mode mTintMode;
     private ColorStateList mTintList;
+    private boolean mAnimationEnabled = true;
 
     public SlashDrawable(Drawable d) {
         mDrawable = d;
@@ -97,6 +99,10 @@ public class SlashDrawable extends Drawable {
         invalidateSelf();
     }
 
+    public void setAnimationEnabled(boolean enabled) {
+        mAnimationEnabled = enabled;
+    }
+
     // Animate this value on change
     private float mCurrentSlashLength;
     private final FloatProperty mSlashLengthProp = new FloatProperty<SlashDrawable>("slashLength") {
@@ -119,12 +125,15 @@ public class SlashDrawable extends Drawable {
         final float end = mSlashed ? SLASH_HEIGHT / SCALE : 0f;
         final float start = mSlashed ? 0f : SLASH_HEIGHT / SCALE;
 
-        ObjectAnimator anim = ObjectAnimator.ofFloat(this, mSlashLengthProp, start, end);
-        anim.addUpdateListener((ValueAnimator valueAnimator) -> {
+        if (mAnimationEnabled) {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(this, mSlashLengthProp, start, end);
+            anim.addUpdateListener((ValueAnimator valueAnimator) -> invalidateSelf());
+            anim.setDuration(QS_ANIM_LENGTH);
+            anim.start();
+        } else {
+            mCurrentSlashLength = end;
             invalidateSelf();
-        });
-        anim.setDuration(QS_ANIM_LENGTH);
-        anim.start();
+        }
     }
 
     @Override
@@ -133,8 +142,8 @@ public class SlashDrawable extends Drawable {
         Matrix m = new Matrix();
         final int width = getBounds().width();
         final int height = getBounds().height();
-        final float radiusX = scale(1f, width);
-        final float radiusY = scale(1f, height);
+        final float radiusX = scale(CORNER_RADIUS, width);
+        final float radiusY = scale(CORNER_RADIUS, height);
         updateRect(
                 scale(LEFT, width),
                 scale(TOP, height),

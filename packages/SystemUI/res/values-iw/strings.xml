@@ -534,7 +534,7 @@
     <string name="tuner_warning" msgid="8730648121973575701">"‏System UI Tuner מספק לך דרכים נוספות להתאים אישית את ממשק המשתמש של Android. התכונות הניסיוניות האלה עשויות להשתנות, להתקלקל או להיעלם בגרסאות עתידיות. המשך בזהירות."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"התכונות הניסיוניות האלה עשויות להשתנות, להתקלקל או להיעלם בגרסאות עתידיות. המשך בזהירות."</string>
     <string name="got_it" msgid="2239653834387972602">"הבנתי"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"‏מזל טוב! System UI Tuner נוסף ל\'הגדרות\'"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"‏מזל טוב! ה-System UI Tuner נוסף ל\'הגדרות\'"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"הסר מההגדרות"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"‏האם להסיר את System UI Tuner ולהפסיק להשתמש בכל התכונות שלו?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"האפליקציה אינה מותקנת במכשיר"</string>
