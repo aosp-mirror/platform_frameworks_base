@@ -59,7 +59,7 @@ namespace android
 
 static bool wakeup_init = false;
 static sem_t wakeup_sem;
-extern sp<IPower> gPowerHal;
+extern sp<android::hardware::power::V1_0::IPower> gPowerHalV1_0;
 extern std::mutex gPowerHalMutex;
 extern bool getPowerHal();
 
@@ -203,7 +203,7 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
             return -1;
         }
 
-        Return<void> ret = gPowerHal->getPlatformLowPowerStats(
+        Return<void> ret = gPowerHalV1_0->getPlatformLowPowerStats(
             [&offset, &remaining, &total_added](hidl_vec<PowerStatePlatformSleepState> states,
                     Status status) {
                 if (status != Status::SUCCESS)
@@ -257,7 +257,7 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
 
         if (!ret.isOk()) {
             ALOGE("getPlatformLowPowerStats() failed: power HAL service not available");
-            gPowerHal = nullptr;
+            gPowerHalV1_0 = nullptr;
             return -1;
         }
     }
@@ -288,7 +288,7 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
         }
 
         //Trying to cast to 1.1, this will succeed only for devices supporting 1.1
-        gPowerHal_1_1 = android::hardware::power::V1_1::IPower::castFrom(gPowerHal);
+        gPowerHal_1_1 = android::hardware::power::V1_1::IPower::castFrom(gPowerHalV1_0);
     	if (gPowerHal_1_1 == nullptr) {
             //This device does not support IPower@1.1, exiting gracefully
             return 0;
@@ -351,7 +351,7 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
 
         if (!ret.isOk()) {
             ALOGE("getSubsystemLowPowerStats() failed: power HAL service not available");
-            gPowerHal = nullptr;
+            gPowerHalV1_0 = nullptr;
             return -1;
         }
     }
