@@ -739,7 +739,7 @@ public class StorageManager {
      * {@link Environment#getDataDirectory()}, the returned value will be
      * {@link #UUID_DEFAULT}.
      *
-     * @throws IOException when the storage device at the given path isn't
+     * @throws IOException when the storage device hosting the given path isn't
      *             present, or when it doesn't have a valid UUID.
      */
     public @NonNull UUID getUuidForPath(@NonNull File path) throws IOException {
@@ -769,6 +769,19 @@ public class StorageManager {
             return vol.getPath();
         }
         throw new FileNotFoundException("Failed to find a storage device for " + volumeUuid);
+    }
+
+    /**
+     * Test if the given file descriptor supports allocation of disk space using
+     * {@link #allocateBytes(FileDescriptor, long)}.
+     */
+    public boolean isAllocationSupported(@NonNull FileDescriptor fd) {
+        try {
+            getUuidForPath(ParcelFileDescriptor.getFile(fd));
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /** {@hide} */
@@ -1562,12 +1575,6 @@ public class StorageManager {
         }
     }
 
-    /** @removed */
-    @Deprecated
-    public long getCacheQuotaBytes(@NonNull File path) throws IOException {
-        return getCacheQuotaBytes(getUuidForPath(path));
-    }
-
     /**
      * Return total size in bytes of all cached data belonging to the calling
      * app on the given storage volume.
@@ -1601,36 +1608,6 @@ public class StorageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /** @removed */
-    @Deprecated
-    public long getCacheSizeBytes(@NonNull File path) throws IOException {
-        return getCacheSizeBytes(getUuidForPath(path));
-    }
-
-    /** @removed */
-    @Deprecated
-    public long getCacheQuotaBytes() throws IOException {
-        return getCacheQuotaBytes(mContext.getCacheDir());
-    }
-
-    /** @removed */
-    @Deprecated
-    public long getCacheSizeBytes() throws IOException {
-        return getCacheSizeBytes(mContext.getCacheDir());
-    }
-
-    /** @removed */
-    @Deprecated
-    public long getExternalCacheQuotaBytes() throws IOException {
-        return getCacheQuotaBytes(mContext.getExternalCacheDir());
-    }
-
-    /** @removed */
-    @Deprecated
-    public long getExternalCacheSizeBytes() throws IOException {
-        return getCacheSizeBytes(mContext.getExternalCacheDir());
     }
 
     /**
@@ -1741,15 +1718,6 @@ public class StorageManager {
         }
     }
 
-    /** @removed */
-    @Deprecated
-    @WorkerThread
-    @SuppressLint("Doclava125")
-    public long getAllocatableBytes(@NonNull File path,
-            @RequiresPermission @AllocateFlags int flags) throws IOException {
-        return getAllocatableBytes(getUuidForPath(path), flags);
-    }
-
     /**
      * Allocate the requested number of bytes for your application to use on the
      * given storage volume. This will cause the system to delete any cached
@@ -1798,15 +1766,6 @@ public class StorageManager {
         }
     }
 
-    /** @removed */
-    @Deprecated
-    @WorkerThread
-    @SuppressLint("Doclava125")
-    public void allocateBytes(@NonNull File path, @BytesLong long bytes,
-            @RequiresPermission @AllocateFlags int flags) throws IOException {
-        allocateBytes(getUuidForPath(path), bytes, flags);
-    }
-
     /**
      * Allocate the requested number of bytes for your application to use in the
      * given open file. This will cause the system to delete any cached files
@@ -1834,6 +1793,7 @@ public class StorageManager {
      *             doesn't support allocating space, or if the device had
      *             trouble allocating the requested space.
      * @see #getAllocatableBytes(UUID, int)
+     * @see #isAllocationSupported(FileDescriptor)
      * @see Environment#isExternalStorageEmulated(File)
      */
     @WorkerThread
@@ -1848,17 +1808,28 @@ public class StorageManager {
     public void allocateBytes(FileDescriptor fd, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         final File file = ParcelFileDescriptor.getFile(fd);
+        final UUID uuid = getUuidForPath(file);
         for (int i = 0; i < 3; i++) {
             try {
                 final long haveBytes = Os.fstat(fd).st_blocks * 512;
                 final long needBytes = bytes - haveBytes;
 
                 if (needBytes > 0) {
-                    allocateBytes(file, needBytes, flags);
+                    allocateBytes(uuid, needBytes, flags);
                 }
 
-                Os.posix_fallocate(fd, 0, bytes);
-                return;
+                try {
+                    Os.posix_fallocate(fd, 0, bytes);
+                    return;
+                } catch (ErrnoException e) {
+                    if (e.errno == OsConstants.ENOSYS || e.errno == OsConstants.ENOTSUP) {
+                        Log.w(TAG, "fallocate() not supported; falling back to ftruncate()");
+                        Os.ftruncate(fd, bytes);
+                        return;
+                    } else {
+                        throw e;
+                    }
+                }
             } catch (ErrnoException e) {
                 if (e.errno == OsConstants.ENOSPC) {
                     Log.w(TAG, "Odd, not enough space; let's try again?");
@@ -1939,18 +1910,6 @@ public class StorageManager {
      */
     public boolean isCacheBehaviorGroup(File path) throws IOException {
         return isCacheBehavior(path, XATTR_CACHE_GROUP);
-    }
-
-    /** @removed */
-    @Deprecated
-    public void setCacheBehaviorAtomic(File path, boolean atomic) throws IOException {
-        setCacheBehaviorGroup(path, atomic);
-    }
-
-    /** @removed */
-    @Deprecated
-    public boolean isCacheBehaviorAtomic(File path) throws IOException {
-        return isCacheBehaviorGroup(path);
     }
 
     /**
