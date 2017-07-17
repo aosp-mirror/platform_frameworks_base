@@ -48,8 +48,10 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -89,11 +91,12 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final W mWorker;
     private final Context mContext;
     private AudioManager mAudio;
+    protected StatusBar mStatusBar;
     private final NotificationManager mNoMan;
     private final SettingObserver mObserver;
     private final Receiver mReceiver = new Receiver();
     private final MediaSessions mMediaSessions;
-    private final C mCallbacks = new C();
+    protected C mCallbacks = new C();
     private final State mState = new State();
     private final MediaSessionsCallbacks mMediaSessionsCallbacksW = new MediaSessionsCallbacks();
     private final Vibrator mVibrator;
@@ -123,6 +126,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mReceiver.init();
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator != null && mVibrator.hasVibrator();
+        updateStatusBar();
 
         boolean accessibilityVolumeStreamActive = context.getSystemService(
                 AccessibilityManager.class).isAccessibilityVolumeStreamActive();
@@ -326,8 +330,17 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         return changed;
     }
 
-    private boolean onVolumeChangedW(int stream, int flags) {
-        final boolean showUI = (flags & AudioManager.FLAG_SHOW_UI) != 0;
+    private void updateStatusBar() {
+        if (mStatusBar == null) {
+            mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
+        }
+    }
+
+    boolean onVolumeChangedW(int stream, int flags) {
+        updateStatusBar();
+
+        final boolean showUI = (mStatusBar != null && mStatusBar.isDeviceInteractive()) &&
+                ((flags & AudioManager.FLAG_SHOW_UI) != 0);
         final boolean fromKey = (flags & AudioManager.FLAG_FROM_KEY) != 0;
         final boolean showVibrateHint = (flags & AudioManager.FLAG_SHOW_VIBRATE_HINT) != 0;
         final boolean showSilentHint = (flags & AudioManager.FLAG_SHOW_SILENT_HINT) != 0;
@@ -638,7 +651,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         }
     }
 
-    private final class C implements Callbacks {
+    class C implements Callbacks {
         private final HashMap<Callbacks, Handler> mCallbackMap = new HashMap<>();
 
         public void add(Callbacks callback, Handler handler) {
