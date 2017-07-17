@@ -978,9 +978,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
         Dependency.get(ConfigurationController.class).addCallback(this);
-
-        // Make sure that we're using the correct theme
-        onOverlayChanged();
     }
 
     protected void createIconController() {
@@ -993,6 +990,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final Context context = mContext;
         updateDisplaySize(); // populates mDisplayMetrics
         updateResources();
+        updateTheme();
 
         inflateStatusBarWindow(context);
         mStatusBarWindow.setService(this);
@@ -1200,7 +1198,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             });
         }
 
-
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         if (!pm.isScreenOn()) {
             mBroadcastReceiver.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
@@ -1305,14 +1302,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         reevaluateStyles();
     }
 
-    public void onOverlayChanged() {
+    private void reinflateViews() {
         reevaluateStyles();
 
         // Clock and bottom icons
         mNotificationPanel.onOverlayChanged();
-
+        // The status bar on the keyguard is a special layout.
+        mKeyguardStatusBar.onOverlayChanged();
         // Recreate Indication controller because internal references changed
-        // TODO: unregister callbacks before recreating
         mKeyguardIndicationController =
                 SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
                         mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
@@ -2855,17 +2852,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onColorsChanged(ColorExtractor extractor, int which) {
         updateTheme();
-    }
-
-    public boolean isUsingDarkText() {
-        OverlayInfo themeInfo = null;
-        try {
-            themeInfo = mOverlayManager.getOverlayInfo("com.android.systemui.theme.lightwallpaper",
-                    mCurrentUserId);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        return themeInfo != null && themeInfo.isEnabled();
     }
 
     public boolean isUsingDarkTheme() {
@@ -4566,24 +4552,13 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Switches theme from light to dark and vice-versa.
      */
     private void updateTheme() {
+        final boolean inflated = mStackScroller != null;
 
-        int which;
-        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            which = WallpaperManager.FLAG_LOCK;
-        } else {
-            which = WallpaperManager.FLAG_SYSTEM;
-        }
-
-        // Gradient defines if text color should be light or dark.
-        final boolean useDarkText = mColorExtractor.getColors(which, true /* ignoreVisibility */)
-                .supportsDarkText();
-        // And wallpaper defines if QS should be light or dark.
+        // The system wallpaper defines if QS should be light or dark.
         WallpaperColors systemColors = mColorExtractor
                 .getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
         final boolean useDarkTheme = systemColors != null
                 && (systemColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0;
-
-        // Enable/disable dark UI.
         if (isUsingDarkTheme() != useDarkTheme) {
             try {
                 mOverlayManager.setEnabled("com.android.systemui.theme.dark",
@@ -4592,18 +4567,33 @@ public class StatusBar extends SystemUI implements DemoMode,
                 Log.w(TAG, "Can't change theme", e);
             }
         }
-        // Enable/disable dark text overlay.
-        if (isUsingDarkText() != useDarkText) {
-            try {
-                mOverlayManager.setEnabled("com.android.systemui.theme.lightwallpaper",
-                        useDarkText, mCurrentUserId);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Can't change theme", e);
+
+        // Lock wallpaper defines the color of the majority of the views, hence we'll use it
+        // to set our default theme.
+        final boolean lockDarkText = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, true
+                /* ignoreVisibility */).supportsDarkText();
+        final int themeResId = lockDarkText ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI;
+        if (mContext.getThemeResId() != themeResId) {
+            mContext.setTheme(themeResId);
+            if (inflated) {
+                reinflateViews();
             }
         }
 
-        // Make sure we have the correct navbar/statusbar colors.
-        mStatusBarWindowManager.setKeyguardDark(useDarkText);
+        if (inflated) {
+            int which;
+            if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
+                which = WallpaperManager.FLAG_LOCK;
+            } else {
+                which = WallpaperManager.FLAG_SYSTEM;
+            }
+            final boolean useDarkText = mColorExtractor.getColors(which,
+                    true /* ignoreVisibility */).supportsDarkText();
+            mStackScroller.updateDecorViews(useDarkText);
+
+            // Make sure we have the correct navbar/statusbar colors.
+            mStatusBarWindowManager.setKeyguardDark(useDarkText);
+        }
     }
 
     private void updateDozingState() {
