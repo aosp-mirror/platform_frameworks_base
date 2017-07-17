@@ -43,7 +43,7 @@ import java.util.Set;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class AppsBackedUpOnThisDeviceJournalTest {
+public class ProcessedPackagesJournalTest {
     private static final String JOURNAL_FILE_NAME = "processed";
 
     private static final String GOOGLE_PHOTOS = "com.google.photos";
@@ -53,21 +53,23 @@ public class AppsBackedUpOnThisDeviceJournalTest {
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
     private File mStateDirectory;
-    private AppsBackedUpOnThisDeviceJournal mAppsBackedUpOnThisDeviceJournal;
+    private ProcessedPackagesJournal mProcessedPackagesJournal;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mStateDirectory = mTemporaryFolder.newFolder();
-        mAppsBackedUpOnThisDeviceJournal = new AppsBackedUpOnThisDeviceJournal(mStateDirectory);
+        mProcessedPackagesJournal = new ProcessedPackagesJournal(mStateDirectory);
+        mProcessedPackagesJournal.init();
     }
 
     @Test
     public void constructor_loadsAnyPreviousJournalFromDisk() throws Exception {
         writePermanentJournalPackages(Sets.newHashSet(GOOGLE_PHOTOS, GMAIL));
 
-        AppsBackedUpOnThisDeviceJournal journalFromDisk =
-                new AppsBackedUpOnThisDeviceJournal(mStateDirectory);
+        ProcessedPackagesJournal journalFromDisk =
+                new ProcessedPackagesJournal(mStateDirectory);
+        journalFromDisk.init();
 
         assertThat(journalFromDisk.hasBeenProcessed(GOOGLE_PHOTOS)).isTrue();
         assertThat(journalFromDisk.hasBeenProcessed(GMAIL)).isTrue();
@@ -75,61 +77,61 @@ public class AppsBackedUpOnThisDeviceJournalTest {
 
     @Test
     public void hasBeenProcessed_isFalseForAnyPackageFromBlankInit() {
-        assertThat(mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(GOOGLE_PHOTOS)).isFalse();
-        assertThat(mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(GMAIL)).isFalse();
-        assertThat(mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(GOOGLE_PLUS)).isFalse();
+        assertThat(mProcessedPackagesJournal.hasBeenProcessed(GOOGLE_PHOTOS)).isFalse();
+        assertThat(mProcessedPackagesJournal.hasBeenProcessed(GMAIL)).isFalse();
+        assertThat(mProcessedPackagesJournal.hasBeenProcessed(GOOGLE_PLUS)).isFalse();
     }
 
     @Test
     public void addPackage_addsPackageToObjectState() {
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GOOGLE_PHOTOS);
+        mProcessedPackagesJournal.addPackage(GOOGLE_PHOTOS);
 
-        assertThat(mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(GOOGLE_PHOTOS)).isTrue();
+        assertThat(mProcessedPackagesJournal.hasBeenProcessed(GOOGLE_PHOTOS)).isTrue();
     }
 
     @Test
     public void addPackage_addsPackageToFileSystem() throws Exception {
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GOOGLE_PHOTOS);
+        mProcessedPackagesJournal.addPackage(GOOGLE_PHOTOS);
 
         assertThat(readJournalPackages()).contains(GOOGLE_PHOTOS);
     }
 
     @Test
     public void getPackagesCopy_returnsTheCurrentState() throws Exception {
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GOOGLE_PHOTOS);
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GMAIL);
+        mProcessedPackagesJournal.addPackage(GOOGLE_PHOTOS);
+        mProcessedPackagesJournal.addPackage(GMAIL);
 
-        assertThat(mAppsBackedUpOnThisDeviceJournal.getPackagesCopy())
+        assertThat(mProcessedPackagesJournal.getPackagesCopy())
                 .isEqualTo(Sets.newHashSet(GOOGLE_PHOTOS, GMAIL));
     }
 
     @Test
     public void getPackagesCopy_returnsACopy() throws Exception {
-        mAppsBackedUpOnThisDeviceJournal.getPackagesCopy().add(GMAIL);
+        mProcessedPackagesJournal.getPackagesCopy().add(GMAIL);
 
-        assertThat(mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(GMAIL)).isFalse();
+        assertThat(mProcessedPackagesJournal.hasBeenProcessed(GMAIL)).isFalse();
     }
 
     @Test
     public void reset_removesAllPackagesFromObjectState() {
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GOOGLE_PHOTOS);
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GOOGLE_PLUS);
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GMAIL);
+        mProcessedPackagesJournal.addPackage(GOOGLE_PHOTOS);
+        mProcessedPackagesJournal.addPackage(GOOGLE_PLUS);
+        mProcessedPackagesJournal.addPackage(GMAIL);
 
-        mAppsBackedUpOnThisDeviceJournal.reset();
+        mProcessedPackagesJournal.reset();
 
-        assertThat(mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(GOOGLE_PHOTOS)).isFalse();
-        assertThat(mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(GMAIL)).isFalse();
-        assertThat(mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(GOOGLE_PLUS)).isFalse();
+        assertThat(mProcessedPackagesJournal.hasBeenProcessed(GOOGLE_PHOTOS)).isFalse();
+        assertThat(mProcessedPackagesJournal.hasBeenProcessed(GMAIL)).isFalse();
+        assertThat(mProcessedPackagesJournal.hasBeenProcessed(GOOGLE_PLUS)).isFalse();
     }
 
     @Test
     public void reset_removesAllPackagesFromFileSystem() throws Exception {
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GOOGLE_PHOTOS);
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GOOGLE_PLUS);
-        mAppsBackedUpOnThisDeviceJournal.addPackage(GMAIL);
+        mProcessedPackagesJournal.addPackage(GOOGLE_PHOTOS);
+        mProcessedPackagesJournal.addPackage(GOOGLE_PLUS);
+        mProcessedPackagesJournal.addPackage(GMAIL);
 
-        mAppsBackedUpOnThisDeviceJournal.reset();
+        mProcessedPackagesJournal.reset();
 
         assertThat(readJournalPackages()).isEmpty();
     }
