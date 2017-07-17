@@ -399,7 +399,7 @@ public class RankingHelper implements RankingConfig {
         for (int i = 0; i < N; i++) {
             mSignalExtractors[i].setConfig(this);
         }
-        mRankingHandler.requestSort(false);
+        mRankingHandler.requestSort();
     }
 
     public void sort(ArrayList<NotificationRecord> notificationList) {
@@ -511,7 +511,6 @@ public class RankingHelper implements RankingConfig {
             MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
         }
         r.groups.put(group.getId(), group);
-        updateConfig();
     }
 
     @Override
@@ -569,7 +568,6 @@ public class RankingHelper implements RankingConfig {
         r.channels.put(channel.getId(), channel);
         MetricsLogger.action(getChannelLog(channel, pkg).setType(
                 MetricsProto.MetricsEvent.TYPE_OPEN));
-        updateConfig();
     }
 
     void clearLockedFields(NotificationChannel channel) {
@@ -641,7 +639,6 @@ public class RankingHelper implements RankingConfig {
             LogMaker lm = getChannelLog(channel, pkg);
             lm.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
             MetricsLogger.action(lm);
-            updateConfig();
         }
     }
 
@@ -655,7 +652,6 @@ public class RankingHelper implements RankingConfig {
             return;
         }
         r.channels.remove(channelId);
-        updateConfig();
     }
 
     @Override
@@ -672,7 +668,6 @@ public class RankingHelper implements RankingConfig {
                 r.channels.remove(key);
             }
         }
-        updateConfig();
     }
 
     public NotificationChannelGroup getNotificationChannelGroup(String groupId, String pkg,
@@ -735,7 +730,6 @@ public class RankingHelper implements RankingConfig {
                 deletedChannels.add(nc);
             }
         }
-        updateConfig();
         return deletedChannels;
     }
 
@@ -1150,7 +1144,7 @@ public class RankingHelper implements RankingConfig {
             changed |= oldValue != newValue;
         }
         if (changed) {
-            mRankingHandler.requestSort(false);
+            mRankingHandler.requestSort();
         }
     }
 

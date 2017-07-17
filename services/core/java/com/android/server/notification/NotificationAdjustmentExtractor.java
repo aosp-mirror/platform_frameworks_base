@@ -19,13 +19,12 @@ import android.content.Context;
 import android.util.Slog;
 
 /**
- * Determines whether a badge should be shown for this notification
+ * Applies adjustments from the group helper and notification assistant
  */
-public class BadgeExtractor implements NotificationSignalExtractor {
+public class NotificationAdjustmentExtractor implements NotificationSignalExtractor {
     private static final String TAG = "BadgeExtractor";
     private static final boolean DBG = false;
 
-    private RankingConfig mConfig;
 
     public void initialize(Context ctx, NotificationUsageStats usageStats) {
         if (DBG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
@@ -37,28 +36,13 @@ public class BadgeExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        if (mConfig == null) {
-            if (DBG) Slog.d(TAG, "missing config");
-            return null;
-        }
-        boolean userWantsBadges = mConfig.badgingEnabled(record.sbn.getUser());
-        boolean appCanShowBadge =
-                mConfig.canShowBadge(record.sbn.getPackageName(), record.sbn.getUid());
-        if (!userWantsBadges || !appCanShowBadge) {
-            record.setShowBadge(false);
-        } else {
-            if (record.getChannel() != null) {
-                record.setShowBadge(record.getChannel().canShowBadge() && appCanShowBadge);
-            } else {
-                record.setShowBadge(appCanShowBadge);
-            }
-        }
+        record.applyAdjustments();
 
         return null;
     }
 
     @Override
     public void setConfig(RankingConfig config) {
-        mConfig = config;
+        // config is not used
     }
 }

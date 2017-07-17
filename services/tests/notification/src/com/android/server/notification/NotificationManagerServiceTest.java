@@ -20,6 +20,9 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
+import static com.android.server.notification.NotificationManagerService
+        .MESSAGE_SEND_RANKING_UPDATE;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -31,9 +34,12 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,6 +60,9 @@ import android.content.pm.ParceledListSlice;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
@@ -63,7 +72,22 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.Log;
+import android.util.Slog;
+
+import com.android.server.lights.Light;
+import com.android.server.lights.LightsManager;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,16 +95,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import com.android.server.lights.Light;
-import com.android.server.lights.LightsManager;
+import java.util.Map;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -109,6 +124,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     private AudioManager mAudioManager;
     @Mock
     ActivityManager mActivityManager;
+    NotificationManagerService.WorkerHandler mHandler;
 
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
@@ -152,6 +168,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
         mNotificationManagerService = new TestableNotificationManagerService(mContext);
 
+        // Use this testable looper.
+        mTestableLooper = TestableLooper.get(this);
+        mHandler = mNotificationManagerService.new WorkerHandler(mTestableLooper.getLooper());
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = uid;
@@ -162,8 +181,6 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
-        // Use this testable looper.
-        mTestableLooper = TestableLooper.get(this);
 
         mFile = new File(mContext.getCacheDir(), "test.xml");
         mFile.createNewFile();
@@ -174,10 +191,11 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 null, new ComponentName(PKG, "test_class"), uid, true, null, 0);
         when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
         try {
-            mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
-                    mPackageManagerClient, mockLightsManager, mNotificationListeners,
-                    mNotificationAssistants, mConditionProviders, mCompanionMgr,
-                    mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper);
+            mNotificationManagerService.init(mTestableLooper.getLooper(),
+                    mPackageManager, mPackageManagerClient, mockLightsManager,
+                    mNotificationListeners, mNotificationAssistants, mConditionProviders,
+                    mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
+                    mGroupHelper);
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
@@ -232,6 +250,43 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", uid, 0,
                 nb.build(), new UserHandle(uid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
+    }
+
+    private Map<String, Answer> getSignalExtractorSideEffects() {
+        Map<String, Answer> answers = new ArrayMap<>();
+
+        answers.put("override group key", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .setOverrideGroupKey("bananas");
+            return null;
+        });
+        answers.put("override people", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .setPeopleOverride(new ArrayList<>());
+            return null;
+        });
+        answers.put("snooze criteria", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .setSnoozeCriteria(new ArrayList<>());
+            return null;
+        });
+        answers.put("notification channel", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .updateNotificationChannel(new NotificationChannel("a", "", IMPORTANCE_LOW));
+            return null;
+        });
+        answers.put("badging", invocationOnMock -> {
+            NotificationRecord r = (NotificationRecord) invocationOnMock.getArguments()[0];
+            r.setShowBadge(!r.canShowBadge());
+            return null;
+        });
+        answers.put("package visibility", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).setPackageVisibilityOverride(
+                    Notification.VISIBILITY_SECRET);
+            return null;
+        });
+
+        return answers;
     }
 
     @Test
@@ -1317,11 +1372,59 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mNotificationManagerService.addNotification(otherPackage);
 
         // Same notifications are enqueued as posted, everything counts b/c id and tag don't match
-        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(PKG, new UserHandle(uid).getIdentifier(), 0, null));
-        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(PKG, new UserHandle(uid).getIdentifier(), 0, "tag2"));
-        assertEquals(2, mNotificationManagerService.getNotificationCountLocked("a", new UserHandle(uid).getIdentifier(), 0, "banana"));
+        int userId = new UserHandle(uid).getIdentifier();
+        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(PKG, userId, 0, null));
+        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(PKG, userId, 0, "tag2"));
+        assertEquals(2, mNotificationManagerService.getNotificationCountLocked("a", userId, 0, "banana"));
 
         // exclude a known notification - it's excluded from only the posted list, not enqueued
-        assertEquals(39, mNotificationManagerService.getNotificationCountLocked(PKG, new UserHandle(uid).getIdentifier(), 0, "tag"));
+        assertEquals(39, mNotificationManagerService.getNotificationCountLocked(PKG, userId, 0, "tag"));
+    }
+
+    @Test
+    public void testModifyAutogroup_requestsSort() throws Exception {
+        RankingHandler rh = mock(RankingHandler.class);
+        mNotificationManagerService.setRankingHandler(rh);
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mNotificationManagerService.addNotification(r);
+        mNotificationManagerService.addAutogroupKeyLocked(r.getKey());
+        mNotificationManagerService.removeAutogroupKeyLocked(r.getKey());
+
+        verify(rh, times(2)).requestSort();
+    }
+
+    @Test
+    public void testHandleRankingSort_sendsUpdateOnSignalExtractorChange() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mNotificationManagerService.setHandler(handler);
+
+        Map<String, Answer> answers = getSignalExtractorSideEffects();
+        for (String message : answers.keySet()) {
+            mNotificationManagerService.clearNotifications();
+            final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+            mNotificationManagerService.addNotification(r);
+
+            doAnswer(answers.get(message)).when(mRankingHelper).extractSignals(r);
+
+            mNotificationManagerService.handleRankingSort();
+        }
+        verify(handler, times(answers.size())).scheduleSendRankingUpdate();
+    }
+
+    @Test
+    public void testHandleRankingSort_noUpdateWhenNoSignalChange() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mNotificationManagerService.setHandler(handler);
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mNotificationManagerService.addNotification(r);
+
+        mNotificationManagerService.handleRankingSort();
+        verify(handler, never()).scheduleSendRankingUpdate();
     }
 }

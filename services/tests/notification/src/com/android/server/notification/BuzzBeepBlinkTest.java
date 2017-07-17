@@ -76,7 +76,8 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     @Mock Vibrator mVibrator;
     @Mock android.media.IRingtonePlayer mRingtonePlayer;
     @Mock Light mLight;
-    @Mock Handler mHandler;
+    @Mock
+    NotificationManagerService.WorkerHandler mHandler;
     @Mock
     NotificationUsageStats mUsageStats;
 
