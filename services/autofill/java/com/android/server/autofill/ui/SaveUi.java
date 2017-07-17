@@ -28,7 +28,6 @@ import android.service.autofill.CustomDescription;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.ValueFinder;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.Gravity;
