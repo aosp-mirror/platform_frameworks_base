@@ -36,7 +36,6 @@ import android.os.Parcelable;
  *
  * @hide
  */
-// TODO(nfuller): Expose necessary APIs for OEMs with @SystemApi. http://b/31008728
 public final class DistroRulesVersion implements Parcelable {
 
     private final String mRulesVersion;
