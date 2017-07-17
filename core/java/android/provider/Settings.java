@@ -7882,6 +7882,7 @@ public final class Settings {
          * A setting of > 0 enacts this override duration in favor of the default or
          * any other configured wakelock duration.
          * A setting of == 0 effectively disables the net transition wakelock.
+         * @hide
          */
         public static final String NET_TRANSITION_WAKELOCK_OVERRIDE_MS =
                 "net_transition_wakelock_override_ms";
