@@ -64,7 +64,7 @@ std::mutex gPowerHalMutex;
 static nsecs_t gLastEventTime[USER_ACTIVITY_EVENT_LAST + 1];
 
 // Throttling interval for user activity calls.
-static const nsecs_t MIN_TIME_BETWEEN_USERACTIVITIES = 500 * 1000000L; // 500ms
+static const nsecs_t MIN_TIME_BETWEEN_USERACTIVITIES = 100 * 1000000L; // 100ms
 
 // ----------------------------------------------------------------------------
 
@@ -104,19 +104,6 @@ static void processReturn(const Return<void> &ret, const char* functionName) {
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
-    // Tell the power HAL when user activity occurs.
-    gPowerHalMutex.lock();
-    if (getPowerHal()) {
-        Return<void> ret;
-        if (gPowerHalV1_1 != nullptr) {
-            ret = gPowerHalV1_1->powerHintAsync(PowerHint::INTERACTION, 0);
-        } else {
-            ret = gPowerHalV1_0->powerHint(PowerHint::INTERACTION, 0);
-        }
-        processReturn(ret, "powerHint");
-    }
-    gPowerHalMutex.unlock();
-
     if (gPowerManagerServiceObj) {
         // Throttle calls into user activity by event type.
         // We're a little conservative about argument checking here in case the caller
@@ -131,6 +118,21 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
                 return;
             }
             gLastEventTime[eventType] = eventTime;
+
+
+            // Tell the power HAL when user activity occurs.
+            gPowerHalMutex.lock();
+            if (getPowerHal()) {
+              Return<void> ret;
+              if (gPowerHalV1_1 != nullptr) {
+                ret = gPowerHalV1_1->powerHintAsync(PowerHint::INTERACTION, 0);
+              } else {
+                ret = gPowerHalV1_0->powerHint(PowerHint::INTERACTION, 0);
+              }
+              processReturn(ret, "powerHint");
+            }
+            gPowerHalMutex.unlock();
+
         }
 
         JNIEnv* env = AndroidRuntime::getJNIEnv();
