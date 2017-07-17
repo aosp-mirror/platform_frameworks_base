@@ -16,6 +16,7 @@
 
 package com.android.server.timezone;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -80,7 +81,7 @@ final class PackageStatusStorage {
     private final AtomicFile mPackageStatusFile;
 
     PackageStatusStorage(File storageDir) {
-        mPackageStatusFile = new AtomicFile(new File(storageDir, "packageStatus.xml"));
+        mPackageStatusFile = new AtomicFile(new File(storageDir, "package-status.xml"));
         if (!mPackageStatusFile.getBaseFile().exists()) {
             try {
                 insertInitialPackageStatus();
@@ -103,7 +104,7 @@ final class PackageStatusStorage {
     PackageStatus getPackageStatus() {
         synchronized (this) {
             try {
-                return getPackageStatusInternal();
+                return getPackageStatusLocked();
             } catch (ParseException e) {
                 // This means that data exists in the file but it was bad.
                 Slog.e(LOG_TAG, "Package status invalid, resetting and retrying", e);
@@ -111,7 +112,7 @@ final class PackageStatusStorage {
                 // Reset the storage so it is in a good state again.
                 recoverFromBadData(e);
                 try {
-                    return getPackageStatusInternal();
+                    return getPackageStatusLocked();
                 } catch (ParseException e2) {
                     throw new IllegalStateException("Recovery from bad file failed", e2);
                 }
@@ -119,7 +120,8 @@ final class PackageStatusStorage {
         }
     }
 
-    private PackageStatus getPackageStatusInternal() throws ParseException {
+    @GuardedBy("this")
+    private PackageStatus getPackageStatusLocked() throws ParseException {
         try (FileInputStream fis = mPackageStatusFile.openRead()) {
             XmlPullParser parser = parseToPackageStatusTag(fis);
             Integer checkStatus = getNullableIntAttribute(parser, ATTRIBUTE_CHECK_STATUS);
@@ -137,7 +139,7 @@ final class PackageStatusStorage {
         }
     }
 
-    // Callers should be synchronized(this).
+    @GuardedBy("this")
     private int recoverFromBadData(Exception cause) {
         mPackageStatusFile.delete();
         try {
@@ -155,7 +157,7 @@ final class PackageStatusStorage {
         // is reset to ensure that old tokens are unlikely to work.
         final int initialOptimisticLockId = (int) System.currentTimeMillis();
 
-        writePackageStatusInternal(null /* status */, initialOptimisticLockId,
+        writePackageStatusLocked(null /* status */, initialOptimisticLockId,
                 null /* packageVersions */);
         return initialOptimisticLockId;
     }
@@ -243,7 +245,7 @@ final class PackageStatusStorage {
         }
     }
 
-    // Caller should be synchronized(this).
+    @GuardedBy("this")
     private int getCurrentOptimisticLockId() throws ParseException {
         try (FileInputStream fis = mPackageStatusFile.openRead()) {
             XmlPullParser parser = parseToPackageStatusTag(fis);
@@ -278,7 +280,7 @@ final class PackageStatusStorage {
         }
     }
 
-    // Caller should be synchronized(this).
+    @GuardedBy("this")
     private boolean writePackageStatusWithOptimisticLockCheck(int optimisticLockId,
             int newOptimisticLockId, Integer status, PackageVersions packageVersions)
             throws IOException {
@@ -294,12 +296,12 @@ final class PackageStatusStorage {
             return false;
         }
 
-        writePackageStatusInternal(status, newOptimisticLockId, packageVersions);
+        writePackageStatusLocked(status, newOptimisticLockId, packageVersions);
         return true;
     }
 
-    // Caller should be synchronized(this).
-    private void writePackageStatusInternal(Integer status, int optimisticLockId,
+    @GuardedBy("this")
+    private void writePackageStatusLocked(Integer status, int optimisticLockId,
             PackageVersions packageVersions) throws IOException {
         if ((status == null) != (packageVersions == null)) {
             throw new IllegalArgumentException(
