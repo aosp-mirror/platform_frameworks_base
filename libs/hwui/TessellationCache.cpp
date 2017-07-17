@@ -290,7 +290,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 TessellationCache::TessellationCache()
-        : mMaxSize(Properties::tessellationCacheSize)
+        : mMaxSize(MB(1))
         , mCache(LruCache<Description, Buffer*>::kUnlimitedCapacity)
         , mShadowCache(LruCache<ShadowDescription, Task<vertexBuffer_pair_t*>*>::kUnlimitedCapacity) {
     mCache.setOnEntryRemovedListener(&mBufferRemovedListener);

@@ -17,6 +17,7 @@
 #include "Debug.h"
 #include "Properties.h"
 #include "RenderBufferCache.h"
+#include "DeviceInfo.h"
 
 #include <utils/Log.h>
 
@@ -36,13 +37,20 @@ namespace uirenderer {
     #define RENDER_BUFFER_LOGD(...)
 #endif
 
+static uint32_t calculateRboCacheSize() {
+    // TODO: Do we need to use extensions().has4BitStencil() here?
+    // The tuning guide recommends it, but all real devices are configured
+    // with a larger cache than necessary by 4x, so keep the 2x for now regardless
+    return DeviceInfo::multiplyByResolution(2);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
 RenderBufferCache::RenderBufferCache()
         : mSize(0)
-        , mMaxSize(Properties::renderBufferCacheSize) {}
+        , mMaxSize(calculateRboCacheSize()) {}
 
 RenderBufferCache::~RenderBufferCache() {
     clear();
