@@ -32,8 +32,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -61,7 +59,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
-import android.service.notification.NotificationListenerService;
+import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -82,7 +80,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -2895,7 +2892,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 146;
+            private static final int SETTINGS_VERSION = 147;
 
             private final int mUserId;
 
@@ -3420,6 +3417,23 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 146;
+                }
+
+                if (currentVersion == 146) {
+                    // Version 146: Set the default value for DEFAULT_RESTRICT_BACKGROUND_DATA.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        final Setting currentSetting = globalSettings.getSettingLocked(
+                                Global.DEFAULT_RESTRICT_BACKGROUND_DATA);
+                        if (currentSetting.isNull()) {
+                            globalSettings.insertSettingLocked(
+                                    Global.DEFAULT_RESTRICT_BACKGROUND_DATA,
+                                    getContext().getResources().getBoolean(
+                                            R.bool.def_restrict_background_data) ? "1" : "0",
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 147;
                 }
 
                 // vXXX: Add new settings above this point.
