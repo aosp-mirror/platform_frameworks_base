@@ -24,7 +24,6 @@ import android.net.Uri;
  *
  * @hide
  */
-// TODO(nfuller): Expose necessary APIs for OEMs with @SystemApi. http://b/31008728
 public final class TimeZoneRulesDataContract {
 
     private TimeZoneRulesDataContract() {}

@@ -64,7 +64,6 @@ import java.util.Arrays;
  * {@link Context#TIME_ZONE_RULES_MANAGER_SERVICE}.
  * @hide
  */
-// TODO(nfuller): Expose necessary APIs for OEMs with @SystemApi. http://b/31008728
 public final class RulesManager {
     private static final String TAG = "timezone.RulesManager";
     private static final boolean DEBUG = false;
