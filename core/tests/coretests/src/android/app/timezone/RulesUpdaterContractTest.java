@@ -33,7 +33,6 @@ import org.junit.Test;
 /**
  * Tests for {@link RulesUpdaterContract}.
  */
-// TODO(nfuller) Move to CTS once this class is part of the SystemApi. http://b/31008728
 public class RulesUpdaterContractTest {
 
     @Test

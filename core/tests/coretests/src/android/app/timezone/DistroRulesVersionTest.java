@@ -27,7 +27,6 @@ import org.junit.Test;
 /**
  * Tests for {@link DistroRulesVersion}.
  */
-// TODO(nfuller) Move to CTS once this class is part of the SystemApi. http://b/31008728
 public class DistroRulesVersionTest {
 
     @Test
