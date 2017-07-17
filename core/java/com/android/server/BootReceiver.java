@@ -195,6 +195,8 @@ public class BootReceiver extends BroadcastReceiver {
                     "/proc/last_kmsg", -LOG_SIZE, "SYSTEM_LAST_KMSG");
             addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
                     "/sys/fs/pstore/console-ramoops", -LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
+                    "/sys/fs/pstore/console-ramoops-0", -LOG_SIZE, "SYSTEM_LAST_KMSG");
             addFileToDropBox(db, timestamps, headers, "/cache/recovery/log", -LOG_SIZE,
                     "SYSTEM_RECOVERY_LOG");
             addFileToDropBox(db, timestamps, headers, "/cache/recovery/last_kmsg",
@@ -276,6 +278,10 @@ public class BootReceiver extends BroadcastReceiver {
         if (fileTime <= 0) {
             file = new File("/sys/fs/pstore/console-ramoops");
             fileTime = file.lastModified();
+            if (fileTime <= 0) {
+                file = new File("/sys/fs/pstore/console-ramoops-0");
+                fileTime = file.lastModified();
+            }
         }
 
         if (fileTime <= 0) return;  // File does not exist
