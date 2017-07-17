@@ -99,7 +99,7 @@ import java.util.List;
  *       shut down the tunnel gracefully.</li>
  * </ol>
  *
- * <p>Services extended this class need to be declared with appropriate
+ * <p>Services extending this class need to be declared with an appropriate
  * permission and intent filter. Their access must be secured by
  * {@link android.Manifest.permission#BIND_VPN_SERVICE} permission, and
  * their intent filter must match {@link #SERVICE_INTERFACE} action. Here
@@ -111,6 +111,13 @@ import java.util.List;
  *         &lt;action android:name="android.net.VpnService"/&gt;
  *     &lt;/intent-filter&gt;
  * &lt;/service&gt;</pre>
+ *
+ * <p> The Android system starts a VPN in the background by calling
+ * {@link android.content.Context#startService startService()}. In Android 8.0
+ * (API level 26) and higher, the system places VPN apps on the temporary
+ * whitelist for a short period so the app can start in the background. The VPN
+ * app must promote itself to the foreground after it's launched or the system
+ * will shut down the app.
  *
  * @see Builder
  */
