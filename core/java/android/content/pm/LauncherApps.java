@@ -608,15 +608,15 @@ public class LauncherApps {
     }
 
     /**
-     * Get {@link ApplicationInfo} for a profile
+     * Returns {@link ApplicationInfo} about an application installed for a specific user profile.
      *
      * @param packageName The package name of the application
      * @param flags Additional option flags {@link PackageManager#getApplicationInfo}
      * @param user The UserHandle of the profile.
      *
-     * @return An {@link ApplicationInfo} containing information about the package or
-     *         null if the package isn't installed for the given user, or the target user
-     *         is not enabled.
+     * @return {@link ApplicationInfo} containing information about the package. Returns
+     *         {@code null} if the package isn't installed for the given profile, or the profile
+     *         isn't enabled.
      */
     public ApplicationInfo getApplicationInfo(@NonNull String packageName,
             @ApplicationInfoFlags int flags, @NonNull UserHandle user)
