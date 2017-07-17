@@ -301,33 +301,21 @@ public class DexManager {
     }
 
     /**
-     * Perform dexopt on the package {@code packageName} secondary dex files.
+     * Perform dexopt on with the given {@code options} on the secondary dex files.
      * @return true if all secondary dex files were processed successfully (compiled or skipped
      *         because they don't need to be compiled)..
      */
-    public boolean dexoptSecondaryDex(String packageName, int compilerReason, boolean force,
-            boolean downgrade) {
-        return dexoptSecondaryDex(packageName,
-                PackageManagerServiceCompilerMapping.getCompilerFilterForReason(compilerReason),
-                force, /* compileOnlySharedDex */ false, downgrade);
-    }
-
-    /**
-     * Perform dexopt on the package {@code packageName} secondary dex files.
-     * @return true if all secondary dex files were processed successfully (compiled or skipped
-     *         because they don't need to be compiled)..
-     */
-    public boolean dexoptSecondaryDex(String packageName, String compilerFilter, boolean force,
-            boolean compileOnlySharedDex, boolean downgrade) {
+    public boolean dexoptSecondaryDex(DexoptOptions options) {
         // Select the dex optimizer based on the force parameter.
         // Forced compilation is done through ForcedUpdatePackageDexOptimizer which will adjust
         // the necessary dexopt flags to make sure that compilation is not skipped. This avoid
         // passing the force flag through the multitude of layers.
         // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
         //       allocate an object here.
-        PackageDexOptimizer pdo = force
+        PackageDexOptimizer pdo = options.isForce()
                 ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
                 : mPackageDexOptimizer;
+        String packageName = options.getPackageName();
         PackageUseInfo useInfo = getPackageUseInfo(packageName);
         if (useInfo == null || useInfo.getDexUseInfoMap().isEmpty()) {
             if (DEBUG) {
@@ -340,7 +328,7 @@ public class DexManager {
         for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
             String dexPath = entry.getKey();
             DexUseInfo dexUseInfo = entry.getValue();
-            if (compileOnlySharedDex && !dexUseInfo.isUsedByOtherApps()) {
+            if (options.isDexoptOnlySharedDex() && !dexUseInfo.isUsedByOtherApps()) {
                 continue;
             }
             PackageInfo pkg = null;
@@ -362,8 +350,8 @@ public class DexManager {
             }
 
             int result = pdo.dexOptSecondaryDexPath(pkg.applicationInfo, dexPath,
-                    dexUseInfo.getLoaderIsas(), compilerFilter, dexUseInfo.isUsedByOtherApps(),
-                    downgrade);
+                    dexUseInfo.getLoaderIsas(), options.getCompilerFilter(),
+                    dexUseInfo.isUsedByOtherApps(), options.isDowngrade());
             success = success && (result != PackageDexOptimizer.DEX_OPT_FAILED);
         }
         return success;
