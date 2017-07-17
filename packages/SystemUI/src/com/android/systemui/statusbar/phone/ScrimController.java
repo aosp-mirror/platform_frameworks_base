@@ -25,6 +25,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,6 +103,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     protected long mDurationOverride = -1;
     private long mAnimationDelay;
     private Runnable mOnAnimationFinished;
+    private boolean mDeferFinishedListener;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
     private boolean mDozing;
     private float mDozeInFrontAlpha;
@@ -446,7 +448,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mOnAnimationFinished != null) {
+                if (!mDeferFinishedListener && mOnAnimationFinished != null) {
                     mOnAnimationFinished.run();
                     mOnAnimationFinished = null;
                 }
@@ -557,7 +559,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         float animEndValue = -1;
         if (previousAnimator != null) {
             if (animate || alpha == currentAlpha) {
+                // We are not done yet! Defer calling the finished listener.
+                if (animate) {
+                    mDeferFinishedListener = true;
+                }
                 previousAnimator.cancel();
+                mDeferFinishedListener = false;
             } else {
                 animEndValue = ViewState.getChildTag(scrim, TAG_END_ALPHA);
             }
