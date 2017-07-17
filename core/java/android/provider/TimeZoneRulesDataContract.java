@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 
 /**
@@ -24,7 +25,7 @@ import android.net.Uri;
  *
  * @hide
  */
-// TODO(nfuller): Expose necessary APIs for OEMs with @SystemApi. http://b/31008728
+@SystemApi
 public final class TimeZoneRulesDataContract {
 
     private TimeZoneRulesDataContract() {}
