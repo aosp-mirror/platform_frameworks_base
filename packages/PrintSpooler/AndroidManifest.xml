@@ -36,6 +36,8 @@
     <uses-permission android:name="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_PRINT_SERVICES" />
+    <uses-permission android:name="android.permission.READ_PRINT_SERVICE_RECOMMENDATIONS" />
 
     <application
         android:allowClearUserData="true"
