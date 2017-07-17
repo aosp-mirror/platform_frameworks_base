@@ -38,7 +38,7 @@ static jint runBidi(JNIEnv* env, jobject obj, jint dir, jcharArray chsArray,
         if (info != NULL) {
             UErrorCode status = U_ZERO_ERROR;
             UBiDi* bidi = ubidi_openSized(n, 0, &status);
-            ubidi_setPara(bidi, chs, n, dir, NULL, &status);
+            ubidi_setPara(bidi, reinterpret_cast<const UChar*>(chs), n, dir, NULL, &status);
             if (U_SUCCESS(status)) {
                 for (int i = 0; i < n; ++i) {
                   info[i] = ubidi_getLevelAt(bidi, i);
