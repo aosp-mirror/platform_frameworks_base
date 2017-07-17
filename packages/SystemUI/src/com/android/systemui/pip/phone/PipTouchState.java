@@ -29,7 +29,7 @@ import java.io.PrintWriter;
  */
 public class PipTouchState {
     private static final String TAG = "PipTouchHandler";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private ViewConfiguration mViewConfig;
 
