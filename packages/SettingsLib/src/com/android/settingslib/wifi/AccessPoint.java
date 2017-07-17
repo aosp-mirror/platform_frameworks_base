@@ -177,7 +177,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private Object mTag;
 
-    private int mRankingScore = Integer.MIN_VALUE;
     private int mSpeed = Speed.NONE;
     private boolean mIsScoredNetworkMetered = false;
 
@@ -283,7 +282,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
         this.mId = that.mId;
         this.mSpeed = that.mSpeed;
         this.mIsScoredNetworkMetered = that.mIsScoredNetworkMetered;
-        this.mRankingScore = that.mRankingScore;
     }
 
     /**
@@ -294,7 +292,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     *   1. Active before inactive
     *   2. Reachable before unreachable
     *   3. Saved before unsaved
-    *   4. (Internal only) Network ranking score
+    *   4. Network speed value
     *   5. Stronger signal before weaker signal
     *   6. SSID alphabetically
     *
@@ -315,9 +313,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (isSaved() && !other.isSaved()) return -1;
         if (!isSaved() && other.isSaved()) return 1;
 
-        // Higher scores go before lower scores
-        if (getRankingScore() != other.getRankingScore()) {
-            return (getRankingScore() > other.getRankingScore()) ? -1 : 1;
+        // Faster speeds go before slower speeds
+        if (getSpeed() != other.getSpeed()) {
+            return other.getSpeed() - getSpeed();
         }
 
         // Sort by signal strength, bucketed by level
@@ -376,9 +374,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
             builder.append(',').append(securityToString(security, pskType));
         }
         builder.append(",level=").append(getLevel());
-        if (mRankingScore != Integer.MIN_VALUE) {
-            builder.append(",rankingScore=").append(mRankingScore);
-        }
         if (mSpeed != Speed.NONE) {
             builder.append(",speed=").append(mSpeed);
         }
@@ -409,9 +404,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     private boolean updateScores(WifiNetworkScoreCache scoreCache) {
         int oldSpeed = mSpeed;
-        int oldRankingScore = mRankingScore;
         mSpeed = Speed.NONE;
-        mRankingScore = Integer.MIN_VALUE;
 
         if (isActive() && mInfo != null) {
             NetworkKey key = new NetworkKey(new WifiKey(
@@ -419,20 +412,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
             ScoredNetwork score = scoreCache.getScoredNetwork(key);
             if (score != null) {
                 mSpeed = score.calculateBadge(mInfo.getRssi());
-                if (score.hasRankingScore()) {
-                    mRankingScore = score.calculateRankingScore(mInfo.getRssi());
-                }
             }
         } else {
             for (ScanResult result : mScanResultCache.values()) {
                 ScoredNetwork score = scoreCache.getScoredNetwork(result);
                 if (score == null) {
                     continue;
-                }
-
-                if (score.hasRankingScore()) {
-                    mRankingScore =
-                            Math.max(mRankingScore, score.calculateRankingScore(result.level));
                 }
                 // TODO(sghuman): Rename calculateBadge API
                 mSpeed = Math.max(mSpeed, score.calculateBadge(result.level));
@@ -443,7 +428,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             Log.i(TAG, String.format("%s: Set speed to %d", ssid, mSpeed));
         }
 
-        return (oldSpeed != mSpeed || oldRankingScore != mRankingScore);
+        return oldSpeed != mSpeed;
     }
 
     /**
@@ -799,12 +784,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
 
-        // If Speed label is present, use the preference combination to prepend it to the summary.
-        if (mSpeed != Speed.NONE) {
+        // If Speed label and summary are both present, use the preference combination to combine
+        // the two, else return the non-null one.
+        if (getSpeedLabel() != null && summary.length() != 0) {
             return mContext.getResources().getString(
                     R.string.preference_summary_default_combination,
                     getSpeedLabel(),
                     summary.toString());
+        } else if (getSpeedLabel() != null) {
+            return getSpeedLabel();
         } else {
             return summary.toString();
         }
@@ -834,9 +822,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
             visibility.append(" rssi=").append(mInfo.getRssi());
             visibility.append(" ");
             visibility.append(" score=").append(mInfo.score);
-            if (mRankingScore != Integer.MIN_VALUE) {
-                visibility.append(" rankingScore=").append(getRankingScore());
-            }
             if (mSpeed != Speed.NONE) {
                 visibility.append(" speed=").append(getSpeedLabel());
             }
@@ -1139,10 +1124,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
     /** Sets the rssi to {@link #UNREACHABLE_RSSI}. */
     void setUnreachable() {
         setRssi(AccessPoint.UNREACHABLE_RSSI);
-    }
-
-    int getRankingScore() {
-        return mRankingScore;
     }
 
     int getSpeed() { return mSpeed;}
