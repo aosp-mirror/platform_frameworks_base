@@ -16,11 +16,16 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.WallpaperColors;
+import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
@@ -49,6 +54,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private boolean mDockedLight;
     private int mLastStatusBarMode;
     private int mLastNavigationBarMode;
+    private final Color mDarkModeColor;
 
     /**
      * Whether the navigation bar should be light factoring in already how much alpha the scrim has
@@ -61,12 +67,14 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
      */
     private boolean mHasLightNavigationBar;
     private boolean mScrimAlphaBelowThreshold;
+    private boolean mInvertLightNavBarWithScrim;
     private float mScrimAlpha;
 
     private final Rect mLastFullscreenBounds = new Rect();
     private final Rect mLastDockedBounds = new Rect();
 
-    public LightBarController() {
+    public LightBarController(Context ctx) {
+        mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
         mStatusBarIconController = Dependency.get(DarkIconDispatcher.class);
         mBatteryController = Dependency.get(BatteryController.class);
         mBatteryController.addCallback(this);
@@ -74,6 +82,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
         mNavigationBarController = navigationBar;
+        updateNavigation();
     }
 
     public void setFingerprintUnlockController(
@@ -119,7 +128,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             boolean last = mNavigationLight;
             mHasLightNavigationBar = isLight(vis, navigationBarMode,
                     View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-            mNavigationLight = mHasLightNavigationBar && mScrimAlphaBelowThreshold;
+            mNavigationLight = mHasLightNavigationBar
+                    && (mScrimAlphaBelowThreshold || !mInvertLightNavBarWithScrim);
             if (mNavigationLight != last) {
                 updateNavigation();
             }
@@ -141,6 +151,15 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         boolean belowThresholdBefore = mScrimAlphaBelowThreshold;
         mScrimAlphaBelowThreshold = mScrimAlpha < NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD;
         if (mHasLightNavigationBar && belowThresholdBefore != mScrimAlphaBelowThreshold) {
+            reevaluate();
+        }
+    }
+
+    public void setScrimColor(GradientColors colors) {
+        boolean invertLightNavBarWithScrimBefore = mInvertLightNavBarWithScrim;
+        mInvertLightNavBarWithScrim = !colors.supportsDarkText();
+        if (mHasLightNavigationBar
+                && invertLightNavBarWithScrimBefore != mInvertLightNavBarWithScrim) {
             reevaluate();
         }
     }
