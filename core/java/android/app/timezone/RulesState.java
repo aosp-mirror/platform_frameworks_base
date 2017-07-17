@@ -60,7 +60,6 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-// TODO(nfuller): Expose necessary APIs for OEMs with @SystemApi. http://b/31008728
 public final class RulesState implements Parcelable {
 
     @Retention(RetentionPolicy.SOURCE)
