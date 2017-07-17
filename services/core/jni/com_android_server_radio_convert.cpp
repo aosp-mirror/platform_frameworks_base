@@ -126,6 +126,11 @@ static struct {
     } ParcelableException;
 } gjni;
 
+template <>
+bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult) {
+    return __ThrowIfFailedHidl(env, hidlResult);
+}
+
 bool __ThrowIfFailedHidl(JNIEnv *env, const hardware::details::return_status &hidlResult) {
     if (hidlResult.isOk()) return false;
 

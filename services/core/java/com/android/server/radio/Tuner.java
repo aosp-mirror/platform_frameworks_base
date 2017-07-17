@@ -17,6 +17,8 @@
 package com.android.server.radio;
 
 import android.annotation.NonNull;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.ProgramSelector;
@@ -85,6 +87,8 @@ class Tuner extends ITuner.Stub {
     private native boolean nativeStartBackgroundScan(long nativeContext);
     private native List<RadioManager.ProgramInfo> nativeGetProgramList(long nativeContext,
             String filter);
+
+    private native byte[] nativeGetImage(long nativeContext, int id);
 
     private native boolean nativeIsAnalogForced(long nativeContext);
     private native void nativeSetAnalogForced(long nativeContext, boolean isForced);
@@ -210,6 +214,23 @@ class Tuner extends ITuner.Stub {
             checkNotClosedLocked();
             return nativeGetProgramInformation(mNativeContext);
         }
+    }
+
+    @Override
+    public Bitmap getImage(int id) {
+        if (id == 0) {
+            throw new IllegalArgumentException("Image ID is missing");
+        }
+
+        byte[] rawImage;
+        synchronized (mLock) {
+            rawImage = nativeGetImage(mNativeContext, id);
+        }
+        if (rawImage == null || rawImage.length == 0) {
+            return null;
+        }
+
+        return BitmapFactory.decodeByteArray(rawImage, 0, rawImage.length);
     }
 
     @Override

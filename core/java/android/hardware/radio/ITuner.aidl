@@ -16,6 +16,7 @@
 
 package android.hardware.radio;
 
+import android.graphics.Bitmap;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 
@@ -63,6 +64,8 @@ interface ITuner {
     void cancelAnnouncement();
 
     RadioManager.ProgramInfo getProgramInformation();
+
+    Bitmap getImage(int id);
 
     /**
      * @returns {@code true} if the scan was properly scheduled,

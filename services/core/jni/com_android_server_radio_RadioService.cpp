@@ -232,7 +232,7 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
         return nullptr;
     }
 
-    Tuner::setHalTuner(env, tuner, halTuner);
+    Tuner::assignHalInterfaces(env, tuner, module, halTuner);
     ALOGD("Opened tuner %p", halTuner.get());
     return tuner.release();
 }
