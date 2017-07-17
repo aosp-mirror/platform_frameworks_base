@@ -23,15 +23,18 @@ import android.os.Looper;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
+import android.system.StructTimespec;
 import android.util.Log;
-
-import com.google.android.collect.Maps;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ExponentiallyBucketedHistogram;
 import com.android.internal.util.XmlUtils;
 
 import dalvik.system.BlockGuard;
+
+import libcore.io.IoUtils;
+
+import com.google.android.collect.Maps;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -49,8 +52,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
-
-import libcore.io.IoUtils;
 
 final class SharedPreferencesImpl implements SharedPreferences {
     private static final String TAG = "SharedPreferencesImpl";
@@ -80,7 +81,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
     private boolean mLoaded = false;
 
     @GuardedBy("mLock")
-    private long mStatTimestamp;
+    private StructTimespec mStatTimestamp;
 
     @GuardedBy("mLock")
     private long mStatSize;
@@ -162,7 +163,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             mLoaded = true;
             if (map != null) {
                 mMap = map;
-                mStatTimestamp = stat.st_mtime;
+                mStatTimestamp = stat.st_mtim;
                 mStatSize = stat.st_size;
             } else {
                 mMap = new HashMap<>();
@@ -209,7 +210,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
 
         synchronized (mLock) {
-            return mStatTimestamp != stat.st_mtime || mStatSize != stat.st_size;
+            return !stat.st_mtim.equals(mStatTimestamp) || mStatSize != stat.st_size;
         }
     }
 
@@ -744,7 +745,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             try {
                 final StructStat stat = Os.stat(mFile.getPath());
                 synchronized (mLock) {
-                    mStatTimestamp = stat.st_mtime;
+                    mStatTimestamp = stat.st_mtim;
                     mStatSize = stat.st_size;
                 }
             } catch (ErrnoException e) {
