@@ -635,9 +635,8 @@ class LockSettingsStorage {
         static final int VERSION_1_HEADER_SIZE = 1 + 1 + 4 + 4;
 
         public static final int TYPE_NONE = 0;
-        public static final int TYPE_GATEKEEPER = 1;
-        public static final int TYPE_SP = 2;
-        public static final int TYPE_SP_WEAVER = 3;
+        public static final int TYPE_SP = 1;
+        public static final int TYPE_SP_WEAVER = 2;
 
         public static final PersistentData NONE = new PersistentData(TYPE_NONE,
                 UserHandle.USER_NULL, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, null);
