@@ -18,6 +18,8 @@ package com.android.server.pm.dex;
 
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 
+import android.annotation.Nullable;
+
 /**
  * Options used for dexopt invocations.
  */
@@ -58,7 +60,19 @@ public final class DexoptOptions {
     // The set of flags for the dexopt options. It's a mix of the DEXOPT_* flags.
     private final int mFlags;
 
+    // When not null, dexopt will optimize only the split identified by this name.
+    // It only applies for primary apk and it's always null if mOnlySecondaryDex is true.
+    private final String mSplitName;
+
     public DexoptOptions(String packageName, String compilerFilter, int flags) {
+        this(packageName, compilerFilter, /*splitName*/ null, flags);
+    }
+
+    public DexoptOptions(String packageName, int compilerReason, int flags) {
+        this(packageName, getCompilerFilterForReason(compilerReason), flags);
+    }
+
+    public DexoptOptions(String packageName, String compilerFilter, String splitName, int flags) {
         int validityMask =
                 DEXOPT_CHECK_FOR_PROFILES_UPDATES |
                 DEXOPT_FORCE |
@@ -73,10 +87,7 @@ public final class DexoptOptions {
         mPackageName = packageName;
         mCompilerFilter = compilerFilter;
         mFlags = flags;
-    }
-
-    public DexoptOptions(String packageName, int compilerReason, int flags) {
-        this(packageName, getCompilerFilterForReason(compilerReason), flags);
+        mSplitName = splitName;
     }
 
     public String getPackageName() {
@@ -109,5 +120,9 @@ public final class DexoptOptions {
 
     public boolean isDowngrade() {
         return (mFlags & DEXOPT_DOWNGRADE) != 0;
+    }
+
+    public String getSplitName() {
+        return mSplitName;
     }
 }

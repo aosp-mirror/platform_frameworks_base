@@ -38,12 +38,14 @@ public class DexoptOptionsTests {
     private final static String mPackageName = "test.android.com";
     private final static String mCompilerFilter =
             PackageManagerServiceCompilerMapping.getDefaultCompilerFilter();
+    private final static String mSplitName = "split-A.apk";
 
     @Test
     public void testCreateDexoptOptionsEmpty() {
         DexoptOptions opt = new DexoptOptions(mPackageName, mCompilerFilter, /*flags*/ 0);
         assertEquals(mPackageName, opt.getPackageName());
         assertEquals(mCompilerFilter, opt.getCompilerFilter());
+        assertEquals(null, opt.getSplitName());
         assertFalse(opt.isBootComplete());
         assertFalse(opt.isCheckForProfileUpdates());
         assertFalse(opt.isDexoptOnlySecondaryDex());
@@ -65,6 +67,7 @@ public class DexoptOptionsTests {
         DexoptOptions opt = new DexoptOptions(mPackageName, mCompilerFilter, flags);
         assertEquals(mPackageName, opt.getPackageName());
         assertEquals(mCompilerFilter, opt.getCompilerFilter());
+        assertEquals(null, opt.getSplitName());
         assertTrue(opt.isBootComplete());
         assertTrue(opt.isCheckForProfileUpdates());
         assertTrue(opt.isDexoptOnlySecondaryDex());
@@ -92,6 +95,7 @@ public class DexoptOptionsTests {
             DexoptOptions opt = new DexoptOptions(mPackageName, reason, flags);
             assertEquals(mPackageName, opt.getPackageName());
             assertEquals(getCompilerFilterForReason(reason), opt.getCompilerFilter());
+            assertEquals(null, opt.getSplitName());
             assertTrue(opt.isBootComplete());
             assertTrue(opt.isCheckForProfileUpdates());
             assertFalse(opt.isDexoptOnlySecondaryDex());
@@ -99,6 +103,22 @@ public class DexoptOptionsTests {
             assertFalse(opt.isDowngrade());
             assertTrue(opt.isForce());
         }
+    }
+
+    @Test
+    public void testCreateDexoptOptionsSplit() {
+        int flags = DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE;
+
+        DexoptOptions opt = new DexoptOptions(mPackageName, mCompilerFilter, mSplitName, flags);
+        assertEquals(mPackageName, opt.getPackageName());
+        assertEquals(mCompilerFilter, opt.getCompilerFilter());
+        assertEquals(mSplitName, opt.getSplitName());
+        assertTrue(opt.isBootComplete());
+        assertFalse(opt.isCheckForProfileUpdates());
+        assertFalse(opt.isDexoptOnlySecondaryDex());
+        assertFalse(opt.isDexoptOnlySharedDex());
+        assertFalse(opt.isDowngrade());
+        assertTrue(opt.isForce());
     }
 
     @Test

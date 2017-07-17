@@ -514,7 +514,7 @@ interface IPackageManager {
      *       definite state.
      */
     boolean performDexOptMode(String packageName, boolean checkProfiles,
-            String targetCompilerFilter, boolean force, boolean bootComplete);
+            String targetCompilerFilter, boolean force, boolean bootComplete, String splitName);
 
     /**
      * Ask the package manager to perform a dex-opt with the given compiler filter on the
