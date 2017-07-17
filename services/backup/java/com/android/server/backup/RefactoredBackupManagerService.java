@@ -27,7 +27,6 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RETRY_CLEAR;
 import static com.android.server.backup.internal.BackupHandler.MSG_RETRY_INIT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_BACKUP;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_RESTORE;
-import static com.android.server.backup.internal.BackupHandler.MSG_RUN_BACKUP;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_CLEAR;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACKUP_PACKAGE;
@@ -127,14 +126,12 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.security.SecureRandom;
@@ -630,11 +627,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     private final SecureRandom mRng = new SecureRandom();
 
-    // Keep a log of all the apps we've ever backed up, and what the
-    // dataset tokens are for both the current backup dataset and
-    // the ancestral dataset.
-    private File mEverStored;
-    private HashSet<String> mEverStoredApps = new HashSet<>();
+    // Keep a log of all the apps we've ever backed up, and what the dataset tokens are for both
+    // the current backup dataset and the ancestral dataset.
+    private AppsBackedUpOnThisDeviceJournal mAppsBackedUpOnThisDeviceJournal;
 
     private static final int CURRENT_ANCESTRAL_RECORD_VERSION = 1;
     // increment when the schema changes
@@ -821,49 +816,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             Slog.w(TAG, "Unable to read token file", e);
         }
 
-        // Keep a log of what apps we've ever backed up.  Because we might have
-        // rebooted in the middle of an operation that was removing something from
-        // this log, we sanity-check its contents here and reconstruct it.
-        mEverStored = new File(mBaseStateDir, "processed");
-        File tempProcessedFile = new File(mBaseStateDir, "processed.new");
-
-        // If we were in the middle of removing something from the ever-backed-up
-        // file, there might be a transient "processed.new" file still present.
-        // Ignore it -- we'll validate "processed" against the current package set.
-        if (tempProcessedFile.exists()) {
-            tempProcessedFile.delete();
-        }
-
-        // If there are previous contents, parse them out then start a new
-        // file to continue the recordkeeping.
-        if (mEverStored.exists()) {
-            try (RandomAccessFile temp = new RandomAccessFile(tempProcessedFile, "rws");
-                 RandomAccessFile in = new RandomAccessFile(mEverStored, "r")) {
-                // Loop until we hit EOF
-                while (true) {
-                    String pkg = in.readUTF();
-                    try {
-                        // is this package still present?
-                        mPackageManager.getPackageInfo(pkg, 0);
-                        // if we get here then yes it is; remember it
-                        mEverStoredApps.add(pkg);
-                        temp.writeUTF(pkg);
-                        if (MORE_DEBUG) Slog.v(TAG, "   + " + pkg);
-                    } catch (NameNotFoundException e) {
-                        // nope, this package was uninstalled; don't include it
-                        if (MORE_DEBUG) Slog.v(TAG, "   - " + pkg);
-                    }
-                }
-            } catch (EOFException e) {
-                // Once we've rewritten the backup history log, atomically replace the
-                // old one with the new one then reopen the file for continuing use.
-                if (!tempProcessedFile.renameTo(mEverStored)) {
-                    Slog.e(TAG, "Error renaming " + tempProcessedFile + " to " + mEverStored);
-                }
-            } catch (IOException e) {
-                Slog.e(TAG, "Error in processed file", e);
-            }
-        }
+        mAppsBackedUpOnThisDeviceJournal = new AppsBackedUpOnThisDeviceJournal(mBaseStateDir);
 
         synchronized (mQueueLock) {
             // Resume the full-data backup queue
@@ -1115,9 +1068,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // so we must re-upload all saved settings.
     public void resetBackupState(File stateFileDir) {
         synchronized (mQueueLock) {
-            // Wipe the "what we've ever backed up" tracking
-            mEverStoredApps.clear();
-            mEverStored.delete();
+            mAppsBackedUpOnThisDeviceJournal.reset();
 
             mCurrentToken = 0;
             writeRestoreTokens();
@@ -1412,49 +1363,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     public void logBackupComplete(String packageName) {
         if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) return;
 
-        synchronized (mEverStoredApps) {
-            if (!mEverStoredApps.add(packageName)) return;
-
-            try (RandomAccessFile out = new RandomAccessFile(mEverStored, "rws")) {
-                out.seek(out.length());
-                out.writeUTF(packageName);
-            } catch (IOException e) {
-                Slog.e(TAG, "Can't log backup of " + packageName + " to " + mEverStored);
-            }
-        }
-    }
-
-    // Remove our awareness of having ever backed up the given package
-    void removeEverBackedUp(String packageName) {
-        if (DEBUG) Slog.v(TAG, "Removing backed-up knowledge of " + packageName);
-        if (MORE_DEBUG) Slog.v(TAG, "New set:");
-
-        synchronized (mEverStoredApps) {
-            // Rewrite the file and rename to overwrite.  If we reboot in the middle,
-            // we'll recognize on initialization time that the package no longer
-            // exists and fix it up then.
-            File tempKnownFile = new File(mBaseStateDir, "processed.new");
-            try (RandomAccessFile known = new RandomAccessFile(tempKnownFile, "rws")) {
-                mEverStoredApps.remove(packageName);
-                for (String s : mEverStoredApps) {
-                    known.writeUTF(s);
-                    if (MORE_DEBUG) Slog.v(TAG, "    " + s);
-                }
-                known.close();
-                if (!tempKnownFile.renameTo(mEverStored)) {
-                    throw new IOException("Can't rename " + tempKnownFile + " to " + mEverStored);
-                }
-            } catch (IOException e) {
-                // Bad: we couldn't create the new copy.  For safety's sake we
-                // abandon the whole process and remove all what's-backed-up
-                // state entirely, meaning we'll force a backup pass for every
-                // participant on the next boot or [re]install.
-                Slog.w(TAG, "Error rewriting " + mEverStored, e);
-                mEverStoredApps.clear();
-                tempKnownFile.delete();
-                mEverStored.delete();
-            }
-        }
+        mAppsBackedUpOnThisDeviceJournal.addPackage(packageName);
     }
 
     // Persistently record the current and ancestral backup tokens as well
@@ -1591,7 +1500,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         long token = mAncestralToken;
         synchronized (mQueueLock) {
-            if (mEverStoredApps.contains(packageName)) {
+            if (mAppsBackedUpOnThisDeviceJournal.hasBeenProcessed(packageName)) {
                 if (MORE_DEBUG) {
                     Slog.i(TAG, "App in ever-stored, so using current token");
                 }
@@ -3394,8 +3303,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 }
             }
 
-            pw.println("Ever backed up: " + mEverStoredApps.size());
-            for (String pkg : mEverStoredApps) {
+            HashSet<String> processedApps = mAppsBackedUpOnThisDeviceJournal.getPackagesCopy();
+            pw.println("Ever backed up: " + processedApps.size());
+            for (String pkg : processedApps) {
                 pw.println("    " + pkg);
             }
 
