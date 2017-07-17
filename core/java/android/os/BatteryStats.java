@@ -16,15 +16,6 @@
 
 package android.os;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.app.job.JobParameters;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -42,6 +33,15 @@ import android.view.Display;
 
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A class providing access to battery usage statistics, including information on
@@ -168,6 +168,11 @@ public abstract class BatteryStats implements Parcelable {
     public static final int BLUETOOTH_UNOPTIMIZED_SCAN_ON = 21;
 
     /**
+     * A constant indicating a foreground service timer
+     */
+    public static final int FOREGROUND_SERVICE = 22;
+
+    /**
      * Include all of the data in the stats, including previously saved data.
      */
     public static final int STATS_SINCE_CHARGED = 0;
@@ -223,7 +228,11 @@ public abstract class BatteryStats implements Parcelable {
     private static final String CPU_TIMES_AT_FREQ_DATA = "ctf";
     private static final String SENSOR_DATA = "sr";
     private static final String VIBRATOR_DATA = "vib";
-    private static final String FOREGROUND_DATA = "fg";
+    private static final String FOREGROUND_ACTIVITY_DATA = "fg";
+    // fgs line is:
+    // BATTERY_STATS_CHECKIN_VERSION, uid, category, "fgs",
+    // foreground service time, count
+    private static final String FOREGROUND_SERVICE_DATA = "fgs";
     private static final String STATE_TIME_DATA = "st";
     // wl line is:
     // BATTERY_STATS_CHECKIN_VERSION, uid, which, "wl", name,
@@ -582,6 +591,11 @@ public abstract class BatteryStats implements Parcelable {
         public abstract Timer getFlashlightTurnedOnTimer();
         public abstract Timer getCameraTurnedOnTimer();
         public abstract Timer getForegroundActivityTimer();
+
+        /**
+         * Returns the timer keeping track of Foreground Service time
+         */
+        public abstract Timer getForegroundServiceTimer();
         public abstract Timer getBluetoothScanTimer();
         public abstract Timer getBluetoothScanBackgroundTimer();
         public abstract Timer getBluetoothUnoptimizedScanTimer();
@@ -3616,7 +3630,10 @@ public abstract class BatteryStats implements Parcelable {
             dumpTimer(pw, uid, category, VIBRATOR_DATA, u.getVibratorOnTimer(),
                     rawRealtime, which);
 
-            dumpTimer(pw, uid, category, FOREGROUND_DATA, u.getForegroundActivityTimer(),
+            dumpTimer(pw, uid, category, FOREGROUND_ACTIVITY_DATA, u.getForegroundActivityTimer(),
+                    rawRealtime, which);
+
+            dumpTimer(pw, uid, category, FOREGROUND_SERVICE_DATA, u.getForegroundServiceTimer(),
                     rawRealtime, which);
 
             final Object[] stateTimes = new Object[Uid.NUM_PROCESS_STATE];
@@ -5093,6 +5110,8 @@ public abstract class BatteryStats implements Parcelable {
                     "Vibrator");
             uidActivity |= printTimer(pw, sb, u.getForegroundActivityTimer(), rawRealtime, which,
                     prefix, "Foreground activities");
+            uidActivity |= printTimer(pw, sb, u.getForegroundServiceTimer(), rawRealtime, which,
+                    prefix, "Foreground services");
 
             long totalStateTime = 0;
             for (int ips=0; ips<Uid.NUM_PROCESS_STATE; ips++) {
