@@ -28,7 +28,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 FboCache::FboCache()
-        : mMaxSize(Properties::fboCacheSize) {}
+        : mMaxSize(0) {}
 
 FboCache::~FboCache() {
     clear();
