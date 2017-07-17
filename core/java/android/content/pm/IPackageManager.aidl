@@ -508,14 +508,6 @@ interface IPackageManager {
              in boolean isSharedModule, IDexModuleRegisterCallback callback);
 
     /**
-     * Ask the package manager to perform a dex-opt for the given reason. The package
-     * manager will map the reason to a compiler filter according to the current system
-     * configuration.
-     */
-    boolean performDexOpt(String packageName, boolean checkProfiles,
-            int compileReason, boolean force, boolean bootComplete, boolean downgrade);
-
-    /**
      * Ask the package manager to perform a dex-opt with the given compiler filter.
      *
      * Note: exposed only for the shell command to allow moving packages explicitly to a
