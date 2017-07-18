@@ -748,9 +748,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     static class Token extends IApplicationToken.Stub {
         private final WeakReference<ActivityRecord> weakActivity;
+        private final String name;
 
-        Token(ActivityRecord activity) {
+        Token(ActivityRecord activity, Intent intent) {
             weakActivity = new WeakReference<>(activity);
+            name = intent.getComponent().flattenToShortString();
         }
 
         private static ActivityRecord tokenToActivityRecordLocked(Token token) {
@@ -773,6 +775,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             sb.append(weakActivity.get());
             sb.append('}');
             return sb.toString();
+        }
+
+        @Override
+        public String getName() {
+            return name;
         }
     }
 
@@ -797,7 +804,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             ActivityStackSupervisor supervisor, ActivityOptions options,
             ActivityRecord sourceRecord) {
         service = _service;
-        appToken = new Token(this);
+        appToken = new Token(this, _intent);
         info = aInfo;
         launchedFromPid = _launchedFromPid;
         launchedFromUid = _launchedFromUid;

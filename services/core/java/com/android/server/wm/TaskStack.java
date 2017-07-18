@@ -36,6 +36,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
+import static com.android.server.wm.proto.StackProto.ANIMATION_BACKGROUND_SURFACE_IS_DIMMING;
+import static com.android.server.wm.proto.StackProto.BOUNDS;
+import static com.android.server.wm.proto.StackProto.FILLS_PARENT;
+import static com.android.server.wm.proto.StackProto.ID;
+import static com.android.server.wm.proto.StackProto.TASKS;
 
 import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
@@ -45,6 +50,7 @@ import android.os.RemoteException;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -52,7 +58,6 @@ import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.EventLogTags;
-import com.android.server.UiThread;
 
 import java.io.PrintWriter;
 
@@ -1223,6 +1228,18 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     boolean isAdjustedForMinimizedDockedStack() {
         return mMinimizeAmount != 0f;
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(ID, mStackId);
+        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
+            mChildren.get(taskNdx).writeToProto(proto, TASKS);
+        }
+        proto.write(FILLS_PARENT, mFillsParent);
+        mBounds.writeToProto(proto, BOUNDS);
+        proto.write(ANIMATION_BACKGROUND_SURFACE_IS_DIMMING, mAnimationBackgroundSurface.isDimming());
+        proto.end(token);
     }
 
     public void dump(String prefix, PrintWriter pw) {

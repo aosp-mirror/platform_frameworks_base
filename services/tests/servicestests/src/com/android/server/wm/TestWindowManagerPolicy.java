@@ -29,6 +29,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 
 import android.os.PowerSaveState;
+import android.util.proto.ProtoOutputStream;
 import org.mockito.invocation.InvocationOnMock;
 
 import android.annotation.Nullable;
@@ -592,6 +593,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void setSwitchingUser(boolean switching) {
+
+    }
+
+    @Override
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
 
     }
 

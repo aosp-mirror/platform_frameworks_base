@@ -16,12 +16,18 @@
 
 package android.view;
 
+import static android.view.DisplayInfoProto.APP_HEIGHT;
+import static android.view.DisplayInfoProto.APP_WIDTH;
+import static android.view.DisplayInfoProto.LOGICAL_HEIGHT;
+import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
+
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
+import android.util.proto.ProtoOutputStream;
 
 import libcore.util.Objects;
 
@@ -652,6 +658,22 @@ public final class DisplayInfo implements Parcelable {
         sb.append(removeMode);
         sb.append("}");
         return sb.toString();
+    }
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.view.DisplayInfoProto}
+     *
+     * @param protoOutputStream Stream to write the Rect object to.
+     * @param fieldId           Field Id of the DisplayInfoProto as defined in the parent message
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        final long token = protoOutputStream.start(fieldId);
+        protoOutputStream.write(LOGICAL_WIDTH, logicalWidth);
+        protoOutputStream.write(LOGICAL_HEIGHT, logicalHeight);
+        protoOutputStream.write(APP_WIDTH, appWidth);
+        protoOutputStream.write(APP_HEIGHT, appHeight);
+        protoOutputStream.end(token);
     }
 
     private static String flagsToString(int flags) {

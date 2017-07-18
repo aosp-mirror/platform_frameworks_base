@@ -34,6 +34,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
 import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
+import static com.android.server.wm.proto.DockedStackDividerControllerProto.MINIMIZED_DOCK;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -42,6 +43,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.IDockedStackListener;
 import android.view.animation.AnimationUtils;
@@ -918,5 +920,11 @@ public class DockedStackDividerController implements DimLayerUser {
             pw.println(prefix + "  Dim layer is dimming: ");
             mDimLayer.printTo(prefix + "    ", pw);
         }
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(MINIMIZED_DOCK, mMinimizedDock);
+        proto.end(token);
     }
 }

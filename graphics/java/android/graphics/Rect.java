@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -194,7 +195,24 @@ public final class Rect implements Parcelable {
         pw.print(top); pw.print("]["); pw.print(right);
         pw.print(','); pw.print(bottom); pw.print(']');
     }
-    
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.graphics.RectProto}
+     *
+     * @param protoOutputStream Stream to write the Rect object to.
+     * @param fieldId           Field Id of the Rect as defined in the parent message
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        final long token = protoOutputStream.start(fieldId);
+        protoOutputStream.write(RectProto.LEFT, left);
+        protoOutputStream.write(RectProto.TOP, top);
+        protoOutputStream.write(RectProto.RIGHT, right);
+        protoOutputStream.write(RectProto.BOTTOM, bottom);
+        protoOutputStream.end(token);
+    }
+
     /**
      * Returns true if the rectangle is empty (left >= right or top >= bottom)
      */

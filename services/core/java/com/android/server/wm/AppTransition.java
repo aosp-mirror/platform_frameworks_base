@@ -47,6 +47,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
+import static com.android.server.wm.proto.AppTransitionProto.APP_TRANSITION_STATE;
+import static com.android.server.wm.proto.AppTransitionProto.LAST_USED_APP_TRANSITION;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -65,6 +67,7 @@ import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.WindowManager;
@@ -1973,6 +1976,13 @@ public class AppTransition implements Dump {
             default:
                 return "unknown type=" + mNextAppTransitionType;
         }
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(APP_TRANSITION_STATE, mAppTransitionState);
+        proto.write(LAST_USED_APP_TRANSITION, mLastUsedAppTransition);
+        proto.end(token);
     }
 
     @Override
