@@ -51,8 +51,6 @@ void StartReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
             return aZValue < bZValue;
         });
 
-    SkASSERT(!mChildren.empty());
-
     size_t drawIndex = 0;
     const size_t endIndex = mChildren.size();
     while (drawIndex < endIndex) {
@@ -76,7 +74,6 @@ EndReorderBarrierDrawable::EndReorderBarrierDrawable(StartReorderBarrierDrawable
 
 void EndReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
     auto& zChildren = mStartBarrier->mChildren;
-    SkASSERT(!zChildren.empty());
 
     /**
      * Draw shadows and (potential) casters mostly in order, but allow the shadows of casters
