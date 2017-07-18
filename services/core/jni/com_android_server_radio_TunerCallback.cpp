@@ -22,9 +22,10 @@
 #include "com_android_server_radio_convert.h"
 #include "com_android_server_radio_Tuner.h"
 
+#include <JNIHelp.h>
+#include <Utils.h>
 #include <core_jni_helpers.h>
 #include <utils/Log.h>
-#include <JNIHelp.h>
 
 namespace android {
 namespace server {
@@ -37,11 +38,13 @@ using hardware::hidl_vec;
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
 
+using V1_0::Band;
 using V1_0::BandConfig;
 using V1_0::MetaData;
 using V1_0::Result;
 using V1_1::ITunerCallback;
 using V1_1::ProgramListResult;
+using V1_1::ProgramSelector;
 
 static JavaVM *gvm = nullptr;
 
@@ -53,7 +56,6 @@ static struct {
         jmethodID onError;
         jmethodID onConfigurationChanged;
         jmethodID onProgramInfoChanged;
-        jmethodID onMetadataChanged;
         jmethodID onTrafficAnnouncement;
         jmethodID onEmergencyAnnouncement;
         jmethodID onAntennaState;
@@ -82,6 +84,8 @@ class NativeCallback : public ITunerCallback {
     NativeCallbackThread mCallbackThread;
     HalRevision mHalRev;
 
+    Band mBand;
+
     DISALLOW_COPY_AND_ASSIGN(NativeCallback);
 
 public:
@@ -99,11 +103,12 @@ public:
     virtual Return<void> emergencyAnnouncement(bool active);
     virtual Return<void> newMetadata(uint32_t channel, uint32_t subChannel,
             const hidl_vec<MetaData>& metadata);
-    virtual Return<void> tuneComplete_1_1(Result result, const V1_1::ProgramInfo& info);
-    virtual Return<void> afSwitch_1_1(const V1_1::ProgramInfo& info);
+    virtual Return<void> tuneComplete_1_1(Result result, const ProgramSelector& selector);
+    virtual Return<void> afSwitch_1_1(const ProgramSelector& selector);
     virtual Return<void> backgroundScanAvailable(bool isAvailable);
     virtual Return<void> backgroundScanComplete(ProgramListResult result);
     virtual Return<void> programListChanged();
+    virtual Return<void> programInfoChanged();
 };
 
 struct TunerCallbackContext {
@@ -171,24 +176,20 @@ Return<void> NativeCallback::tuneComplete(Result result, const V1_0::ProgramInfo
     ALOGV("tuneComplete(%d)", result);
 
     if (mHalRev > HalRevision::V1_0) {
-        ALOGD("1.0 callback was ignored");
+        ALOGW("1.0 callback was ignored");
         return Return<void>();
     }
 
-    V1_1::ProgramInfo info_1_1 {
-        .base = info,
-    };
-    return tuneComplete_1_1(result, info_1_1);
+    auto selector = V1_1::utils::make_selector(mBand, info.channel, info.subChannel);
+    return tuneComplete_1_1(result, selector);
 }
 
-Return<void> NativeCallback::tuneComplete_1_1(Result result, const V1_1::ProgramInfo& info) {
+Return<void> NativeCallback::tuneComplete_1_1(Result result, const ProgramSelector& selector) {
     ALOGV("tuneComplete_1_1(%d)", result);
 
-    mCallbackThread.enqueue([result, info, this](JNIEnv *env) {
+    mCallbackThread.enqueue([result, this](JNIEnv *env) {
         if (result == Result::OK) {
-            auto jInfo = convert::ProgramInfoFromHal(env, info);
-            if (jInfo == nullptr) return;
-            env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramInfoChanged, jInfo.get());
+            env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramInfoChanged);
         } else {
             TunerError cause = TunerError::CANCELLED;
             if (result == Result::TIMEOUT) cause = TunerError::SCAN_TIMEOUT;
@@ -204,9 +205,9 @@ Return<void> NativeCallback::afSwitch(const V1_0::ProgramInfo& info) {
     return tuneComplete(Result::OK, info);
 }
 
-Return<void> NativeCallback::afSwitch_1_1(const V1_1::ProgramInfo& info) {
+Return<void> NativeCallback::afSwitch_1_1(const ProgramSelector& selector) {
     ALOGV("afSwitch_1_1()");
-    return tuneComplete_1_1(Result::OK, info);
+    return tuneComplete_1_1(Result::OK, selector);
 }
 
 Return<void> NativeCallback::antennaStateChange(bool connected) {
@@ -244,10 +245,13 @@ Return<void> NativeCallback::newMetadata(uint32_t channel, uint32_t subChannel,
     // channel and subChannel are not used
     ALOGV("newMetadata(%d, %d)", channel, subChannel);
 
+    if (mHalRev > HalRevision::V1_0) {
+        ALOGW("1.0 callback was ignored");
+        return Return<void>();
+    }
+
     mCallbackThread.enqueue([this, metadata](JNIEnv *env) {
-        auto jMetadata = convert::MetadataFromHal(env, metadata);
-        if (jMetadata == nullptr) return;
-        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onMetadataChanged, jMetadata.get());
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramInfoChanged);
     });
 
     return Return<void>();
@@ -285,6 +289,16 @@ Return<void> NativeCallback::programListChanged() {
 
     mCallbackThread.enqueue([this](JNIEnv *env) {
         env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramListChanged);
+    });
+
+    return Return<void>();
+}
+
+Return<void> NativeCallback::programInfoChanged() {
+    ALOGV("programInfoChanged()");
+
+    mCallbackThread.enqueue([this](JNIEnv *env) {
+        env->CallVoidMethod(mJCallback, gjni.TunerCallback.onProgramInfoChanged);
     });
 
     return Return<void>();
@@ -363,9 +377,7 @@ void register_android_server_radio_TunerCallback(JavaVM *vm, JNIEnv *env) {
     gjni.TunerCallback.onConfigurationChanged = GetMethodIDOrDie(env, tunerCbClass,
             "onConfigurationChanged", "(Landroid/hardware/radio/RadioManager$BandConfig;)V");
     gjni.TunerCallback.onProgramInfoChanged = GetMethodIDOrDie(env, tunerCbClass,
-            "onProgramInfoChanged", "(Landroid/hardware/radio/RadioManager$ProgramInfo;)V");
-    gjni.TunerCallback.onMetadataChanged = GetMethodIDOrDie(env, tunerCbClass,
-            "onMetadataChanged", "(Landroid/hardware/radio/RadioMetadata;)V");
+            "onProgramInfoChanged", "()V");
     gjni.TunerCallback.onTrafficAnnouncement = GetMethodIDOrDie(env, tunerCbClass,
             "onTrafficAnnouncement", "(Z)V");
     gjni.TunerCallback.onEmergencyAnnouncement = GetMethodIDOrDie(env, tunerCbClass,

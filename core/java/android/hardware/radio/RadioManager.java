@@ -1560,7 +1560,7 @@ public class RadioManager {
         Log.d(TAG, "Opening tuner " + moduleId + "...");
 
         ITuner tuner;
-        ITunerCallback halCallback = new TunerCallbackAdapter(callback, handler);
+        TunerCallbackAdapter halCallback = new TunerCallbackAdapter(callback, handler);
         try {
             tuner = mService.openTuner(moduleId, config, withAudio, halCallback);
         } catch (RemoteException e) {
@@ -1571,6 +1571,7 @@ public class RadioManager {
             Log.e(TAG, "Failed to open tuner");
             return null;
         }
+        halCallback.attachTuner(tuner);
         return new TunerAdapter(tuner, config != null ? config.getType() : BAND_INVALID);
     }
 

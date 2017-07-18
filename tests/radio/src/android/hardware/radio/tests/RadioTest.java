@@ -44,6 +44,7 @@ import static org.junit.Assume.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
@@ -110,7 +111,7 @@ public class RadioTest {
             mRadioTuner.close();
             mRadioTuner = null;
         }
-        verifyNoMoreInteractions(mCallback);
+        resetCallback();
     }
 
     private void openTuner() {
@@ -118,6 +119,7 @@ public class RadioTest {
     }
 
     private void resetCallback() {
+        verify(mCallback, atLeast(0)).onMetadataChanged(any());
         verifyNoMoreInteractions(mCallback);
         Mockito.reset(mCallback);
     }

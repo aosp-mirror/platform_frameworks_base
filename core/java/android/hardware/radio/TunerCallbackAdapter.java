@@ -20,13 +20,21 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * Implements the ITunerCallback interface by forwarding calls to RadioTuner.Callback.
  */
 class TunerCallbackAdapter extends ITunerCallback.Stub {
+    private static final String TAG = "radio.TunerCallbackAdapter";
+
     @NonNull private final RadioTuner.Callback mCallback;
     @NonNull private final Handler mHandler;
+    private final Object mLock = new Object();
+
+    @Nullable private ITuner mTuner;
+    boolean mPendingProgramInfoChanged = false;
 
     TunerCallbackAdapter(@NonNull RadioTuner.Callback callback, @Nullable Handler handler) {
         mCallback = callback;
@@ -34,6 +42,14 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
             mHandler = new Handler(Looper.getMainLooper());
         } else {
             mHandler = handler;
+        }
+    }
+
+    public void attachTuner(@NonNull ITuner tuner) {
+        synchronized (mLock) {
+            if (mTuner != null) throw new IllegalStateException();
+            mTuner = tuner;
+            if (mPendingProgramInfoChanged) onProgramInfoChanged();
         }
     }
 
@@ -48,13 +64,28 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
     }
 
     @Override
-    public void onProgramInfoChanged(RadioManager.ProgramInfo info) {
-        mHandler.post(() -> mCallback.onProgramInfoChanged(info));
-    }
+    public void onProgramInfoChanged() {
+        synchronized (mLock) {
+            if (mTuner == null) {
+                mPendingProgramInfoChanged = true;
+                return;
+            }
+        }
 
-    @Override
-    public void onMetadataChanged(RadioMetadata metadata) {
-        mHandler.post(() -> mCallback.onMetadataChanged(metadata));
+        RadioManager.ProgramInfo info;
+        try {
+            info = mTuner.getProgramInformation();
+        } catch (RemoteException e) {
+            Log.e(TAG, "service died", e);
+            return;
+        }
+
+        mHandler.post(() -> {
+            mCallback.onProgramInfoChanged(info);
+
+            RadioMetadata metadata = info.getMetadata();
+            if (metadata != null) mCallback.onMetadataChanged(metadata);
+        });
     }
 
     @Override
