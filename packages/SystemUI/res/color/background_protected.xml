@@ -16,5 +16,5 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="?attr/bgProtectTextColor" />
+    <item android:color="?attr/wallpaperTextColor" />
 </selector>
