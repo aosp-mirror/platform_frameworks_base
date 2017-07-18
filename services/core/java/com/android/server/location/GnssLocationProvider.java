@@ -2516,6 +2516,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
+        s.append("  mStarted=").append(mStarted).append('\n');
         s.append("  mFixInterval=").append(mFixInterval).append('\n');
         s.append("  mDisableGps (battery saver mode)=").append(mDisableGps).append('\n');
         s.append("  mEngineCapabilities=0x").append(Integer.toHexString(mEngineCapabilities));
