@@ -34,6 +34,7 @@ import com.android.internal.util.ArrayUtils;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -224,11 +225,18 @@ public final class PlaybackActivityMonitor
         pw.println("\nPlaybackActivityMonitor dump time: "
                 + DateFormat.getTimeInstance().format(new Date()));
         synchronized(mPlayerLock) {
-            for (AudioPlaybackConfiguration conf : mPlayers.values()) {
-                conf.dump(pw);
+            // all players
+            pw.println("\n  players:");
+            final List<Integer> piidIntList = new ArrayList<Integer>(mPlayers.keySet());
+            Collections.sort(piidIntList);
+            for (Integer piidInt : piidIntList) {
+                final AudioPlaybackConfiguration apc = mPlayers.get(piidInt);
+                if (apc != null) {
+                    apc.dump(pw);
+                }
             }
             // ducked players
-            pw.println("\n  ducked players:");
+            pw.println("\n  ducked players piids:");
             mDuckingManager.dump(pw);
             // players muted due to the device ringing or being in a call
             pw.print("\n  muted player piids:");
