@@ -234,6 +234,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/net/INetworkScoreService.aidl \
 	core/java/android/net/INetworkStatsService.aidl \
 	core/java/android/net/INetworkStatsSession.aidl \
+	core/java/android/net/ITetheringStatsProvider.aidl \
 	core/java/android/net/nsd/INsdManager.aidl \
 	core/java/android/nfc/IAppCallback.aidl \
 	core/java/android/nfc/INfcAdapter.aidl \

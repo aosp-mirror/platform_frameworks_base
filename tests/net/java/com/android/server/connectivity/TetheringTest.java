@@ -178,6 +178,7 @@ public class TetheringTest {
         mTethering = new Tethering(mServiceContext, mNMService, mStatsService, mPolicyManager,
                                    mLooper.getLooper(), mSystemProperties,
                                    mTetheringDependencies);
+        verify(mNMService).registerTetheringStatsProvider(any(), anyString());
     }
 
     @After

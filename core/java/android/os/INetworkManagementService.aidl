@@ -20,6 +20,7 @@ package android.os;
 import android.net.InterfaceConfiguration;
 import android.net.INetd;
 import android.net.INetworkManagementEventObserver;
+import android.net.ITetheringStatsProvider;
 import android.net.Network;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
@@ -205,6 +206,18 @@ interface INetworkManagementService
      *  Disables Network Address Translation between two interfaces.
      */
     void disableNat(String internalInterface, String externalInterface);
+
+    /**
+     * Registers a {@code ITetheringStatsProvider} to provide tethering statistics.
+     * All registered providers will be called in order, and their results will be added together.
+     * Netd is always registered as a tethering stats provider.
+     */
+    void registerTetheringStatsProvider(ITetheringStatsProvider provider, String name);
+
+    /**
+     * Unregisters a previously-registered {@code ITetheringStatsProvider}.
+     */
+    void unregisterTetheringStatsProvider(ITetheringStatsProvider provider);
 
     /**
      ** PPPD
