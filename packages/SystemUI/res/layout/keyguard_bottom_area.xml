@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:textStyle="italic"
-            android:textColor="?attr/bgProtectSecondaryTextColor"
+            android:textColor="?attr/wallpaperTextColorSecondary"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:visibility="gone" />
 
@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:textStyle="italic"
-            android:textColor="?attr/bgProtectSecondaryTextColor"
+            android:textColor="?attr/wallpaperTextColorSecondary"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:accessibilityLiveRegion="polite" />
 
@@ -69,7 +69,7 @@
         android:src="@drawable/ic_camera_alt_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_camera_button"
-        android:tint="?attr/bgProtectTextColor" />
+        android:tint="?attr/wallpaperTextColor" />
 
     <com.android.systemui.statusbar.KeyguardAffordanceView
         android:id="@+id/left_button"
@@ -79,7 +79,7 @@
         android:src="@drawable/ic_phone_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_phone_button"
-        android:tint="?attr/bgProtectTextColor" />
+        android:tint="?attr/wallpaperTextColor" />
 
     <com.android.systemui.statusbar.phone.LockIcon
         android:id="@+id/lock_icon"
@@ -89,7 +89,7 @@
         android:src="@drawable/ic_lock_24dp"
         android:contentDescription="@string/accessibility_unlock_button"
         android:scaleType="center"
-        android:tint="?attr/bgProtectTextColor" />
+        android:tint="?attr/wallpaperTextColor" />
 
     <FrameLayout
         android:id="@+id/overlay_container"
