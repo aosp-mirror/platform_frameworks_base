@@ -3591,6 +3591,8 @@ public class Editor {
                 mIsShowingUp = true;
                 super.show();
             }
+
+            mSuggestionListView.setVisibility(mNumberOfSuggestions == 0 ? View.GONE : View.VISIBLE);
         }
 
         @Override
