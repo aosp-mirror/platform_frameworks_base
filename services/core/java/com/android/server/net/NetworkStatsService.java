@@ -18,7 +18,6 @@ package com.android.server.net;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
-import static android.Manifest.permission.MODIFY_NETWORK_ACCOUNTING;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
@@ -689,7 +688,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public void incrementOperationCount(int uid, int tag, int operationCount) {
         if (Binder.getCallingUid() != uid) {
-            mContext.enforceCallingOrSelfPermission(MODIFY_NETWORK_ACCOUNTING, TAG);
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.UPDATE_DEVICE_STATS, TAG);
         }
 
         if (operationCount < 0) {
@@ -710,7 +710,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public void setUidForeground(int uid, boolean uidForeground) {
-        mContext.enforceCallingOrSelfPermission(MODIFY_NETWORK_ACCOUNTING, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         synchronized (mStatsLock) {
             final int set = uidForeground ? SET_FOREGROUND : SET_DEFAULT;
@@ -750,7 +750,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public void advisePersistThreshold(long thresholdBytes) {
-        mContext.enforceCallingOrSelfPermission(MODIFY_NETWORK_ACCOUNTING, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         assertBandwidthControlEnabled();
 
         // clamp threshold into safe range
