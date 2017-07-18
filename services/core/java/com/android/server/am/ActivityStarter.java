@@ -1640,6 +1640,16 @@ class ActivityStarter {
                                 REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
                                 "reparentToDisplay");
                         mMovedToFront = true;
+                    } else if (launchStack.getStackId() == StackId.HOME_STACK_ID
+                        && mTargetStack.getStackId() != StackId.HOME_STACK_ID) {
+                        // It is possible for the home activity to be in another stack initially.
+                        // For example, the activity may have been initially started with an intent
+                        // which placed it in the fullscreen stack. To ensure the proper handling of
+                        // the activity based on home stack assumptions, we must move it over.
+                        intentActivity.getTask().reparent(launchStack.mStackId, ON_TOP,
+                                REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
+                                "reparentingHome");
+                        mMovedToFront = true;
                     }
                     mOptions = null;
 
