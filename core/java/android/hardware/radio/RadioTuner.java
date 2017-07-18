@@ -203,6 +203,17 @@ public abstract class RadioTuner {
     public abstract int cancel();
 
     /**
+     * Cancels traffic or emergency announcement.
+     *
+     * If there was no announcement to cancel, no action is taken.
+     *
+     * There is a race condition between calling cancelAnnouncement and the actual announcement
+     * being finished, so onTrafficAnnouncement / onEmergencyAnnouncement callback should be
+     * tracked with proper locking.
+     */
+    public abstract void cancelAnnouncement();
+
+    /**
      * Get current station information.
      * @param info a ProgramInfo array of lengh 1 where the information is returned.
      * @return

@@ -1267,8 +1267,10 @@ public class RadioManager {
     public static class ProgramInfo implements Parcelable {
 
         // sourced from hardware/interfaces/broadcastradio/1.1/types.hal
-        private final static int FLAG_LIVE = 1 << 0;
-        private final static int FLAG_MUTED = 1 << 1;
+        private static final int FLAG_LIVE = 1 << 0;
+        private static final int FLAG_MUTED = 1 << 1;
+        private static final int FLAG_TRAFFIC_PROGRAM = 1 << 2;
+        private static final int FLAG_TRAFFIC_ANNOUNCEMENT = 1 << 3;
 
         @NonNull private final ProgramSelector mSelector;
         private final boolean mTuned;
@@ -1367,6 +1369,22 @@ public class RadioManager {
          */
         public boolean isMuted() {
             return (mFlags & FLAG_MUTED) != 0;
+        }
+
+        /**
+         * {@code true} if radio station transmits traffic information
+         * regularily.
+         */
+        public boolean isTrafficProgram() {
+            return (mFlags & FLAG_TRAFFIC_PROGRAM) != 0;
+        }
+
+        /**
+         * {@code true} if radio station transmits traffic information
+         * at the very moment.
+         */
+        public boolean isTrafficAnnouncementActive() {
+            return (mFlags & FLAG_TRAFFIC_ANNOUNCEMENT) != 0;
         }
 
         /** Signal strength indicator from 0 (no signal) to 100 (excellent)
