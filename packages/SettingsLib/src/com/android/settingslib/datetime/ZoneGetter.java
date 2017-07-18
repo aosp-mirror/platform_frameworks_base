@@ -18,6 +18,7 @@ package com.android.settingslib.datetime;
 
 import android.content.Context;
 import android.content.res.XmlResourceParser;
+import android.icu.text.TimeZoneFormat;
 import android.icu.text.TimeZoneNames;
 import android.support.v4.text.BidiFormatter;
 import android.support.v4.text.TextDirectionHeuristicsCompat;
@@ -88,8 +89,9 @@ public class ZoneGetter {
     private static final String XMLTAG_TIMEZONE = "timezone";
 
     public static CharSequence getTimeZoneOffsetAndName(Context context, TimeZone tz, Date now) {
-        Locale locale = Locale.getDefault();
-        CharSequence gmtText = getGmtOffsetText(context, locale, tz, now);
+        Locale locale = context.getResources().getConfiguration().locale;
+        TimeZoneFormat tzFormatter = TimeZoneFormat.getInstance(locale);
+        CharSequence gmtText = getGmtOffsetText(tzFormatter, locale, tz, now);
         TimeZoneNames timeZoneNames = TimeZoneNames.getInstance(locale);
         String zoneNameString = getZoneLongName(timeZoneNames, tz, now);
         if (zoneNameString == null) {
@@ -101,7 +103,7 @@ public class ZoneGetter {
     }
 
     public static List<Map<String, Object>> getZonesList(Context context) {
-        final Locale locale = Locale.getDefault();
+        final Locale locale = context.getResources().getConfiguration().locale;
         final Date now = new Date();
         final TimeZoneNames timeZoneNames = TimeZoneNames.getInstance(locale);
         final ZoneGetterData data = new ZoneGetterData(context);
@@ -243,12 +245,15 @@ public class ZoneGetter {
         builder.setSpan(span, start, builder.length(), 0);
     }
 
-    private static String twoDigits(int input) {
-        StringBuilder builder = new StringBuilder(3);
-        if (input < 0) builder.append('-');
-        String string = Integer.toString(Math.abs(input));
-        if (string.length() == 1) builder.append("0");
-        builder.append(string);
+    // Input must be positive. minDigits must be 1 or 2.
+    private static String formatDigits(int input, int minDigits, String localizedDigits) {
+        final int tens = input / 10;
+        final int units = input % 10;
+        StringBuilder builder = new StringBuilder(minDigits);
+        if (input >= 10 || minDigits == 2) {
+            builder.append(localizedDigits.charAt(tens));
+        }
+        builder.append(localizedDigits.charAt(units));
         return builder.toString();
     }
 
@@ -256,36 +261,83 @@ public class ZoneGetter {
      * Get the GMT offset text label for the given time zone, in the format "GMT-08:00". This will
      * also add TTS spans to give hints to the text-to-speech engine for the type of data it is.
      *
-     * @param context The context which the string is displayed in.
+     * @param tzFormatter The timezone formatter to use.
      * @param locale The locale which the string is displayed in. This should be the same as the
-     *               locale of the context.
+     *               locale of the time zone formatter.
      * @param tz Time zone to get the GMT offset from.
      * @param now The current time, used to tell whether daylight savings is active.
      * @return A CharSequence suitable for display as the offset label of {@code tz}.
      */
-    private static CharSequence getGmtOffsetText(Context context, Locale locale, TimeZone tz,
-            Date now) {
-        SpannableStringBuilder builder = new SpannableStringBuilder();
+    private static CharSequence getGmtOffsetText(TimeZoneFormat tzFormatter, Locale locale,
+            TimeZone tz, Date now) {
+        final SpannableStringBuilder builder = new SpannableStringBuilder();
 
-        appendWithTtsSpan(builder, "GMT",
-                new TtsSpan.TextBuilder(context.getString(R.string.time_zone_gmt)).build());
-
-        int offsetMillis = tz.getOffset(now.getTime());
-        if (offsetMillis >= 0) {
-            appendWithTtsSpan(builder, "+", new TtsSpan.VerbatimBuilder("+").build());
+        final String gmtPattern = tzFormatter.getGMTPattern();
+        final int placeholderIndex = gmtPattern.indexOf("{0}");
+        final String gmtPatternPrefix, gmtPatternSuffix;
+        if (placeholderIndex == -1) {
+            // Bad pattern. Replace with defaults.
+            gmtPatternPrefix = "GMT";
+            gmtPatternSuffix = "";
+        } else {
+            gmtPatternPrefix = gmtPattern.substring(0, placeholderIndex);
+            gmtPatternSuffix = gmtPattern.substring(placeholderIndex + 3); // After the "{0}".
         }
 
+        if (!gmtPatternPrefix.isEmpty()) {
+            appendWithTtsSpan(builder, gmtPatternPrefix,
+                    new TtsSpan.TextBuilder(gmtPatternPrefix).build());
+        }
+
+        int offsetMillis = tz.getOffset(now.getTime());
+        final boolean negative = offsetMillis < 0;
+        final TimeZoneFormat.GMTOffsetPatternType patternType;
+        if (negative) {
+            offsetMillis = -offsetMillis;
+            patternType = TimeZoneFormat.GMTOffsetPatternType.NEGATIVE_HM;
+        } else {
+            patternType = TimeZoneFormat.GMTOffsetPatternType.POSITIVE_HM;
+        }
+        final String gmtOffsetPattern = tzFormatter.getGMTOffsetPattern(patternType);
+        final String localizedDigits = tzFormatter.getGMTOffsetDigits();
+
         final int offsetHours = (int) (offsetMillis / DateUtils.HOUR_IN_MILLIS);
-        appendWithTtsSpan(builder, twoDigits(offsetHours),
-                new TtsSpan.MeasureBuilder().setNumber(offsetHours).setUnit("hour").build());
-
-        builder.append(":");
-
         final int offsetMinutes = (int) (offsetMillis / DateUtils.MINUTE_IN_MILLIS);
         final int offsetMinutesRemaining = Math.abs(offsetMinutes) % 60;
-        appendWithTtsSpan(builder, twoDigits(offsetMinutesRemaining),
-                new TtsSpan.MeasureBuilder().setNumber(offsetMinutesRemaining)
-                        .setUnit("minute").build());
+
+        for (int i = 0; i < gmtOffsetPattern.length(); i++) {
+            char c = gmtOffsetPattern.charAt(i);
+            if (c == '+' || c == '-' || c == '\u2212' /* MINUS SIGN */) {
+                final String sign = String.valueOf(c);
+                appendWithTtsSpan(builder, sign, new TtsSpan.VerbatimBuilder(sign).build());
+            } else if (c == 'H' || c == 'm') {
+                final int numDigits;
+                if (i + 1 < gmtOffsetPattern.length() && gmtOffsetPattern.charAt(i + 1) == c) {
+                    numDigits = 2;
+                    i++; // Skip the next formatting character.
+                } else {
+                    numDigits = 1;
+                }
+                final int number;
+                final String unit;
+                if (c == 'H') {
+                    number = offsetHours;
+                    unit = "hour";
+                } else { // c == 'm'
+                    number = offsetMinutesRemaining;
+                    unit = "minute";
+                }
+                appendWithTtsSpan(builder, formatDigits(number, numDigits, localizedDigits),
+                        new TtsSpan.MeasureBuilder().setNumber(number).setUnit(unit).build());
+            } else {
+                builder.append(c);
+            }
+        }
+
+        if (!gmtPatternSuffix.isEmpty()) {
+            appendWithTtsSpan(builder, gmtPatternSuffix,
+                    new TtsSpan.TextBuilder(gmtPatternSuffix).build());
+        }
 
         CharSequence gmtText = new SpannableString(builder);
 
@@ -305,7 +357,8 @@ public class ZoneGetter {
         public final int zoneCount;
 
         public ZoneGetterData(Context context) {
-            final Locale locale = Locale.getDefault();
+            final Locale locale = context.getResources().getConfiguration().locale;
+            final TimeZoneFormat tzFormatter = TimeZoneFormat.getInstance(locale);
             final Date now = new Date();
             final List<String> olsonIdsToDisplayList = readTimezonesToDisplay(context);
 
@@ -319,7 +372,7 @@ public class ZoneGetter {
                 olsonIdsToDisplay[i] = olsonId;
                 final TimeZone tz = TimeZone.getTimeZone(olsonId);
                 timeZones[i] = tz;
-                gmtOffsetTexts[i] = getGmtOffsetText(context, locale, tz, now);
+                gmtOffsetTexts[i] = getGmtOffsetText(tzFormatter, locale, tz, now);
             }
 
             // Create a lookup of local zone IDs.
