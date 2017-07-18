@@ -80,7 +80,9 @@ public class TaskWindowContainerController
             final Task task = createTask(taskId, stack, userId, bounds, overrideConfig, resizeMode,
                     supportsPictureInPicture, homeTask, taskDescription);
             final int position = toTop ? POSITION_TOP : POSITION_BOTTOM;
-            stack.addTask(task, position, showForAllUsers, true /* moveParents */);
+            // We only want to move the parents to the parents if we are creating this task at the
+            // top of its stack.
+            stack.addTask(task, position, showForAllUsers, toTop /* moveParents */);
         }
     }
 
