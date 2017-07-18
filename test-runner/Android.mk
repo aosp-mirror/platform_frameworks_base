@@ -22,9 +22,15 @@ android_test_mock_source_files := $(call all-java-files-under, src/android/test/
 # =====================================
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_SRC_FILES := \
+    $(filter-out $(android_test_mock_source_files), $(call all-java-files-under, src))
 
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework legacy-test
+LOCAL_JAVA_LIBRARIES := \
+    core-oj \
+    core-libart \
+    framework \
+    legacy-test \
+    android.test.mock \
 
 LOCAL_MODULE:= android.test.runner
 

@@ -3846,7 +3846,7 @@ public class PackageParser {
         // every activity info has had a chance to set it from its attributes.
         setMaxAspectRatio(owner);
 
-        modifySharedLibrariesForBackwardCompatibility(owner);
+        PackageBackwardCompatibility.modifySharedLibraries(owner);
 
         if (hasDomainURLs(owner)) {
             owner.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
@@ -3855,18 +3855,6 @@ public class PackageParser {
         }
 
         return true;
-    }
-
-    private static void modifySharedLibrariesForBackwardCompatibility(Package owner) {
-        // "org.apache.http.legacy" is now a part of the boot classpath so it doesn't need
-        // to be an explicit dependency.
-        //
-        // A future change will remove this library from the boot classpath, at which point
-        // all apps that target SDK 21 and earlier will have it automatically added to their
-        // dependency lists.
-        owner.usesLibraries = ArrayUtils.remove(owner.usesLibraries, "org.apache.http.legacy");
-        owner.usesOptionalLibraries = ArrayUtils.remove(owner.usesOptionalLibraries,
-                "org.apache.http.legacy");
     }
 
     /**
