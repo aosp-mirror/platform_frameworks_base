@@ -19,6 +19,7 @@ package com.android.server.radio;
 import android.annotation.NonNull;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
+import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -44,12 +45,13 @@ class Tuner extends ITuner.Stub {
     private int mRegion;  // TODO(b/62710330): find better solution to handle regions
     private final boolean mWithAudio;
 
-    Tuner(@NonNull ITunerCallback clientCallback, int halRev, int region, boolean withAudio) {
+    Tuner(@NonNull ITunerCallback clientCallback, int halRev,
+            int region, boolean withAudio, int band) {
         mClientCallback = clientCallback;
         mTunerCallback = new TunerCallback(this, clientCallback, halRev);
         mRegion = region;
         mWithAudio = withAudio;
-        mNativeContext = nativeInit(halRev, withAudio);
+        mNativeContext = nativeInit(halRev, withAudio, band);
         mDeathRecipient = this::close;
         try {
             mClientCallback.asBinder().linkToDeath(mDeathRecipient, 0);
@@ -64,7 +66,7 @@ class Tuner extends ITuner.Stub {
         super.finalize();
     }
 
-    private native long nativeInit(int halRev, boolean withAudio);
+    private native long nativeInit(int halRev, boolean withAudio, int band);
     private native void nativeFinalize(long nativeContext);
     private native void nativeClose(long nativeContext);
 
@@ -74,7 +76,7 @@ class Tuner extends ITuner.Stub {
 
     private native void nativeStep(long nativeContext, boolean directionDown, boolean skipSubChannel);
     private native void nativeScan(long nativeContext, boolean directionDown, boolean skipSubChannel);
-    private native void nativeTune(long nativeContext, int channel, int subChannel);
+    private native void nativeTune(long nativeContext, @NonNull ProgramSelector selector);
     private native void nativeCancel(long nativeContext);
 
     private native RadioManager.ProgramInfo nativeGetProgramInformation(long nativeContext);
@@ -173,10 +175,14 @@ class Tuner extends ITuner.Stub {
     }
 
     @Override
-    public void tune(int channel, int subChannel) {
+    public void tune(ProgramSelector selector) {
+        if (selector == null) {
+            throw new IllegalArgumentException("The argument must not be a null pointer");
+        }
+        Slog.i(TAG, "Tuning to " + selector);
         synchronized (mLock) {
             checkNotClosedLocked();
-            nativeTune(mNativeContext, channel, subChannel);
+            nativeTune(mNativeContext, selector);
         }
     }
 

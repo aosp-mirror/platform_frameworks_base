@@ -32,11 +32,14 @@ class TunerAdapter extends RadioTuner {
     @NonNull private final ITuner mTuner;
     private boolean mIsClosed = false;
 
-    TunerAdapter(ITuner tuner) {
+    private @RadioManager.Band int mBand;
+
+    TunerAdapter(ITuner tuner, @RadioManager.Band int band) {
         if (tuner == null) {
             throw new NullPointerException();
         }
         mTuner = tuner;
+        mBand = band;
     }
 
     @Override
@@ -59,6 +62,7 @@ class TunerAdapter extends RadioTuner {
     public int setConfiguration(RadioManager.BandConfig config) {
         try {
             mTuner.setConfiguration(config);
+            mBand = config.getType();
             return RadioManager.STATUS_OK;
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Can't set configuration", e);
@@ -138,7 +142,7 @@ class TunerAdapter extends RadioTuner {
     @Override
     public int tune(int channel, int subChannel) {
         try {
-            mTuner.tune(channel, subChannel);
+            mTuner.tune(ProgramSelector.createAmFmSelector(mBand, channel, subChannel));
         } catch (IllegalStateException e) {
             Log.e(TAG, "Can't tune", e);
             return RadioManager.STATUS_INVALID_OPERATION;
@@ -150,6 +154,15 @@ class TunerAdapter extends RadioTuner {
             return RadioManager.STATUS_DEAD_OBJECT;
         }
         return RadioManager.STATUS_OK;
+    }
+
+    @Override
+    public void tune(@NonNull ProgramSelector selector) {
+        try {
+            mTuner.tune(selector);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
     }
 
     @Override

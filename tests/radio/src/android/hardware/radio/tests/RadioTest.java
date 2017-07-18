@@ -18,6 +18,7 @@ package android.hardware.radio.tests;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
 import android.support.test.InstrumentationRegistry;
@@ -64,6 +65,7 @@ public class RadioTest {
     private final int kConfigCallbackTimeoutMs = 10000;
     private final int kCancelTimeoutMs = 1000;
     private final int kTuneCallbackTimeoutMs = 30000;
+    private final int kFullScanTimeoutMs = 60000;
 
     private RadioManager mRadioManager;
     private RadioTuner mRadioTuner;
@@ -144,11 +146,9 @@ public class RadioTest {
         assertNotNull(mRadioTuner);
         verify(mCallback, timeout(kConfigCallbackTimeoutMs)).onConfigurationChanged(any());
         resetCallback();
-    }
 
-    private void checkAntenna() {
-        boolean isConnected = mRadioTuner.isAntennaConnected();
-        assertTrue(isConnected);
+        boolean isAntennaConnected = mRadioTuner.isAntennaConnected();
+        assertTrue(isAntennaConnected);
     }
 
     @Test
@@ -256,7 +256,6 @@ public class RadioTest {
     @Test
     public void testStep() {
         openTuner();
-        checkAntenna();
 
         int ret = mRadioTuner.step(RadioTuner.DIRECTION_DOWN, true);
         assertEquals(RadioManager.STATUS_OK, ret);
@@ -272,7 +271,6 @@ public class RadioTest {
     @Test
     public void testTuneAndGetPI() {
         openTuner();
-        checkAntenna();
 
         int channel = mFmBandConfig.getLowerLimit() + mFmBandConfig.getSpacing();
 
@@ -304,7 +302,6 @@ public class RadioTest {
     @Test
     public void testLateCancel() {
         openTuner();
-        checkAntenna();
 
         int ret = mRadioTuner.step(RadioTuner.DIRECTION_DOWN, false);
         assertEquals(RadioManager.STATUS_OK, ret);
@@ -317,7 +314,6 @@ public class RadioTest {
     @Test
     public void testScanAndCancel() {
         openTuner();
-        checkAntenna();
 
         /* There is a possible race condition between scan and cancel commands - the scan may finish
          * before cancel command is issued. Thus we accept both outcomes in this test.
@@ -335,7 +331,6 @@ public class RadioTest {
     @Test
     public void testStartBackgroundScan() {
         openTuner();
-        checkAntenna();
 
         boolean ret = mRadioTuner.startBackgroundScan();
         boolean isSupported = mModule.isBackgroundScanningSupported();
@@ -345,7 +340,6 @@ public class RadioTest {
     @Test
     public void testGetProgramList() {
         openTuner();
-        checkAntenna();
 
         try {
             List<RadioManager.ProgramInfo> list = mRadioTuner.getProgramList(null);
@@ -354,6 +348,39 @@ public class RadioTest {
             // the list may or may not be ready at this point
             Log.i(TAG, "Background list is not ready");
         }
+    }
+
+    @Test
+    public void testTuneFromProgramList() {
+        openTuner();
+
+        List<RadioManager.ProgramInfo> list;
+
+        try {
+            list = mRadioTuner.getProgramList(null);
+            assertNotNull(list);
+        } catch (IllegalStateException e) {
+            Log.i(TAG, "Background list is not ready, trying to fix it");
+
+            boolean success = mRadioTuner.startBackgroundScan();
+            assertTrue(success);
+            verify(mCallback, timeout(kFullScanTimeoutMs)).onBackgroundScanComplete();
+
+            list = mRadioTuner.getProgramList(null);
+            assertNotNull(list);
+        }
+
+        if (list.isEmpty()) {
+            Log.i(TAG, "Program list is empty, can't test tune");
+            return;
+        }
+
+        ProgramSelector sel = list.get(0).getSelector();
+        mRadioTuner.tune(sel);
+        ArgumentCaptor<RadioManager.ProgramInfo> infoc =
+                ArgumentCaptor.forClass(RadioManager.ProgramInfo.class);
+        verify(mCallback, timeout(kTuneCallbackTimeoutMs)).onProgramInfoChanged(infoc.capture());
+        assertEquals(sel, infoc.getValue().getSelector());
     }
 
     @Test

@@ -45,9 +45,10 @@ V1_0::BandConfig BandConfigToHal(JNIEnv *env, jobject jConfig, Region &region);
 V1_0::Direction DirectionToHal(bool directionDown);
 
 JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hardware::hidl_vec<V1_0::MetaData> &metadata);
-JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info);
+JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info, V1_0::Band band);
 JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info);
 
+V1_1::ProgramSelector ProgramSelectorToHal(JNIEnv *env, jobject jSelector);
 
 void ThrowParcelableRuntimeException(JNIEnv *env, const std::string& msg);
 

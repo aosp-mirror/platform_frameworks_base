@@ -712,6 +712,7 @@ aidl_files := \
 	frameworks/base/core/java/android/print/PrinterInfo.aidl \
 	frameworks/base/core/java/android/print/PrintJobId.aidl \
 	frameworks/base/core/java/android/printservice/recommendation/RecommendationInfo.aidl \
+	frameworks/base/core/java/android/hardware/radio/ProgramSelector.aidl \
 	frameworks/base/core/java/android/hardware/radio/RadioManager.aidl \
 	frameworks/base/core/java/android/hardware/radio/RadioMetadata.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbDevice.aidl \

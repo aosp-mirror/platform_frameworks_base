@@ -19,9 +19,10 @@
 
 #include "com_android_server_radio_convert.h"
 
+#include <JNIHelp.h>
+#include <Utils.h>
 #include <core_jni_helpers.h>
 #include <utils/Log.h>
-#include <JNIHelp.h>
 
 namespace android {
 namespace server {
@@ -37,7 +38,9 @@ using V1_0::Direction;
 using V1_0::MetadataType;
 using V1_0::Result;
 using V1_0::Rds;
+using V1_1::ProgramIdentifier;
 using V1_1::ProgramListResult;
+using V1_1::ProgramSelector;
 
 static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
 
@@ -86,6 +89,22 @@ static struct {
         jclass clazz;
         jmethodID cstor;
     } ProgramInfo;
+
+    struct {
+        jclass clazz;
+        jmethodID cstor;
+        jfieldID programType;
+        jfieldID primaryId;
+        jfieldID secondaryIds;
+        jfieldID vendorIds;
+
+        struct {
+            jclass clazz;
+            jmethodID cstor;
+            jfieldID type;
+            jfieldID value;
+        } Identifier;
+    } ProgramSelector;
 
     struct {
         jclass clazz;
@@ -383,25 +402,100 @@ JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &me
     return jMetadata;
 }
 
+static JavaRef<jobject> ProgramIdentifierFromHal(JNIEnv *env, const ProgramIdentifier &id) {
+    ALOGV("ProgramIdentifierFromHal()");
+    return make_javaref(env, env->NewObject(gjni.ProgramSelector.Identifier.clazz,
+            gjni.ProgramSelector.Identifier.cstor, id.type, id.value));
+}
+
+static JavaRef<jobject> ProgramSelectorFromHal(JNIEnv *env, const ProgramSelector &selector) {
+    ALOGV("ProgramSelectorFromHal()");
+    auto jPrimary = ProgramIdentifierFromHal(env, selector.primaryId);
+
+    auto jSecondary = make_javaref(env, env->NewObjectArray(selector.secondaryIds.size(),
+            gjni.ProgramSelector.Identifier.clazz, nullptr));
+    for (size_t i = 0; i < selector.secondaryIds.size(); i++) {
+        auto jId = ProgramIdentifierFromHal(env, selector.secondaryIds[i]);
+        env->SetObjectArrayElement(jSecondary.get(), i, jId.get());
+    }
+
+    auto jVendor = make_javaref(env, env->NewLongArray(selector.vendorIds.size()));
+    auto jVendorElements = env->GetLongArrayElements(jVendor.get(), nullptr);
+    for (size_t i = 0; i < selector.vendorIds.size(); i++) {
+        jVendorElements[i] = selector.vendorIds[i];
+    }
+    env->ReleaseLongArrayElements(jVendor.get(), jVendorElements, 0);
+
+    return make_javaref(env, env->NewObject(gjni.ProgramSelector.clazz, gjni.ProgramSelector.cstor,
+            selector.programType, jPrimary.get(), jSecondary.get(), jVendor.get()));
+}
+
+static ProgramIdentifier ProgramIdentifierToHal(JNIEnv *env, jobject jId) {
+    ALOGV("ProgramIdentifierToHal()");
+
+    ProgramIdentifier id = {};
+    id.type = env->GetIntField(jId, gjni.ProgramSelector.Identifier.type);
+    id.value = env->GetLongField(jId, gjni.ProgramSelector.Identifier.value);
+    return id;
+}
+
+ProgramSelector ProgramSelectorToHal(JNIEnv *env, jobject jSelector) {
+    ALOGV("ProgramSelectorToHal()");
+
+    ProgramSelector selector = {};
+
+    selector.programType = env->GetIntField(jSelector, gjni.ProgramSelector.programType);
+
+    auto jPrimary = env->GetObjectField(jSelector, gjni.ProgramSelector.primaryId);
+    auto jSecondary = reinterpret_cast<jobjectArray>(
+            env->GetObjectField(jSelector, gjni.ProgramSelector.secondaryIds));
+    auto jVendor = reinterpret_cast<jlongArray>(
+            env->GetObjectField(jSelector, gjni.ProgramSelector.vendorIds));
+
+    if (jPrimary == nullptr || jSecondary == nullptr || jVendor == nullptr) {
+        ALOGE("ProgramSelector object is incomplete");
+        return {};
+    }
+
+    selector.primaryId = ProgramIdentifierToHal(env, jPrimary);
+    auto count = env->GetArrayLength(jSecondary);
+    selector.secondaryIds.resize(count);
+    for (jsize i = 0; i < count; i++) {
+        auto jId = env->GetObjectArrayElement(jSecondary, i);
+        selector.secondaryIds[i] = ProgramIdentifierToHal(env, jId);
+    }
+
+    count = env->GetArrayLength(jVendor);
+    selector.vendorIds.resize(count);
+    auto jVendorElements = env->GetLongArrayElements(jVendor, nullptr);
+    for (jint i = 0; i < count; i++) {
+        selector.vendorIds[i] = jVendorElements[i];
+    }
+    env->ReleaseLongArrayElements(jVendor, jVendorElements, 0);
+
+    return selector;
+}
+
 static JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info10,
-        const V1_1::ProgramInfo *info11) {
+        const V1_1::ProgramInfo *info11, const ProgramSelector &selector) {
     ALOGV("ProgramInfoFromHal()");
 
     auto jMetadata = MetadataFromHal(env, info10.metadata);
     auto jVendorExtension = info11 ? make_javastr(env, info11->vendorExension) : nullptr;
+    auto jSelector = ProgramSelectorFromHal(env, selector);
 
     return make_javaref(env, env->NewObject(gjni.ProgramInfo.clazz, gjni.ProgramInfo.cstor,
-            info10.channel, info10.subChannel, info10.tuned, info10.stereo, info10.digital,
-            info10.signalStrength, jMetadata.get(), info11 ? info11->flags : 0,
-            jVendorExtension.get()));
+            jSelector.get(), info10.tuned, info10.stereo, info10.digital, info10.signalStrength,
+            jMetadata.get(), info11 ? info11->flags : 0, jVendorExtension.get()));
 }
 
-JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info) {
-    return ProgramInfoFromHal(env, info, nullptr);
+JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info, V1_0::Band band) {
+    auto selector = V1_1::utils::make_selector(band, info.channel, info.subChannel);
+    return ProgramInfoFromHal(env, info, nullptr, selector);
 }
 
 JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info) {
-    return ProgramInfoFromHal(env, info.base, &info);
+    return ProgramInfoFromHal(env, info.base, &info, info.selector);
 }
 
 } // namespace convert
@@ -465,7 +559,31 @@ void register_android_server_radio_convert(JNIEnv *env) {
     auto programInfoClass = FindClassOrDie(env, "android/hardware/radio/RadioManager$ProgramInfo");
     gjni.ProgramInfo.clazz = MakeGlobalRefOrDie(env, programInfoClass);
     gjni.ProgramInfo.cstor = GetMethodIDOrDie(env, programInfoClass, "<init>",
-            "(IIZZZILandroid/hardware/radio/RadioMetadata;ILjava/lang/String;)V");
+            "(Landroid/hardware/radio/ProgramSelector;ZZZILandroid/hardware/radio/RadioMetadata;I"
+            "Ljava/lang/String;)V");
+
+    auto programSelectorClass = FindClassOrDie(env, "android/hardware/radio/ProgramSelector");
+    gjni.ProgramSelector.clazz = MakeGlobalRefOrDie(env, programSelectorClass);
+    gjni.ProgramSelector.cstor = GetMethodIDOrDie(env, programSelectorClass, "<init>",
+            "(ILandroid/hardware/radio/ProgramSelector$Identifier;"
+            "[Landroid/hardware/radio/ProgramSelector$Identifier;[J)V");
+    gjni.ProgramSelector.programType = GetFieldIDOrDie(env, programSelectorClass,
+            "mProgramType", "I");
+    gjni.ProgramSelector.primaryId = GetFieldIDOrDie(env, programSelectorClass,
+            "mPrimaryId", "Landroid/hardware/radio/ProgramSelector$Identifier;");
+    gjni.ProgramSelector.secondaryIds = GetFieldIDOrDie(env, programSelectorClass,
+            "mSecondaryIds", "[Landroid/hardware/radio/ProgramSelector$Identifier;");
+    gjni.ProgramSelector.vendorIds = GetFieldIDOrDie(env, programSelectorClass,
+            "mVendorIds", "[J");
+
+    auto progSelIdClass = FindClassOrDie(env, "android/hardware/radio/ProgramSelector$Identifier");
+    gjni.ProgramSelector.Identifier.clazz = MakeGlobalRefOrDie(env, progSelIdClass);
+    gjni.ProgramSelector.Identifier.cstor = GetMethodIDOrDie(env, progSelIdClass,
+            "<init>", "(IJ)V");
+    gjni.ProgramSelector.Identifier.type = GetFieldIDOrDie(env, progSelIdClass,
+            "mType", "I");
+    gjni.ProgramSelector.Identifier.value = GetFieldIDOrDie(env, progSelIdClass,
+            "mValue", "J");
 
     auto radioMetadataClass = FindClassOrDie(env, "android/hardware/radio/RadioMetadata");
     gjni.RadioMetadata.clazz = MakeGlobalRefOrDie(env, radioMetadataClass);
