@@ -233,7 +233,7 @@ class WindowSurfacePlacer {
      */
     int handleAppTransitionReadyLocked() {
         int appsCount = mService.mOpeningApps.size();
-        if (!transitionGoodToGo(appsCount)) {
+        if (!transitionGoodToGo(appsCount, mTempTransitionReasons)) {
             return 0;
         }
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
@@ -375,6 +375,9 @@ class WindowSurfacePlacer {
                 true /*updateInputWindows*/);
         mService.mFocusMayChange = false;
 
+        mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING,
+                mTempTransitionReasons.clone()).sendToTarget();
+
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
 
         return layoutRedo | FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG;
@@ -499,7 +502,7 @@ class WindowSurfacePlacer {
         }
     }
 
-    private boolean transitionGoodToGo(int appsCount) {
+    private boolean transitionGoodToGo(int appsCount, SparseIntArray outReasons) {
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                 "Checking " + appsCount + " opening apps (frozen="
                         + mService.mDisplayFrozen + " timeout="
@@ -508,7 +511,7 @@ class WindowSurfacePlacer {
             mService.mAnimator.getScreenRotationAnimationLocked(
                     Display.DEFAULT_DISPLAY);
 
-        final SparseIntArray reasons = mTempTransitionReasons;
+        outReasons.clear();
         if (!mService.mAppTransition.isTimeout()) {
             // Imagine the case where we are changing orientation due to an app transition, but a previous
             // orientation change is still in progress. We won't process the orientation change
@@ -542,10 +545,10 @@ class WindowSurfacePlacer {
                 final TaskStack stack = wtoken.getStack();
                 final int stackId = stack != null ? stack.mStackId : INVALID_STACK_ID;
                 if (allDrawn) {
-                    reasons.put(stackId, drawnBeforeRestoring ? APP_TRANSITION_WINDOWS_DRAWN
+                    outReasons.put(stackId, drawnBeforeRestoring ? APP_TRANSITION_WINDOWS_DRAWN
                             : APP_TRANSITION_SAVED_SURFACE);
                 } else {
-                    reasons.put(stackId, wtoken.startingData instanceof SplashScreenStartingData
+                    outReasons.put(stackId, wtoken.startingData instanceof SplashScreenStartingData
                             ? APP_TRANSITION_SPLASH_SCREEN
                             : APP_TRANSITION_SNAPSHOT);
                 }
@@ -569,13 +572,10 @@ class WindowSurfacePlacer {
             boolean wallpaperReady = !mWallpaperControllerLocked.isWallpaperVisible() ||
                     mWallpaperControllerLocked.wallpaperTransitionReady();
             if (wallpaperReady) {
-                mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING, reasons.clone())
-                        .sendToTarget();
                 return true;
             }
             return false;
         }
-        mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING, reasons.clone()).sendToTarget();
         return true;
     }
 
