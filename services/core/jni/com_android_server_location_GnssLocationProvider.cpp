@@ -1523,6 +1523,10 @@ static jstring android_location_GnssLocationProvider_get_internal_state(JNIEnv* 
                           << " satellites:: " << std::endl;
         }
 
+        internalState << "constellation: 1=GPS, 2=SBAS, 3=GLO, 4=QZSS, 5=BDS, 6=GAL; "
+                      << "ephemerisType: 0=Eph, 1=Alm, 2=?; "
+                      << "ephemerisSource: 0=Demod, 1=Supl, 2=Server, 3=?; "
+                      << "ephemerisHealth: 0=Good, 1=Bad, 2=?" << std::endl;
         for (size_t i = 0; i < data.satelliteDataArray.size(); i++) {
             internalState << "svid: " << data.satelliteDataArray[i].svid
                           << ", constellation: "

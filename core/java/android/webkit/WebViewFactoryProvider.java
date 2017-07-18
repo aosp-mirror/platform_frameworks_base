@@ -91,9 +91,10 @@ public interface WebViewFactoryProvider {
 
         /**
         * Implement the API method
-        * {@link android.webkit.WebView#setSafeBrowsingWhiteList(List<String>)}
+        * {@link android.webkit.WebView#setSafeBrowsingWhitelist(List<String>,
+        * ValueCallback<Boolean>)}
         */
-        void setSafeBrowsingWhiteList(List<String> urls);
+        void setSafeBrowsingWhitelist(List<String> urls, ValueCallback<Boolean> callback);
     }
 
     Statics getStatics();

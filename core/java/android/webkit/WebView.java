@@ -1645,9 +1645,13 @@ public class WebView extends AbsoluteLayout
      * TODO: Add documentation for the format of the urls.
      *
      * @param urls the list of URLs
+     * @param callback will be called with true if URLs are successfully added to the whitelist. It
+     * will be called with false if any URLs are malformed. The callback will be run on the UI
+     * thread.
      */
-    public static void setSafeBrowsingWhiteList(@Nullable List<String> urls) {
-        getFactory().getStatics().setSafeBrowsingWhiteList(urls);
+    public static void setSafeBrowsingWhitelist(@Nullable List<String> urls,
+            @Nullable ValueCallback<Boolean> callback) {
+        getFactory().getStatics().setSafeBrowsingWhitelist(urls, callback);
     }
 
     /**

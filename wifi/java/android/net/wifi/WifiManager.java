@@ -1837,7 +1837,7 @@ public class WifiManager {
     }
 
     /**
-     * This call will be deprecated and removed in an upcoming release.  It is no longer used to
+     * This call is deprecated and removed.  It is no longer used to
      * start WiFi Tethering.  Please use {@link ConnectivityManager#startTethering(int, boolean,
      * ConnectivityManager#OnStartTetheringCallback)} if
      * the caller has proper permissions.  Callers can also use the LocalOnlyHotspot feature for a
@@ -1849,8 +1849,11 @@ public class WifiManager {
      * @return {@code false}
      *
      * @hide
+     * @deprecated This API is nolonger supported.
+     * @removed
      */
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
         String packageName = mContext.getOpPackageName();

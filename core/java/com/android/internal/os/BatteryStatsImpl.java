@@ -119,7 +119,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 160 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 161 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -5637,6 +5637,7 @@ public class BatteryStatsImpl extends BatteryStats {
         StopwatchTimer mFlashlightTurnedOnTimer;
         StopwatchTimer mCameraTurnedOnTimer;
         StopwatchTimer mForegroundActivityTimer;
+        StopwatchTimer mForegroundServiceTimer;
         /** Total time spent by the uid holding any partial wakelocks. */
         DualTimer mAggregatedPartialWakelockTimer;
         DualTimer mBluetoothScanTimer;
@@ -5646,6 +5647,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         int mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
         StopwatchTimer[] mProcessStateTimer;
+
+        boolean mInForegroundService = false;
 
         BatchTimer mVibratorOnTimer;
 
@@ -6119,6 +6122,14 @@ public class BatteryStatsImpl extends BatteryStats {
             return mForegroundActivityTimer;
         }
 
+        public StopwatchTimer createForegroundServiceTimerLocked() {
+            if (mForegroundServiceTimer == null) {
+                mForegroundServiceTimer = new StopwatchTimer(mBsi.mClocks, Uid.this,
+                        FOREGROUND_SERVICE, null, mBsi.mOnBatteryTimeBase);
+            }
+            return mForegroundServiceTimer;
+        }
+
         public DualTimer createAggregatedPartialWakelockTimerLocked() {
             if (mAggregatedPartialWakelockTimer == null) {
                 mAggregatedPartialWakelockTimer = new DualTimer(mBsi.mClocks, this,
@@ -6204,6 +6215,16 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteActivityPausedLocked(long elapsedRealtimeMs) {
             if (mForegroundActivityTimer != null) {
                 mForegroundActivityTimer.stopRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
+        public void noteForegroundServiceResumedLocked(long elapsedRealtimeMs) {
+            createForegroundServiceTimerLocked().startRunningLocked(elapsedRealtimeMs);
+        }
+
+        public void noteForegroundServicePausedLocked(long elapsedRealtimeMs) {
+            if (mForegroundServiceTimer != null) {
+                mForegroundServiceTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
@@ -6332,6 +6353,11 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public Timer getForegroundActivityTimer() {
             return mForegroundActivityTimer;
+        }
+
+        @Override
+        public Timer getForegroundServiceTimer() {
+            return mForegroundServiceTimer;
         }
 
         @Override
@@ -6618,6 +6644,7 @@ public class BatteryStatsImpl extends BatteryStats {
             active |= !resetTimerIfNotNull(mFlashlightTurnedOnTimer, false);
             active |= !resetTimerIfNotNull(mCameraTurnedOnTimer, false);
             active |= !resetTimerIfNotNull(mForegroundActivityTimer, false);
+            active |= !resetTimerIfNotNull(mForegroundServiceTimer, false);
             active |= !resetTimerIfNotNull(mAggregatedPartialWakelockTimer, false);
             active |= !resetTimerIfNotNull(mBluetoothScanTimer, false);
             active |= !resetTimerIfNotNull(mBluetoothUnoptimizedScanTimer, false);
@@ -6816,6 +6843,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (mForegroundActivityTimer != null) {
                     mForegroundActivityTimer.detach();
                     mForegroundActivityTimer = null;
+                }
+                if (mForegroundServiceTimer != null) {
+                    mForegroundServiceTimer.detach();
+                    mForegroundServiceTimer = null;
                 }
                 if (mAggregatedPartialWakelockTimer != null) {
                     mAggregatedPartialWakelockTimer.detach();
@@ -7023,6 +7054,12 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mForegroundActivityTimer != null) {
                 out.writeInt(1);
                 mForegroundActivityTimer.writeToParcel(out, elapsedRealtimeUs);
+            } else {
+                out.writeInt(0);
+            }
+            if (mForegroundServiceTimer != null) {
+                out.writeInt(1);
+                mForegroundServiceTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
@@ -7303,6 +7340,12 @@ public class BatteryStatsImpl extends BatteryStats {
                         FOREGROUND_ACTIVITY, null, mBsi.mOnBatteryTimeBase, in);
             } else {
                 mForegroundActivityTimer = null;
+            }
+            if (in.readInt() != 0) {
+                mForegroundServiceTimer = new StopwatchTimer(mBsi.mClocks, Uid.this,
+                        FOREGROUND_SERVICE, null, mBsi.mOnBatteryTimeBase, in);
+            } else {
+                mForegroundServiceTimer = null;
             }
             if (in.readInt() != 0) {
                 mAggregatedPartialWakelockTimer = new DualTimer(mBsi.mClocks, this,
@@ -8350,6 +8393,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void updateUidProcessStateLocked(int procState) {
             int uidRunningState;
+            // Make special note of Foreground Services
+            final boolean userAwareService =
+                    (procState == ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
             if (procState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
                 uidRunningState = ActivityManager.PROCESS_STATE_NONEXISTENT;
             } else if (procState == ActivityManager.PROCESS_STATE_TOP) {
@@ -8368,24 +8414,37 @@ public class BatteryStatsImpl extends BatteryStats {
                 uidRunningState = PROCESS_STATE_CACHED;
             }
 
-            if (mProcessState == uidRunningState) return;
+            if (mProcessState == uidRunningState && userAwareService == mInForegroundService) {
+                return;
+            }
 
             final long elapsedRealtimeMs = mBsi.mClocks.elapsedRealtime();
-            final long uptimeMs = mBsi.mClocks.uptimeMillis();
+            if (mProcessState != uidRunningState) {
+                final long uptimeMs = mBsi.mClocks.uptimeMillis();
 
-            if (mProcessState != ActivityManager.PROCESS_STATE_NONEXISTENT) {
-                mProcessStateTimer[mProcessState].stopRunningLocked(elapsedRealtimeMs);
-            }
-            mProcessState = uidRunningState;
-            if (uidRunningState != ActivityManager.PROCESS_STATE_NONEXISTENT) {
-                if (mProcessStateTimer[uidRunningState] == null) {
-                    makeProcessState(uidRunningState, null);
+                if (mProcessState != ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                    mProcessStateTimer[mProcessState].stopRunningLocked(elapsedRealtimeMs);
                 }
-                mProcessStateTimer[uidRunningState].startRunningLocked(elapsedRealtimeMs);
+                mProcessState = uidRunningState;
+                if (uidRunningState != ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                    if (mProcessStateTimer[uidRunningState] == null) {
+                        makeProcessState(uidRunningState, null);
+                    }
+                    mProcessStateTimer[uidRunningState].startRunningLocked(elapsedRealtimeMs);
+                }
+
+                updateOnBatteryBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
+                updateOnBatteryScreenOffBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
             }
 
-            updateOnBatteryBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
-            updateOnBatteryScreenOffBgTimeBase(uptimeMs * 1000, elapsedRealtimeMs * 1000);
+            if (userAwareService != mInForegroundService) {
+                if (userAwareService) {
+                    noteForegroundServiceResumedLocked(elapsedRealtimeMs);
+                } else {
+                    noteForegroundServicePausedLocked(elapsedRealtimeMs);
+                }
+                mInForegroundService = userAwareService;
+            }
         }
 
         /** Whether to consider Uid to be in the background for background timebase purposes. */
@@ -11610,6 +11669,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 u.createForegroundActivityTimerLocked().readSummaryFromParcelLocked(in);
             }
             if (in.readInt() != 0) {
+                u.createForegroundServiceTimerLocked().readSummaryFromParcelLocked(in);
+            }
+            if (in.readInt() != 0) {
                 u.createAggregatedPartialWakelockTimerLocked().readSummaryFromParcelLocked(in);
             }
             if (in.readInt() != 0) {
@@ -12018,6 +12080,12 @@ public class BatteryStatsImpl extends BatteryStats {
             if (u.mForegroundActivityTimer != null) {
                 out.writeInt(1);
                 u.mForegroundActivityTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            } else {
+                out.writeInt(0);
+            }
+            if (u.mForegroundServiceTimer != null) {
+                out.writeInt(1);
+                u.mForegroundServiceTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }

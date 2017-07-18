@@ -1132,12 +1132,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             fixateNewestUserKeyAuth(userId);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
             notifyActivePasswordMetricsAvailable(null, userId);
-
-            if (mStorage.getPersistentDataBlock() != null
-                    && LockPatternUtils.userOwnsFrpCredential(mUserManager.getUserInfo(userId))) {
-                // If owner, write to persistent storage for FRP
-                mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, userId, 0, null);
-            }
             return;
         }
         if (credential == null) {
@@ -1190,12 +1184,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Refresh the auth token
             doVerifyCredential(credential, credentialType, true, 0, userId, null /* progressCallback */);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
-            if (mStorage.getPersistentDataBlock() != null
-                    && LockPatternUtils.userOwnsFrpCredential(mUserManager.getUserInfo(userId))) {
-                // If owner, write to persistent storage for FRP
-                mStorage.writePersistentDataBlock(PersistentData.TYPE_GATEKEEPER, userId,
-                        requestedQuality, willStore.toBytes());
-            }
         } else {
             throw new RemoteException("Failed to enroll " +
                     (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD ? "password"
@@ -1443,18 +1431,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             return response;
         }
 
-        final CredentialHash storedHash;
         if (userId == USER_FRP) {
-            PersistentData data = mStorage.readPersistentDataBlock();
-            if (data.type != PersistentData.TYPE_GATEKEEPER) {
-                Slog.wtf(TAG, "Expected PersistentData.TYPE_GATEKEEPER, but was: " + data.type);
-                return VerifyCredentialResponse.ERROR;
-            }
-            return verifyFrpCredential(credential, credentialType, data, progressCallback);
-        } else {
-            storedHash = mStorage.readCredentialHash(userId);
+            Slog.wtf(TAG, "Unexpected FRP credential type, should be SP based.");
+            return VerifyCredentialResponse.ERROR;
         }
 
+        final CredentialHash storedHash = mStorage.readCredentialHash(userId);
         if (storedHash.type != credentialType) {
             Slog.wtf(TAG, "doVerifyCredential type mismatch with stored credential??"
                     + " stored: " + storedHash.type + " passed in: " + credentialType);
@@ -1482,29 +1464,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
-        return response;
-    }
-
-    private VerifyCredentialResponse verifyFrpCredential(String credential, int credentialType,
-            PersistentData data, ICheckCredentialProgressCallback progressCallback)
-            throws RemoteException {
-        CredentialHash storedHash = CredentialHash.fromBytes(data.payload);
-        if (storedHash.type != credentialType) {
-            Slog.wtf(TAG, "doVerifyCredential type mismatch with stored credential??"
-                    + " stored: " + storedHash.type + " passed in: " + credentialType);
-            return VerifyCredentialResponse.ERROR;
-        }
-        if (ArrayUtils.isEmpty(storedHash.hash) || TextUtils.isEmpty(credential)) {
-            Slog.e(TAG, "Stored hash or credential is empty");
-            return VerifyCredentialResponse.ERROR;
-        }
-        VerifyCredentialResponse response = VerifyCredentialResponse.fromGateKeeperResponse(
-                getGateKeeperService().verifyChallenge(data.userId, 0 /* challenge */,
-                        storedHash.hash, credential.getBytes()));
-        if (progressCallback != null
-                && response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-            progressCallback.onCredentialVerified();
-        }
         return response;
     }
 

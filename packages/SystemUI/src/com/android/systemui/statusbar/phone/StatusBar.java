@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -104,6 +102,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
@@ -565,7 +564,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }};
 
     private boolean mWaitingForKeyguardExit;
-    private boolean mDozing;
+    protected boolean mDozing;
     private boolean mDozingRequested;
     protected boolean mScrimSrcModeEnabled;
 
@@ -5280,6 +5279,18 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    boolean isCameraAllowedByAdmin() {
+        if (mDevicePolicyManager.getCameraDisabled(null, mCurrentUserId)) {
+            return false;
+        } else if (isKeyguardShowing() && isKeyguardSecure()) {
+            // Check if the admin has disabled the camera specifically for the keyguard
+            return (mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUserId)
+                    & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) == 0;
+        }
+
+        return true;
+    }
+
     public void notifyFpAuthModeChanged() {
         updateDozing();
     }
@@ -5303,6 +5314,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean isKeyguardShowing() {
+        if (mStatusBarKeyguardViewManager == null) {
+            Slog.i(TAG, "isKeyguardShowing() called before startKeyguard(), returning true");
+            return true;
+        }
         return mStatusBarKeyguardViewManager.isShowing();
     }
 
@@ -5577,6 +5592,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected boolean mVrMode;
 
     private Set<String> mNonBlockablePkgs;
+
+    public boolean isDeviceInteractive() {
+        return mDeviceInteractive;
+    }
 
     @Override  // NotificationData.Environment
     public boolean isDeviceProvisioned() {
@@ -7227,7 +7246,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        if (mNotificationData.shouldSuppressScreenOn(sbn.getKey())) {
+        if (!isDozing() && mNotificationData.shouldSuppressScreenOn(sbn.getKey())) {
+            if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
+            return false;
+        }
+
+        if (isDozing() && mNotificationData.shouldSuppressScreenOff(sbn.getKey())) {
             if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }

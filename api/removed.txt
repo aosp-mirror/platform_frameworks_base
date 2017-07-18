@@ -267,6 +267,14 @@ package android.net {
 
 }
 
+package android.net.wifi {
+
+  public class WifiManager {
+    method public deprecated boolean setWifiApEnabled(android.net.wifi.WifiConfiguration, boolean);
+  }
+
+}
+
 package android.os {
 
   public class BatteryManager {

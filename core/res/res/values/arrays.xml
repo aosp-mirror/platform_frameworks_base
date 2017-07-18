@@ -106,12 +106,6 @@
         <item>@drawable/progress_large_material</item>
         <item>@drawable/progress_medium_material</item>
         <item>@drawable/progress_small_material</item>
-        <item>@drawable/quickcontact_badge_overlay_dark</item>
-        <item>@drawable/quickcontact_badge_overlay_light</item>
-        <item>@drawable/quickcontact_badge_overlay_normal_dark</item>
-        <item>@drawable/quickcontact_badge_overlay_normal_light</item>
-        <item>@drawable/quickcontact_badge_overlay_pressed_dark</item>
-        <item>@drawable/quickcontact_badge_overlay_pressed_light</item>
         <item>@drawable/ratingbar_indicator_material</item>
         <item>@drawable/ratingbar_material</item>
         <item>@drawable/ratingbar_small_material</item>
