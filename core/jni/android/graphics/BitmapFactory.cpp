@@ -136,7 +136,7 @@ public:
             : mScale(scale), mSize(size) {
     }
 
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable*) {
+    virtual bool allocPixelRef(SkBitmap* bitmap) {
         // accounts for scale in final allocation, using eventual size and config
         const int bytesPerPixel = SkColorTypeBytesPerPixel(bitmap->colorType());
         const int requestedSize = bytesPerPixel *
@@ -147,7 +147,7 @@ public:
                     mSize, requestedSize);
             return false;
         }
-        return SkBitmap::HeapAllocator::allocPixelRef(bitmap, nullptr);
+        return SkBitmap::HeapAllocator::allocPixelRef(bitmap);
     }
 private:
     const float mScale;
@@ -163,7 +163,7 @@ public:
     ~RecyclingPixelAllocator() {
     }
 
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable*) {
+    virtual bool allocPixelRef(SkBitmap* bitmap) {
         const SkImageInfo& info = bitmap->info();
         if (info.colorType() == kUnknown_SkColorType) {
             ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
@@ -401,7 +401,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     }
     SkBitmap decodingBitmap;
     if (!decodingBitmap.setInfo(bitmapInfo) ||
-            !decodingBitmap.tryAllocPixels(decodeAllocator, nullptr)) {
+            !decodingBitmap.tryAllocPixels(decodeAllocator)) {
         // SkAndroidCodec should recommend a valid SkImageInfo, so setInfo()
         // should only only fail if the calculated value for rowBytes is too
         // large.
@@ -486,7 +486,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         // to/from unpremultiplied bitmaps.
         outputBitmap.setInfo(
                 bitmapInfo.makeWH(scaledWidth, scaledHeight).makeColorType(scaledColorType));
-        if (!outputBitmap.tryAllocPixels(outputAllocator, NULL)) {
+        if (!outputBitmap.tryAllocPixels(outputAllocator)) {
             // This should only fail on OOM.  The recyclingAllocator should have
             // enough memory since we check this before decoding using the
             // scaleCheckingAllocator.

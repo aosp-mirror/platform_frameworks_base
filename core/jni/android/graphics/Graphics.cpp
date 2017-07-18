@@ -433,7 +433,7 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 ///////////////////////////////////////////////////////////////////////////////
 
 android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
-        SkColorTable*, int fd, void* addr, size_t size, bool readOnly) {
+        int fd, void* addr, size_t size, bool readOnly) {
     const SkImageInfo& info = bitmap->info();
     if (info.colorType() == kUnknown_SkColorType) {
         doThrowIAE(env, "unknown bitmap configuration");
@@ -607,7 +607,7 @@ jobject GraphicsJNI::getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColor
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool HeapAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable*) {
+bool HeapAllocator::allocPixelRef(SkBitmap* bitmap) {
     mStorage = android::Bitmap::allocateHeapBitmap(bitmap);
     return !!mStorage;
 }
@@ -624,7 +624,7 @@ RecyclingClippingPixelAllocator::RecyclingClippingPixelAllocator(
 
 RecyclingClippingPixelAllocator::~RecyclingClippingPixelAllocator() {}
 
-bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable*) {
+bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap) {
     // Ensure that the caller did not pass in a NULL bitmap to the constructor or this
     // function.
     LOG_ALWAYS_FATAL_IF(!mRecycledBitmap);
@@ -683,7 +683,7 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTab
     // decode is complete.
     mNeedsCopy = true;
 
-    return heapAllocator.allocPixelRef(bitmap, nullptr);
+    return heapAllocator.allocPixelRef(bitmap);
 }
 
 void RecyclingClippingPixelAllocator::copyIfNecessary() {
@@ -714,7 +714,7 @@ AshmemPixelAllocator::AshmemPixelAllocator(JNIEnv *env) {
             "env->GetJavaVM failed");
 }
 
-bool AshmemPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable*) {
+bool AshmemPixelAllocator::allocPixelRef(SkBitmap* bitmap) {
     mStorage = android::Bitmap::allocateAshmemBitmap(bitmap);
     return !!mStorage;
 }
