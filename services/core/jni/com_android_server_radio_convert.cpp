@@ -185,6 +185,44 @@ void ThrowParcelableRuntimeException(JNIEnv *env, const std::string& msg) {
     ALOGE_IF(res != JNI_OK, "Couldn't throw parcelable runtime exception");
 }
 
+static JavaRef<jintArray> ArrayFromHal(JNIEnv *env, const hidl_vec<uint32_t>& vec) {
+    auto jArr = make_javaref(env, env->NewIntArray(vec.size()));
+    auto jArrElements = env->GetIntArrayElements(jArr.get(), nullptr);
+    for (size_t i = 0; i < vec.size(); i++) {
+        jArrElements[i] = vec[i];
+    }
+    env->ReleaseIntArrayElements(jArr.get(), jArrElements, 0);
+    return jArr;
+}
+
+static JavaRef<jlongArray> ArrayFromHal(JNIEnv *env, const hidl_vec<uint64_t>& vec) {
+    auto jArr = make_javaref(env, env->NewLongArray(vec.size()));
+    auto jArrElements = env->GetLongArrayElements(jArr.get(), nullptr);
+    for (size_t i = 0; i < vec.size(); i++) {
+        jArrElements[i] = vec[i];
+    }
+    env->ReleaseLongArrayElements(jArr.get(), jArrElements, 0);
+    return jArr;
+}
+
+template <typename T>
+static JavaRef<jobjectArray> ArrayFromHal(JNIEnv *env, const hidl_vec<T>& vec,
+        jclass jElementClass, std::function<JavaRef<jobject>(JNIEnv*, const T&)> converter) {
+    auto jArr = make_javaref(env, env->NewObjectArray(vec.size(), jElementClass, nullptr));
+    for (size_t i = 0; i < vec.size(); i++) {
+        auto jElement = converter(env, vec[i]);
+        env->SetObjectArrayElement(jArr.get(), i, jElement.get());
+    }
+    return jArr;
+}
+
+template <typename T>
+static JavaRef<jobjectArray> ArrayFromHal(JNIEnv *env, const hidl_vec<T>& vec,
+        jclass jElementClass, JavaRef<jobject>(*converter)(JNIEnv*, const T&)) {
+    return ArrayFromHal(env, vec, jElementClass,
+            std::function<JavaRef<jobject>(JNIEnv*, const T&)>(converter));
+}
+
 static Rds RdsForRegion(bool rds, Region region) {
     if (!rds) return Rds::NONE;
 
@@ -220,6 +258,7 @@ static Deemphasis DeemphasisForRegion(Region region) {
 static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Properties &prop10,
         const V1_1::Properties *prop11, jint moduleId, const std::string& serviceName) {
     ALOGV("ModulePropertiesFromHal()");
+    using namespace std::placeholders;
 
     auto jServiceName = make_javastr(env, serviceName);
     auto jImplementor = make_javastr(env, prop10.implementor);
@@ -228,21 +267,19 @@ static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Propert
     auto jSerial = make_javastr(env, prop10.serial);
     bool isBgScanSupported = prop11 ? prop11->supportsBackgroundScanning : false;
     auto jVendorExtension = prop11 ? make_javastr(env, prop11->vendorExension) : nullptr;
-
-    auto jBands = make_javaref(env, env->NewObjectArray(prop10.bands.size(),
-            gjni.BandDescriptor.clazz, nullptr));
-    int i = 0;
-    for (auto &&band : prop10.bands) {
-        // ITU_1 is the default region just because its index is 0.
-        auto jBand = BandDescriptorFromHal(env, band, Region::ITU_1);
-        env->SetObjectArrayElement(jBands.get(), i++, jBand.get());
-    }
+    // ITU_1 is the default region just because its index is 0.
+    auto jBands = ArrayFromHal<V1_0::BandConfig>(env, prop10.bands, gjni.BandDescriptor.clazz,
+        std::bind(BandDescriptorFromHal, _1, _2, Region::ITU_1));
+    auto jSupportedProgramTypes =
+            prop11 ? ArrayFromHal(env, prop11->supportedProgramTypes) : nullptr;
+    auto jSupportedIdentifierTypes =
+            prop11 ? ArrayFromHal(env, prop11->supportedIdentifierTypes) : nullptr;
 
     return make_javaref(env, env->NewObject(gjni.ModuleProperties.clazz,
             gjni.ModuleProperties.cstor, moduleId, jServiceName.get(), prop10.classId,
             jImplementor.get(), jProduct.get(), jVersion.get(), jSerial.get(), prop10.numTuners,
             prop10.numAudioSources, prop10.supportsCapture, jBands.get(), isBgScanSupported,
-            jVendorExtension.get()));
+            jSupportedProgramTypes.get(), jSupportedIdentifierTypes.get(), jVendorExtension.get()));
 }
 
 JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Properties &properties,
@@ -411,20 +448,9 @@ static JavaRef<jobject> ProgramIdentifierFromHal(JNIEnv *env, const ProgramIdent
 static JavaRef<jobject> ProgramSelectorFromHal(JNIEnv *env, const ProgramSelector &selector) {
     ALOGV("ProgramSelectorFromHal()");
     auto jPrimary = ProgramIdentifierFromHal(env, selector.primaryId);
-
-    auto jSecondary = make_javaref(env, env->NewObjectArray(selector.secondaryIds.size(),
-            gjni.ProgramSelector.Identifier.clazz, nullptr));
-    for (size_t i = 0; i < selector.secondaryIds.size(); i++) {
-        auto jId = ProgramIdentifierFromHal(env, selector.secondaryIds[i]);
-        env->SetObjectArrayElement(jSecondary.get(), i, jId.get());
-    }
-
-    auto jVendor = make_javaref(env, env->NewLongArray(selector.vendorIds.size()));
-    auto jVendorElements = env->GetLongArrayElements(jVendor.get(), nullptr);
-    for (size_t i = 0; i < selector.vendorIds.size(); i++) {
-        jVendorElements[i] = selector.vendorIds[i];
-    }
-    env->ReleaseLongArrayElements(jVendor.get(), jVendorElements, 0);
+    auto jSecondary = ArrayFromHal(env, selector.secondaryIds,
+            gjni.ProgramSelector.Identifier.clazz, ProgramIdentifierFromHal);
+    auto jVendor = ArrayFromHal(env, selector.vendorIds);
 
     return make_javaref(env, env->NewObject(gjni.ProgramSelector.clazz, gjni.ProgramSelector.cstor,
             selector.programType, jPrimary.get(), jSecondary.get(), jVendor.get()));
@@ -554,7 +580,7 @@ void register_android_server_radio_convert(JNIEnv *env) {
     gjni.ModuleProperties.cstor = GetMethodIDOrDie(env, modulePropertiesClass, "<init>",
             "(ILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;"
             "Ljava/lang/String;IIZ[Landroid/hardware/radio/RadioManager$BandDescriptor;Z"
-            "Ljava/lang/String;)V");
+            "[I[ILjava/lang/String;)V");
 
     auto programInfoClass = FindClassOrDie(env, "android/hardware/radio/RadioManager$ProgramInfo");
     gjni.ProgramInfo.clazz = MakeGlobalRefOrDie(env, programInfoClass);
