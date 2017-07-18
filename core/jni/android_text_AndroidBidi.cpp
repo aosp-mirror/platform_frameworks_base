@@ -42,7 +42,7 @@ static jint runBidi(JNIEnv* env, jobject obj, jint dir, jcharArray chsArray,
             // Set callbacks to override bidi classes of new emoji
             ubidi_setClassCallback(
                     bidi, minikin::emojiBidiOverride, nullptr, nullptr, nullptr, &status);
-            ubidi_setPara(bidi, chs, n, dir, NULL, &status);
+            ubidi_setPara(bidi, reinterpret_cast<const UChar*>(chs), n, dir, NULL, &status);
             if (U_SUCCESS(status)) {
                 for (int i = 0; i < n; ++i) {
                   info[i] = ubidi_getLevelAt(bidi, i);
