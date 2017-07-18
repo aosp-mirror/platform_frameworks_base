@@ -211,7 +211,7 @@ public class Tethering extends BaseNetworkObserver {
         final Handler smHandler = mTetherMasterSM.getHandler();
         mOffloadController = new OffloadController(smHandler,
                 deps.getOffloadHardwareInterface(smHandler, mLog),
-                mContext.getContentResolver(),
+                mContext.getContentResolver(), mNMService,
                 mLog);
         mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
                 mContext, mTetherMasterSM, mLog, TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
@@ -1754,6 +1754,11 @@ public class Tethering extends BaseNetworkObserver {
             pw.println("Current upstream interface: " + mCurrentUpstreamIface);
             pw.decreaseIndent();
         }
+
+        pw.println("Hardware offload:");
+        pw.increaseIndent();
+        mOffloadController.dump(pw);
+        pw.decreaseIndent();
 
         pw.println("Log:");
         pw.increaseIndent();
