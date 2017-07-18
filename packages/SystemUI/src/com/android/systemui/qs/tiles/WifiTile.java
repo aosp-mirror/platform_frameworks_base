@@ -324,9 +324,27 @@ public class WifiTile extends QSTileImpl<SignalState> {
         @Override
         public void onAccessPointsChanged(final List<AccessPoint> accessPoints) {
             mAccessPoints = accessPoints.toArray(new AccessPoint[accessPoints.size()]);
+            filterUnreachableAPs();
+
             updateItems();
             if (accessPoints != null && accessPoints.size() > 0) {
                 fireScanStateChanged(false);
+            }
+        }
+
+        /** Filter unreachable APs from mAccessPoints */
+        private void filterUnreachableAPs() {
+            int numReachable = 0;
+            for (AccessPoint ap : mAccessPoints) {
+                if (ap.isReachable()) numReachable++;
+            }
+            if (numReachable != mAccessPoints.length) {
+                AccessPoint[] unfiltered = mAccessPoints;
+                mAccessPoints = new AccessPoint[numReachable];
+                int i = 0;
+                for (AccessPoint ap : unfiltered) {
+                    if (ap.isReachable()) mAccessPoints[i++] = ap;
+                }
             }
         }
 
