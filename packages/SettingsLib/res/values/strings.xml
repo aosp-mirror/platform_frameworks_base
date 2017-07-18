@@ -237,6 +237,12 @@
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_signal_full">Wifi signal full.</string>
 
+    <!-- Content description of the Wi-Fi security type. This message indicates this is an open Wi-Fi (no password needed) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_security_type_none">Open network</string>
+
+    <!-- Content description of the Wi-Fi security type. This message indicates this is a secured Wi-Fi (password needed) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_security_type_secured">Secure network</string>
+
     <!-- Label for kernel threads in battery usage -->
     <string name="process_kernel_label">Android OS</string>
     <!-- Title of data usage item that represents all uninstalled applications. [CHAR LIMIT=48] -->

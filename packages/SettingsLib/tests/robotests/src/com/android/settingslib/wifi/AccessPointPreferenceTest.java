@@ -16,6 +16,8 @@
 package com.android.settingslib.wifi;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 
@@ -57,5 +59,23 @@ public class AccessPointPreferenceTest {
 
         assertThat(AccessPointPreference.generatePreferenceKey(builder.build()))
                 .isEqualTo(expectedKey);
+    }
+
+    @Test
+    public void refresh_openNetwork_updateContentDescription() {
+        final String ssid = "ssid";
+        final String summary = "connected";
+        final int security = AccessPoint.SECURITY_WEP;
+        final AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setSsid(ssid)
+                .setSecurity(security)
+                .build();
+        final AccessPointPreference pref = mock(AccessPointPreference.class);
+        when(pref.getTitle()).thenReturn(ssid);
+        when(pref.getSummary()).thenReturn(summary);
+
+        assertThat(AccessPointPreference.buildContentDescription(
+                RuntimeEnvironment.application, pref, ap))
+                .isEqualTo("ssid,connected,Wifi signal full.,Secure network");
     }
 }
