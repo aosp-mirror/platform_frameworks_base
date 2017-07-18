@@ -175,6 +175,8 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
@@ -422,8 +424,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private DozeServiceHost mDozeServiceHost;
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
-    private boolean mScreenTurningOn;
-    private boolean mScreenFullyOff;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -634,11 +634,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
 
-    /**
-     * If set, the device has started going to sleep but isn't fully non-interactive yet.
-     */
-    protected boolean mStartedGoingToSleep;
-
     private final OnChildLocationsChangedListener mNotificationLocationsChangedListener =
             new OnChildLocationsChangedListener() {
                 @Override
@@ -737,6 +732,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private String mKeyToRemoveOnGutsClosed;
     private SysuiColorExtractor mColorExtractor;
     private ForegroundServiceController mForegroundServiceController;
+    private ScreenLifecycle mScreenLifecycle;
+    private WakefulnessLifecycle mWakefulnessLifecycle;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -775,6 +772,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNetworkController = Dependency.get(NetworkController.class);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
         mKeyguardMonitor = (KeyguardMonitorImpl) Dependency.get(KeyguardMonitor.class);
+        mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
+        mScreenLifecycle.addObserver(mScreenObserver);
+        mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
+        mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
         mBatteryController = Dependency.get(BatteryController.class);
         mAssistManager = Dependency.get(AssistManager.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
@@ -2830,12 +2831,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mRemoteInputEntriesToRemoveOnCollapse.clear();
     }
 
-    public void onScreenTurnedOff() {
-        mScreenFullyOff = true;
-        mFalsingManager.onScreenOff();
-        updateIsKeyguard();
-    }
-
     public NotificationStackScrollLayout getNotificationScrollLayout() {
         return mStackScroller;
     }
@@ -4221,7 +4216,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // late in the transition, so we also allow the device to start dozing once the screen has
         // turned off fully.
         boolean keyguardForDozing = mDozingRequested &&
-                (!mDeviceInteractive || mStartedGoingToSleep && (mScreenFullyOff || mIsKeyguard));
+                (!mDeviceInteractive || isGoingToSleep() && (isScreenFullyOff() || mIsKeyguard));
         boolean shouldBeKeyguard = mKeyguardRequested || keyguardForDozing;
         if (keyguardForDozing) {
             updatePanelExpansionForKeyguard();
@@ -5110,70 +5105,76 @@ public class StatusBar extends SystemUI implements DemoMode,
         recomputeDisableFlags(true /* animate */);
     }
 
-    public void onStartedGoingToSleep() {
-        mStartedGoingToSleep = true;
-    }
-
-    public void onFinishedGoingToSleep() {
-        mNotificationPanel.onAffordanceLaunchEnded();
-        releaseGestureWakeLock();
-        mLaunchCameraOnScreenTurningOn = false;
-        mStartedGoingToSleep = false;
-        mDeviceInteractive = false;
-        mWakeUpComingFromTouch = false;
-        mWakeUpTouchLocation = null;
-        mStackScroller.setAnimationsEnabled(false);
-        mVisualStabilityManager.setScreenOn(false);
-        updateVisibleToUser();
-
-        // We need to disable touch events because these might
-        // collapse the panel after we expanded it, and thus we would end up with a blank
-        // Keyguard.
-        mNotificationPanel.setTouchDisabled(true);
-        mStatusBarWindow.cancelCurrentTouch();
-        if (mLaunchCameraOnFinishedGoingToSleep) {
-            mLaunchCameraOnFinishedGoingToSleep = false;
-
-            // This gets executed before we will show Keyguard, so post it in order that the state
-            // is correct.
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onCameraLaunchGestureDetected(mLastCameraLaunchSource);
-                }
-            });
-        }
-        updateIsKeyguard();
-    }
-
-    public void onStartedWakingUp() {
-        mDeviceInteractive = true;
-        mStackScroller.setAnimationsEnabled(true);
-        mVisualStabilityManager.setScreenOn(true);
-        mNotificationPanel.setTouchDisabled(false);
-        updateVisibleToUser();
-        updateIsKeyguard();
-    }
-
-    public void onScreenTurningOn() {
-        mScreenFullyOff = false;
-        mScreenTurningOn = true;
-        mFalsingManager.onScreenTurningOn();
-        mNotificationPanel.onScreenTurningOn();
-        if (mLaunchCameraOnScreenTurningOn) {
-            mNotificationPanel.launchCamera(false, mLastCameraLaunchSource);
+    WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
+        @Override
+        public void onFinishedGoingToSleep() {
+            mNotificationPanel.onAffordanceLaunchEnded();
+            releaseGestureWakeLock();
             mLaunchCameraOnScreenTurningOn = false;
+            mDeviceInteractive = false;
+            mWakeUpComingFromTouch = false;
+            mWakeUpTouchLocation = null;
+            mStackScroller.setAnimationsEnabled(false);
+            mVisualStabilityManager.setScreenOn(false);
+            updateVisibleToUser();
+
+            // We need to disable touch events because these might
+            // collapse the panel after we expanded it, and thus we would end up with a blank
+            // Keyguard.
+            mNotificationPanel.setTouchDisabled(true);
+            mStatusBarWindow.cancelCurrentTouch();
+            if (mLaunchCameraOnFinishedGoingToSleep) {
+                mLaunchCameraOnFinishedGoingToSleep = false;
+
+                // This gets executed before we will show Keyguard, so post it in order that the state
+                // is correct.
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onCameraLaunchGestureDetected(mLastCameraLaunchSource);
+                    }
+                });
+            }
+            updateIsKeyguard();
         }
-    }
+
+        @Override
+        public void onStartedWakingUp() {
+            mDeviceInteractive = true;
+            mStackScroller.setAnimationsEnabled(true);
+            mVisualStabilityManager.setScreenOn(true);
+            mNotificationPanel.setTouchDisabled(false);
+            updateVisibleToUser();
+            updateIsKeyguard();
+        }
+    };
+
+    ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
+        @Override
+        public void onScreenTurningOn() {
+            mFalsingManager.onScreenTurningOn();
+            mNotificationPanel.onScreenTurningOn();
+            if (mLaunchCameraOnScreenTurningOn) {
+                mNotificationPanel.launchCamera(false, mLastCameraLaunchSource);
+                mLaunchCameraOnScreenTurningOn = false;
+            }
+        }
+
+        @Override
+        public void onScreenTurnedOn() {
+            mDozeScrimController.onScreenTurnedOn();
+        }
+
+        @Override
+        public void onScreenTurnedOff() {
+            mFalsingManager.onScreenOff();
+            updateIsKeyguard();
+        }
+    };
 
     private void vibrateForCameraGesture() {
         // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
         mVibrator.vibrate(mCameraLaunchGestureVibePattern, -1 /* repeat */);
-    }
-
-    public void onScreenTurnedOn() {
-        mScreenTurningOn = false;
-        mDozeScrimController.onScreenTurnedOn();
     }
 
     /**
@@ -5181,7 +5182,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      *         since not started turning on.
      */
     public boolean isScreenFullyOff() {
-        return mScreenFullyOff;
+        return mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_OFF;
     }
 
     @Override
@@ -5228,7 +5229,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onCameraLaunchGestureDetected(int source) {
         mLastCameraLaunchSource = source;
-        if (mStartedGoingToSleep) {
+        if (isGoingToSleep()) {
             if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Finish going to sleep before launching camera");
             mLaunchCameraOnFinishedGoingToSleep = true;
             return;
@@ -5255,7 +5256,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mScrimController.dontAnimateBouncerChangesUntilNextFrame();
                 mGestureWakeLock.acquire(LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
             }
-            if (mScreenTurningOn || mStatusBarKeyguardViewManager.isScreenTurnedOn()) {
+            if (isScreenTurningOnOrOn()) {
                 if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Launching camera");
                 mNotificationPanel.launchCamera(mDeviceInteractive /* animate */, source);
             } else {
@@ -5279,6 +5280,16 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         return true;
+    }
+
+    private boolean isGoingToSleep() {
+        return mWakefulnessLifecycle.getWakefulness()
+                == WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
+    }
+
+    private boolean isScreenTurningOnOrOn() {
+        return mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_TURNING_ON
+                || mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
     }
 
     public void notifyFpAuthModeChanged() {
