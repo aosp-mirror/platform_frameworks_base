@@ -123,4 +123,9 @@ public interface PackageManagerWrapper {
      * @return the label as a CharSequence
      */
     CharSequence loadLabel(ApplicationInfo app);
+
+    /**
+     * Retrieve all activities that can be performed for the given intent.
+     */
+    List<ResolveInfo> queryIntentActivities(Intent intent, int flags);
 }
