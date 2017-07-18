@@ -26,6 +26,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * Class used to represent a single MBMS stream. After a stream has been started with
+ * {@link android.telephony.MbmsStreamingManager#startStreaming(StreamingServiceInfo,
+ * StreamingServiceCallback)},
+ * this class is used to hold information about the stream and control it.
  * @hide
  */
 public class StreamingService {
@@ -60,7 +64,8 @@ public class StreamingService {
 
     /**
      * State changed due to a call to {@link #stopStreaming()} or
-     * {@link android.telephony.MbmsStreamingManager#startStreaming(StreamingServiceInfo, StreamingServiceCallback)}
+     * {@link android.telephony.MbmsStreamingManager#startStreaming(StreamingServiceInfo,
+     * StreamingServiceCallback)}
      */
     public static final int REASON_BY_USER_REQUEST = 1;
 

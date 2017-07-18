@@ -32,6 +32,7 @@ import java.util.Map;
 public class FileServiceInfo extends ServiceInfo implements Parcelable {
     private final List<FileInfo> files;
 
+    /** @hide TODO: systemapi */
     public FileServiceInfo(Map<Locale, String> newNames, String newClassName,
             List<Locale> newLocales, String newServiceId, Date start, Date end,
             List<FileInfo> newFiles) {

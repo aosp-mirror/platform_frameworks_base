@@ -31,7 +31,7 @@ public class MbmsException extends Exception {
 
     /**
      * Indicates that the app attempted to perform an operation on an instance of
-     * {@link android.telephony.MbmsDownloadManager} or
+     * TODO: link android.telephony.MbmsDownloadManager or
      * {@link android.telephony.MbmsStreamingManager} without being bound to the middleware.
      */
     public static final int ERROR_MIDDLEWARE_NOT_BOUND = 2;
@@ -47,7 +47,7 @@ public class MbmsException extends Exception {
         /**
          * Indicates that the app tried to create more than one instance each of
          * {@link android.telephony.MbmsStreamingManager} or
-         * {@link android.telephony.MbmsDownloadManager}.
+         * TODO: link android.telephony.MbmsDownloadManager
          */
         public static final int ERROR_DUPLICATE_INITIALIZE = 101;
         /** Indicates that the app is not authorized to access media via MBMS.*/
@@ -64,7 +64,7 @@ public class MbmsException extends Exception {
         /**
          * Indicates that the app attempted to perform an operation before receiving notification
          * that the middleware is ready via {@link MbmsStreamingManagerCallback#middlewareReady()}
-         * or {@link MbmsDownloadManagerCallback#middlewareReady()}.
+         * or TODO: link MbmsDownloadManagerCallback#middlewareReady
          */
         public static final int ERROR_MIDDLEWARE_NOT_YET_READY = 201;
         /**
@@ -113,6 +113,8 @@ public class MbmsException extends Exception {
 
     /**
      * Indicates the errors that are applicable only to the file-download use-case
+     * TODO: unhide
+     * @hide
      */
     public static class DownloadErrors {
         /**
@@ -127,9 +129,7 @@ public class MbmsException extends Exception {
 
     private final int mErrorCode;
 
-    /** @hide
-     * TODO: future systemapi
-     */
+    /** @hide */
     public MbmsException(int errorCode) {
         super();
         mErrorCode = errorCode;

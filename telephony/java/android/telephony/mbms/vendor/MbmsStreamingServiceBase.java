@@ -17,18 +17,23 @@
 package android.telephony.mbms.vendor;
 
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.telephony.mbms.IMbmsStreamingManagerCallback;
 import android.telephony.mbms.IStreamingServiceCallback;
 import android.telephony.mbms.MbmsException;
+import android.telephony.mbms.MbmsStreamingManagerCallback;
+import android.telephony.mbms.StreamingService;
+import android.telephony.mbms.StreamingServiceCallback;
+import android.telephony.mbms.StreamingServiceInfo;
 
 import java.util.List;
 
 /**
  * @hide
- * TODO: future systemapi
  */
+//@SystemApi
 public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Initialize streaming service for this app and subId, registering the listener.
@@ -44,11 +49,37 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @param listener The callback to use to communicate with the app.
      * @param subscriptionId The subscription ID to use.
      */
-    @Override
-    public int initialize(IMbmsStreamingManagerCallback listener, int subscriptionId)
+    public int initialize(MbmsStreamingManagerCallback listener, int subscriptionId)
             throws RemoteException {
         return 0;
     }
+
+    /**
+     * Actual AIDL implementation that hides the callback AIDL from the middleware.
+     * @hide
+     */
+    @Override
+    public final int initialize(IMbmsStreamingManagerCallback listener, int subscriptionId)
+            throws RemoteException {
+        return initialize(new MbmsStreamingManagerCallback() {
+            @Override
+            public void error(int errorCode, String message) throws RemoteException {
+                listener.error(errorCode, message);
+            }
+
+            @Override
+            public void streamingServicesUpdated(List<StreamingServiceInfo> services) throws
+                    RemoteException {
+                listener.streamingServicesUpdated(services);
+            }
+
+            @Override
+            public void middlewareReady() throws RemoteException {
+                listener.middlewareReady();
+            }
+        }, subscriptionId);
+    }
+
 
     /**
      * Registers serviceClasses of interest with the appName/subId key.
@@ -85,10 +116,47 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
      * @param listener The listener object on which the app wishes to receive updates.
      * @return Any error in {@link android.telephony.mbms.MbmsException.GeneralErrors}
      */
+    public int startStreaming(int subscriptionId, String serviceId,
+            StreamingServiceCallback listener) throws RemoteException {
+        return 0;
+    }
+
+    /**
+     * Actual AIDL implementation of startStreaming that hides the callback AIDL from the
+     * middleware.
+     * @hide
+     */
     @Override
     public int startStreaming(int subscriptionId, String serviceId,
             IStreamingServiceCallback listener) throws RemoteException {
-        return 0;
+        return startStreaming(subscriptionId, serviceId, new StreamingServiceCallback() {
+            @Override
+            public void error(int errorCode, String message) throws RemoteException {
+                listener.error(errorCode, message);
+            }
+
+            @Override
+            public void streamStateUpdated(@StreamingService.StreamingState int state,
+                    @StreamingService.StreamingStateChangeReason int reason)
+                    throws RemoteException {
+                listener.streamStateUpdated(state, reason);
+            }
+
+            @Override
+            public void mediaDescriptionUpdated() throws RemoteException {
+                listener.mediaDescriptionUpdated();
+            }
+
+            @Override
+            public void broadcastSignalStrengthUpdated(int signalStrength) throws RemoteException {
+                listener.broadcastSignalStrengthUpdated(signalStrength);
+            }
+
+            @Override
+            public void streamMethodUpdated(int methodType) throws RemoteException {
+                listener.streamMethodUpdated(methodType);
+            }
+        });
     }
 
     /**

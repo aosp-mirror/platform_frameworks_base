@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
@@ -41,6 +43,14 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
  */
 public class MbmsStreamingManager {
     private static final String LOG_TAG = "MbmsStreamingManager";
+
+    /**
+     * Service action which must be handled by the middleware implementing the MBMS streaming
+     * interface.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String MBMS_STREAMING_SERVICE_ACTION =
             "android.telephony.action.EmbmsStreaming";
 
@@ -203,13 +213,23 @@ public class MbmsStreamingManager {
                             return;
                         } catch (RuntimeException e) {
                             Log.e(LOG_TAG, "Runtime exception during initialization");
-                            mCallbackToApp.error(
-                                    MbmsException.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
-                                    e.toString());
+                            try {
+                                mCallbackToApp.error(
+                                        MbmsException.InitializationErrors
+                                                .ERROR_UNABLE_TO_INITIALIZE,
+                                        e.toString());
+                            } catch (RemoteException e1) {
+                                // ignore
+                            }
                             return;
                         }
                         if (result != MbmsException.SUCCESS) {
-                            mCallbackToApp.error(result, "Error returned during initialization");
+                            try {
+                                mCallbackToApp.error(
+                                        result, "Error returned during initialization");
+                            } catch (RemoteException e) {
+                                // ignore
+                            }
                             return;
                         }
                         mService.set(streamingService);
