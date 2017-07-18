@@ -40,7 +40,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFIC
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -4299,7 +4299,7 @@ public class PackageParser {
                 sa.getString(R.styleable.AndroidManifestActivity_enableVrMode);
 
             a.info.rotationAnimation =
-                sa.getInt(R.styleable.AndroidManifestActivity_rotationAnimation, ROTATION_ANIMATION_ROTATE);
+                sa.getInt(R.styleable.AndroidManifestActivity_rotationAnimation, ROTATION_ANIMATION_UNSPECIFIED);
 
             a.info.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode,
                     ActivityInfo.COLOR_MODE_DEFAULT);
