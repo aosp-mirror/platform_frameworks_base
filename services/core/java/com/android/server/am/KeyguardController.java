@@ -143,6 +143,7 @@ class KeyguardController {
             failCallback(callback);
             return;
         }
+        Slog.i(TAG, "Activity requesting to dismiss Keyguard: " + activityRecord);
 
         // If the client has requested to dismiss the keyguard and the Activity has the flag to
         // turn the screen on, wakeup the screen if it's the top Activity.
