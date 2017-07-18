@@ -24,5 +24,6 @@
     android:fadingEdge="horizontal"
     android:gravity="top"
     android:singleLine="true"
+    android:textAlignment="viewStart"
     android:textAppearance="@style/TextAppearance.Material.Notification"
     />

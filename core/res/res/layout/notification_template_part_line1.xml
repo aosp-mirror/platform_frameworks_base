@@ -28,6 +28,7 @@
         android:singleLine="true"
         android:ellipsize="marquee"
         android:fadingEdge="horizontal"
+        android:textAlignment="viewStart"
         />
     <TextView android:id="@+id/text_line_1"
         android:textAppearance="@style/TextAppearance.Material.Notification"
