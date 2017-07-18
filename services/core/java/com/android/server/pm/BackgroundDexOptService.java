@@ -99,6 +99,10 @@ public class BackgroundDexOptService extends JobService {
             getDowngradeUnusedAppsThresholdInMillis();
 
     public static void schedule(Context context) {
+        if (isBackgroundDexoptDisabled()) {
+            return;
+        }
+
         JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
         // Schedule a one-off job which scans installed packages and updates
@@ -476,5 +480,10 @@ public class BackgroundDexOptService extends JobService {
             return Long.MAX_VALUE;
         }
         return TimeUnit.DAYS.toMillis(Long.parseLong(sysPropValue));
+    }
+
+    private static boolean isBackgroundDexoptDisabled() {
+        return SystemProperties.getBoolean("pm.dexopt.disable_bg_dexopt" /* key */,
+                false /* default */);
     }
 }
