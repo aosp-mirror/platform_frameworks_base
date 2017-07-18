@@ -16,10 +16,26 @@
 
 package android.net.lowpan;
 
-import android.net.lowpan.LowpanBeaconInfo;
+/**
+ * Exception indicating this operation requires the interface to be enabled.
+ *
+ * @see LowpanInterface
+ * @hide
+ */
+// @SystemApi
+public class InterfaceDisabledException extends LowpanException {
 
-/** {@hide} */
-interface ILowpanNetScanCallback {
-    oneway void onNetScanBeacon(in LowpanBeaconInfo beacon);
-    oneway void onNetScanFinished();
+    public InterfaceDisabledException() {}
+
+    public InterfaceDisabledException(String message) {
+        super(message);
+    }
+
+    public InterfaceDisabledException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    protected InterfaceDisabledException(Exception cause) {
+        super(cause);
+    }
 }

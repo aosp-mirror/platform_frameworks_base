@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package android.net.lowpan;
+#ifndef _ANDROID_NET_LOWPANPROVISIONTEST_H_
+#define _ANDROID_NET_LOWPANPROVISIONTEST_H_
 
-import android.net.lowpan.LowpanBeaconInfo;
+#include <jni.h>
+#include <android/net/lowpan/LowpanProvision.h>
 
-/** {@hide} */
-interface ILowpanNetScanCallback {
-    oneway void onNetScanBeacon(in LowpanBeaconInfo beacon);
-    oneway void onNetScanFinished();
-}
+extern "C"
+JNIEXPORT jbyteArray Java_android_net_lowpan_LowpanProvisionTest_readAndWriteNative(JNIEnv* env, jclass,
+        jbyteArray inParcel);
+
+#endif  //  _ANDROID_NET_LOWPANPROVISIONTEST_H_

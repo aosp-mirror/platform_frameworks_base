@@ -16,26 +16,22 @@
 
 package android.net.lowpan;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.net.LinkAddress;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.test.TestLooper;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import java.util.Map;
-import java.util.HashMap;
 
 /** Unit tests for android.net.lowpan.LowpanInterface. */
 @RunWith(AndroidJUnit4.class)
@@ -64,7 +60,8 @@ public class LowpanInterfaceTest {
         when(mLowpanInterfaceService.getName()).thenReturn("wpan0");
         when(mLowpanInterfaceService.asBinder()).thenReturn(mLowpanInterfaceBinder);
 
-        mLowpanInterface = new LowpanInterface(mContext, mLowpanInterfaceService, mTestLooper.getLooper());
+        mLowpanInterface =
+                new LowpanInterface(mContext, mLowpanInterfaceService, mTestLooper.getLooper());
     }
 
     @Test
@@ -81,17 +78,75 @@ public class LowpanInterfaceTest {
                                     return listener instanceof ILowpanInterfaceListener;
                                 }));
 
-        // Build a changed property map
-        Map<String, Object> changedProperties = new HashMap<>();
-        LowpanProperties.KEY_INTERFACE_STATE.putInMap(changedProperties, LowpanInterface.STATE_OFFLINE);
-
         // Change some properties
-        mInterfaceListener.onPropertiesChanged(changedProperties);
+        mInterfaceListener.onStateChanged(LowpanInterface.STATE_OFFLINE);
         mTestLooper.dispatchAll();
 
         // Verify that the property was changed
         verify(mLowpanInterfaceCallback)
                 .onStateChanged(
                         argThat(stateString -> stateString.equals(LowpanInterface.STATE_OFFLINE)));
+    }
+
+    @Test
+    public void testLinkAddressCallback() throws Exception {
+        // Register our callback
+        mLowpanInterface.registerCallback(mLowpanInterfaceCallback);
+
+        // Verify a listener was added
+        verify(mLowpanInterfaceService)
+                .addListener(
+                        argThat(
+                                listener -> {
+                                    mInterfaceListener = listener;
+                                    return listener instanceof ILowpanInterfaceListener;
+                                }));
+
+        final LinkAddress linkAddress = new LinkAddress("fe80::1/64");
+
+        // Change some properties
+        mInterfaceListener.onLinkAddressAdded(linkAddress.toString());
+        mTestLooper.dispatchAll();
+
+        // Verify that the property was changed
+        verify(mLowpanInterfaceCallback)
+                .onLinkAddressAdded(argThat(addr -> addr.equals(linkAddress)));
+
+        // Change some properties
+        mInterfaceListener.onLinkAddressRemoved(linkAddress.toString());
+        mTestLooper.dispatchAll();
+
+        // Verify that the property was changed
+        verify(mLowpanInterfaceCallback)
+                .onLinkAddressRemoved(argThat(addr -> addr.equals(linkAddress)));
+    }
+
+    @Test
+    public void testBogusLinkAddressCallback() throws Exception {
+        // Register our callback
+        mLowpanInterface.registerCallback(mLowpanInterfaceCallback);
+
+        // Verify a listener was added
+        verify(mLowpanInterfaceService)
+                .addListener(
+                        argThat(
+                                listener -> {
+                                    mInterfaceListener = listener;
+                                    return listener instanceof ILowpanInterfaceListener;
+                                }));
+
+        // Change some properties
+        mInterfaceListener.onLinkAddressAdded("fe80:::1/640");
+        mTestLooper.dispatchAll();
+
+        // Verify that no callback was called.
+        verifyNoMoreInteractions(mLowpanInterfaceCallback);
+
+        // Change some properties
+        mInterfaceListener.onLinkAddressRemoved("fe80:::1/640");
+        mTestLooper.dispatchAll();
+
+        // Verify that no callback was called.
+        verifyNoMoreInteractions(mLowpanInterfaceCallback);
     }
 }

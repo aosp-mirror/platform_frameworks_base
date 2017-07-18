@@ -16,10 +16,27 @@
 
 package android.net.lowpan;
 
-import android.net.lowpan.LowpanBeaconInfo;
+import android.util.AndroidRuntimeException;
 
-/** {@hide} */
-interface ILowpanNetScanCallback {
-    oneway void onNetScanBeacon(in LowpanBeaconInfo beacon);
-    oneway void onNetScanFinished();
+/**
+ * Generic runtime exception for LoWPAN operations.
+ *
+ * @hide
+ */
+// @SystemApi
+public class LowpanRuntimeException extends AndroidRuntimeException {
+
+    public LowpanRuntimeException() {}
+
+    public LowpanRuntimeException(String message) {
+        super(message);
+    }
+
+    public LowpanRuntimeException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public LowpanRuntimeException(Exception cause) {
+        super(cause);
+    }
 }

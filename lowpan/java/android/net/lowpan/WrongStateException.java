@@ -16,10 +16,26 @@
 
 package android.net.lowpan;
 
-import android.net.lowpan.LowpanBeaconInfo;
+/**
+ * Exception indicating the interface is the wrong state for an operation.
+ *
+ * @see LowpanInterface
+ * @hide
+ */
+// @SystemApi
+public class WrongStateException extends LowpanException {
 
-/** {@hide} */
-interface ILowpanNetScanCallback {
-    oneway void onNetScanBeacon(in LowpanBeaconInfo beacon);
-    oneway void onNetScanFinished();
+    public WrongStateException() {}
+
+    public WrongStateException(String message) {
+        super(message);
+    }
+
+    public WrongStateException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    protected WrongStateException(Exception cause) {
+        super(cause);
+    }
 }

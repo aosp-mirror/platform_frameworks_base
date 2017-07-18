@@ -16,10 +16,26 @@
 
 package android.net.lowpan;
 
-import android.net.lowpan.LowpanBeaconInfo;
+/**
+ * Exception indicating this operation was canceled by the driver before it could finish.
+ *
+ * @see LowpanInterface
+ * @hide
+ */
+// @SystemApi
+public class OperationCanceledException extends LowpanException {
 
-/** {@hide} */
-interface ILowpanNetScanCallback {
-    oneway void onNetScanBeacon(in LowpanBeaconInfo beacon);
-    oneway void onNetScanFinished();
+    public OperationCanceledException() {}
+
+    public OperationCanceledException(String message) {
+        super(message);
+    }
+
+    public OperationCanceledException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    protected OperationCanceledException(Exception cause) {
+        super(cause);
+    }
 }

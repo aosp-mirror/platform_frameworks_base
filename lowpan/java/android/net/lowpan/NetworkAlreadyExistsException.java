@@ -16,10 +16,26 @@
 
 package android.net.lowpan;
 
-import android.net.lowpan.LowpanBeaconInfo;
+/**
+ * Exception indicating the form operation found a network nearby with the same identity.
+ *
+ * @see LowpanInterface
+ * @hide
+ */
+// @SystemApi
+public class NetworkAlreadyExistsException extends LowpanException {
 
-/** {@hide} */
-interface ILowpanNetScanCallback {
-    oneway void onNetScanBeacon(in LowpanBeaconInfo beacon);
-    oneway void onNetScanFinished();
+    public NetworkAlreadyExistsException() {}
+
+    public NetworkAlreadyExistsException(String message) {
+        super(message, null);
+    }
+
+    public NetworkAlreadyExistsException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public NetworkAlreadyExistsException(Exception cause) {
+        super(cause);
+    }
 }

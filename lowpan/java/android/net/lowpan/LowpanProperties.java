@@ -16,74 +16,14 @@
 
 package android.net.lowpan;
 
-import android.net.IpPrefix;
-import android.net.LinkAddress;
-
 /** {@hide} */
 public final class LowpanProperties {
 
-    public static final LowpanProperty<Boolean> KEY_INTERFACE_ENABLED =
-            new LowpanStandardProperty(
-                    "android.net.lowpan.property.INTERFACE_ENABLED", Boolean.class);
-    public static final LowpanProperty<Boolean> KEY_INTERFACE_COMMISSIONED =
-            new LowpanStandardProperty(
-                    "android.net.lowpan.property.INTERFACE_COMMISSIONED", Boolean.class);
-    public static final LowpanProperty<Boolean> KEY_INTERFACE_CONNECTED =
-            new LowpanStandardProperty(
-                    "android.net.lowpan.property.INTERFACE_CONNECTED", Boolean.class);
-    public static final LowpanProperty<Boolean> KEY_INTERFACE_UP =
-            new LowpanStandardProperty("android.net.lowpan.property.INTERFACE_UP", Boolean.class);
-    public static final LowpanProperty<String> KEY_INTERFACE_STATE =
-            new LowpanStandardProperty("android.net.lowpan.property.INTERFACE_STATE", String.class);
-
-    public static final LowpanProperty<String> KEY_NETWORK_NAME =
-            new LowpanStandardProperty("android.net.lowpan.property.NETWORK_NAME", Boolean.class);
-    public static final LowpanProperty<Integer> KEY_NETWORK_PANID =
-            new LowpanStandardProperty("android.net.lowpan.property.NETWORK_PANID", Integer.class);
-    public static final LowpanProperty<byte[]> KEY_NETWORK_XPANID =
-            new LowpanStandardProperty("android.net.lowpan.property.NETWORK_XPANID", byte[].class);
-    public static final LowpanProperty<byte[]> KEY_NETWORK_MASTER_KEY =
-            new LowpanStandardProperty(
-                    "android.net.lowpan.property.NETWORK_MASTER_KEY", byte[].class);
-    public static final LowpanProperty<Integer> KEY_NETWORK_MASTER_KEY_INDEX =
-            new LowpanStandardProperty(
-                    "android.net.lowpan.property.NETWORK_MASTER_KEY_INDEX", Integer.class);
-    public static final LowpanProperty<Integer> KEY_NETWORK_TYPE =
-            new LowpanStandardProperty("android.net.lowpan.property.NETWORK_TYPE", Integer.class);
-    public static final LowpanProperty<String> KEY_NETWORK_ROLE =
-            new LowpanStandardProperty("android.net.lowpan.property.NETWORK_ROLE", String.class);
-
-    public static final LowpanProperty<Integer> KEY_CHANNEL =
-            new LowpanStandardProperty("android.net.lowpan.property.CHANNEL", Integer.class);
     public static final LowpanProperty<int[]> KEY_CHANNEL_MASK =
             new LowpanStandardProperty("android.net.lowpan.property.CHANNEL_MASK", int[].class);
+
     public static final LowpanProperty<Integer> KEY_MAX_TX_POWER =
             new LowpanStandardProperty("android.net.lowpan.property.MAX_TX_POWER", Integer.class);
-    public static final LowpanProperty<Integer> KEY_RSSI =
-            new LowpanStandardProperty("android.net.lowpan.property.RSSI", Integer.class);
-
-    public static final LowpanProperty<Integer> KEY_LQI =
-            new LowpanStandardProperty("android.net.lowpan.property.LQI", Integer.class);
-    public static final LowpanProperty<byte[]> KEY_BEACON_ADDRESS =
-            new LowpanStandardProperty("android.net.lowpan.property.BEACON_ADDRESS", byte[].class);
-    public static final LowpanProperty<Boolean> KEY_BEACON_CAN_ASSIST =
-            new LowpanStandardProperty(
-                    "android.net.lowpan.property.BEACON_CAN_ASSIST", Boolean.class);
-
-    public static final LowpanProperty<String> KEY_DRIVER_VERSION =
-            new LowpanStandardProperty("android.net.lowpan.property.DRIVER_VERSION", String.class);
-
-    public static final LowpanProperty<String> KEY_NCP_VERSION =
-            new LowpanStandardProperty("android.net.lowpan.property.NCP_VERSION", String.class);
-
-    /** @hide */
-    public static final LowpanProperty<byte[]> KEY_EXTENDED_ADDRESS =
-            new LowpanStandardProperty(
-                    "android.net.lowpan.property.EXTENDED_ADDRESS", byte[].class);
-
-    /** @hide */
-    public static final LowpanProperty<byte[]> KEY_MAC_ADDRESS =
-            new LowpanStandardProperty("android.net.lowpan.property.MAC_ADDRESS", byte[].class);
 
     /** @hide */
     private LowpanProperties() {}

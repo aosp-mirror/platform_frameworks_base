@@ -16,10 +16,26 @@
 
 package android.net.lowpan;
 
-import android.net.lowpan.LowpanBeaconInfo;
+/**
+ * Exception indicating the join operation has failed.
+ *
+ * @see LowpanInterface
+ * @hide
+ */
+// @SystemApi
+public class JoinFailedException extends LowpanException {
 
-/** {@hide} */
-interface ILowpanNetScanCallback {
-    oneway void onNetScanBeacon(in LowpanBeaconInfo beacon);
-    oneway void onNetScanFinished();
+    public JoinFailedException() {}
+
+    public JoinFailedException(String message) {
+        super(message);
+    }
+
+    public JoinFailedException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    protected JoinFailedException(Exception cause) {
+        super(cause);
+    }
 }
