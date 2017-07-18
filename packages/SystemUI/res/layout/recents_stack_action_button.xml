@@ -24,7 +24,7 @@
     android:paddingBottom="12dp"
     android:text="@string/recents_stack_action_button_label"
     android:textSize="14sp"
-    android:textColor="?attr/bgProtectTextColor"
+    android:textColor="?attr/wallpaperTextColor"
     android:textAllCaps="true"
     android:shadowColor="#99000000"
     android:shadowDx="0"
