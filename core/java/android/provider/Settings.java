@@ -7744,6 +7744,16 @@ public final class Settings {
          */
         public static final String CDMA_SUBSCRIPTION_MODE = "subscription_mode";
 
+        /**
+         * The default value for whether background data is enabled or not.
+         *
+         * Used by {@code NetworkPolicyManagerService}.
+         *
+         * @hide
+         */
+        public static final String DEFAULT_RESTRICT_BACKGROUND_DATA =
+                "default_restrict_background_data";
+
         /** Inactivity timeout to track mobile data activity.
         *
         * If set to a positive integer, it indicates the inactivity timeout value in seconds to

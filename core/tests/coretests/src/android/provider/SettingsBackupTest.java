@@ -158,6 +158,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEBUG_VIEW_ATTRIBUTES,
                     Settings.Global.DEFAULT_DNS_SERVER,
                     Settings.Global.DEFAULT_INSTALL_LOCATION,
+                    Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA,
                     Settings.Global.DESK_DOCK_SOUND,
                     Settings.Global.DESK_UNDOCK_SOUND,
                     Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
