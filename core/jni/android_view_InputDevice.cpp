@@ -17,7 +17,7 @@
 #include <input/Input.h>
 
 #include <android_runtime/AndroidRuntime.h>
-#include <nativehelper/jni.h>
+#include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
 #include <ScopedLocalRef.h>
