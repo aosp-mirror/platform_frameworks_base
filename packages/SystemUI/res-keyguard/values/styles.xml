@@ -20,11 +20,11 @@
 <resources>
     <!-- Keyguard PIN pad styles -->
     <style name="Keyguard.TextView" parent="@android:style/Widget.DeviceDefault.TextView">
-        <item name="android:textColor">?attr/bgProtectSecondaryTextColor</item>
+        <item name="android:textColor">?attr/wallpaperTextColorSecondary</item>
         <item name="android:textSize">@dimen/kg_status_line_font_size</item>
     </style>
     <style name="Keyguard.TextView.EmergencyButton" parent="@android:style/DeviceDefault.ButtonBar">
-        <item name="android:textColor">?attr/bgProtectSecondaryTextColor</item>
+        <item name="android:textColor">?attr/wallpaperTextColorSecondary</item>
         <item name="android:textSize">@dimen/kg_status_line_font_size</item>
         <item name="android:background">@null</item>
     </style>
@@ -34,7 +34,7 @@
         <item name="android:background">@null</item>
         <item name="android:textSize">32sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
-        <item name="android:textColor">?attr/bgProtectTextColor</item>
+        <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:paddingBottom">-16dp</item>
     </style>
     <style name="Keyguard.ImageButton.NumPadEnter" parent="@android:style/Widget.ImageButton">
@@ -43,7 +43,7 @@
     <style name="Widget.TextView.NumPadKey.Klondike" parent="Widget.TextView.NumPadKey">
         <item name="android:textSize">12sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textColor">?attr/bgProtectSecondaryTextColor</item>
+        <item name="android:textColor">?attr/wallpaperTextColorSecondary</item>
         <item name="android:paddingBottom">0dp</item>
     </style>
 
@@ -61,9 +61,9 @@
     </style>
 
     <style name="PasswordTheme" parent="systemui_theme">
-        <item name="android:textColor">?attr/bgProtectTextColor</item>
-        <item name="android:colorControlNormal">?attr/bgProtectTextColor</item>
-        <item name="android:colorControlActivated">?attr/bgProtectTextColor</item>
+        <item name="android:textColor">?attr/wallpaperTextColor</item>
+        <item name="android:colorControlNormal">?attr/wallpaperTextColor</item>
+        <item name="android:colorControlActivated">?attr/wallpaperTextColor</item>
     </style>
 
     <style name="keyguard_presentation_theme" parent="@android:style/Theme.Material.NoActionBar.Fullscreen">
