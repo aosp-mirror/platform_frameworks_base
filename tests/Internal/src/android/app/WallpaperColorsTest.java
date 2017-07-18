@@ -77,4 +77,16 @@ public class WallpaperColorsTest {
         Assert.assertFalse("Light surface shouldn't support dark text "
                 + "when it contains dark pixels", supportsDarkText);
     }
+
+    /**
+     * WallpaperColors should not recycle bitmaps that it didn't create.
+     */
+    @Test
+    public void wallpaperRecycleBitmapTest() {
+        Bitmap image = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+        WallpaperColors.fromBitmap(image);
+        Canvas canvas = new Canvas();
+        // This would crash:
+        canvas.drawBitmap(image, 0, 0, new Paint());
+    }
 }
