@@ -421,7 +421,6 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Indicates this network uses a LoWPAN transport.
-     * @hide
      */
     public static final int TRANSPORT_LOWPAN = 6;
 
