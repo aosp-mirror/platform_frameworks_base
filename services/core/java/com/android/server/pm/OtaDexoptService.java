@@ -30,7 +30,6 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.storage.StorageManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -40,7 +39,6 @@ import com.android.server.pm.Installer.InstallerException;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -152,7 +150,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
                     + PackageManagerServiceUtils.packagesToString(others));
             for (PackageParser.Package pkg : others) {
-                deleteOatArtifactsOfPackage(pkg);
+                mPackageManagerService.deleteOatArtifactsOfPackage(pkg.packageName);
             }
         }
         long spaceAvailableNow = getAvailableSpace();
@@ -242,30 +240,6 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         return usableSpace - lowThreshold;
     }
 
-    private static String getOatDir(PackageParser.Package pkg) {
-        if (!pkg.canHaveOatDir()) {
-            return null;
-        }
-        File codePath = new File(pkg.codePath);
-        if (codePath.isDirectory()) {
-            return PackageDexOptimizer.getOatDir(codePath).getAbsolutePath();
-        }
-        return null;
-    }
-
-    private void deleteOatArtifactsOfPackage(PackageParser.Package pkg) {
-        String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
-        for (String codePath : pkg.getAllCodePaths()) {
-            for (String isa : instructionSets) {
-                try {
-                    mPackageManagerService.mInstaller.deleteOdex(codePath, isa, getOatDir(pkg));
-                } catch (InstallerException e) {
-                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
-                }
-            }
-        }
-    }
-
     /**
      * Generate all dexopt commands for the given package.
      */
@@ -285,11 +259,12 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             public void dexopt(String apkPath, int uid, @Nullable String pkgName,
                     String instructionSet, int dexoptNeeded, @Nullable String outputPath,
                     int dexFlags, String compilerFilter, @Nullable String volumeUuid,
-                    @Nullable String sharedLibraries, @Nullable String seInfo) throws InstallerException {
+                    @Nullable String sharedLibraries, @Nullable String seInfo, boolean downgrade)
+                    throws InstallerException {
                 final StringBuilder builder = new StringBuilder();
 
-                // The version. Right now it's 2.
-                builder.append("2 ");
+                // The version. Right now it's 3.
+                builder.append("3 ");
 
                 builder.append("dexopt");
 
@@ -304,6 +279,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 encodeParameter(builder, volumeUuid);
                 encodeParameter(builder, sharedLibraries);
                 encodeParameter(builder, seInfo);
+                encodeParameter(builder, downgrade);
 
                 commands.add(builder.toString());
             }
@@ -343,12 +319,14 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 getCompilerFilterForReason(compilationReason),
                 null /* CompilerStats.PackageStats */,
                 mPackageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName),
-                true /* bootComplete */);
+                true /* bootComplete */,
+                false /* downgrade */);
 
         mPackageManagerService.getDexManager().dexoptSecondaryDex(pkg.packageName,
                 getCompilerFilterForReason(compilationReason),
                 false /* force */,
-                false /* compileOnlySharedDex */);
+                false /* compileOnlySharedDex */,
+                false /* downgrade */);
         return commands;
     }
 

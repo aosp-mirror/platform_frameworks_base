@@ -283,6 +283,7 @@ import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import dalvik.system.CloseGuard;
@@ -561,8 +562,9 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final int REASON_INSTALL = 2;
     public static final int REASON_BACKGROUND_DEXOPT = 3;
     public static final int REASON_AB_OTA = 4;
+    public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 5;
 
-    public static final int REASON_LAST = REASON_AB_OTA;
+    public static final int REASON_LAST = REASON_INACTIVE_PACKAGE_DOWNGRADE;
 
     /** All dangerous permission names in the same order as the events in MetricsEvent */
     private static final List<String> ALL_DANGEROUS_PERMISSIONS = Arrays.asList(
@@ -9367,7 +9369,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     false /* checkProfiles */,
                     compilerFilter,
                     false /* force */,
-                    bootComplete);
+                    bootComplete,
+                    false /* downgrade */);
 
             if (pkg.isSystemApp()) {
                 // Only dexopt shared secondary dex files belonging to system apps to not slow down
@@ -9375,7 +9378,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 mDexManager.dexoptSecondaryDex(pkg.packageName,
                         compilerFilter,
                         false /* force */,
-                        true /* compileOnlySharedDex */);
+                        true /* compileOnlySharedDex */,
+                        false /* downgrade */);
             }
 
             // TODO(shubhamajmera): Record secondary dexopt stats.
@@ -9460,14 +9464,16 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean performDexOpt(String packageName,
-            boolean checkProfiles, int compileReason, boolean force, boolean bootComplete) {
+            boolean checkProfiles, int compileReason, boolean force, boolean bootComplete,
+            boolean downgrade) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
         } else if (isInstantApp(packageName, UserHandle.getCallingUserId())) {
             return false;
         }
         int dexoptStatus = performDexOptWithStatus(
-              packageName, checkProfiles, compileReason, force, bootComplete);
+              packageName, checkProfiles, compileReason, force, bootComplete,
+              downgrade);
         return dexoptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
@@ -9478,9 +9484,10 @@ public class PackageManagerService extends IPackageManager.Stub
      *  {@link PackageDexOptimizer#DEX_OPT_FAILED}
      */
     /* package */ int performDexOptWithStatus(String packageName,
-            boolean checkProfiles, int compileReason, boolean force, boolean bootComplete) {
+            boolean checkProfiles, int compileReason, boolean force, boolean bootComplete,
+            boolean downgrade) {
         return performDexOptTraced(packageName, checkProfiles,
-                getCompilerFilterForReason(compileReason), force, bootComplete);
+                getCompilerFilterForReason(compileReason), force, bootComplete, downgrade);
     }
 
     @Override
@@ -9493,17 +9500,17 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
         int dexOptStatus = performDexOptTraced(packageName, checkProfiles,
-                targetCompilerFilter, force, bootComplete);
+                targetCompilerFilter, force, bootComplete, false /* downgrade */);
         return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     private int performDexOptTraced(String packageName,
                 boolean checkProfiles, String targetCompilerFilter, boolean force,
-                boolean bootComplete) {
+                boolean bootComplete, boolean downgrade) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
             return performDexOptInternal(packageName, checkProfiles,
-                    targetCompilerFilter, force, bootComplete);
+                    targetCompilerFilter, force, bootComplete, downgrade);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -9513,7 +9520,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // if the package can now be considered up to date for the given filter.
     private int performDexOptInternal(String packageName,
                 boolean checkProfiles, String targetCompilerFilter, boolean force,
-                boolean bootComplete) {
+                boolean bootComplete, boolean downgrade) {
         PackageParser.Package p;
         synchronized (mPackages) {
             p = mPackages.get(packageName);
@@ -9528,7 +9535,7 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             synchronized (mInstallLock) {
                 return performDexOptInternalWithDependenciesLI(p, checkProfiles,
-                        targetCompilerFilter, force, bootComplete);
+                        targetCompilerFilter, force, bootComplete, downgrade);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -9549,7 +9556,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private int performDexOptInternalWithDependenciesLI(PackageParser.Package p,
             boolean checkProfiles, String targetCompilerFilter,
-            boolean force, boolean bootComplete) {
+            boolean force, boolean bootComplete, boolean downgrade) {
         // Select the dex optimizer based on the force parameter.
         // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
         //       allocate an object here.
@@ -9574,12 +9581,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         targetCompilerFilter,
                         getOrCreateCompilerPackageStats(depPackage),
                         true /* isUsedByOtherApps */,
-                        bootComplete);
+                        bootComplete,
+                        downgrade);
             }
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
                 targetCompilerFilter, getOrCreateCompilerPackageStats(p),
-                mDexManager.isUsedByOtherApps(p.packageName), bootComplete);
+                mDexManager.isUsedByOtherApps(p.packageName), bootComplete, downgrade);
     }
 
     // Performs dexopt on the used secondary dex files belonging to the given package.
@@ -9594,12 +9602,12 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
         return mDexManager.dexoptSecondaryDex(packageName, compilerFilter, force,
-                /* compileOnlySharedDex*/ false);
+                false /* compileOnlySharedDex */, false /* downgrade */);
     }
 
     public boolean performDexOptSecondary(String packageName, int compileReason,
-            boolean force) {
-        return mDexManager.dexoptSecondaryDex(packageName, compileReason, force);
+            boolean force, boolean downgrade) {
+        return mDexManager.dexoptSecondaryDex(packageName, compileReason, force, downgrade);
     }
 
     /**
@@ -9778,7 +9786,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final int res = performDexOptInternalWithDependenciesLI(pkg,
                     false /* checkProfiles */, getDefaultCompilerFilter(),
                     true /* force */,
-                    true /* bootComplete */);
+                    true /* bootComplete */,
+                    false /* downgrade */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -16199,7 +16208,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void removeDexFiles(List<String> allCodePaths, String[] instructionSets) {
+    void removeDexFiles(List<String> allCodePaths, String[] instructionSets) {
         if (!allCodePaths.isEmpty()) {
             if (instructionSets == null) {
                 throw new IllegalStateException("instructionSet == null");
@@ -18245,7 +18254,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         getCompilerFilterForReason(REASON_INSTALL),
                         getOrCreateCompilerPackageStats(pkg),
                         mDexManager.isUsedByOtherApps(pkg.packageName),
-                        true /* bootComplete */);
+                        true /* bootComplete */,
+                        false /* downgrade */);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
 
@@ -25006,6 +25016,73 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         synchronized (mPackages) {
             return mInstantAppRegistry.getInstantAppAndroidIdLPw(packageName, userId);
         }
+    }
+
+    boolean canHaveOatDir(String packageName) {
+        synchronized (mPackages) {
+            PackageParser.Package p = mPackages.get(packageName);
+            if (p == null) {
+                return false;
+            }
+            return p.canHaveOatDir();
+        }
+    }
+
+    private String getOatDir(PackageParser.Package pkg) {
+        if (!pkg.canHaveOatDir()) {
+            return null;
+        }
+        File codePath = new File(pkg.codePath);
+        if (codePath.isDirectory()) {
+            return PackageDexOptimizer.getOatDir(codePath).getAbsolutePath();
+        }
+        return null;
+    }
+
+    void deleteOatArtifactsOfPackage(String packageName) {
+        final String[] instructionSets;
+        final List<String> codePaths;
+        final String oatDir;
+        final PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(packageName);
+        }
+        instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
+        codePaths = pkg.getAllCodePaths();
+        oatDir = getOatDir(pkg);
+
+        for (String codePath : codePaths) {
+            for (String isa : instructionSets) {
+                try {
+                    mInstaller.deleteOdex(codePath, isa, oatDir);
+                } catch (InstallerException e) {
+                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
+                }
+            }
+        }
+    }
+
+    Set<String> getUnusedPackages(long downgradeTimeThresholdMillis) {
+        Set<String> unusedPackages = new HashSet<>();
+        long currentTimeInMillis = System.currentTimeMillis();
+        synchronized (mPackages) {
+            for (PackageParser.Package pkg : mPackages.values()) {
+                PackageSetting ps =  mSettings.mPackages.get(pkg.packageName);
+                if (ps == null) {
+                    continue;
+                }
+                PackageDexUsage.PackageUseInfo packageUseInfo = getDexManager().getPackageUseInfo(
+                        pkg.packageName);
+                if (PackageManagerServiceUtils
+                        .isUnusedSinceTimeInMillis(ps.firstInstallTime, currentTimeInMillis,
+                                downgradeTimeThresholdMillis, packageUseInfo,
+                                pkg.getLatestPackageUseTimeInMills(),
+                                pkg.getLatestForegroundPackageUseTimeInMills())) {
+                    unusedPackages.add(pkg.packageName);
+                }
+            }
+        }
+        return unusedPackages;
     }
 }
 

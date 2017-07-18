@@ -513,7 +513,7 @@ interface IPackageManager {
      * configuration.
      */
     boolean performDexOpt(String packageName, boolean checkProfiles,
-            int compileReason, boolean force, boolean bootComplete);
+            int compileReason, boolean force, boolean bootComplete, boolean downgrade);
 
     /**
      * Ask the package manager to perform a dex-opt with the given compiler filter.
