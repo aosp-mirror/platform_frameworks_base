@@ -1743,6 +1743,13 @@ public interface WindowManager extends ViewManager {
         public float buttonBrightness = BRIGHTNESS_OVERRIDE_NONE;
 
         /**
+         * Unspecified value for {@link #rotationAnimation} indicating
+         * a lack of preference.
+         * @hide
+         */
+        public static final int ROTATION_ANIMATION_UNSPECIFIED = -1;
+
+        /**
          * Value for {@link #rotationAnimation} which specifies that this
          * window will visually rotate in or out following a rotation.
          */
