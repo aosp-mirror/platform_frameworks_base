@@ -54,35 +54,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 	mockito-target-minus-junit4 \
 	frameworks-base-testutils \
 
-LOCAL_JNI_SHARED_LIBRARIES += libframeworkslowpantestsjni
-LOCAL_JNI_SHARED_LIBRARIES += libandroid_net_lowpan
-LOCAL_JNI_SHARED_LIBRARIES += \
-    libbacktrace \
-    libbase \
-    libbinder \
-    libc++ \
-    libcutils \
-    liblog \
-    liblzma \
-    libnativehelper \
-    libnetdaidl \
-    libui \
-    libunwind \
-    libutils \
-    libvndksupport \
-    libcrypto \
-    libhidl-gen-utils \
-    libhidlbase \
-    libhidltransport \
-    libpackagelistparser \
-    libpcre2 \
-    libselinux \
-    libtinyxml2 \
-    libvintf \
-    libhwbinder \
-    android.hidl.token@1.0
-
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_JAVA_LIBRARIES := \
+	android.test.runner \
 
 LOCAL_PACKAGE_NAME := FrameworksLowpanApiTests
 LOCAL_COMPATIBILITY_SUITE := device-tests
@@ -90,25 +63,3 @@ LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 include $(BUILD_PACKAGE)
-
-#########################################################################
-# Build JNI Shared Library
-#########################################################################
-
-LOCAL_PATH:= $(LOCAL_PATH)/jni
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE_TAGS := tests
-
-LOCAL_CFLAGS := -Wall -Wextra -Werror
-
-LOCAL_SRC_FILES := $(call all-cpp-files-under)
-
-LOCAL_SHARED_LIBRARIES += libandroid_net_lowpan
-LOCAL_SHARED_LIBRARIES += libbinder
-LOCAL_SHARED_LIBRARIES += liblog
-
-LOCAL_MODULE := libframeworkslowpantestsjni
-
-include $(BUILD_SHARED_LIBRARY)
