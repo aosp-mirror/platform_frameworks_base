@@ -29,6 +29,7 @@
 #include "Diagnostics.h"
 #include "io/File.h"
 #include "io/FileSystem.h"
+#include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
@@ -107,6 +108,61 @@ namespace configuration {
 
 const std::string& AbiToString(Abi abi) {
   return kAbiToStringMap.find(abi)->second;
+}
+
+/**
+ * Attempts to replace the placeholder in the name string with the provided value. Returns true on
+ * success, or false if the either the placeholder is not found in the name, or the value is not
+ * present and the placeholder was.
+ */
+static bool ReplacePlaceholder(const std::string& placeholder, const Maybe<std::string>& value,
+                               std::string* name, IDiagnostics* diag) {
+  size_t offset = name->find(placeholder);
+  if (value) {
+    if (offset == std::string::npos) {
+      diag->Error(DiagMessage() << "Missing placeholder for artifact: " << placeholder);
+      return false;
+    }
+    name->replace(offset, placeholder.length(), value.value());
+    return true;
+  }
+
+  // Make sure the placeholder was not present if the desired value was not present.
+  bool result = (offset == std::string::npos);
+  if (!result) {
+    diag->Error(DiagMessage() << "Placeholder present but no value for artifact: " << placeholder);
+  }
+  return result;
+}
+
+Maybe<std::string> Artifact::ToArtifactName(const std::string& format, IDiagnostics* diag) const {
+  std::string result = format;
+
+  if (!ReplacePlaceholder("{abi}", abi_group, &result, diag)) {
+    return {};
+  }
+
+  if (!ReplacePlaceholder("{density}", screen_density_group, &result, diag)) {
+    return {};
+  }
+
+  if (!ReplacePlaceholder("{locale}", locale_group, &result, diag)) {
+    return {};
+  }
+
+  if (!ReplacePlaceholder("{sdk}", android_sdk_group, &result, diag)) {
+    return {};
+  }
+
+  if (!ReplacePlaceholder("{feature}", device_feature_group, &result, diag)) {
+    return {};
+  }
+
+  if (!ReplacePlaceholder("{gl}", gl_texture_group, &result, diag)) {
+    return {};
+  }
+
+  return result;
 }
 
 }  // namespace configuration
