@@ -1649,7 +1649,7 @@ public class WebView extends AbsoluteLayout
      * will be called with false if any URLs are malformed. The callback will be run on the UI
      * thread.
      */
-    public static void setSafeBrowsingWhitelist(@Nullable List<String> urls,
+    public static void setSafeBrowsingWhitelist(@NonNull List<String> urls,
             @Nullable ValueCallback<Boolean> callback) {
         getFactory().getStatics().setSafeBrowsingWhitelist(urls, callback);
     }
