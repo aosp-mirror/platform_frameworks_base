@@ -5150,6 +5150,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mStackScroller.setAnimationsEnabled(true);
             mVisualStabilityManager.setScreenOn(true);
             mNotificationPanel.setTouchDisabled(false);
+            mDozeServiceHost.stopDozing();
             updateVisibleToUser();
             updateIsKeyguard();
         }
