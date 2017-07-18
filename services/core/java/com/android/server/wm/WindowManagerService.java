@@ -480,6 +480,9 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     final ArrayList<WindowState> mForceRemoves = new ArrayList<>();
 
+    /** List of window currently causing non-system overlay windows to be hidden. */
+    private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<WindowState>();
+
     /**
      * Windows that clients are waiting to have drawn.
      */
@@ -2059,6 +2062,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
+            win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
+
             if (type == TYPE_APPLICATION_STARTING && token.appWindowToken != null) {
                 token.appWindowToken.startingWindow = win;
                 if (DEBUG_STARTING_WINDOW) Slog.v (TAG_WM, "addWindow: " + token.appWindowToken
@@ -2485,6 +2491,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mPendingRemove.remove(win);
         mResizingWindows.remove(win);
+        updateNonSystemOverlayWindowsVisibilityIfNeeded(win, false /* surfaceShown */);
         mWindowsChanged = true;
         if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Final remove of window: " + win);
 
@@ -11384,6 +11391,36 @@ public class WindowManagerService extends IWindowManager.Stub
         public boolean isDockedDividerResizing() {
             synchronized (mWindowMap) {
                 return getDefaultDisplayContentLocked().getDockedDividerController().isResizing();
+            }
+        }
+    }
+
+    void updateNonSystemOverlayWindowsVisibilityIfNeeded(WindowState win, boolean surfaceShown) {
+        if (!win.hideNonSystemOverlayWindowsWhenVisible()) {
+            return;
+        }
+        final boolean systemAlertWindowsHidden = !mHidingNonSystemOverlayWindows.isEmpty();
+        if (surfaceShown) {
+            if (!mHidingNonSystemOverlayWindows.contains(win)) {
+                mHidingNonSystemOverlayWindows.add(win);
+            }
+        } else {
+            mHidingNonSystemOverlayWindows.remove(win);
+        }
+
+        final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
+
+        if (systemAlertWindowsHidden == hideSystemAlertWindows) {
+            return;
+        }
+
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+            final int numWindows = windows.size();
+            for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
+                final WindowState w = windows.get(winNdx);
+                w.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
             }
         }
     }
