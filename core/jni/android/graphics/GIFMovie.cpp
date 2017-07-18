@@ -391,8 +391,8 @@ bool GIFMovie::onGetBitmap(SkBitmap* bm)
     }
 
     SkColor bgColor = SkPackARGB32(0, 0, 0, 0);
-    if (gif->SColorMap != nullptr) {
-        const GifColorType& col = gif->SColorMap->Colors[fGIF->SBackGroundColor];
+    if (gif->SColorMap != nullptr && gif->SBackGroundColor < gif->SColorMap->ColorCount) {
+        const GifColorType& col = gif->SColorMap->Colors[gif->SBackGroundColor];
         bgColor = SkColorSetARGB(0xFF, col.Red, col.Green, col.Blue);
     }
 
