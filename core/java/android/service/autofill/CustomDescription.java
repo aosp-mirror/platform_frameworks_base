@@ -103,8 +103,10 @@ public final class CustomDescription implements Parcelable {
                 try {
                     transformation.apply(finder, mPresentation, id);
                 } catch (Exception e) {
-                    Log.e(TAG, "Could not apply transformation " + transformation + ". "
+                    // Do not log full exception to avoid PII leaking
+                    Log.e(TAG, "Could not apply transformation " + transformation + ": "
                             + e.getClass());
+                    return null;
                 }
             }
         }

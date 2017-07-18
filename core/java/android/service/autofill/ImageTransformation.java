@@ -70,7 +70,7 @@ public final class ImageTransformation extends InternalTransformation implements
     @TestApi
     @Override
     public void apply(@NonNull ValueFinder finder, @NonNull RemoteViews parentTemplate,
-            int childViewId) {
+            int childViewId) throws Exception {
         final String value = finder.findByAutofillId(mId);
         if (value == null) {
             Log.w(TAG, "No view for id " + mId);
@@ -83,14 +83,22 @@ public final class ImageTransformation extends InternalTransformation implements
         }
 
         for (int i = 0; i < size; i++) {
-            Pair<Pattern, Integer> regex = mOptions.get(i);
-            if (regex.first.matcher(value).matches()) {
-                Log.d(TAG, "Found match at " + i + ": " + regex);
-                parentTemplate.setImageViewResource(childViewId, regex.second);
-                return;
+            final Pair<Pattern, Integer> option = mOptions.get(i);
+            try {
+                if (option.first.matcher(value).matches()) {
+                    Log.d(TAG, "Found match at " + i + ": " + option);
+                    parentTemplate.setImageViewResource(childViewId, option.second);
+                    return;
+                }
+            } catch (Exception e) {
+                // Do not log full exception to avoid PII leaking
+                Log.w(TAG, "Error matching regex #" + i + "(" + option.first.pattern() + ") on id "
+                        + option.second + ": " + e.getClass());
+                throw e;
+
             }
         }
-        Log.w(TAG, "No match for " + value);
+        if (sDebug) Log.d(TAG, "No match for " + value);
     }
 
     /**
