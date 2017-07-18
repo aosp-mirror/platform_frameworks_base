@@ -71,6 +71,9 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.os.UserManagerInternal;
+import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.text.TextUtils;
@@ -87,6 +90,7 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.server.LocalServices;
 import com.android.server.connectivity.tethering.IControlsTethering;
 import com.android.server.connectivity.tethering.IPv6TetheringCoordinator;
 import com.android.server.connectivity.tethering.OffloadController;
@@ -245,6 +249,13 @@ public class Tethering extends BaseNetworkObserver {
         filter.addAction(Intent.ACTION_MEDIA_UNSHARED);
         filter.addDataScheme("file");
         mContext.registerReceiver(mStateReceiver, filter, null, smHandler);
+
+        UserManagerInternal userManager = LocalServices.getService(UserManagerInternal.class);
+
+        // this check is useful only for some unit tests; example: ConnectivityServiceTest
+        if (userManager != null) {
+            userManager.addUserRestrictionsListener(new TetheringUserRestrictionListener(this));
+        }
 
         // load device config info
         updateConfiguration();
@@ -733,6 +744,11 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     private void showTetheredNotification(int id) {
+        showTetheredNotification(id, true);
+    }
+
+    @VisibleForTesting
+    protected void showTetheredNotification(int id, boolean tetheringOn) {
         NotificationManager notificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
@@ -769,9 +785,16 @@ public class Tethering extends BaseNetworkObserver {
                 null, UserHandle.CURRENT);
 
         Resources r = Resources.getSystem();
-        CharSequence title = r.getText(com.android.internal.R.string.tethered_notification_title);
-        CharSequence message = r.getText(com.android.internal.R.string.
-                tethered_notification_message);
+        final CharSequence title;
+        final CharSequence message;
+
+        if (tetheringOn) {
+            title = r.getText(com.android.internal.R.string.tethered_notification_title);
+            message = r.getText(com.android.internal.R.string.tethered_notification_message);
+        } else {
+            title = r.getText(com.android.internal.R.string.disable_tether_notification_title);
+            message = r.getText(com.android.internal.R.string.disable_tether_notification_message);
+        }
 
         if (mTetheredNotificationBuilder == null) {
             mTetheredNotificationBuilder =
@@ -793,7 +816,8 @@ public class Tethering extends BaseNetworkObserver {
                 mTetheredNotificationBuilder.buildInto(new Notification()), UserHandle.ALL);
     }
 
-    private void clearTetheredNotification() {
+    @VisibleForTesting
+    protected void clearTetheredNotification() {
         NotificationManager notificationManager =
             (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null && mLastNotificationId != 0) {
@@ -892,6 +916,38 @@ public class Tethering extends BaseNetworkObserver {
                         disableWifiIpServingLocked(ifname, curState);
                         break;
                 }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    protected static class TetheringUserRestrictionListener implements UserRestrictionsListener {
+        private final Tethering mWrapper;
+
+        public TetheringUserRestrictionListener(Tethering wrapper) {
+            mWrapper = wrapper;
+        }
+
+        public void onUserRestrictionsChanged(int userId,
+                                              Bundle newRestrictions,
+                                              Bundle prevRestrictions) {
+            final boolean newlyDisallowed =
+                    newRestrictions.getBoolean(UserManager.DISALLOW_CONFIG_TETHERING);
+            final boolean previouslyDisallowed =
+                    prevRestrictions.getBoolean(UserManager.DISALLOW_CONFIG_TETHERING);
+            final boolean tetheringDisallowedChanged = (newlyDisallowed != previouslyDisallowed);
+
+            if (!tetheringDisallowedChanged) {
+                return;
+            }
+
+            mWrapper.clearTetheredNotification();
+            final boolean isTetheringActiveOnDevice = (mWrapper.getTetheredIfaces().length != 0);
+
+            if (newlyDisallowed && isTetheringActiveOnDevice) {
+                mWrapper.showTetheredNotification(
+                        com.android.internal.R.drawable.stat_sys_tether_general, false);
+                mWrapper.untetherAll();
             }
         }
     }

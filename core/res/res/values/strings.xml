@@ -3462,6 +3462,13 @@
     <string name="tethered_notification_title">Tethering or hotspot active</string>
     <string name="tethered_notification_message">Tap to set up.</string>
 
+    <!-- Strings for tether disabling notification -->
+    <!-- This notification is shown when tethering has been disabled on a user's device.
+    The device is managed by the user's employer. Tethering can't be turned on unless the
+    IT administrator allows it. The noun "admin" is another reference for "IT administrator." -->
+    <string name="disable_tether_notification_title">Tethering is disabled</string>
+    <string name="disable_tether_notification_message">Contact your admin for details</string>
+
     <!--  Strings for possible PreferenceActivity Back/Next buttons -->
     <string name="back_button_label">Back</string>
     <string name="next_button_label">Next</string>
