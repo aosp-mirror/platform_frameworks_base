@@ -3929,26 +3929,18 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device or profile owner to configure an always-on VPN connection through a
-     * specific application for the current user.
-     *
-     * @deprecated this version only exists for compability with previous developer preview builds.
-     *             TODO: delete once there are no longer any live references.
-     * @hide
-     */
-    @Deprecated
-    public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage)
-            throws NameNotFoundException, UnsupportedOperationException {
-        setAlwaysOnVpnPackage(admin, vpnPackage, /* lockdownEnabled */ true);
-    }
-
-    /**
-     * Called by a device or profile owner to configure an always-on VPN connection through a
      * specific application for the current user. This connection is automatically granted and
      * persisted after a reboot.
      * <p>
-     * The designated package should declare a {@link android.net.VpnService} in its manifest
-     * guarded by {@link android.Manifest.permission#BIND_VPN_SERVICE}, otherwise the call will
-     * fail.
+     * To support the always-on feature, an app must
+     * <ul>
+     *     <li>declare a {@link android.net.VpnService} in its manifest, guarded by
+     *         {@link android.Manifest.permission#BIND_VPN_SERVICE};</li>
+     *     <li>target {@link android.os.Build.VERSION_CODES#N API 24} or above; and</li>
+     *     <li><i>not</i> explicitly opt out of the feature through
+     *         {@link android.net.VpnService#METADATA_SUPPORTS_ALWAYS_ON}.</li>
+     * </ul>
+     * The call will fail if called with the package name of an unsupported VPN app.
      *
      * @param vpnPackage The package name for an installed VPN app on the device, or {@code null} to
      *        remove an existing always-on VPN configuration.

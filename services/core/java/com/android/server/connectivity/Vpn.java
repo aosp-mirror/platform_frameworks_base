@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -56,7 +57,10 @@ import android.net.NetworkMisc;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.Uri;
+import android.net.VpnService;
 import android.os.Binder;
+import android.os.Build.VERSION_CODES;
+import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -296,12 +300,66 @@ public class Vpn {
     }
 
     /**
+     * Checks if a VPN app supports always-on mode.
+     *
+     * In order to support the always-on feature, an app has to
+     * <ul>
+     *     <li>target {@link VERSION_CODES#N API 24} or above, and
+     *     <li>not opt out through the {@link VpnService#METADATA_SUPPORTS_ALWAYS_ON} meta-data
+     *         field.
+     * </ul>
+     *
+     * @param packageName the canonical package name of the VPN app
+     * @return {@code true} if and only if the VPN app exists and supports always-on mode
+     */
+    public boolean isAlwaysOnPackageSupported(String packageName) {
+        enforceSettingsPermission();
+
+        if (packageName == null) {
+            return false;
+        }
+
+        PackageManager pm = mContext.getPackageManager();
+        ApplicationInfo appInfo = null;
+        try {
+            appInfo = pm.getApplicationInfoAsUser(packageName, 0 /*flags*/, mUserHandle);
+        } catch (NameNotFoundException unused) {
+            Log.w(TAG, "Can't find \"" + packageName + "\" when checking always-on support");
+        }
+        if (appInfo == null || appInfo.targetSdkVersion < VERSION_CODES.N) {
+            return false;
+        }
+
+        final Intent intent = new Intent(VpnConfig.SERVICE_INTERFACE);
+        intent.setPackage(packageName);
+        List<ResolveInfo> services =
+                pm.queryIntentServicesAsUser(intent, PackageManager.GET_META_DATA, mUserHandle);
+        if (services == null || services.size() == 0) {
+            return false;
+        }
+
+        for (ResolveInfo rInfo : services) {
+            final Bundle metaData = rInfo.serviceInfo.metaData;
+            if (metaData != null
+                    && !metaData.getBoolean(VpnService.METADATA_SUPPORTS_ALWAYS_ON, true)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Configures an always-on VPN connection through a specific application.
      * This connection is automatically granted and persisted after a reboot.
      *
      * <p>The designated package should exist and declare a {@link VpnService} in its
      *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
      *    otherwise the call will fail.
+     *
+     * <p>Note that this method does not check if the VPN app supports always-on mode. The check is
+     *    delayed to {@link #startAlwaysOnVpn()}, which is always called immediately after this
+     *    method in {@link android.net.IConnectivityManager#setAlwaysOnVpnPackage}.
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
@@ -442,6 +500,11 @@ public class Vpn {
             // Skip if there is no service to start.
             if (alwaysOnPackage == null) {
                 return true;
+            }
+            // Remove always-on VPN if it's not supported.
+            if (!isAlwaysOnPackageSupported(alwaysOnPackage)) {
+                setAlwaysOnPackage(null, false);
+                return false;
             }
             // Skip if the service is already established. This isn't bulletproof: it's not bound
             // until after establish(), so if it's mid-setup onStartCommand will be sent twice,
@@ -1216,6 +1279,11 @@ public class Vpn {
         // Require caller to be either an application with CONTROL_VPN permission or a process
         // in the system server.
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CONTROL_VPN,
+                "Unauthorized Caller");
+    }
+
+    private void enforceSettingsPermission() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.NETWORK_SETTINGS,
                 "Unauthorized Caller");
     }
 
