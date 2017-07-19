@@ -835,6 +835,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_BUGREPORT_TV = 22;
     private static final int MSG_ACCESSIBILITY_TV = 23;
     private static final int MSG_DISPATCH_BACK_KEY_TO_AUTOFILL = 24;
+    private static final int MSG_HANDLE_ALL_APPS = 25;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -923,6 +924,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_DISPATCH_BACK_KEY_TO_AUTOFILL:
                     mAutofillManagerInternal.onBackKeyPressed();
+                    break;
+                case MSG_HANDLE_ALL_APPS:
+                    launchAllAppsAction();
                     break;
             }
         }
@@ -1785,6 +1789,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void launchAllAppsAction() {
         Intent intent = new Intent(Intent.ACTION_ALL_APPS);
+        if (mHasFeatureLeanback) {
+            final PackageManager pm = mContext.getPackageManager();
+            Intent intentLauncher = new Intent(Intent.ACTION_MAIN);
+            intentLauncher.addCategory(Intent.CATEGORY_HOME);
+            ResolveInfo resolveInfo = pm.resolveActivityAsUser(intentLauncher,
+                    PackageManager.MATCH_SYSTEM_ONLY,
+                    mCurrentUserId);
+            if (resolveInfo != null) {
+                intent.setPackage(resolveInfo.activityInfo.packageName);
+            }
+        }
         startActivityAsUser(intent, UserHandle.CURRENT);
     }
 
@@ -3620,6 +3635,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (interceptAccessibilityGestureTv()) {
                 return -1;
             }
+        } else if (keyCode == KeyEvent.KEYCODE_ALL_APPS) {
+            if (!down) {
+                mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
+                Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
+                msg.setAsynchronous(true);
+                msg.sendToTarget();
+            }
+            return -1;
         }
 
         // Toggle Caps Lock on META-ALT.
