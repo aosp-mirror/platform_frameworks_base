@@ -315,6 +315,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 mScrimInFront.setColors(mSystemColors, animateScrimInFront);
                 mScrimBehind.setColors(mSystemColors, animateScrimBehind);
             }
+            mLightBarController.setScrimColor(mScrimInFront.getColors());
         }
 
         if (mAnimateKeyguardFadingOut || mForceHideScrims) {

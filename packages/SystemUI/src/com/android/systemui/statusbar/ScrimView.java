@@ -202,8 +202,7 @@ public class ScrimView extends View implements ConfigurationController.Configura
         return mDrawable;
     }
 
-    @VisibleForTesting
-    ColorExtractor.GradientColors getColors() {
+    public ColorExtractor.GradientColors getColors() {
         return mColors;
     }
 
