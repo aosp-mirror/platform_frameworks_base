@@ -31,7 +31,8 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
     private final boolean mWantColor;
     private final int mColor;
 
-    private static final int BULLET_RADIUS = 3;
+    // Bullet is slightly bigger to avoid aliasing artifacts on mdpi devices.
+    private static final float BULLET_RADIUS = 3 * 1.2f;
     private static Path sBulletPath = null;
     public static final int STANDARD_GAP_WIDTH = 2;
 
@@ -59,34 +60,41 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
         mColor = src.readInt();
     }
 
+    @Override
     public int getSpanTypeId() {
         return getSpanTypeIdInternal();
     }
 
     /** @hide */
+    @Override
     public int getSpanTypeIdInternal() {
         return TextUtils.BULLET_SPAN;
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         writeToParcelInternal(dest, flags);
     }
 
     /** @hide */
+    @Override
     public void writeToParcelInternal(Parcel dest, int flags) {
         dest.writeInt(mGapWidth);
         dest.writeInt(mWantColor ? 1 : 0);
         dest.writeInt(mColor);
     }
 
+    @Override
     public int getLeadingMargin(boolean first) {
-        return 2 * BULLET_RADIUS + mGapWidth;
+        return (int) (2 * BULLET_RADIUS + mGapWidth);
     }
 
+    @Override
     public void drawLeadingMargin(Canvas c, Paint p, int x, int dir,
                                   int top, int baseline, int bottom,
                                   CharSequence text, int start, int end,
@@ -102,19 +110,31 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
 
             p.setStyle(Paint.Style.FILL);
 
+            final int line = l.getLineForOffset(start);
+            final float y;
+            if (line == l.getLineCount() - 1) {
+                // line spacing values are not added to last line, vertical center is top+bottom/2
+                y = (top + bottom) / 2f;
+            } else {
+                // line spacing values are added to the lines other than last line, remove added
+                // empty line spacing to calculate vertical center
+                final float lineHeight =
+                        (top - bottom - l.getSpacingAdd()) / l.getSpacingMultiplier();
+                y = top - lineHeight / 2f;
+            }
+
             if (c.isHardwareAccelerated()) {
                 if (sBulletPath == null) {
                     sBulletPath = new Path();
-                    // Bullet is slightly better to avoid aliasing artifacts on mdpi devices.
-                    sBulletPath.addCircle(0.0f, 0.0f, 1.2f * BULLET_RADIUS, Direction.CW);
+                    sBulletPath.addCircle(0.0f, 0.0f, BULLET_RADIUS, Direction.CW);
                 }
 
                 c.save();
-                c.translate(x + dir * BULLET_RADIUS, (top + bottom) / 2.0f);
+                c.translate(x + dir * BULLET_RADIUS, y);
                 c.drawPath(sBulletPath, p);
                 c.restore();
             } else {
-                c.drawCircle(x + dir * BULLET_RADIUS, (top + bottom) / 2.0f, BULLET_RADIUS, p);
+                c.drawCircle(x + dir * BULLET_RADIUS, y, BULLET_RADIUS, p);
             }
 
             if (mWantColor) {
