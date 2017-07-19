@@ -491,34 +491,103 @@ Bitmap& Tree::getBitmapUpdateIfDirty() {
     return *mCache.bitmap;
 }
 
-void Tree::updateCache(sk_sp<SkSurface> surface) {
-    if (surface.get()) {
-        mCache.surface = surface;
+void Tree::updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* context) {
+    SkRect dst;
+    sk_sp<SkSurface> surface = mCache.getSurface(&dst);
+    bool canReuseSurface = surface && dst.width() >= mProperties.getScaledWidth()
+            && dst.height() >= mProperties.getScaledHeight();
+    if (!canReuseSurface) {
+        int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
+        int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
+        auto atlasEntry = atlas->requestNewEntry(scaledWidth, scaledHeight, context);
+        if (INVALID_ATLAS_KEY != atlasEntry.key) {
+            dst = atlasEntry.rect;
+            surface = atlasEntry.surface;
+            mCache.setAtlas(atlas, atlasEntry.key);
+        } else {
+            //don't draw, if we failed to allocate an offscreen buffer
+            mCache.clear();
+            surface.reset();
+        }
     }
-    if (surface.get() || mCache.dirty) {
-        SkSurface* vdSurface = mCache.surface.get();
-        SkCanvas* canvas = vdSurface->getCanvas();
-        float scaleX = vdSurface->width() / mProperties.getViewportWidth();
-        float scaleY = vdSurface->height() / mProperties.getViewportHeight();
-        SkAutoCanvasRestore acr(canvas, true);
-        canvas->clear(SK_ColorTRANSPARENT);
-        canvas->scale(scaleX, scaleY);
-        mRootNode->draw(canvas, false);
+    if (!canReuseSurface || mCache.dirty) {
+        draw(surface.get(), dst);
         mCache.dirty = false;
-        canvas->flush();
     }
 }
 
+void Tree::draw(SkSurface* surface, const SkRect& dst) {
+    if (surface) {
+        SkCanvas* canvas = surface->getCanvas();
+        float scaleX = dst.width() / mProperties.getViewportWidth();
+        float scaleY = dst.height() / mProperties.getViewportHeight();
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->translate(dst.fLeft, dst.fTop);
+        canvas->clipRect(SkRect::MakeWH(dst.width(), dst.height()));
+        canvas->clear(SK_ColorTRANSPARENT);
+        canvas->scale(scaleX, scaleY);
+        mRootNode->draw(canvas, false);
+    }
+}
+
+void Tree::Cache::setAtlas(sp<skiapipeline::VectorDrawableAtlas> newAtlas,
+        skiapipeline::AtlasKey newAtlasKey) {
+    LOG_ALWAYS_FATAL_IF(newAtlasKey == INVALID_ATLAS_KEY);
+    clear();
+    mAtlas = newAtlas;
+    mAtlasKey = newAtlasKey;
+}
+
+sk_sp<SkSurface> Tree::Cache::getSurface(SkRect* bounds) {
+    sk_sp<SkSurface> surface;
+    sp<skiapipeline::VectorDrawableAtlas> atlas = mAtlas.promote();
+    if (atlas.get() && mAtlasKey != INVALID_ATLAS_KEY) {
+        auto atlasEntry = atlas->getEntry(mAtlasKey);
+        *bounds = atlasEntry.rect;
+        surface = atlasEntry.surface;
+        mAtlasKey = atlasEntry.key;
+    }
+
+    return surface;
+}
+
+void Tree::Cache::clear() {
+    sp<skiapipeline::VectorDrawableAtlas> lockAtlas = mAtlas.promote();
+    if (lockAtlas.get()) {
+        lockAtlas->releaseEntry(mAtlasKey);
+    }
+    mAtlas = nullptr;
+    mAtlasKey = INVALID_ATLAS_KEY;
+}
+
 void Tree::draw(SkCanvas* canvas) {
-   /*
-    * TODO address the following...
-    *
-    * 1) figure out how to set path's as volatile during animation
-    * 2) if mRoot->getPaint() != null either promote to layer (during
-    *    animation) or cache in SkSurface (for static content)
-    */
-    canvas->drawImageRect(mCache.surface->makeImageSnapshot().get(),
-        mutateProperties()->getBounds(), getPaint());
+    SkRect src;
+    sk_sp<SkSurface> vdSurface = mCache.getSurface(&src);
+    if (vdSurface) {
+        canvas->drawImageRect(vdSurface->makeImageSnapshot().get(), src,
+                mutateProperties()->getBounds(), getPaint());
+    } else {
+        // Handle the case when VectorDrawableAtlas has been destroyed, because of memory pressure.
+        // We render the VD into a temporary standalone buffer and mark the frame as dirty. Next
+        // frame will be cached into the atlas.
+        int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
+        int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
+        SkRect src = SkRect::MakeWH(scaledWidth, scaledHeight);
+#ifndef ANDROID_ENABLE_LINEAR_BLENDING
+        sk_sp<SkColorSpace> colorSpace = nullptr;
+#else
+        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+#endif
+        SkImageInfo info = SkImageInfo::MakeN32(scaledWidth, scaledHeight, kPremul_SkAlphaType,
+                colorSpace);
+        sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(canvas->getGrContext(),
+                SkBudgeted::kYes, info);
+        draw(surface.get(), src);
+        mCache.clear();
+        canvas->drawImageRect(surface->makeImageSnapshot().get(), mutateProperties()->getBounds(),
+                getPaint());
+        markDirty();
+    }
 }
 
 void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {

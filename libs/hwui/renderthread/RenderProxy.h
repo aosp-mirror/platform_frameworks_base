@@ -140,6 +140,9 @@ public:
     static void onBitmapDestroyed(uint32_t pixelRefId);
 
     ANDROID_API static void disableVsync();
+
+    static void repackVectorDrawableAtlas();
+
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;
