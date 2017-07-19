@@ -307,6 +307,7 @@ public class NotificationManager {
             }
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
+        notification.reduceImageSizes(mContext);
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         boolean isLowRam = am.isLowRamDevice();
         final Notification copy = Builder.maybeCloneStrippedForDelivery(notification, isLowRam);

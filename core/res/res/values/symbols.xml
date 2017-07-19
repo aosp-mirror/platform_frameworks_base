@@ -2933,6 +2933,14 @@
   <java-symbol type="style" name="AutofillDatasetPicker" />
   <java-symbol type="dimen" name="autofill_dataset_picker_max_size"/>
 
+  <java-symbol type="dimen" name="notification_big_picture_max_height"/>
+  <java-symbol type="dimen" name="notification_big_picture_max_width"/>
+  <java-symbol type="dimen" name="notification_media_image_max_width"/>
+  <java-symbol type="dimen" name="notification_media_image_max_height"/>
+  <java-symbol type="dimen" name="notification_right_icon_size"/>
+  <java-symbol type="dimen" name="notification_custom_view_max_image_height"/>
+  <java-symbol type="dimen" name="notification_custom_view_max_image_width"/>
+
   <!-- Accessibility fingerprint gestures -->
   <java-symbol type="string" name="capability_title_canCaptureFingerprintGestures" />
   <java-symbol type="string" name="capability_desc_canCaptureFingerprintGestures" />
