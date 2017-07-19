@@ -167,7 +167,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
                 animation -> setIconTintInternal((Float) animation.getAnimatedValue()));
         mTintAnimator.setDuration(duration);
         mTintAnimator.setStartDelay(delay);
-        mTintAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mTintAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         mTintAnimator.start();
     }
 
