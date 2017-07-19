@@ -1088,7 +1088,7 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
      * Start VM.  This thread becomes the main thread of the VM, and will
      * not return until the VM exits.
      */
-    char* slashClassName = toSlashClassName(className);
+    char* slashClassName = toSlashClassName(className != NULL ? className : "");
     jclass startClass = env->FindClass(slashClassName);
     if (startClass == NULL) {
         ALOGE("JavaVM unable to locate class '%s'\n", slashClassName);
