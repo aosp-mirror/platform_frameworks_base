@@ -18,8 +18,8 @@
 #define LOG_TAG "Midi-JNI"
 
 #include <android_util_Binder.h>
+#include <jni.h>
 #include <midi_internal.h>
-#include <nativehelper/jni.h>
 #include <utils/Log.h>
 
 using namespace android;
