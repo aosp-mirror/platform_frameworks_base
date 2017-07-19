@@ -24,8 +24,8 @@
 #include "core_jni_helpers.h"
 
 #include <android-base/chrono_utils.h>
-#include <JNIHelp.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
 #include <gui/Surface.h>

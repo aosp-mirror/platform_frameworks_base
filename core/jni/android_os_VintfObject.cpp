@@ -21,7 +21,7 @@
 #include <vector>
 #include <string>
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <vintf/VintfObject.h>
 #include <vintf/parse_string.h>
 #include <vintf/parse_xml.h>

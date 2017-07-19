@@ -15,7 +15,7 @@
 ** limitations under the License.
 */
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>

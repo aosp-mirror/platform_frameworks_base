@@ -23,7 +23,7 @@
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 #include <GraphicsJNI.h>
-#include <ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>

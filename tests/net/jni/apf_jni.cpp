@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <JNIHelp.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <jni.h>
 #include <pcap.h>
 #include <stdlib.h>

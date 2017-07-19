@@ -20,7 +20,7 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -41,8 +41,8 @@
 #include <utils/threads.h>
 #include <utils/String8.h>
 
-#include <ScopedUtfChars.h>
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include <android_runtime/AndroidRuntime.h>
 

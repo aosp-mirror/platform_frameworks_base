@@ -16,14 +16,14 @@
 
 #define LOG_TAG "MotionEvent-JNI"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <SkMatrix.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <input/Input.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "android_os_Parcel.h"
 #include "android_view_MotionEvent.h"
 #include "android_util_Binder.h"

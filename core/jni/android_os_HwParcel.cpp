@@ -24,7 +24,7 @@
 #include "android_os_HwBlob.h"
 #include "android_os_HwRemoteBinder.h"
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <hidl/HidlTransportSupport.h>
 #include <hidl/Status.h>

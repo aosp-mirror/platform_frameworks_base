@@ -16,7 +16,7 @@
 
 #define LOG_TAG "SurfaceSession"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_SurfaceSession.h>

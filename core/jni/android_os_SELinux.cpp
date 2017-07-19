@@ -17,15 +17,15 @@
 #define LOG_TAG "SELinuxJNI"
 #include <utils/Log.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "core_jni_helpers.h"
 #include "selinux/selinux.h"
 #include "selinux/android.h"
 #include <errno.h>
 #include <memory>
-#include <ScopedLocalRef.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 namespace android {
 

@@ -23,9 +23,9 @@
 #include <utils/String8.h>
 #include <log/log.h>
 
-#include <JNIHelp.h>
-#include <ScopedUtfChars.h>
-#include <ScopedStringChars.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedStringChars.h>
 
 namespace android {
 

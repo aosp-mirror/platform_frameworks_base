@@ -16,7 +16,7 @@
 
 #define LOG_TAG "LocalSocketImpl"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
@@ -35,7 +35,7 @@
 
 #include <cutils/sockets.h>
 #include <netinet/tcp.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 namespace android {
 

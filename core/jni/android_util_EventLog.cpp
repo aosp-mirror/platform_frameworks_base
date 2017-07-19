@@ -20,7 +20,7 @@
 
 #include <log/log.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 #include "jni.h"
 
