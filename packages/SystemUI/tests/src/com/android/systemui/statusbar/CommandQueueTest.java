@@ -269,9 +269,9 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHandleSysnavKey() {
-        mCommandQueue.handleSystemNavigationKey(1);
+    public void testHandleSysKey() {
+        mCommandQueue.handleSystemKey(1);
         waitForIdleSync();
-        verify(mCallbacks).handleSystemNavigationKey(eq(1));
+        verify(mCallbacks).handleSystemKey(eq(1));
     }
 }
