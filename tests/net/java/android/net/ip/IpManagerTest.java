@@ -75,7 +75,8 @@ public class IpManagerTest {
     @Mock private AlarmManager mAlarm;
     private MockContentResolver mContentResolver;
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         when(mContext.getSystemService(eq(Context.ALARM_SERVICE))).thenReturn(mAlarm);
@@ -86,6 +87,13 @@ public class IpManagerTest {
         mContentResolver = new MockContentResolver();
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
+    }
+
+    private IpManager makeIpManager(String ifname) throws Exception {
+        final IpManager ipm = new IpManager(mContext, ifname, mCb, mNMService);
+        verify(mNMService, timeout(100).times(1)).disableIpv6(ifname);
+        verify(mNMService, timeout(100).times(1)).clearInterfaceAddresses(ifname);
+        return ipm;
     }
 
     @Test
@@ -101,7 +109,8 @@ public class IpManagerTest {
     @Test
     public void testDefaultProvisioningConfiguration() throws Exception {
         final String iface = "test_wlan0";
-        final IpManager ipm = new IpManager(mContext, iface, mCb, mNMService);
+        final IpManager ipm = makeIpManager(iface);
+
         ProvisioningConfiguration config = new ProvisioningConfiguration.Builder()
                 .withoutIPv4()
                 // TODO: mock IpReachabilityMonitor's dependencies (NetworkInterface, PowerManager)
