@@ -199,6 +199,22 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Reduces all images and ensures that they are all below the given sizes.
+     *
+     * @param maxWidth the maximum width allowed
+     * @param maxHeight the maximum height allowed
+     *
+     * @hide
+     */
+    public void reduceImageSizes(int maxWidth, int maxHeight) {
+        ArrayList<Bitmap> cache = mBitmapCache.mBitmaps;
+        for (int i = 0; i < cache.size(); i++) {
+            Bitmap bitmap = cache.get(i);
+            cache.set(i, Icon.scaleDownIfNecessary(bitmap, maxWidth, maxHeight));
+        }
+    }
+
+    /**
      * Handle with care!
      */
     static class MutablePair<F, S> {
