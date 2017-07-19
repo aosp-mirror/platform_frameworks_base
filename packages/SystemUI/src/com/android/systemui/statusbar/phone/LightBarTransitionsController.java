@@ -23,8 +23,8 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.util.TimeUtils;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.Dependency;
+import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -55,7 +55,6 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
     private ValueAnimator mTintAnimator;
     private float mDarkIntensity;
     private float mNextDarkIntensity;
-
     private final Runnable mTransitionDeferringDoneRunnable = new Runnable() {
         @Override
         public void run() {
@@ -130,6 +129,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
     public void setIconsDark(boolean dark, boolean animate) {
         if (!animate) {
             setIconTintInternal(dark ? 1.0f : 0.0f);
+            mNextDarkIntensity = dark ? 1.0f : 0.0f;
         } else if (mTransitionPending) {
             deferIconTintChange(dark ? 1.0f : 0.0f);
         } else if (mTransitionDeferring) {
@@ -155,11 +155,11 @@ public class LightBarTransitionsController implements Dumpable, Callbacks {
 
     private void animateIconTint(float targetDarkIntensity, long delay,
             long duration) {
+        if (mNextDarkIntensity == targetDarkIntensity) {
+            return;
+        }
         if (mTintAnimator != null) {
             mTintAnimator.cancel();
-        }
-        if (mDarkIntensity == targetDarkIntensity) {
-            return;
         }
         mNextDarkIntensity = targetDarkIntensity;
         mTintAnimator = ValueAnimator.ofFloat(mDarkIntensity, targetDarkIntensity);
