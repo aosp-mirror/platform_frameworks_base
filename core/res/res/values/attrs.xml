@@ -69,6 +69,9 @@
         <!-- Max height of the autofill data set picker as a fraction of the screen height -->
         <attr name="autofillDatasetPickerMaxHeight" format="reference" />
 
+        <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
+        <attr name="autofillSaveCustomSubtitleMaxHeight" format="reference" />
+
         <!-- Default disabled alpha for widgets that set enabled/disabled alpha programmatically. -->
         <attr name="disabledAlpha" format="float" />
         <!-- The alpha applied to the foreground color to create the primary text color. -->

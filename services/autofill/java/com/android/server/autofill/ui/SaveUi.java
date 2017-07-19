@@ -33,11 +33,13 @@ import android.util.Slog;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.RemoteViews;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 
 import com.android.internal.R;
 import com.android.server.UiThread;
@@ -140,27 +142,6 @@ final class SaveUi {
             types.add(context.getString(R.string.autofill_save_type_email_address));
         }
 
-        final CustomDescription customDescription = info.getCustomDescription();
-
-        if (customDescription != null) {
-            if (sDebug) Slog.d(TAG, "Using custom description");
-
-            final RemoteViews presentation = customDescription.getPresentation(valueFinder);
-            if (presentation != null) {
-                try {
-                    final View remote = presentation.apply(context, null);
-                    final LinearLayout layout = view.findViewById(
-                            R.id.autofill_save_custom_subtitle);
-                    layout.addView(remote);
-                    layout.setVisibility(View.VISIBLE);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Could not inflate custom description. ", e);
-                }
-            } else {
-                Slog.w(TAG, "could not create remote presentation for custom title");
-            }
-        }
-
         switch (types.size()) {
             case 1:
                 mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_type,
@@ -181,14 +162,39 @@ final class SaveUi {
         }
 
         titleView.setText(mTitle);
-        mSubTitle = info.getDescription();
-        if (mSubTitle != null) {
-            final TextView subTitleView = (TextView) view.findViewById(R.id.autofill_save_subtitle);
-            subTitleView.setText(mSubTitle);
-            subTitleView.setVisibility(View.VISIBLE);
-        }
 
-        if (sDebug) Slog.d(TAG, "on constructor: title=" + mTitle + ", subTitle=" + mSubTitle);
+        ScrollView subtitleContainer = null;
+        final CustomDescription customDescription = info.getCustomDescription();
+        if (customDescription != null) {
+            mSubTitle = null;
+            if (sDebug) Slog.d(TAG, "Using custom description");
+
+            final RemoteViews presentation = customDescription.getPresentation(valueFinder);
+            if (presentation != null) {
+                try {
+                    final View customSubtitleView = presentation.apply(context, null);
+                    subtitleContainer = view.findViewById(R.id.autofill_save_custom_subtitle);
+                    subtitleContainer.addView(customSubtitleView);
+                    subtitleContainer.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Could not inflate custom description. ", e);
+                }
+            } else {
+                Slog.w(TAG, "could not create remote presentation for custom title");
+            }
+        } else {
+            mSubTitle = info.getDescription();
+            if (mSubTitle != null) {
+                subtitleContainer = view.findViewById(R.id.autofill_save_custom_subtitle);
+                final TextView subtitleView = new TextView(context);
+                subtitleView.setText(mSubTitle);
+                subtitleContainer.addView(subtitleView,
+                        new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT));
+                subtitleContainer.setVisibility(View.VISIBLE);
+            }
+            if (sDebug) Slog.d(TAG, "on constructor: title=" + mTitle + ", subTitle=" + mSubTitle);
+        }
 
         final TextView noButton = view.findViewById(R.id.autofill_save_no);
         if (info.getNegativeActionStyle() == SaveInfo.NEGATIVE_BUTTON_STYLE_REJECT) {
