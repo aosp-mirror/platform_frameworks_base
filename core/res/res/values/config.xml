@@ -2775,6 +2775,9 @@
     <!-- True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
 
+    <!-- Component that runs demo mode when it is enabled. -->
+    <string name="config_demoModePackage" translatable="false"></string>
+
     <!-- Component that is the default launcher when demo mode is enabled. -->
     <string name="config_demoModeLauncherComponent">com.android.retaildemo/.DemoPlayer</string>
 
