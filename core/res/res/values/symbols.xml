@@ -2538,6 +2538,8 @@
   <java-symbol type="id" name="suggestionContainer" />
   <java-symbol type="id" name="addToDictionaryButton" />
   <java-symbol type="id" name="deleteButton" />
+  <!-- TextView -->
+  <java-symbol type="string" name="failed_to_copy_to_clipboard" />
 
   <java-symbol type="id" name="notification_material_reply_container" />
   <java-symbol type="id" name="notification_material_reply_text_1" />

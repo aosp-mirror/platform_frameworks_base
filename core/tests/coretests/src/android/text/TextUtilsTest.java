@@ -683,4 +683,36 @@ public class TextUtilsTest {
             assertEquals(source.getSpanFlags(span), result.getSpanFlags(span));
         }
     }
+
+    @Test
+    public void testTrimToSize() {
+        final String testString = "a\uD800\uDC00a";
+        assertEquals("Should return text as it is if size is longer than length",
+                testString, TextUtils.trimToSize(testString, 5));
+        assertEquals("Should return text as it is if size is equal to length",
+                testString, TextUtils.trimToSize(testString, 4));
+        assertEquals("Should trim text",
+                "a\uD800\uDC00", TextUtils.trimToSize(testString, 3));
+        assertEquals("Should trim surrogate pairs if size is in the middle of a pair",
+                "a", TextUtils.trimToSize(testString, 2));
+        assertEquals("Should trim text",
+                "a", TextUtils.trimToSize(testString, 1));
+        assertEquals("Should handle null",
+                null, TextUtils.trimToSize(null, 1));
+
+        assertEquals("Should trim high surrogate if invalid surrogate",
+                "a\uD800", TextUtils.trimToSize("a\uD800\uD800", 2));
+        assertEquals("Should trim low surrogate if invalid surrogate",
+                "a\uDC00", TextUtils.trimToSize("a\uDC00\uDC00", 2));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTrimToSizeThrowsExceptionForNegativeSize() {
+        TextUtils.trimToSize("", -1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTrimToSizeThrowsExceptionForZeroSize() {
+        TextUtils.trimToSize("abc", 0);
+    }
 }

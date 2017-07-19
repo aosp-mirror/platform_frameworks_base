@@ -17,6 +17,7 @@
 package android.text;
 
 import android.annotation.FloatRange;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PluralsRes;
@@ -2022,6 +2023,45 @@ public class TextUtils {
     public static void wrap(StringBuilder builder, String start, String end) {
         builder.insert(0, start);
         builder.append(end);
+    }
+
+    /**
+     * Intent size limitations prevent sending over a megabyte of data. Limit
+     * text length to 100K characters - 200KB.
+     */
+    private static final int PARCEL_SAFE_TEXT_LENGTH = 100000;
+
+    /**
+     * Trims the text to {@link #PARCEL_SAFE_TEXT_LENGTH} length. Returns the string as it is if
+     * the length() is smaller than {@link #PARCEL_SAFE_TEXT_LENGTH}. Used for text that is parceled
+     * into a {@link Parcelable}.
+     *
+     * @hide
+     */
+    @Nullable
+    public static <T extends CharSequence> T trimToParcelableSize(@Nullable T text) {
+        return trimToSize(text, PARCEL_SAFE_TEXT_LENGTH);
+    }
+
+    /**
+     * Trims the text to {@code size} length. Returns the string as it is if the length() is
+     * smaller than {@code size}. If chars at {@code size-1} and {@code size} is a surrogate
+     * pair, returns a CharSequence of length {@code size-1}.
+     *
+     * @param size length of the result, should be greater than 0
+     *
+     * @hide
+     */
+    @Nullable
+    public static <T extends CharSequence> T trimToSize(@Nullable T text,
+            @IntRange(from = 1) int size) {
+        Preconditions.checkArgument(size > 0);
+        if (TextUtils.isEmpty(text) || text.length() <= size) return text;
+        if (Character.isHighSurrogate(text.charAt(size - 1))
+                && Character.isLowSurrogate(text.charAt(size))) {
+            size = size - 1;
+        }
+        return (T) text.subSequence(0, size);
     }
 
     private static Object sLock = new Object();
