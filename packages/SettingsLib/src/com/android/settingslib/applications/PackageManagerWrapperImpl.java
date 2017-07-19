@@ -113,4 +113,9 @@ public class PackageManagerWrapperImpl implements PackageManagerWrapper {
     public CharSequence loadLabel(ApplicationInfo app) {
         return app.loadLabel(mPm);
     }
+
+    @Override
+    public List<ResolveInfo> queryIntentActivities(Intent intent, int flags) {
+        return mPm.queryIntentActivities(intent, flags);
+    }
 }

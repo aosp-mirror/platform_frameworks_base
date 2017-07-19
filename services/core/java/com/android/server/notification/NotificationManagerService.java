@@ -1080,7 +1080,7 @@ public class NotificationManagerService extends SystemService {
         mUsageStats = us;
     }
 
-    // TODO: Tests should call onStart instead once the methods above are removed.
+    // TODO: All tests should use this init instead of the one-off setters above.
     @VisibleForTesting
     void init(Looper looper, IPackageManager packageManager, PackageManager packageManagerClient,
             LightsManager lightsManager, NotificationListeners notificationListeners,
@@ -1211,6 +1211,37 @@ public class NotificationManagerService extends SystemService {
         mUserProfiles.updateCache(getContext());
         listenForCallState();
 
+        mSettingsObserver = new SettingsObserver(mHandler);
+
+        mArchive = new Archive(resources.getInteger(
+                R.integer.config_notificationServiceArchiveSize));
+
+        mIsTelevision = mPackageManagerClient.hasSystemFeature(FEATURE_LEANBACK)
+                || mPackageManagerClient.hasSystemFeature(FEATURE_TELEVISION);
+    }
+
+    @Override
+    public void onStart() {
+        SnoozeHelper snoozeHelper = new SnoozeHelper(getContext(), new SnoozeHelper.Callback() {
+            @Override
+            public void repost(int userId, NotificationRecord r) {
+                try {
+                    if (DBG) {
+                        Slog.d(TAG, "Reposting " + r.getKey());
+                    }
+                    enqueueNotificationInternal(r.sbn.getPackageName(), r.sbn.getOpPkg(),
+                            r.sbn.getUid(), r.sbn.getInitialPid(), r.sbn.getTag(), r.sbn.getId(),
+                            r.sbn.getNotification(), userId);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Cannot un-snooze notification", e);
+                }
+            }
+        }, mUserProfiles);
+
+        init(Looper.myLooper(), AppGlobals.getPackageManager(), getContext().getPackageManager(),
+                getLocalService(LightsManager.class), new NotificationListeners(),
+                null, snoozeHelper, new NotificationUsageStats(getContext()));
+
         // register for various Intents
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_ON);
@@ -1248,36 +1279,6 @@ public class NotificationManagerService extends SystemService {
         timeoutFilter.addDataScheme(SCHEME_TIMEOUT);
         getContext().registerReceiver(mNotificationTimeoutReceiver, timeoutFilter);
 
-        mSettingsObserver = new SettingsObserver(mHandler);
-
-        mArchive = new Archive(resources.getInteger(
-                R.integer.config_notificationServiceArchiveSize));
-
-        mIsTelevision = mPackageManagerClient.hasSystemFeature(FEATURE_LEANBACK)
-                || mPackageManagerClient.hasSystemFeature(FEATURE_TELEVISION);
-    }
-
-    @Override
-    public void onStart() {
-        SnoozeHelper snoozeHelper = new SnoozeHelper(getContext(), new SnoozeHelper.Callback() {
-            @Override
-            public void repost(int userId, NotificationRecord r) {
-                try {
-                    if (DBG) {
-                        Slog.d(TAG, "Reposting " + r.getKey());
-                    }
-                    enqueueNotificationInternal(r.sbn.getPackageName(), r.sbn.getOpPkg(),
-                            r.sbn.getUid(), r.sbn.getInitialPid(), r.sbn.getTag(), r.sbn.getId(),
-                            r.sbn.getNotification(), userId);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Cannot un-snooze notification", e);
-                }
-            }
-        }, mUserProfiles);
-
-        init(Looper.myLooper(), AppGlobals.getPackageManager(), getContext().getPackageManager(),
-                getLocalService(LightsManager.class), new NotificationListeners(),
-                null, snoozeHelper, new NotificationUsageStats(getContext()));
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }

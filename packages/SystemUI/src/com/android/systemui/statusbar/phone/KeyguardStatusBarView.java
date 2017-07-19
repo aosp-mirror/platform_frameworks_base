@@ -333,7 +333,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     public void onOverlayChanged() {
-        @ColorInt int textColor = Utils.getColorAttr(mContext, R.attr.bgProtectTextColor);
+        @ColorInt int textColor = Utils.getColorAttr(mContext, R.attr.wallpaperTextColor);
         mCarrierLabel.setTextColor(textColor);
         mBatteryView.setFillColor(textColor);
         mIconManager.setTint(textColor);

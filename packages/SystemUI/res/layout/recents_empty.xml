@@ -23,8 +23,8 @@
     android:drawableTop="@drawable/recents_empty"
     android:drawablePadding="25dp"
     android:textSize="16sp"
-    android:drawableTint="?attr/bgProtectTextColor"
-    android:textColor="?attr/bgProtectTextColor"
+    android:drawableTint="?attr/wallpaperTextColor"
+    android:textColor="?attr/wallpaperTextColor"
     android:text="@string/recents_empty_message"
     android:fontFamily="sans-serif"
     android:visibility="gone" />
