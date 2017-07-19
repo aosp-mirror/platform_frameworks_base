@@ -209,10 +209,12 @@ public class PackageManagerServiceUtils {
 
         // If the app was active in background during the threshold period and was used
         // by other packages.
+        // If packageUseInfo is null, it can be said that the package was not used by other
+        // packages.
         boolean isActiveInBackgroundAndUsedByOtherPackages = ((currentTimeInMillis
                 - latestPackageUseTimeInMillis)
                 < thresholdTimeinMillis)
-                && packageUseInfo.isUsedByOtherApps();
+                && (packageUseInfo != null && packageUseInfo.isUsedByOtherApps());
 
         return !isActiveInBackgroundAndUsedByOtherPackages;
     }
