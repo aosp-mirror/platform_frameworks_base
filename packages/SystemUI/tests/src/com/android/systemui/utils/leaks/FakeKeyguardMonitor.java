@@ -47,6 +47,11 @@ public class FakeKeyguardMonitor implements KeyguardMonitor {
     }
 
     @Override
+    public boolean isOccluded() {
+        return false;
+    }
+
+    @Override
     public boolean isKeyguardFadingAway() {
         return false;
     }
