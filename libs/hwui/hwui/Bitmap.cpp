@@ -168,7 +168,7 @@ void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes) {
     // really hard to work with. Skia really, really wants immutable objects,
     // but with the nested-ref-count hackery going on that's just not
     // feasible without going insane trying to figure it out
-    this->android_only_reset(mInfo.width(), mInfo.height(), rowBytes, nullptr);
+    this->android_only_reset(mInfo.width(), mInfo.height(), rowBytes);
 }
 
 Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes)
@@ -201,8 +201,7 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
 
 Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
         : SkPixelRef(info.width(), info.height(), nullptr,
-                     bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride(),
-                     nullptr)
+                     bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride())
         , mInfo(validateAlpha(info))
         , mPixelStorageType(PixelStorageType::Hardware) {
     mPixelStorage.hardware.buffer = buffer;
