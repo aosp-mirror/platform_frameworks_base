@@ -1670,12 +1670,14 @@ public class PackageManagerService extends IPackageManager.Stub
                                 & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0;
                         final boolean killApp = (args.installFlags
                                 & PackageManager.INSTALL_DONT_KILL_APP) == 0;
+                        final boolean virtualPreload = ((args.installFlags
+                                & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0);
                         final String[] grantedPermissions = args.installGrantPermissions;
 
                         // Handle the parent package
                         handlePackagePostInstall(parentRes, grantPermissions, killApp,
-                                grantedPermissions, didRestore, args.installerPackageName,
-                                args.observer);
+                                virtualPreload, grantedPermissions, didRestore,
+                                args.installerPackageName, args.observer);
 
                         // Handle the child packages
                         final int childCount = (parentRes.addedChildPackages != null)
@@ -1683,8 +1685,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         for (int i = 0; i < childCount; i++) {
                             PackageInstalledInfo childRes = parentRes.addedChildPackages.valueAt(i);
                             handlePackagePostInstall(childRes, grantPermissions, killApp,
-                                    grantedPermissions, false, args.installerPackageName,
-                                    args.observer);
+                                    virtualPreload, grantedPermissions, false /*didRestore*/,
+                                    args.installerPackageName, args.observer);
                         }
 
                         // Log tracing if needed
@@ -1895,7 +1897,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void handlePackagePostInstall(PackageInstalledInfo res, boolean grantPermissions,
-            boolean killApp, String[] grantedPermissions,
+            boolean killApp, boolean virtualPreload, String[] grantedPermissions,
             boolean launchedForRestore, String installerPackage,
             IPackageInstallObserver2 installObserver) {
         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
@@ -1969,7 +1971,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 // sendPackageAddedForNewUsers also deals with system apps
                 int appId = UserHandle.getAppId(res.uid);
                 boolean isSystem = res.pkg.applicationInfo.isSystemApp();
-                sendPackageAddedForNewUsers(packageName, isSystem, appId, firstUsers);
+                sendPackageAddedForNewUsers(packageName, isSystem || virtualPreload,
+                        virtualPreload /*startReceiver*/, appId, firstUsers);
 
                 // Send added for users that don't see the package for the first time
                 Bundle extras = new Bundle(1);
@@ -14350,7 +14353,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private void sendPackageAddedForUser(String packageName, PackageSetting pkgSetting,
             int userId) {
         final boolean isSystem = isSystemApp(pkgSetting) || isUpdatedSystemApp(pkgSetting);
-        sendPackageAddedForNewUsers(packageName, isSystem, pkgSetting.appId, userId);
+        sendPackageAddedForNewUsers(packageName, isSystem /*sendBootCompleted*/,
+                false /*startReceiver*/, pkgSetting.appId, userId);
 
         // Send a session commit broadcast
         final PackageInstaller.SessionInfo info = new PackageInstaller.SessionInfo();
@@ -14359,7 +14363,8 @@ public class PackageManagerService extends IPackageManager.Stub
         sendSessionCommitBroadcast(info, userId);
     }
 
-    public void sendPackageAddedForNewUsers(String packageName, boolean isSystem, int appId, int... userIds) {
+    public void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
+            boolean includeStopped, int appId, int... userIds) {
         if (ArrayUtils.isEmpty(userIds)) {
             return;
         }
@@ -14369,10 +14374,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                 packageName, extras, 0, null, null, userIds);
-        if (isSystem) {
+        if (sendBootCompleted) {
             mHandler.post(() -> {
                         for (int userId : userIds) {
-                            sendBootCompletedBroadcastToSystemApp(packageName, userId);
+                            sendBootCompletedBroadcastToSystemApp(
+                                    packageName, includeStopped, userId);
                         }
                     }
             );
@@ -14384,7 +14390,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * automatically without needing an explicit launch.
      * Send it a LOCKED_BOOT_COMPLETED/BOOT_COMPLETED if it would ordinarily have gotten ones.
      */
-    private void sendBootCompletedBroadcastToSystemApp(String packageName, int userId) {
+    private void sendBootCompletedBroadcastToSystemApp(String packageName, boolean includeStopped,
+            int userId) {
         // If user is not running, the app didn't miss any broadcast
         if (!mUserManagerInternal.isUserRunning(userId)) {
             return;
@@ -14394,6 +14401,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // Deliver LOCKED_BOOT_COMPLETED first
             Intent lockedBcIntent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
                     .setPackage(packageName);
+            if (includeStopped) {
+                lockedBcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+            }
             final String[] requiredPermissions = {Manifest.permission.RECEIVE_BOOT_COMPLETED};
             am.broadcastIntent(null, lockedBcIntent, null, null, 0, null, null, requiredPermissions,
                     android.app.AppOpsManager.OP_NONE, null, false, false, userId);
@@ -14401,6 +14411,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // Deliver BOOT_COMPLETED only if user is unlocked
             if (mUserManagerInternal.isUserUnlockingOrUnlocked(userId)) {
                 Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
+                if (includeStopped) {
+                    bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                }
                 am.broadcastIntent(null, bcIntent, null, null, 0, null, null, requiredPermissions,
                         android.app.AppOpsManager.OP_NONE, null, false, false, userId);
             }
@@ -18724,6 +18737,12 @@ public class PackageManagerService extends IPackageManager.Stub
         return packageName;
     }
 
+    boolean isCallerVerifier(int callingUid) {
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        return mRequiredVerifierPackage != null &&
+                callingUid == getPackageUid(mRequiredVerifierPackage, 0, callingUserId);
+    }
+
     private boolean isCallerAllowedToSilentlyUninstall(int callingUid, String pkgName) {
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID
               || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
@@ -18997,8 +19016,8 @@ public class PackageManagerService extends IPackageManager.Stub
             for (int i = 0; i < packageCount; i++) {
                 PackageInstalledInfo installedInfo = appearedChildPackages.valueAt(i);
                 packageSender.sendPackageAddedForNewUsers(installedInfo.name,
-                    true, UserHandle.getAppId(installedInfo.uid),
-                    installedInfo.newUsers);
+                    true /*sendBootCompleted*/, false /*startReceiver*/,
+                    UserHandle.getAppId(installedInfo.uid), installedInfo.newUsers);
             }
         }
 
@@ -25086,6 +25105,6 @@ interface PackageSender {
     void sendPackageBroadcast(final String action, final String pkg,
         final Bundle extras, final int flags, final String targetPkg,
         final IIntentReceiver finishedReceiver, final int[] userIds);
-    void sendPackageAddedForNewUsers(String packageName, boolean isSystem,
-        int appId, int... userIds);
+    void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
+        boolean includeStopped, int appId, int... userIds);
 }
