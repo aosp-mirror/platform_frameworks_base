@@ -60,37 +60,51 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), backendTexture,
             kTopLeft_GrSurfaceOrigin));
     if (image) {
-        // convert to Skia data structures
-        const SkRect bufferRect = SkRect::MakeIWH(imgWidth, imgHeight);
-        SkRect skiaSrcRect = srcRect.toSkRect();
         SkMatrix textureMatrix;
         imgTransform.copyTo(textureMatrix);
 
-        // remove the y-flip applied to the matrix so that we can scale the srcRect.
-        // This flip is not needed as we specify the origin of the texture when we
-        // wrap it as an SkImage.
+        // remove the y-flip applied to the matrix
         SkMatrix yFlip = SkMatrix::MakeScale(1, -1);
         yFlip.postTranslate(0,1);
         textureMatrix.preConcat(yFlip);
 
-        // copy the entire src if the rect is empty
-        if (skiaSrcRect.isEmpty()) {
-            skiaSrcRect = bufferRect;
+        // multiply by image size, because textureMatrix maps to [0..1] range
+        textureMatrix[SkMatrix::kMTransX] *= imgWidth;
+        textureMatrix[SkMatrix::kMTransY] *= imgHeight;
+
+        // swap rotation and translation part of the matrix, because we convert from
+        // right-handed Cartesian to left-handed coordinate system.
+        std::swap(textureMatrix[SkMatrix::kMTransX], textureMatrix[SkMatrix::kMTransY]);
+        std::swap(textureMatrix[SkMatrix::kMSkewX], textureMatrix[SkMatrix::kMSkewY]);
+
+        // convert to Skia data structures
+        SkRect skiaSrcRect = srcRect.toSkRect();
+        SkMatrix textureMatrixInv;
+        SkRect skiaDestRect = SkRect::MakeWH(bitmap->width(), bitmap->height());
+        bool srcNotEmpty = false;
+        if (textureMatrix.invert(&textureMatrixInv)) {
+            if (skiaSrcRect.isEmpty()) {
+                skiaSrcRect = SkRect::MakeIWH(imgWidth, imgHeight);
+                srcNotEmpty = !skiaSrcRect.isEmpty();
+            } else {
+                // src and dest rectangles need to be converted into texture coordinates before the
+                // rotation matrix is applied (because drawImageRect preconcat its matrix).
+                textureMatrixInv.mapRect(&skiaSrcRect);
+                srcNotEmpty = skiaSrcRect.intersect(SkRect::MakeIWH(imgWidth, imgHeight));
+            }
+            textureMatrixInv.mapRect(&skiaDestRect);
         }
 
-        // since the y-flip has been removed we can simply scale & translate
-        // the source rectangle
-        textureMatrix.mapRect(&skiaSrcRect);
-
-        if (skiaSrcRect.intersect(bufferRect)) {
+        if (srcNotEmpty) {
             // we render in an offscreen buffer to scale and to avoid an issue b/62262733
             // with reading incorrect data from EGLImage backed SkImage (likely a driver bug)
             sk_sp<SkSurface> scaledSurface = SkSurface::MakeRenderTarget(
                     grContext.get(), SkBudgeted::kYes, bitmap->info());
             SkPaint paint;
             paint.setBlendMode(SkBlendMode::kSrc);
-            scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect,
-                    SkRect::MakeWH(bitmap->width(), bitmap->height()), &paint);
+            scaledSurface->getCanvas()->concat(textureMatrix);
+            scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect, skiaDestRect, &paint);
+
             image = scaledSurface->makeImageSnapshot();
 
             if (image->readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
