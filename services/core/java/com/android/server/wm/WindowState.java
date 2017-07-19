@@ -79,6 +79,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
@@ -91,7 +92,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
@@ -141,6 +144,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final int mAppOp;
     // UserId and appId of the owner. Don't display windows of non-current user.
     final int mOwnerUid;
+    final boolean mOwnerCanAddInternalSystemWindow;
     final IWindowId mWindowId;
     WindowToken mToken;
     WindowToken mRootToken;
@@ -167,6 +171,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppOpVisibility = true;
     boolean mPermanentlyHidden; // the window should never be shown again
+    // This is a non-system overlay window that is currently force hidden.
+    private boolean mForceHideNonSystemOverlayWindow;
     boolean mAppFreezing;
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
@@ -522,6 +528,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mAppOp = appOp;
         mToken = token;
         mOwnerUid = s.mUid;
+        mOwnerCanAddInternalSystemWindow = s.mCanAddInternalSystemWindow;
         mWindowId = new IWindowId.Stub() {
             @Override
             public void registerFocusObserver(IWindowFocusObserver observer) {
@@ -1882,6 +1889,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // to handle their windows being removed from under them.
             return false;
         }
+        if (mForceHideNonSystemOverlayWindow) {
+            // This is an alert window that is currently force hidden.
+            return false;
+        }
         if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
             // Already showing.
             return false;
@@ -1953,6 +1964,22 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mService.scheduleAnimationLocked();
         }
         return true;
+    }
+
+    void setForceHideNonSystemOverlayWindowIfNeeded(boolean forceHide) {
+        if (mOwnerCanAddInternalSystemWindow
+                || (!isSystemAlertWindowType(mAttrs.type) && mAttrs.type != TYPE_TOAST)) {
+            return;
+        }
+        if (mForceHideNonSystemOverlayWindow == forceHide) {
+            return;
+        }
+        mForceHideNonSystemOverlayWindow = forceHide;
+        if (forceHide) {
+            hideLw(true /* doAnimation */, true /* requestAnim */);
+        } else {
+            showLw(true /* doAnimation */, true /* requestAnim */);
+        }
     }
 
     public void setAppOpVisibilityLw(boolean state) {
@@ -2753,6 +2780,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (computeDragResizing()) {
             pw.print(prefix); pw.println("computeDragResizing=" + computeDragResizing());
         }
+    }
+
+    /**
+     * Returns true if any window added by an application process that if of type
+     * {@link android.view.WindowManager.LayoutParams#TYPE_TOAST} or that requires that requires
+     * {@link android.app.AppOpsManager#OP_SYSTEM_ALERT_WINDOW} permission should be hidden when
+     * this window is visible.
+     */
+    boolean hideNonSystemOverlayWindowsWhenVisible() {
+        return (mAttrs.privateFlags & PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0
+                && mSession.mCanHideNonSystemOverlayWindows;
     }
 
     String makeInputChannelName() {
