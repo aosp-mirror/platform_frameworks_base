@@ -95,7 +95,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers,
             SkASSERT(layerNode->getDisplayList()->isSkiaDL());
             SkiaDisplayList* displayList = (SkiaDisplayList*)layerNode->getDisplayList();
             if (!displayList || displayList->isEmpty()) {
-                SkDEBUGF(("%p drawLayers(%s) : missing drawable", this, layerNode->getName()));
+                SkDEBUGF(("%p drawLayers(%s) : missing drawable", layerNode, layerNode->getName()));
                 return;
             }
 
