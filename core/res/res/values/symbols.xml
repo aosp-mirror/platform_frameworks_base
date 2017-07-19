@@ -1167,10 +1167,6 @@
   <java-symbol type="string" name="config_ethernet_tcp_buffers" />
   <java-symbol type="string" name="config_wifi_tcp_buffers" />
   <java-symbol type="string" name="config_demoModePackage" />
-  <java-symbol type="string" name="config_demoModeLauncherComponent" />
-  <java-symbol type="string" name="config_carrierDemoModePassword" />
-  <java-symbol type="string" name="config_carrierDemoModeSetting" />
-  <java-symbol type="string" name="config_carrierDemoModePackages" />
   <java-symbol type="string" name="demo_starting_message" />
   <java-symbol type="string" name="demo_restarting_message" />
   <java-symbol type="string" name="conference_call" />
@@ -2019,12 +2015,6 @@
   <java-symbol type="string" name="config_customVpnConfirmDialogComponent" />
   <java-symbol type="string" name="config_defaultNetworkScorerPackageName" />
   <java-symbol type="string" name="config_persistentDataPackageName" />
-  <java-symbol type="string" name="reset_retail_demo_mode_title" />
-  <java-symbol type="string" name="reset_retail_demo_mode_text" />
-  <java-symbol type="string" name="demo_user_inactivity_timeout_title" />
-  <java-symbol type="string" name="demo_user_inactivity_timeout_countdown" />
-  <java-symbol type="string" name="demo_user_inactivity_timeout_left_button" />
-  <java-symbol type="string" name="demo_user_inactivity_timeout_right_button" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />
