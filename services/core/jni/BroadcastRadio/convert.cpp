@@ -271,7 +271,7 @@ static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Propert
     auto jVersion = make_javastr(env, prop10.version);
     auto jSerial = make_javastr(env, prop10.serial);
     bool isBgScanSupported = prop11 ? prop11->supportsBackgroundScanning : false;
-    auto jVendorExtension = prop11 ? make_javastr(env, prop11->vendorExension) : nullptr;
+    auto jVendorInfo = prop11 ? make_javastr(env, prop11->vendorInfo) : nullptr;
     // ITU_1 is the default region just because its index is 0.
     auto jBands = ArrayFromHal<V1_0::BandConfig>(env, prop10.bands, gjni.BandDescriptor.clazz,
         std::bind(BandDescriptorFromHal, _1, _2, Region::ITU_1));
@@ -284,7 +284,7 @@ static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Propert
             gjni.ModuleProperties.cstor, moduleId, jServiceName.get(), prop10.classId,
             jImplementor.get(), jProduct.get(), jVersion.get(), jSerial.get(), prop10.numTuners,
             prop10.numAudioSources, prop10.supportsCapture, jBands.get(), isBgScanSupported,
-            jSupportedProgramTypes.get(), jSupportedIdentifierTypes.get(), jVendorExtension.get()));
+            jSupportedProgramTypes.get(), jSupportedIdentifierTypes.get(), jVendorInfo.get()));
 }
 
 JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Properties &properties,
@@ -512,12 +512,12 @@ static JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo 
     ALOGV("ProgramInfoFromHal()");
 
     auto jMetadata = MetadataFromHal(env, info10.metadata);
-    auto jVendorExtension = info11 ? make_javastr(env, info11->vendorExension) : nullptr;
+    auto jVendorInfo = info11 ? make_javastr(env, info11->vendorInfo) : nullptr;
     auto jSelector = ProgramSelectorFromHal(env, selector);
 
     return make_javaref(env, env->NewObject(gjni.ProgramInfo.clazz, gjni.ProgramInfo.cstor,
             jSelector.get(), info10.tuned, info10.stereo, info10.digital, info10.signalStrength,
-            jMetadata.get(), info11 ? info11->flags : 0, jVendorExtension.get()));
+            jMetadata.get(), info11 ? info11->flags : 0, jVendorInfo.get()));
 }
 
 JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info, V1_0::Band band) {
