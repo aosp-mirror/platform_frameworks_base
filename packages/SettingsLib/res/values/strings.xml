@@ -97,6 +97,9 @@
     <!-- Summary for Connected wifi network without internet -->
     <string name="wifi_connected_no_internet">Connected, no Internet</string>
 
+    <!-- Summary for networks failing to connect due to association rejection status 17, AP full -->
+    <string name="wifi_ap_unable_to_handle_new_sta">Access point temporarily full</string>
+
     <!-- Speed label for very slow network speed -->
     <string name="speed_label_very_slow">Very Slow</string>
     <!-- Speed label for slow network speed -->
