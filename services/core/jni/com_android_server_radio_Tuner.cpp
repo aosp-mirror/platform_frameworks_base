@@ -82,6 +82,8 @@ struct TunerContext {
     HalRevision mHalRev;
     bool mWithAudio;
     Band mBand;
+    wp<V1_0::IBroadcastRadio> mHalModule;
+    wp<V1_1::IBroadcastRadio> mHalModule11;
     sp<V1_0::ITuner> mHalTuner;
     sp<V1_1::ITuner> mHalTuner11;
     sp<HalDeathRecipient> mHalDeathRecipient;
@@ -146,7 +148,8 @@ static void notifyAudioService(TunerContext& ctx, bool connected) {
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
-void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner, sp<V1_0::ITuner> halTuner) {
+void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
+        sp<V1_0::IBroadcastRadio> halModule, sp<V1_0::ITuner> halTuner) {
     ALOGV("setHalTuner(%p)", halTuner.get());
     ALOGE_IF(halTuner == nullptr, "HAL tuner is a nullptr");
 
@@ -162,6 +165,9 @@ void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner, sp<V1_0::ITuner> h
         ALOGE("HAL tuner is already set.");
         return;
     }
+
+    ctx.mHalModule = halModule;
+    ctx.mHalModule11 = V1_1::IBroadcastRadio::castFrom(halModule).withDefault(nullptr);
 
     ctx.mHalTuner = halTuner;
     ctx.mHalTuner11 = V1_1::ITuner::castFrom(halTuner).withDefault(nullptr);
@@ -390,6 +396,44 @@ static jobject nativeGetProgramList(JNIEnv *env, jobject obj, jlong nativeContex
     return jList.release();
 }
 
+static jbyteArray nativeGetImage(JNIEnv *env, jobject obj, jlong nativeContext, jint id) {
+    ALOGV("%s(%x)", __func__, id);
+    AutoMutex _l(gContextMutex);
+    auto& ctx = getNativeContext(nativeContext);
+
+    if (ctx.mHalModule11 == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Out-of-band images are not supported with HAL < 1.1");
+        return nullptr;
+    }
+
+    auto halModule = ctx.mHalModule11.promote();
+    if (halModule == nullptr) {
+        ALOGE("HAL module is gone");
+        return nullptr;
+    }
+
+    JavaRef<jbyteArray> jRawImage = nullptr;
+
+    auto hidlResult = halModule->getImage(id, [&](hidl_vec<uint8_t> rawImage) {
+        auto len = rawImage.size();
+        if (len == 0) return;
+
+        jRawImage = make_javaref(env, env->NewByteArray(len));
+        if (jRawImage == nullptr) {
+            ALOGE("Failed to allocate byte array of len %zu", len);
+            return;
+        }
+
+        env->SetByteArrayRegion(jRawImage.get(), 0, len,
+                reinterpret_cast<const jbyte*>(rawImage.data()));
+    });
+
+    if (convert::ThrowIfFailed(env, hidlResult)) return nullptr;
+
+    return jRawImage.get();
+}
+
 static bool nativeIsAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext) {
     ALOGV("nativeIsAnalogForced()");
     auto halTuner = getHalTuner11(nativeContext);
@@ -457,6 +501,7 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeStartBackgroundScan", "(J)Z", (void*)nativeStartBackgroundScan },
     { "nativeGetProgramList", "(JLjava/lang/String;)Ljava/util/List;",
             (void*)nativeGetProgramList },
+    { "nativeGetImage", "(JI)[B", (void*)nativeGetImage},
     { "nativeIsAnalogForced", "(J)Z", (void*)nativeIsAnalogForced },
     { "nativeSetAnalogForced", "(JZ)V", (void*)nativeSetAnalogForced },
     { "nativeIsAntennaConnected", "(J)Z", (void*)nativeIsAntennaConnected },

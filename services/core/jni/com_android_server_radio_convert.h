@@ -68,6 +68,9 @@ bool ThrowIfFailed(JNIEnv *env, const hardware::Return<T> &hidlResult) {
     return __ThrowIfFailedHidl(env, hidlResult) || __ThrowIfFailed(env, static_cast<T>(hidlResult));
 }
 
+template <>
+bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult);
+
 } // namespace convert
 } // namespace radio
 } // namespace server

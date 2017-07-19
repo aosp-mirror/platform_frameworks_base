@@ -21,6 +21,7 @@
 
 #include "JavaRef.h"
 
+#include <android/hardware/broadcastradio/1.1/IBroadcastRadio.h>
 #include <android/hardware/broadcastradio/1.1/ITuner.h>
 #include <android/hardware/broadcastradio/1.1/ITunerCallback.h>
 #include <jni.h>
@@ -34,7 +35,8 @@ namespace server {
 namespace radio {
 namespace Tuner {
 
-void setHalTuner(JNIEnv *env, JavaRef<jobject> const &jTuner,
+void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
+        sp<hardware::broadcastradio::V1_0::IBroadcastRadio> halModule,
         sp<hardware::broadcastradio::V1_0::ITuner> halTuner);
 
 sp<hardware::broadcastradio::V1_1::ITunerCallback>
