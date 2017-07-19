@@ -345,8 +345,10 @@ static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz
         return 0;
     }
 
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    if (!event) {
+    MotionEvent* event;
+    if (nativePtr) {
+        event = reinterpret_cast<MotionEvent*>(nativePtr);
+    } else {
         event = new MotionEvent();
     }
 
