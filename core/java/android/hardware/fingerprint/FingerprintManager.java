@@ -110,6 +110,10 @@ public class FingerprintManager {
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
+     * These messages are typically reserved for internal operations such as enrollment, but may be
+     * used to express vendor errors not covered by the ones in fingerprint.h. Applications are
+     * expected to show the error message string if they happen, but are advised not to rely on the
+     * message id since they will be device and vendor-specific
      */
     public static final int FINGERPRINT_ERROR_VENDOR = 8;
 
