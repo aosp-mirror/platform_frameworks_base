@@ -21,8 +21,6 @@ import android.os.IUpdateEngine;
 import android.os.IUpdateEngineCallback;
 import android.os.RemoteException;
 
-import android.util.Log;
-
 /**
  * UpdateEngine handles calls to the update engine which takes care of A/B OTA
  * updates. It wraps up the update engine Binder APIs and exposes them as
@@ -90,6 +88,8 @@ public class UpdateEngine {
     }
 
     private IUpdateEngine mUpdateEngine;
+    private IUpdateEngineCallback mUpdateEngineCallback = null;
+    private final Object mUpdateEngineCallbackLock = new Object();
 
     /**
      * Creates a new instance.
@@ -107,40 +107,42 @@ public class UpdateEngine {
      */
     @SystemApi
     public boolean bind(final UpdateEngineCallback callback, final Handler handler) {
-        IUpdateEngineCallback updateEngineCallback = new IUpdateEngineCallback.Stub() {
-            @Override
-            public void onStatusUpdate(final int status, final float percent) {
-                if (handler != null) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            callback.onStatusUpdate(status, percent);
-                        }
-                    });
-                } else {
-                    callback.onStatusUpdate(status, percent);
+        synchronized (mUpdateEngineCallbackLock) {
+            mUpdateEngineCallback = new IUpdateEngineCallback.Stub() {
+                @Override
+                public void onStatusUpdate(final int status, final float percent) {
+                    if (handler != null) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onStatusUpdate(status, percent);
+                            }
+                        });
+                    } else {
+                        callback.onStatusUpdate(status, percent);
+                    }
                 }
-            }
 
-            @Override
-            public void onPayloadApplicationComplete(final int errorCode) {
-                if (handler != null) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            callback.onPayloadApplicationComplete(errorCode);
-                        }
-                    });
-                } else {
-                    callback.onPayloadApplicationComplete(errorCode);
+                @Override
+                public void onPayloadApplicationComplete(final int errorCode) {
+                    if (handler != null) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onPayloadApplicationComplete(errorCode);
+                            }
+                        });
+                    } else {
+                        callback.onPayloadApplicationComplete(errorCode);
+                    }
                 }
-            }
-        };
+            };
 
-        try {
-            return mUpdateEngine.bind(updateEngineCallback);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            try {
+                return mUpdateEngine.bind(mUpdateEngineCallback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -247,6 +249,25 @@ public class UpdateEngine {
             mUpdateEngine.resetStatus();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unbinds the last bound callback function.
+     */
+    @SystemApi
+    public boolean unbind() {
+        synchronized (mUpdateEngineCallbackLock) {
+            if (mUpdateEngineCallback == null) {
+                return true;
+            }
+            try {
+                boolean result = mUpdateEngine.unbind(mUpdateEngineCallback);
+                mUpdateEngineCallback = null;
+                return result;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 }
