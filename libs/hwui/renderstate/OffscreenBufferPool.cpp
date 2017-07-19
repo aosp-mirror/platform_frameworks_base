@@ -179,8 +179,9 @@ OffscreenBuffer* OffscreenBufferPool::resize(OffscreenBuffer* layer,
         layer->region.clear();
         return layer;
     }
+    bool wideColorGamut = layer->wideColorGamut;
     putOrDelete(layer);
-    return get(renderState, width, height, layer->wideColorGamut);
+    return get(renderState, width, height, wideColorGamut);
 }
 
 void OffscreenBufferPool::dump() {
