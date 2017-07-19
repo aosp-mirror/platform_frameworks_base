@@ -33,29 +33,17 @@ public class CpuPowerCalculator extends PowerCalculator {
                              long rawUptimeUs, int statsType) {
 
         app.cpuTimeMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
-
-        // Aggregate total time spent on each cluster.
-        long totalTime = 0;
         final int numClusters = mProfile.getNumCpuClusters();
-        for (int cluster = 0; cluster < numClusters; cluster++) {
-            final int speedsForCluster = mProfile.getNumSpeedStepsInCpuCluster(cluster);
-            for (int speed = 0; speed < speedsForCluster; speed++) {
-                totalTime += u.getTimeAtCpuSpeed(cluster, speed, statsType);
-            }
-        }
-        totalTime = Math.max(totalTime, 1);
 
         double cpuPowerMaMs = 0;
         for (int cluster = 0; cluster < numClusters; cluster++) {
             final int speedsForCluster = mProfile.getNumSpeedStepsInCpuCluster(cluster);
             for (int speed = 0; speed < speedsForCluster; speed++) {
-                final double ratio = (double) u.getTimeAtCpuSpeed(cluster, speed, statsType) /
-                        totalTime;
-                final double cpuSpeedStepPower = ratio * app.cpuTimeMs *
+                final double cpuSpeedStepPower = u.getTimeAtCpuSpeed(cluster, speed, statsType) *
                         mProfile.getAveragePowerForCpu(cluster, speed);
-                if (DEBUG && ratio != 0) {
+                if (DEBUG) {
                     Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster + " step #"
-                            + speed + " ratio=" + BatteryStatsHelper.makemAh(ratio) + " power="
+                            + speed + " power="
                             + BatteryStatsHelper.makemAh(cpuSpeedStepPower / (60 * 60 * 1000)));
                 }
                 cpuPowerMaMs += cpuSpeedStepPower;
