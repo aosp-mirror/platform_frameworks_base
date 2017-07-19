@@ -38,6 +38,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.system.ErrnoException;
@@ -793,7 +794,7 @@ public class PackageInstaller {
          * @throws IOException if trouble opening the file for writing, such as
          *             lack of disk space or unavailable media.
          * @throws SecurityException if called after the session has been
-         *             committed or abandoned.
+         *             sealed or abandoned
          */
         public @NonNull OutputStream openWrite(@NonNull String name, long offsetBytes,
                 long lengthBytes) throws IOException {
@@ -918,7 +919,68 @@ public class PackageInstaller {
          */
         public void commit(@NonNull IntentSender statusReceiver) {
             try {
-                mSession.commit(statusReceiver);
+                mSession.commit(statusReceiver, false);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Attempt to commit a session that has been {@link #transfer(String) transferred}.
+         *
+         * <p>If the device reboots before the session has been finalized, you may commit the
+         * session again.
+         *
+         * <p>The caller of this method is responsible to ensure the safety of the session. As the
+         * session was created by another - usually less trusted - app, it is paramount that before
+         * committing <u>all</u> public and system {@link SessionInfo properties of the session}
+         * and <u>all</u> {@link #openRead(String) APKs} are verified by the caller. It might happen
+         * that new properties are added to the session with a new API revision. In this case the
+         * callers need to be updated.
+         *
+         * @param statusReceiver Callbacks called when the state of the session changes.
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)
+        public void commitTransferred(@NonNull IntentSender statusReceiver) {
+            try {
+                mSession.commit(statusReceiver, true);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Transfer the session to a new owner.
+         * <p>
+         * Only sessions that update the installing app can be transferred.
+         * <p>
+         * After the transfer to a package with a different uid all method calls on the session
+         * will cause {@link SecurityException}s.
+         * <p>
+         * Once this method is called, the session is sealed and no additional mutations beside
+         * committing it may be performed on the session.
+         *
+         * @param packageName The package of the new owner. Needs to hold the INSTALL_PACKAGES
+         *                    permission.
+         *
+         * @throws PackageManager.NameNotFoundException if the new owner could not be found.
+         * @throws SecurityException if called after the session has been committed or abandoned.
+         * @throws SecurityException if the session does not update the original installer
+         * @throws SecurityException if streams opened through
+         *                           {@link #openWrite(String, long, long) are still open.
+         */
+        public void transfer(@NonNull String packageName)
+                throws PackageManager.NameNotFoundException {
+            Preconditions.checkNotNull(packageName);
+
+            try {
+                mSession.transfer(packageName);
+            } catch (ParcelableException e) {
+                e.maybeRethrow(PackageManager.NameNotFoundException.class);
+                throw new RuntimeException(e);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
