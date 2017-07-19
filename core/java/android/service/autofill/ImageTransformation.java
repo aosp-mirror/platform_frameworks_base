@@ -49,7 +49,9 @@ import java.util.regex.Pattern;
  * </pre>
  *
  * <p>There is no imposed limit in the number of options, but keep in mind that regexs are
- * expensive to evaluate, so use the minimum number of regexs.
+ * expensive to evaluate, so use the minimum number of regexs and add the most common first
+ * (for example, if this is a tranformation for a credit card logo and the most common credit card
+ * issuers are banks X and Y, add the regexes that resolves these 2 banks first).
  */
 public final class ImageTransformation extends InternalTransformation implements Transformation,
         Parcelable {

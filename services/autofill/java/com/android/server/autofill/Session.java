@@ -797,51 +797,48 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final AutofillId[] requiredIds = saveInfo.getRequiredIds();
-        if (requiredIds == null || requiredIds.length == 0) {
-            Slog.w(TAG, "showSaveLocked(): no required ids on saveInfo");
-            return true;
-        }
-
         boolean allRequiredAreNotEmpty = true;
         boolean atLeastOneChanged = false;
-        for (int i = 0; i < requiredIds.length; i++) {
-            final AutofillId id = requiredIds[i];
-            if (id == null) {
-                Slog.w(TAG, "null autofill id on " + Arrays.toString(requiredIds));
-                continue;
-            }
-            final ViewState viewState = mViewStates.get(id);
-            if (viewState == null) {
-                Slog.w(TAG, "showSaveLocked(): no ViewState for required " + id);
-                allRequiredAreNotEmpty = false;
-                break;
-            }
-
-            AutofillValue value = viewState.getCurrentValue();
-            if (value == null || value.isEmpty()) {
-                final AutofillValue initialValue = getValueFromContexts(id);
-                if (initialValue != null) {
-                    if (sDebug) {
-                        Slog.d(TAG, "Value of required field " + id + " didn't change; "
-                                + "using initial value (" + initialValue + ") instead");
-                    }
-                    value = initialValue;
-                } else {
-                    if (sDebug) {
-                        Slog.d(TAG, "showSaveLocked(): empty value for required " + id );
-                    }
+        if (requiredIds != null) {
+            for (int i = 0; i < requiredIds.length; i++) {
+                final AutofillId id = requiredIds[i];
+                if (id == null) {
+                    Slog.w(TAG, "null autofill id on " + Arrays.toString(requiredIds));
+                    continue;
+                }
+                final ViewState viewState = mViewStates.get(id);
+                if (viewState == null) {
+                    Slog.w(TAG, "showSaveLocked(): no ViewState for required " + id);
                     allRequiredAreNotEmpty = false;
                     break;
                 }
-            }
-            final AutofillValue filledValue = viewState.getAutofilledValue();
 
-            if (!value.equals(filledValue)) {
-                if (sDebug) {
-                    Slog.d(TAG, "showSaveLocked(): found a change on required " + id + ": "
-                            + filledValue + " => " + value);
+                AutofillValue value = viewState.getCurrentValue();
+                if (value == null || value.isEmpty()) {
+                    final AutofillValue initialValue = getValueFromContexts(id);
+                    if (initialValue != null) {
+                        if (sDebug) {
+                            Slog.d(TAG, "Value of required field " + id + " didn't change; "
+                                    + "using initial value (" + initialValue + ") instead");
+                        }
+                        value = initialValue;
+                    } else {
+                        if (sDebug) {
+                            Slog.d(TAG, "showSaveLocked(): empty value for required " + id );
+                        }
+                        allRequiredAreNotEmpty = false;
+                        break;
+                    }
                 }
-                atLeastOneChanged = true;
+                final AutofillValue filledValue = viewState.getAutofilledValue();
+
+                if (!value.equals(filledValue)) {
+                    if (sDebug) {
+                        Slog.d(TAG, "showSaveLocked(): found a change on required " + id + ": "
+                                + filledValue + " => " + value);
+                    }
+                    atLeastOneChanged = true;
+                }
             }
         }
 
@@ -1364,8 +1361,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final SaveInfo saveInfo = response.getSaveInfo();
         if (saveInfo != null) {
             final AutofillId[] requiredIds = saveInfo.getRequiredIds();
-            for (AutofillId id : requiredIds) {
-                createOrUpdateViewStateLocked(id, state, null);
+            if (requiredIds != null) {
+                for (AutofillId id : requiredIds) {
+                    createOrUpdateViewStateLocked(id, state, null);
+                }
             }
             final AutofillId[] optionalIds = saveInfo.getOptionalIds();
             if (optionalIds != null) {
