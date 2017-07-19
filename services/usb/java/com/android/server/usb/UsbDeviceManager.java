@@ -946,11 +946,6 @@ public class UsbDeviceManager {
                         Slog.i(TAG, "HOST_STATE connected:" + connected);
                     }
 
-                    if ((mHideUsbNotification && connected)
-                            || (!mHideUsbNotification && !connected)) {
-                        break;
-                    }
-
                     mHideUsbNotification = false;
                     while (devices.hasNext()) {
                         Map.Entry pair = (Map.Entry) devices.next();
@@ -1053,12 +1048,22 @@ public class UsbDeviceManager {
 
         private void updateUsbNotification(boolean force) {
             if (mNotificationManager == null || !mUseUsbNotification
-                    || ("0".equals(SystemProperties.get("persist.charging.notify")))
-                    // Dont show the notification when connected to a USB peripheral
-                    // and the link does not support PR_SWAP and DR_SWAP
-                    || (mHideUsbNotification && !mSupportsAllCombinations)) {
+                    || ("0".equals(SystemProperties.get("persist.charging.notify")))) {
                 return;
             }
+
+            // Dont show the notification when connected to a USB peripheral
+            // and the link does not support PR_SWAP and DR_SWAP
+            if (mHideUsbNotification && !mSupportsAllCombinations) {
+                if (mUsbNotificationId != 0) {
+                    mNotificationManager.cancelAsUser(null, mUsbNotificationId,
+                            UserHandle.ALL);
+                    mUsbNotificationId = 0;
+                    Slog.d(TAG, "Clear notification");
+                }
+                return;
+            }
+
             int id = 0;
             int titleRes = 0;
             Resources r = mContext.getResources();
@@ -1109,6 +1114,7 @@ public class UsbDeviceManager {
                 if (mUsbNotificationId != 0) {
                     mNotificationManager.cancelAsUser(null, mUsbNotificationId,
                             UserHandle.ALL);
+                    Slog.d(TAG, "Clear notification");
                     mUsbNotificationId = 0;
                 }
                 if (id != 0) {
@@ -1165,6 +1171,7 @@ public class UsbDeviceManager {
 
                     mNotificationManager.notifyAsUser(null, id, notification,
                             UserHandle.ALL);
+                    Slog.d(TAG, "push notification:" + title);
                     mUsbNotificationId = id;
                 }
             }
