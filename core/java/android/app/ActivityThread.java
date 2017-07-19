@@ -5413,8 +5413,8 @@ public final class ActivityThread {
                     int uid = Process.myUid();
                     String[] packages = getPackageManager().getPackagesForUid(uid);
                     if (packages != null) {
-                        ThreadedRenderer.setupDiskCache(cacheDir);
-                        RenderScriptCacheDir.setupDiskCache(cacheDir);
+                        ThreadedRenderer.setupDiskCache(codeCacheDir);
+                        RenderScriptCacheDir.setupDiskCache(codeCacheDir);
                     }
                 } catch (RemoteException e) {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
