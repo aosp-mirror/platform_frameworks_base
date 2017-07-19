@@ -74,6 +74,15 @@ public class FullscreenUserSwitcher {
             automaticallySelectUser();
         });
 
+        // Any interaction with the screen should cancel the timer.
+        mContainer.setOnClickListener(v -> {
+            cancelTimer();
+        });
+        mUserGridView.setOnTouchListener((v, e) -> {
+            cancelTimer();
+            return false;
+        });
+
         mSwitchingUsers = mParent.findViewById(R.id.switching_users);
     }
 
@@ -152,6 +161,7 @@ public class FullscreenUserSwitcher {
         if (mTimer != null) {
             mTimer.cancel();
             mTimer = null;
+            mProgressBar.setProgress(0, true /* animate */);
         }
     }
 
