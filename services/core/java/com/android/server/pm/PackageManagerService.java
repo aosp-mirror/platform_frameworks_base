@@ -8918,9 +8918,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        boolean updatedPkgBetter = false;
+        final boolean isUpdatedPkg = updatedPkg != null;
+        final boolean isUpdatedSystemPkg = isUpdatedPkg
+                && (policyFlags & PackageParser.PARSE_IS_SYSTEM) != 0;
+        boolean isUpdatedPkgBetter = false;
         // First check if this is a system package that may involve an update
-        if (updatedPkg != null && (policyFlags & PackageParser.PARSE_IS_SYSTEM) != 0) {
+        if (isUpdatedSystemPkg) {
             // If new package is not located in "/system/priv-app" (e.g. due to an OTA),
             // it needs to drop FLAG_PRIVILEGED.
             if (locationIsPrivileged(scanFile)) {
@@ -8964,10 +8967,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             updatedChildPkg.versionCode = pkg.mVersionCode;
                         }
                     }
-
-                    throw new PackageManagerException(Log.WARN, "Package " + ps.name + " at "
-                            + scanFile + " ignored: updated version " + ps.versionCode
-                            + " better than this " + pkg.mVersionCode);
                 } else {
                     // The current app on the system partition is better than
                     // what we have updated to on the data partition; switch
@@ -8994,12 +8993,44 @@ public class PackageManagerService extends IPackageManager.Stub
                     synchronized (mPackages) {
                         mSettings.enableSystemPackageLPw(ps.name);
                     }
-                    updatedPkgBetter = true;
+                    isUpdatedPkgBetter = true;
                 }
             }
         }
 
-        if (updatedPkg != null) {
+        String resourcePath = null;
+        String baseResourcePath = null;
+        if ((policyFlags & PackageParser.PARSE_FORWARD_LOCK) != 0 && !isUpdatedPkgBetter) {
+            if (ps != null && ps.resourcePathString != null) {
+                resourcePath = ps.resourcePathString;
+                baseResourcePath = ps.resourcePathString;
+            } else {
+                // Should not happen at all. Just log an error.
+                Slog.e(TAG, "Resource path not set for package " + pkg.packageName);
+            }
+        } else {
+            resourcePath = pkg.codePath;
+            baseResourcePath = pkg.baseCodePath;
+        }
+
+        // Set application objects path explicitly.
+        pkg.setApplicationVolumeUuid(pkg.volumeUuid);
+        pkg.setApplicationInfoCodePath(pkg.codePath);
+        pkg.setApplicationInfoBaseCodePath(pkg.baseCodePath);
+        pkg.setApplicationInfoSplitCodePaths(pkg.splitCodePaths);
+        pkg.setApplicationInfoResourcePath(resourcePath);
+        pkg.setApplicationInfoBaseResourcePath(baseResourcePath);
+        pkg.setApplicationInfoSplitResourcePaths(pkg.splitCodePaths);
+
+        // throw an exception if we have an update to a system application, but, it's not more
+        // recent than the package we've already scanned
+        if (isUpdatedSystemPkg && !isUpdatedPkgBetter) {
+            throw new PackageManagerException(Log.WARN, "Package " + ps.name + " at "
+                    + scanFile + " ignored: updated version " + ps.versionCode
+                    + " better than this " + pkg.mVersionCode);
+        }
+
+        if (isUpdatedPkg) {
             // An updated system app will not have the PARSE_IS_SYSTEM flag set
             // initially
             policyFlags |= PackageParser.PARSE_IS_SYSTEM;
@@ -9019,7 +9050,7 @@ public class PackageManagerService extends IPackageManager.Stub
          * same name installed earlier.
          */
         boolean shouldHideSystemApp = false;
-        if (updatedPkg == null && ps != null
+        if (!isUpdatedPkg && ps != null
                 && (policyFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0 && !isSystemApp(ps)) {
             /*
              * Check to make sure the signatures match first. If they don't,
@@ -9073,31 +9104,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 policyFlags |= PackageParser.PARSE_FORWARD_LOCK;
             }
         }
-
-        // TODO: extend to support forward-locked splits
-        String resourcePath = null;
-        String baseResourcePath = null;
-        if ((policyFlags & PackageParser.PARSE_FORWARD_LOCK) != 0 && !updatedPkgBetter) {
-            if (ps != null && ps.resourcePathString != null) {
-                resourcePath = ps.resourcePathString;
-                baseResourcePath = ps.resourcePathString;
-            } else {
-                // Should not happen at all. Just log an error.
-                Slog.e(TAG, "Resource path not set for package " + pkg.packageName);
-            }
-        } else {
-            resourcePath = pkg.codePath;
-            baseResourcePath = pkg.baseCodePath;
-        }
-
-        // Set application objects path explicitly.
-        pkg.setApplicationVolumeUuid(pkg.volumeUuid);
-        pkg.setApplicationInfoCodePath(pkg.codePath);
-        pkg.setApplicationInfoBaseCodePath(pkg.baseCodePath);
-        pkg.setApplicationInfoSplitCodePaths(pkg.splitCodePaths);
-        pkg.setApplicationInfoResourcePath(resourcePath);
-        pkg.setApplicationInfoBaseResourcePath(baseResourcePath);
-        pkg.setApplicationInfoSplitResourcePaths(pkg.splitCodePaths);
 
         final int userId = ((user == null) ? 0 : user.getIdentifier());
         if (ps != null && ps.getInstantApp(userId)) {
