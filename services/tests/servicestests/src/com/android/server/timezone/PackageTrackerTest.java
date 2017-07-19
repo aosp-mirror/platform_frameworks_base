@@ -198,26 +198,25 @@ public class PackageTrackerTest {
         mFakeIntentHelper.assertReliabilityTriggeringDisabled();
     }
 
-    // TODO(nfuller): Uncomment or delete when it's clear what will happen with http://b/35995024
-    // @Test
-    // public void trackingEnabled_updateAppNotPrivileged() throws Exception {
-    //     // Set up device configuration.
-    //     configureTrackingEnabled();
-    //     configureReliabilityConfigSettingsOk();
-    //     configureUpdateAppPackageNotPrivileged(UPDATE_APP_PACKAGE_NAME);
-    //     configureDataAppPackageOk(DATA_APP_PACKAGE_NAME);
-    //
-    //     try {
-    //         // Initialize the tracker.
-    //         mPackageTracker.start();
-    //         fail();
-    //     } catch (RuntimeException expected) {}
-    //
-    //     mFakeIntentHelper.assertNotInitialized();
-    //
-    //     // Check reliability triggering state.
-    //     mFakeIntentHelper.assertReliabilityTriggeringDisabled();
-    // }
+    @Test
+    public void trackingEnabled_updateAppNotPrivileged() throws Exception {
+        // Set up device configuration.
+        configureTrackingEnabled();
+        configureReliabilityConfigSettingsOk();
+        configureUpdateAppPackageNotPrivileged(UPDATE_APP_PACKAGE_NAME);
+        configureDataAppPackageOk(DATA_APP_PACKAGE_NAME);
+
+        try {
+            // Initialize the tracker.
+            mPackageTracker.start();
+            fail();
+        } catch (RuntimeException expected) {}
+
+        mFakeIntentHelper.assertNotInitialized();
+
+        // Check reliability triggering state.
+        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+    }
 
     @Test
     public void trackingEnabled_dataAppConfigMissing() throws Exception {
@@ -239,26 +238,25 @@ public class PackageTrackerTest {
         mFakeIntentHelper.assertReliabilityTriggeringDisabled();
     }
 
-    // TODO(nfuller): Uncomment or delete when it's clear what will happen with http://b/35995024
-    // @Test
-    // public void trackingEnabled_dataAppNotPrivileged() throws Exception {
-    //     // Set up device configuration.
-    //     configureTrackingEnabled();
-    //     configureReliabilityConfigSettingsOk();
-    //     configureUpdateAppPackageOk(UPDATE_APP_PACKAGE_NAME);
-    //     configureDataAppPackageNotPrivileged(DATA_APP_PACKAGE_NAME);
-    //
-    //     try {
-    //         // Initialize the tracker.
-    //         mPackageTracker.start();
-    //         fail();
-    //     } catch (RuntimeException expected) {}
-    //
-    //     mFakeIntentHelper.assertNotInitialized();
-    //
-    //     // Check reliability triggering state.
-    //     mFakeIntentHelper.assertReliabilityTriggeringDisabled();
-    // }
+    @Test
+    public void trackingEnabled_dataAppNotPrivileged() throws Exception {
+        // Set up device configuration.
+        configureTrackingEnabled();
+        configureReliabilityConfigSettingsOk();
+        configureUpdateAppPackageOk(UPDATE_APP_PACKAGE_NAME);
+        configureDataAppPackageNotPrivileged(DATA_APP_PACKAGE_NAME);
+
+        try {
+            // Initialize the tracker.
+            mPackageTracker.start();
+            fail();
+        } catch (RuntimeException expected) {}
+
+        mFakeIntentHelper.assertNotInitialized();
+
+        // Check reliability triggering state.
+        mFakeIntentHelper.assertReliabilityTriggeringDisabled();
+     }
 
     @Test
     public void trackingEnabled_packageUpdate_badUpdateAppManifestEntry() throws Exception {
