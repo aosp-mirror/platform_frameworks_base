@@ -2861,6 +2861,8 @@ public final class MediaCodecInfo {
         public static final int AVCProfileHigh10   = 0x10;
         public static final int AVCProfileHigh422  = 0x20;
         public static final int AVCProfileHigh444  = 0x40;
+        public static final int AVCProfileConstrainedBaseline = 0x10000;
+        public static final int AVCProfileConstrainedHigh     = 0x80000;
 
         // from OMX_VIDEO_AVCLEVELTYPE
         public static final int AVCLevel1       = 0x01;
