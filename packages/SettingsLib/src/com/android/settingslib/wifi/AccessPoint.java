@@ -673,13 +673,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // Update to new summary
         StringBuilder summary = new StringBuilder();
 
-        // TODO(b/62354743): Standardize and international delimiter usage
-        final String concatenator = " / ";
-
-        if (mSpeed != Speed.NONE) {
-            summary.append(getSpeedLabel() + concatenator);
-        }
-
         if (isActive() && config != null && config.isPasspoint()) {
             // This is the active connection on passpoint
             summary.append(getSummary(mContext, getDetailedState(),
@@ -773,14 +766,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
 
-        // Strip trailing delimiter if applicable
-        int concatLength = concatenator.length();
-        if (summary.length() >= concatLength && summary.substring(
-                summary.length() - concatLength, summary.length()).equals(concatenator)) {
-            summary.delete(summary.length() - concatLength, summary.length());
+        // If Speed label is present, use the preference combination to prepend it to the summary.
+        if (mSpeed != Speed.NONE) {
+            return mContext.getResources().getString(
+                    R.string.preference_summary_default_combination,
+                    getSpeedLabel(),
+                    summary.toString());
+        } else {
+            return summary.toString();
         }
-
-        return summary.toString();
     }
 
     /**

@@ -113,6 +113,9 @@
     <!-- Speed label for very fast network speed -->
     <string name="speed_label_very_fast">Very Fast</string>
 
+    <!-- Summary text separator for preferences including a short description (eg. "Fast / Connected"). -->
+    <string name="preference_summary_default_combination"><xliff:g id="state" example="ON">%1$s</xliff:g> / <xliff:g id="description" example="High accuracy mode">%2$s</xliff:g></string>
+
     <!-- Bluetooth settings.  Message when a device is disconnected -->
     <string name="bluetooth_disconnected">Disconnected</string>
     <!-- Bluetooth settings.  Message when disconnecting from a device -->
