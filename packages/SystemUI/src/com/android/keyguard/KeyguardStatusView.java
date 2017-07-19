@@ -24,6 +24,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
@@ -48,6 +50,7 @@ import java.util.Locale;
 public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
+    private static final int MARQUEE_DELAY_MS = 2000;
 
     private final LockPatternUtils mLockPatternUtils;
     private final AlarmManager mAlarmManager;
@@ -59,6 +62,8 @@ public class KeyguardStatusView extends GridLayout {
     private ViewGroup mClockContainer;
     private ChargingView mBatteryDoze;
     private View mKeyguardStatusArea;
+    private Runnable mPendingMarqueeStart;
+    private Handler mHandler;
 
     private View[] mVisibleInDoze;
     private boolean mPulsing;
@@ -112,9 +117,29 @@ public class KeyguardStatusView extends GridLayout {
         super(context, attrs, defStyle);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mLockPatternUtils = new LockPatternUtils(getContext());
+        mHandler = new Handler(Looper.myLooper());
     }
 
     private void setEnableMarquee(boolean enabled) {
+        if (DEBUG) Log.v(TAG, "Schedule setEnableMarquee: " + (enabled ? "Enable" : "Disable"));
+        if (enabled) {
+            if (mPendingMarqueeStart == null) {
+                mPendingMarqueeStart = () -> {
+                    setEnableMarqueeImpl(true);
+                    mPendingMarqueeStart = null;
+                };
+                mHandler.postDelayed(mPendingMarqueeStart, MARQUEE_DELAY_MS);
+            }
+        } else {
+            if (mPendingMarqueeStart != null) {
+                mHandler.removeCallbacks(mPendingMarqueeStart);
+                mPendingMarqueeStart = null;
+            }
+            setEnableMarqueeImpl(false);
+        }
+    }
+
+    private void setEnableMarqueeImpl(boolean enabled) {
         if (DEBUG) Log.v(TAG, (enabled ? "Enable" : "Disable") + " transport text marquee");
         if (mAlarmStatusView != null) mAlarmStatusView.setSelected(enabled);
         if (mOwnerInfo != null) mOwnerInfo.setSelected(enabled);

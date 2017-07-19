@@ -18,7 +18,9 @@ package android.net.lowpan;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import java.util.Map;
+import android.os.Parcel;
+import android.os.Parcelable;
+import java.util.Objects;
 
 /**
  * Describes the information needed to describe a network
@@ -26,7 +28,7 @@ import java.util.Map;
  * @hide
  */
 // @SystemApi
-public class LowpanProvision {
+public class LowpanProvision implements Parcelable {
 
     // Builder
 
@@ -69,20 +71,6 @@ public class LowpanProvision {
         return mCredential;
     }
 
-    // LoWPAN-Internal Methods
-
-    static void addToMap(Map<String, Object> parameters, LowpanProvision provision)
-            throws LowpanException {
-        provision.mIdentity.addToMap(parameters);
-        if (provision.mCredential != null) {
-            provision.mCredential.addToMap(parameters);
-        }
-    }
-
-    void addToMap(Map<String, Object> parameters) throws LowpanException {
-        addToMap(parameters, this);
-    }
-
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
@@ -90,11 +78,72 @@ public class LowpanProvision {
         sb.append("LowpanProvision { identity => ").append(mIdentity.toString());
 
         if (mCredential != null) {
-            sb.append(", credential: ").append(mCredential.toString());
+            sb.append(", credential => ").append(mCredential.toString());
         }
 
         sb.append("}");
 
         return sb.toString();
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mIdentity, mCredential);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof LowpanProvision)) {
+            return false;
+        }
+        LowpanProvision rhs = (LowpanProvision) obj;
+
+        if (!mIdentity.equals(rhs.mIdentity)) {
+            return false;
+        }
+
+        if (!Objects.equals(mCredential, rhs.mCredential)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /** Implement the Parcelable interface. */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /** Implement the Parcelable interface. */
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        mIdentity.writeToParcel(dest, flags);
+        if (mCredential == null) {
+            dest.writeBoolean(false);
+        } else {
+            dest.writeBoolean(true);
+            mCredential.writeToParcel(dest, flags);
+        }
+    }
+
+    /** Implement the Parcelable interface. */
+    public static final Creator<LowpanProvision> CREATOR =
+            new Creator<LowpanProvision>() {
+                public LowpanProvision createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
+
+                    builder.setLowpanIdentity(LowpanIdentity.CREATOR.createFromParcel(in));
+
+                    if (in.readBoolean()) {
+                        builder.setLowpanCredential(LowpanCredential.CREATOR.createFromParcel(in));
+                    }
+
+                    return builder.build();
+                }
+
+                public LowpanProvision[] newArray(int size) {
+                    return new LowpanProvision[size];
+                }
+            };
 };

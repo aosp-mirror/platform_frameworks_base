@@ -1453,10 +1453,10 @@ public final class Settings {
      * to the caller package.
      *
      * <p>
-     * <b>NOTE: </b> applications should call
+     * <b>NOTE: </b> Applications should call
      * {@link android.view.autofill.AutofillManager#hasEnabledAutofillServices()} and
-     * {@link android.view.autofill.AutofillManager#isAutofillSupported()} first, and only
-     * broadcast this intent if they return {@code false} and {@code true} respectively.
+     * {@link android.view.autofill.AutofillManager#isAutofillSupported()}, and only use this action
+     * to start an activity if they return {@code false} and {@code true} respectively.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_SET_AUTOFILL_SERVICE =
@@ -7743,6 +7743,16 @@ public final class Settings {
          * @hide
          */
         public static final String CDMA_SUBSCRIPTION_MODE = "subscription_mode";
+
+        /**
+         * The default value for whether background data is enabled or not.
+         *
+         * Used by {@code NetworkPolicyManagerService}.
+         *
+         * @hide
+         */
+        public static final String DEFAULT_RESTRICT_BACKGROUND_DATA =
+                "default_restrict_background_data";
 
         /** Inactivity timeout to track mobile data activity.
         *

@@ -22,6 +22,7 @@
 #include <ui/DisplayInfo.h>
 #include <utils/String8.h>
 #include <vector>
+#include "pipeline/skia/VectorDrawableAtlas.h"
 
 namespace android {
 
@@ -36,11 +37,6 @@ namespace renderthread {
 class IRenderPipeline;
 class RenderThread;
 
-struct VectorDrawableAtlas {
-    sk_sp<SkSurface> surface;
-    bool isNewAtlas = true;
-};
-
 class CacheManager {
 public:
     enum class TrimMemoryMode {
@@ -53,8 +49,7 @@ public:
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
 
-    VectorDrawableAtlas* acquireVectorDrawableAtlas();
-    void releaseVectorDrawableAtlas(VectorDrawableAtlas*);
+    sp<skiapipeline::VectorDrawableAtlas> acquireVectorDrawableAtlas();
 
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
@@ -81,7 +76,7 @@ private:
         size_t surfaceArea = 0;
     };
 
-    std::unique_ptr<VectorDrawableAtlas> mVectorDrawableAtlas;
+    sp<skiapipeline::VectorDrawableAtlas> mVectorDrawableAtlas;
 };
 
 } /* namespace renderthread */

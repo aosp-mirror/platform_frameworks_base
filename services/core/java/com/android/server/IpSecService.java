@@ -406,17 +406,14 @@ public class IpSecService extends IIpSecService.Stub {
 
     private void connectNativeNetdService() {
         // Avoid blocking the system server to do this
-        Thread t =
-                new Thread(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                synchronized (IpSecService.this) {
-                                    NetdService.get(NETD_FETCH_TIMEOUT);
-                                }
-                            }
-                        });
-        t.run();
+        new Thread() {
+            @Override
+            public void run() {
+                synchronized (IpSecService.this) {
+                    NetdService.get(NETD_FETCH_TIMEOUT);
+                }
+            }
+        }.start();
     }
 
     INetd getNetdInstance() throws RemoteException {

@@ -30,6 +30,7 @@ import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -252,7 +253,7 @@ public final class SaveInfo implements Parcelable {
     }
 
     /** @hide */
-    public AutofillId[] getRequiredIds() {
+    public @Nullable AutofillId[] getRequiredIds() {
         return mRequiredIds;
     }
 
@@ -321,9 +322,28 @@ public final class SaveInfo implements Parcelable {
          * it contains any {@code null} entry.
          */
         public Builder(@SaveDataType int type, @NonNull AutofillId[] requiredIds) {
-            // TODO: add CTS unit tests (not integration) to assert the null cases
             mType = type;
             mRequiredIds = assertValid(requiredIds);
+        }
+
+        /**
+         * Creates a new builder when no id is required.
+         *
+         * <p>When using this builder, caller must call {@link #setOptionalIds(AutofillId[])} before
+         * calling {@link #build()}.
+         *
+         * @param type the type of information the associated {@link FillResponse} represents. It
+         * can be any combination of {@link SaveInfo#SAVE_DATA_TYPE_GENERIC},
+         * {@link SaveInfo#SAVE_DATA_TYPE_PASSWORD},
+         * {@link SaveInfo#SAVE_DATA_TYPE_ADDRESS}, {@link SaveInfo#SAVE_DATA_TYPE_CREDIT_CARD},
+         * {@link SaveInfo#SAVE_DATA_TYPE_USERNAME}, or
+         * {@link SaveInfo#SAVE_DATA_TYPE_EMAIL_ADDRESS}.
+         *
+         * <p>See {@link SaveInfo} for more info.
+         */
+        public Builder(@SaveDataType int type) {
+            mType = type;
+            mRequiredIds = null;
         }
 
         private AutofillId[] assertValid(AutofillId[] ids) {
@@ -362,7 +382,6 @@ public final class SaveInfo implements Parcelable {
          * it contains any {@code null} entry.
          */
         public @NonNull Builder setOptionalIds(@NonNull AutofillId[] ids) {
-            // TODO: add CTS unit tests (not integration) to assert the null cases
             throwIfDestroyed();
             mOptionalIds = assertValid(ids);
             return this;
@@ -509,9 +528,16 @@ public final class SaveInfo implements Parcelable {
 
         /**
          * Builds a new {@link SaveInfo} instance.
+         *
+         * @throws IllegalStateException if no
+         * {@link #SaveInfo.Builder(int, AutofillId[]) required ids}
+         * or {@link #setOptionalIds(AutofillId[]) optional ids} were set
          */
         public SaveInfo build() {
             throwIfDestroyed();
+            Preconditions.checkState(
+                    !ArrayUtils.isEmpty(mRequiredIds) || !ArrayUtils.isEmpty(mOptionalIds),
+                    "must have at least one required or optional id");
             mDestroyed = true;
             return new SaveInfo(this);
         }
@@ -556,9 +582,9 @@ public final class SaveInfo implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mType);
         parcel.writeParcelableArray(mRequiredIds, flags);
+        parcel.writeParcelableArray(mOptionalIds, flags);
         parcel.writeInt(mNegativeButtonStyle);
         parcel.writeParcelable(mNegativeActionListener, flags);
-        parcel.writeParcelableArray(mOptionalIds, flags);
         parcel.writeCharSequence(mDescription);
         parcel.writeParcelable(mCustomDescription, flags);
         parcel.writeParcelable(mValidator, flags);
@@ -568,16 +594,21 @@ public final class SaveInfo implements Parcelable {
     public static final Parcelable.Creator<SaveInfo> CREATOR = new Parcelable.Creator<SaveInfo>() {
         @Override
         public SaveInfo createFromParcel(Parcel parcel) {
+
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final Builder builder = new Builder(parcel.readInt(),
-                    parcel.readParcelableArray(null, AutofillId.class));
-            builder.setNegativeAction(parcel.readInt(), parcel.readParcelable(null));
+            final int type = parcel.readInt();
+            final AutofillId[] requiredIds = parcel.readParcelableArray(null, AutofillId.class);
+            final Builder builder = requiredIds != null
+                    ? new Builder(type, requiredIds)
+                    : new Builder(type);
             final AutofillId[] optionalIds = parcel.readParcelableArray(null, AutofillId.class);
             if (optionalIds != null) {
                 builder.setOptionalIds(optionalIds);
             }
+
+            builder.setNegativeAction(parcel.readInt(), parcel.readParcelable(null));
             builder.setDescription(parcel.readCharSequence());
             final CustomDescription customDescripton = parcel.readParcelable(null);
             if (customDescripton != null) {

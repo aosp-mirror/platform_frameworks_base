@@ -127,7 +127,7 @@
 
     <attr name="lightIconTheme" format="reference" />
     <attr name="darkIconTheme" format="reference" />
-    <attr name="bgProtectTextColor" format="color" />
-    <attr name="bgProtectSecondaryTextColor" format="color" />
+    <attr name="wallpaperTextColor" format="color" />
+    <attr name="wallpaperTextColorSecondary" format="color" />
 </resources>
 

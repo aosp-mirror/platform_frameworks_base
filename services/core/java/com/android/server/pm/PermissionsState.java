@@ -427,7 +427,7 @@ public final class PermissionsState {
                 mPermissionReviewRequired.put(userId, true);
             } else if ((oldFlags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0
                     && (newFlags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
-                if (mPermissionReviewRequired != null) {
+                if (mPermissionReviewRequired != null && !hasPermissionRequiringReview(userId)) {
                     mPermissionReviewRequired.delete(userId);
                     if (mPermissionReviewRequired.size() <= 0) {
                         mPermissionReviewRequired = null;
@@ -436,6 +436,18 @@ public final class PermissionsState {
             }
         }
         return updated;
+    }
+
+    private boolean hasPermissionRequiringReview(int userId) {
+        final int permissionCount = mPermissions.size();
+        for (int i = 0; i < permissionCount; i++) {
+            final PermissionData permission = mPermissions.valueAt(i);
+            if ((permission.getFlags(userId)
+                    & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean updatePermissionFlagsForAllPermissions(

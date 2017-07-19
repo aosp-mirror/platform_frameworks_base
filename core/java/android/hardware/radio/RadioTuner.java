@@ -170,8 +170,20 @@ public abstract class RadioTuner {
      *  <li>{@link RadioManager#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *  service fails, </li>
      * </ul>
+     * @deprecated Use {@link tune(ProgramSelector)} instead.
      */
+    @Deprecated
     public abstract int tune(int channel, int subChannel);
+
+    /**
+     * Tune to a program.
+     *
+     * The operation is asynchronous and {@link Callback} onProgramInfoChanged() will be called
+     * when tune completes or onError() when cancelled or on timeout.
+     *
+     * @thows IllegalArgumentException if the provided selector is invalid
+     */
+    public abstract void tune(@NonNull ProgramSelector selector);
 
     /**
      * Cancel a pending scan or tune operation.
@@ -189,6 +201,17 @@ public abstract class RadioTuner {
      * </ul>
      */
     public abstract int cancel();
+
+    /**
+     * Cancels traffic or emergency announcement.
+     *
+     * If there was no announcement to cancel, no action is taken.
+     *
+     * There is a race condition between calling cancelAnnouncement and the actual announcement
+     * being finished, so onTrafficAnnouncement / onEmergencyAnnouncement callback should be
+     * tracked with proper locking.
+     */
+    public abstract void cancelAnnouncement();
 
     /**
      * Get current station information.
@@ -318,20 +341,24 @@ public abstract class RadioTuner {
          * or {@link RadioTuner#setConfiguration(RadioManager.BandConfig)}
          */
         public void onConfigurationChanged(RadioManager.BandConfig config) {}
+
         /**
-         * onProgramInfoChanged() is called upon successful completion of
-         * {@link RadioTuner#step(int, boolean)}, {@link RadioTuner#scan(int, boolean)},
-         * {@link RadioTuner#tune(int, int)} or when a switching to alternate frequency occurs.
-         * Note that if metadata only are updated,  {@link #onMetadataChanged(RadioMetadata)} will
-         * be called.
+         * Called when program info (including metadata) for the current program has changed.
+         *
+         * It happens either upon successful completion of {@link RadioTuner#step(int, boolean)},
+         * {@link RadioTuner#scan(int, boolean)}, {@link RadioTuner#tune(int, int)}; when
+         * a switching to alternate frequency occurs; or when metadata is updated.
          */
         public void onProgramInfoChanged(RadioManager.ProgramInfo info) {}
+
         /**
-         * onMetadataChanged() is called when new meta data are received on current program.
-         * Meta data are also received in {@link RadioManager.ProgramInfo} when
-         *  {@link #onProgramInfoChanged(RadioManager.ProgramInfo)} is called.
+         * Called when metadata is updated for the current program.
+         *
+         * @deprecated Use {@link #onProgramInfoChanged(RadioManager.ProgramInfo)} instead.
          */
+        @Deprecated
         public void onMetadataChanged(RadioMetadata metadata) {}
+
         /**
          * onTrafficAnnouncement() is called when a traffic announcement starts and stops.
          */
@@ -374,7 +401,7 @@ public abstract class RadioTuner {
         /**
          * Called when available program list changed.
          *
-         * Use getProgramList() to get the actual list.
+         * Use {@link RadioTuner#getProgramList(String)} to get an actual list.
          */
         public void onProgramListChanged() {}
     }

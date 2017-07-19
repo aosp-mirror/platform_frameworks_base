@@ -149,6 +149,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -1896,7 +1897,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         } catch (FileNotFoundException e) {
             // missing policy is okay, probably first boot
-            upgradeLegacyBackgroundDataUL();
+            upgradeDefaultBackgroundDataUL();
         } catch (IOException e) {
             Log.wtf(TAG, "problem reading network policy", e);
         } catch (XmlPullParserException e) {
@@ -1910,16 +1911,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Upgrade legacy background data flags, notifying listeners of one last
      * change to always-true.
      */
-    private void upgradeLegacyBackgroundDataUL() {
-        mRestrictBackground = Settings.Secure.getInt(
-                mContext.getContentResolver(), Settings.Secure.BACKGROUND_DATA, 1) != 1;
+    private void upgradeDefaultBackgroundDataUL() {
+        // This method is only called when we're unable to find the network policy flag, which
+        // usually happens on first boot of a new device and not one that has received an OTA.
 
-        // kick off one last broadcast if restricted
-        if (mRestrictBackground) {
-            final Intent broadcast = new Intent(
-                    ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
-            mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
-        }
+        // Seed from the default value configured for this device.
+        mRestrictBackground = Settings.Global.getInt(
+                mContext.getContentResolver(), Global.DEFAULT_RESTRICT_BACKGROUND_DATA, 0) == 1;
+
+        // NOTE: We used to read the legacy setting here :
+        //
+        // final int legacyFlagValue = Settings.Secure.getInt(
+        //        mContext.getContentResolver(), Settings.Secure.BACKGROUND_DATA, ..);
+        //
+        // This is no longer necessary because we will never upgrade directly from Gingerbread
+        // to O+. Devices upgrading from ICS onwards to O will have a netpolicy.xml file that
+        // contains the correct value that we will continue to use.
     }
 
     /**

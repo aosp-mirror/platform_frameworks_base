@@ -20,6 +20,7 @@ import static android.net.NetworkCapabilities.MAX_TRANSPORT;
 import static android.net.NetworkCapabilities.TRANSPORT_BLUETOOTH;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_LOWPAN;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
@@ -362,29 +363,46 @@ final public class IpConnectivityEventBuilder {
         TRANSPORT_LINKLAYER_MAP[TRANSPORT_BLUETOOTH]  = IpConnectivityLogClass.BLUETOOTH;
         TRANSPORT_LINKLAYER_MAP[TRANSPORT_ETHERNET]   = IpConnectivityLogClass.ETHERNET;
         TRANSPORT_LINKLAYER_MAP[TRANSPORT_VPN]        = IpConnectivityLogClass.UNKNOWN;
-        // TODO: change mapping TRANSPORT_WIFI_AWARE -> WIFI_AWARE
-        TRANSPORT_LINKLAYER_MAP[TRANSPORT_WIFI_AWARE] = IpConnectivityLogClass.UNKNOWN;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_WIFI_AWARE] = IpConnectivityLogClass.WIFI_NAN;
+        TRANSPORT_LINKLAYER_MAP[TRANSPORT_LOWPAN]     = IpConnectivityLogClass.LOWPAN;
     };
 
     private static int ifnameToLinkLayer(String ifname) {
         // Do not try to catch all interface names with regexes, instead only catch patterns that
         // are cheap to check, and otherwise fallback on postprocessing in aggregation layer.
-        for (int i = 0; i < IFNAME_LINKLAYER_MAP.size(); i++) {
-            String pattern = IFNAME_LINKLAYER_MAP.valueAt(i);
+        for (int i = 0; i < KNOWN_PREFIX; i++) {
+            String pattern = IFNAME_PREFIXES[i];
             if (ifname.startsWith(pattern)) {
-                return IFNAME_LINKLAYER_MAP.keyAt(i);
+                return IFNAME_LINKLAYERS[i];
             }
         }
         return IpConnectivityLogClass.UNKNOWN;
     }
 
-    private static final SparseArray<String> IFNAME_LINKLAYER_MAP = new SparseArray<String>();
+    private static final int KNOWN_PREFIX = 7;
+    private static final String[] IFNAME_PREFIXES = new String[KNOWN_PREFIX];
+    private static final int[] IFNAME_LINKLAYERS = new int[KNOWN_PREFIX];
     static {
-        IFNAME_LINKLAYER_MAP.put(IpConnectivityLogClass.CELLULAR, "rmnet");
-        IFNAME_LINKLAYER_MAP.put(IpConnectivityLogClass.WIFI, "wlan");
-        IFNAME_LINKLAYER_MAP.put(IpConnectivityLogClass.BLUETOOTH, "bt-pan");
-        // TODO: rekey to USB
-        IFNAME_LINKLAYER_MAP.put(IpConnectivityLogClass.ETHERNET, "usb");
-        // TODO: add mappings for nan -> WIFI_AWARE and p2p -> WIFI_P2P
+        // Ordered from most likely link layer to least likely.
+        IFNAME_PREFIXES[0] = "rmnet";
+        IFNAME_LINKLAYERS[0] = IpConnectivityLogClass.CELLULAR;
+
+        IFNAME_PREFIXES[1] = "wlan";
+        IFNAME_LINKLAYERS[1] = IpConnectivityLogClass.WIFI;
+
+        IFNAME_PREFIXES[2] = "bt-pan";
+        IFNAME_LINKLAYERS[2] = IpConnectivityLogClass.BLUETOOTH;
+
+        IFNAME_PREFIXES[3] = "p2p";
+        IFNAME_LINKLAYERS[3] = IpConnectivityLogClass.WIFI_P2P;
+
+        IFNAME_PREFIXES[4] = "aware";
+        IFNAME_LINKLAYERS[4] = IpConnectivityLogClass.WIFI_NAN;
+
+        IFNAME_PREFIXES[5] = "eth";
+        IFNAME_LINKLAYERS[5] = IpConnectivityLogClass.ETHERNET;
+
+        IFNAME_PREFIXES[6] = "wpan";
+        IFNAME_LINKLAYERS[6] = IpConnectivityLogClass.LOWPAN;
     }
 }

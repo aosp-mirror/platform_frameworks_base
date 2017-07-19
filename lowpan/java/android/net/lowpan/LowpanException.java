@@ -28,245 +28,65 @@ import android.util.AndroidException;
  */
 // @SystemApi
 public class LowpanException extends AndroidException {
-    // Make the eclipse warning about serializable exceptions go away
-    private static final long serialVersionUID = 0x31863cbe562b0e11l; // randomly generated
-
-    public static final int LOWPAN_ERROR = 1;
-    public static final int LOWPAN_CREDENTIAL_NEEDED = 2;
-    public static final int LOWPAN_DEAD = 3;
-    public static final int LOWPAN_DISABLED = 4;
-    public static final int LOWPAN_WRONG_STATE = 5;
-    public static final int LOWPAN_BUSY = 7;
-    public static final int LOWPAN_NCP_PROBLEM = 8;
-    public static final int LOWPAN_ALREADY = 9;
-    public static final int LOWPAN_CANCELED = 10;
-    public static final int LOWPAN_FEATURE_NOT_SUPPORTED = 12;
-    public static final int LOWPAN_PROPERTY_NOT_FOUND = 13;
-    public static final int LOWPAN_JOIN_FAILED_UNKNOWN = 14;
-    public static final int LOWPAN_JOIN_FAILED_AT_SCAN = 15;
-    public static final int LOWPAN_JOIN_FAILED_AT_AUTH = 16;
-    public static final int LOWPAN_FORM_FAILED_AT_SCAN = 17;
-
-    public static LowpanException rethrowAsLowpanException(ServiceSpecificException e)
-            throws LowpanException {
-        int reason;
-        switch (e.errorCode) {
-            case ILowpanInterface.ERROR_INVALID_ARGUMENT:
-            case ILowpanInterface.ERROR_INVALID_TYPE:
-            case ILowpanInterface.ERROR_INVALID_VALUE:
-                throw new IllegalArgumentException(e.getMessage(), e);
-
-            case ILowpanInterface.ERROR_PERMISSION_DENIED:
-                throw new SecurityException(e.getMessage(), e);
-
-            case ILowpanInterface.ERROR_DISABLED:
-                reason = LowpanException.LOWPAN_DISABLED;
-                break;
-
-            case ILowpanInterface.ERROR_WRONG_STATE:
-                reason = LowpanException.LOWPAN_WRONG_STATE;
-                break;
-
-            case ILowpanInterface.ERROR_BUSY:
-                reason = LowpanException.LOWPAN_BUSY;
-                break;
-
-            case ILowpanInterface.ERROR_ALREADY:
-                reason = LowpanException.LOWPAN_ALREADY;
-                break;
-
-            case ILowpanInterface.ERROR_CANCELED:
-                reason = LowpanException.LOWPAN_CANCELED;
-                break;
-
-            case ILowpanInterface.ERROR_CREDENTIAL_NEEDED:
-                reason = LowpanException.LOWPAN_CREDENTIAL_NEEDED;
-                break;
-
-            case ILowpanInterface.ERROR_FEATURE_NOT_SUPPORTED:
-                reason = LowpanException.LOWPAN_FEATURE_NOT_SUPPORTED;
-                break;
-
-            case ILowpanInterface.ERROR_PROPERTY_NOT_FOUND:
-                reason = LowpanException.LOWPAN_PROPERTY_NOT_FOUND;
-                break;
-
-            case ILowpanInterface.ERROR_JOIN_FAILED_UNKNOWN:
-                reason = LowpanException.LOWPAN_JOIN_FAILED_UNKNOWN;
-                break;
-
-            case ILowpanInterface.ERROR_JOIN_FAILED_AT_SCAN:
-                reason = LowpanException.LOWPAN_JOIN_FAILED_AT_SCAN;
-                break;
-
-            case ILowpanInterface.ERROR_JOIN_FAILED_AT_AUTH:
-                reason = LowpanException.LOWPAN_JOIN_FAILED_AT_AUTH;
-                break;
-
-            case ILowpanInterface.ERROR_FORM_FAILED_AT_SCAN:
-                reason = LowpanException.LOWPAN_FORM_FAILED_AT_SCAN;
-                break;
-
-            case ILowpanInterface.ERROR_TIMEOUT:
-            case ILowpanInterface.ERROR_NCP_PROBLEM:
-                reason = LowpanException.LOWPAN_NCP_PROBLEM;
-                break;
-            case ILowpanInterface.ERROR_UNSPECIFIED:
-            default:
-                reason = LOWPAN_ERROR;
-                break;
-        }
-        throw new LowpanException(reason, e.getMessage(), e);
-    }
-
-    private final int mReason;
-
-    public final int getReason() {
-        return mReason;
-    }
-
-    public LowpanException(int problem) {
-        super(getDefaultMessage(problem));
-        mReason = problem;
-    }
+    public LowpanException() {}
 
     public LowpanException(String message) {
-        super(getCombinedMessage(LOWPAN_ERROR, message));
-        mReason = LOWPAN_ERROR;
+        super(message);
     }
 
-    public LowpanException(int problem, String message, Throwable cause) {
-        super(getCombinedMessage(problem, message), cause);
-        mReason = problem;
+    public LowpanException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public LowpanException(int problem, Throwable cause) {
-        super(getDefaultMessage(problem), cause);
-        mReason = problem;
+    public LowpanException(Exception cause) {
+        super(cause);
     }
 
-    /** @hide */
-    public static String getDefaultMessage(int problem) {
-        String problemString;
+    /* This method returns LowpanException so that the caller
+     * can add "throw" before the invocation of this method.
+     * This might seem superfluous, but it is actually to
+     * help provide a hint to the java compiler that this
+     * function will not return.
+     */
+    static LowpanException rethrowFromServiceSpecificException(ServiceSpecificException e)
+            throws LowpanException {
+        switch (e.errorCode) {
+            case ILowpanInterface.ERROR_DISABLED:
+                throw new InterfaceDisabledException(e);
 
-        // TODO: Does this need localization?
+            case ILowpanInterface.ERROR_WRONG_STATE:
+                throw new WrongStateException(e);
 
-        switch (problem) {
-            case LOWPAN_DEAD:
-                problemString = "LoWPAN interface is no longer alive";
-                break;
-            case LOWPAN_DISABLED:
-                problemString = "LoWPAN interface is disabled";
-                break;
-            case LOWPAN_WRONG_STATE:
-                problemString = "LoWPAN interface in wrong state to perfom requested action";
-                break;
-            case LOWPAN_BUSY:
-                problemString =
-                        "LoWPAN interface was unable to perform the requestion action because it was busy";
-                break;
-            case LOWPAN_NCP_PROBLEM:
-                problemString =
-                        "The Network Co-Processor associated with this interface has experienced a problem";
-                break;
-            case LOWPAN_ALREADY:
-                problemString = "The LoWPAN interface is already in the given state";
-                break;
-            case LOWPAN_CANCELED:
-                problemString = "This operation was canceled";
-                break;
-            case LOWPAN_CREDENTIAL_NEEDED:
-                problemString = "Additional credentials are required to complete this operation";
-                break;
-            case LOWPAN_FEATURE_NOT_SUPPORTED:
-                problemString =
-                        "A dependent feature required to perform the given action is not currently supported";
-                break;
-            case LOWPAN_PROPERTY_NOT_FOUND:
-                problemString = "The given property was not found";
-                break;
-            case LOWPAN_JOIN_FAILED_UNKNOWN:
-                problemString = "The join operation failed for an unspecified reason";
-                break;
-            case LOWPAN_JOIN_FAILED_AT_SCAN:
-                problemString =
-                        "The join operation failed because it could not communicate with any peers";
-                break;
-            case LOWPAN_JOIN_FAILED_AT_AUTH:
-                problemString =
-                        "The join operation failed because the credentials were not accepted by any peers";
-                break;
-            case LOWPAN_FORM_FAILED_AT_SCAN:
-                problemString = "Network form failed";
-                break;
-            case LOWPAN_ERROR:
+            case ILowpanInterface.ERROR_CANCELED:
+                throw new OperationCanceledException(e);
+
+            case ILowpanInterface.ERROR_JOIN_FAILED_UNKNOWN:
+                throw new JoinFailedException(e);
+
+            case ILowpanInterface.ERROR_JOIN_FAILED_AT_SCAN:
+                throw new JoinFailedAtScanException(e);
+
+            case ILowpanInterface.ERROR_JOIN_FAILED_AT_AUTH:
+                throw new JoinFailedAtAuthException(e);
+
+            case ILowpanInterface.ERROR_FORM_FAILED_AT_SCAN:
+                throw new NetworkAlreadyExistsException(e);
+
+            case ILowpanInterface.ERROR_FEATURE_NOT_SUPPORTED:
+                throw new LowpanException(
+                        e.getMessage() != null ? e.getMessage() : "Feature not supported", e);
+
+            case ILowpanInterface.ERROR_NCP_PROBLEM:
+                throw new LowpanRuntimeException(
+                        e.getMessage() != null ? e.getMessage() : "NCP problem", e);
+
+            case ILowpanInterface.ERROR_INVALID_ARGUMENT:
+                throw new LowpanRuntimeException(
+                        e.getMessage() != null ? e.getMessage() : "Invalid argument", e);
+
+            case ILowpanInterface.ERROR_UNSPECIFIED:
             default:
-                problemString = "The requested LoWPAN operation failed";
-                break;
+                throw new LowpanRuntimeException(e);
         }
-
-        return problemString;
-    }
-
-    private static String getCombinedMessage(int problem, String message) {
-        String problemString = getProblemString(problem);
-        return String.format("%s (%d): %s", problemString, problem, message);
-    }
-
-    private static String getProblemString(int problem) {
-        String problemString;
-
-        switch (problem) {
-            case LOWPAN_ERROR:
-                problemString = "LOWPAN_ERROR";
-                break;
-            case LOWPAN_DEAD:
-                problemString = "LOWPAN_DEAD";
-                break;
-            case LOWPAN_DISABLED:
-                problemString = "LOWPAN_DISABLED";
-                break;
-            case LOWPAN_WRONG_STATE:
-                problemString = "LOWPAN_WRONG_STATE";
-                break;
-            case LOWPAN_BUSY:
-                problemString = "LOWPAN_BUSY";
-                break;
-            case LOWPAN_NCP_PROBLEM:
-                problemString = "LOWPAN_NCP_PROBLEM";
-                break;
-            case LOWPAN_ALREADY:
-                problemString = "LOWPAN_ALREADY";
-                break;
-            case LOWPAN_CANCELED:
-                problemString = "LOWPAN_CANCELED";
-                break;
-            case LOWPAN_CREDENTIAL_NEEDED:
-                problemString = "LOWPAN_CREDENTIAL_NEEDED";
-                break;
-            case LOWPAN_FEATURE_NOT_SUPPORTED:
-                problemString = "LOWPAN_FEATURE_NOT_SUPPORTED";
-                break;
-            case LOWPAN_PROPERTY_NOT_FOUND:
-                problemString = "LOWPAN_PROPERTY_NOT_FOUND";
-                break;
-            case LOWPAN_JOIN_FAILED_UNKNOWN:
-                problemString = "LOWPAN_JOIN_FAILED_UNKNOWN";
-                break;
-            case LOWPAN_JOIN_FAILED_AT_SCAN:
-                problemString = "LOWPAN_JOIN_FAILED_AT_SCAN";
-                break;
-            case LOWPAN_JOIN_FAILED_AT_AUTH:
-                problemString = "LOWPAN_JOIN_FAILED_AT_AUTH";
-                break;
-            case LOWPAN_FORM_FAILED_AT_SCAN:
-                problemString = "LOWPAN_FORM_FAILED_AT_SCAN";
-                break;
-            default:
-                problemString = "LOWPAN_ERROR_CODE_" + problem;
-                break;
-        }
-
-        return problemString;
     }
 }

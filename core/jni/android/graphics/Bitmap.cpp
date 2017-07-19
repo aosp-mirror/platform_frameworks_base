@@ -727,7 +727,7 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
     if (!dst->setInfo(dstInfo)) {
         return false;
     }
-    if (!dst->tryAllocPixels(alloc, nullptr)) {
+    if (!dst->tryAllocPixels(alloc)) {
         return false;
     }
 
@@ -1081,7 +1081,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
         // Map the pixels in place and take ownership of the ashmem region.
         nativeBitmap = sk_sp<Bitmap>(GraphicsJNI::mapAshmemBitmap(env, bitmap.get(),
-                nullptr, dupFd, const_cast<void*>(blob.data()), size, !isMutable));
+                dupFd, const_cast<void*>(blob.data()), size, !isMutable));
         if (!nativeBitmap) {
             close(dupFd);
             blob.release();

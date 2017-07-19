@@ -18,6 +18,7 @@ package com.android.server.timezone;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 
@@ -56,10 +57,9 @@ final class RulesManagerServiceHelperImpl implements PermissionHelper, Executor 
         return true;
     }
 
-    // TODO Wake lock required?
+    // TODO(nfuller): Wake lock required while running in background thread?
     @Override
     public void execute(Runnable runnable) {
-        // TODO Is there a better way?
-        new Thread(runnable).start();
+        AsyncTask.execute(runnable);
     }
 }

@@ -55,6 +55,7 @@
                 android:singleLine="false"
                 android:gravity="top"
                 android:visibility="gone"
+                android:textAlignment="viewStart"
                 />
         </LinearLayout>
 

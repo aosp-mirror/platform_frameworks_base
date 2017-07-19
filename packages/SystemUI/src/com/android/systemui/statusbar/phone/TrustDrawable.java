@@ -83,7 +83,7 @@ public class TrustDrawable extends Drawable {
 
         mPaint = new Paint();
         mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(Utils.getColorAttr(context, R.attr.bgProtectTextColor));
+        mPaint.setColor(Utils.getColorAttr(context, R.attr.wallpaperTextColor));
         mPaint.setAntiAlias(true);
         mPaint.setStrokeWidth(mThickness);
     }

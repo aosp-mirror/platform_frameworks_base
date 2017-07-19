@@ -36,6 +36,7 @@ cc_defaults {
         "external/skia/src/effects",
         "external/skia/src/image",
         "external/skia/src/utils",
+        "external/skia/src/gpu",
     ],
 
     product_variables: {
@@ -133,6 +134,7 @@ cc_defaults {
         "pipeline/skia/SkiaProfileRenderer.cpp",
         "pipeline/skia/SkiaRecordingCanvas.cpp",
         "pipeline/skia/SkiaVulkanPipeline.cpp",
+        "pipeline/skia/VectorDrawableAtlas.cpp",
         "renderstate/Blend.cpp",
         "renderstate/MeshState.cpp",
         "renderstate/OffscreenBufferPool.cpp",
@@ -340,6 +342,7 @@ cc_test {
         "tests/unit/TextureCacheTests.cpp",
 	"tests/unit/TypefaceTests.cpp",
         "tests/unit/VectorDrawableTests.cpp",
+        "tests/unit/VectorDrawableAtlasTests.cpp",
     ],
 }
 

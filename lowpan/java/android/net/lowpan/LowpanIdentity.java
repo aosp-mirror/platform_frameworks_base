@@ -16,8 +16,16 @@
 
 package android.net.lowpan;
 
+import android.annotation.NonNull;
+import android.icu.text.StringPrep;
+import android.icu.text.StringPrepParseException;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 import com.android.internal.util.HexDump;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Describes an instance of a LoWPAN network.
@@ -25,76 +33,100 @@ import java.util.Map;
  * @hide
  */
 // @SystemApi
-public class LowpanIdentity {
+public class LowpanIdentity implements Parcelable {
+    private static final String TAG = LowpanIdentity.class.getSimpleName();
 
     // Constants
-
-    /** @hide */
-    public static final int TYPE_ZIGBEE = 1;
-
-    /** @hide */
-    public static final int TYPE_ZIGBEE_IP = 2;
-
-    /** @hide */
-    public static final int TYPE_THREAD = 3;
-
-    public static final int UNKNOWN = Integer.MAX_VALUE;
-
+    public static final int UNSPECIFIED_CHANNEL = -1;
+    public static final int UNSPECIFIED_PANID = 0xFFFFFFFF;
     // Builder
 
     /** @hide */
     // @SystemApi
     public static class Builder {
-        private final LowpanIdentity identity = new LowpanIdentity();
+        private static final StringPrep stringPrep =
+                StringPrep.getInstance(StringPrep.RFC3920_RESOURCEPREP);
 
-        public Builder setName(String x) {
-            identity.mName = x;
+        final LowpanIdentity mIdentity = new LowpanIdentity();
+
+        private static String escape(@NonNull byte[] bytes) {
+            StringBuffer sb = new StringBuffer();
+            for (byte b : bytes) {
+                if (b >= 32 && b <= 126) {
+                    sb.append((char) b);
+                } else {
+                    sb.append(String.format("\\0x%02x", b & 0xFF));
+                }
+            }
+            return sb.toString();
+        }
+
+        public Builder setLowpanIdentity(@NonNull LowpanIdentity x) {
+            Objects.requireNonNull(x);
+            setRawName(x.getRawName());
+            setXpanid(x.getXpanid());
+            setPanid(x.getPanid());
+            setChannel(x.getChannel());
+            setType(x.getType());
+            return this;
+        }
+
+        public Builder setName(@NonNull String name) {
+            Objects.requireNonNull(name);
+            try {
+                mIdentity.mName = stringPrep.prepare(name, StringPrep.DEFAULT);
+                mIdentity.mRawName = mIdentity.mName.getBytes(StandardCharsets.UTF_8);
+                mIdentity.mIsNameValid = true;
+            } catch (StringPrepParseException x) {
+                Log.w(TAG, x.toString());
+                setRawName(name.getBytes(StandardCharsets.UTF_8));
+            }
+            return this;
+        }
+
+        public Builder setRawName(@NonNull byte[] name) {
+            Objects.requireNonNull(name);
+            mIdentity.mRawName = name.clone();
+            mIdentity.mName = new String(name, StandardCharsets.UTF_8);
+            try {
+                String nameCheck = stringPrep.prepare(mIdentity.mName, StringPrep.DEFAULT);
+                mIdentity.mIsNameValid =
+                        Arrays.equals(nameCheck.getBytes(StandardCharsets.UTF_8), name);
+            } catch (StringPrepParseException x) {
+                Log.w(TAG, x.toString());
+                mIdentity.mIsNameValid = false;
+            }
+
+            // Non-normal names must be rendered differently to avoid confusion.
+            if (!mIdentity.mIsNameValid) {
+                mIdentity.mName = "«" + escape(name) + "»";
+            }
+
             return this;
         }
 
         public Builder setXpanid(byte x[]) {
-            identity.mXpanid = (x != null ? x.clone() : null);
+            mIdentity.mXpanid = (x != null ? x.clone() : null);
             return this;
         }
 
         public Builder setPanid(int x) {
-            identity.mPanid = x;
+            mIdentity.mPanid = x;
             return this;
         }
 
-        /** @hide */
-        public Builder setType(int x) {
-            identity.mType = x;
+        public Builder setType(@NonNull String x) {
+            mIdentity.mType = x;
             return this;
         }
 
         public Builder setChannel(int x) {
-            identity.mChannel = x;
-            return this;
-        }
-
-        /** @hide */
-        Builder updateFromMap(Map map) {
-            if (map.containsKey(ILowpanInterface.KEY_NETWORK_NAME)) {
-                setName(LowpanProperties.KEY_NETWORK_NAME.getFromMap(map));
-            }
-            if (map.containsKey(ILowpanInterface.KEY_NETWORK_PANID)) {
-                setPanid(LowpanProperties.KEY_NETWORK_PANID.getFromMap(map));
-            }
-            if (map.containsKey(ILowpanInterface.KEY_NETWORK_XPANID)) {
-                setXpanid(LowpanProperties.KEY_NETWORK_XPANID.getFromMap(map));
-            }
-            if (map.containsKey(ILowpanInterface.KEY_CHANNEL)) {
-                setChannel(LowpanProperties.KEY_CHANNEL.getFromMap(map));
-            }
-            if (map.containsKey(ILowpanInterface.KEY_NETWORK_TYPE)) {
-                setType(LowpanProperties.KEY_NETWORK_TYPE.getFromMap(map));
-            }
+            mIdentity.mChannel = x;
             return this;
         }
 
         public LowpanIdentity build() {
-            return identity;
+            return mIdentity;
         }
     }
 
@@ -102,28 +134,37 @@ public class LowpanIdentity {
 
     // Instance Variables
 
-    private String mName = null;
-    private byte[] mXpanid = null;
-    private int mType = UNKNOWN;
-    private int mPanid = UNKNOWN;
-    private int mChannel = UNKNOWN;
+    private String mName = "";
+    private boolean mIsNameValid = true;
+    private byte[] mRawName = new byte[0];
+    private String mType = "";
+    private byte[] mXpanid = new byte[0];
+    private int mPanid = UNSPECIFIED_PANID;
+    private int mChannel = UNSPECIFIED_CHANNEL;
 
-    // Public Getters and Setters
+    // Public Getters
 
     public String getName() {
         return mName;
     }
 
+    public boolean isNameValid() {
+        return mIsNameValid;
+    }
+
+    public byte[] getRawName() {
+        return mRawName.clone();
+    }
+
     public byte[] getXpanid() {
-        return mXpanid != null ? mXpanid.clone() : null;
+        return mXpanid.clone();
     }
 
     public int getPanid() {
         return mPanid;
     }
 
-    /** @hide */
-    public int getType() {
+    public String getType() {
         return mType;
     }
 
@@ -131,43 +172,84 @@ public class LowpanIdentity {
         return mChannel;
     }
 
-    static void addToMap(Map<String, Object> parameters, LowpanIdentity networkInfo) {
-        if (networkInfo.getName() != null) {
-            LowpanProperties.KEY_NETWORK_NAME.putInMap(parameters, networkInfo.getName());
-        }
-        if (networkInfo.getPanid() != LowpanIdentity.UNKNOWN) {
-            LowpanProperties.KEY_NETWORK_PANID.putInMap(parameters, networkInfo.getPanid());
-        }
-        if (networkInfo.getChannel() != LowpanIdentity.UNKNOWN) {
-            LowpanProperties.KEY_CHANNEL.putInMap(parameters, networkInfo.getChannel());
-        }
-        if (networkInfo.getXpanid() != null) {
-            LowpanProperties.KEY_NETWORK_XPANID.putInMap(parameters, networkInfo.getXpanid());
-        }
-    }
-
-    void addToMap(Map<String, Object> parameters) {
-        addToMap(parameters, this);
-    }
-
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
 
-        sb.append("Name: ").append(mName == null ? "<none>" : mName);
+        sb.append("Name:").append(getName());
 
-        if (mXpanid != null) {
-            sb.append(", XPANID: ").append(HexDump.toHexString(mXpanid));
+        if (mType.length() > 0) {
+            sb.append(", Type:").append(mType);
         }
 
-        if (mPanid != UNKNOWN) {
-            sb.append(", PANID: ").append(String.format("0x%04X", mPanid));
+        if (mXpanid.length > 0) {
+            sb.append(", XPANID:").append(HexDump.toHexString(mXpanid));
         }
 
-        if (mChannel != UNKNOWN) {
-            sb.append(", Channel: ").append(mChannel);
+        if (mPanid != UNSPECIFIED_PANID) {
+            sb.append(", PANID:").append(String.format("0x%04X", mPanid));
+        }
+
+        if (mChannel != UNSPECIFIED_CHANNEL) {
+            sb.append(", Channel:").append(mChannel);
         }
 
         return sb.toString();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof LowpanIdentity)) {
+            return false;
+        }
+        LowpanIdentity rhs = (LowpanIdentity) obj;
+        return Arrays.equals(mRawName, rhs.mRawName)
+                && Arrays.equals(mXpanid, rhs.mXpanid)
+                && mType.equals(rhs.mType)
+                && mPanid == rhs.mPanid
+                && mChannel == rhs.mChannel;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                Arrays.hashCode(mRawName), mType, Arrays.hashCode(mXpanid), mPanid, mChannel);
+    }
+
+    /** Implement the Parcelable interface. */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /** Implement the Parcelable interface. */
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByteArray(mRawName);
+        dest.writeString(mType);
+        dest.writeByteArray(mXpanid);
+        dest.writeInt(mPanid);
+        dest.writeInt(mChannel);
+    }
+
+    /** Implement the Parcelable interface. */
+    public static final Creator<LowpanIdentity> CREATOR =
+            new Creator<LowpanIdentity>() {
+
+                public LowpanIdentity createFromParcel(Parcel in) {
+                    Builder builder = new Builder();
+
+                    builder.setRawName(in.createByteArray());
+                    builder.setType(in.readString());
+                    builder.setXpanid(in.createByteArray());
+                    builder.setPanid(in.readInt());
+                    builder.setChannel(in.readInt());
+
+                    return builder.build();
+                }
+
+                public LowpanIdentity[] newArray(int size) {
+                    return new LowpanIdentity[size];
+                }
+            };
 }
