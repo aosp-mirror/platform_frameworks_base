@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_RADIO_TUNER_H
-#define _ANDROID_SERVER_RADIO_TUNER_H
+#ifndef _ANDROID_SERVER_BROADCASTRADIORADIO_TUNER_H
+#define _ANDROID_SERVER_BROADCASTRADIORADIO_TUNER_H
 
-#include "com_android_server_radio_types.h"
+#include "types.h"
 
 #include "JavaRef.h"
 
@@ -29,10 +29,10 @@
 
 namespace android {
 
-void register_android_server_radio_Tuner(JavaVM *vm, JNIEnv *env);
+void register_android_server_broadcastradio_Tuner(JavaVM *vm, JNIEnv *env);
 
 namespace server {
-namespace radio {
+namespace BroadcastRadio {
 namespace Tuner {
 
 void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
@@ -45,8 +45,8 @@ getNativeCallback(JNIEnv *env, JavaRef<jobject> const &tuner);
 Region getRegion(JNIEnv *env, jobject obj);
 
 } // namespace Tuner
-} // namespace radio
+} // namespace BroadcastRadio
 } // namespace server
 } // namespace android
 
-#endif // _ANDROID_SERVER_RADIO_TUNER_H
+#endif // _ANDROID_SERVER_BROADCASTRADIORADIO_TUNER_H

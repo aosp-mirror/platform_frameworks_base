@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.radio.tests;
+package android.hardware.radio.tests.functional;
 
 import android.Manifest;
 import android.content.Context;
@@ -58,8 +58,8 @@ import static org.testng.Assert.assertThrows;
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
-public class RadioTest {
-    private static final String TAG = "RadioTest";
+public class RadioTunerTest {
+    private static final String TAG = "BroadcastRadioTests.RadioTuner";
 
     public final Context mContext = InstrumentationRegistry.getContext();
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.radio;
+package com.android.server.broadcastradio;
 
 import android.annotation.NonNull;
 import android.hardware.radio.ITuner;
@@ -27,7 +27,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 class TunerCallback implements ITunerCallback {
-    private static final String TAG = "RadioService.TunerCallback";
+    private static final String TAG = "BroadcastRadioService.TunerCallback";
 
     /**
      * This field is used by native code, do not access or modify.

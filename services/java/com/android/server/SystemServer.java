@@ -97,7 +97,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
-import com.android.server.radio.RadioService;
+import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.retaildemo.RetailDemoModeService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
@@ -1208,7 +1208,7 @@ public final class SystemServer {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BROADCAST_RADIO)) {
                 traceBeginAndSlog("StartBroadcastRadioService");
-                mSystemServiceManager.startService(RadioService.class);
+                mSystemServiceManager.startService(BroadcastRadioService.class);
                 traceEnd();
             }
 

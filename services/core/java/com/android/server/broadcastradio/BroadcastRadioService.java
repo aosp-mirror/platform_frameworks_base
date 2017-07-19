@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.radio;
+package com.android.server.broadcastradio;
 
 import android.Manifest;
 import android.content.Context;
@@ -29,8 +29,8 @@ import com.android.server.SystemService;
 
 import java.util.List;
 
-public class RadioService extends SystemService {
-    private final RadioServiceImpl mServiceImpl = new RadioServiceImpl();
+public class BroadcastRadioService extends SystemService {
+    private final ServiceImpl mServiceImpl = new ServiceImpl();
 
     /**
      * This field is used by native code, do not access or modify.
@@ -40,7 +40,7 @@ public class RadioService extends SystemService {
     private final Object mLock = new Object();
     private List<RadioManager.ModuleProperties> mModules = null;
 
-    public RadioService(Context context) {
+    public BroadcastRadioService(Context context) {
         super(context);
     }
 
@@ -61,7 +61,7 @@ public class RadioService extends SystemService {
         publishBinderService(Context.RADIO_SERVICE, mServiceImpl);
     }
 
-    private class RadioServiceImpl extends IRadioService.Stub {
+    private class ServiceImpl extends IRadioService.Stub {
         private void enforcePolicyAccess() {
             if (PackageManager.PERMISSION_GRANTED != getContext().checkCallingPermission(
                     Manifest.permission.ACCESS_FM_RADIO)) {

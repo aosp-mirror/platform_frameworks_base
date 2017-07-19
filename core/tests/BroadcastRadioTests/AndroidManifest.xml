@@ -26,6 +26,6 @@
     <instrumentation
         android:name="android.support.test.runner.AndroidJUnitRunner"
         android:targetPackage="android.hardware.radio.tests"
-        android:label="Tests for broadcast radio API" >
+        android:label="Tests for Broadcast Radio APIs" >
     </instrumentation>
 </manifest>

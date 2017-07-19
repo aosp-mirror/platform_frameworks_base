@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_RADIO_CONVERT_H
-#define _ANDROID_SERVER_RADIO_CONVERT_H
+#ifndef _ANDROID_SERVER_BROADCASTRADIO_CONVERT_H
+#define _ANDROID_SERVER_BROADCASTRADIO_CONVERT_H
+
+#include "types.h"
 
 #include "JavaRef.h"
-#include "com_android_server_radio_types.h"
 
 #include <android/hardware/broadcastradio/1.1/types.h>
 #include <jni.h>
 
 namespace android {
 
-void register_android_server_radio_convert(JNIEnv *env);
+void register_android_server_broadcastradio_convert(JNIEnv *env);
 
 namespace server {
-namespace radio {
+namespace BroadcastRadio {
 namespace convert {
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
@@ -72,8 +73,8 @@ template <>
 bool ThrowIfFailed(JNIEnv *env, const hardware::Return<void> &hidlResult);
 
 } // namespace convert
-} // namespace radio
+} // namespace BroadcastRadio
 } // namespace server
 } // namespace android
 
-#endif // _ANDROID_SERVER_RADIO_CONVERT_H
+#endif // _ANDROID_SERVER_BROADCASTRADIO_CONVERT_H

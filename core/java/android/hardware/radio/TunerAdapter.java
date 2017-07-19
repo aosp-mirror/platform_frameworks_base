@@ -28,7 +28,7 @@ import java.util.List;
  * Implements the RadioTuner interface by forwarding calls to radio service.
  */
 class TunerAdapter extends RadioTuner {
-    private static final String TAG = "radio.TunerAdapter";
+    private static final String TAG = "BroadcastRadio.TunerAdapter";
 
     @NonNull private final ITuner mTuner;
     private boolean mIsClosed = false;

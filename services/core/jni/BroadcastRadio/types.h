@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_RADIO_TYPES_H
-#define _ANDROID_SERVER_RADIO_TYPES_H
+#ifndef _ANDROID_SERVER_BROADCASTRADIO_TYPES_H
+#define _ANDROID_SERVER_BROADCASTRADIO_TYPES_H
 
 #include <jni.h>
 
 namespace android {
 namespace server {
-namespace radio {
+namespace BroadcastRadio {
 
 /* Most of these enums are dereived from Java code, based at
  * frameworks/base/core/java/android/hardware/radio/RadioManager.java.
@@ -53,7 +53,7 @@ enum class Region : jint {
     KOREA = 4,
 };
 
-} // namespace radio
+} // namespace BroadcastRadio
 } // namespace server
 } // namespace android
 

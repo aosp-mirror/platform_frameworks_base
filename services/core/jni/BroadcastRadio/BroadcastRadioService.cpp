@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "radio.RadioService.jni"
+#define LOG_TAG "BroadcastRadioService.jni"
 #define LOG_NDEBUG 0
 
-#include "com_android_server_radio_RadioService.h"
+#include "BroadcastRadioService.h"
 
-#include "com_android_server_radio_Tuner.h"
-#include "com_android_server_radio_convert.h"
+#include "Tuner.h"
+#include "convert.h"
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadio.h>
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
@@ -32,8 +32,8 @@
 
 namespace android {
 namespace server {
-namespace radio {
-namespace RadioService {
+namespace BroadcastRadio {
+namespace BroadcastRadioService {
 
 using hardware::Return;
 using hardware::hidl_string;
@@ -242,20 +242,20 @@ static const JNINativeMethod gRadioServiceMethods[] = {
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
     { "nativeLoadModules", "(J)Ljava/util/List;", (void*)nativeLoadModules },
     { "nativeOpenTuner", "(JILandroid/hardware/radio/RadioManager$BandConfig;Z"
-            "Landroid/hardware/radio/ITunerCallback;)Lcom/android/server/radio/Tuner;",
+            "Landroid/hardware/radio/ITunerCallback;)Lcom/android/server/broadcastradio/Tuner;",
             (void*)nativeOpenTuner },
 };
 
-} // namespace RadioService
-} // namespace radio
+} // namespace BroadcastRadioService
+} // namespace BroadcastRadio
 } // namespace server
 
-void register_android_server_radio_RadioService(JNIEnv *env) {
-    using namespace server::radio::RadioService;
+void register_android_server_broadcastradio_BroadcastRadioService(JNIEnv *env) {
+    using namespace server::BroadcastRadio::BroadcastRadioService;
 
-    register_android_server_radio_convert(env);
+    register_android_server_broadcastradio_convert(env);
 
-    auto tunerClass = FindClassOrDie(env, "com/android/server/radio/Tuner");
+    auto tunerClass = FindClassOrDie(env, "com/android/server/broadcastradio/Tuner");
     gjni.Tuner.clazz = MakeGlobalRefOrDie(env, tunerClass);
     gjni.Tuner.cstor = GetMethodIDOrDie(env, tunerClass, "<init>",
             "(Landroid/hardware/radio/ITunerCallback;IIZI)V");
@@ -265,7 +265,8 @@ void register_android_server_radio_RadioService(JNIEnv *env) {
     gjni.ArrayList.cstor = GetMethodIDOrDie(env, arrayListClass, "<init>", "()V");
     gjni.ArrayList.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
-    auto res = jniRegisterNativeMethods(env, "com/android/server/radio/RadioService",
+    auto res = jniRegisterNativeMethods(env,
+            "com/android/server/broadcastradio/BroadcastRadioService",
             gRadioServiceMethods, NELEM(gRadioServiceMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 }

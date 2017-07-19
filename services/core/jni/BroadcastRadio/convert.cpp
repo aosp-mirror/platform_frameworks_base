@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "radio.convert.jni"
+#define LOG_TAG "BroadcastRadioService.convert.jni"
 #define LOG_NDEBUG 0
 
-#include "com_android_server_radio_convert.h"
+#include "convert.h"
 
 #include <JNIHelp.h>
 #include <Utils.h>
@@ -26,7 +26,7 @@
 
 namespace android {
 namespace server {
-namespace radio {
+namespace BroadcastRadio {
 namespace convert {
 
 using hardware::Return;
@@ -530,11 +530,11 @@ JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_1::ProgramInfo &info) 
 }
 
 } // namespace convert
-} // namespace radio
+} // namespace BroadcastRadio
 } // namespace server
 
-void register_android_server_radio_convert(JNIEnv *env) {
-    using namespace server::radio::convert;
+void register_android_server_broadcastradio_convert(JNIEnv *env) {
+    using namespace server::BroadcastRadio::convert;
 
     auto bandConfigClass = FindClassOrDie(env, "android/hardware/radio/RadioManager$BandConfig");
     gjni.BandConfig.descriptor = GetFieldIDOrDie(env, bandConfigClass,

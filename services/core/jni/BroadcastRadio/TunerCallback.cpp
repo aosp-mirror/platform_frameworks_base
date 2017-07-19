@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "radio.TunerCallback.jni"
+#define LOG_TAG "BroadcastRadioService.TunerCallback.jni"
 #define LOG_NDEBUG 0
 
-#include "com_android_server_radio_TunerCallback.h"
+#include "TunerCallback.h"
 
-#include "com_android_server_radio_convert.h"
-#include "com_android_server_radio_Tuner.h"
+#include "Tuner.h"
+#include "convert.h"
 
 #include <JNIHelp.h>
 #include <Utils.h>
@@ -29,7 +29,7 @@
 
 namespace android {
 namespace server {
-namespace radio {
+namespace BroadcastRadio {
 namespace TunerCallback {
 
 using hardware::Return;
@@ -355,21 +355,21 @@ sp<ITunerCallback> getNativeCallback(JNIEnv *env, jobject jTunerCallback) {
 }
 
 static const JNINativeMethod gTunerCallbackMethods[] = {
-    { "nativeInit", "(Lcom/android/server/radio/Tuner;I)J", (void*)nativeInit },
+    { "nativeInit", "(Lcom/android/server/broadcastradio/Tuner;I)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
     { "nativeDetach", "(J)V", (void*)nativeDetach },
 };
 
 } // namespace TunerCallback
-} // namespace radio
+} // namespace BroadcastRadio
 } // namespace server
 
-void register_android_server_radio_TunerCallback(JavaVM *vm, JNIEnv *env) {
-    using namespace server::radio::TunerCallback;
+void register_android_server_broadcastradio_TunerCallback(JavaVM *vm, JNIEnv *env) {
+    using namespace server::BroadcastRadio::TunerCallback;
 
     gvm = vm;
 
-    auto tunerCbClass = FindClassOrDie(env, "com/android/server/radio/TunerCallback");
+    auto tunerCbClass = FindClassOrDie(env, "com/android/server/broadcastradio/TunerCallback");
     gjni.TunerCallback.clazz = MakeGlobalRefOrDie(env, tunerCbClass);
     gjni.TunerCallback.nativeContext = GetFieldIDOrDie(env, tunerCbClass, "mNativeContext", "J");
     gjni.TunerCallback.handleHwFailure = GetMethodIDOrDie(env, tunerCbClass, "handleHwFailure", "()V");
@@ -391,7 +391,7 @@ void register_android_server_radio_TunerCallback(JavaVM *vm, JNIEnv *env) {
     gjni.TunerCallback.onProgramListChanged = GetMethodIDOrDie(env, tunerCbClass,
             "onProgramListChanged", "()V");
 
-    auto res = jniRegisterNativeMethods(env, "com/android/server/radio/TunerCallback",
+    auto res = jniRegisterNativeMethods(env, "com/android/server/broadcastradio/TunerCallback",
             gTunerCallbackMethods, NELEM(gTunerCallbackMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 }
