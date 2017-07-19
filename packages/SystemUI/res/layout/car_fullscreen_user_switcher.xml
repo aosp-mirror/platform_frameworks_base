@@ -35,6 +35,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <include layout="@layout/car_status_bar_header"
+            android:theme="@android:style/Theme"
+            android:layout_alignParentTop="true"/>
+
         <!-- This progress bar is the countdown timer. -->
         <ProgressBar
             android:id="@+id/countdown_progress"
