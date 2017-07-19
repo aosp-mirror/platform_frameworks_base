@@ -42,9 +42,10 @@ import java.util.regex.Pattern;
  * <p>Typically used to display credit card logos. Example:
  *
  * <pre class="prettyprint">
- *   new ImageTransformation.Builder(ccNumberId, "^4815.*$", R.drawable.ic_credit_card_logo1)
- *     .addOption("^1623.*$", R.drawable.ic_credit_card_logo2)
- *     .addOption("^42.*$", R.drawable.ic_credit_card_logo3)
+ *   new ImageTransformation.Builder(ccNumberId, Pattern.compile("^4815.*$"),
+ *                                   R.drawable.ic_credit_card_logo1)
+ *     .addOption(Pattern.compile("^1623.*$"), R.drawable.ic_credit_card_logo2)
+ *     .addOption(Pattern.compile("^42.*$"), R.drawable.ic_credit_card_logo3)
  *     .build();
  * </pre>
  *
@@ -105,12 +106,11 @@ public final class ImageTransformation extends InternalTransformation implements
          *
          * @param id id of the screen field that will be used to evaluate whether the image should
          * be used.
-         * @param regex regular expression defining what should be matched to use this image. The
-         * pattern will be {@link Pattern#compile compiled} without setting any flags.
+         * @param regex regular expression defining what should be matched to use this image.
          * @param resId resource id of the image (in the autofill service's package). The
          * {@link RemoteViews presentation} must contain a {@link ImageView} child with that id.
          */
-        public Builder(@NonNull AutofillId id, @NonNull String regex, @DrawableRes int resId) {
+        public Builder(@NonNull AutofillId id, @NonNull Pattern regex, @DrawableRes int resId) {
             mId = Preconditions.checkNotNull(id);
 
             addOption(regex, resId);
@@ -119,34 +119,27 @@ public final class ImageTransformation extends InternalTransformation implements
         /**
          * Adds an option to replace the child view with a different image when the regex matches.
          *
-         * @param regex regular expression defining what should be matched to use this image. The
-         * pattern will be {@link Pattern#compile compiled} without setting any flags.
+         * @param regex regular expression defining what should be matched to use this image.
          * @param resId resource id of the image (in the autofill service's package). The
          * {@link RemoteViews presentation} must contain a {@link ImageView} child with that id.
          *
          * @return this build
          */
-        public Builder addOption(@NonNull String regex, @DrawableRes int resId) {
+        public Builder addOption(@NonNull Pattern regex, @DrawableRes int resId) {
             throwIfDestroyed();
 
+            Preconditions.checkNotNull(regex);
             Preconditions.checkArgument(resId != 0);
 
-            // Check regex
-            Pattern pattern = Pattern.compile(regex);
-
-            mOptions.add(new Pair<>(pattern, resId));
+            mOptions.add(new Pair<>(regex, resId));
             return this;
         }
 
         /**
          * Creates a new {@link ImageTransformation} instance.
-         *
-         * @throws IllegalStateException if no call to {@link #addOption(String, int)} was made.
          */
         public ImageTransformation build() {
             throwIfDestroyed();
-            Preconditions.checkState(mOptions != null && !mOptions.isEmpty(),
-                    "Must add at least one option");
             mDestroyed = true;
             return new ImageTransformation(this);
         }
@@ -178,14 +171,14 @@ public final class ImageTransformation extends InternalTransformation implements
         parcel.writeParcelable(mId, flags);
 
         final int size = mOptions.size();
-        final String[] regexs = new String[size];
+        final Pattern[] regexs = new Pattern[size];
         final int[] resIds = new int[size];
         for (int i = 0; i < size; i++) {
             Pair<Pattern, Integer> regex = mOptions.get(i);
-            regexs[i] = regex.first.pattern();
+            regexs[i] = regex.first;
             resIds[i] = regex.second;
         }
-        parcel.writeStringArray(regexs);
+        parcel.writeSerializable(regexs);
         parcel.writeIntArray(resIds);
     }
 
@@ -195,7 +188,7 @@ public final class ImageTransformation extends InternalTransformation implements
         public ImageTransformation createFromParcel(Parcel parcel) {
             final AutofillId id = parcel.readParcelable(null);
 
-            final String[] regexs = parcel.createStringArray();
+            final Pattern[] regexs = (Pattern[]) parcel.readSerializable();
             final int[] resIds = parcel.createIntArray();
 
             // Always go through the builder to ensure the data ingested by the system obeys the
