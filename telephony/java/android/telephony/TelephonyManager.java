@@ -767,12 +767,15 @@ public class TelephonyManager {
      * The {@link #EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT} extra is a
      * {@link android.app.PendingIntent} that will launch the voicemail settings. This extra is only
      * available when the voicemail number is not set.
+     * The {@link #EXTRA_IS_REFRESH} extra indicates whether the notification is a refresh or a new
+     * notification.
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @see #EXTRA_NOTIFICATION_COUNT
      * @see #EXTRA_VOICEMAIL_NUMBER
      * @see #EXTRA_CALL_VOICEMAIL_INTENT
      * @see #EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT
+     * @see #EXTRA_IS_REFRESH
      */
     public static final String ACTION_SHOW_VOICEMAIL_NOTIFICATION =
             "android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION";
@@ -809,6 +812,15 @@ public class TelephonyManager {
      */
     public static final String EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT =
             "android.telephony.extra.LAUNCH_VOICEMAIL_SETTINGS_INTENT";
+
+    /**
+     * Boolean value representing whether the {@link
+     * TelephonyManager#ACTION_SHOW_VOICEMAIL_NOTIFICATION} is new or a refresh of an existing
+     * notification. Notification refresh happens after reboot or connectivity changes. The user has
+     * already been notified for the voicemail so it should not alert the user, and should not be
+     * shown again if the user has dismissed it.
+     */
+    public static final String EXTRA_IS_REFRESH = "android.telephony.extra.IS_REFRESH";
 
     /**
      * {@link android.telecom.Connection} event used to indicate that an IMS call has be
