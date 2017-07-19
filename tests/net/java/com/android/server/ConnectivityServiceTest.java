@@ -881,6 +881,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     private void verifyNoNetwork() {
+        waitForIdle();
         // Test getActiveNetworkInfo()
         assertNull(mCm.getActiveNetworkInfo());
         // Test getActiveNetwork()
@@ -3277,7 +3278,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         ConditionVariable broadcastCV = waitForConnectivityBroadcasts(1);
 
         verifyNoNetwork();
-        MockNetworkAgent lowpanNetwork = new MockNetworkAgent(TRANSPORT_WIFI_AWARE);
+        MockNetworkAgent wifiAware = new MockNetworkAgent(TRANSPORT_WIFI_AWARE);
         assertNull(mCm.getActiveNetworkInfo());
 
         Network[] allNetworks = mCm.getAllNetworks();
@@ -3291,19 +3292,19 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         final TestNetworkCallback callback = new TestNetworkCallback();
         mCm.registerNetworkCallback(request, callback);
 
-        // Bring up lowpan.
-        lowpanNetwork.connect(false, false);
-        callback.expectAvailableCallbacks(lowpanNetwork);
+        // Bring up wifi aware network.
+        wifiAware.connect(false, false);
+        callback.expectAvailableCallbacks(wifiAware);
 
         assertNull(mCm.getActiveNetworkInfo());
         assertNull(mCm.getActiveNetwork());
-        // TODO: getAllNetworkInfo is dirty and returns a non-empty array rght from the start
+        // TODO: getAllNetworkInfo is dirty and returns a non-empty array right from the start
         // of this test. Fix it and uncomment the assert below.
         //assertEmpty(mCm.getAllNetworkInfo());
 
-        // Disconnect lowpan.
-        lowpanNetwork.disconnect();
-        callback.expectCallback(CallbackState.LOST, lowpanNetwork);
+        // Disconnect wifi aware network.
+        wifiAware.disconnect();
+        callback.expectCallbackLike((info) -> info.state == CallbackState.LOST, TIMEOUT_MS);
         mCm.unregisterNetworkCallback(callback);
 
         verifyNoNetwork();
