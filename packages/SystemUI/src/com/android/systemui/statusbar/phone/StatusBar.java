@@ -102,6 +102,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
@@ -562,7 +563,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }};
 
     private boolean mWaitingForKeyguardExit;
-    private boolean mDozing;
+    protected boolean mDozing;
     private boolean mDozingRequested;
     protected boolean mScrimSrcModeEnabled;
 
@@ -7233,7 +7234,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        if (mNotificationData.shouldSuppressScreenOn(sbn.getKey())) {
+        if (!isDozing() && mNotificationData.shouldSuppressScreenOn(sbn.getKey())) {
+            if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
+            return false;
+        }
+
+        if (isDozing() && mNotificationData.shouldSuppressScreenOff(sbn.getKey())) {
             if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }

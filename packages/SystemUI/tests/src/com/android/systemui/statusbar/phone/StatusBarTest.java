@@ -334,6 +334,83 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldPeek_suppressedScreenOn_dozing() {
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
+        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
+        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
+
+        mStatusBar.mDozing = true;
+        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(true);
+        when(mNotificationData.shouldSuppressScreenOff(any())).thenReturn(false);
+
+        Notification n = new Notification.Builder(getContext(), "a").build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
+                UserHandle.of(0), null, 0);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+
+        assertTrue(mStatusBar.shouldPeek(entry, sbn));
+    }
+
+    @Test
+    public void testShouldPeek_suppressedScreenOn_noDoze() {
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
+        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
+        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
+
+        mStatusBar.mDozing = false;
+        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(true);
+        when(mNotificationData.shouldSuppressScreenOff(any())).thenReturn(false);
+
+        Notification n = new Notification.Builder(getContext(), "a").build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
+                UserHandle.of(0), null, 0);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        assertFalse(mStatusBar.shouldPeek(entry, sbn));
+    }
+    @Test
+    public void testShouldPeek_suppressedScreenOff_dozing() {
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
+        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
+        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
+
+        mStatusBar.mDozing = true;
+        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(false);
+        when(mNotificationData.shouldSuppressScreenOff(any())).thenReturn(true);
+
+        Notification n = new Notification.Builder(getContext(), "a").build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
+                UserHandle.of(0), null, 0);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        assertFalse(mStatusBar.shouldPeek(entry, sbn));
+    }
+
+    @Test
+    public void testShouldPeek_suppressedScreenOff_noDoze() {
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
+        when(mNotificationData.shouldFilterOut(any())).thenReturn(false);
+        when(mSystemServicesProxy.isDreaming()).thenReturn(false);
+        when(mNotificationData.getImportance(any())).thenReturn(IMPORTANCE_HIGH);
+
+        mStatusBar.mDozing = false;
+        when(mNotificationData.shouldSuppressScreenOn(any())).thenReturn(false);
+        when(mNotificationData.shouldSuppressScreenOff(any())).thenReturn(true);
+
+        Notification n = new Notification.Builder(getContext(), "a").build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, "a", 0, 0, n,
+                UserHandle.of(0), null, 0);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        assertTrue(mStatusBar.shouldPeek(entry, sbn));
+    }
+
+
+    @Test
     public void testLogHidden() {
         try {
             mStatusBar.handleVisibleToUserChanged(false);
