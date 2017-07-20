@@ -268,3 +268,16 @@ option java_package com.android.server
 # GestureLauncherService.java
 # ---------------------------
 40100 camera_gesture_triggered (gesture_on_time|2|3), (sensor1_on_time|2|3), (sensor2_on_time|2|3), (event_extra|1|1)
+
+# ---------------------------
+# timezone/RulesManagerService.java
+# ---------------------------
+51600 timezone_trigger_check (token|3)
+51610 timezone_request_install (token|3)
+51611 timezone_install_started (token|3)
+51612 timezone_install_complete (token|3), (result|1)
+51620 timezone_request_uninstall (token|3)
+51621 timezone_uninstall_started (token|3)
+51622 timezone_uninstall_complete (token|3), (result|1)
+51630 timezone_request_nothing (token|3)
+51631 timezone_nothing_complete (token|3)
