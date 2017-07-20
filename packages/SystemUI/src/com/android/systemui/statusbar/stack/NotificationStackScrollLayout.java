@@ -369,6 +369,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private NotificationShelf mShelf;
     private int mMaxDisplayedNotifications = -1;
     private int mStatusBarHeight;
+    private int mMinInteractionHeight;
     private boolean mNoAmbient;
     private final Rect mClipRect = new Rect();
     private boolean mIsClipped;
@@ -517,6 +518,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 R.dimen.min_top_overscroll_to_qs);
         mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
         mBottomMargin = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
+        mMinInteractionHeight = res.getDimensionPixelSize(
+                R.dimen.notification_min_interaction_height);
     }
 
     public void setDrawBackgroundAsSrc(boolean asSrc) {
@@ -1079,7 +1082,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int count = getChildCount();
         for (int childIdx = 0; childIdx < count; childIdx++) {
             ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
-            if (slidingChild.getVisibility() == GONE
+            if (slidingChild.getVisibility() != VISIBLE
                     || slidingChild instanceof StackScrollerDecorView) {
                 continue;
             }
@@ -1093,7 +1096,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             int left = 0;
             int right = getWidth();
 
-            if (touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
+            if (bottom - top >= mMinInteractionHeight
+                    && touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
@@ -2005,6 +2009,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         mContentHeight = height + mTopPadding + mBottomMargin;
         updateScrollability();
+        clampScrollPosition();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
     }
 
@@ -3463,7 +3468,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
-        if (view instanceof ExpandableNotificationRow) {
+        if (view instanceof ExpandableNotificationRow && !onKeyguard()) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             if (row.isUserLocked() && row != getFirstChildNotGone()) {
                 if (row.isSummaryWithChildren()) {
