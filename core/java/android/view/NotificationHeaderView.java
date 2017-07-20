@@ -59,6 +59,7 @@ public class NotificationHeaderView extends ViewGroup {
     private Drawable mBackground;
     private int mHeaderBackgroundHeight;
     private boolean mEntireHeaderClickable;
+    private boolean mExpandOnlyOnButton;
     private boolean mAcceptAllTouches;
 
     ViewOutlineProvider mProvider = new ViewOutlineProvider() {
@@ -315,6 +316,7 @@ public class NotificationHeaderView extends ViewGroup {
     public class HeaderTouchListener implements View.OnTouchListener {
 
         private final ArrayList<Rect> mTouchRects = new ArrayList<>();
+        private Rect mExpandButtonRect;
         private int mTouchSlop;
         private boolean mTrackGesture;
         private float mDownX;
@@ -326,7 +328,7 @@ public class NotificationHeaderView extends ViewGroup {
         public void bindTouchRects() {
             mTouchRects.clear();
             addRectAroundView(mIcon);
-            addRectAroundView(mExpandButton);
+            mExpandButtonRect = addRectAroundView(mExpandButton);
             addWidthRect();
             mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }
@@ -340,9 +342,10 @@ public class NotificationHeaderView extends ViewGroup {
             mTouchRects.add(r);
         }
 
-        private void addRectAroundView(View view) {
+        private Rect addRectAroundView(View view) {
             final Rect r = getRectAroundView(view);
             mTouchRects.add(r);
+            return r;
         }
 
         private Rect getRectAroundView(View view) {
@@ -395,6 +398,9 @@ public class NotificationHeaderView extends ViewGroup {
             if (mAcceptAllTouches) {
                 return true;
             }
+            if (mExpandOnlyOnButton) {
+                return mExpandButtonRect.contains((int) x, (int) y);
+            }
             for (int i = 0; i < mTouchRects.size(); i++) {
                 Rect r = mTouchRects.get(i);
                 if (r.contains((int) x, (int) y)) {
@@ -439,5 +445,13 @@ public class NotificationHeaderView extends ViewGroup {
     @RemotableViewMethod
     public void setAcceptAllTouches(boolean acceptAllTouches) {
         mAcceptAllTouches = mEntireHeaderClickable || acceptAllTouches;
+    }
+
+    /**
+     * Sets whether only the expand icon itself should serve as the expand target.
+     */
+    @RemotableViewMethod
+    public void setExpandOnlyOnButton(boolean expandOnlyOnButton) {
+        mExpandOnlyOnButton = expandOnlyOnButton;
     }
 }
