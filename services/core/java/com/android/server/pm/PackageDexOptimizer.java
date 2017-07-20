@@ -162,6 +162,14 @@ public class PackageDexOptimizer {
             }
             // Append shared libraries with split dependencies for this split.
             String path = paths.get(i);
+            if (options.getSplitName() != null) {
+                // We are asked to compile only a specific split. Check that the current path is
+                // what we are looking for.
+                if (!options.getSplitName().equals(new File(path).getName())) {
+                    continue;
+                }
+            }
+
             String sharedLibrariesPathWithSplits;
             if (sharedLibrariesPath != null && splitDependencies[i] != null) {
                 sharedLibrariesPathWithSplits = sharedLibrariesPath + ":" + splitDependencies[i];

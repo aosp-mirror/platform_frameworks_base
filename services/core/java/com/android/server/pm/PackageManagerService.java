@@ -9479,11 +9479,12 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean performDexOptMode(String packageName,
             boolean checkProfiles, String targetCompilerFilter, boolean force,
-            boolean bootComplete) {
+            boolean bootComplete, String splitName) {
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0) |
                 (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
-        return performDexOpt(new DexoptOptions(packageName, targetCompilerFilter, flags));
+        return performDexOpt(new DexoptOptions(packageName, targetCompilerFilter,
+                splitName, flags));
     }
 
     /**
