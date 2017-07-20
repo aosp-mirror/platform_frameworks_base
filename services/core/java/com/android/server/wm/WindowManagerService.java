@@ -2410,7 +2410,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean okToAnimate() {
-        return okToDisplay() && mPolicy.isInteractive();
+        return okToDisplay() && mPolicy.okToAnimate();
     }
 
     @Override
