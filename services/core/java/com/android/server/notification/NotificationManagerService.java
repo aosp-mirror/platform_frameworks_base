@@ -3828,13 +3828,6 @@ public class NotificationManagerService extends SystemService {
             return true;
         }
 
-        // Suppressed for being too recently noisy
-        final String pkg = record.sbn.getPackageName();
-        if (mUsageStats.isAlertRateLimited(pkg)) {
-            Slog.e(TAG, "Muting recently noisy " + record.getKey());
-            return true;
-        }
-
         // muted by listener
         final String disableEffects = disableNotificationEffects(record);
         if (disableEffects != null) {
@@ -3850,6 +3843,13 @@ public class NotificationManagerService extends SystemService {
         // Suppressed because another notification in its group handles alerting
         if (record.sbn.isGroup()) {
             return notification.suppressAlertingDueToGrouping();
+        }
+
+        // Suppressed for being too recently noisy
+        final String pkg = record.sbn.getPackageName();
+        if (mUsageStats.isAlertRateLimited(pkg)) {
+            Slog.e(TAG, "Muting recently noisy " + record.getKey());
+            return true;
         }
 
         return false;
