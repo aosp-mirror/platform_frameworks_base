@@ -1266,7 +1266,9 @@ public class MediaRouter {
     }
 
     static void dispatchRouteChanged(RouteInfo info, int oldSupportedTypes) {
-        Log.v(TAG, "Dispatching route change: " + info);
+        if (DEBUG) {
+            Log.d(TAG, "Dispatching route change: " + info);
+        }
         final int newSupportedTypes = info.mSupportedTypes;
         for (CallbackInfo cbi : sStatic.mCallbacks) {
             // Reconstruct some of the history for callbacks that may not have observed
