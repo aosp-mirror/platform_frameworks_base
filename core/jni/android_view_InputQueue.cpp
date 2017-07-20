@@ -26,9 +26,9 @@
 #include <input/Input.h>
 #include <utils/Looper.h>
 #include <utils/TypeHelpers.h>
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedLocalRef.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_os_MessageQueue.h"
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"

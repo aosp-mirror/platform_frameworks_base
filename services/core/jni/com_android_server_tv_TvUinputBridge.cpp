@@ -20,7 +20,7 @@
 
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <android/keycodes.h>
 
 #include <utils/BitSet.h>

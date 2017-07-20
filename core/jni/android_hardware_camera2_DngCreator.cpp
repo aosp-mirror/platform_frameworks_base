@@ -46,7 +46,7 @@
 #include "android_runtime/android_hardware_camera2_CameraMetadata.h"
 
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 
 using namespace android;
 using namespace img_utils;

@@ -31,7 +31,7 @@
 #include "GraphicsJNI.h"
 #include "NinePatchUtils.h"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 using namespace android;

@@ -5,7 +5,7 @@
 #include "SkTypes.h"
 #include "Utils.h"
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <memory>
 
 static jmethodID    gInputStream_readMethodID;

@@ -25,7 +25,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "core_jni_helpers.h"
 

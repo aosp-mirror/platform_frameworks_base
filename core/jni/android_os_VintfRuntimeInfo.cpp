@@ -17,7 +17,7 @@
 #define LOG_TAG "VintfRuntimeInfo"
 //#define LOG_NDEBUG 0
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <vintf/VintfObject.h>
 #include <vintf/parse_string.h>
 #include <vintf/parse_xml.h>

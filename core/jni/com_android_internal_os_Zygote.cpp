@@ -54,10 +54,10 @@
 #include <processgroup/processgroup.h>
 
 #include "core_jni_helpers.h"
-#include "JNIHelp.h"
-#include "ScopedLocalRef.h"
-#include "ScopedPrimitiveArray.h"
-#include "ScopedUtfChars.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "fd_utils.h"
 
 #include "nativebridge/native_bridge.h"
