@@ -23,6 +23,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
+import com.android.settingslib.wifi.AccessPoint.Speed;
 
 import java.util.ArrayList;
 
@@ -40,6 +41,7 @@ public class TestAccessPointBuilder {
 
     // set some sensible defaults
     private String mBssid = null;
+    private int mSpeed = Speed.NONE;
     private int mRssi = AccessPoint.UNREACHABLE_RSSI;
     private int mNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
     private String ssid = "TestSsid";
@@ -78,6 +80,7 @@ public class TestAccessPointBuilder {
             bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, mScanResultCache);
         }
         bundle.putInt(AccessPoint.KEY_SECURITY, mSecurity);
+        bundle.putInt(AccessPoint.KEY_SPEED, mSpeed);
 
         AccessPoint ap = new AccessPoint(mContext, bundle);
         ap.setRssi(mRssi);
@@ -124,6 +127,11 @@ public class TestAccessPointBuilder {
 
     public TestAccessPointBuilder setRssi(int rssi) {
         mRssi = rssi;
+        return this;
+    }
+
+    public TestAccessPointBuilder setSpeed(int speed) {
+        mSpeed = speed;
         return this;
     }
 
