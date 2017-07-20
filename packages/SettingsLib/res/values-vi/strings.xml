@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Tùy chỉnh (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Trợ giúp và phản hồi"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Nhập mật khẩu để tiến hành khôi phục cài đặt gốc ở chế độ trình diễn"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Tiếp theo"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Yêu cầu mật khẩu"</string>

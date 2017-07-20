@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"自訂 (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"說明和意見反映"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"選單"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"輸入密碼即可在示範模式下重設原廠設定"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"下一步"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"請輸入密碼"</string>

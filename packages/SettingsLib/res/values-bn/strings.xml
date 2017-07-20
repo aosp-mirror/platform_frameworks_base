@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"কাস্টম (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"সহায়তা ও মতামত"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"মেনু"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ডেমো মোডে ফ্যাক্টরি রিসেট করতে পাসওয়ার্ড দিন"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"পরবর্তী"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"পাসওয়ার্ড আবশ্যক"</string>

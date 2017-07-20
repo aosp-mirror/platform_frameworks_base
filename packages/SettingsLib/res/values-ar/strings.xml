@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"مخصص (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"المساعدة والتعليقات"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"القائمة"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"غرينيتش"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"إدخال كلمة المرور لإعادة الضبط بحسب بيانات المصنع في الوضع التجريبي"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"التالي"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"يلزم توفر كلمة مرور"</string>

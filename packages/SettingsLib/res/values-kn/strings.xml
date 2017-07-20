@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ಕಸ್ಟಮ್ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ಸಹಾಯ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ಮೆನು"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ಫ್ಯಾಕ್ಟರಿ ರಿಸೆಟ್‌ಗೆ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"ಮುಂದೆ"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿದೆ"</string>
