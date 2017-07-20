@@ -18,6 +18,7 @@ package android.provider;
 
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.system.OsConstants.SEEK_SET;
+
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
@@ -28,7 +29,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -44,7 +44,6 @@ import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.Parcelable;
 import android.os.ParcelableException;
 import android.os.RemoteException;
@@ -181,6 +180,15 @@ public final class DocumentsContract {
 
     /** {@hide} */
     public static final String PACKAGE_DOCUMENTS_UI = "com.android.documentsui";
+
+    /** {@hide} */
+    public static final String METADATA_TYPES = "android:documentMetadataType";
+
+    /** {@hide} */
+    public static final String METADATA_EXIF = "android:documentExif";
+
+    /** {@hide} */
+    public static final String EXTRA_METADATA_TAGS = "android:documentMetadataTags";
 
     /**
      * Constants related to a document, including {@link Cursor} column names
@@ -442,6 +450,13 @@ public final class DocumentsContract {
          * @hide
          */
         public static final int FLAG_PARTIAL = 1 << 16;
+
+        /**
+         * Flag indicating that a document has available metadata that can be read
+         * using DocumentsContract#getDocumentMetadata
+         * @hide
+         */
+        public static final int FLAG_SUPPORTS_METADATA = 1 << 17;
     }
 
     /**
@@ -706,6 +721,8 @@ public final class DocumentsContract {
     public static final String METHOD_FIND_DOCUMENT_PATH = "android:findDocumentPath";
     /** {@hide} */
     public static final String METHOD_CREATE_WEB_LINK_INTENT = "android:createWebLinkIntent";
+    /** {@hide} */
+    public static final String METHOD_GET_DOCUMENT_METADATA = "android:getDocumentMetadata";
 
     /** {@hide} */
     public static final String EXTRA_PARENT_URI = "parentUri";
@@ -1375,6 +1392,89 @@ public final class DocumentsContract {
         in.putParcelable(DocumentsContract.EXTRA_URI, rootUri);
 
         client.call(METHOD_EJECT_ROOT, null, in);
+    }
+
+    /**
+     * Returns metadata associated with the document. The type of metadata returned
+     * is specific to the document type. For example image files will largely return EXIF
+     * metadata.
+     *
+     * <p>The returned {@link Bundle} will contain zero or more entries.
+     * <p>Each entry represents a specific type of metadata.
+     *
+     * <p>if tags == null, then a list of default tags will be used.
+     *
+     * @param documentUri a Document URI
+     * @param tags an array of keys to choose which data are added to the Bundle. If the Document
+     *             is a JPG or ExifInterface compatible, send keys from {@link ExifInterface}.
+     *             If tags are null, a set of default tags will be used. If the tags don't
+     *             match with any relevant data, they will not be added to the Bundle.
+     * @return a Bundle of Bundles. If metadata exists within the Bundle, there will also
+     * be a String under DocumentsContract.METADATA_TYPES that will return a String[] of the
+     * types of metadata gathered.
+     *
+     * <pre><code>
+     *     Bundle metadata = DocumentsContract.getDocumentMetadata(resolver, imageDocUri, tags);
+     *     int imageLength = metadata.getInt(ExifInterface.TAG_IMAGE_LENGTH);
+     * </code></pre>
+     *
+     * {@hide}
+     */
+    public static Bundle getDocumentMetadata(ContentResolver resolver, Uri documentUri,
+            @Nullable String[] tags)
+            throws FileNotFoundException {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                documentUri.getAuthority());
+
+        try {
+            return getDocumentMetadata(client, documentUri, tags);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to get document metadata");
+            rethrowIfNecessary(resolver, e);
+            return null;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
+    /**
+     * Returns metadata associated with the document. The type of metadata returned
+     * is specific to the document type. For example image files will largely return EXIF
+     * metadata.
+     *
+     * <p>The returned {@link Bundle} will contain zero or more entries.
+     * <p>Each entry represents a specific type of metadata.
+     *
+     * <p>if tags == null, then a list of default tags will be used.
+     *
+     * @param documentUri a Document URI
+     * @param tags an array of keys to choose which data are added to the Bundle. If the Document
+     *             is a JPG or ExifInterface compatible, send keys from {@link ExifInterface}.
+     *             If tags are null, a set of default tags will be used. If the tags don't
+     *             match with any relevant data, they will not be added to the Bundle.
+     * @return a Bundle of Bundles. If metadata exists within the Bundle, there will also
+     * be a String under DocumentsContract.METADATA_TYPES that will return a String[] of the
+     * types of metadata gathered.
+     *
+     * <pre><code>
+     *     Bundle metadata = DocumentsContract.getDocumentMetadata(client, imageDocUri, tags);
+     *     int imageLength = metadata.getInt(ExifInterface.TAG_IMAGE_LENGTH);
+     * </code></pre>
+     *
+     * {@hide}
+     */
+    public static Bundle getDocumentMetadata(ContentProviderClient client,
+            Uri documentUri, @Nullable String[] tags) throws RemoteException {
+        final Bundle in = new Bundle();
+        in.putParcelable(EXTRA_URI, documentUri);
+        in.putStringArray(EXTRA_METADATA_TAGS, tags);
+
+        final Bundle out = client.call(METHOD_GET_DOCUMENT_METADATA, null, in);
+
+        if (out == null) {
+            throw new RemoteException("Failed to get a response from getDocumentMetadata");
+        }
+        return out;
     }
 
     /**
