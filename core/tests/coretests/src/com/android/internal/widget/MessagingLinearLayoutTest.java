@@ -22,12 +22,12 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.espresso.core.deps.guava.base.Function;
 import android.support.test.filters.SmallTest;
 import android.view.LayoutInflater;
 import android.view.View.MeasureSpec;
 
 import com.android.frameworks.coretests.R;
+import com.google.common.base.Function;
 
 import org.junit.Before;
 import org.junit.Test;
