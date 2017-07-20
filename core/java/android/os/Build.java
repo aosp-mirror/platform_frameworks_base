@@ -759,6 +759,11 @@ public class Build {
          * O.
          */
         public static final int O = 26;
+
+        /**
+         * O MR1.
+         */
+        public static final int O_MR1 = CUR_DEVELOPMENT; // STOPSHIP Replace with the real version.
     }
 
     /** The type of build, like "user" or "eng". */
