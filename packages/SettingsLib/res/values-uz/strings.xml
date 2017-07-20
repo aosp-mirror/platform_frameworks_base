@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Moslashtirilgan (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Yordam va fikr-mulohaza"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menyu"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Demo rejimda zavod holatiga qaytarish uchun parolni kiriting"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Keyingisi"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Parolni kiritish zarur"</string>

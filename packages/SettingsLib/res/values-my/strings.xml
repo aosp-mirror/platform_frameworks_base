@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"စိတ်ကြိုက် (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"အကူအညီနှင့် အကြံပြုချက်"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"မီနူး"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"ဂရင်းနစ်စံတော်ချိန်"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ဒီမိုမုဒ်၌မူလဆက်တင်ထားရန် စကားဝှက်ထည့်ပါ"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"ရှေ့သို့"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"စကားဝှက် လိုအပ်သည်"</string>

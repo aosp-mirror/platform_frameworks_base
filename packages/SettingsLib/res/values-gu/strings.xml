@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"કસ્ટમ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"સહાય અને પ્રતિસાદ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"મેનુ"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ડેમો મોડમાં ફેક્ટરી રીસેટ પાસવર્ડ દાખલ કરો"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"આગલું"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"પાસવર્ડ આવશ્યક છે"</string>

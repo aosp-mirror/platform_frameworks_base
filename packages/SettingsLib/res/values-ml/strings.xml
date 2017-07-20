@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ഇഷ്ടാനുസൃതം ( <xliff:g id="DENSITYDPI">%d</xliff:g> )"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"സഹായവും പ്രതികരണവും"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"മെനു"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ഡെമോ ‌മോഡിൽ ഫാക്ടറി റീസെറ്റിന് പാസ്‌വേഡ് നൽകുക"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"അടുത്തത്"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"പാസ്‌വേഡ് ആവശ്യമാണ്"</string>

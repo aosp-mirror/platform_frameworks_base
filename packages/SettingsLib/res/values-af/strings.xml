@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Gepasmaak (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Hulp en terugvoer"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Kieslys"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"MGT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Voer wagwoord in om fabriekterugstelling in demonstrasiemodus uit te voer"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Volgende"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Wagwoord word benodig"</string>

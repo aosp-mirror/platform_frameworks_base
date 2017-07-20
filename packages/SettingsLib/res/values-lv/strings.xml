@@ -375,7 +375,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Pielāgots (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Palīdzība un atsauksmes"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Izvēlne"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Iev. paroli, lai atiest. rūpnīcas iest. dem. režīmā"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Tālāk"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Nepieciešama parole"</string>
