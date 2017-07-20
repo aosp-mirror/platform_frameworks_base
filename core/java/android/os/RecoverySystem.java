@@ -24,11 +24,11 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.euicc.EuiccManager;
 import android.text.TextUtils;
@@ -751,9 +751,7 @@ public class RecoverySystem {
         // Block until the ordered broadcast has completed.
         condition.block();
 
-        // TODO(b/63693573): Uncomment this once the pSIM slot is restored as needed
-        // after the ensuing boot. Currently you end up stuck on the eSIM.
-        // wipeEuiccData(context, wipeEuicc);
+        wipeEuiccData(context, wipeEuicc);
 
         String shutdownArg = null;
         if (shutdown) {
@@ -770,6 +768,14 @@ public class RecoverySystem {
     }
 
     private static void wipeEuiccData(Context context, final boolean isWipeEuicc) {
+        ContentResolver cr = context.getContentResolver();
+        if (Settings.Global.getInt(cr, Settings.Global.EUICC_PROVISIONED, 0) == 0) {
+            // If the eUICC isn't provisioned, there's no reason to either wipe or retain profiles,
+            // as there's nothing to wipe nor retain.
+            Log.d(TAG, "Skipping eUICC wipe/retain as it is not provisioned");
+            return;
+        }
+
         EuiccManager euiccManager = (EuiccManager) context.getSystemService(
                 Context.EUICC_SERVICE);
         if (euiccManager != null && euiccManager.isEnabled()) {
