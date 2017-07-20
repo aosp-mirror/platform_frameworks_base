@@ -20,7 +20,7 @@
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include "android_view_InputDevice.h"
 #include "android_view_KeyCharacterMap.h"

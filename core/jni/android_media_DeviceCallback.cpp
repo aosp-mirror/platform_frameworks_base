@@ -19,8 +19,8 @@
 #define LOG_TAG "AudioDeviceCallback-JNI"
 
 #include <utils/Log.h>
-#include <JNIHelp.h>
-#include <JniConstants.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JniConstants.h>
 #include "core_jni_helpers.h"
 #include <media/AudioSystem.h>
 

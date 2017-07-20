@@ -18,7 +18,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 
 #include <android/hardware/vr/1.0/IVr.h>
 #include <utils/Errors.h>

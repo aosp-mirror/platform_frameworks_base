@@ -18,7 +18,7 @@
 #include <error.h>
 #include <hidl/HidlSupport.h>
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <linux/netfilter/nfnetlink.h>
 #include <linux/netlink.h>
 #include <sys/socket.h>

@@ -24,7 +24,7 @@
 #include <utils/threads.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 using namespace android;
 

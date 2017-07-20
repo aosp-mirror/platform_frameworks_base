@@ -21,13 +21,13 @@
 
 #include "hardware_legacy/uevent.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <utils/Mutex.h>
 #include <utils/Vector.h>
 #include <utils/String8.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 namespace android {
 

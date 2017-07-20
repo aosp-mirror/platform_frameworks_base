@@ -17,7 +17,7 @@
 #define LOG_TAG "LightsService"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 
 #include <android/hardware/light/2.0/ILight.h>

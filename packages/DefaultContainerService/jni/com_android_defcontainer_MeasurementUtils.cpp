@@ -16,7 +16,7 @@
 
 #define LOG_TAG "DefContainer-JNI"
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 
 #include <diskusage/dirsize.h>
 #include <utils/Log.h>

@@ -37,9 +37,9 @@
 #include "android_util_Binder.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
-#include "JNIHelp.h"
-#include "ScopedStringChars.h"
-#include "ScopedUtfChars.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedStringChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "utils/Log.h"
 #include "utils/misc.h"
 #include "utils/String8.h"
