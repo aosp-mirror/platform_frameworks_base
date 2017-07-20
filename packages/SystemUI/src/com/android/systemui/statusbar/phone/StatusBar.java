@@ -1792,7 +1792,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
         if (entry != null && mNotificationGutsExposed != null
-                && mNotificationGutsExposed == entry.row.getGuts()) {
+                && mNotificationGutsExposed == entry.row.getGuts() && entry.row.getGuts() != null
+                && !entry.row.getGuts().isLeavebehind()) {
             Log.w(TAG, "Keeping notification because it's showing guts. " + key);
             mLatestRankingMap = ranking;
             mKeyToRemoveOnGutsClosed = key;
