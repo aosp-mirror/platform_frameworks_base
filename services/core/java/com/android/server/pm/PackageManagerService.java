@@ -283,6 +283,7 @@ import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
@@ -9371,21 +9372,22 @@ public class PackageManagerService extends IPackageManager.Stub
             // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
             // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
             // trade-off worth doing to save boot time work.
-            int primaryDexOptStaus = performDexOptTraced(pkg.packageName,
-                    false /* checkProfiles */,
+            int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
+            int primaryDexOptStaus = performDexOptTraced(new DexoptOptions(
+                    pkg.packageName,
                     compilerFilter,
-                    false /* force */,
-                    bootComplete,
-                    false /* downgrade */);
+                    dexoptFlags));
 
             if (pkg.isSystemApp()) {
                 // Only dexopt shared secondary dex files belonging to system apps to not slow down
                 // too much boot after an OTA.
-                mDexManager.dexoptSecondaryDex(pkg.packageName,
+                int secondaryDexoptFlags = dexoptFlags |
+                        DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
+                        DexoptOptions.DEXOPT_ONLY_SHARED_DEX;
+                mDexManager.dexoptSecondaryDex(new DexoptOptions(
+                        pkg.packageName,
                         compilerFilter,
-                        false /* force */,
-                        true /* compileOnlySharedDex */,
-                        false /* downgrade */);
+                        secondaryDexoptFlags));
             }
 
             // TODO(shubhamajmera): Record secondary dexopt stats.
@@ -9468,19 +9470,52 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /**
+     * Ask the package manager to perform a dex-opt with the given compiler filter.
+     *
+     * Note: exposed only for the shell command to allow moving packages explicitly to a
+     *       definite state.
+     */
     @Override
-    public boolean performDexOpt(String packageName,
-            boolean checkProfiles, int compileReason, boolean force, boolean bootComplete,
-            boolean downgrade) {
+    public boolean performDexOptMode(String packageName,
+            boolean checkProfiles, String targetCompilerFilter, boolean force,
+            boolean bootComplete) {
+        int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
+                (force ? DexoptOptions.DEXOPT_FORCE : 0) |
+                (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
+        return performDexOpt(new DexoptOptions(packageName, targetCompilerFilter, flags));
+    }
+
+    /**
+     * Ask the package manager to perform a dex-opt with the given compiler filter on the
+     * secondary dex files belonging to the given package.
+     *
+     * Note: exposed only for the shell command to allow moving packages explicitly to a
+     *       definite state.
+     */
+    @Override
+    public boolean performDexOptSecondary(String packageName, String compilerFilter,
+            boolean force) {
+        int flags = DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
+                DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES |
+                DexoptOptions.DEXOPT_BOOT_COMPLETE |
+                (force ? DexoptOptions.DEXOPT_FORCE : 0);
+        return performDexOpt(new DexoptOptions(packageName, compilerFilter, flags));
+    }
+
+    /*package*/ boolean performDexOpt(DexoptOptions options) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
-        } else if (isInstantApp(packageName, UserHandle.getCallingUserId())) {
+        } else if (isInstantApp(options.getPackageName(), UserHandle.getCallingUserId())) {
             return false;
         }
-        int dexoptStatus = performDexOptWithStatus(
-              packageName, checkProfiles, compileReason, force, bootComplete,
-              downgrade);
-        return dexoptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
+
+        if (options.isDexoptOnlySecondaryDex()) {
+            return mDexManager.dexoptSecondaryDex(options);
+        } else {
+            int dexoptStatus = performDexOptWithStatus(options);
+            return dexoptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
+        }
     }
 
     /**
@@ -9489,34 +9524,14 @@ public class PackageManagerService extends IPackageManager.Stub
      *  {@link PackageDexOptimizer#DEX_OPT_PERFORMED}
      *  {@link PackageDexOptimizer#DEX_OPT_FAILED}
      */
-    /* package */ int performDexOptWithStatus(String packageName,
-            boolean checkProfiles, int compileReason, boolean force, boolean bootComplete,
-            boolean downgrade) {
-        return performDexOptTraced(packageName, checkProfiles,
-                getCompilerFilterForReason(compileReason), force, bootComplete, downgrade);
+    /* package */ int performDexOptWithStatus(DexoptOptions options) {
+        return performDexOptTraced(options);
     }
 
-    @Override
-    public boolean performDexOptMode(String packageName,
-            boolean checkProfiles, String targetCompilerFilter, boolean force,
-            boolean bootComplete) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return false;
-        } else if (isInstantApp(packageName, UserHandle.getCallingUserId())) {
-            return false;
-        }
-        int dexOptStatus = performDexOptTraced(packageName, checkProfiles,
-                targetCompilerFilter, force, bootComplete, false /* downgrade */);
-        return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
-    }
-
-    private int performDexOptTraced(String packageName,
-                boolean checkProfiles, String targetCompilerFilter, boolean force,
-                boolean bootComplete, boolean downgrade) {
+    private int performDexOptTraced(DexoptOptions options) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
-            return performDexOptInternal(packageName, checkProfiles,
-                    targetCompilerFilter, force, bootComplete, downgrade);
+            return performDexOptInternal(options);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -9524,12 +9539,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // Run dexopt on a given package. Returns true if dexopt did not fail, i.e.
     // if the package can now be considered up to date for the given filter.
-    private int performDexOptInternal(String packageName,
-                boolean checkProfiles, String targetCompilerFilter, boolean force,
-                boolean bootComplete, boolean downgrade) {
+    private int performDexOptInternal(DexoptOptions options) {
         PackageParser.Package p;
         synchronized (mPackages) {
-            p = mPackages.get(packageName);
+            p = mPackages.get(options.getPackageName());
             if (p == null) {
                 // Package could not be found. Report failure.
                 return PackageDexOptimizer.DEX_OPT_FAILED;
@@ -9540,8 +9553,7 @@ public class PackageManagerService extends IPackageManager.Stub
         long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mInstallLock) {
-                return performDexOptInternalWithDependenciesLI(p, checkProfiles,
-                        targetCompilerFilter, force, bootComplete, downgrade);
+                return performDexOptInternalWithDependenciesLI(p, options);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -9561,12 +9573,11 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private int performDexOptInternalWithDependenciesLI(PackageParser.Package p,
-            boolean checkProfiles, String targetCompilerFilter,
-            boolean force, boolean bootComplete, boolean downgrade) {
+            DexoptOptions options) {
         // Select the dex optimizer based on the force parameter.
         // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
         //       allocate an object here.
-        PackageDexOptimizer pdo = force
+        PackageDexOptimizer pdo = options.isForce()
                 ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
                 : mPackageDexOptimizer;
 
@@ -9583,37 +9594,14 @@ public class PackageManagerService extends IPackageManager.Stub
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
                 pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
-                        false /* checkProfiles */,
-                        targetCompilerFilter,
                         getOrCreateCompilerPackageStats(depPackage),
                         true /* isUsedByOtherApps */,
-                        bootComplete,
-                        downgrade);
+                        options);
             }
         }
-        return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
-                targetCompilerFilter, getOrCreateCompilerPackageStats(p),
-                mDexManager.isUsedByOtherApps(p.packageName), bootComplete, downgrade);
-    }
-
-    // Performs dexopt on the used secondary dex files belonging to the given package.
-    // Returns true if all dex files were process successfully (which could mean either dexopt or
-    // skip). Returns false if any of the files caused errors.
-    @Override
-    public boolean performDexOptSecondary(String packageName, String compilerFilter,
-            boolean force) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return false;
-        } else if (isInstantApp(packageName, UserHandle.getCallingUserId())) {
-            return false;
-        }
-        return mDexManager.dexoptSecondaryDex(packageName, compilerFilter, force,
-                false /* compileOnlySharedDex */, false /* downgrade */);
-    }
-
-    public boolean performDexOptSecondary(String packageName, int compileReason,
-            boolean force, boolean downgrade) {
-        return mDexManager.dexoptSecondaryDex(packageName, compileReason, force, downgrade);
+        return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets,
+                getOrCreateCompilerPackageStats(p),
+                mDexManager.isUsedByOtherApps(p.packageName), options);
     }
 
     /**
@@ -9789,11 +9777,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Whoever is calling forceDexOpt wants a compiled package.
             // Don't use profiles since that may cause compilation to be skipped.
-            final int res = performDexOptInternalWithDependenciesLI(pkg,
-                    false /* checkProfiles */, getDefaultCompilerFilter(),
-                    true /* force */,
-                    true /* bootComplete */,
-                    false /* downgrade */);
+            final int res = performDexOptInternalWithDependenciesLI(
+                    pkg,
+                    new DexoptOptions(packageName,
+                            getDefaultCompilerFilter(),
+                            DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -18255,13 +18243,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 // method because `pkg` may not be in `mPackages` yet.
                 //
                 // Also, don't fail application installs if the dexopt step fails.
+                DexoptOptions dexoptOptions = new DexoptOptions(pkg.packageName,
+                        REASON_INSTALL,
+                        DexoptOptions.DEXOPT_BOOT_COMPLETE);
                 mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
-                        null /* instructionSets */, false /* checkProfiles */,
-                        getCompilerFilterForReason(REASON_INSTALL),
+                        null /* instructionSets */,
                         getOrCreateCompilerPackageStats(pkg),
                         mDexManager.isUsedByOtherApps(pkg.packageName),
-                        true /* bootComplete */,
-                        false /* downgrade */);
+                        dexoptOptions);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
 

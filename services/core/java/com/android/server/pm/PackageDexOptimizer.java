@@ -19,9 +19,7 @@ package com.android.server.pm;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
-import android.os.Environment;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -34,6 +32,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.DexoptOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -112,18 +111,16 @@ public class PackageDexOptimizer {
      * synchronized on {@link #mInstallLock}.
      */
     int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
-            String[] instructionSets, boolean checkProfiles, String targetCompilationFilter,
-            CompilerStats.PackageStats packageStats, boolean isUsedByOtherApps,
-            boolean bootComplete, boolean downgrade) {
+            String[] instructionSets, CompilerStats.PackageStats packageStats,
+            boolean isUsedByOtherApps, DexoptOptions options) {
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
         synchronized (mInstallLock) {
             final long acquireTime = acquireWakeLockLI(pkg.applicationInfo.uid);
             try {
-                return performDexOptLI(pkg, sharedLibraries, instructionSets, checkProfiles,
-                        targetCompilationFilter, packageStats, isUsedByOtherApps, bootComplete,
-                        downgrade);
+                return performDexOptLI(pkg, sharedLibraries, instructionSets,
+                        packageStats, isUsedByOtherApps, options);
             } finally {
                 releaseWakeLockLI(acquireTime);
             }
@@ -136,9 +133,8 @@ public class PackageDexOptimizer {
      */
     @GuardedBy("mInstallLock")
     private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
-            String[] targetInstructionSets, boolean checkForProfileUpdates,
-            String targetCompilerFilter, CompilerStats.PackageStats packageStats,
-            boolean isUsedByOtherApps, boolean bootComplete, boolean downgrade) {
+            String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
+            boolean isUsedByOtherApps, DexoptOptions options) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
@@ -146,13 +142,13 @@ public class PackageDexOptimizer {
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
 
         final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
-                targetCompilerFilter, isUsedByOtherApps);
-        final boolean profileUpdated = checkForProfileUpdates &&
+                options.getCompilerFilter(), isUsedByOtherApps);
+        final boolean profileUpdated = options.isCheckForProfileUpdates() &&
                 isProfileUpdated(pkg, sharedGid, compilerFilter);
 
         final String sharedLibrariesPath = getSharedLibrariesPath(sharedLibraries);
         // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
-        final int dexoptFlags = getDexFlags(pkg, compilerFilter, bootComplete);
+        final int dexoptFlags = getDexFlags(pkg, compilerFilter, options.isBootComplete());
         // Get the dependencies of each split in the package. For each code path in the package,
         // this array contains the relative paths of each split it depends on, separated by colons.
         String[] splitDependencies = getSplitDependencies(pkg);
@@ -176,7 +172,7 @@ public class PackageDexOptimizer {
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter, profileUpdated,
                         sharedLibrariesPathWithSplits, dexoptFlags, sharedGid, packageStats,
-                        downgrade);
+                        options.isDowngrade());
                 // The end result is:
                 //  - FAILED if any path failed,
                 //  - PERFORMED if at least one path needed compilation,

@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -35,6 +34,7 @@ import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.DexoptOptions;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -314,19 +314,19 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             libraryDependencies = NO_LIBRARIES;
         }
 
+
         optimizer.performDexOpt(pkg, libraryDependencies,
-                null /* ISAs */, false /* checkProfiles */,
-                getCompilerFilterForReason(compilationReason),
+                null /* ISAs */,
                 null /* CompilerStats.PackageStats */,
                 mPackageManagerService.getDexManager().isUsedByOtherApps(pkg.packageName),
-                true /* bootComplete */,
-                false /* downgrade */);
+                new DexoptOptions(pkg.packageName, compilationReason,
+                        DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
-        mPackageManagerService.getDexManager().dexoptSecondaryDex(pkg.packageName,
-                getCompilerFilterForReason(compilationReason),
-                false /* force */,
-                false /* compileOnlySharedDex */,
-                false /* downgrade */);
+        mPackageManagerService.getDexManager().dexoptSecondaryDex(
+                new DexoptOptions(pkg.packageName, compilationReason,
+                        DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
+                        DexoptOptions.DEXOPT_BOOT_COMPLETE));
+
         return commands;
     }
 
