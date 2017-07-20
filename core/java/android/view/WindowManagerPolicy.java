@@ -74,7 +74,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.animation.Animation;
@@ -1317,12 +1316,12 @@ public interface WindowManagerPolicy {
     public boolean isScreenOn();
 
     /**
-     * @return whether the device is currently {@link PowerManager#isInteractive() interactive}.
+     * @return whether the device is currently allowed to animate.
      *
-     * Note: the screen can be on while the device is not interactive, e.g. when the device is
-     * showing Ambient Display.
+     * Note: this can be true even if it is not appropriate to animate for reasons that are outside
+     *       of the policy's authority.
      */
-    boolean isInteractive();
+    boolean okToAnimate();
 
     /**
      * Tell the policy that the lid switch has changed state.
