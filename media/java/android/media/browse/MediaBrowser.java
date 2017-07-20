@@ -485,7 +485,7 @@ public final class MediaBrowser {
             sub = new Subscription();
             mSubscriptions.put(parentId, sub);
         }
-        sub.putCallback(options, callback);
+        sub.putCallback(mContext, options, callback);
 
         // If we are connected, tell the service that we are watching. If we aren't connected,
         // the service will be told when we connect.
@@ -662,7 +662,8 @@ public final class MediaBrowser {
                 final Subscription subscription = mSubscriptions.get(parentId);
                 if (subscription != null) {
                     // Tell the app.
-                    SubscriptionCallback subscriptionCallback = subscription.getCallback(options);
+                    SubscriptionCallback subscriptionCallback =
+                            subscription.getCallback(mContext, options);
                     if (subscriptionCallback != null) {
                         List<MediaItem> data = list == null ? null : list.getList();
                         if (options == null) {
@@ -1132,7 +1133,8 @@ public final class MediaBrowser {
             return mCallbacks;
         }
 
-        public SubscriptionCallback getCallback(Bundle options) {
+        public SubscriptionCallback getCallback(Context context, Bundle options) {
+            options.setClassLoader(context.getClassLoader());
             for (int i = 0; i < mOptionsList.size(); ++i) {
                 if (MediaBrowserUtils.areSameOptions(mOptionsList.get(i), options)) {
                     return mCallbacks.get(i);
@@ -1141,7 +1143,8 @@ public final class MediaBrowser {
             return null;
         }
 
-        public void putCallback(Bundle options, SubscriptionCallback callback) {
+        public void putCallback(Context context, Bundle options, SubscriptionCallback callback) {
+            options.setClassLoader(context.getClassLoader());
             for (int i = 0; i < mOptionsList.size(); ++i) {
                 if (MediaBrowserUtils.areSameOptions(mOptionsList.get(i), options)) {
                     mCallbacks.set(i, callback);
