@@ -128,6 +128,15 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override
+    public void onFinishedWakingUp() {
+        try {
+            mService.onFinishedWakingUp();
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
+    @Override
     public void onScreenTurningOn(IKeyguardDrawnCallback callback) {
         try {
             mService.onScreenTurningOn(callback);
@@ -140,6 +149,15 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     public void onScreenTurnedOn() {
         try {
             mService.onScreenTurnedOn();
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
+    @Override
+    public void onScreenTurningOff() {
+        try {
+            mService.onScreenTurningOff();
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
