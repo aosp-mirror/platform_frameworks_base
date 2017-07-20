@@ -21,10 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"بایت"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"کیلوبایت"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"مگابایت"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"گیگابایت"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"ترابایت"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"پتابایت"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> ‏<xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"‏&lt;بدون عنوان&gt;"</string>
@@ -233,7 +229,7 @@
     <string name="global_action_assist" msgid="3892832961594295030">"دستیار"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"دستیار صوتی"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"اکنون قفل شود"</string>
-    <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"بیشتر از 999"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"۹۹۹+"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"محتواها پنهان هستند"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"محتوا بر اساس خط‌مشی پنهان شده است"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"صفحه‌‌کلید مجازی"</string>
