@@ -244,7 +244,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             boolean aboveShelf = ViewState.getFinalTranslationZ(row) > baseZHeight;
             boolean isLastChild = child == lastChild;
             float rowTranslationY = row.getTranslationY();
-            if (isLastChild || aboveShelf || backgroundForceHidden) {
+            if ((isLastChild && !child.isInShelf()) || aboveShelf || backgroundForceHidden) {
                 notificationClipEnd = shelfStart + getIntrinsicHeight();
             } else {
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
