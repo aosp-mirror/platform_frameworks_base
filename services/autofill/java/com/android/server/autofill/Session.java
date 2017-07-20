@@ -264,9 +264,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 value = getValueFromContexts(id);
             }
         }
-        // TODO(b/62534917): support list values, using the String provided by getAutofillOptions()
-        if (value != null && value.isText()) {
-            return value.getTextValue().toString();
+        if (value != null) {
+            if (value.isText()) {
+                return value.getTextValue().toString();
+            }
+            if (value.isList()) {
+                final CharSequence[] options = getAutofillOptionsFromContexts(id);
+                if (options != null) {
+                    final int index = value.getListValue();
+                    final CharSequence option = options[index];
+                    return option != null ? option.toString() : null;
+                } else {
+                    Slog.w(TAG, "getValueAsString(): no autofill options for id " + id);
+                }
+            }
         }
         return null;
     }
@@ -919,22 +930,38 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @Nullable
     private AutofillValue getValueFromContexts(AutofillId id) {
-        AutofillValue value = null;
         final int numContexts = mContexts.size();
-        for (int i = 0; i < numContexts; i++) {
+        for (int i = numContexts - 1; i >= 0; i--) {
             final FillContext context = mContexts.get(i);
             final ViewNode node = context.findViewNodeByAutofillId(id);
             if (node != null) {
-                final AutofillValue candidate = node.getAutofillValue();
+                final AutofillValue value = node.getAutofillValue();
                 if (sDebug) {
-                    Slog.d(TAG, "getValueFromContexts(" + id + ") at " + i + ": " + candidate);
+                    Slog.d(TAG, "getValueFromContexts(" + id + ") at " + i + ": " + value);
                 }
-                if (candidate != null && !candidate.isEmpty()) {
-                    value = candidate;
+                if (value != null && !value.isEmpty()) {
+                    return value;
                 }
             }
         }
-        return value;
+        return null;
+    }
+
+    /**
+     * Gets the latest autofill options for the given id in the autofill contexts.
+     */
+    @Nullable
+    private CharSequence[] getAutofillOptionsFromContexts(AutofillId id) {
+        final int numContexts = mContexts.size();
+
+        for (int i = numContexts - 1; i >= 0; i--) {
+            final FillContext context = mContexts.get(i);
+            final ViewNode node = context.findViewNodeByAutofillId(id);
+            if (node != null && node.getAutofillOptions() != null) {
+                return node.getAutofillOptions();
+            }
+        }
+        return null;
     }
 
     /**
