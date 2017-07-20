@@ -66,6 +66,8 @@ import android.util.Log;
 import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -633,6 +635,29 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
+     * Returns metadata for arbitrary file given its stream and mimetype.
+     *
+     * <p><b>Note: Providers should only call this with streams for locally cached resources.
+     * Use of network backed streams is inadvisable for performance reasons.
+     *
+     * @param stream The input stream. Should be backed by locally cached content.
+     *       Client retains ownership of the stream.
+     * @param mimeType The mime type of the file.
+     * @param tags The list of tags to load, if known. Pass null to get a default set.
+     * @return Bundle containing any metadata found.
+     * @throws IOException in the event of an error reading metadata.
+     *
+     * @hide
+     */
+    protected Bundle getDocumentMetadataFromStream(
+            InputStream stream, String mimeType, @Nullable String[] tags)
+            throws IOException {
+        Bundle metadata = new Bundle();
+        MetadataReader.getMetadata(metadata, stream, mimeType, tags);
+        return metadata;
+    }
+
+    /**
      * Return concrete MIME type of the requested document. Must match the value
      * of {@link Document#COLUMN_MIME_TYPE} for this document. The default
      * implementation queries {@link #queryDocument(String, String[])}, so
@@ -685,7 +710,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @see ParcelFileDescriptor#parseMode(String)
      */
     public abstract ParcelFileDescriptor openDocument(
-            String documentId, String mode, CancellationSignal signal) throws FileNotFoundException;
+            String documentId,
+            String mode,
+            @Nullable CancellationSignal signal) throws FileNotFoundException;
 
     /**
      * Open and return a thumbnail of the requested document.
