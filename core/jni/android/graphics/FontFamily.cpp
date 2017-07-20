@@ -16,7 +16,7 @@
 
 #define LOG_TAG "Minikin"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <core_jni_helpers.h>
 
 #include "SkData.h"
@@ -24,8 +24,8 @@
 #include "SkRefCnt.h"
 #include "SkTypeface.h"
 #include "GraphicsJNI.h"
-#include <ScopedPrimitiveArray.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/AssetManager.h>

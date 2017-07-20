@@ -19,11 +19,11 @@
 
 #include "android_media_AudioTrack.h"
 
-#include <JNIHelp.h>
-#include <JniConstants.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JniConstants.h>
 #include "core_jni_helpers.h"
 
-#include "ScopedBytes.h"
+#include <nativehelper/ScopedBytes.h>
 
 #include <utils/Log.h>
 #include <media/AudioSystem.h>

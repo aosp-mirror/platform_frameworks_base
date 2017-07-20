@@ -16,7 +16,7 @@
 
 #define LOG_TAG "PointerIcon-JNI"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include "android_view_PointerIcon.h"
 
@@ -24,7 +24,7 @@
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <android/graphics/GraphicsJNI.h>
-#include "ScopedLocalRef.h"
+#include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
 

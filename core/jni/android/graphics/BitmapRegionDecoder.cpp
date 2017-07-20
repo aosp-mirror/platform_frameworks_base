@@ -33,7 +33,7 @@
 #include "android_util_Binder.h"
 #include "core_jni_helpers.h"
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <androidfw/Asset.h>
 #include <binder/Parcel.h>
 #include <jni.h>

@@ -29,8 +29,8 @@
 #include <string>
 
 #include "jni.h"
-#include "JNIHelp.h"
-#include "ScopedPrimitiveArray.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"

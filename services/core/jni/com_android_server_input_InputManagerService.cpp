@@ -27,7 +27,7 @@
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include <atomic>
 #include <cinttypes>
@@ -54,9 +54,9 @@
 #include <android_view_PointerIcon.h>
 #include <android/graphics/GraphicsJNI.h>
 
-#include <ScopedLocalRef.h>
-#include <ScopedPrimitiveArray.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include "com_android_server_power_PowerManagerService.h"
 #include "com_android_server_input_InputApplicationHandle.h"

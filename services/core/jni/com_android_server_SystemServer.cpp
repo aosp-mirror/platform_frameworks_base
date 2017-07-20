@@ -15,7 +15,7 @@
  */
 
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 
 #include <hidl/HidlTransportSupport.h>
 

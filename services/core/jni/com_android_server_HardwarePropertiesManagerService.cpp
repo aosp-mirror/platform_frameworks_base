@@ -16,7 +16,7 @@
 
 #define LOG_TAG "HardwarePropertiesManagerService-JNI"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
 #include <math.h>

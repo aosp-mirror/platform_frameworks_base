@@ -21,9 +21,9 @@
 #include "unicode/brkiter.h"
 #include "utils/misc.h"
 #include "utils/Log.h"
-#include "ScopedStringChars.h"
-#include "ScopedPrimitiveArray.h"
-#include "JNIHelp.h"
+#include <nativehelper/ScopedStringChars.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 #include <cstdint>
 #include <vector>

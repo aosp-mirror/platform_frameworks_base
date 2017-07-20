@@ -30,7 +30,7 @@
 #include "core_jni_helpers.h"
 
 #include "android_util_Binder.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <dirent.h>
 #include <fcntl.h>

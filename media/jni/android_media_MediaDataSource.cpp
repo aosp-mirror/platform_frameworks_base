@@ -23,7 +23,7 @@
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <binder/MemoryDealer.h>
 #include <drm/drm_framework_common.h>

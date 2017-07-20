@@ -28,7 +28,7 @@
 #include "android_runtime/android_view_Surface.h"
 #include "android_util_Binder.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android/hardware/cas/native/1.0/IDescrambler.h>
 

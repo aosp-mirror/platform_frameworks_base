@@ -18,8 +18,8 @@
 
 #define LOG_NDEBUG 1
 
-#include <JNIHelp.h>
-#include <ScopedPrimitiveArray.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include <android/hardware/tv/cec/1.0/IHdmiCec.h>
 #include <android/hardware/tv/cec/1.0/IHdmiCecCallback.h>
