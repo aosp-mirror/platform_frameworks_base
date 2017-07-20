@@ -2947,8 +2947,8 @@ public class StatusBar extends SystemUI implements DemoMode,
      * settings. Down action closes the entire panel.
      */
     @Override
-    public void handleSystemNavigationKey(int key) {
-        if (SPEW) Log.d(TAG, "handleSystemNavigationKey: " + key);
+    public void handleSystemKey(int key) {
+        if (SPEW) Log.d(TAG, "handleNavigationKey: " + key);
         if (!panelsEnabled() || !mKeyguardMonitor.isDeviceInteractive()
                 || mKeyguardMonitor.isShowing() && !mKeyguardMonitor.isOccluded()) {
             return;
