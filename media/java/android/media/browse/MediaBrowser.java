@@ -1134,7 +1134,9 @@ public final class MediaBrowser {
         }
 
         public SubscriptionCallback getCallback(Context context, Bundle options) {
-            options.setClassLoader(context.getClassLoader());
+            if (options != null) {
+                options.setClassLoader(context.getClassLoader());
+            }
             for (int i = 0; i < mOptionsList.size(); ++i) {
                 if (MediaBrowserUtils.areSameOptions(mOptionsList.get(i), options)) {
                     return mCallbacks.get(i);
@@ -1144,7 +1146,9 @@ public final class MediaBrowser {
         }
 
         public void putCallback(Context context, Bundle options, SubscriptionCallback callback) {
-            options.setClassLoader(context.getClassLoader());
+            if (options != null) {
+                options.setClassLoader(context.getClassLoader());
+            }
             for (int i = 0; i < mOptionsList.size(); ++i) {
                 if (MediaBrowserUtils.areSameOptions(mOptionsList.get(i), options)) {
                     mCallbacks.set(i, callback);
