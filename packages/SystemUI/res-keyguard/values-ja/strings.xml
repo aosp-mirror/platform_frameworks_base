@@ -110,9 +110,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"端末の再起動後はパターンの入力が必要となります"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"端末の再起動後は PIN の入力が必要となります"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"端末の再起動後はパスワードの入力が必要となります"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"セキュリティを強化するにはパターンが必要です"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"セキュリティを強化するには PIN が必要です"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"セキュリティを強化するにはパスワードが必要です"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"追加の確認のためパターンが必要です"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"追加の確認のため PIN が必要です"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"追加の確認のためパスワードが必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"プロファイルを切り替えるにはパターンが必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"プロファイルを切り替えるには PIN が必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"プロファイルを切り替えるにはパスワードが必要です"</string>
