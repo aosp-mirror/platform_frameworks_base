@@ -20,8 +20,10 @@ import android.annotation.NonNull;
 import android.os.RemoteException;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.FileInfo;
+import android.telephony.mbms.FileServiceInfo;
 import android.telephony.mbms.IDownloadProgressListener;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
+import android.telephony.mbms.MbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsException;
 
 import java.util.List;
@@ -44,13 +46,37 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * or {@link MbmsException#SUCCESS}. Non-successful error codes will be passed to the app via
      * {@link IMbmsDownloadManagerCallback#error(int, String)}.
      *
-     * @param listener The callback to use to communicate with the app.
+     * @param callback The callback to use to communicate with the app.
      * @param subscriptionId The subscription ID to use.
+     */
+    public int initialize(int subscriptionId, MbmsDownloadManagerCallback callback)
+            throws RemoteException {
+        return 0;
+    }
+
+    /**
+     * Actual AIDL implementation -- hides the callback AIDL from the API.
+     * @hide
      */
     @Override
     public int initialize(int subscriptionId,
-            IMbmsDownloadManagerCallback listener) throws RemoteException {
-        return 0;
+            IMbmsDownloadManagerCallback callback) throws RemoteException {
+        return initialize(subscriptionId, new MbmsDownloadManagerCallback() {
+            @Override
+            public void error(int errorCode, String message) throws RemoteException {
+                callback.error(errorCode, message);
+            }
+
+            @Override
+            public void fileServicesUpdated(List<FileServiceInfo> services) throws RemoteException {
+                callback.fileServicesUpdated(services);
+            }
+
+            @Override
+            public void middlewareReady() throws RemoteException {
+                callback.middlewareReady();
+            }
+        });
     }
 
     /**
@@ -119,7 +145,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     /**
      * Returns a list of pending {@link DownloadRequest}s that originated from the calling
      * application, identified by its uid. A pending request is one that was issued via
-     * {@link #download(DownloadRequest, IDownloadCallback)} but not cancelled through
+     * {@link #download(DownloadRequest, IDownloadProgressListener)} but not cancelled through
      * {@link #cancelDownload(DownloadRequest)}.
      * The middleware must return a non-null result synchronously or throw an exception
      * inheriting from {@link RuntimeException}.
