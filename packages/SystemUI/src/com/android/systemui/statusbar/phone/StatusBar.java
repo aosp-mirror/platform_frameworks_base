@@ -4199,10 +4199,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void showKeyguard() {
         mKeyguardRequested = true;
-        // Unconditionally show keyguard again. There's some logic that relies on this
-        // being called even when the keyguard is already showing, e.g. for updating
-        // sensitiveness of notifications and making sure the panels are expanded.
-        showKeyguardImpl();
+        updateIsKeyguard();
     }
 
     public boolean hideKeyguard() {
@@ -4222,7 +4219,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             updatePanelExpansionForKeyguard();
         }
         if (shouldBeKeyguard) {
-            showKeyguardImpl();
+            if (isGoingToSleep()
+                    && mScreenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_TURNING_OFF) {
+                // Delay showing the keyguard until screen turned off.
+            } else {
+                showKeyguardImpl();
+            }
         } else {
             return hideKeyguardImpl();
         }
