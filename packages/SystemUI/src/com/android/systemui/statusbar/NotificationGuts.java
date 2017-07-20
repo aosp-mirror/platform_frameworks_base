@@ -329,4 +329,8 @@ public class NotificationGuts extends FrameLayout {
     public boolean isExposed() {
         return mExposed;
     }
+
+    public boolean isLeavebehind() {
+        return mGutsContent != null && mGutsContent.isLeavebehind();
+    }
 }
