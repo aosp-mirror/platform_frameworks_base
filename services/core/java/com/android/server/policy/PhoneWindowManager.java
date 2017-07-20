@@ -1278,6 +1278,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        // Inform the StatusBar; but do not allow it to consume the event.
+        IStatusBarService statusBar = getStatusBarService();
+        if (statusBar != null) {
+            try {
+                statusBar.handleSystemKey(event.getKeyCode());
+            } catch (RemoteException e) {
+                // Oh well.
+            }
+        }
+
         // If the power key has still not yet been handled, then detect short
         // press, long press, or multi press and decide what to do.
         mPowerKeyHandled = hungUp || mScreenshotChordVolumeDownKeyTriggered
@@ -6221,7 +6231,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     IStatusBarService sbar = getStatusBarService();
                     if (sbar != null) {
                         try {
-                            sbar.handleSystemNavigationKey(event.getKeyCode());
+                            sbar.handleSystemKey(event.getKeyCode());
                         } catch (RemoteException e1) {
                             // oops, no statusbar. Ignore event.
                         }
