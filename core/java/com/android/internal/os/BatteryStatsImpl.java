@@ -3497,26 +3497,31 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void updateTimeBasesLocked(boolean unplugged, boolean screenOff, long uptime,
             long realtime) {
-        boolean batteryStatusChanged = mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime);
+        final boolean updateOnBatteryTimeBase = unplugged != mOnBatteryTimeBase.isRunning();
+        final boolean updateOnBatteryScreenOffTimeBase =
+                (unplugged && screenOff) != mOnBatteryScreenOffTimeBase.isRunning();
 
-        if (batteryStatusChanged) {
-            for (int i = 0; i < mUidStats.size(); i++) {
-                mUidStats.valueAt(i).updateOnBatteryBgTimeBase(uptime, realtime);
+        if (updateOnBatteryScreenOffTimeBase || updateOnBatteryTimeBase) {
+            if (updateOnBatteryScreenOffTimeBase) {
+                updateKernelWakelocksLocked();
+                updateBatteryPropertiesLocked();
             }
-        }
-
-        boolean unpluggedScreenOff = unplugged && screenOff;
-        if (unpluggedScreenOff != mOnBatteryScreenOffTimeBase.isRunning()) {
-            updateKernelWakelocksLocked();
-            updateBatteryPropertiesLocked();
             if (DEBUG_ENERGY_CPU) {
-                Slog.d(TAG, "Updating cpu time because screen is now " +
-                        (unpluggedScreenOff ? "off" : "on"));
+                Slog.d(TAG, "Updating cpu time because screen is now " + (screenOff ? "off" : "on")
+                        + " and battery is " + (unplugged ? "on" : "off"));
             }
             updateCpuTimeLocked(true /* updateCpuFreqData */);
-            mOnBatteryScreenOffTimeBase.setRunning(unpluggedScreenOff, uptime, realtime);
-            for (int i = 0; i < mUidStats.size(); i++) {
-                mUidStats.valueAt(i).updateOnBatteryScreenOffBgTimeBase(uptime, realtime);
+
+            mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime);
+            mOnBatteryScreenOffTimeBase.setRunning(unplugged && screenOff, uptime, realtime);
+            for (int i = mUidStats.size() - 1; i >= 0; --i) {
+                final Uid u = mUidStats.valueAt(i);
+                if (updateOnBatteryTimeBase) {
+                    u.updateOnBatteryBgTimeBase(uptime, realtime);
+                }
+                if (updateOnBatteryScreenOffTimeBase) {
+                    u.updateOnBatteryScreenOffBgTimeBase(uptime, realtime);
+                }
             }
         }
     }
