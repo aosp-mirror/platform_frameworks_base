@@ -333,6 +333,10 @@ public class KeyguardStatusView extends GridLayout {
             }
             child.setAlpha(dark ? 0 : 1);
         }
+        if (mOwnerInfo != null) {
+            mOwnerInfo.setAlpha(dark ? 0 : 1);
+        }
+
         updateDozeVisibleViews();
         mBatteryDoze.setDark(dark);
         mClockView.setTextColor(ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount));
