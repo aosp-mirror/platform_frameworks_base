@@ -1152,6 +1152,7 @@
   <java-symbol type="string" name="lockscreen_transport_pause_description" />
   <java-symbol type="string" name="config_ethernet_tcp_buffers" />
   <java-symbol type="string" name="config_wifi_tcp_buffers" />
+  <java-symbol type="string" name="config_demoModePackage" />
   <java-symbol type="string" name="config_demoModeLauncherComponent" />
   <java-symbol type="string" name="config_carrierDemoModePassword" />
   <java-symbol type="string" name="config_carrierDemoModeSetting" />
