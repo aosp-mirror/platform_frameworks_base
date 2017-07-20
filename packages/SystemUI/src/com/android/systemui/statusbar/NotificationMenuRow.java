@@ -431,7 +431,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         if (mParent == null || mMenuItems.size() == 0 || mMenuContainer == null) {
             return;
         }
-        int parentHeight = mParent.getCollapsedHeight();
+        int parentHeight = mParent.getActualHeight();
         float translationY;
         if (parentHeight < mVertSpaceForIcons) {
             translationY = (parentHeight / 2) - (mHorizSpaceForIcon / 2);
