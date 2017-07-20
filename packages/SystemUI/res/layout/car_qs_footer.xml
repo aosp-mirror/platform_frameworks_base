@@ -27,8 +27,7 @@
     android:paddingTop="16dp"
     android:paddingEnd="32dp"
     android:paddingStart="32dp"
-    android:gravity="center_vertical"
-    android:orientation="horizontal">
+    android:gravity="center_vertical">
 
     <com.android.systemui.statusbar.phone.MultiUserSwitch
         android:id="@+id/multi_user_switch"
