@@ -334,16 +334,18 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     public void onOverlayChanged() {
         @ColorInt int textColor = Utils.getColorAttr(mContext, R.attr.wallpaperTextColor);
-        mCarrierLabel.setTextColor(textColor);
-        mBatteryView.setFillColor(textColor);
-        mIconManager.setTint(textColor);
-
+        @ColorInt int iconColor = Utils.getDefaultColor(mContext, Color.luminance(textColor) < 0.5 ?
+                R.color.dark_mode_icon_color_single_tone :
+                R.color.light_mode_icon_color_single_tone);
         float intensity = textColor == Color.WHITE ? 0 : 1;
+        mCarrierLabel.setTextColor(iconColor);
+        mBatteryView.setFillColor(iconColor);
+        mIconManager.setTint(iconColor);
         Rect tintArea = new Rect(0, 0, 0, 0);
 
-        applyDarkness(R.id.signal_cluster, tintArea, intensity, textColor);
-        applyDarkness(R.id.battery, tintArea, intensity, textColor);
-        applyDarkness(R.id.clock, tintArea, intensity, textColor);
+        applyDarkness(R.id.signal_cluster, tintArea, intensity, iconColor);
+        applyDarkness(R.id.battery, tintArea, intensity, iconColor);
+        applyDarkness(R.id.clock, tintArea, intensity, iconColor);
     }
 
     private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
