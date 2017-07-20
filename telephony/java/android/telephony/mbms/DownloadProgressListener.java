@@ -20,22 +20,26 @@ package android.telephony.mbms;
  * A optional listener class used by download clients to track progress.
  * @hide
  */
-public class DownloadCallback extends IDownloadCallback.Stub {
+public class DownloadProgressListener extends IDownloadProgressListener.Stub {
     /**
      * Gives process callbacks for a given DownloadRequest.
-     * request indicates which download is being referenced.
-     * fileInfo gives information about the file being downloaded.  Note that
+     * This is optionally specified when requesting a download and
+     * only lives while the app is running - it's unlikely to be useful for
+     * downloads far in the future.
+     *
+     * @param request a {@link DownloadRequest}, indicating which download is being referenced.
+     * @param fileInfo a {@link FileInfo} specifying the file to report progress on.  Note that
      *   the request may result in many files being downloaded and the client
      *   may not have been able to get a list of them in advance.
-     * downloadSize is the final amount to be downloaded.  This may be different
-     *   from the decoded final size, but is useful in gauging download progress.
-     * currentSize is the amount currently downloaded.
-     * decodedPercent is the percent from 0 to 100 of the file decoded.  After the
-     *   download completes the contents needs to be processed.  It is perhaps
-     *   uncompressed, transcoded and/or decrypted.  Generally the download completes
-     *   before the decode is started, but that's not required.
+     * @param currentDownloadSize is the current amount downloaded.
+     * @param fullDownloadSize is the total number of bytes that make up the downloaded content.
+     *   This may be different from the decoded final size, but is useful in gauging download
+     *   progress.
+     * @param currentDecodedSize is the number of bytes that have been decoded.
+     * @param fullDecodedSize is the total number of bytes that make up the final decoded content.
      */
     public void progress(DownloadRequest request, FileInfo fileInfo,
-            int downloadSize, int currentSize, int decodedPercent) {
+            int currentDownloadSize, int fullDownloadSize,
+            int currentDecodedSize, int fullDecodedSize) {
     }
 }

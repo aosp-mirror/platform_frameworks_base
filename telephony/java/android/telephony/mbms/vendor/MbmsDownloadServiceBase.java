@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.os.RemoteException;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.FileInfo;
-import android.telephony.mbms.IDownloadCallback;
+import android.telephony.mbms.IDownloadProgressListener;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsException;
 
@@ -105,7 +105,7 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
      * @return TODO: enumerate possible return values
      */
     @Override
-    public int download(DownloadRequest downloadRequest, IDownloadCallback listener)
+    public int download(DownloadRequest downloadRequest, IDownloadProgressListener listener)
             throws RemoteException {
         return 0;
     }

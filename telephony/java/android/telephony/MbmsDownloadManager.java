@@ -28,8 +28,8 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.mbms.FileInfo;
-import android.telephony.mbms.IDownloadCallback;
 import android.telephony.mbms.DownloadRequest;
+import android.telephony.mbms.IDownloadProgressListener;
 import android.telephony.mbms.IMbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsDownloadManagerCallback;
 import android.telephony.mbms.MbmsDownloadReceiver;
@@ -390,9 +390,10 @@ public class MbmsDownloadManager {
      * Asynchronous errors through the listener include any of the errors
      *
      * @param request The request that specifies what should be downloaded
-     * @param callback Optional callback that will provide progress updates if the app is running.
+     * @param progressListener Optional listener that will be provided progress updates
+     *                         if the app is running.
      */
-    public void download(DownloadRequest request, IDownloadCallback callback)
+    public void download(DownloadRequest request, IDownloadProgressListener progressListener)
             throws MbmsException {
         IMbmsDownloadService downloadService = mService.get();
         if (downloadService == null) {
@@ -412,7 +413,7 @@ public class MbmsDownloadManager {
         checkValidDownloadDestination(request);
         writeDownloadRequestToken(request);
         try {
-            downloadService.download(request, callback);
+            downloadService.download(request, progressListener);
         } catch (RemoteException e) {
             mService.set(null);
             throw new MbmsException(MbmsException.ERROR_MIDDLEWARE_LOST);
