@@ -18,6 +18,7 @@ package android.telephony.mbms;
 
 import android.content.Context;
 import android.os.RemoteException;
+import android.telephony.MbmsStreamingManager;
 
 import java.util.List;
 
