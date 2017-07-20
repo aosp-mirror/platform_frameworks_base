@@ -389,10 +389,13 @@ public class UserManager {
     public static final String DISALLOW_ADD_MANAGED_PROFILE = "no_add_managed_profile";
 
     /**
-     * Specifies if a user is disallowed from disabling application verification.
-     * Starting from {@link android.os.Build.VERSION_CODES#O}, application verification
-     * is enforced across all users on the device if a profile owner or device owner sets
-     * this restriction to <code>true</code>. The default value is <code>false</code>.
+     * Specifies if a user is disallowed from disabling application verification. The default
+     * value is <code>false</code>.
+     *
+     * <p>In Android 8.0 ({@linkplain android.os.Build.VERSION_CODES#O API level 26}) and higher,
+     * this is a global user restriction. If a device owner or profile owner sets this restriction,
+     * the system enforces app verification across all users on the device. Running in earlier
+     * Android versions, this restriction affects only the profile that sets it.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
