@@ -21,6 +21,8 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -389,6 +391,39 @@ public class AccessPointTest {
     }
 
     @Test
+    public void testSpeedLabel_isDerivedFromConnectedBssid() {
+        int rssi = -55;
+        String bssid = "00:00:00:00:00:00";
+        int networkId = 123;
+
+        WifiInfo info = new WifiInfo();
+        info.setRssi(rssi);
+        info.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
+        info.setBSSID(bssid);
+        info.setNetworkId(networkId);
+
+        AccessPoint ap =
+                new TestAccessPointBuilder(mContext)
+                        .setActive(true)
+                        .setNetworkId(networkId)
+                        .setSsid(TEST_SSID)
+                        .setScanResultCache(buildScanResultCache())
+                        .setWifiInfo(info)
+                        .build();
+
+        NetworkKey key = new NetworkKey(new WifiKey('"' + TEST_SSID + '"', bssid));
+        when(mockWifiNetworkScoreCache.getScoredNetwork(key))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.FAST);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */);
+
+        verify(mockWifiNetworkScoreCache, times(2)).getScoredNetwork(key);
+        verify(mockWifiNetworkScoreCache, never()).getScoredNetwork(any(ScanResult.class));
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.FAST);
+    }
+
+    @Test
     public void testSummaryString_showsSpeedLabel() {
         AccessPoint ap = createAccessPointWithScanResultCache();
 
@@ -443,6 +478,12 @@ public class AccessPointTest {
 
     private AccessPoint createAccessPointWithScanResultCache() {
         Bundle bundle = new Bundle();
+        ArrayList<ScanResult> scanResults = buildScanResultCache();
+        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, scanResults);
+        return new AccessPoint(mContext, bundle);
+    }
+
+    private ArrayList<ScanResult> buildScanResultCache() {
         ArrayList<ScanResult> scanResults = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             ScanResult scanResult = new ScanResult();
@@ -452,9 +493,7 @@ public class AccessPointTest {
             scanResult.capabilities = "";
             scanResults.add(scanResult);
         }
-
-        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, scanResults);
-        return new AccessPoint(mContext, bundle);
+        return scanResults;
     }
 
     private WifiConfiguration createWifiConfiguration() {

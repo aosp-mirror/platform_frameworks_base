@@ -29,6 +29,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.FileObserver;
 import android.os.FileUtils;
@@ -38,6 +39,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
+import android.provider.MetadataReader;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -45,7 +47,10 @@ import android.webkit.MimeTypeMap;
 
 import com.android.internal.annotations.GuardedBy;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -70,6 +75,12 @@ public abstract class FileSystemProvider extends DocumentsProvider {
     private Handler mHandler;
 
     private static final String MIMETYPE_PDF = "application/pdf";
+
+    private static final String MIMETYPE_JPEG = "image/jpeg";
+
+    private static final String MIMETYPE_JPG = "image/jpg";
+
+
 
     protected abstract File getFileForDocId(String docId, boolean visible)
             throws FileNotFoundException;
@@ -100,6 +111,30 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             throw new IllegalArgumentException(
                     "Failed to determine if " + docId + " is child of " + parentDocId + ": " + e);
         }
+    }
+
+    @Override
+    public @Nullable Bundle getDocumentMetadata(String documentId, @Nullable String[] tags)
+            throws FileNotFoundException {
+        File file = getFileForDocId(documentId);
+        if (!(file.exists() && file.isFile() && file.canRead())) {
+            return Bundle.EMPTY;
+        }
+        String filePath = file.getAbsolutePath();
+        Bundle metadata = new Bundle();
+        if (getTypeForFile(file).equals(MIMETYPE_JPEG)
+                || getTypeForFile(file).equals(MIMETYPE_JPG)) {
+            FileInputStream stream = new FileInputStream(filePath);
+            try {
+                MetadataReader.getMetadata(metadata, stream, getTypeForFile(file), tags);
+                return metadata;
+            } catch (IOException e) {
+                Log.e(TAG, "An error occurred retrieving the metadata", e);
+            } finally {
+                IoUtils.closeQuietly(stream);
+            }
+        }
+        return null;
     }
 
     protected final List<String> findDocumentPath(File parent, File doc)

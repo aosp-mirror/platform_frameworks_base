@@ -105,34 +105,43 @@ public class WifiInfo implements Parcelable {
     private boolean mEphemeral;
 
     /**
+     * Running total count of lost (not ACKed) transmitted unicast data packets.
      * @hide
      */
     public long txBad;
     /**
+     * Running total count of transmitted unicast data retry packets.
      * @hide
      */
     public long txRetries;
     /**
+     * Running total count of successfully transmitted (ACKed) unicast data packets.
      * @hide
      */
     public long txSuccess;
     /**
+     * Running total count of received unicast data packets.
      * @hide
      */
     public long rxSuccess;
+
     /**
+     * Average rate of lost transmitted packets, in units of packets per 5 seconds.
      * @hide
      */
     public double txBadRate;
     /**
+     * Average rate of transmitted retry packets, in units of packets per 5 seconds.
      * @hide
      */
     public double txRetriesRate;
     /**
+     * Average rate of successfully transmitted unicast packets, in units of packets per 5 seconds.
      * @hide
      */
     public double txSuccessRate;
     /**
+     * Average rate of received unicast data packets, in units of packets per 5 seconds.
      * @hide
      */
     public double rxSuccessRate;

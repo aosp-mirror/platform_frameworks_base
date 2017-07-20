@@ -27,7 +27,7 @@ import android.util.Log;
  * Implements the ITunerCallback interface by forwarding calls to RadioTuner.Callback.
  */
 class TunerCallbackAdapter extends ITunerCallback.Stub {
-    private static final String TAG = "radio.TunerCallbackAdapter";
+    private static final String TAG = "BroadcastRadio.TunerCallbackAdapter";
 
     @NonNull private final RadioTuner.Callback mCallback;
     @NonNull private final Handler mHandler;

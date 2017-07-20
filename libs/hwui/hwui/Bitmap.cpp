@@ -208,7 +208,9 @@ Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
     buffer->incStrong(buffer);
     setImmutable(); // HW bitmaps are always immutable
     if (uirenderer::Properties::isSkiaEnabled()) {
-        // TODO: add color correctness for Skia pipeline - pass null color space for now
+        // GraphicBuffer should be in the display color space (Bitmap::createFrom is always
+        // passing SRGB). The code that uploads into a GraphicBuffer should do color conversion if
+        // needed.
         mImage = SkImage::MakeFromAHardwareBuffer(reinterpret_cast<AHardwareBuffer*>(buffer),
                 mInfo.alphaType(), nullptr);
     }
@@ -293,7 +295,6 @@ void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
     if (isHardware()) {
         if (uirenderer::Properties::isSkiaEnabled()) {
-            // TODO: add color correctness for Skia pipeline - pass null color space for now
             outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
                     info().colorType(), info().alphaType(), nullptr));
         } else {
@@ -329,7 +330,12 @@ sk_sp<SkImage> Bitmap::makeImage() {
         // Note we don't cache in this case, because the raster image holds a pointer to this Bitmap
         // internally and ~Bitmap won't be invoked.
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.
-        image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
+        if (uirenderer::Properties::isSkiaEnabled()) {
+            image = SkMakeImageInColorSpace(skiaBitmap, SkColorSpace::MakeSRGB(),
+                    skiaBitmap.getGenerationID(), kNever_SkCopyPixelsMode);
+        } else {
+            image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
+        }
     }
     return image;
 }

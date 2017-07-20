@@ -18,6 +18,7 @@ package android.hardware.radio;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Bitmap;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -27,7 +28,7 @@ import java.util.List;
  * Implements the RadioTuner interface by forwarding calls to radio service.
  */
 class TunerAdapter extends RadioTuner {
-    private static final String TAG = "radio.TunerAdapter";
+    private static final String TAG = "BroadcastRadio.TunerAdapter";
 
     @NonNull private final ITuner mTuner;
     private boolean mIsClosed = false;
@@ -199,6 +200,15 @@ class TunerAdapter extends RadioTuner {
         } catch (RemoteException e) {
             Log.e(TAG, "service died", e);
             return RadioManager.STATUS_DEAD_OBJECT;
+        }
+    }
+
+    @Override
+    public @Nullable Bitmap getMetadataImage(int id) {
+        try {
+            return mTuner.getImage(id);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
         }
     }
 

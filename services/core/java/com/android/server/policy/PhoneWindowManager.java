@@ -1278,6 +1278,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        // Inform the StatusBar; but do not allow it to consume the event.
+        IStatusBarService statusBar = getStatusBarService();
+        if (statusBar != null) {
+            try {
+                statusBar.handleSystemKey(event.getKeyCode());
+            } catch (RemoteException e) {
+                // Oh well.
+            }
+        }
+
         // If the power key has still not yet been handled, then detect short
         // press, long press, or multi press and decide what to do.
         mPowerKeyHandled = hungUp || mScreenshotChordVolumeDownKeyTriggered
@@ -6221,7 +6231,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     IStatusBarService sbar = getStatusBarService();
                     if (sbar != null) {
                         try {
-                            sbar.handleSystemNavigationKey(event.getKeyCode());
+                            sbar.handleSystemKey(event.getKeyCode());
                         } catch (RemoteException e1) {
                             // oops, no statusbar. Ignore event.
                         }
@@ -7832,21 +7842,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int updateLightStatusBarLw(int vis, WindowState opaque, WindowState opaqueOrDimming) {
-        WindowState statusColorWin = isStatusBarKeyguard() && !mKeyguardOccluded
-                ? mStatusBar
-                : opaqueOrDimming;
-
-        if (statusColorWin != null) {
-            if (statusColorWin == opaque) {
-                // If the top fullscreen-or-dimming window is also the top fullscreen, respect
-                // its light flag.
-                vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-                vis |= PolicyControl.getSystemUiVisibility(statusColorWin, null)
-                        & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            } else if (statusColorWin != null && statusColorWin.isDimming()) {
-                // Otherwise if it's dimming, clear the light flag.
-                vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            }
+        final boolean onKeyguard = isStatusBarKeyguard() && !mKeyguardOccluded;
+        final WindowState statusColorWin = onKeyguard ? mStatusBar : opaqueOrDimming;
+        if (statusColorWin != null && (statusColorWin == opaque || onKeyguard)) {
+            // If the top fullscreen-or-dimming window is also the top fullscreen, respect
+            // its light flag.
+            vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            vis |= PolicyControl.getSystemUiVisibility(statusColorWin, null)
+                    & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        } else if (statusColorWin != null && statusColorWin.isDimming()) {
+            // Otherwise if it's dimming, clear the light flag.
+            vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
         }
         return vis;
     }
@@ -7856,7 +7862,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final WindowState imeWin = mWindowManagerFuncs.getInputMethodWindowLw();
 
         final WindowState navColorWin;
-        if (imeWin != null && imeWin.isVisibleLw()) {
+        if (imeWin != null && imeWin.isVisibleLw() && mNavigationBarPosition == NAV_BAR_BOTTOM) {
             navColorWin = imeWin;
         } else {
             navColorWin = opaqueOrDimming;

@@ -37,6 +37,7 @@ import android.util.Log;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.LocalServices;
 import com.android.server.PinnerService;
+import com.android.server.pm.dex.DexoptOptions;
 
 import java.io.File;
 import java.util.Set;
@@ -221,12 +222,10 @@ public class BackgroundDexOptService extends JobService {
             // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
             // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
             // trade-off worth doing to save boot time work.
-            int result = pm.performDexOptWithStatus(pkg,
-                    /* checkProfiles */ false,
+            int result = pm.performDexOptWithStatus(new DexoptOptions(
+                    pkg,
                     PackageManagerService.REASON_BOOT,
-                    /* force */ false,
-                    /* bootComplete */ true,
-                    /* downgrade */ false);
+                    DexoptOptions.DEXOPT_BOOT_COMPLETE));
             if (result == PackageDexOptimizer.DEX_OPT_PERFORMED)  {
                 updatedPackages.add(pkg);
             }
@@ -338,22 +337,22 @@ public class BackgroundDexOptService extends JobService {
             // Optimize package if needed. Note that there can be no race between
             // concurrent jobs because PackageDexOptimizer.performDexOpt is synchronized.
             boolean success;
+            int dexoptFlags =
+                    DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES |
+                    DexoptOptions.DEXOPT_BOOT_COMPLETE |
+                    (downgrade ? DexoptOptions.DEXOPT_DOWNGRADE : 0);
             if (is_for_primary_dex) {
-                int result = pm.performDexOptWithStatus(pkg,
-                        /* checkProfiles */ true,
-                        reason,
-                        false /* forceCompile*/,
-                        true /* bootComplete */,
-                        downgrade);
+                int result = pm.performDexOptWithStatus(new DexoptOptions(pkg,
+                        PackageManagerService.REASON_BACKGROUND_DEXOPT,
+                        dexoptFlags));
                 success = result != PackageDexOptimizer.DEX_OPT_FAILED;
                 if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
                     updatedPackages.add(pkg);
                 }
             } else {
-                success = pm.performDexOptSecondary(pkg,
-                        reason,
-                        false /* force */,
-                        downgrade);
+                success = pm.performDexOpt(new DexoptOptions(pkg,
+                        PackageManagerService.REASON_BACKGROUND_DEXOPT,
+                        dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX));
             }
             if (success) {
                 // Dexopt succeeded, remove package from the list of failing ones.

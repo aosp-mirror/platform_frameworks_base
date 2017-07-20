@@ -47,12 +47,11 @@ public final class SimpleRegexValidator extends InternalValidator implements Val
      * @param id id of the field whose regex is applied to.
      * @param regex regular expression that defines the result of the validator: if the regex
      * matches the contents of the field identified by {@code id}, it returns {@code true};
-     * otherwise, it returns {@code false}. The pattern will be {@link Pattern#compile compiled}
-     * without setting any flags.
+     * otherwise, it returns {@code false}.
       */
-    public SimpleRegexValidator(@NonNull AutofillId id, @NonNull String regex) {
+    public SimpleRegexValidator(@NonNull AutofillId id, @NonNull Pattern regex) {
         mId = Preconditions.checkNotNull(id);
-        mRegex = Pattern.compile(regex);
+        mRegex = Preconditions.checkNotNull(regex);
     }
 
     /** @hide */
@@ -91,14 +90,15 @@ public final class SimpleRegexValidator extends InternalValidator implements Val
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mId, flags);
-        parcel.writeString(mRegex.pattern());
+        parcel.writeSerializable(mRegex);
     }
 
     public static final Parcelable.Creator<SimpleRegexValidator> CREATOR =
             new Parcelable.Creator<SimpleRegexValidator>() {
         @Override
         public SimpleRegexValidator createFromParcel(Parcel parcel) {
-            return new SimpleRegexValidator(parcel.readParcelable(null), parcel.readString());
+            return new SimpleRegexValidator(parcel.readParcelable(null),
+                    (Pattern) parcel.readSerializable());
         }
 
         @Override

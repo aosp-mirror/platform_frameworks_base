@@ -19,6 +19,7 @@ package android.hardware.radio;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.graphics.Bitmap;
 import android.os.Handler;
 
 import java.util.List;
@@ -228,6 +229,27 @@ public abstract class RadioTuner {
      * </ul>
      */
     public abstract int getProgramInformation(RadioManager.ProgramInfo[] info);
+
+    /**
+     * Retrieves a {@link Bitmap} for the given image ID or null,
+     * if the image was missing from the tuner.
+     *
+     * This involves doing a call to the tuner, so the bitmap should be cached
+     * on the application side.
+     *
+     * If the method returns null for non-zero ID, it means the image was
+     * updated on the tuner side. There is a race conditon between fetching
+     * image for an old ID and tuner updating the image (and cleaning up the
+     * old image). In such case, a new ProgramInfo with updated image id will
+     * be sent with a {@link onProgramInfoChanged} callback.
+     *
+     * @param id The image identifier, retrieved with
+     *           {@link RadioMetadata#getBitmapId(String)}.
+     * @return A {@link Bitmap} or null.
+     * @throws IllegalArgumentException if id==0
+     * @hide This API is not thoroughly elaborated yet
+     */
+    public abstract @Nullable Bitmap getMetadataImage(int id);
 
     /**
      * Initiates a background scan to update internally cached program list.

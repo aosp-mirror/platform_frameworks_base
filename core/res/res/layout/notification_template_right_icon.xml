@@ -21,8 +21,8 @@
              android:layout_height="wrap_content"
              android:layout_gravity="top|end">
     <ImageView android:id="@+id/right_icon"
-               android:layout_width="40dp"
-               android:layout_height="40dp"
+               android:layout_width="@dimen/notification_right_icon_size"
+               android:layout_height="@dimen/notification_right_icon_size"
                android:layout_gravity="top|end"
                android:layout_marginTop="36dp"
                android:layout_marginEnd="@dimen/notification_content_margin_end"

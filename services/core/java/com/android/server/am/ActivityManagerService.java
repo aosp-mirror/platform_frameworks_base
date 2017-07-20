@@ -1732,6 +1732,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final boolean mPermissionReviewRequired;
 
+    private static String sTheRealBuildSerial = Build.UNKNOWN;
+
     /**
      * Current global configuration information. Contains general settings for the entire system,
      * also corresponds to the merged configuration of the default display.
@@ -6990,12 +6992,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // We deprecated Build.SERIAL and it is not accessible to
             // apps that target the v2 security sandbox. Since access to
             // the serial is now behind a permission we push down the value.
-            String buildSerial = Build.UNKNOWN;
-            if (appInfo.targetSandboxVersion != 2) {
-                buildSerial = IDeviceIdentifiersPolicyService.Stub.asInterface(
-                        ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE))
-                        .getSerial();
-            }
+            String buildSerial = appInfo.targetSandboxVersion < 2
+                    ? sTheRealBuildSerial : Build.UNKNOWN;
 
             // Check if this is a secondary process that should be incorporated into some
             // currently active instrumentation.  (Note we do this AFTER all of the profiling
@@ -14117,6 +14115,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAppOpsService.systemReady();
             mSystemReady = true;
         }
+
+        try {
+            sTheRealBuildSerial = IDeviceIdentifiersPolicyService.Stub.asInterface(
+                    ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE))
+                    .getSerial();
+        } catch (RemoteException e) {}
 
         ArrayList<ProcessRecord> procsToKill = null;
         synchronized(mPidsSelfLocked) {

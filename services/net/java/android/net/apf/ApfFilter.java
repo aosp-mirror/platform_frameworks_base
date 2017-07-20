@@ -179,6 +179,7 @@ public class ApfFilter {
     private static final int ETH_HEADER_LEN = 14;
     private static final int ETH_DEST_ADDR_OFFSET = 0;
     private static final int ETH_ETHERTYPE_OFFSET = 12;
+    private static final int ETH_TYPE_MIN = 0x0600;
     private static final byte[] ETH_BROADCAST_MAC_ADDRESS =
             {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
     // TODO: Make these offsets relative to end of link-layer header; don't include ETH_HEADER_LEN.
@@ -236,6 +237,7 @@ public class ApfFilter {
     private final IpManager.Callback mIpManagerCallback;
     private final NetworkInterface mNetworkInterface;
     private final IpConnectivityLog mMetricsLog;
+
     @VisibleForTesting
     byte[] mHardwareAddress;
     @VisibleForTesting
@@ -244,6 +246,7 @@ public class ApfFilter {
     private long mUniqueCounter;
     @GuardedBy("this")
     private boolean mMulticastFilter;
+    private final boolean mDrop802_3Frames;
     // Our IPv4 address, if we have just one, otherwise null.
     @GuardedBy("this")
     private byte[] mIPv4Address;
@@ -253,11 +256,13 @@ public class ApfFilter {
 
     @VisibleForTesting
     ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
-            IpManager.Callback ipManagerCallback, boolean multicastFilter, IpConnectivityLog log) {
+            IpManager.Callback ipManagerCallback, boolean multicastFilter,
+            boolean ieee802_3Filter, IpConnectivityLog log) {
         mApfCapabilities = apfCapabilities;
         mIpManagerCallback = ipManagerCallback;
         mNetworkInterface = networkInterface;
         mMulticastFilter = multicastFilter;
+        mDrop802_3Frames = ieee802_3Filter;
         mMetricsLog = log;
 
         // TODO: ApfFilter should not generate programs until IpManager sends provisioning success.
@@ -885,6 +890,7 @@ public class ApfFilter {
     /**
      * Begin generating an APF program to:
      * <ul>
+     * <li>Drop/Pass 802.3 frames (based on policy)
      * <li>Drop ARP requests not for us, if mIPv4Address is set,
      * <li>Drop IPv4 broadcast packets, except DHCP destined to our MAC,
      * <li>Drop IPv4 multicast packets, if mMulticastFilter,
@@ -906,6 +912,8 @@ public class ApfFilter {
 
         // Here's a basic summary of what the initial program does:
         //
+        // if it's a 802.3 Frame (ethtype < 0x0600):
+        //    drop or pass based on configurations
         // if it's ARP:
         //   insert ARP filter to drop or pass these appropriately
         // if it's IPv4:
@@ -916,9 +924,15 @@ public class ApfFilter {
         //   pass
         // insert IPv6 filter to drop, pass, or fall off the end for ICMPv6 packets
 
+        gen.addLoad16(Register.R0, ETH_ETHERTYPE_OFFSET);
+
+        if (mDrop802_3Frames) {
+            // drop 802.3 frames (ethtype < 0x0600)
+            gen.addJumpIfR0LessThan(ETH_TYPE_MIN, gen.DROP_LABEL);
+        }
+
         // Add ARP filters:
         String skipArpFiltersLabel = "skipArpFilters";
-        gen.addLoad16(Register.R0, ETH_ETHERTYPE_OFFSET);
         gen.addJumpIfR0NotEquals(ETH_P_ARP, skipArpFiltersLabel);
         generateArpFilterLocked(gen);
         gen.defineLabel(skipArpFiltersLabel);
@@ -1101,7 +1115,7 @@ public class ApfFilter {
      */
     public static ApfFilter maybeCreate(ApfCapabilities apfCapabilities,
             NetworkInterface networkInterface, IpManager.Callback ipManagerCallback,
-            boolean multicastFilter) {
+            boolean multicastFilter, boolean ieee802_3Filter) {
         if (apfCapabilities == null || networkInterface == null) return null;
         if (apfCapabilities.apfVersionSupported == 0) return null;
         if (apfCapabilities.maximumApfProgramSize < 512) {
@@ -1118,7 +1132,7 @@ public class ApfFilter {
             return null;
         }
         return new ApfFilter(apfCapabilities, networkInterface, ipManagerCallback,
-                multicastFilter, new IpConnectivityLog());
+                multicastFilter, ieee802_3Filter, new IpConnectivityLog());
     }
 
     public synchronized void shutdown() {

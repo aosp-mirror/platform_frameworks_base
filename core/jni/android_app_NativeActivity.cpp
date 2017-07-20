@@ -35,7 +35,7 @@
 
 #include <utils/Looper.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
@@ -45,7 +45,7 @@
 
 #include "core_jni_helpers.h"
 
-#include "ScopedUtfChars.h"
+#include <nativehelper/ScopedUtfChars.h>
 
 #define LOG_TRACE(...)
 //#define LOG_TRACE(...) ALOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__)

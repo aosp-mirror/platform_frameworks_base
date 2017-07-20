@@ -1110,7 +1110,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
-        mLightBarController = new LightBarController();
+        mLightBarController = new LightBarController(context);
         if (mNavigationBar != null) {
             mNavigationBar.setLightBarController(mLightBarController);
         }
@@ -1792,7 +1792,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
         if (entry != null && mNotificationGutsExposed != null
-                && mNotificationGutsExposed == entry.row.getGuts()) {
+                && mNotificationGutsExposed == entry.row.getGuts() && entry.row.getGuts() != null
+                && !entry.row.getGuts().isLeavebehind()) {
             Log.w(TAG, "Keeping notification because it's showing guts. " + key);
             mLatestRankingMap = ranking;
             mKeyToRemoveOnGutsClosed = key;
@@ -2946,8 +2947,8 @@ public class StatusBar extends SystemUI implements DemoMode,
      * settings. Down action closes the entire panel.
      */
     @Override
-    public void handleSystemNavigationKey(int key) {
-        if (SPEW) Log.d(TAG, "handleSystemNavigationKey: " + key);
+    public void handleSystemKey(int key) {
+        if (SPEW) Log.d(TAG, "handleNavigationKey: " + key);
         if (!panelsEnabled() || !mKeyguardMonitor.isDeviceInteractive()
                 || mKeyguardMonitor.isShowing() && !mKeyguardMonitor.isOccluded()) {
             return;

@@ -26,7 +26,7 @@
 #include <utils/threads.h>
 #include "media/Visualizer.h"
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 using namespace android;
 

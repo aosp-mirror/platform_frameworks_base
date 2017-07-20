@@ -99,8 +99,6 @@ public class FingerprintManager {
     /**
      * The {@link FingerprintManager#remove} call failed. Typically this will happen when the
      * provided fingerprint id was incorrect.
-     *
-     * @hide
      */
     public static final int FINGERPRINT_ERROR_UNABLE_TO_REMOVE = 6;
 
@@ -112,7 +110,10 @@ public class FingerprintManager {
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
-     * @hide
+     * These messages are typically reserved for internal operations such as enrollment, but may be
+     * used to express vendor errors not covered by the ones in fingerprint.h. Applications are
+     * expected to show the error message string if they happen, but are advised not to rely on the
+     * message id since they will be device and vendor-specific
      */
     public static final int FINGERPRINT_ERROR_VENDOR = 8;
 
@@ -120,7 +121,6 @@ public class FingerprintManager {
      * The operation was canceled because FINGERPRINT_ERROR_LOCKOUT occurred too many times.
      * Fingerprint authentication is disabled until the user unlocks with strong authentication
      * (PIN/Pattern/Password)
-     * @hide
      */
     public static final int FINGERPRINT_ERROR_LOCKOUT_PERMANENT = 9;
 

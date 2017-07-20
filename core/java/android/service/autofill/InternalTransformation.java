@@ -38,5 +38,5 @@ abstract class InternalTransformation implements Transformation, Parcelable {
      * @hide
      */
     abstract void apply(@NonNull ValueFinder finder, @NonNull RemoteViews template,
-            int childViewId);
+            int childViewId) throws Exception;
 }

@@ -21,7 +21,7 @@
 #include "android_os_MessageQueue.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
 #include <android/hardware/tv/input/1.0/ITvInputCallback.h>

@@ -135,20 +135,22 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_DRMO_SERVICE_ID = 9;
     /** kHz */
     public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10;
+    /** 1: AM, 2:FM */
+    public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11;
     /** 32bit */
-    public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 11;
+    public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12;
     /** 0-999 range */
-    public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 12;
+    public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13;
     /**
      * Primary identifier for vendor-specific radio technology.
      * The value format is determined by a vendor.
      *
      * It must not be used in any other programType than VENDORx.
      */
-    public static final int IDENTIFIER_TYPE_VENDOR1_PRIMARY = 13;
-    public static final int IDENTIFIER_TYPE_VENDOR2_PRIMARY = 14;
-    public static final int IDENTIFIER_TYPE_VENDOR3_PRIMARY = 15;
-    public static final int IDENTIFIER_TYPE_VENDOR4_PRIMARY = 16;
+    public static final int IDENTIFIER_TYPE_VENDOR1_PRIMARY = 14;
+    public static final int IDENTIFIER_TYPE_VENDOR2_PRIMARY = 15;
+    public static final int IDENTIFIER_TYPE_VENDOR3_PRIMARY = 16;
+    public static final int IDENTIFIER_TYPE_VENDOR4_PRIMARY = 17;
     @IntDef(prefix = { "IDENTIFIER_TYPE_" }, value = {
         IDENTIFIER_TYPE_AMFM_FREQUENCY,
         IDENTIFIER_TYPE_RDS_PI,
@@ -160,6 +162,7 @@ public final class ProgramSelector implements Parcelable {
         IDENTIFIER_TYPE_DAB_FREQUENCY,
         IDENTIFIER_TYPE_DRMO_SERVICE_ID,
         IDENTIFIER_TYPE_DRMO_FREQUENCY,
+        IDENTIFIER_TYPE_DRMO_MODULATION,
         IDENTIFIER_TYPE_SXM_SERVICE_ID,
         IDENTIFIER_TYPE_SXM_CHANNEL,
         IDENTIFIER_TYPE_VENDOR1_PRIMARY,

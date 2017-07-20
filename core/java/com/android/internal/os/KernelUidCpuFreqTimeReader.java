@@ -17,8 +17,10 @@
 package com.android.internal.os;
 
 import android.annotation.Nullable;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -50,6 +52,8 @@ public class KernelUidCpuFreqTimeReader {
 
     private long[] mCpuFreqs;
     private int mCpuFreqsCount;
+    private long mLastTimeReadMs;
+    private long mNowTimeMs;
 
     private SparseArray<long[]> mLastUidCpuFreqTimeMs = new SparseArray<>();
 
@@ -64,7 +68,9 @@ public class KernelUidCpuFreqTimeReader {
             return;
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
+            mNowTimeMs = SystemClock.elapsedRealtime();
             readDelta(reader, callback);
+            mLastTimeReadMs = mNowTimeMs;
             mProcFileAvailable = true;
         } catch (IOException e) {
             mReadErrorCounter++;
@@ -115,16 +121,33 @@ public class KernelUidCpuFreqTimeReader {
             return;
         }
         final long[] deltaUidTimeMs = new long[size];
+        final long[] curUidTimeMs = new long[size];
         boolean notify = false;
         for (int i = 0; i < size; ++i) {
             // Times read will be in units of 10ms
             final long totalTimeMs = Long.parseLong(timesStr[i], 10) * 10;
             deltaUidTimeMs[i] = totalTimeMs - uidTimeMs[i];
-            uidTimeMs[i] = totalTimeMs;
+            // If there is malformed data for any uid, then we just log about it and ignore
+            // the data for that uid.
+            if (deltaUidTimeMs[i] < 0 || totalTimeMs < 0) {
+                final StringBuilder sb = new StringBuilder("Malformed cpu freq data for UID=")
+                        .append(uid).append("\n");
+                sb.append("data=").append("(").append(uidTimeMs[i]).append(",")
+                        .append(totalTimeMs).append(")").append("\n");
+                sb.append("times=").append("(")
+                        .append(TimeUtils.formatForLogging(mLastTimeReadMs)).append(",")
+                        .append(TimeUtils.formatForLogging(mNowTimeMs)).append(")");
+                Slog.wtf(TAG, sb.toString());
+                return;
+            }
+            curUidTimeMs[i] = totalTimeMs;
             notify = notify || (deltaUidTimeMs[i] > 0);
         }
-        if (callback != null && notify) {
-            callback.onUidCpuFreqTime(uid, deltaUidTimeMs);
+        if (notify) {
+            System.arraycopy(curUidTimeMs, 0, uidTimeMs, 0, size);
+            if (callback != null) {
+                callback.onUidCpuFreqTime(uid, deltaUidTimeMs);
+            }
         }
     }
 

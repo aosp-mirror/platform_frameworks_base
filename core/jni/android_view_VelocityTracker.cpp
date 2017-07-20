@@ -16,7 +16,7 @@
 
 #define LOG_TAG "VelocityTracker-JNI"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
@@ -24,7 +24,7 @@
 #include <input/VelocityTracker.h>
 #include "android_view_MotionEvent.h"
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include "core_jni_helpers.h"
 

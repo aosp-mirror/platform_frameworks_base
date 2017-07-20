@@ -34,7 +34,7 @@
 #include <grallocusage/GrallocUsageConversion.h>
 
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 
 #include <stdint.h>
 #include <inttypes.h>

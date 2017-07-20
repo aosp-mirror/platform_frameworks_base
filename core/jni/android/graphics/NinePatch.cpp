@@ -31,7 +31,7 @@
 #include "GraphicsJNI.h"
 #include "NinePatchUtils.h"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 using namespace android;
@@ -91,7 +91,6 @@ public:
             jlong chunkHandle, jobject dstRect) {
         Res_png_9patch* chunk = reinterpret_cast<Res_png_9patch*>(chunkHandle);
         SkASSERT(chunk);
-        SkASSERT(boundsRect);
 
         SkBitmap bitmap;
         GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);

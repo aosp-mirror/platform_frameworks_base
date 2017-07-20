@@ -1232,7 +1232,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         }
                         dispatchOnFragmentAttached(f, mHost.getContext(), false);
 
-                        if (!f.mRetaining) {
+                        if (!f.mIsCreated) {
                             dispatchOnFragmentPreCreated(f, f.mSavedFragmentState, false);
                             f.performCreate(f.mSavedFragmentState);
                             dispatchOnFragmentCreated(f, f.mSavedFragmentState, false);

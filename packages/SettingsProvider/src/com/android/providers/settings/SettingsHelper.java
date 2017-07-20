@@ -16,6 +16,11 @@
 
 package com.android.providers.settings;
 
+import com.android.internal.R;
+import com.android.internal.app.LocalePicker;
+import com.android.internal.annotations.VisibleForTesting;
+
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.backup.IBackupManager;
@@ -24,11 +29,13 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.icu.util.ULocale;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.IPowerManager;
+import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -39,6 +46,9 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 public class SettingsHelper {
@@ -305,59 +315,106 @@ public class SettingsHelper {
         }
     }
 
-    byte[] getLocaleData() {
+    /* package */ byte[] getLocaleData() {
         Configuration conf = mContext.getResources().getConfiguration();
-        final Locale loc = conf.locale;
-        String localeString = loc.getLanguage();
-        String country = loc.getCountry();
-        if (!TextUtils.isEmpty(country)) {
-            localeString += "-" + country;
+        return conf.getLocales().toLanguageTags().getBytes();
+    }
+
+    private static Locale toFullLocale(@NonNull Locale locale) {
+        if (locale.getScript().isEmpty() || locale.getCountry().isEmpty()) {
+            return ULocale.addLikelySubtags(ULocale.forLocale(locale)).toLocale();
         }
-        return localeString.getBytes();
+        return locale;
     }
 
     /**
-     * Sets the locale specified. Input data is the byte representation of a
-     * BCP-47 language tag. For backwards compatibility, strings of the form
+     * Merging the locale came from backup server and current device locale.
+     *
+     * Merge works with following rules.
+     * - The backup locales are appended to the current locale with keeping order.
+     *   e.g. current locale "en-US,zh-CN" and backup locale "ja-JP,ko-KR" are merged to
+     *   "en-US,zh-CH,ja-JP,ko-KR".
+     *
+     * - Duplicated locales are dropped.
+     *   e.g. current locale "en-US,zh-CN" and backup locale "ja-JP,zh-Hans-CN,en-US" are merged to
+     *   "en-US,zh-CN,ja-JP".
+     *
+     * - Unsupported locales are dropped.
+     *   e.g. current locale "en-US" and backup locale "ja-JP,zh-CN" but the supported locales
+     *   are "en-US,zh-CN", the merged locale list is "en-US,zh-CN".
+     *
+     * - The final result locale list only contains the supported locales.
+     *   e.g. current locale "en-US" and backup locale "zh-Hans-CN" and supported locales are
+     *   "en-US,zh-CN", the merged locale list is "en-US,zh-CN".
+     *
+     * @param restore The locale list that came from backup server.
+     * @param current The device's locale setting.
+     * @param supportedLocales The list of language tags supported by this device.
+     */
+    @VisibleForTesting
+    public static LocaleList resolveLocales(LocaleList restore, LocaleList current,
+            String[] supportedLocales) {
+        final HashMap<Locale, Locale> allLocales = new HashMap<>(supportedLocales.length);
+        for (String supportedLocaleStr : supportedLocales) {
+            final Locale locale = Locale.forLanguageTag(supportedLocaleStr);
+            allLocales.put(toFullLocale(locale), locale);
+        }
+
+        final ArrayList<Locale> filtered = new ArrayList<>(current.size());
+        for (int i = 0; i < current.size(); i++) {
+            final Locale locale = current.get(i);
+            allLocales.remove(toFullLocale(locale));
+            filtered.add(locale);
+        }
+
+        for (int i = 0; i < restore.size(); i++) {
+            final Locale locale = allLocales.remove(toFullLocale(restore.get(i)));
+            if (locale != null) {
+                filtered.add(locale);
+            }
+        }
+
+        if (filtered.size() == current.size()) {
+            return current;  // Nothing added to current locale list.
+        }
+
+        return new LocaleList(filtered.toArray(new Locale[filtered.size()]));
+    }
+
+    /**
+     * Sets the locale specified. Input data is the byte representation of comma separated
+     * multiple BCP-47 language tags. For backwards compatibility, strings of the form
      * {@code ll_CC} are also accepted, where {@code ll} is a two letter language
      * code and {@code CC} is a two letter country code.
      *
-     * @param data the locale string in bytes.
+     * @param data the comma separated BCP-47 language tags in bytes.
      */
-    void setLocaleData(byte[] data, int size) {
-        // Check if locale was set by the user:
-        final ContentResolver cr = mContext.getContentResolver();
-        final boolean userSetLocale = mContext.getResources().getConfiguration().userSetLocale;
-        final boolean provisioned = Settings.Global.getInt(cr,
-                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
-        if (userSetLocale || provisioned) {
-            // Don't change if user set it in the SetupWizard, or if this is a post-setup
-            // deferred restore operation
-            Slog.i(TAG, "Not applying restored locale; "
-                    + (userSetLocale ? "user already specified" : "device already provisioned"));
+    /* package */ void setLocaleData(byte[] data, int size) {
+        final Configuration conf = mContext.getResources().getConfiguration();
+
+        // Replace "_" with "-" to deal with older backups.
+        final String localeCodes = new String(data, 0, size).replace('_', '-');
+        final LocaleList localeList = LocaleList.forLanguageTags(localeCodes);
+        if (localeList.isEmpty()) {
             return;
         }
 
-        final String[] availableLocales = mContext.getAssets().getLocales();
-        // Replace "_" with "-" to deal with older backups.
-        String localeCode = new String(data, 0, size).replace('_', '-');
-        Locale loc = null;
-        for (int i = 0; i < availableLocales.length; i++) {
-            if (availableLocales[i].equals(localeCode)) {
-                loc = Locale.forLanguageTag(localeCode);
-                break;
-            }
+        final String[] supportedLocales = LocalePicker.getSupportedLocales(mContext);
+        final LocaleList currentLocales = conf.getLocales();
+
+        final LocaleList merged = resolveLocales(localeList, currentLocales, supportedLocales);
+        if (merged.equals(currentLocales)) {
+            return;
         }
-        if (loc == null) return; // Couldn't find the saved locale in this version of the software
 
         try {
             IActivityManager am = ActivityManager.getService();
             Configuration config = am.getConfiguration();
-            config.locale = loc;
+            config.setLocales(merged);
             // indicate this isn't some passing default - the user wants this remembered
             config.userSetLocale = true;
 
-            am.updateConfiguration(config);
+            am.updatePersistentConfiguration(config);
         } catch (RemoteException e) {
             // Intentionally left blank
         }

@@ -24,7 +24,7 @@
 #include "android_runtime/Log.h"
 #include "android_os_Parcel.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <binder/IServiceManager.h>
 #include <binder/Parcel.h>

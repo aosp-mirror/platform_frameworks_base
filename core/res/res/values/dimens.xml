@@ -580,6 +580,21 @@
     <dimen name="item_touch_helper_swipe_escape_velocity">120dp</dimen>
     <dimen name="item_touch_helper_swipe_escape_max_velocity">800dp</dimen>
 
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. This value is determined by the maximum notification height -->
+    <dimen name="notification_custom_view_max_image_height">284dp</dimen>
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. This value is determined a maximum notification width -->
+    <dimen name="notification_custom_view_max_image_width">450dp</dimen>
+    <!-- The maximum height of a big picture in a notification. The images will be reduced to that height in case they are bigger. This value is determined by the maximum notification height -->
+    <dimen name="notification_big_picture_max_height">284dp</dimen>
+    <!-- The maximum width of a big picture in a notification. The images will be reduced to that width in case they are bigger. This value is determined by the standard panel size -->
+    <dimen name="notification_big_picture_max_width">416dp</dimen>
+    <!-- The maximum height of a image in a media notification. The images will be reduced to that height in case they are bigger. This value is determined by the expanded media template-->
+    <dimen name="notification_media_image_max_height">140dp</dimen>
+    <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
+    <dimen name="notification_media_image_max_width">280dp</dimen>
+    <!-- The size of the right icon -->
+    <dimen name="notification_right_icon_size">40dp</dimen>
+
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_size">90%</dimen>
 

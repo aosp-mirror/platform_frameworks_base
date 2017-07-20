@@ -97,6 +97,9 @@
     <!-- Summary for Connected wifi network without internet -->
     <string name="wifi_connected_no_internet">Connected, no Internet</string>
 
+    <!-- Summary for networks failing to connect due to association rejection status 17, AP full -->
+    <string name="wifi_ap_unable_to_handle_new_sta">Access point temporarily full</string>
+
     <!-- Speed label for very slow network speed -->
     <string name="speed_label_very_slow">Very Slow</string>
     <!-- Speed label for slow network speed -->
@@ -109,6 +112,9 @@
     <string name="speed_label_fast">Fast</string>
     <!-- Speed label for very fast network speed -->
     <string name="speed_label_very_fast">Very Fast</string>
+
+    <!-- Summary text separator for preferences including a short description (eg. "Fast / Connected"). -->
+    <string name="preference_summary_default_combination"><xliff:g id="state" example="ON">%1$s</xliff:g> / <xliff:g id="description" example="High accuracy mode">%2$s</xliff:g></string>
 
     <!-- Bluetooth settings.  Message when a device is disconnected -->
     <string name="bluetooth_disconnected">Disconnected</string>
@@ -236,6 +242,12 @@
     <string name="accessibility_wifi_three_bars">Wifi three bars.</string>
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_signal_full">Wifi signal full.</string>
+
+    <!-- Content description of the Wi-Fi security type. This message indicates this is an open Wi-Fi (no password needed) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_security_type_none">Open network</string>
+
+    <!-- Content description of the Wi-Fi security type. This message indicates this is a secured Wi-Fi (password needed) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_security_type_secured">Secure network</string>
 
     <!-- Label for kernel threads in battery usage -->
     <string name="process_kernel_label">Android OS</string>

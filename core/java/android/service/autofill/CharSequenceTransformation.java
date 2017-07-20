@@ -44,15 +44,17 @@ import java.util.regex.Pattern;
  * be:
  *
  * <pre class="prettyprint">
- * new CharSequenceTransformation.Builder(ccNumberId, "^.*(\\d\\d\\d\\d)$", "...$1").build();
+ * new CharSequenceTransformation
+ *     .Builder(ccNumberId, Pattern.compile("^.*(\\d\\d\\d\\d)$"), "...$1")
+ *     .build();
  * </pre>
  *
  * <p>But a transformation that generates a {@code Exp: MM / YYYY} credit expiration date from two
  * fields (month and year) would be:
  *
  * <pre class="prettyprint">
- * new CharSequenceTransformation.Builder(ccExpMonthId, "^(\\d\\d)$", "Exp: $1")
- *   .addField(ccExpYearId, "^(\\d\\d\\d\\d)$", " / $1");
+ * new CharSequenceTransformation.Builder(ccExpMonthId, Pattern.compile("^(\\d\\d)$"), "Exp: $1")
+ *   .addField(ccExpYearId, Pattern.compile("^(\\d\\d\\d\\d)$"), " / $1");
  * </pre>
  */
 public final class CharSequenceTransformation extends InternalTransformation implements
@@ -68,13 +70,13 @@ public final class CharSequenceTransformation extends InternalTransformation imp
     @Override
     @TestApi
     public void apply(@NonNull ValueFinder finder, @NonNull RemoteViews parentTemplate,
-            int childViewId) {
+            int childViewId) throws Exception {
         final StringBuilder converted = new StringBuilder();
         final int size = mFields.size();
         if (sDebug) Log.d(TAG, size + " multiple fields on id " + childViewId);
         for (int i = 0; i < size; i++) {
             final AutofillId id = mFields.keyAt(i);
-            final Pair<Pattern, String> regex = mFields.valueAt(i);
+            final Pair<Pattern, String> field = mFields.valueAt(i);
             final String value = finder.findByAutofillId(id);
             if (value == null) {
                 Log.w(TAG, "No value for id " + id);
@@ -82,12 +84,13 @@ public final class CharSequenceTransformation extends InternalTransformation imp
             }
             try {
                 // replaceAll throws an exception if the subst is invalid
-                final String convertedValue = regex.first.matcher(value).replaceAll(regex.second);
+                final String convertedValue = field.first.matcher(value).replaceAll(field.second);
                 converted.append(convertedValue);
             } catch (Exception e) {
-                // Do not log full exception to avoid leaks
-                Log.w(TAG, "Cannot apply " + regex.first.pattern() + "->" + regex.second + " to "
+                // Do not log full exception to avoid PII leaking
+                Log.w(TAG, "Cannot apply " + field.first.pattern() + "->" + field.second + " to "
                         + "field with autofill id" + id + ": " + e.getClass());
+                throw e;
             }
         }
         parentTemplate.setCharSequence(childViewId, "setText", converted);
@@ -107,12 +110,11 @@ public final class CharSequenceTransformation extends InternalTransformation imp
          *
          * @param id id of the screen field.
          * @param regex regular expression with groups (delimited by {@code (} and {@code (}) that
-         * are used to substitute parts of the value. The pattern will be {@link Pattern#compile
-         * compiled} without setting any flags.
+         * are used to substitute parts of the value.
          * @param subst the string that substitutes the matched regex, using {@code $} for
          * group substitution ({@code $1} for 1st group match, {@code $2} for 2nd, etc).
          */
-        public Builder(@NonNull AutofillId id, @NonNull String regex, @NonNull String subst) {
+        public Builder(@NonNull AutofillId id, @NonNull Pattern regex, @NonNull String subst) {
             addField(id, regex, subst);
         }
 
@@ -121,24 +123,20 @@ public final class CharSequenceTransformation extends InternalTransformation imp
          *
          * @param id id of the screen field.
          * @param regex regular expression with groups (delimited by {@code (} and {@code (}) that
-         * are used to substitute parts of the value. The pattern will be {@link Pattern#compile
-         * compiled} without setting any flags.
+         * are used to substitute parts of the value.
          * @param subst the string that substitutes the matched regex, using {@code $} for
          * group substitution ({@code $1} for 1st group match, {@code $2} for 2nd, etc).
          *
          * @return this builder.
          */
-        public Builder addField(@NonNull AutofillId id, @NonNull String regex,
+        public Builder addField(@NonNull AutofillId id, @NonNull Pattern regex,
                 @NonNull String subst) {
             throwIfDestroyed();
             Preconditions.checkNotNull(id);
             Preconditions.checkNotNull(regex);
             Preconditions.checkNotNull(subst);
 
-            // Check if the regex is valid
-            Pattern pattern = Pattern.compile(regex);
-
-            mFields.put(id, new Pair<>(pattern, subst));
+            mFields.put(id, new Pair<>(regex, subst));
             return this;
         }
 
@@ -178,17 +176,17 @@ public final class CharSequenceTransformation extends InternalTransformation imp
     public void writeToParcel(Parcel parcel, int flags) {
         final int size = mFields.size();
         final AutofillId[] ids = new AutofillId[size];
-        final String[] regexs = new String[size];
+        final Pattern[] regexs = new Pattern[size];
         final String[] substs = new String[size];
         Pair<Pattern, String> pair;
         for (int i = 0; i < size; i++) {
             ids[i] = mFields.keyAt(i);
             pair = mFields.valueAt(i);
-            regexs[i] = pair.first.pattern();
+            regexs[i] = pair.first;
             substs[i] = pair.second;
         }
         parcel.writeParcelableArray(ids, flags);
-        parcel.writeStringArray(regexs);
+        parcel.writeSerializable(regexs);
         parcel.writeStringArray(substs);
     }
 
@@ -197,7 +195,7 @@ public final class CharSequenceTransformation extends InternalTransformation imp
         @Override
         public CharSequenceTransformation createFromParcel(Parcel parcel) {
             final AutofillId[] ids = parcel.readParcelableArray(null, AutofillId.class);
-            final String[] regexs = parcel.createStringArray();
+            final Pattern[] regexs = (Pattern[]) parcel.readSerializable();
             final String[] substs = parcel.createStringArray();
 
             // Always go through the builder to ensure the data ingested by

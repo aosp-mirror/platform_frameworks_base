@@ -39,8 +39,24 @@ public class ClassLoaderFactory {
      * binary name of a class, as defined by {@code Class.getName}.
      */
     public static boolean isValidClassLoaderName(String name) {
-        return PATH_CLASS_LOADER_NAME.equals(name) ||
-                DELEGATE_LAST_CLASS_LOADER_NAME.equals(name);
+        // This method is used to parse package data and does not accept null names.
+        return name != null && (isPathClassLoaderName(name) || isDelegateLastClassLoaderName(name));
+    }
+
+    /**
+     * Returns true if {@code name} is the encoding for the PathClassLoader.
+     */
+    public static boolean isPathClassLoaderName(String name) {
+        // For null values we default to PathClassLoader. This cover the case when packages
+        // don't specify any value for their class loaders.
+        return name == null || PATH_CLASS_LOADER_NAME.equals(name);
+    }
+
+    /**
+     * Returns true if {@code name} is the encoding for the DelegateLastClassLoader.
+     */
+    public static boolean isDelegateLastClassLoaderName(String name) {
+        return DELEGATE_LAST_CLASS_LOADER_NAME.equals(name);
     }
 
     /**
@@ -49,9 +65,9 @@ public class ClassLoaderFactory {
      */
     public static ClassLoader createClassLoader(String dexPath,
             String librarySearchPath, ClassLoader parent, String classloaderName) {
-        if (classloaderName == null || PATH_CLASS_LOADER_NAME.equals(classloaderName)) {
+        if (isPathClassLoaderName(classloaderName)) {
             return new PathClassLoader(dexPath, librarySearchPath, parent);
-        } else if (DELEGATE_LAST_CLASS_LOADER_NAME.equals(classloaderName)) {
+        } else if (isPathClassLoaderName(classloaderName)) {
             return new DelegateLastClassLoader(dexPath, librarySearchPath, parent);
         }
 

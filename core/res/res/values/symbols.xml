@@ -1152,6 +1152,7 @@
   <java-symbol type="string" name="lockscreen_transport_pause_description" />
   <java-symbol type="string" name="config_ethernet_tcp_buffers" />
   <java-symbol type="string" name="config_wifi_tcp_buffers" />
+  <java-symbol type="string" name="config_demoModePackage" />
   <java-symbol type="string" name="config_demoModeLauncherComponent" />
   <java-symbol type="string" name="config_carrierDemoModePassword" />
   <java-symbol type="string" name="config_carrierDemoModeSetting" />
@@ -1829,6 +1830,7 @@
   <java-symbol type="integer" name="config_networkAvoidBadWifi" />
   <java-symbol type="integer" name="config_networkWakeupPacketMark" />
   <java-symbol type="integer" name="config_networkWakeupPacketMask" />
+  <java-symbol type="bool" name="config_apfDrop802_3Frames" />
   <java-symbol type="integer" name="config_networkMeteredMultipathPreference" />
   <java-symbol type="integer" name="config_notificationsBatteryFullARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryLedOff" />
@@ -2931,6 +2933,14 @@
   <java-symbol type="drawable" name="autofill_dataset_picker_background" />
   <java-symbol type="style" name="AutofillDatasetPicker" />
   <java-symbol type="dimen" name="autofill_dataset_picker_max_size"/>
+
+  <java-symbol type="dimen" name="notification_big_picture_max_height"/>
+  <java-symbol type="dimen" name="notification_big_picture_max_width"/>
+  <java-symbol type="dimen" name="notification_media_image_max_width"/>
+  <java-symbol type="dimen" name="notification_media_image_max_height"/>
+  <java-symbol type="dimen" name="notification_right_icon_size"/>
+  <java-symbol type="dimen" name="notification_custom_view_max_image_height"/>
+  <java-symbol type="dimen" name="notification_custom_view_max_image_width"/>
 
   <!-- Accessibility fingerprint gestures -->
   <java-symbol type="string" name="capability_title_canCaptureFingerprintGestures" />

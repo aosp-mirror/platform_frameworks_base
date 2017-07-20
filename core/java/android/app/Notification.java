@@ -1092,6 +1092,11 @@ public class Notification implements Parcelable
     public static final String EXTRA_CONTAINS_CUSTOM_VIEW = "android.contains.customView";
 
     /**
+     * @hide
+     */
+    public static final String EXTRA_REDUCED_IMAGES = "android.reduced.images";
+
+    /**
      * {@link #extras} key: the audio contents of this notification.
      *
      * This is for use when rendering the notification on an audio-focused interface;
@@ -4956,8 +4961,12 @@ public class Notification implements Parcelable
             buildUnstyled();
 
             if (mStyle != null) {
+                mStyle.reduceImageSizes(mContext);
+                mStyle.purgeResources();
                 mStyle.buildStyled(mN);
             }
+            mN.reduceImageSizes(mContext);
+
             if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
                     && (useExistingRemoteView())) {
                 if (mN.contentView == null) {
@@ -5155,6 +5164,52 @@ public class Notification implements Parcelable
          */
         public void setRebuildStyledRemoteViews(boolean rebuild) {
             mRebuildStyledRemoteViews = rebuild;
+        }
+    }
+
+    /**
+     * Reduces the image sizes to conform to a maximum allowed size. This also processes all custom
+     * remote views.
+     *
+     * @hide
+     */
+    void reduceImageSizes(Context context) {
+        if (extras.getBoolean(EXTRA_REDUCED_IMAGES)) {
+            return;
+        }
+        if (mLargeIcon != null || largeIcon != null) {
+            Resources resources = context.getResources();
+            Class<? extends Style> style = getNotificationStyle();
+            int maxWidth = resources.getDimensionPixelSize(R.dimen.notification_right_icon_size);
+            int maxHeight = maxWidth;
+            if (MediaStyle.class.equals(style)
+                    || DecoratedMediaCustomViewStyle.class.equals(style)) {
+                maxHeight = resources.getDimensionPixelSize(
+                        R.dimen.notification_media_image_max_height);
+                maxWidth = resources.getDimensionPixelSize(
+                        R.dimen.notification_media_image_max_width);
+            }
+            if (mLargeIcon != null) {
+                mLargeIcon.scaleDownIfNecessary(maxWidth, maxHeight);
+            }
+            if (largeIcon != null) {
+                largeIcon = Icon.scaleDownIfNecessary(largeIcon, maxWidth, maxHeight);
+            }
+        }
+        reduceImageSizesForRemoteView(contentView, context);
+        reduceImageSizesForRemoteView(headsUpContentView, context);
+        reduceImageSizesForRemoteView(bigContentView, context);
+        extras.putBoolean(EXTRA_REDUCED_IMAGES, true);
+    }
+
+    private void reduceImageSizesForRemoteView(RemoteViews remoteView, Context context) {
+        if (remoteView != null) {
+            Resources resources = context.getResources();
+            int maxWidth = resources.getDimensionPixelSize(
+                    R.dimen.notification_custom_view_max_image_width);
+            int maxHeight = resources.getDimensionPixelSize(
+                    R.dimen.notification_custom_view_max_image_height);
+            remoteView.reduceImageSizes(maxWidth, maxHeight);
         }
     }
 
@@ -5459,6 +5514,14 @@ public class Notification implements Parcelable
         public boolean displayCustomViewInline() {
             return false;
         }
+
+        /**
+         * Reduces the image sizes contained in this style.
+         *
+         * @hide
+         */
+        public void reduceImageSizes(Context context) {
+        }
     }
 
     /**
@@ -5551,6 +5614,27 @@ public class Notification implements Parcelable
             }
             if (mBigLargeIcon != null) {
                 mBigLargeIcon.convertToAshmem();
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void reduceImageSizes(Context context) {
+            super.reduceImageSizes(context);
+            Resources resources = context.getResources();
+            if (mPicture != null) {
+                int maxPictureWidth = resources.getDimensionPixelSize(
+                        R.dimen.notification_big_picture_max_height);
+                int maxPictureHeight = resources.getDimensionPixelSize(
+                        R.dimen.notification_big_picture_max_width);
+                mPicture = Icon.scaleDownIfNecessary(mPicture, maxPictureWidth, maxPictureHeight);
+            }
+            if (mBigLargeIcon != null) {
+                int rightIconSize = resources.getDimensionPixelSize(
+                        R.dimen.notification_right_icon_size);
+                mBigLargeIcon.scaleDownIfNecessary(rightIconSize, rightIconSize);
             }
         }
 

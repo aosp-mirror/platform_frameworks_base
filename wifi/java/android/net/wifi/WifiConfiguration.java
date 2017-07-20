@@ -420,12 +420,6 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
-     * last failure
-     */
-    public String lastFailure;
-
-    /**
-     * @hide
      * last time we connected, this configuration had validated internet access
      */
     public boolean validatedInternetAccess;
@@ -1417,6 +1411,53 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * This class is intended to store extra failure reason information for the most recent
+     * connection attempt, so that it may be surfaced to the settings UI
+     */
+    public static class RecentFailure {
+
+        /**
+         * No recent failure, or no specific reason given for the recent connection failure
+         */
+        public static final int NONE = 0;
+        /**
+         * Connection to this network recently failed due to Association Rejection Status 17
+         * (AP is full)
+         */
+        public static final int STATUS_AP_UNABLE_TO_HANDLE_NEW_STA = 17;
+        /**
+         * Association Rejection Status code (NONE for success/non-association-rejection-fail)
+         */
+        private int mAssociationStatus = NONE;
+
+        /**
+         * @param status the association status code for the recent failure
+         */
+        public void setAssociationStatus(int status) {
+            mAssociationStatus = status;
+        }
+        /**
+         * Sets the RecentFailure to NONE
+         */
+        public void clear() {
+            mAssociationStatus = NONE;
+        }
+        /**
+         * Get the recent failure code
+         */
+        public int getAssociationStatus() {
+            return mAssociationStatus;
+        }
+    }
+
+    /**
+     * @hide
+     * RecentFailure member
+     */
+    final public RecentFailure recentFailure = new RecentFailure();
+
+    /**
+     * @hide
      * @return network selection status
      */
     public NetworkSelectionStatus getNetworkSelectionStatus() {
@@ -1705,7 +1746,8 @@ public class WifiConfiguration implements Parcelable {
                 sbuf.append('\n');
             }
         }
-
+        sbuf.append("recentFailure: ").append("Association Rejection code: ")
+                .append(recentFailure.getAssociationStatus()).append("\n");
         return sbuf.toString();
     }
 
@@ -2029,7 +2071,6 @@ public class WifiConfiguration implements Parcelable {
                 visibility = new Visibility(source.visibility);
             }
 
-            lastFailure = source.lastFailure;
             didSelfAdd = source.didSelfAdd;
             lastConnectUid = source.lastConnectUid;
             lastUpdateUid = source.lastUpdateUid;
@@ -2053,6 +2094,7 @@ public class WifiConfiguration implements Parcelable {
             creationTime = source.creationTime;
             updateTime = source.updateTime;
             shared = source.shared;
+            recentFailure.setAssociationStatus(source.recentFailure.getAssociationStatus());
         }
     }
 
@@ -2119,6 +2161,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(noInternetAccessExpected ? 1 : 0);
         dest.writeInt(shared ? 1 : 0);
         dest.writeString(mPasspointManagementObjectTree);
+        dest.writeInt(recentFailure.getAssociationStatus());
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -2186,6 +2229,7 @@ public class WifiConfiguration implements Parcelable {
                 config.noInternetAccessExpected = in.readInt() != 0;
                 config.shared = in.readInt() != 0;
                 config.mPasspointManagementObjectTree = in.readString();
+                config.recentFailure.setAssociationStatus(in.readInt());
                 return config;
             }
 
