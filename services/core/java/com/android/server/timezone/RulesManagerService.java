@@ -17,6 +17,7 @@
 package com.android.server.timezone;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 import com.android.timezone.distro.DistroException;
 import com.android.timezone.distro.DistroVersion;
@@ -56,8 +57,6 @@ import static android.app.timezone.RulesState.STAGED_OPERATION_NONE;
 import static android.app.timezone.RulesState.STAGED_OPERATION_UNINSTALL;
 import static android.app.timezone.RulesState.STAGED_OPERATION_UNKNOWN;
 
-// TODO(nfuller) Add EventLog calls where useful in the system server.
-// TODO(nfuller) Check logging best practices in the system server.
 // TODO(nfuller) Check error handling best practices in the system server.
 public final class RulesManagerService extends IRulesManager.Stub {
 
@@ -203,6 +202,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
             if (checkTokenBytes != null) {
                 checkToken = createCheckTokenOrThrow(checkTokenBytes);
             }
+            EventLogTags.writeTimezoneRequestInstall(toStringOrNull(checkToken));
 
             synchronized (this) {
                 if (distroParcelFileDescriptor == null) {
@@ -254,6 +254,8 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
         @Override
         public void run() {
+            EventLogTags.writeTimezoneInstallStarted(toStringOrNull(mCheckToken));
+
             boolean success = false;
             // Adopt the ParcelFileDescriptor into this try-with-resources so it is closed
             // when we are done.
@@ -266,6 +268,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
                 TimeZoneDistro distro = new TimeZoneDistro(is);
                 int installerResult = mInstaller.stageInstallWithErrorCode(distro);
                 int resultCode = mapInstallerResultToApiCode(installerResult);
+                EventLogTags.writeTimezoneInstallComplete(toStringOrNull(mCheckToken), resultCode);
                 sendFinishedStatus(mCallback, resultCode);
 
                 // All the installer failure modes are currently non-recoverable and won't be
@@ -273,6 +276,8 @@ public final class RulesManagerService extends IRulesManager.Stub {
                 success = true;
             } catch (Exception e) {
                 Slog.w(TAG, "Failed to install distro.", e);
+                EventLogTags.writeTimezoneInstallComplete(
+                        toStringOrNull(mCheckToken), Callback.ERROR_UNKNOWN_FAILURE);
                 sendFinishedStatus(mCallback, Callback.ERROR_UNKNOWN_FAILURE);
             } finally {
                 // Notify the package tracker that the operation is now complete.
@@ -308,6 +313,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
         if (checkTokenBytes != null) {
             checkToken = createCheckTokenOrThrow(checkTokenBytes);
         }
+        EventLogTags.writeTimezoneRequestUninstall(toStringOrNull(checkToken));
         synchronized(this) {
             if (callback == null) {
                 throw new NullPointerException("callback == null");
@@ -337,6 +343,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
         @Override
         public void run() {
+            EventLogTags.writeTimezoneUninstallStarted(toStringOrNull(mCheckToken));
             boolean success = false;
             try {
                 success = mInstaller.stageUninstall();
@@ -344,8 +351,12 @@ public final class RulesManagerService extends IRulesManager.Stub {
                 // against SUCCESS. More granular failures may be added in future.
                 int resultCode = success ? Callback.SUCCESS
                         : Callback.ERROR_UNKNOWN_FAILURE;
+                EventLogTags.writeTimezoneUninstallComplete(
+                        toStringOrNull(mCheckToken), resultCode);
                 sendFinishedStatus(mCallback, resultCode);
             } catch (Exception e) {
+                EventLogTags.writeTimezoneUninstallComplete(
+                        toStringOrNull(mCheckToken), Callback.ERROR_UNKNOWN_FAILURE);
                 Slog.w(TAG, "Failed to uninstall distro.", e);
                 sendFinishedStatus(mCallback, Callback.ERROR_UNKNOWN_FAILURE);
             } finally {
@@ -372,7 +383,9 @@ public final class RulesManagerService extends IRulesManager.Stub {
         if (checkTokenBytes != null) {
             checkToken = createCheckTokenOrThrow(checkTokenBytes);
         }
+        EventLogTags.writeTimezoneRequestNothing(toStringOrNull(checkToken));
         mPackageTracker.recordCheckResult(checkToken, success);
+        EventLogTags.writeTimezoneNothingComplete(toStringOrNull(checkToken));
     }
 
     @Override
@@ -445,6 +458,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
         pw.println("RulesManagerService state: " + toString());
         pw.println("Active rules version (ICU, libcore): " + ICU.getTZDataVersion() + ","
                 + ZoneInfoDB.getInstance().getVersion());
+        pw.println("Distro state: " + rulesState.toString());
         mPackageTracker.dump(pw);
     }
 
@@ -490,5 +504,9 @@ public final class RulesManagerService extends IRulesManager.Stub {
             default:
                 return "Unknown";
         }
+    }
+
+    private static String toStringOrNull(Object obj) {
+        return obj == null ? null : obj.toString();
     }
 }
