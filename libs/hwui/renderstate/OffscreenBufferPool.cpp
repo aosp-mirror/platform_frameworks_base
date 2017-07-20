@@ -17,7 +17,6 @@
 #include "OffscreenBufferPool.h"
 
 #include "Caches.h"
-#include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
 #include "utils/TraceUtils.h"
@@ -118,7 +117,8 @@ OffscreenBuffer::~OffscreenBuffer() {
 ///////////////////////////////////////////////////////////////////////////////
 
 OffscreenBufferPool::OffscreenBufferPool()
-    : mMaxSize(Properties::layerPoolSize) {
+     // 4 screen-sized RGBA_8888 textures
+    : mMaxSize(DeviceInfo::multiplyByResolution(4 * 4)) {
 }
 
 OffscreenBufferPool::~OffscreenBufferPool() {
