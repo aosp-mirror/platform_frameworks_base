@@ -729,7 +729,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 mLocation[1] = getHeight();
 
                 mScreenRect.set(mWindowSpaceLeft, mWindowSpaceTop,
-                        mLocation[0], mLocation[1]);
+                        mWindowSpaceLeft + mLocation[0], mWindowSpaceTop + mLocation[1]);
 
                 if (mTranslator != null) {
                     mTranslator.translateRectInAppWindowToScreen(mScreenRect);
