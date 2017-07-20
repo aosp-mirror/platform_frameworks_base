@@ -71,8 +71,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/accounts/IAccountManagerResponse.aidl \
 	core/java/android/accounts/IAccountAuthenticator.aidl \
 	core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
-	core/java/android/app/IActivityContainer.aidl \
-	core/java/android/app/IActivityContainerCallback.aidl \
 	core/java/android/app/IActivityController.aidl \
 	core/java/android/app/IActivityManager.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
@@ -84,6 +82,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/ITaskStackListener.aidl \
 	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IEphemeralResolver.aidl \
+	core/java/android/app/IInputForwarder.aidl \
 	core/java/android/app/IInstantAppResolver.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \

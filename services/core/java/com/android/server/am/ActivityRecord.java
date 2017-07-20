@@ -164,7 +164,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.AttributeCache.Entry;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.AppWindowContainerListener;
 import com.android.server.wm.TaskWindowContainerController;
@@ -306,7 +305,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
     ComponentName requestedVrComponent; // the requested component for handling VR mode.
-    ArrayList<ActivityContainer> mChildContainers = new ArrayList<>();
 
     String stringName;      // for caching of toString().
 
@@ -320,7 +318,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     boolean mTaskOverlay = false; // Task is always on-top of other activities in the task.
 
     boolean mUpdateTaskThumbnailWhenHidden;
-    ActivityContainer mInitialActivityContainer;
 
     TaskDescription taskDescription; // the recents information for this activity
     boolean mLaunchTaskBehind; // this activity is actively being launched with
@@ -798,8 +795,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             ActivityInfo aInfo, Configuration _configuration,
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
             boolean _componentSpecified, boolean _rootVoiceInteraction,
-            ActivityStackSupervisor supervisor,
-            ActivityContainer container, ActivityOptions options, ActivityRecord sourceRecord) {
+            ActivityStackSupervisor supervisor, ActivityOptions options,
+            ActivityRecord sourceRecord) {
         service = _service;
         appToken = new Token(this);
         info = aInfo;
@@ -830,7 +827,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         idle = false;
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
-        mInitialActivityContainer = container;
 
         mRotationAnimationHint = aInfo.rotationAnimation;
 
@@ -1595,11 +1591,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             mUpdateTaskThumbnailWhenHidden = false;
         }
         setVisibility(visible);
-        final ArrayList<ActivityContainer> containers = mChildContainers;
-        for (int containerNdx = containers.size() - 1; containerNdx >= 0; --containerNdx) {
-            final ActivityContainer container = containers.get(containerNdx);
-            container.setVisible(visible);
-        }
         mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
     }
 
@@ -2615,8 +2606,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         startFreezingScreenLocked(app, 0);
 
-        mStackSupervisor.removeChildActivityContainers(this);
-
         try {
             if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_SWITCH,
                     "Moving to " + (andResume ? "RESUMED" : "PAUSED") + " Relaunching " + this
@@ -2795,7 +2784,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 0 /* launchedFromPid */, launchedFromUid, launchedFromPackage, intent, resolvedType,
                 aInfo, service.getConfiguration(), null /* resultTo */, null /* resultWho */,
                 0 /* reqCode */, componentSpecified, false /* rootVoiceInteraction */,
-                stackSupervisor, null /* container */, null /* options */, null /* sourceRecord */);
+                stackSupervisor, null /* options */, null /* sourceRecord */);
 
         r.persistentState = persistentState;
         r.taskDescription = taskDescription;

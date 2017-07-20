@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, The Android Open Source Project
+ * Copyright (c) 2017, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,14 @@
 
 package android.app;
 
-import android.app.IActivityContainerCallback;
-import android.content.Intent;
-import android.content.IIntentSender;
-import android.os.IBinder;
 import android.view.InputEvent;
-import android.view.Surface;
 
-/** @hide */
-interface IActivityContainer {
-    void addToDisplay(int displayId);
-    void setSurface(in Surface surface, int width, int height, int density);
-    int startActivity(in Intent intent);
-    int startActivityIntentSender(in IIntentSender intentSender);
-    int getDisplayId();
-    int getStackId();
-    boolean injectEvent(in InputEvent event);
-    void release();
+/**
+ * Forwards input events into owned activity container, used in {@link android.app.ActivityView}.
+ * To forward input to other apps {@link android.Manifest.permission.INJECT_EVENTS} permission is
+ * required.
+ * @hide
+ */
+interface IInputForwarder {
+    boolean forwardEvent(in InputEvent event);
 }
