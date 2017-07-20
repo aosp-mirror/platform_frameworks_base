@@ -101,6 +101,9 @@
     <!-- Height of a the shelf with the notification icons -->
     <dimen name="notification_shelf_height">32dp</dimen>
 
+    <!-- Minimum height of a notification to be interactable -->
+    <dimen name="notification_min_interaction_height">40dp</dimen>
+
     <!-- the padding of the shelf icon container -->
     <dimen name="shelf_icon_container_padding">13dp</dimen>
 
