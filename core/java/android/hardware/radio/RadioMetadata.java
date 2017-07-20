@@ -34,7 +34,7 @@ import java.util.Set;
  */
 @SystemApi
 public final class RadioMetadata implements Parcelable {
-    private static final String TAG = "RadioMetadata";
+    private static final String TAG = "BroadcastRadio.metadata";
 
     /**
      * The RDS Program Information.

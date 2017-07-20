@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 @SystemApi
 @SystemService(Context.RADIO_SERVICE)
 public class RadioManager {
-    private static final String TAG = "RadioManager";
+    private static final String TAG = "BroadcastRadio.manager";
 
     /** Method return status: successful operation */
     public static final int STATUS_OK = 0;

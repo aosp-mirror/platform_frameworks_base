@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.radio;
+package com.android.server.broadcastradio;
 
 import android.annotation.NonNull;
 import android.graphics.Bitmap;
@@ -30,7 +30,7 @@ import android.util.Slog;
 import java.util.List;
 
 class Tuner extends ITuner.Stub {
-    private static final String TAG = "RadioService.Tuner";
+    private static final String TAG = "BroadcastRadioService.Tuner";
 
     /**
      * This field is used by native code, do not access or modify.

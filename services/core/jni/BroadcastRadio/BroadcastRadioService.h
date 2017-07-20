@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_RADIO_RADIOSERVICE_H
-#define _ANDROID_SERVER_RADIO_RADIOSERVICE_H
+#ifndef _ANDROID_SERVER_BROADCASTRADIO_BROADCASTRADIOSERVICE_H
+#define _ANDROID_SERVER_BROADCASTRADIO_BROADCASTRADIOSERVICE_H
 
 #include <jni.h>
 
 namespace android {
 
-void register_android_server_radio_RadioService(JNIEnv *env);
+void register_android_server_broadcastradio_BroadcastRadioService(JNIEnv *env);
 
 } // namespace android
 
-#endif // _ANDROID_SERVER_RADIO_RADIOSERVICE_H
+#endif // _ANDROID_SERVER_BROADCASTRADIO_BROADCASTRADIOSERVICE_H

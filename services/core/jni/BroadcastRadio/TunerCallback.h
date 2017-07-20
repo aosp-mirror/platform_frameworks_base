@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_SERVER_RADIO_TUNERCALLBACK_H
-#define _ANDROID_SERVER_RADIO_TUNERCALLBACK_H
+#ifndef _ANDROID_SERVER_BROADCASTRADIO_TUNERCALLBACK_H
+#define _ANDROID_SERVER_BROADCASTRADIO_TUNERCALLBACK_H
 
 #include "JavaRef.h"
 #include "NativeCallbackThread.h"
-#include "com_android_server_radio_types.h"
+#include "types.h"
 
 #include <android/hardware/broadcastradio/1.1/ITunerCallback.h>
 #include <jni.h>
 
 namespace android {
 
-void register_android_server_radio_TunerCallback(JavaVM *vm, JNIEnv *env);
+void register_android_server_broadcastradio_TunerCallback(JavaVM *vm, JNIEnv *env);
 
 namespace server {
-namespace radio {
+namespace BroadcastRadio {
 namespace TunerCallback {
 
 sp<hardware::broadcastradio::V1_1::ITunerCallback>
 getNativeCallback(JNIEnv *env, jobject jTunerCallback);
 
 } // namespace TunerCallback
-} // namespace radio
+} // namespace BroadcastRadio
 } // namespace server
 } // namespace android
 
-#endif // _ANDROID_SERVER_RADIO_TUNERCALLBACK_H
+#endif // _ANDROID_SERVER_BROADCASTRADIO_TUNERCALLBACK_H
