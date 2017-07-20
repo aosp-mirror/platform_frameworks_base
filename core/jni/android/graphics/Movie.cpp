@@ -1,6 +1,6 @@
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "GraphicsJNI.h"
-#include "ScopedLocalRef.h"
+#include <nativehelper/ScopedLocalRef.h>
 #include "SkFrontBufferedStream.h"
 #include "SkMovie.h"
 #include "SkStream.h"

@@ -22,8 +22,8 @@
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
-#include <ScopedStringChars.h>
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedStringChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"

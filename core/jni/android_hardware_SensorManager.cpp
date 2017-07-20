@@ -15,13 +15,13 @@
  */
 #define LOG_TAG "SensorManager"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_os_MessageQueue.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
 
-#include <ScopedUtfChars.h>
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedLocalRef.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <gui/Sensor.h>
 #include <gui/SensorEventQueue.h>

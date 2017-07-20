@@ -18,7 +18,7 @@
 
 //#define LOG_NDEBUG 0
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
@@ -31,7 +31,7 @@
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"
 
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
 

@@ -31,7 +31,7 @@
 #include <android_runtime/android_view_Surface.h>
 
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 
 #include <stdint.h>
 #include <inttypes.h>

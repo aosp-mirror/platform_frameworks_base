@@ -21,7 +21,7 @@
 #include "android_media_Utils.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>

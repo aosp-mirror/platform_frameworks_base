@@ -22,7 +22,7 @@
 
 #include <sstream>
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <media/AudioSystem.h>

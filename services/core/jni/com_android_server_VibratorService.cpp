@@ -17,7 +17,7 @@
 #define LOG_TAG "VibratorService"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 
 #include <utils/misc.h>

@@ -16,7 +16,7 @@
 
 #define LOG_TAG "InputWindowHandle"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>

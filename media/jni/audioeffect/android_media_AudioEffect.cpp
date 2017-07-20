@@ -25,7 +25,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include "media/AudioEffect.h"
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 using namespace android;
 

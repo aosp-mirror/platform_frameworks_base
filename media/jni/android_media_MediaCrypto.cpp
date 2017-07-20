@@ -22,7 +22,7 @@
 
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <binder/IServiceManager.h>
 #include <cutils/properties.h>

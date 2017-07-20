@@ -31,8 +31,8 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <jni.h>
 
-#include <ScopedLocalRef.h>
-#include <ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include <log/log.h>
 #include <utils/misc.h>

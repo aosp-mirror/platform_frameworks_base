@@ -25,7 +25,7 @@
 
 #include <cstring>
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <android/hidl/manager/1.0/IServiceManager.h>
 #include <android/hidl/base/1.0/IBase.h>
 #include <android/hidl/base/1.0/BpHwBase.h>
