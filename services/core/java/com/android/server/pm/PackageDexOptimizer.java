@@ -27,12 +27,12 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexoptOptions;
+import com.android.server.pm.dex.DexoptUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -146,12 +146,14 @@ public class PackageDexOptimizer {
         final boolean profileUpdated = options.isCheckForProfileUpdates() &&
                 isProfileUpdated(pkg, sharedGid, compilerFilter);
 
-        final String sharedLibrariesPath = getSharedLibrariesPath(sharedLibraries);
         // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
         final int dexoptFlags = getDexFlags(pkg, compilerFilter, options.isBootComplete());
-        // Get the dependencies of each split in the package. For each code path in the package,
-        // this array contains the relative paths of each split it depends on, separated by colons.
-        String[] splitDependencies = getSplitDependencies(pkg);
+
+        // Get the class loader context dependencies.
+        // For each code path in the package, this array contains the class loader context that
+        // needs to be passed to dexopt in order to ensure correct optimizations.
+        String[] classLoaderContexts = DexoptUtils.getClassLoaderContexts(
+                pkg.applicationInfo, sharedLibraries);
 
         int result = DEX_OPT_SKIPPED;
         for (int i = 0; i < paths.size(); i++) {
@@ -170,17 +172,10 @@ public class PackageDexOptimizer {
                 }
             }
 
-            String sharedLibrariesPathWithSplits;
-            if (sharedLibrariesPath != null && splitDependencies[i] != null) {
-                sharedLibrariesPathWithSplits = sharedLibrariesPath + ":" + splitDependencies[i];
-            } else {
-                sharedLibrariesPathWithSplits =
-                        splitDependencies[i] != null ? splitDependencies[i] : sharedLibrariesPath;
-            }
             for (String dexCodeIsa : dexCodeInstructionSets) {
-                int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter, profileUpdated,
-                        sharedLibrariesPathWithSplits, dexoptFlags, sharedGid, packageStats,
-                        options.isDowngrade());
+                int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter,
+                        profileUpdated, classLoaderContexts[i], dexoptFlags, sharedGid,
+                        packageStats, options.isDowngrade());
                 // The end result is:
                 //  - FAILED if any path failed,
                 //  - PERFORMED if at least one path needed compilation,
@@ -446,86 +441,6 @@ public class PackageDexOptimizer {
             return DEX_OPT_FAILED;
         }
         return adjustDexoptNeeded(dexoptNeeded);
-    }
-
-    /**
-     * Computes the shared libraries path that should be passed to dexopt.
-     */
-    private String getSharedLibrariesPath(String[] sharedLibraries) {
-        if (sharedLibraries == null || sharedLibraries.length == 0) {
-            return null;
-        }
-        StringBuilder sb = new StringBuilder();
-        for (String lib : sharedLibraries) {
-            if (sb.length() != 0) {
-                sb.append(":");
-            }
-            sb.append(lib);
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Walks dependency tree and gathers the dependencies for each split in a split apk.
-     * The split paths are stored as relative paths, separated by colons.
-     */
-    private String[] getSplitDependencies(PackageParser.Package pkg) {
-        // Convert all the code paths to relative paths.
-        String baseCodePath = new File(pkg.baseCodePath).getParent();
-        List<String> paths = pkg.getAllCodePaths();
-        String[] splitDependencies = new String[paths.size()];
-        for (int i = 0; i < paths.size(); i++) {
-            File pathFile = new File(paths.get(i));
-            String fileName = pathFile.getName();
-            paths.set(i, fileName);
-
-            // Sanity check that the base paths of the splits are all the same.
-            String basePath = pathFile.getParent();
-            if (!basePath.equals(baseCodePath)) {
-                Slog.wtf(TAG, "Split paths have different base paths: " + basePath + " and " +
-                        baseCodePath);
-            }
-        }
-
-        // If there are no other dependencies, fill in the implicit dependency on the base apk.
-        SparseArray<int[]> dependencies = pkg.applicationInfo.splitDependencies;
-        if (dependencies == null) {
-            for (int i = 1; i < paths.size(); i++) {
-                splitDependencies[i] = paths.get(0);
-            }
-            return splitDependencies;
-        }
-
-        // Fill in the dependencies, skipping the base apk which has no dependencies.
-        for (int i = 1; i < dependencies.size(); i++) {
-            getParentDependencies(dependencies.keyAt(i), paths, dependencies, splitDependencies);
-        }
-
-        return splitDependencies;
-    }
-
-    /**
-     * Recursive method to generate dependencies for a particular split.
-     * The index is a key from the package's splitDependencies.
-     */
-    private String getParentDependencies(int index, List<String> paths,
-            SparseArray<int[]> dependencies, String[] splitDependencies) {
-        // The base apk is always first, and has no dependencies.
-        if (index == 0) {
-            return null;
-        }
-        // Return the result if we've computed the dependencies for this index already.
-        if (splitDependencies[index] != null) {
-            return splitDependencies[index];
-        }
-        // Get the dependencies for the parent of this index and append its path to it.
-        int parent = dependencies.get(index)[0];
-        String parentDependencies =
-                getParentDependencies(parent, paths, dependencies, splitDependencies);
-        String path = parentDependencies == null ? paths.get(parent) :
-                parentDependencies + ":" + paths.get(parent);
-        splitDependencies[index] = path;
-        return path;
     }
 
     /**
