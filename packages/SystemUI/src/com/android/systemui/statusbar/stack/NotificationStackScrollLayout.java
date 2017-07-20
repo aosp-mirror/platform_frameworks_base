@@ -4344,10 +4344,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         @Override
         public void onDownUpdate(View currView, MotionEvent ev) {
             mTranslatingParentView = currView;
-            mCurrMenuRow = null;
             if (mCurrMenuRow != null) {
                 mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
             }
+            mCurrMenuRow = null;
             mHandler.removeCallbacks(mFalsingCheck);
 
             // Slide back any notifications that might be showing a menu
@@ -4358,6 +4358,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mCurrMenuRow = row.createMenu();
                 mCurrMenuRow.setSwipeActionHelper(NotificationSwipeHelper.this);
                 mCurrMenuRow.setMenuClickListener(NotificationStackScrollLayout.this);
+                mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
             }
         }
 
