@@ -250,6 +250,10 @@ public class WifiTracker {
             mLastNetworkInfo = mConnectivityManager.getNetworkInfo(mWifiManager.getCurrentNetwork());
 
             final List<ScanResult> newScanResults = mWifiManager.getScanResults();
+            if (sVerboseLogging) {
+                Log.i(TAG, "Fetched scan results: " + newScanResults);
+            }
+
             List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
             updateAccessPointsLocked(newScanResults, configs);
 
@@ -480,6 +484,9 @@ public class WifiTracker {
     private void updateAccessPoints() {
         List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
         final List<ScanResult> newScanResults = mWifiManager.getScanResults();
+        if (sVerboseLogging) {
+            Log.i(TAG, "Fetched scan results: " + newScanResults);
+        }
 
         synchronized (mLock) {
             if(!mStaleScanResults) {
