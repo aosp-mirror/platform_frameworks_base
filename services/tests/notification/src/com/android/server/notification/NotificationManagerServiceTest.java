@@ -1391,16 +1391,41 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
-    public void testModifyAutogroup_requestsSort() throws Exception {
+    public void testAddAutogroup_requestsSort() throws Exception {
         RankingHandler rh = mock(RankingHandler.class);
         mNotificationManagerService.setRankingHandler(rh);
 
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mNotificationManagerService.addNotification(r);
         mNotificationManagerService.addAutogroupKeyLocked(r.getKey());
+
+        verify(rh, times(1)).requestSort();
+    }
+
+    @Test
+    public void testRemoveAutogroup_requestsSort() throws Exception {
+        RankingHandler rh = mock(RankingHandler.class);
+        mNotificationManagerService.setRankingHandler(rh);
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.setOverrideGroupKey("TEST");
+        mNotificationManagerService.addNotification(r);
         mNotificationManagerService.removeAutogroupKeyLocked(r.getKey());
 
-        verify(rh, times(2)).requestSort();
+        verify(rh, times(1)).requestSort();
+    }
+
+    @Test
+    public void testReaddAutogroup_noSort() throws Exception {
+        RankingHandler rh = mock(RankingHandler.class);
+        mNotificationManagerService.setRankingHandler(rh);
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.setOverrideGroupKey("TEST");
+        mNotificationManagerService.addNotification(r);
+        mNotificationManagerService.addAutogroupKeyLocked(r.getKey());
+
+        verify(rh, never()).requestSort();
     }
 
     @Test

@@ -3002,9 +3002,11 @@ public class NotificationManagerService extends SystemService {
         if (r == null) {
             return;
         }
-        addAutoGroupAdjustment(r, GroupHelper.AUTOGROUP_KEY);
-        EventLogTags.writeNotificationAutogrouped(key);
-        mRankingHandler.requestSort();
+        if (r.sbn.getOverrideGroupKey() == null) {
+            addAutoGroupAdjustment(r, GroupHelper.AUTOGROUP_KEY);
+            EventLogTags.writeNotificationAutogrouped(key);
+            mRankingHandler.requestSort();
+        }
     }
 
     @GuardedBy("mNotificationLock")
@@ -3013,9 +3015,11 @@ public class NotificationManagerService extends SystemService {
         if (r == null) {
             return;
         }
-        addAutoGroupAdjustment(r, null);
-        EventLogTags.writeNotificationUnautogrouped(key);
-        mRankingHandler.requestSort();
+        if (r.sbn.getOverrideGroupKey() != null) {
+            addAutoGroupAdjustment(r, null);
+            EventLogTags.writeNotificationUnautogrouped(key);
+            mRankingHandler.requestSort();
+        }
     }
 
     private void addAutoGroupAdjustment(NotificationRecord r, String overrideGroupKey) {
