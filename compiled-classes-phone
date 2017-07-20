@@ -441,7 +441,6 @@ android.app.ResourcesManager$1
 android.app.ResourcesManager$ActivityResources
 android.app.ResultInfo
 android.app.ResultInfo$1
-android.app.RetailDemoModeServiceInternal
 android.app.SearchableInfo
 android.app.SearchableInfo$1
 android.app.Service
