@@ -382,7 +382,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isInteractive() {
+    public boolean okToAnimate() {
         return true;
     }
 

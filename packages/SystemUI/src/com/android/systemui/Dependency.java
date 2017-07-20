@@ -30,6 +30,8 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginActivityManager;
 import com.android.systemui.plugins.PluginDependencyProvider;
@@ -247,6 +249,12 @@ public class Dependency extends SystemUI {
 
         mProviders.put(StatusBarIconController.class, () ->
                 new StatusBarIconControllerImpl(mContext));
+
+        mProviders.put(ScreenLifecycle.class, () ->
+                new ScreenLifecycle());
+
+        mProviders.put(WakefulnessLifecycle.class, () ->
+                new WakefulnessLifecycle());
 
         mProviders.put(FragmentService.class, () ->
                 new FragmentService(mContext));

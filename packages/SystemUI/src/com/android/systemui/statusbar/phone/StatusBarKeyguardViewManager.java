@@ -80,7 +80,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private ViewGroup mContainer;
 
-    private boolean mDeviceInteractive = false;
     private boolean mScreenTurnedOn;
     protected KeyguardBouncer mBouncer;
     protected boolean mShowing;
@@ -100,7 +99,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
-    private boolean mDeviceWillWakeUp;
     private boolean mDeferScrimFadeOut;
 
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
@@ -213,31 +211,19 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void onStartedGoingToSleep() {
-        mStatusBar.onStartedGoingToSleep();
+        // TODO: remove
     }
 
     public void onFinishedGoingToSleep() {
-        mDeviceInteractive = false;
-        mStatusBar.onFinishedGoingToSleep();
         mBouncer.onScreenTurnedOff();
     }
 
     public void onStartedWakingUp() {
-        Trace.beginSection("StatusBarKeyguardViewManager#onStartedWakingUp");
-        mDeviceInteractive = true;
-        mDeviceWillWakeUp = false;
-        mStatusBar.onStartedWakingUp();
-        Trace.endSection();
+        // TODO: remove
     }
 
     public void onScreenTurningOn() {
-        Trace.beginSection("StatusBarKeyguardViewManager#onScreenTurningOn");
-        mStatusBar.onScreenTurningOn();
-        Trace.endSection();
-    }
-
-    public boolean isScreenTurnedOn() {
-        return mScreenTurnedOn;
+        // TODO: remove
     }
 
     public void onScreenTurnedOn() {
@@ -249,7 +235,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     true /* skipFirstFrame */);
             updateStates();
         }
-        mStatusBar.onScreenTurnedOn();
         Trace.endSection();
     }
 
@@ -269,11 +254,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void onScreenTurnedOff() {
         mScreenTurnedOn = false;
-        mStatusBar.onScreenTurnedOff();
     }
 
     public void notifyDeviceWakeUpRequested() {
-        mDeviceWillWakeUp = !mDeviceInteractive;
+        // TODO: remove
     }
 
     public void setNeedsInput(boolean needsInput) {

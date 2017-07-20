@@ -3168,10 +3168,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void selectRotationAnimationLw(int anim[]) {
+        // If the screen is off or non-interactive, force a jumpcut.
+        final boolean forceJumpcut = !mScreenOnFully || !mAwake;
         if (PRINT_ANIM) Slog.i(TAG, "selectRotationAnimation mTopFullscreen="
                 + mTopFullscreenOpaqueWindowState + " rotationAnimation="
                 + (mTopFullscreenOpaqueWindowState == null ?
-                        "0" : mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation));
+                        "0" : mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation)
+                + " forceJumpcut=" + forceJumpcut);
+        if (forceJumpcut) {
+            anim[0] = R.anim.rotation_animation_jump_exit;
+            anim[1] = R.anim.rotation_animation_enter;
+            return;
+        }
         if (mTopFullscreenOpaqueWindowState != null) {
             int animationHint = mTopFullscreenOpaqueWindowState.getRotationAnimationHint();
             if (animationHint < 0 && mTopIsFullscreen) {
@@ -6616,6 +6624,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void finishedWakingUp() {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Finished waking up...");
+
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.onFinishedWakingUp();
+        }
     }
 
     private void wakeUpFromPowerKey(long eventTime) {
@@ -6724,6 +6736,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void screenTurningOff(ScreenOffListener screenOffListener) {
         mWindowManagerFuncs.screenTurningOff(screenOffListener);
+        synchronized (mLock) {
+            if (mKeyguardDelegate != null) {
+                mKeyguardDelegate.onScreenTurningOff();
+            }
+        }
     }
 
     private void reportScreenStateToVrManager(boolean isScreenOn) {
@@ -6820,8 +6837,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isInteractive() {
-        return mAwake;
+    public boolean okToAnimate() {
+        return mAwake && !mGoingToSleep;
     }
 
     /** {@inheritDoc} */
