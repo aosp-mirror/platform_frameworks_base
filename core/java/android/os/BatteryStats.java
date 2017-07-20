@@ -5606,8 +5606,10 @@ public abstract class BatteryStats implements Parcelable {
                         pw.print(',');
                         if (rec.stepDetails.statPlatformIdleState != null) {
                             pw.print(rec.stepDetails.statPlatformIdleState);
+                            if (rec.stepDetails.statSubsystemPowerState != null) {
+                                pw.print(',');
+                            }
                         }
-                        pw.println();
 
                         if (rec.stepDetails.statSubsystemPowerState != null) {
                             pw.print(rec.stepDetails.statSubsystemPowerState);
