@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_os_Parcel.h"
 #include "core_jni_helpers.h"
 #include "android_runtime/android_hardware_camera2_CameraMetadata.h"

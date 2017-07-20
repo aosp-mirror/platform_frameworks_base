@@ -14,7 +14,7 @@
 #include "Utils.h"
 #include "core_jni_helpers.h"
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
 #include <cutils/compiler.h>

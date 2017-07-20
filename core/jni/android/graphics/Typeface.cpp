@@ -19,7 +19,7 @@
 
 #include "FontUtils.h"
 #include "GraphicsJNI.h"
-#include "ScopedPrimitiveArray.h"
+#include <nativehelper/ScopedPrimitiveArray.h>
 #include "SkTypeface.h"
 #include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/AssetManager.h>

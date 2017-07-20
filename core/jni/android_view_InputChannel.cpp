@@ -16,7 +16,7 @@
 
 #define LOG_TAG "InputChannel-JNI"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <binder/Parcel.h>

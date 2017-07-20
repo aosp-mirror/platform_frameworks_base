@@ -19,7 +19,7 @@
 #include <stdio.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_os_Parcel.h"
 #include "android/graphics/GraphicBuffer.h"
 #include "android/graphics/GraphicsJNI.h"
@@ -47,7 +47,7 @@
 #include <utils/misc.h>
 #include <utils/Log.h>
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include <AnimationContext.h>
 #include <FrameInfo.h>

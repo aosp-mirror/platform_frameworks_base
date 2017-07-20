@@ -20,7 +20,7 @@
 #include <utils/Log.h>
 #include <utils/String8.h>
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
 #include <androidfw/BackupHelpers.h>

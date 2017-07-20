@@ -22,7 +22,7 @@
 
 #include "android_os_HwParcel.h"
 
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <hidl/Status.h>
 #include <nativehelper/ScopedLocalRef.h>

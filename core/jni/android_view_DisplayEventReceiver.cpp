@@ -18,7 +18,7 @@
 
 //#define LOG_NDEBUG 0
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <inttypes.h>
 
@@ -30,7 +30,7 @@
 #include <gui/DisplayEventReceiver.h>
 #include "android_os_MessageQueue.h"
 
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
 

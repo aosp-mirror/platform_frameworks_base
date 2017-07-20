@@ -17,7 +17,7 @@
 #define LOG_TAG "SQLiteDebug"
 
 #include <jni.h>
-#include <JNIHelp.h>
+#include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
 #include <stdio.h>
