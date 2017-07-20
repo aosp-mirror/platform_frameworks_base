@@ -16,6 +16,8 @@
 
 package com.android.server.timezone;
 
+import com.android.server.EventLogTags;
+
 import android.app.timezone.RulesUpdaterContract;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,8 +25,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PatternMatcher;
 import android.util.Slog;
-
-import java.util.regex.Pattern;
 
 /**
  * The bona fide implementation of {@link IntentHelper}.
@@ -75,6 +75,7 @@ final class IntentHelperImpl implements IntentHelper {
     public void sendTriggerUpdateCheck(CheckToken checkToken) {
         RulesUpdaterContract.sendBroadcast(
                 mContext, mUpdaterAppPackageName, checkToken.toByteArray());
+        EventLogTags.writeTimezoneTriggerCheck(checkToken.toString());
     }
 
     @Override
