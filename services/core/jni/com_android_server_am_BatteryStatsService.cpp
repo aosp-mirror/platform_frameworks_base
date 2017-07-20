@@ -301,30 +301,17 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
             if (status != Status::SUCCESS)
                 return;
 
-            for (size_t i = 0; i < subsystems.size(); i++) {
-                int added;
-                const PowerStateSubsystem &subsystem = subsystems[i];
-
-                added = snprintf(offset, remaining,
-                                 "subsystem_%zu name=%s ", i + 1, subsystem.name.c_str());
-                if (added < 0) {
-                    break;
-                }
-
-                if (added > remaining) {
-                    added = remaining;
-                }
-
+            if (subsystems.size() > 0) {
+                int added = snprintf(offset, remaining, "SubsystemPowerState ");
                 offset += added;
                 remaining -= added;
                 total_added += added;
 
-                for (size_t j = 0; j < subsystem.states.size(); j++) {
-                    const PowerStateSubsystemSleepState& state = subsystem.states[j];
+                for (size_t i = 0; i < subsystems.size(); i++) {
+                    const PowerStateSubsystem &subsystem = subsystems[i];
+
                     added = snprintf(offset, remaining,
-                                     "state_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " last entry TS(ms)=%" PRIu64 " ",
-                                     j + 1, state.name.c_str(), state.residencyInMsecSinceBoot,
-                                     state.totalTransitions, state.lastEntryTimestampMs);
+                                     "subsystem_%zu name=%s ", i + 1, subsystem.name.c_str());
                     if (added < 0) {
                         break;
                     }
@@ -336,14 +323,33 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
                     offset += added;
                     remaining -= added;
                     total_added += added;
-                }
 
-                if (remaining <= 0) {
-                    /* rewrite NULL character*/
-                    offset--;
-                    total_added--;
-                    ALOGE("PowerHal: buffer not enough");
-                    break;
+                    for (size_t j = 0; j < subsystem.states.size(); j++) {
+                        const PowerStateSubsystemSleepState& state = subsystem.states[j];
+                        added = snprintf(offset, remaining,
+                                         "state_%zu name=%s time=%" PRIu64 " count=%" PRIu64 " last entry=%" PRIu64 " ",
+                                         j + 1, state.name.c_str(), state.residencyInMsecSinceBoot,
+                                         state.totalTransitions, state.lastEntryTimestampMs);
+                        if (added < 0) {
+                            break;
+                        }
+
+                        if (added > remaining) {
+                            added = remaining;
+                        }
+
+                        offset += added;
+                        remaining -= added;
+                        total_added += added;
+                    }
+
+                    if (remaining <= 0) {
+                        /* rewrite NULL character*/
+                        offset--;
+                        total_added--;
+                        ALOGE("PowerHal: buffer not enough");
+                        break;
+                    }
                 }
             }
         }

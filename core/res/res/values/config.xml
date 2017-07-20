@@ -291,6 +291,11 @@
     <!-- Mask to use when checking skb mark defined in config_networkWakeupPacketMark above. -->
     <integer name="config_networkWakeupPacketMask">0</integer>
 
+    <!-- Whether the APF Filter in the device should filter out IEEE 802.3 Frames
+         Those frames are identified by the field Eth-type having values
+         less than 0x600 -->
+    <bool translatable="false" name="config_apfDrop802_3Frames">true</bool>
+
     <!-- Default value for ConnectivityManager.getMultipathPreference() on metered networks. Actual
          device behaviour is controlled by Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE.
          This is the default value of that setting. -->
@@ -2774,6 +2779,9 @@
 
     <!-- True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
+
+    <!-- Component that runs demo mode when it is enabled. -->
+    <string name="config_demoModePackage" translatable="false"></string>
 
     <!-- Component that is the default launcher when demo mode is enabled. -->
     <string name="config_demoModeLauncherComponent">com.android.retaildemo/.DemoPlayer</string>

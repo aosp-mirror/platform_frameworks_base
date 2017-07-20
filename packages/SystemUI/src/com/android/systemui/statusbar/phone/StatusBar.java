@@ -102,6 +102,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
@@ -562,7 +563,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }};
 
     private boolean mWaitingForKeyguardExit;
-    private boolean mDozing;
+    protected boolean mDozing;
     private boolean mDozingRequested;
     protected boolean mScrimSrcModeEnabled;
 
@@ -1789,7 +1790,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
         if (entry != null && mNotificationGutsExposed != null
-                && mNotificationGutsExposed == entry.row.getGuts()) {
+                && mNotificationGutsExposed == entry.row.getGuts() && entry.row.getGuts() != null
+                && !entry.row.getGuts().isLeavebehind()) {
             Log.w(TAG, "Keeping notification because it's showing guts. " + key);
             mLatestRankingMap = ranking;
             mKeyToRemoveOnGutsClosed = key;
@@ -2943,8 +2945,8 @@ public class StatusBar extends SystemUI implements DemoMode,
      * settings. Down action closes the entire panel.
      */
     @Override
-    public void handleSystemNavigationKey(int key) {
-        if (SPEW) Log.d(TAG, "handleSystemNavigationKey: " + key);
+    public void handleSystemKey(int key) {
+        if (SPEW) Log.d(TAG, "handleNavigationKey: " + key);
         if (!panelsEnabled() || !mKeyguardMonitor.isDeviceInteractive()
                 || mKeyguardMonitor.isShowing() && !mKeyguardMonitor.isOccluded()) {
             return;
@@ -7233,7 +7235,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        if (mNotificationData.shouldSuppressScreenOn(sbn.getKey())) {
+        if (!isDozing() && mNotificationData.shouldSuppressScreenOn(sbn.getKey())) {
+            if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
+            return false;
+        }
+
+        if (isDozing() && mNotificationData.shouldSuppressScreenOff(sbn.getKey())) {
             if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }

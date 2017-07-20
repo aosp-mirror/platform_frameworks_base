@@ -312,6 +312,7 @@ public class NotificationManager {
             }
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
+        notification.reduceImageSizes(mContext);
         final Notification copy = Builder.maybeCloneStrippedForDelivery(notification);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,

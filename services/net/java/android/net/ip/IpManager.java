@@ -49,6 +49,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.R;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.IState;
 import com.android.internal.util.State;
@@ -1286,8 +1287,12 @@ public class IpManager extends StateMachine {
 
         @Override
         public void enter() {
+            // Get the Configuration for ApfFilter from Context
+            boolean filter802_3Frames =
+                    mContext.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
+
             mApfFilter = ApfFilter.maybeCreate(mConfiguration.mApfCapabilities, mNetworkInterface,
-                    mCallback, mMulticastFiltering);
+                    mCallback, mMulticastFiltering, filter802_3Frames);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.
             if (mApfFilter == null) {

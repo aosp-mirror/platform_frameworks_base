@@ -77,7 +77,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_TOGGLE_APP_SPLIT_SCREEN       = 30 << MSG_SHIFT;
     private static final int MSG_APP_TRANSITION_FINISHED       = 31 << MSG_SHIFT;
     private static final int MSG_DISMISS_KEYBOARD_SHORTCUTS    = 32 << MSG_SHIFT;
-    private static final int MSG_HANDLE_SYSNAV_KEY             = 33 << MSG_SHIFT;
+    private static final int MSG_HANDLE_SYSTEM_KEY             = 33 << MSG_SHIFT;
     private static final int MSG_SHOW_GLOBAL_ACTIONS           = 34 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
@@ -134,7 +134,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void remQsTile(ComponentName tile) { }
         default void clickTile(ComponentName tile) { }
 
-        default void handleSystemNavigationKey(int arg1) { }
+        default void handleSystemKey(int arg1) { }
         default void handleShowGlobalActionsMenu() { }
     }
 
@@ -415,9 +415,9 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void handleSystemNavigationKey(int key) {
+    public void handleSystemKey(int key) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_HANDLE_SYSNAV_KEY, key, 0).sendToTarget();
+            mHandler.obtainMessage(MSG_HANDLE_SYSTEM_KEY, key, 0).sendToTarget();
         }
     }
 
@@ -600,9 +600,9 @@ public class CommandQueue extends IStatusBar.Stub {
                         mCallbacks.get(i).toggleSplitScreen();
                     }
                     break;
-                case MSG_HANDLE_SYSNAV_KEY:
+                case MSG_HANDLE_SYSTEM_KEY:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).handleSystemNavigationKey(msg.arg1);
+                        mCallbacks.get(i).handleSystemKey(msg.arg1);
                     }
                     break;
                 case MSG_SHOW_GLOBAL_ACTIONS:

@@ -805,6 +805,43 @@ public final class Icon implements Parcelable {
     };
 
     /**
+     * Scale down a bitmap to a given max width and max height. The scaling will be done in a uniform way
+     * @param bitmap the bitmap to scale down
+     * @param maxWidth the maximum width allowed
+     * @param maxHeight the maximum height allowed
+     *
+     * @return the scaled bitmap if necessary or the original bitmap if no scaling was needed
+     * @hide
+     */
+    public static Bitmap scaleDownIfNecessary(Bitmap bitmap, int maxWidth, int maxHeight) {
+        int bitmapWidth = bitmap.getWidth();
+        int bitmapHeight = bitmap.getHeight();
+        if (bitmapWidth > maxWidth || bitmapHeight > maxHeight) {
+            float scale = Math.min((float) maxWidth / bitmapWidth,
+                    (float) maxHeight / bitmapHeight);
+            bitmap = Bitmap.createScaledBitmap(bitmap, (int) (scale * bitmapWidth),
+                    (int) (scale * bitmapHeight), true /* filter */);
+        }
+        return bitmap;
+    }
+
+    /**
+     * Scale down this icon to a given max width and max height.
+     * The scaling will be done in a uniform way and currently only bitmaps are supported.
+     * @param maxWidth the maximum width allowed
+     * @param maxHeight the maximum height allowed
+     *
+     * @hide
+     */
+    public void scaleDownIfNecessary(int maxWidth, int maxHeight) {
+        if (mType != TYPE_BITMAP && mType != TYPE_ADAPTIVE_BITMAP) {
+            return;
+        }
+        Bitmap bitmap = getBitmap();
+        setBitmap(scaleDownIfNecessary(bitmap, maxWidth, maxHeight));
+    }
+
+    /**
      * Implement this interface to receive a callback when
      * {@link #loadDrawableAsync(Context, OnDrawableLoadedListener, Handler) loadDrawableAsync}
      * is finished and your Drawable is ready.

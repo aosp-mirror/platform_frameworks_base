@@ -111,7 +111,7 @@ public final class MediaProjectionManagerService extends SystemService
             mProjectionGrant.stop();
         }
         if (mMediaRouteInfo != null) {
-            mMediaRouter.getDefaultRoute().select();
+            mMediaRouter.getFallbackRoute().select();
         }
         mProjectionToken = projection.asBinder();
         mProjectionGrant = projection;

@@ -97,14 +97,14 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     }
 
     /**
-     * Retrieve TYPE_NORMAL gradient colors considering wallpaper visibility.
+     * Retrieve gradient colors for a specific wallpaper.
      *
      * @param which FLAG_LOCK or FLAG_SYSTEM
      * @return colors
      */
     @NonNull
     public GradientColors getColors(int which) {
-        return getColors(which, TYPE_NORMAL);
+        return getColors(which, TYPE_DARK);
     }
 
     /**

@@ -144,6 +144,7 @@ class KeyguardController {
             failCallback(callback);
             return;
         }
+        Slog.i(TAG, "Activity requesting to dismiss Keyguard: " + activityRecord);
         mWindowManager.dismissKeyguard(callback);
     }
 
