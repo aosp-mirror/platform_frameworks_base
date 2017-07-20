@@ -136,14 +136,14 @@ public class RadioManager {
         private final boolean mIsBgScanSupported;
         private final Set<Integer> mSupportedProgramTypes;
         private final Set<Integer> mSupportedIdentifierTypes;
-        private final String mVendorExension;
+        private final String mVendorInfo;
 
         ModuleProperties(int id, String serviceName, int classId, String implementor,
                 String product, String version, String serial, int numTuners, int numAudioSources,
                 boolean isCaptureSupported, BandDescriptor[] bands, boolean isBgScanSupported,
                 @ProgramSelector.ProgramType int[] supportedProgramTypes,
                 @ProgramSelector.IdentifierType int[] supportedIdentifierTypes,
-                String vendorExension) {
+                String vendorInfo) {
             mId = id;
             mServiceName = TextUtils.isEmpty(serviceName) ? "default" : serviceName;
             mClassId = classId;
@@ -158,7 +158,7 @@ public class RadioManager {
             mIsBgScanSupported = isBgScanSupported;
             mSupportedProgramTypes = arrayToSet(supportedProgramTypes);
             mSupportedIdentifierTypes = arrayToSet(supportedIdentifierTypes);
-            mVendorExension = vendorExension;
+            mVendorInfo = vendorInfo;
         }
 
         private static Set<Integer> arrayToSet(int[] arr) {
@@ -294,8 +294,8 @@ public class RadioManager {
          * Client application MUST verify vendor/product name from the
          * ModuleProperties class before doing any interpretation of this value.
          */
-        public @NonNull String getVendorExension() {
-            return mVendorExension == null ? "" : mVendorExension;
+        public @NonNull String getVendorInfo() {
+            return mVendorInfo == null ? "" : mVendorInfo;
         }
 
         /** List of descriptors for all bands supported by this module.
@@ -325,7 +325,7 @@ public class RadioManager {
             mIsBgScanSupported = in.readInt() == 1;
             mSupportedProgramTypes = arrayToSet(in.createIntArray());
             mSupportedIdentifierTypes = arrayToSet(in.createIntArray());
-            mVendorExension = in.readString();
+            mVendorInfo = in.readString();
         }
 
         public static final Parcelable.Creator<ModuleProperties> CREATOR
@@ -355,7 +355,7 @@ public class RadioManager {
             dest.writeInt(mIsBgScanSupported ? 1 : 0);
             dest.writeIntArray(setToArray(mSupportedProgramTypes));
             dest.writeIntArray(setToArray(mSupportedIdentifierTypes));
-            dest.writeString(mVendorExension);
+            dest.writeString(mVendorInfo);
         }
 
         @Override
@@ -392,7 +392,7 @@ public class RadioManager {
             result = prime * result + (mIsCaptureSupported ? 1 : 0);
             result = prime * result + Arrays.hashCode(mBands);
             result = prime * result + (mIsBgScanSupported ? 1 : 0);
-            result = prime * result + ((mVendorExension == null) ? 0 : mVendorExension.hashCode());
+            result = prime * result + ((mVendorInfo == null) ? 0 : mVendorInfo.hashCode());
             return result;
         }
 
@@ -438,8 +438,7 @@ public class RadioManager {
                 return false;
             if (mIsBgScanSupported != other.isBackgroundScanningSupported())
                 return false;
-            if (!TextUtils.equals(mVendorExension, other.mVendorExension))
-                return false;
+            if (!TextUtils.equals(mVendorInfo, other.mVendorInfo)) return false;
             return true;
         }
     }
@@ -1323,11 +1322,11 @@ public class RadioManager {
         private final int mFlags;
         private final int mSignalStrength;
         private final RadioMetadata mMetadata;
-        private final String mVendorExension;
+        private final String mVendorInfo;
 
         ProgramInfo(@NonNull ProgramSelector selector, boolean tuned, boolean stereo,
                 boolean digital, int signalStrength, RadioMetadata metadata, int flags,
-                String vendorExension) {
+                String vendorInfo) {
             mSelector = selector;
             mTuned = tuned;
             mStereo = stereo;
@@ -1335,7 +1334,7 @@ public class RadioManager {
             mFlags = flags;
             mSignalStrength = signalStrength;
             mMetadata = metadata;
-            mVendorExension = vendorExension;
+            mVendorInfo = vendorInfo;
         }
 
         /**
@@ -1455,8 +1454,8 @@ public class RadioManager {
          * Client application MUST verify vendor/product name from the
          * ModuleProperties class before doing any interpretation of this value.
          */
-        public @NonNull String getVendorExension() {
-            return mVendorExension == null ? "" : mVendorExension;
+        public @NonNull String getVendorInfo() {
+            return mVendorInfo == null ? "" : mVendorInfo;
         }
 
         private ProgramInfo(Parcel in) {
@@ -1471,7 +1470,7 @@ public class RadioManager {
                 mMetadata = null;
             }
             mFlags = in.readInt();
-            mVendorExension = in.readString();
+            mVendorInfo = in.readString();
         }
 
         public static final Parcelable.Creator<ProgramInfo> CREATOR
@@ -1499,7 +1498,7 @@ public class RadioManager {
                 mMetadata.writeToParcel(dest, flags);
             }
             dest.writeInt(mFlags);
-            dest.writeString(mVendorExension);
+            dest.writeString(mVendorInfo);
         }
 
         @Override
@@ -1527,7 +1526,7 @@ public class RadioManager {
             result = prime * result + mFlags;
             result = prime * result + mSignalStrength;
             result = prime * result + ((mMetadata == null) ? 0 : mMetadata.hashCode());
-            result = prime * result + ((mVendorExension == null) ? 0 : mVendorExension.hashCode());
+            result = prime * result + ((mVendorInfo == null) ? 0 : mVendorInfo.hashCode());
             return result;
         }
 
@@ -1554,8 +1553,7 @@ public class RadioManager {
                     return false;
             } else if (!mMetadata.equals(other.getMetadata()))
                 return false;
-            if (!TextUtils.equals(mVendorExension, other.mVendorExension))
-                return false;
+            if (!TextUtils.equals(mVendorInfo, other.mVendorInfo)) return false;
             return true;
         }
     }
