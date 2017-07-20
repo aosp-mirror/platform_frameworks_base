@@ -6616,6 +6616,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void finishedWakingUp() {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Finished waking up...");
+
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.onFinishedWakingUp();
+        }
     }
 
     private void wakeUpFromPowerKey(long eventTime) {
@@ -6724,6 +6728,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void screenTurningOff(ScreenOffListener screenOffListener) {
         mWindowManagerFuncs.screenTurningOff(screenOffListener);
+        synchronized (mLock) {
+            if (mKeyguardDelegate != null) {
+                mKeyguardDelegate.onScreenTurningOff();
+            }
+        }
     }
 
     private void reportScreenStateToVrManager(boolean isScreenOn) {

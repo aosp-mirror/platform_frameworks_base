@@ -64,6 +64,11 @@ oneway interface IKeyguardService {
     void onStartedWakingUp();
 
     /**
+     * Called when the device has finished waking up.
+     */
+    void onFinishedWakingUp();
+
+    /**
      * Called when the device screen is turning on.
      */
     void onScreenTurningOn(IKeyguardDrawnCallback callback);
@@ -72,6 +77,11 @@ oneway interface IKeyguardService {
      * Called when the screen has actually turned on.
      */
     void onScreenTurnedOn();
+
+    /**
+     * Called when the screen starts turning off.
+     */
+    void onScreenTurningOff();
 
     /**
      * Called when the screen has turned off.
