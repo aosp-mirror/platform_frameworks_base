@@ -70,13 +70,13 @@ public final class CharSequenceTransformation extends InternalTransformation imp
     @Override
     @TestApi
     public void apply(@NonNull ValueFinder finder, @NonNull RemoteViews parentTemplate,
-            int childViewId) {
+            int childViewId) throws Exception {
         final StringBuilder converted = new StringBuilder();
         final int size = mFields.size();
         if (sDebug) Log.d(TAG, size + " multiple fields on id " + childViewId);
         for (int i = 0; i < size; i++) {
             final AutofillId id = mFields.keyAt(i);
-            final Pair<Pattern, String> regex = mFields.valueAt(i);
+            final Pair<Pattern, String> field = mFields.valueAt(i);
             final String value = finder.findByAutofillId(id);
             if (value == null) {
                 Log.w(TAG, "No value for id " + id);
@@ -84,12 +84,13 @@ public final class CharSequenceTransformation extends InternalTransformation imp
             }
             try {
                 // replaceAll throws an exception if the subst is invalid
-                final String convertedValue = regex.first.matcher(value).replaceAll(regex.second);
+                final String convertedValue = field.first.matcher(value).replaceAll(field.second);
                 converted.append(convertedValue);
             } catch (Exception e) {
-                // Do not log full exception to avoid leaks
-                Log.w(TAG, "Cannot apply " + regex.first.pattern() + "->" + regex.second + " to "
+                // Do not log full exception to avoid PII leaking
+                Log.w(TAG, "Cannot apply " + field.first.pattern() + "->" + field.second + " to "
                         + "field with autofill id" + id + ": " + e.getClass());
+                throw e;
             }
         }
         parentTemplate.setCharSequence(childViewId, "setText", converted);
