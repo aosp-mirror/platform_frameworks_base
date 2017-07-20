@@ -3145,6 +3145,8 @@ public class PackageParser {
         perm.info.descriptionRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_description,
                 0);
+        perm.info.requestRes = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_request, 0);
         perm.info.flags = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags, 0);
         perm.info.priority = sa.getInt(
@@ -3198,6 +3200,9 @@ public class PackageParser {
         perm.info.descriptionRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestPermission_description,
                 0);
+
+        perm.info.requestRes = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestPermission_request, 0);
 
         perm.info.protectionLevel = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestPermission_protectionLevel,
@@ -3273,6 +3278,7 @@ public class PackageParser {
         }
 
         perm.info.descriptionRes = 0;
+        perm.info.requestRes = 0;
         perm.info.protectionLevel = PermissionInfo.PROTECTION_NORMAL;
         perm.tree = true;
 

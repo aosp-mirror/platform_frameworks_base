@@ -562,6 +562,7 @@
         android:icon="@drawable/perm_group_contacts"
         android:label="@string/permgrouplab_contacts"
         android:description="@string/permgroupdesc_contacts"
+        android:request="@string/permgrouprequest_contacts"
         android:priority="100" />
 
     <!-- Allows an application to read the user's contacts data.
@@ -592,6 +593,7 @@
         android:icon="@drawable/perm_group_calendar"
         android:label="@string/permgrouplab_calendar"
         android:description="@string/permgroupdesc_calendar"
+        android:request="@string/permgrouprequest_calendar"
         android:priority="200" />
 
     <!-- Allows an application to read the user's calendar data.
@@ -622,6 +624,7 @@
         android:icon="@drawable/perm_group_sms"
         android:label="@string/permgrouplab_sms"
         android:description="@string/permgroupdesc_sms"
+        android:request="@string/permgrouprequest_sms"
         android:priority="300" />
 
     <!-- Allows an application to send SMS messages.
@@ -698,6 +701,7 @@
         android:icon="@drawable/perm_group_storage"
         android:label="@string/permgrouplab_storage"
         android:description="@string/permgroupdesc_storage"
+        android:request="@string/permgrouprequest_storage"
         android:priority="900" />
 
     <!-- Allows an application to read from external storage.
@@ -759,6 +763,7 @@
         android:icon="@drawable/perm_group_location"
         android:label="@string/permgrouplab_location"
         android:description="@string/permgroupdesc_location"
+        android:request="@string/permgrouprequest_location"
         android:priority="400" />
 
     <!-- Allows an app to access precise location.
@@ -791,6 +796,7 @@
         android:icon="@drawable/perm_group_phone_calls"
         android:label="@string/permgrouplab_phone"
         android:description="@string/permgroupdesc_phone"
+        android:request="@string/permgrouprequest_phone"
         android:priority="500" />
 
     <!-- Allows read only access to phone state, including the phone number of the device,
@@ -942,6 +948,7 @@
         android:icon="@drawable/perm_group_microphone"
         android:label="@string/permgrouplab_microphone"
         android:description="@string/permgroupdesc_microphone"
+        android:request="@string/permgrouprequest_microphone"
         android:priority="600" />
 
     <!-- Allows an application to record audio.
@@ -984,6 +991,7 @@
         android:icon="@drawable/perm_group_camera"
         android:label="@string/permgrouplab_camera"
         android:description="@string/permgroupdesc_camera"
+        android:request="@string/permgrouprequest_camera"
         android:priority="700" />
 
     <!-- Required to be able to access the camera device.
@@ -1013,6 +1021,7 @@
         android:icon="@drawable/perm_group_sensors"
         android:label="@string/permgrouplab_sensors"
         android:description="@string/permgroupdesc_sensors"
+        android:request="@string/permgrouprequest_sensors"
         android:priority="800" />
 
     <!-- Allows an application to access data from sensors that the user uses to

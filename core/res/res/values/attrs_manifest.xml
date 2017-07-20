@@ -1527,6 +1527,7 @@
         <attr name="logo" />
         <attr name="permissionGroup" />
         <attr name="description" />
+        <attr name="request" />
         <attr name="protectionLevel" />
         <attr name="permissionFlags" />
     </declare-styleable>
@@ -1554,6 +1555,7 @@
         <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
+        <attr name="request" />
         <attr name="permissionGroupFlags" />
         <attr name="priority" />
     </declare-styleable>
