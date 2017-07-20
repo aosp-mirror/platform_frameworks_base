@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import dalvik.system.CloseGuard;
 import java.io.IOException;
@@ -486,6 +487,15 @@ public final class IpSecTransform implements AutoCloseable {
             Preconditions.checkNotNull(context);
             mContext = context;
             mConfig = new IpSecConfig();
+        }
+
+        /**
+         * Return an {@link IpSecConfig} object for testing purposes.
+         * @hide
+         */
+        @VisibleForTesting
+        public IpSecConfig getIpSecConfig() {
+            return mConfig;
         }
     }
 }
