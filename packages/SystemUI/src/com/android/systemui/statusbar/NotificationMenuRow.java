@@ -100,6 +100,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private boolean mShouldShowMenu;
 
     private NotificationSwipeActionHelper mSwipeHelper;
+    private boolean mIsUserTouching;
 
     public NotificationMenuRow(Context context) {
         mContext = context;
@@ -202,8 +203,11 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         } else {
             mIconsPlaced = false;
             setMenuLocation();
-            // If the # of items showing changed we need to update the snap position
-            showMenu(mParent, mOnLeft ? getSpaceForMenu() : -getSpaceForMenu(), 0 /* velocity */);
+            if (!mIsUserTouching) {
+                // If the # of items showing changed we need to update the snap position
+                showMenu(mParent, mOnLeft ? getSpaceForMenu() : -getSpaceForMenu(),
+                        0 /* velocity */);
+            }
         }
     }
 
@@ -233,6 +237,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
                 mHandler.removeCallbacks(mCheckForDrag);
                 mCheckForDrag = null;
                 mPrevX = ev.getRawX();
+                mIsUserTouching = true;
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -265,7 +270,12 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
                 break;
 
             case MotionEvent.ACTION_UP:
+                mIsUserTouching = false;
                 return handleUpEvent(ev, view, velocity);
+            case MotionEvent.ACTION_CANCEL:
+                mIsUserTouching = false;
+                cancelDrag();
+                return false;
         }
         return false;
     }
@@ -354,23 +364,24 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     }
 
     private void snapBack(View animView, float velocity) {
-        if (mFadeAnimator != null) {
-            mFadeAnimator.cancel();
-        }
-        mHandler.removeCallbacks(mCheckForDrag);
+        cancelDrag();
         mMenuSnappedTo = false;
         mSnapping = true;
         mSwipeHelper.snap(animView, 0 /* leftTarget */, velocity);
     }
 
     private void dismiss(View animView, float velocity) {
+        cancelDrag();
+        mMenuSnappedTo = false;
+        mDismissing = true;
+        mSwipeHelper.dismiss(animView, velocity);
+    }
+
+    private void cancelDrag() {
         if (mFadeAnimator != null) {
             mFadeAnimator.cancel();
         }
         mHandler.removeCallbacks(mCheckForDrag);
-        mMenuSnappedTo = false;
-        mDismissing = true;
-        mSwipeHelper.dismiss(animView, velocity);
     }
 
     /**
