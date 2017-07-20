@@ -76,6 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/date_owner_info_margin"
+            android:layout_gravity="center_horizontal"
             android:layout_centerHorizontal="true"
             android:textColor="?attr/wallpaperTextColorSecondary"
             android:textSize="@dimen/widget_label_font_size"
