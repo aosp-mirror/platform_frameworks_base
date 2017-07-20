@@ -4677,9 +4677,11 @@
                  result to valid color values. Saturate(S + D) -->
             <enum name="add" value="16" />
         </attr>
-        <!-- Extra spacing between lines of text. -->
+        <!-- Extra spacing between lines of text. The value will not be applied for the last
+             line of text. -->
         <attr name="lineSpacingExtra" format="dimension" />
-        <!-- Extra spacing between lines of text, as a multiplier. -->
+        <!-- Extra spacing between lines of text, as a multiplier. The value will not be applied
+             for the last line of text.-->
         <attr name="lineSpacingMultiplier" format="float" />
         <!-- The number of times to repeat the marquee animation. Only applied if the
              TextView has marquee enabled. -->
