@@ -114,6 +114,7 @@ public class DozeScrimController {
         // be invoked when we're done so that the caller can drop the pulse wakelock.
         mPulseCallback = callback;
         mPulseReason = reason;
+        mScrimController.setDozeInFrontAlpha(1f);
         mHandler.post(mPulseIn);
     }
 
@@ -290,10 +291,6 @@ public class DozeScrimController {
 
             // Signal that the pulse is ready to turn the screen on and draw.
             pulseStarted();
-
-            if (mDozeParameters.getAlwaysOn()) {
-                mHandler.post(DozeScrimController.this::onScreenTurnedOn);
-            }
         }
     };
 

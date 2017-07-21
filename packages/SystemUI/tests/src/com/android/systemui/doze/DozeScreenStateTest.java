@@ -86,13 +86,13 @@ public class DozeScreenStateTest extends SysuiTestCase {
     }
 
     @Test
-    public void testScreen_onInRequestPulseWithAoD() {
+    public void testScreen_offInRequestPulseWithAoD() {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
 
         mScreen.transitionTo(DOZE, DOZE_REQUEST_PULSE);
 
-        assertEquals(Display.STATE_DOZE_SUSPEND, mServiceFake.screenState);
+        assertEquals(Display.STATE_OFF, mServiceFake.screenState);
     }
 
 }
