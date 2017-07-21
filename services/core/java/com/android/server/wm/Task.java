@@ -624,6 +624,17 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return token != null ? token.findMainWindow() : null;
     }
 
+    AppWindowToken getTopFullscreenAppToken() {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final AppWindowToken token = mChildren.get(i);
+            final WindowState win = token.findMainWindow();
+            if (win != null && win.mAttrs.isFullscreen()) {
+                return token;
+            }
+        }
+        return null;
+    }
+
     AppWindowToken getTopVisibleAppToken() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken token = mChildren.get(i);
