@@ -51,10 +51,10 @@ public class MbmsStreamingManager {
     private int mSubscriptionId = INVALID_SUBSCRIPTION_ID;
 
     /** @hide */
-    private MbmsStreamingManager(Context context, MbmsStreamingManagerCallback listener,
+    private MbmsStreamingManager(Context context, MbmsStreamingManagerCallback callback,
                     int subscriptionId) {
         mContext = context;
-        mCallbackToApp = listener;
+        mCallbackToApp = callback;
         mSubscriptionId = subscriptionId;
     }
 
@@ -66,14 +66,14 @@ public class MbmsStreamingManager {
      * during the initialization or binding process.
      *
      * @param context The {@link Context} to use.
-     * @param listener A callback object on which you wish to receive results of asynchronous
+     * @param callback A callback object on which you wish to receive results of asynchronous
      *                 operations.
      * @param subscriptionId The subscription ID to use.
      */
     public static MbmsStreamingManager create(Context context,
-            MbmsStreamingManagerCallback listener, int subscriptionId)
+            MbmsStreamingManagerCallback callback, int subscriptionId)
             throws MbmsException {
-        MbmsStreamingManager manager = new MbmsStreamingManager(context, listener, subscriptionId);
+        MbmsStreamingManager manager = new MbmsStreamingManager(context, callback, subscriptionId);
         manager.bindAndInitialize();
         return manager;
     }
@@ -83,9 +83,9 @@ public class MbmsStreamingManager {
      * See {@link #create(Context, MbmsStreamingManagerCallback, int)}.
      */
     public static MbmsStreamingManager create(Context context,
-            MbmsStreamingManagerCallback listener)
+            MbmsStreamingManagerCallback callback)
             throws MbmsException {
-        return create(context, listener, SubscriptionManager.getDefaultSubscriptionId());
+        return create(context, callback, SubscriptionManager.getDefaultSubscriptionId());
     }
 
     /**
@@ -195,10 +195,21 @@ public class MbmsStreamingManager {
                     public void onServiceConnected(ComponentName name, IBinder service) {
                         IMbmsStreamingService streamingService =
                                 IMbmsStreamingService.Stub.asInterface(service);
+                        int result;
                         try {
-                            streamingService.initialize(mCallbackToApp, mSubscriptionId);
+                            result = streamingService.initialize(mCallbackToApp, mSubscriptionId);
                         } catch (RemoteException e) {
                             Log.e(LOG_TAG, "Service died before initialization");
+                            return;
+                        } catch (RuntimeException e) {
+                            Log.e(LOG_TAG, "Runtime exception during initialization");
+                            mCallbackToApp.error(
+                                    MbmsException.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                                    e.toString());
+                            return;
+                        }
+                        if (result != MbmsException.SUCCESS) {
+                            mCallbackToApp.error(result, "Error returned during initialization");
                             return;
                         }
                         mService.set(streamingService);
