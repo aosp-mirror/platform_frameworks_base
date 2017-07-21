@@ -1133,6 +1133,15 @@ public final class Display {
     }
 
     /**
+     * Returns true if the display may be in a reduced operating mode while in the
+     * specified display power state.
+     * @hide
+     */
+    public static boolean isDozeState(int state) {
+        return state == STATE_DOZE || state == STATE_DOZE_SUSPEND;
+    }
+
+    /**
      * A mode supported by a given display.
      *
      * @see Display#getSupportedModes()
