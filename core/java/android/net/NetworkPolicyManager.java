@@ -254,7 +254,7 @@ public class NetworkPolicyManager {
 
     /** {@hide} */
     public static Iterator<Pair<ZonedDateTime, ZonedDateTime>> cycleIterator(NetworkPolicy policy) {
-        return SubscriptionPlan.convert(policy).cycleIterator();
+        return policy.cycleIterator();
     }
 
     /**

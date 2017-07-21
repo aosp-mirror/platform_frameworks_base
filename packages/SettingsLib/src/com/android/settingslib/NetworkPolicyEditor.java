@@ -30,10 +30,12 @@ import android.net.NetworkTemplate;
 import android.net.wifi.WifiInfo;
 import android.os.AsyncTask;
 import android.text.TextUtils;
-import android.text.format.Time;
+import android.util.RecurrenceRule;
 
 import com.google.android.collect.Lists;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 /**
@@ -129,35 +131,36 @@ public class NetworkPolicyEditor {
     @Deprecated
     private static NetworkPolicy buildDefaultPolicy(NetworkTemplate template) {
         // TODO: move this into framework to share with NetworkPolicyManagerService
-        final int cycleDay;
-        final String cycleTimezone;
+        final RecurrenceRule cycleRule;
         final boolean metered;
 
         if (template.getMatchRule() == MATCH_WIFI) {
-            cycleDay = CYCLE_NONE;
-            cycleTimezone = Time.TIMEZONE_UTC;
+            cycleRule = RecurrenceRule.buildNever();
             metered = false;
         } else {
-            final Time time = new Time();
-            time.setToNow();
-            cycleDay = time.monthDay;
-            cycleTimezone = time.timezone;
+            cycleRule = RecurrenceRule.buildRecurringMonthly(ZonedDateTime.now().getDayOfMonth(),
+                    ZoneId.systemDefault());
             metered = true;
         }
 
-        return new NetworkPolicy(template, cycleDay, cycleTimezone, WARNING_DISABLED,
+        return new NetworkPolicy(template, cycleRule, WARNING_DISABLED,
                 LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER, metered, true);
     }
 
+    @Deprecated
     public int getPolicyCycleDay(NetworkTemplate template) {
         final NetworkPolicy policy = getPolicy(template);
-        return (policy != null) ? policy.cycleDay : CYCLE_NONE;
+        if (policy != null && policy.cycleRule.isMonthly()) {
+            return policy.cycleRule.start.getDayOfMonth();
+        } else {
+            return CYCLE_NONE;
+        }
     }
 
+    @Deprecated
     public void setPolicyCycleDay(NetworkTemplate template, int cycleDay, String cycleTimezone) {
         final NetworkPolicy policy = getOrCreatePolicy(template);
-        policy.cycleDay = cycleDay;
-        policy.cycleTimezone = cycleTimezone;
+        policy.cycleRule = NetworkPolicy.buildRule(cycleDay, ZoneId.of(cycleTimezone));
         policy.inferred = false;
         policy.clearSnooze();
         writeAsync();

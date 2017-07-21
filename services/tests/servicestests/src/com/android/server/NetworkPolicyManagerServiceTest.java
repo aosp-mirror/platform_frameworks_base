@@ -34,7 +34,6 @@ import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEF
 import static android.telephony.CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG;
 import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG;
 import static android.telephony.CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT;
-import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.Time.TIMEZONE_UTC;
 
@@ -92,7 +91,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicy;
-import android.net.NetworkPolicyManager;
 import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
@@ -108,12 +106,12 @@ import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
-import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
 import android.util.Pair;
+import android.util.RecurrenceRule;
 import android.util.TrustedTime;
 
 import com.android.internal.telephony.PhoneConstants;
@@ -154,7 +152,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.Period;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -396,7 +397,7 @@ public class NetworkPolicyManagerServiceTest {
 
     @After
     public void resetClock() throws Exception {
-        SubscriptionPlan.sNowOverride = -1;
+        RecurrenceRule.sClock = Clock.systemDefaultZone();
     }
 
     @Test
@@ -785,9 +786,9 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private static long computeLastCycleBoundary(long currentTime, NetworkPolicy policy) {
-        SubscriptionPlan.sNowOverride = currentTime;
-        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = NetworkPolicyManager
-                .cycleIterator(policy);
+        RecurrenceRule.sClock = Clock.fixed(Instant.ofEpochMilli(currentTime),
+                ZoneId.systemDefault());
+        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = policy.cycleIterator();
         while (it.hasNext()) {
             final Pair<ZonedDateTime, ZonedDateTime> cycle = it.next();
             if (cycle.first.toInstant().toEpochMilli() < currentTime) {
@@ -799,8 +800,9 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private static long computeNextCycleBoundary(long currentTime, NetworkPolicy policy) {
-        SubscriptionPlan.sNowOverride = currentTime;
-        return NetworkPolicyManager.cycleIterator(policy).next().second.toInstant().toEpochMilli();
+        RecurrenceRule.sClock = Clock.fixed(Instant.ofEpochMilli(currentTime),
+                ZoneId.systemDefault());
+        return policy.cycleIterator().next().second.toInstant().toEpochMilli();
     }
 
     @Test
@@ -894,38 +896,6 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    public void testNextCycleSane() throws Exception {
-        final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 31, TIMEZONE_UTC, WARNING_DISABLED, LIMIT_DISABLED, false);
-        final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
-
-        // walk forwards, ensuring that cycle boundaries don't get stuck
-        long currentCycle = computeNextCycleBoundary(parseTime("2011-08-01T00:00:00.000Z"), policy);
-        for (int i = 0; i < 128; i++) {
-            long nextCycle = computeNextCycleBoundary(currentCycle, policy);
-            assertEqualsFuzzy(DAY_IN_MILLIS * 30, nextCycle - currentCycle, DAY_IN_MILLIS * 3);
-            assertUnique(seen, nextCycle);
-            currentCycle = nextCycle;
-        }
-    }
-
-    @Test
-    public void testLastCycleSane() throws Exception {
-        final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 31, TIMEZONE_UTC, WARNING_DISABLED, LIMIT_DISABLED, false);
-        final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
-
-        // walk backwards, ensuring that cycle boundaries look sane
-        long currentCycle = computeLastCycleBoundary(parseTime("2011-08-04T00:00:00.000Z"), policy);
-        for (int i = 0; i < 128; i++) {
-            long lastCycle = computeLastCycleBoundary(currentCycle, policy);
-            assertEqualsFuzzy(DAY_IN_MILLIS * 30, currentCycle - lastCycle, DAY_IN_MILLIS * 3);
-            assertUnique(seen, lastCycle);
-            currentCycle = lastCycle;
-        }
-    }
-
-    @Test
     public void testCycleTodayJanuary() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
                 sTemplateWifi, 14, "US/Pacific", 1024L, 1024L, false);
@@ -943,17 +913,6 @@ public class NetworkPolicyManagerServiceTest {
                 computeLastCycleBoundary(parseTime("2013-01-14T00:00:01.000-08:00"), policy));
         assertTimeEquals(parseTime("2013-01-14T00:00:00.000-08:00"),
                 computeLastCycleBoundary(parseTime("2013-01-14T15:11:00.000-08:00"), policy));
-    }
-
-    @Test
-    public void testLastCycleBoundaryDST() throws Exception {
-        final long currentTime = parseTime("1989-01-02T07:30:00.000Z");
-        final long expectedCycle = parseTime("1988-12-03T02:00:00.000Z");
-
-        final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 3, "America/Argentina/Buenos_Aires", 1024L, 1024L, false);
-        final long actualCycle = computeLastCycleBoundary(currentTime, policy);
-        assertTimeEquals(expectedCycle, actualCycle);
     }
 
     @Test
@@ -1142,15 +1101,6 @@ public class NetworkPolicyManagerServiceTest {
             verifyRemoveInterfaceQuota(TEST_IFACE);
             verifySetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
         }
-    }
-
-    @Test
-    public void testConversion() throws Exception {
-        NetworkTemplate template = NetworkTemplate.buildTemplateMobileWildcard();
-        NetworkPolicy before = new NetworkPolicy(template, 12, "Israel", 123, 456, true);
-        NetworkPolicy after = SubscriptionPlan.convert(SubscriptionPlan.convert(before));
-        after.template = before.template;
-        assertEquals(before, after);
     }
 
     @Test
@@ -1472,7 +1422,9 @@ public class NetworkPolicyManagerServiceTest {
     private NetworkPolicy buildDefaultFakeMobilePolicy() {
         NetworkPolicy p = mService.buildDefaultMobilePolicy(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
         // set a deterministic cycle date
-        p.cycleDay = DEFAULT_CYCLE_DAY;
+        p.cycleRule = new RecurrenceRule(
+                p.cycleRule.start.withDayOfMonth(DEFAULT_CYCLE_DAY),
+                p.cycleRule.end, Period.ofMonths(1));
         return p;
     }
 
@@ -1665,7 +1617,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void setCurrentTimeMillis(long currentTimeMillis) {
-        SubscriptionPlan.sNowOverride = currentTimeMillis;
+        RecurrenceRule.sClock = Clock.fixed(Instant.ofEpochMilli(currentTimeMillis),
+                ZoneId.systemDefault());
         mStartTime = currentTimeMillis;
         mElapsedRealtime = 0L;
     }
