@@ -96,6 +96,7 @@ struct LinkOptions {
   Maybe<std::string> generate_text_symbols_path;
   Maybe<std::string> generate_proguard_rules_path;
   Maybe<std::string> generate_main_dex_proguard_rules_path;
+  bool generate_conditional_proguard_rules = false;
   bool generate_non_final_ids = false;
   std::vector<std::string> javadoc_annotations;
   Maybe<std::string> private_symbols;
@@ -499,7 +500,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
     return {};
   }
 
-  if (options_.update_proguard_spec && !proguard::CollectProguardRules(src, doc, keep_set_)) {
+  if (options_.update_proguard_spec && !proguard::CollectProguardRules(doc, keep_set_)) {
     return {};
   }
 
@@ -537,6 +538,8 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
 bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archive_writer) {
   bool error = false;
   std::map<std::pair<ConfigDescription, StringPiece>, FileOperation> config_sorted_files;
+
+  proguard::CollectResourceReferences(context_, table, keep_set_);
 
   for (auto& pkg : table->packages) {
     CHECK(!pkg->name.empty()) << "Packages must have names when being linked";
@@ -1719,7 +1722,8 @@ class LinkCommand {
       }
     }
 
-    proguard::KeepSet proguard_keep_set;
+    proguard::KeepSet proguard_keep_set =
+        proguard::KeepSet(options_.generate_conditional_proguard_rules);
     proguard::KeepSet proguard_main_dex_keep_set;
 
     if (context_->GetPackageType() == PackageType::kStaticLib) {
@@ -1795,14 +1799,12 @@ class LinkCommand {
       XmlReferenceLinker manifest_linker;
       if (manifest_linker.Consume(context_, manifest_xml.get())) {
         if (options_.generate_proguard_rules_path &&
-            !proguard::CollectProguardRulesForManifest(Source(options_.manifest_path),
-                                                       manifest_xml.get(), &proguard_keep_set)) {
+            !proguard::CollectProguardRulesForManifest(manifest_xml.get(), &proguard_keep_set)) {
           error = true;
         }
 
         if (options_.generate_main_dex_proguard_rules_path &&
-            !proguard::CollectProguardRulesForManifest(Source(options_.manifest_path),
-                                                       manifest_xml.get(),
+            !proguard::CollectProguardRulesForManifest(manifest_xml.get(),
                                                        &proguard_main_dex_keep_set, true)) {
           error = true;
         }
@@ -1919,6 +1921,9 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
           .OptionalFlag("--proguard-main-dex",
                         "Output file for generated Proguard rules for the main dex.",
                         &options.generate_main_dex_proguard_rules_path)
+          .OptionalSwitch("--proguard-conditional-keep-rules",
+                          "Generate conditional Proguard keep rules.",
+                          &options.generate_conditional_proguard_rules)
           .OptionalSwitch("--no-auto-version",
                           "Disables automatic style and layout SDK versioning.",
                           &options.no_auto_version)

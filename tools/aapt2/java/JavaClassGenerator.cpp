@@ -61,7 +61,7 @@ static bool IsValidSymbol(const StringPiece& symbol) {
 
 // Java symbols can not contain . or -, but those are valid in a resource name.
 // Replace those with '_'.
-static std::string TransformToFieldName(const StringPiece& symbol) {
+std::string JavaClassGenerator::TransformToFieldName(const StringPiece& symbol) {
   std::string output = symbol.to_string();
   for (char& c : output) {
     if (c == '.' || c == '-') {
@@ -89,9 +89,9 @@ static std::string TransformNestedAttr(const ResourceNameRef& attr_name,
   // the package.
   if (!attr_name.package.empty() &&
       package_name_to_generate != attr_name.package) {
-    output += "_" + TransformToFieldName(attr_name.package);
+    output += "_" + JavaClassGenerator::TransformToFieldName(attr_name.package);
   }
-  output += "_" + TransformToFieldName(attr_name.entry);
+  output += "_" + JavaClassGenerator::TransformToFieldName(attr_name.entry);
   return output;
 }
 

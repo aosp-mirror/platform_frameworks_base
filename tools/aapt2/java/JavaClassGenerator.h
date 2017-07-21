@@ -24,6 +24,7 @@
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
+#include "androidfw/StringPiece.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 
@@ -77,6 +78,8 @@ class JavaClassGenerator {
                 std::ostream* out_r_txt = nullptr);
 
   const std::string& getError() const;
+
+  static std::string TransformToFieldName(const android::StringPiece& symbol);
 
  private:
   bool SkipSymbol(SymbolState state);

@@ -21,6 +21,10 @@
 
 #include "android-base/macros.h"
 
+#include "JavaClassGenerator.h"
+#include "ResourceUtils.h"
+#include "ValueVisitor.h"
+#include "androidfw/StringPiece.h"
 #include "util/Util.h"
 #include "xml/XmlDom.h"
 
@@ -31,7 +35,7 @@ class BaseVisitor : public xml::Visitor {
  public:
   using xml::Visitor::Visit;
 
-  BaseVisitor(const Source& source, KeepSet* keep_set) : source_(source), keep_set_(keep_set) {
+  BaseVisitor(const ResourceFile& file, KeepSet* keep_set) : file_(file), keep_set_(keep_set) {
   }
 
   void Visit(xml::Element* node) override {
@@ -52,27 +56,47 @@ class BaseVisitor : public xml::Visitor {
     for (const auto& child : node->children) {
       child->Accept(this);
     }
+
+    for (const auto& attr : node->attributes) {
+      if (attr.compiled_value) {
+        auto ref = ValueCast<Reference>(attr.compiled_value.get());
+        if (ref) {
+          AddReference(node->line_number, ref);
+        }
+      }
+    }
   }
 
  protected:
-  void AddClass(size_t line_number, const std::string& class_name) {
-    keep_set_->AddClass(Source(source_.path, line_number), class_name);
+  ResourceFile file_;
+  KeepSet* keep_set_;
+
+  virtual void AddClass(size_t line_number, const std::string& class_name) {
+    keep_set_->AddConditionalClass({file_.name, file_.source.WithLine(line_number)}, class_name);
   }
 
   void AddMethod(size_t line_number, const std::string& method_name) {
-    keep_set_->AddMethod(Source(source_.path, line_number), method_name);
+    keep_set_->AddMethod({file_.name, file_.source.WithLine(line_number)}, method_name);
+  }
+
+  void AddReference(size_t line_number, Reference* ref) {
+    if (ref && ref->name) {
+      ResourceName ref_name = ref->name.value();
+      if (ref_name.package.empty()) {
+        ref_name = ResourceName(file_.name.package, ref_name.type, ref_name.entry);
+      }
+      keep_set_->AddReference({file_.name, file_.source.WithLine(line_number)}, ref_name);
+    }
   }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BaseVisitor);
 
-  Source source_;
-  KeepSet* keep_set_;
 };
 
 class LayoutVisitor : public BaseVisitor {
  public:
-  LayoutVisitor(const Source& source, KeepSet* keep_set) : BaseVisitor(source, keep_set) {
+  LayoutVisitor(const ResourceFile& file, KeepSet* keep_set) : BaseVisitor(file, keep_set) {
   }
 
   void Visit(xml::Element* node) override {
@@ -110,7 +134,7 @@ class LayoutVisitor : public BaseVisitor {
 
 class MenuVisitor : public BaseVisitor {
  public:
-  MenuVisitor(const Source& source, KeepSet* keep_set) : BaseVisitor(source, keep_set) {
+  MenuVisitor(const ResourceFile& file, KeepSet* keep_set) : BaseVisitor(file, keep_set) {
   }
 
   void Visit(xml::Element* node) override {
@@ -136,7 +160,7 @@ class MenuVisitor : public BaseVisitor {
 
 class XmlResourceVisitor : public BaseVisitor {
  public:
-  XmlResourceVisitor(const Source& source, KeepSet* keep_set) : BaseVisitor(source, keep_set) {
+  XmlResourceVisitor(const ResourceFile& file, KeepSet* keep_set) : BaseVisitor(file, keep_set) {
   }
 
   void Visit(xml::Element* node) override {
@@ -163,7 +187,7 @@ class XmlResourceVisitor : public BaseVisitor {
 
 class TransitionVisitor : public BaseVisitor {
  public:
-  TransitionVisitor(const Source& source, KeepSet* keep_set) : BaseVisitor(source, keep_set) {
+  TransitionVisitor(const ResourceFile& file, KeepSet* keep_set) : BaseVisitor(file, keep_set) {
   }
 
   void Visit(xml::Element* node) override {
@@ -185,8 +209,9 @@ class TransitionVisitor : public BaseVisitor {
 
 class ManifestVisitor : public BaseVisitor {
  public:
-  ManifestVisitor(const Source& source, KeepSet* keep_set, bool main_dex_only)
-      : BaseVisitor(source, keep_set), main_dex_only_(main_dex_only) {}
+  ManifestVisitor(const ResourceFile& file, KeepSet* keep_set, bool main_dex_only)
+      : BaseVisitor(file, keep_set), main_dex_only_(main_dex_only) {
+  }
 
   void Visit(xml::Element* node) override {
     if (node->namespace_uri.empty()) {
@@ -241,6 +266,10 @@ class ManifestVisitor : public BaseVisitor {
     BaseVisitor::Visit(node);
   }
 
+  virtual void AddClass(size_t line_number, const std::string& class_name) override {
+    keep_set_->AddManifestClass({file_.name, file_.source.WithLine(line_number)}, class_name);
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ManifestVisitor);
 
@@ -249,9 +278,8 @@ class ManifestVisitor : public BaseVisitor {
   std::string default_process_;
 };
 
-bool CollectProguardRulesForManifest(const Source& source, xml::XmlResource* res, KeepSet* keep_set,
-                                     bool main_dex_only) {
-  ManifestVisitor visitor(source, keep_set, main_dex_only);
+bool CollectProguardRulesForManifest(xml::XmlResource* res, KeepSet* keep_set, bool main_dex_only) {
+  ManifestVisitor visitor(res->file, keep_set, main_dex_only);
   if (res->root) {
     res->root->Accept(&visitor);
     return true;
@@ -259,55 +287,147 @@ bool CollectProguardRulesForManifest(const Source& source, xml::XmlResource* res
   return false;
 }
 
-bool CollectProguardRules(const Source& source, xml::XmlResource* res, KeepSet* keep_set) {
+bool CollectProguardRules(xml::XmlResource* res, KeepSet* keep_set) {
   if (!res->root) {
     return false;
   }
 
   switch (res->file.name.type) {
     case ResourceType::kLayout: {
-      LayoutVisitor visitor(source, keep_set);
+      LayoutVisitor visitor(res->file, keep_set);
       res->root->Accept(&visitor);
       break;
     }
 
     case ResourceType::kXml: {
-      XmlResourceVisitor visitor(source, keep_set);
+      XmlResourceVisitor visitor(res->file, keep_set);
       res->root->Accept(&visitor);
       break;
     }
 
     case ResourceType::kTransition: {
-      TransitionVisitor visitor(source, keep_set);
+      TransitionVisitor visitor(res->file, keep_set);
       res->root->Accept(&visitor);
       break;
     }
 
     case ResourceType::kMenu: {
-      MenuVisitor visitor(source, keep_set);
+      MenuVisitor visitor(res->file, keep_set);
       res->root->Accept(&visitor);
       break;
     }
 
-    default:
+    default: {
+      BaseVisitor visitor(res->file, keep_set);
+      res->root->Accept(&visitor);
       break;
+    }
   }
   return true;
 }
 
 bool WriteKeepSet(std::ostream* out, const KeepSet& keep_set) {
-  for (const auto& entry : keep_set.keep_set_) {
-    for (const Source& source : entry.second) {
-      *out << "# Referenced at " << source << "\n";
+  for (const auto& entry : keep_set.manifest_class_set_) {
+    for (const UsageLocation& location : entry.second) {
+      *out << "# Referenced at " << location.source << "\n";
     }
     *out << "-keep class " << entry.first << " { <init>(...); }\n" << std::endl;
   }
 
-  for (const auto& entry : keep_set.keep_method_set_) {
-    for (const Source& source : entry.second) {
-      *out << "# Referenced at " << source << "\n";
+  for (const auto& entry : keep_set.conditional_class_set_) {
+    std::set<UsageLocation> locations;
+    bool can_be_conditional = true;
+    for (const UsageLocation& location : entry.second) {
+      can_be_conditional &= CollectLocations(location, keep_set, &locations);
+    }
+
+    for (const UsageLocation& location : entry.second) {
+      *out << "# Referenced at " << location.source << "\n";
+    }
+    if (keep_set.conditional_keep_rules_ && can_be_conditional) {
+      *out << "-keep class " << entry.first << " {\n  ifused class **.R$layout {\n";
+      for (const UsageLocation& location : locations) {
+        auto transformed_name = JavaClassGenerator::TransformToFieldName(location.name.entry);
+        *out << "    int " << transformed_name << ";\n";
+      }
+      *out << "  };\n  <init>(...);\n}\n" << std::endl;
+    } else {
+      *out << "-keep class " << entry.first << " { <init>(...); }\n" << std::endl;
+    }
+  }
+
+  for (const auto& entry : keep_set.method_set_) {
+    for (const UsageLocation& location : entry.second) {
+      *out << "# Referenced at " << location.source << "\n";
     }
     *out << "-keepclassmembers class * { *** " << entry.first << "(...); }\n" << std::endl;
+  }
+  return true;
+}
+
+bool CollectLocations(const UsageLocation& location, const KeepSet& keep_set,
+                      std::set<UsageLocation>* locations) {
+  locations->insert(location);
+
+  // TODO: allow for more reference types if we can determine its safe.
+  if (location.name.type != ResourceType::kLayout) {
+    return false;
+  }
+
+  for (const auto& entry : keep_set.reference_set_) {
+    if (entry.first == location.name) {
+      for (auto& refLocation : entry.second) {
+        // Don't get stuck in loops
+        if (locations->find(refLocation) != locations->end()) {
+          return false;
+        }
+        if (!CollectLocations(refLocation, keep_set, locations)) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+class ReferenceVisitor : public ValueVisitor {
+ public:
+  using ValueVisitor::Visit;
+
+  ReferenceVisitor(aapt::IAaptContext* context, ResourceName from, KeepSet* keep_set)
+      : context_(context), from_(from), keep_set_(keep_set) {
+  }
+
+  void Visit(Reference* reference) override {
+    if (reference->name) {
+      ResourceName reference_name = reference->name.value();
+      if (reference_name.package.empty()) {
+        reference_name = ResourceName(context_->GetCompilationPackage(), reference_name.type,
+                                      reference_name.entry);
+      }
+      keep_set_->AddReference({from_, reference->GetSource()}, reference_name);
+    }
+  }
+
+ private:
+  aapt::IAaptContext* context_;
+  ResourceName from_;
+  KeepSet* keep_set_;
+};
+
+bool CollectResourceReferences(aapt::IAaptContext* context, ResourceTable* table,
+                               KeepSet* keep_set) {
+  for (auto& pkg : table->packages) {
+    for (auto& type : pkg->types) {
+      for (auto& entry : type->entries) {
+        for (auto& config_value : entry->values) {
+          ResourceName from(pkg->name, type->type, entry->name);
+          ReferenceVisitor visitor(context, from, keep_set);
+          config_value->value->Accept(&visitor);
+        }
+      }
+    }
   }
   return true;
 }
