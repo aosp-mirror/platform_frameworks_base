@@ -53,6 +53,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -196,6 +197,9 @@ public final class PowerManagerService extends SystemService
 
     // System property indicating that the screen should remain off until an explicit user action
     private static final String SYSTEM_PROPERTY_QUIESCENT = "ro.boot.quiescent";
+
+    // System Property indicating that retail demo mode is currently enabled.
+    private static final String SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED = "sys.retaildemo.enabled";
 
     // Possible reasons for shutting down for use in data/misc/reboot/last_shutdown_reason
     private static final String REASON_SHUTDOWN = "shutdown";
@@ -805,6 +809,9 @@ public final class PowerManagerService extends SystemService
         resolver.registerContentObserver(Settings.Secure.getUriFor(
                 Settings.Secure.DOUBLE_TAP_TO_WAKE),
                 false, mSettingsObserver, UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.DEVICE_DEMO_MODE),
+                false, mSettingsObserver, UserHandle.USER_SYSTEM);
         IVrManager vrManager = (IVrManager) getBinderService(Context.VR_SERVICE);
         if (vrManager != null) {
             try {
@@ -910,6 +917,11 @@ public final class PowerManagerService extends SystemService
                 mDoubleTapWakeEnabled = doubleTapWakeEnabled;
                 nativeSetFeature(POWER_FEATURE_DOUBLE_TAP_TO_WAKE, mDoubleTapWakeEnabled ? 1 : 0);
             }
+        }
+
+        final String retailDemoValue = UserManager.isDeviceInDemoMode(mContext) ? "1" : "0";
+        if (!retailDemoValue.equals(SystemProperties.get(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED))) {
+            SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, retailDemoValue);
         }
 
         final int oldScreenBrightnessSetting = getCurrentBrightnessSettingLocked();

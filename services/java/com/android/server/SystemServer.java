@@ -99,7 +99,6 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.radio.RadioService;
 import com.android.server.restrictions.RestrictionsManagerService;
-import com.android.server.retaildemo.RetailDemoModeService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.soundtrigger.SoundTriggerService;
@@ -1519,10 +1518,6 @@ public final class SystemServer {
         // MMS service broker
         traceBeginAndSlog("StartMmsService");
         mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
-        traceEnd();
-
-        traceBeginAndSlog("StartRetailDemoModeService");
-        mSystemServiceManager.startService(RetailDemoModeService.class);
         traceEnd();
 
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOFILL)) {

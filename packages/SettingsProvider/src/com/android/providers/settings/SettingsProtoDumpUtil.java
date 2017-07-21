@@ -915,9 +915,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.DEVICE_DEMO_MODE,
                 GlobalSettingsProto.DEVICE_DEMO_MODE);
         dumpSetting(s, p,
-                Settings.Global.RETAIL_DEMO_MODE_CONSTANTS,
-                GlobalSettingsProto.RETAIL_DEMO_MODE_CONSTANTS);
-        dumpSetting(s, p,
                 Settings.Global.DATABASE_DOWNGRADE_REASON,
                 GlobalSettingsProto.DATABASE_DOWNGRADE_REASON);
         dumpSetting(s, p,
