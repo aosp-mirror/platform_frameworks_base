@@ -1,5 +1,5 @@
 <!--
-     Copyright (C) 2015 The Android Open Source Project
+     Copyright (C) 2017 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -22,6 +22,6 @@
 
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M12.0,3.0l0.0,9.28c-0.47,-0.17 -0.97,-0.28 -1.5,-0.28C8.01,12.0 6.0,14.01 6.0,16.5S8.01,21.0 10.5,21.0c2.31,0.0 4.2,-1.75 4.45,-4.0L15.0,17.0L15.0,6.0l4.0,0.0L19.0,3.0l-7.0,0.0z" />
+        android:pathData="M18,3h-5c-0.55,0 -1,0.45 -1,1v8.3a3.88,3.88 0,0 0,-2.9 -0.04c-1.79,0.67 -3.11,2.35 -3.1,4.26A4.483,4.483 0,0 0,10.5 21c2.5,0 4.5,-2.3 4.5,-4.5V6h3c0.55,0 1,-0.45 1,-1V4c0,-0.55 -0.45,-1 -1,-1z"/>
 
 </vector>
