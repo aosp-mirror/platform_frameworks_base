@@ -26,7 +26,7 @@ import java.util.ArrayList;
 public class SyncStatusInfo implements Parcelable {
     private static final String TAG = "Sync";
 
-    static final int VERSION = 3;
+    static final int VERSION = 4;
 
     private static final int MAX_EVENT_COUNT = 10;
 
@@ -102,6 +102,7 @@ public class SyncStatusInfo implements Parcelable {
             parcel.writeLong(mLastEventTimes.get(i));
             parcel.writeString(mLastEvents.get(i));
         }
+        parcel.writeInt(numSourcePeriodic);
     }
 
     public SyncStatusInfo(Parcel parcel) {
@@ -145,6 +146,16 @@ public class SyncStatusInfo implements Parcelable {
                     mLastEvents.add(parcel.readString());
                 }
             }
+        }
+        if (version < 4) {
+            // Before version 4, numSourcePeriodic wasn't persisted.
+            numSourcePeriodic = numSyncs - numSourceLocal - numSourcePoll - numSourceServer
+                    - numSourceUser;
+            if (numSourcePeriodic < 0) { // Sanity check.
+                numSourcePeriodic = 0;
+            }
+        } else {
+            numSourcePeriodic = parcel.readInt();
         }
     }
 
