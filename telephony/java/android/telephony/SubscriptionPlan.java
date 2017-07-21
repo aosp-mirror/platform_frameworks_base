@@ -19,45 +19,31 @@ package android.telephony;
 import android.annotation.BytesLong;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.NetworkPolicy;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.Pair;
+import android.util.RecurrenceRule;
 
-import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.time.Instant;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.Period;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Iterator;
 
-/** {@pending} */
+/**
+ * Description of a billing relationship plan between a carrier and a specific
+ * subscriber. This information is used to present more useful UI to users, such
+ * as explaining how much mobile data they have remaining, and what will happen
+ * when they run out.
+ *
+ * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
+ * @see SubscriptionManager#getSubscriptionPlans(int)
+ */
 public final class SubscriptionPlan implements Parcelable {
-    private static final String TAG = "SubscriptionPlan";
-    private static final boolean DEBUG = false;
-
-    /** {@hide} */
-    @IntDef(prefix = "TYPE_", value = {
-            TYPE_NONRECURRING,
-            TYPE_RECURRING_WEEKLY,
-            TYPE_RECURRING_MONTHLY,
-            TYPE_RECURRING_DAILY,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Type {}
-
-    public static final int TYPE_NONRECURRING = 0;
-    public static final int TYPE_RECURRING_MONTHLY = 1;
-    public static final int TYPE_RECURRING_WEEKLY = 2;
-    public static final int TYPE_RECURRING_DAILY = 3;
-
     /** {@hide} */
     @IntDef(prefix = "LIMIT_BEHAVIOR_", value = {
             LIMIT_BEHAVIOR_UNKNOWN,
@@ -68,51 +54,40 @@ public final class SubscriptionPlan implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface LimitBehavior {}
 
+    /** When a resource limit is hit, the behavior is unknown. */
     public static final int LIMIT_BEHAVIOR_UNKNOWN = -1;
+    /** When a resource limit is hit, access is disabled. */
     public static final int LIMIT_BEHAVIOR_DISABLED = 0;
+    /** When a resource limit is hit, the user is billed automatically. */
     public static final int LIMIT_BEHAVIOR_BILLED = 1;
+    /** When a resource limit is hit, access is throttled to a slower rate. */
     public static final int LIMIT_BEHAVIOR_THROTTLED = 2;
 
+    /** Value indicating a number of bytes is unknown. */
     public static final long BYTES_UNKNOWN = -1;
+    /** Value indicating a number of bytes is unlimited. */
+    public static final long BYTES_UNLIMITED = Long.MAX_VALUE;
+
+    /** Value indicating a timestamp is unknown. */
     public static final long TIME_UNKNOWN = -1;
 
-    private final int type;
-    private final ZonedDateTime start;
-    private final ZonedDateTime end;
+    private final RecurrenceRule cycleRule;
     private CharSequence title;
     private CharSequence summary;
-    private long dataWarningBytes = BYTES_UNKNOWN;
-    private long dataWarningSnoozeTime = TIME_UNKNOWN;
     private long dataLimitBytes = BYTES_UNKNOWN;
-    private long dataLimitSnoozeTime = TIME_UNKNOWN;
     private int dataLimitBehavior = LIMIT_BEHAVIOR_UNKNOWN;
     private long dataUsageBytes = BYTES_UNKNOWN;
     private long dataUsageTime = TIME_UNKNOWN;
 
-    private SubscriptionPlan(@Type int type, ZonedDateTime start, ZonedDateTime end) {
-        this.type = type;
-        this.start = start;
-        this.end = end;
+    private SubscriptionPlan(RecurrenceRule cycleRule) {
+        this.cycleRule = Preconditions.checkNotNull(cycleRule);
     }
 
     private SubscriptionPlan(Parcel source) {
-        type = source.readInt();
-        if (source.readInt() != 0) {
-            start = ZonedDateTime.parse(source.readString());
-        } else {
-            start = null;
-        }
-        if (source.readInt() != 0) {
-            end = ZonedDateTime.parse(source.readString());
-        } else {
-            end = null;
-        }
+        cycleRule = source.readParcelable(null);
         title = source.readCharSequence();
         summary = source.readCharSequence();
-        dataWarningBytes = source.readLong();
-        dataWarningSnoozeTime = source.readLong();
         dataLimitBytes = source.readLong();
-        dataLimitSnoozeTime = source.readLong();
         dataLimitBehavior = source.readInt();
         dataUsageBytes = source.readLong();
         dataUsageTime = source.readLong();
@@ -125,25 +100,10 @@ public final class SubscriptionPlan implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(type);
-        if (start != null) {
-            dest.writeInt(1);
-            dest.writeString(start.toString());
-        } else {
-            dest.writeInt(0);
-        }
-        if (end != null) {
-            dest.writeInt(1);
-            dest.writeString(end.toString());
-        } else {
-            dest.writeInt(0);
-        }
+        dest.writeParcelable(cycleRule, flags);
         dest.writeCharSequence(title);
         dest.writeCharSequence(summary);
-        dest.writeLong(dataWarningBytes);
-        dest.writeLong(dataWarningSnoozeTime);
         dest.writeLong(dataLimitBytes);
-        dest.writeLong(dataLimitSnoozeTime);
         dest.writeInt(dataLimitBehavior);
         dest.writeLong(dataUsageBytes);
         dest.writeLong(dataUsageTime);
@@ -151,20 +111,15 @@ public final class SubscriptionPlan implements Parcelable {
 
     @Override
     public String toString() {
-        return new StringBuilder("SubscriptionPlan:")
-                .append(" type=").append(type)
-                .append(" start=").append(start)
-                .append(" end=").append(end)
+        return new StringBuilder("SubscriptionPlan{")
+                .append("cycleRule=").append(cycleRule)
                 .append(" title=").append(title)
                 .append(" summary=").append(summary)
-                .append(" dataWarningBytes=").append(dataWarningBytes)
-                .append(" dataWarningSnoozeTime=").append(dataWarningSnoozeTime)
                 .append(" dataLimitBytes=").append(dataLimitBytes)
-                .append(" dataLimitSnoozeTime=").append(dataLimitSnoozeTime)
                 .append(" dataLimitBehavior=").append(dataLimitBehavior)
                 .append(" dataUsageBytes=").append(dataUsageBytes)
                 .append(" dataUsageTime=").append(dataUsageTime)
-                .toString();
+                .append("}").toString();
     }
 
     public static final Parcelable.Creator<SubscriptionPlan> CREATOR = new Parcelable.Creator<SubscriptionPlan>() {
@@ -179,296 +134,161 @@ public final class SubscriptionPlan implements Parcelable {
         }
     };
 
-    public @Type int getType() {
-        return type;
+    /** {@hide} */
+    public @NonNull RecurrenceRule getCycleRule() {
+        return cycleRule;
     }
 
-    public ZonedDateTime getStart() {
-        return start;
-    }
-
-    public ZonedDateTime getEnd() {
-        return end;
-    }
-
+    /** Return the short title of this plan. */
     public @Nullable CharSequence getTitle() {
         return title;
     }
 
+    /** Return the short summary of this plan. */
     public @Nullable CharSequence getSummary() {
         return summary;
     }
 
-    public @BytesLong long getDataWarningBytes() {
-        return dataWarningBytes;
-    }
-
+    /**
+     * Return the usage threshold at which data access changes according to
+     * {@link #getDataLimitBehavior()}.
+     */
     public @BytesLong long getDataLimitBytes() {
         return dataLimitBytes;
     }
 
+    /**
+     * Return the behavior of data access when usage reaches
+     * {@link #getDataLimitBytes()}.
+     */
     public @LimitBehavior int getDataLimitBehavior() {
         return dataLimitBehavior;
     }
 
+    /**
+     * Return a snapshot of currently known mobile data usage at
+     * {@link #getDataUsageTime()}.
+     */
     public @BytesLong long getDataUsageBytes() {
         return dataUsageBytes;
     }
 
+    /**
+     * Return the time at which {@link #getDataUsageBytes()} was valid.
+     */
     public @CurrentTimeMillisLong long getDataUsageTime() {
         return dataUsageTime;
     }
 
-    /** {@hide} */
-    @VisibleForTesting
-    public static long sNowOverride = -1;
-
-    private static ZonedDateTime now(ZoneId zone) {
-        return (sNowOverride != -1)
-                ? ZonedDateTime.ofInstant(Instant.ofEpochMilli(sNowOverride), zone)
-                : ZonedDateTime.now(zone);
-    }
-
-    /** {@hide} */
-    public static SubscriptionPlan convert(NetworkPolicy policy) {
-        final ZoneId zone = ZoneId.of(policy.cycleTimezone);
-        final ZonedDateTime now = now(zone);
-        final Builder builder;
-        if (policy.cycleDay != NetworkPolicy.CYCLE_NONE) {
-            // Assume we started last January, since it has all possible days
-            ZonedDateTime start = ZonedDateTime.of(
-                    now.toLocalDate().minusYears(1).withMonth(1).withDayOfMonth(policy.cycleDay),
-                    LocalTime.MIDNIGHT, zone);
-            builder = Builder.createRecurringMonthly(start);
-        } else {
-            Log.w(TAG, "Cycle not defined; assuming last 4 weeks non-recurring");
-            ZonedDateTime end = now;
-            ZonedDateTime start = end.minusWeeks(4);
-            builder = Builder.createNonrecurring(start, end);
-        }
-        if (policy.warningBytes != NetworkPolicy.WARNING_DISABLED) {
-            builder.setDataWarning(policy.warningBytes);
-        }
-        if (policy.lastWarningSnooze != NetworkPolicy.SNOOZE_NEVER) {
-            builder.setDataWarningSnooze(policy.lastWarningSnooze);
-        }
-        if (policy.limitBytes != NetworkPolicy.LIMIT_DISABLED) {
-            builder.setDataLimit(policy.limitBytes, LIMIT_BEHAVIOR_DISABLED);
-        }
-        if (policy.lastLimitSnooze != NetworkPolicy.SNOOZE_NEVER) {
-            builder.setDataLimitSnooze(policy.lastLimitSnooze);
-        }
-        return builder.build();
-    }
-
-    /** {@hide} */
-    public static NetworkPolicy convert(SubscriptionPlan plan) {
-        final NetworkPolicy policy = new NetworkPolicy();
-        switch (plan.type) {
-            case TYPE_RECURRING_MONTHLY:
-                policy.cycleDay = plan.start.getDayOfMonth();
-                policy.cycleTimezone = plan.start.getZone().getId();
-                break;
-            default:
-                policy.cycleDay = NetworkPolicy.CYCLE_NONE;
-                policy.cycleTimezone = "UTC";
-                break;
-        }
-        policy.warningBytes = plan.dataWarningBytes;
-        policy.limitBytes = plan.dataLimitBytes;
-        policy.lastWarningSnooze = plan.dataWarningSnoozeTime;
-        policy.lastLimitSnooze = plan.dataLimitSnoozeTime;
-        policy.metered = true;
-        policy.inferred = false;
-        return policy;
-    }
-
-    /** {@hide} */
-    public TemporalUnit getTemporalUnit() {
-        switch (type) {
-            case TYPE_RECURRING_DAILY: return ChronoUnit.DAYS;
-            case TYPE_RECURRING_WEEKLY: return ChronoUnit.WEEKS;
-            case TYPE_RECURRING_MONTHLY: return ChronoUnit.MONTHS;
-            default: throw new IllegalArgumentException();
-        }
+    /**
+     * Return an iterator that will return all valid data usage cycles based on
+     * any recurrence rules. The iterator starts from the currently active cycle
+     * and walks backwards through time.
+     */
+    public Iterator<Pair<ZonedDateTime, ZonedDateTime>> cycleIterator() {
+        return cycleRule.cycleIterator();
     }
 
     /**
-     * Return an iterator that returns data usage cycles.
-     * <p>
-     * For recurring plans, it starts at the currently active cycle, and then
-     * walks backwards in time through each previous cycle, back to the defined
-     * starting point and no further.
-     * <p>
-     * For non-recurring plans, it returns one single cycle.
+     * Builder for a {@link SubscriptionPlan}.
      */
-    public Iterator<Pair<ZonedDateTime, ZonedDateTime>> cycleIterator() {
-        switch (type) {
-            case TYPE_NONRECURRING:
-                return new NonrecurringIterator();
-            case TYPE_RECURRING_WEEKLY:
-            case TYPE_RECURRING_MONTHLY:
-            case TYPE_RECURRING_DAILY:
-                return new RecurringIterator();
-            default:
-                throw new IllegalStateException("Unknown type: " + type);
-        }
-    }
-
-    private class NonrecurringIterator implements Iterator<Pair<ZonedDateTime, ZonedDateTime>> {
-        boolean hasNext = true;
-
-        @Override
-        public boolean hasNext() {
-            return hasNext;
-        }
-
-        @Override
-        public Pair<ZonedDateTime, ZonedDateTime> next() {
-            hasNext = false;
-            return new Pair<>(start, end);
-        }
-    }
-
-    private class RecurringIterator implements Iterator<Pair<ZonedDateTime, ZonedDateTime>> {
-        TemporalUnit unit;
-        long i;
-        ZonedDateTime cycleStart;
-        ZonedDateTime cycleEnd;
-
-        public RecurringIterator() {
-            final ZonedDateTime now = now(start.getZone());
-            if (DEBUG) Log.d(TAG, "Resolving using now " + now);
-
-            unit = getTemporalUnit();
-            i = unit.between(start, now);
-            updateCycle();
-
-            // Walk forwards until we find first cycle after now
-            while (cycleEnd.toEpochSecond() <= now.toEpochSecond()) {
-                i++;
-                updateCycle();
-            }
-
-            // Walk backwards until we find first cycle before now
-            while (cycleStart.toEpochSecond() > now.toEpochSecond()) {
-                i--;
-                updateCycle();
-            }
-        }
-
-        private void updateCycle() {
-            cycleStart = roundBoundaryTime(start.plus(i, unit));
-            cycleEnd = roundBoundaryTime(start.plus(i + 1, unit));
-        }
-
-        private ZonedDateTime roundBoundaryTime(ZonedDateTime boundary) {
-            if ((type == TYPE_RECURRING_MONTHLY)
-                    && (boundary.getDayOfMonth() < start.getDayOfMonth())) {
-                // When forced to end a monthly cycle early, we want to count
-                // that entire day against the boundary.
-                return ZonedDateTime.of(boundary.toLocalDate(), LocalTime.MAX, start.getZone());
-            } else {
-                return boundary;
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            return cycleStart.toEpochSecond() >= start.toEpochSecond();
-        }
-
-        @Override
-        public Pair<ZonedDateTime, ZonedDateTime> next() {
-            if (DEBUG) Log.d(TAG, "Cycle " + i + " from " + cycleStart + " to " + cycleEnd);
-            Pair<ZonedDateTime, ZonedDateTime> p = new Pair<>(cycleStart, cycleEnd);
-            i--;
-            updateCycle();
-            return p;
-        }
-    }
-
     public static class Builder {
         private final SubscriptionPlan plan;
 
-        private Builder(@Type int type, ZonedDateTime start, ZonedDateTime end) {
-            plan = new SubscriptionPlan(type, start, end);
+        /** {@hide} */
+        public Builder(ZonedDateTime start, ZonedDateTime end, Period period) {
+            plan = new SubscriptionPlan(new RecurrenceRule(start, end, period));
         }
 
+        /**
+         * Start defining a {@link SubscriptionPlan} that covers a very specific
+         * window of time, and never automatically recurs.
+         */
         public static Builder createNonrecurring(ZonedDateTime start, ZonedDateTime end) {
             if (!end.isAfter(start)) {
                 throw new IllegalArgumentException(
                         "End " + end + " isn't after start " + start);
             }
-            return new Builder(TYPE_NONRECURRING, start, end);
+            return new Builder(start, end, null);
         }
 
+        /**
+         * Start defining a {@link SubscriptionPlan} that will recur
+         * automatically every month. It will always recur on the same day of a
+         * particular month. When a particular month ends before the defined
+         * recurrence day, the plan will recur on the last instant of that
+         * month.
+         */
         public static Builder createRecurringMonthly(ZonedDateTime start) {
-            return new Builder(TYPE_RECURRING_MONTHLY, start, null);
+            return new Builder(start, null, Period.ofMonths(1));
         }
 
+        /**
+         * Start defining a {@link SubscriptionPlan} that will recur
+         * automatically every week.
+         */
         public static Builder createRecurringWeekly(ZonedDateTime start) {
-            return new Builder(TYPE_RECURRING_WEEKLY, start, null);
+            return new Builder(start, null, Period.ofDays(7));
         }
 
+        /**
+         * Start defining a {@link SubscriptionPlan} that will recur
+         * automatically every day.
+         */
         public static Builder createRecurringDaily(ZonedDateTime start) {
-            return new Builder(TYPE_RECURRING_DAILY, start, null);
+            return new Builder(start, null, Period.ofDays(1));
         }
 
         public SubscriptionPlan build() {
             return plan;
         }
 
+        /** Set the short title of this plan. */
         public Builder setTitle(@Nullable CharSequence title) {
             plan.title = title;
             return this;
         }
 
+        /** Set the short summary of this plan. */
         public Builder setSummary(@Nullable CharSequence summary) {
             plan.summary = summary;
             return this;
         }
 
-        public Builder setDataWarning(@BytesLong long dataWarningBytes) {
-            if (dataWarningBytes < BYTES_UNKNOWN) {
-                throw new IllegalArgumentException("Warning must be positive or BYTES_UNKNOWN");
-            }
-            plan.dataWarningBytes = dataWarningBytes;
-            return this;
-        }
-
-        /** {@hide} */
-        public Builder setDataWarningSnooze(@CurrentTimeMillisLong long dataWarningSnoozeTime) {
-            plan.dataWarningSnoozeTime = dataWarningSnoozeTime;
-            return this;
-        }
-
+        /**
+         * Set the usage threshold at which data access changes.
+         *
+         * @param dataLimitBytes the usage threshold at which data access
+         *            changes
+         * @param dataLimitBehavior the behavior of data access when usage
+         *            reaches the threshold
+         */
         public Builder setDataLimit(@BytesLong long dataLimitBytes,
                 @LimitBehavior int dataLimitBehavior) {
-            if (dataLimitBytes < BYTES_UNKNOWN) {
-                throw new IllegalArgumentException("Limit must be positive or BYTES_UNKNOWN");
+            if (dataLimitBytes < 0) {
+                throw new IllegalArgumentException("Limit bytes must be positive");
+            }
+            if (dataLimitBehavior < 0) {
+                throw new IllegalArgumentException("Limit behavior must be defined");
             }
             plan.dataLimitBytes = dataLimitBytes;
             plan.dataLimitBehavior = dataLimitBehavior;
             return this;
         }
 
-        /** {@hide} */
-        public Builder setDataLimitSnooze(@CurrentTimeMillisLong long dataLimitSnoozeTime) {
-            plan.dataLimitSnoozeTime = dataLimitSnoozeTime;
-            return this;
-        }
-
+        /**
+         * Set a snapshot of currently known mobile data usage.
+         *
+         * @param dataUsageBytes the currently known mobile data usage
+         * @param dataUsageTime the time at which this snapshot was valid
+         */
         public Builder setDataUsage(@BytesLong long dataUsageBytes,
                 @CurrentTimeMillisLong long dataUsageTime) {
-            if (dataUsageBytes < BYTES_UNKNOWN) {
-                throw new IllegalArgumentException("Usage must be positive or BYTES_UNKNOWN");
+            if (dataUsageBytes < 0) {
+                throw new IllegalArgumentException("Usage bytes must be positive");
             }
-            if (dataUsageTime < TIME_UNKNOWN) {
-                throw new IllegalArgumentException("Time must be positive or TIME_UNKNOWN");
-            }
-            if ((dataUsageBytes == BYTES_UNKNOWN) != (dataUsageTime == TIME_UNKNOWN)) {
-                throw new IllegalArgumentException("Must provide both usage and time or neither");
+            if (dataUsageTime < 0) {
+                throw new IllegalArgumentException("Usage time must be positive");
             }
             plan.dataUsageBytes = dataUsageBytes;
             plan.dataUsageTime = dataUsageTime;
