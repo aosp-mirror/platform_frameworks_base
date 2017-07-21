@@ -365,7 +365,7 @@ public class WifiTracker {
                 mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
                 mRegistered = false;
             }
-            unregisterAndClearScoreCache();
+            unregisterScoreCache();
             pauseScanning();
             mContext.getContentResolver().unregisterContentObserver(mObserver);
 
@@ -375,11 +375,14 @@ public class WifiTracker {
         mStaleScanResults = true;
     }
 
-    private void unregisterAndClearScoreCache() {
+    private void unregisterScoreCache() {
         mNetworkScoreManager.unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI, mScoreCache);
-        mScoreCache.clearScores();
 
-        // Synchronize on mLock to avoid concurrent modification during updateAccessPoints
+        // We do not want to clear the existing scores in the cache, as this method is called during
+        // stop tracking on activity pause. Hence, on resumption we want the ability to show the
+        // last known, potentially stale, scores. However, by clearing requested scores, the scores
+        // will be requested again upon resumption of tracking, and if any changes have occurred
+        // the listeners (UI) will be updated accordingly.
         synchronized (mLock) {
             mRequestedScores.clear();
         }
