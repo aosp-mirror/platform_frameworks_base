@@ -21,6 +21,9 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -4219,13 +4222,16 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private boolean updateIsKeyguard() {
+        boolean wakeAndUnlocking = mFingerprintUnlockController.getMode()
+                == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
+
         // For dozing, keyguard needs to be shown whenever the device is non-interactive. Otherwise
         // there's no surface we can show to the user. Note that the device goes fully interactive
         // late in the transition, so we also allow the device to start dozing once the screen has
         // turned off fully.
         boolean keyguardForDozing = mDozingRequested &&
                 (!mDeviceInteractive || isGoingToSleep() && (isScreenFullyOff() || mIsKeyguard));
-        boolean shouldBeKeyguard = mKeyguardRequested || keyguardForDozing;
+        boolean shouldBeKeyguard = (mKeyguardRequested || keyguardForDozing) && !wakeAndUnlocking;
         if (keyguardForDozing) {
             updatePanelExpansionForKeyguard();
         }
@@ -4267,7 +4273,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updatePanelExpansionForKeyguard() {
-        if (mState == StatusBarState.KEYGUARD) {
+        if (mState == StatusBarState.KEYGUARD && mFingerprintUnlockController.getMode()
+                != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK) {
             instantExpandNotificationsPanel();
         } else if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
             instantCollapseNotificationPanel();
@@ -5167,6 +5174,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onScreenTurningOn() {
             mFalsingManager.onScreenTurningOn();
             mNotificationPanel.onScreenTurningOn();
+
+            int wakefulness = mWakefulnessLifecycle.getWakefulness();
+            if (mDozing && (wakefulness == WAKEFULNESS_WAKING
+                    || wakefulness == WAKEFULNESS_ASLEEP) && !isPulsing()) {
+                mScrimController.prepareWakeUpFromAod();
+            }
+
             if (mLaunchCameraOnScreenTurningOn) {
                 mNotificationPanel.launchCamera(false, mLastCameraLaunchSource);
                 mLaunchCameraOnScreenTurningOn = false;
@@ -5175,13 +5189,18 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onScreenTurnedOn() {
+            mScrimController.wakeUpFromAod();
             mDozeScrimController.onScreenTurnedOn();
         }
 
         @Override
         public void onScreenTurnedOff() {
             mFalsingManager.onScreenOff();
-            updateIsKeyguard();
+            // If we pulse in from AOD, we turn the screen off first. However, updatingIsKeyguard
+            // in that case destroys the HeadsUpManager state, so don't do it in that case.
+            if (!isPulsing()) {
+                updateIsKeyguard();
+            }
         }
     };
 
