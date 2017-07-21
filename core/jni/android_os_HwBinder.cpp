@@ -381,8 +381,7 @@ static jobject JHwBinder_native_getService(
         return NULL;
     }
 
-    sp<hardware::IBinder> service = hardware::toBinder<
-            hidl::base::V1_0::IBase, hidl::base::V1_0::BpHwBase>(ret);
+    sp<hardware::IBinder> service = hardware::toBinder<hidl::base::V1_0::IBase>(ret);
 
     if (service == NULL) {
         signalExceptionForError(env, NAME_NOT_FOUND);
