@@ -20,6 +20,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -64,7 +65,7 @@ public class RankingHelper implements RankingConfig {
 
     private static final int XML_VERSION = 1;
 
-    private static final String TAG_RANKING = "ranking";
+    static final String TAG_RANKING = "ranking";
     private static final String TAG_PACKAGE = "package";
     private static final String TAG_CHANNEL = "channel";
     private static final String TAG_GROUP = "channelGroup";
@@ -169,7 +170,7 @@ public class RankingHelper implements RankingConfig {
             }
             if (type == XmlPullParser.START_TAG) {
                 if (TAG_PACKAGE.equals(tag)) {
-                    int uid = XmlUtils.safeInt(parser, ATT_UID, Record.UNKNOWN_UID);
+                    int uid = XmlUtils.readIntAttribute(parser, ATT_UID, Record.UNKNOWN_UID);
                     String name = parser.getAttributeValue(null, ATT_NAME);
                     if (!TextUtils.isEmpty(name)) {
                         if (forRestore) {
@@ -182,14 +183,21 @@ public class RankingHelper implements RankingConfig {
                         }
 
                         Record r = getOrCreateRecord(name, uid,
-                                XmlUtils.safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
-                                XmlUtils.safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY),
-                                XmlUtils.safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
-                                XmlUtils.safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
-                        r.importance = XmlUtils.safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-                        r.priority = XmlUtils.safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
-                        r.visibility = XmlUtils.safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
-                        r.showBadge = XmlUtils.safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
+                                XmlUtils.readIntAttribute(
+                                        parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
+                                XmlUtils.readIntAttribute(parser, ATT_PRIORITY, DEFAULT_PRIORITY),
+                                XmlUtils.readIntAttribute(
+                                        parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
+                                XmlUtils.readBooleanAttribute(
+                                        parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
+                        r.importance = XmlUtils.readIntAttribute(
+                                parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+                        r.priority = XmlUtils.readIntAttribute(
+                                parser, ATT_PRIORITY, DEFAULT_PRIORITY);
+                        r.visibility = XmlUtils.readIntAttribute(
+                                parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
+                        r.showBadge = XmlUtils.readBooleanAttribute(
+                                parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
 
                         final int innerDepth = parser.getDepth();
                         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -214,7 +222,7 @@ public class RankingHelper implements RankingConfig {
                             if (TAG_CHANNEL.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
                                 String channelName = parser.getAttributeValue(null, ATT_NAME);
-                                int channelImportance = XmlUtils.safeInt(
+                                int channelImportance = XmlUtils.readIntAttribute(
                                         parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                                 if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
                                     NotificationChannel channel = new NotificationChannel(id,
