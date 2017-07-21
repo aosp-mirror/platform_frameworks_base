@@ -39,6 +39,7 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
 
     private final int mHighBrightness;
     private final int mLowBrightness;
+    private final int mSunlightBrightness;
 
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
             SensorManager sensorManager, Sensor lightSensor, Handler handler) {
@@ -52,6 +53,8 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
                 R.integer.config_doze_aod_brightness_low);
         mHighBrightness = context.getResources().getInteger(
                 R.integer.config_doze_aod_brightness_high);
+        mSunlightBrightness = context.getResources().getInteger(
+                R.integer.config_doze_aod_brightness_sunlight);
     }
 
     @Override
@@ -83,9 +86,12 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     }
 
     private int computeBrightness(int sensorValue) {
-        // The sensor reports 0 for off, 1 for low brightness and 2 for high brightness.
-        // We currently use DozeScreenState for screen off, so we treat off as low brightness.
-        if (sensorValue >= 2) {
+        // The sensor reports 0 for off, 1 for low brightness, 2 for high brightness, and 3 for
+        // sunlight. We currently use DozeScreenState for screen off, so we treat off as low
+        // brightness.
+        if (sensorValue >= 3) {
+            return mSunlightBrightness;
+        } else if (sensorValue == 2) {
             return mHighBrightness;
         } else {
             return mLowBrightness;
