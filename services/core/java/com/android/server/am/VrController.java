@@ -163,6 +163,7 @@ final class VrController {
         ComponentName requestedPackage;
         ComponentName callingPackage;
         int userId;
+        int processId = -1;
         boolean changed = false;
         synchronized (mGlobalAmLock) {
             vrMode = record.requestedVrComponent != null;
@@ -172,11 +173,15 @@ final class VrController {
 
             // Tell the VrController that a VR mode change is requested.
             changed = changeVrModeLocked(vrMode, record.app);
+
+            if (record.app != null) {
+                processId = record.app.pid;
+            }
         }
 
         // Tell VrManager that a VR mode changed is requested, VrManager will handle
         // notifying all non-AM dependencies if needed.
-        vrService.setVrMode(vrMode, requestedPackage, userId, callingPackage);
+        vrService.setVrMode(vrMode, requestedPackage, userId, processId, callingPackage);
         return changed;
     }
 
