@@ -1065,7 +1065,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 // are still seen, we will investigate further.
                 update(config); // Notifies the AccessPointListener of the change
             }
-            if (mRssi != info.getRssi()) {
+            if (mRssi != info.getRssi() && info.getRssi() != WifiInfo.INVALID_RSSI) {
                 mRssi = info.getRssi();
                 updated = true;
             } else if (mNetworkInfo != null && networkInfo != null
