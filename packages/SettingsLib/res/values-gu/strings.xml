@@ -40,12 +40,15 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s દ્વારા કનેક્ટ થયેલ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s દ્વારા ઉપલબ્ધ"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"કનેક્ટ કર્યું, કોઈ ઇન્ટરનેટ નથી"</string>
+    <!-- no translation found for wifi_ap_unable_to_handle_new_sta (5348824313514404541) -->
+    <skip />
     <string name="speed_label_very_slow" msgid="1867055264243608530">"ખૂબ જ ધીમી"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"ધીમી"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ઓકે"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"મધ્યમ"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"ઝડપી"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"ખૂબ ઝડપી"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ડિસ્કનેક્ટ કર્યું"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"ડિસ્કનેક્ટ થઈ રહ્યું છે..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"કનેક્ટ થઈ રહ્યું છે…"</string>
@@ -101,6 +104,10 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi બે બાર."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi ત્રણ બાર."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"પૂર્ણ Wifi સિગ્નલ."</string>
+    <!-- no translation found for accessibility_wifi_security_type_none (1223747559986205423) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_security_type_secured (862921720418885331) -->
+    <skip />
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"દૂર કરેલી ઍપ્લિકેશનો"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"દૂર કરેલી ઍપ્લિકેશનો અને વપરાશકર્તાઓ"</string>
@@ -375,7 +382,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"કસ્ટમ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"સહાય અને પ્રતિસાદ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"મેનુ"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ડેમો મોડમાં ફેક્ટરી રીસેટ પાસવર્ડ દાખલ કરો"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"આગલું"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"પાસવર્ડ આવશ્યક છે"</string>

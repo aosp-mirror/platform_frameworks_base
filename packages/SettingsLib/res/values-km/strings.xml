@@ -40,12 +40,15 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"បានភ្ជាប់តាមរយៈ %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"មានតាមរយៈ %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"បានភ្ជាប់ ប៉ុន្តែគ្មានអ៊ីនធឺណិតទេ"</string>
+    <!-- no translation found for wifi_ap_unable_to_handle_new_sta (5348824313514404541) -->
+    <skip />
     <string name="speed_label_very_slow" msgid="1867055264243608530">"យឺតណាស់"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"យឺត"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"យល់ព្រម"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"មធ្យម"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"លឿន"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"លឿន​ណាស់"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"បាន​ផ្ដាច់"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"កំពុង​ផ្ដាច់…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"កំពុង​ត​ភ្ជាប់​…"</string>
@@ -101,6 +104,10 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi ពីរកាំ"</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi បីកាំ"</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"សេវា Wifi ពេញ"</string>
+    <!-- no translation found for accessibility_wifi_security_type_none (1223747559986205423) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_security_type_secured (862921720418885331) -->
+    <skip />
     <string name="process_kernel_label" msgid="3916858646836739323">"ប្រព័ន្ធ​ប្រតិបត្តិការ Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"កម្មវិធី​ដែល​បាន​លុប"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"បាន​លុប​កម្មវិធី និង​អ្នកប្រើ"</string>
@@ -375,7 +382,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ផ្ទាល់ខ្លួន (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ជំនួយ និងមតិស្ថាបនា"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ម៉ឺនុយ"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"បញ្ចូល​ពាក្យ​សម្ងាត់ ដើម្បី​កំណត់ឧបករណ៍​​ឡើង​វិញ​ដូចពេលចេញ​ពី​រោងចក្រ នៅក្នុង​មុខងារ​សាកល្បង"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"បន្ទាប់"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"តម្រូវ​ឲ្យ​មានពាក្យ​សម្ងាត់"</string>
