@@ -2594,7 +2594,7 @@ public class SettingsProvider extends ContentProvider {
             synchronized (mLock) {
                 final int key = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
                 File globalFile = getSettingsFile(key);
-                if (globalFile.exists()) {
+                if (SettingsState.stateFileExists(globalFile)) {
                     return;
                 }
 
@@ -2631,7 +2631,7 @@ public class SettingsProvider extends ContentProvider {
             // Every user has secure settings and if no file we need to migrate.
             final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
             File secureFile = getSettingsFile(secureKey);
-            if (secureFile.exists()) {
+            if (SettingsState.stateFileExists(secureFile)) {
                 return;
             }
 
