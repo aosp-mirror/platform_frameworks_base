@@ -22,6 +22,7 @@ import android.util.Log;
 public class CpuPowerCalculator extends PowerCalculator {
     private static final String TAG = "CpuPowerCalculator";
     private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final long MICROSEC_IN_HR = (long) 60 * 60 * 1000 * 1000;
     private final PowerProfile mProfile;
 
     public CpuPowerCalculator(PowerProfile profile) {
@@ -35,21 +36,22 @@ public class CpuPowerCalculator extends PowerCalculator {
         app.cpuTimeMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
         final int numClusters = mProfile.getNumCpuClusters();
 
-        double cpuPowerMaMs = 0;
+        double cpuPowerMaUs = 0;
         for (int cluster = 0; cluster < numClusters; cluster++) {
             final int speedsForCluster = mProfile.getNumSpeedStepsInCpuCluster(cluster);
             for (int speed = 0; speed < speedsForCluster; speed++) {
-                final double cpuSpeedStepPower = u.getTimeAtCpuSpeed(cluster, speed, statsType) *
+                final long timeUs = u.getTimeAtCpuSpeed(cluster, speed, statsType);
+                final double cpuSpeedStepPower = timeUs *
                         mProfile.getAveragePowerForCpu(cluster, speed);
                 if (DEBUG) {
                     Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster + " step #"
-                            + speed + " power="
-                            + BatteryStatsHelper.makemAh(cpuSpeedStepPower / (60 * 60 * 1000)));
+                            + speed + " timeUs=" + timeUs + " power="
+                            + BatteryStatsHelper.makemAh(cpuSpeedStepPower / MICROSEC_IN_HR));
                 }
-                cpuPowerMaMs += cpuSpeedStepPower;
+                cpuPowerMaUs += cpuSpeedStepPower;
             }
         }
-        app.cpuPowerMah = cpuPowerMaMs / (60 * 60 * 1000);
+        app.cpuPowerMah = cpuPowerMaUs / MICROSEC_IN_HR;
 
         if (DEBUG && (app.cpuTimeMs != 0 || app.cpuPowerMah != 0)) {
             Log.d(TAG, "UID " + u.getUid() + ": CPU time=" + app.cpuTimeMs + " ms power="
