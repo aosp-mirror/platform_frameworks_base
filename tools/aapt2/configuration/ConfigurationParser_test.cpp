@@ -418,6 +418,8 @@ TEST_F(ConfigurationParserTest, DeviceFeatureGroupAction) {
   ASSERT_THAT(out, ElementsAre(low_latency, pro));
 }
 
+// Artifact name parser test cases.
+
 TEST(ArtifactTest, Simple) {
   StdErrDiagnostics diag;
   Artifact x86;
@@ -466,6 +468,54 @@ TEST(ArtifactTest, Empty) {
 
   EXPECT_FALSE(artifact.ToArtifactName("something.{density}.apk", &diag));
   EXPECT_TRUE(artifact.ToArtifactName("something.apk", &diag));
+}
+
+TEST(ArtifactTest, Repeated) {
+  StdErrDiagnostics diag;
+  Artifact artifact;
+  artifact.screen_density_group = {"mdpi"};
+
+  EXPECT_TRUE(artifact.ToArtifactName("something.{density}.apk", &diag));
+  EXPECT_FALSE(artifact.ToArtifactName("something.{density}.{density}.apk", &diag));
+}
+
+TEST(ArtifactTest, Nesting) {
+  StdErrDiagnostics diag;
+  Artifact x86;
+  x86.abi_group = {"x86"};
+
+  EXPECT_FALSE(x86.ToArtifactName("something.{abi{density}}.apk", &diag));
+
+  const Maybe<std::string>& name = x86.ToArtifactName("something.{abi{abi}}.apk", &diag);
+  EXPECT_TRUE(name);
+  EXPECT_EQ(name.value(), "something.{abix86}.apk");
+}
+
+TEST(ArtifactTest, Recursive) {
+  StdErrDiagnostics diag;
+  Artifact artifact;
+  artifact.device_feature_group = {"{gl}"};
+  artifact.gl_texture_group = {"glx1"};
+
+  EXPECT_FALSE(artifact.ToArtifactName("app.{feature}.{gl}.apk", &diag));
+
+  artifact.device_feature_group = {"df1"};
+  artifact.gl_texture_group = {"{feature}"};
+  {
+    const auto& result = artifact.ToArtifactName("app.{feature}.{gl}.apk", &diag);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(result.value(), "app.df1.{feature}.apk");
+  }
+
+  // This is an invalid case, but should be the only possible case due to the ordering of
+  // replacement.
+  artifact.device_feature_group = {"{gl}"};
+  artifact.gl_texture_group = {"glx1"};
+  {
+    const auto& result = artifact.ToArtifactName("app.{feature}.apk", &diag);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(result.value(), "app.glx1.apk");
+  }
 }
 
 }  // namespace

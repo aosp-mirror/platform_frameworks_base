@@ -118,21 +118,33 @@ const std::string& AbiToString(Abi abi) {
 static bool ReplacePlaceholder(const std::string& placeholder, const Maybe<std::string>& value,
                                std::string* name, IDiagnostics* diag) {
   size_t offset = name->find(placeholder);
-  if (value) {
-    if (offset == std::string::npos) {
+  bool found = (offset != std::string::npos);
+
+  // Make sure the placeholder was present if the desired value is present.
+  if (!found) {
+    if (value) {
       diag->Error(DiagMessage() << "Missing placeholder for artifact: " << placeholder);
       return false;
     }
-    name->replace(offset, placeholder.length(), value.value());
     return true;
   }
 
+  DCHECK(found) << "Missing return path for placeholder not found";
+
   // Make sure the placeholder was not present if the desired value was not present.
-  bool result = (offset == std::string::npos);
-  if (!result) {
+  if (!value) {
     diag->Error(DiagMessage() << "Placeholder present but no value for artifact: " << placeholder);
+    return false;
   }
-  return result;
+
+  name->replace(offset, placeholder.length(), value.value());
+
+  // Make sure there was only one instance of the placeholder.
+  if (name->find(placeholder) != std::string::npos) {
+    diag->Error(DiagMessage() << "Placeholder present multiple times: " << placeholder);
+    return false;
+  }
+  return true;
 }
 
 Maybe<std::string> Artifact::ToArtifactName(const std::string& format, IDiagnostics* diag) const {
