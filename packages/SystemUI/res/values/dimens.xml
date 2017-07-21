@@ -781,6 +781,9 @@
     <!-- The shortest-edge size of the expanded PiP. -->
     <dimen name="pip_expanded_shortest_edge_size">160dp</dimen>
 
+    <!-- The additional offset to apply to the IME animation to account for the input field. -->
+    <dimen name="pip_ime_offset">48dp</dimen>
+
     <!-- The padding between actions in the PiP in landscape  Note that the PiP does not reflect
          the configuration of the device, so we can't use -land resources. -->
     <dimen name="pip_between_action_padding_land">8dp</dimen>
