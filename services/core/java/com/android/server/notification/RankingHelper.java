@@ -546,6 +546,13 @@ public class RankingHelper implements RankingConfig {
             existing.setDescription(channel.getDescription());
             existing.setBlockableSystem(channel.isBlockableSystem());
 
+            // Apps are allowed to downgrade channel importance if the user has not changed any
+            // fields on this channel yet.
+            if (existing.getUserLockedFields() == 0 &&
+                    channel.getImportance() < existing.getImportance()) {
+                existing.setImportance(channel.getImportance());
+            }
+
             updateConfig();
             return;
         }
