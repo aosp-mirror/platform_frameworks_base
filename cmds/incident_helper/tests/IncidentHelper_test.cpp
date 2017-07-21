@@ -17,10 +17,12 @@
 #include "IncidentHelper.h"
 
 #include "frameworks/base/core/proto/android/os/kernelwake.pb.h"
+#include "frameworks/base/core/proto/android/os/procrank.pb.h"
 
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
 #include <gmock/gmock.h>
+#include <google/protobuf/message.h>
 #include <gtest/gtest.h>
 #include <string.h>
 #include <fcntl.h>
@@ -37,10 +39,19 @@ using ::testing::internal::GetCapturedStdout;
 class IncidentHelperTest : public Test {
 public:
     virtual void SetUp() override {
+        ASSERT_TRUE(tf.fd != -1);
+    }
 
+    std::string getSerializedString(::google::protobuf::Message& message) {
+        std::string expectedStr;
+        message.SerializeToFileDescriptor(tf.fd);
+        ReadFileToString(tf.path, &expectedStr);
+        return expectedStr;
     }
 
 protected:
+    TemporaryFile tf;
+
     const std::string kTestPath = GetExecutableDirectory();
     const std::string kTestDataPath = kTestPath + "/testdata/";
 };
@@ -61,9 +72,6 @@ TEST_F(IncidentHelperTest, KernelWakesParser) {
     const std::string testFile = kTestDataPath + "kernel_wakeups.txt";
     KernelWakesParser parser;
     KernelWakeSources expected;
-    std::string expectedStr;
-    TemporaryFile tf;
-    ASSERT_TRUE(tf.fd != -1);
 
     WakeupSourceProto* record1 = expected.add_wakeup_sources();
     record1->set_name("ipc000000ab_ATFWD-daemon");
@@ -89,15 +97,12 @@ TEST_F(IncidentHelperTest, KernelWakesParser) {
     record2->set_last_change(2067286206l);
     record2->set_prevent_suspend_time(0l);
 
-    ASSERT_TRUE(expected.SerializeToFileDescriptor(tf.fd));
-    ASSERT_TRUE(ReadFileToString(tf.path, &expectedStr));
-
     int fd = open(testFile.c_str(), O_RDONLY, 0444);
     ASSERT_TRUE(fd != -1);
 
     CaptureStdout();
     ASSERT_EQ(NO_ERROR, parser.Parse(fd, STDOUT_FILENO));
-    EXPECT_EQ(GetCapturedStdout(), expectedStr);
+    EXPECT_EQ(GetCapturedStdout(), getSerializedString(expected));
     close(fd);
 }
 
@@ -113,5 +118,56 @@ TEST_F(IncidentHelperTest, KernelWakesParserBadHeaders) {
     ASSERT_EQ(BAD_VALUE, parser.Parse(fd, STDOUT_FILENO));
     EXPECT_THAT(GetCapturedStdout(), StrEq(""));
     EXPECT_THAT(GetCapturedStderr(), StrEq("[KernelWakeSources]Bad header:\nTHIS IS BAD HEADER\n"));
+    close(fd);
+}
+
+TEST_F(IncidentHelperTest, ProcrankParser) {
+    const std::string testFile = kTestDataPath + "procrank.txt";
+    ProcrankParser parser;
+    Procrank expected;
+
+    ProcessProto* process1 = expected.add_processes();
+    process1->set_pid(1119);
+    process1->set_vss(2607640);
+    process1->set_rss(339564);
+    process1->set_pss(180278);
+    process1->set_uss(114216);
+    process1->set_swap(1584);
+    process1->set_pswap(46);
+    process1->set_uswap(0);
+    process1->set_zswap(10);
+    process1->set_cmdline("system_server");
+
+    ProcessProto* process2 = expected.add_processes();
+    process2->set_pid(649);
+    process2->set_vss(11016);
+    process2->set_rss(1448);
+    process2->set_pss(98);
+    process2->set_uss(48);
+    process2->set_swap(472);
+    process2->set_pswap(342);
+    process2->set_uswap(212);
+    process2->set_zswap(75);
+    process2->set_cmdline("/vendor/bin/qseecomd");
+
+    ProcessProto* total = expected.mutable_summary()->mutable_total();
+    total->set_pss(1201993);
+    total->set_uss(935300);
+    total->set_swap(88164);
+    total->set_pswap(31069);
+    total->set_uswap(27612);
+    total->set_zswap(6826);
+
+    expected.mutable_summary()->mutable_zram()
+        ->set_raw_text("6828K physical used for 31076K in swap (524284K total swap)");
+    expected.mutable_summary()->mutable_ram()
+        ->set_raw_text("3843972K total, 281424K free, 116764K buffers, 1777452K cached, 1136K shmem, 217916K slab");
+
+    int fd = open(testFile.c_str(), O_RDONLY, 0444);
+    ASSERT_TRUE(fd != -1);
+
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, parser.Parse(fd, STDOUT_FILENO));
+    EXPECT_EQ(GetCapturedStdout(), getSerializedString(expected));
     close(fd);
 }

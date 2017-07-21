@@ -17,14 +17,13 @@
 #define LOG_TAG "incident_helper"
 
 #include "IncidentHelper.h"
-#include "strutil.h"
+#include "ih_util.h"
 
 #include "frameworks/base/core/proto/android/os/kernelwake.pb.h"
+#include "frameworks/base/core/proto/android/os/procrank.pb.h"
 
-#include <algorithm>
 #include <android-base/file.h>
 #include <unistd.h>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -67,42 +66,34 @@ const char* kernel_wake_headers[] = {
 const string KERNEL_WAKEUP_LINE_DELIMITER = "\t";
 
 status_t KernelWakesParser::Parse(const int in, const int out) const {
-    // read the content, this is not memory-efficient though since it loads everything
-    // However the data will be held in proto anyway, and incident_helper is less critical
-    string content;
-    if (!ReadFdToString(in, &content)) {
-        fprintf(stderr, "[%s]Failed to read data from incidentd\n", this->name.string());
-        return -1;
-    }
-
-    istringstream iss(content);
+    Reader reader(in);
     string line;
-    vector<string> header;  // the header of /d/wakeup_sources
-    vector<string> record;  // retain each record
+    header_t header;  // the header of /d/wakeup_sources
+    record_t record;  // retain each record
     int nline = 0;
 
     KernelWakeSources proto;
 
     // parse line by line
-    while (getline(iss, line)) {
+    while (reader.readLine(line)) {
+        if (line.empty()) continue;
         // parse head line
-        if (nline == 0) {
-          split(line, &header);
-          if (!assertHeaders(kernel_wake_headers, header)) {
-            fprintf(stderr, "[%s]Bad header:\n%s\n", this->name.string(), line.c_str());
-            return BAD_VALUE;
-          }
-          nline++;
-          continue;
+        if (nline++ == 0) {
+            split(line, header, KERNEL_WAKEUP_LINE_DELIMITER);
+            if (!assertHeaders(kernel_wake_headers, header)) {
+                fprintf(stderr, "[%s]Bad header:\n%s\n", this->name.string(), line.c_str());
+                return BAD_VALUE;
+            }
+            continue;
         }
 
         // parse for each record, the line delimiter is \t only!
-        split(line, &record, KERNEL_WAKEUP_LINE_DELIMITER);
+        split(line, record, KERNEL_WAKEUP_LINE_DELIMITER);
 
         if (record.size() != header.size()) {
-          // TODO: log this to incident report!
-          fprintf(stderr, "[%s]Line %d has missing fields\n%s\n", this->name.string(), nline, line.c_str());
-          continue;
+            // TODO: log this to incident report!
+            fprintf(stderr, "[%s]Line %d has missing fields\n%s\n", this->name.string(), nline, line.c_str());
+            continue;
         }
 
         WakeupSourceProto* source = proto.add_wakeup_sources();
@@ -118,17 +109,106 @@ status_t KernelWakesParser::Parse(const int in, const int out) const {
         source->set_max_time(atol(record.at(7).c_str()));
         source->set_last_change(atol(record.at(8).c_str()));
         source->set_prevent_suspend_time(atol(record.at(9).c_str()));
-
-        nline++;
     }
 
-    fprintf(stderr, "[%s]Proto size: %d bytes\n", this->name.string(), proto.ByteSize());
+    if (!reader.ok(line)) {
+        fprintf(stderr, "Bad read from fd %d: %s\n", in, line.c_str());
+        return -1;
+    }
 
     if (!proto.SerializeToFileDescriptor(out)) {
         fprintf(stderr, "[%s]Error writing proto back\n", this->name.string());
         return -1;
     }
-    close(out);
+    fprintf(stderr, "[%s]Proto size: %d bytes\n", this->name.string(), proto.ByteSize());
+    return NO_ERROR;
+}
 
+// ================================================================================
+const char* procrank_headers[] = {
+    "PID",          // id:  1
+    "Vss",          // id:  2
+    "Rss",          // id:  3
+    "Pss",          // id:  4
+    "Uss",          // id:  5
+    "Swap",         // id:  6
+    "PSwap",        // id:  7
+    "USwap",        // id:  8
+    "ZSwap",        // id:  9
+    "cmdline",      // id: 10
+};
+
+status_t ProcrankParser::Parse(const int in, const int out) const {
+    Reader reader(in);
+    string line, content;
+    header_t header;  // the header of /d/wakeup_sources
+    record_t record;  // retain each record
+    int nline = 0;
+
+    Procrank proto;
+
+    // parse line by line
+    while (reader.readLine(line)) {
+        if (line.empty()) continue;
+
+        // parse head line
+        if (nline++ == 0) {
+            split(line, header);
+            if (!assertHeaders(procrank_headers, header)) {
+                fprintf(stderr, "[%s]Bad header:\n%s\n", this->name.string(), line.c_str());
+                return BAD_VALUE;
+            }
+            continue;
+        }
+
+        split(line, record);
+        if (record.size() != header.size()) {
+            if (record[record.size() - 1] == "TOTAL") { // TOTAL record
+                ProcessProto* total = proto.mutable_summary()->mutable_total();
+                total->set_pss(atol(record.at(0).substr(0, record.at(0).size() - 1).c_str()));
+                total->set_uss(atol(record.at(1).substr(0, record.at(1).size() - 1).c_str()));
+                total->set_swap(atol(record.at(2).substr(0, record.at(2).size() - 1).c_str()));
+                total->set_pswap(atol(record.at(3).substr(0, record.at(3).size() - 1).c_str()));
+                total->set_uswap(atol(record.at(4).substr(0, record.at(4).size() - 1).c_str()));
+                total->set_zswap(atol(record.at(5).substr(0, record.at(5).size() - 1).c_str()));
+            } else if (record[0] == "ZRAM:") {
+                split(line, record, ":");
+                proto.mutable_summary()->mutable_zram()->set_raw_text(record[1]);
+            } else if (record[0] == "RAM:") {
+                split(line, record, ":");
+                proto.mutable_summary()->mutable_ram()->set_raw_text(record[1]);
+            } else {
+                fprintf(stderr, "[%s]Line %d has missing fields\n%s\n", this->name.string(), nline,
+                    line.c_str());
+            }
+            continue;
+        }
+
+        ProcessProto* process = proto.add_processes();
+        // int32
+        process->set_pid(atoi(record.at(0).c_str()));
+        // int64, remove 'K' at the end
+        process->set_vss(atol(record.at(1).substr(0, record.at(1).size() - 1).c_str()));
+        process->set_rss(atol(record.at(2).substr(0, record.at(2).size() - 1).c_str()));
+        process->set_pss(atol(record.at(3).substr(0, record.at(3).size() - 1).c_str()));
+        process->set_uss(atol(record.at(4).substr(0, record.at(4).size() - 1).c_str()));
+        process->set_swap(atol(record.at(5).substr(0, record.at(5).size() - 1).c_str()));
+        process->set_pswap(atol(record.at(6).substr(0, record.at(6).size() - 1).c_str()));
+        process->set_uswap(atol(record.at(7).substr(0, record.at(7).size() - 1).c_str()));
+        process->set_zswap(atol(record.at(8).substr(0, record.at(8).size() - 1).c_str()));
+        // string
+        process->set_cmdline(record.at(9));
+    }
+
+    if (!reader.ok(line)) {
+        fprintf(stderr, "Bad read from fd %d: %s\n", in, line.c_str());
+        return -1;
+    }
+
+    if (!proto.SerializeToFileDescriptor(out)) {
+        fprintf(stderr, "[%s]Error writing proto back\n", this->name.string());
+        return -1;
+    }
+    fprintf(stderr, "[%s]Proto size: %d bytes\n", this->name.string(), proto.ByteSize());
     return NO_ERROR;
 }

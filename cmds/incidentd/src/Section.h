@@ -19,11 +19,14 @@
 
 #include "FdBuffer.h"
 
+#include <stdarg.h>
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>
 
 using namespace android;
+
+const int64_t REMOTE_CALL_TIMEOUT_MS = 10 * 1000; // 10 seconds
 
 /**
  * Base class for sections
@@ -31,10 +34,11 @@ using namespace android;
 class Section
 {
 public:
-    int id;
+    const int id;
+    const int64_t timeoutMs; // each section must have a timeout
     String8 name;
 
-    Section(int id);
+    Section(int id, const int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS);
     virtual ~Section();
 
     virtual status_t Execute(ReportRequestSet* requests) const = 0;
@@ -48,7 +52,7 @@ public:
 class FileSection : public Section
 {
 public:
-    FileSection(int id, const char* filename);
+    FileSection(int id, const char* filename, const int64_t timeoutMs = 5000 /* 5 seconds */);
     virtual ~FileSection();
 
     virtual status_t Execute(ReportRequestSet* requests) const;
@@ -77,13 +81,18 @@ public:
 class CommandSection : public Section
 {
 public:
-    CommandSection(int id, const char* first, ...);
+    CommandSection(int id, const int64_t timeoutMs, const char* command, ...);
+
+    CommandSection(int id, const char* command, ...);
+
     virtual ~CommandSection();
 
     virtual status_t Execute(ReportRequestSet* requests) const;
 
 private:
     const char** mCommand;
+
+    void init(const char* command, va_list args);
 };
 
 /**

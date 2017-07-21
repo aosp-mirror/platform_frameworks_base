@@ -70,4 +70,17 @@ public:
     virtual status_t Parse(const int in, const int out) const;
 };
 
+/**
+ * Procrank parser, parses text produced by command procrank
+ */
+extern const char* procrank_headers[];
+
+class ProcrankParser : public TextParserBase {
+public:
+    ProcrankParser() : TextParserBase(String8("ProcrankParser")) {};
+    ~ProcrankParser() {};
+
+    virtual status_t Parse(const int in, const int out) const;
+};
+
 #endif  // INCIDENT_HELPER_H

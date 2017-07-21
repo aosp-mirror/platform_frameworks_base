@@ -98,7 +98,7 @@ public:
     bool close() { return !(::close(mFds[0]) || ::close(mFds[1])); }
     ~Fpipe() { close(); }
 
-    inline status_t init() { return pipe(mFds); }
+    inline bool init() { return pipe(mFds) != -1; }
     inline int readFd() const { return mFds[0]; }
     inline int writeFd() const { return mFds[1]; }
 
