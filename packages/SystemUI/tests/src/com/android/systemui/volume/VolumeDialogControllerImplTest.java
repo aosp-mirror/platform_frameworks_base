@@ -26,6 +26,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.support.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import org.junit.Before;
@@ -48,6 +49,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     @Test
     public void testVolumeChangeW_deviceNotInteractiveAOD() {
         when(mStatusBar.isDeviceInteractive()).thenReturn(false);
+        when(mStatusBar.getWakefulnessState()).thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
         mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
         verify(mCallback, never()).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
     }
@@ -55,6 +57,18 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     @Test
     public void testVolumeChangeW_deviceInteractive() {
         when(mStatusBar.isDeviceInteractive()).thenReturn(true);
+        when(mStatusBar.getWakefulnessState()).thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
+        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
+        verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
+    }
+
+    @Test
+    public void testVolumeChangeW_deviceInteractive_StartedSleeping() {
+        when(mStatusBar.isDeviceInteractive()).thenReturn(true);
+        when(mStatusBar.getWakefulnessState()).thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
+        mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
+        when(mStatusBar.isDeviceInteractive()).thenReturn(false);
+        when(mStatusBar.getWakefulnessState()).thenReturn(WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP);
         mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
         verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
     }
