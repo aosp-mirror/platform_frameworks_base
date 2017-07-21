@@ -170,7 +170,7 @@ public class ManagedServicesTest extends NotificationTestCase {
                     null);
             writeExpectedValuesToSettings(approvalLevel);
 
-            assertTrue(service.readXml(parser));
+            service.migrateToXml();
 
             verifyExpectedApprovedEntries(service);
         }
@@ -182,7 +182,7 @@ public class ManagedServicesTest extends NotificationTestCase {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
                     mIpm, approvalLevel);
 
-            assertFalse(loadXml(service));
+            loadXml(service);
 
             verifyExpectedApprovedEntries(service);
         }
@@ -239,7 +239,7 @@ public class ManagedServicesTest extends NotificationTestCase {
             parser.setInput(new BufferedInputStream(
                     new ByteArrayInputStream(baos.toByteArray())), null);
             parser.nextTag();
-            assertFalse(service.readXml(parser));
+            service.readXml(parser);
 
             verifyExpectedApprovedEntries(service);
             assertFalse(service.isPackageOrComponentAllowed("this.is.a.package.name", 0));
@@ -341,11 +341,8 @@ public class ManagedServicesTest extends NotificationTestCase {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
                     mIpm, approvalLevel);
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(new BufferedInputStream(new ByteArrayInputStream(new byte[]{})),
-                    null);
             writeExpectedValuesToSettings(approvalLevel);
-            service.readXml(parser);
+            service.migrateToXml();
 
             mExpectedPrimaryPackages.put(0, "another.package");
             mExpectedPrimaryComponentNames.put(0, "another.package/B1");
@@ -360,11 +357,8 @@ public class ManagedServicesTest extends NotificationTestCase {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
                     mIpm, approvalLevel);
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(new BufferedInputStream(new ByteArrayInputStream(new byte[]{})),
-                    null);
             writeExpectedValuesToSettings(approvalLevel);
-            service.readXml(parser);
+            service.migrateToXml();
 
             mExpectedSecondaryComponentNames.put(10, "component/2");
             mExpectedSecondaryPackages.put(10, "component");
@@ -516,9 +510,9 @@ public class ManagedServicesTest extends NotificationTestCase {
         assertEquals(0, service.getAllowedComponents(10).size());
     }
 
-    private boolean loadXml(ManagedServices service) throws Exception {
+    private void loadXml(ManagedServices service) throws Exception {
         final StringBuffer xml = new StringBuffer();
-        xml.append("<" + service.getConfig().managedServiceTypeTag + ">\n");
+        xml.append("<" + service.getConfig().xmlTag + ">\n");
         for (int userId : mExpectedPrimary.get(service.mApprovalLevel).keySet()) {
             xml.append(getXmlEntry(
                     mExpectedPrimary.get(service.mApprovalLevel).get(userId), userId, true));
@@ -527,13 +521,13 @@ public class ManagedServicesTest extends NotificationTestCase {
             xml.append(getXmlEntry(
                     mExpectedSecondary.get(service.mApprovalLevel).get(userId), userId, false));
         }
-        xml.append("</" + service.getConfig().managedServiceTypeTag + ">");
+        xml.append("</" + service.getConfig().xmlTag + ">");
 
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.toString().getBytes())), null);
         parser.nextTag();
-        return service.readXml(parser);
+        service.readXml(parser);
     }
 
     private void addExpectedServices(final ManagedServices service, final List<String> packages,
@@ -674,7 +668,7 @@ public class ManagedServicesTest extends NotificationTestCase {
         @Override
         protected Config getConfig() {
             final Config c = new Config();
-            c.managedServiceTypeTag= "test";
+            c.xmlTag = "test";
             c.secureSettingName = SETTING;
             c.secondarySettingName = SECONDARY_SETTING;
             c.bindPermission = "permission";
