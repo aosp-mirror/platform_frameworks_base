@@ -1045,8 +1045,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         }
         // We need to provide the current orientation of the display on which this task resides,
         // not the orientation of the task.
-        final int orientation =
-                getStack().mActivityContainer.mActivityDisplay.getConfiguration().orientation;
+        final int orientation = getStack().getDisplay().getConfiguration().orientation;
         return setLastThumbnailLocked(thumbnail, taskWidth, taskHeight, orientation);
     }
 
