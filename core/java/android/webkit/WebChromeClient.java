@@ -525,15 +525,4 @@ public class WebChromeClient {
     public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType, String capture) {
         uploadFile.onReceiveValue(null);
     }
-
-    /**
-     * Tell the client that the page being viewed has an autofillable
-     * form and the user would like to set a profile up.
-     * @param msg A Message to send once the user has successfully
-     *      set up a profile and to inform the WebTextView it should
-     *      now autofill using that new profile.
-     * @hide
-     */
-    public void setupAutoFill(Message msg) { }
-
 }
