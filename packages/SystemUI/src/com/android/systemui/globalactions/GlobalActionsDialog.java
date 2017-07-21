@@ -25,8 +25,10 @@ import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.HardwareUiLayout;
+import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.volume.VolumeDialogMotion.LogAccelerateInterpolator;
 import com.android.systemui.volume.VolumeDialogMotion.LogDecelerateInterpolator;
@@ -65,6 +67,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,6 +114,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
     private static final String GLOBAL_ACTION_KEY_VOICEASSIST = "voiceassist";
     private static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
     private static final String GLOBAL_ACTION_KEY_RESTART = "restart";
+
+    private static final float SHUTDOWN_SCRIM_ALPHA = 0.95f;
 
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
@@ -1291,7 +1296,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                     .alpha(1)
                     .translationX(0)
                     .setDuration(300)
-                    .setInterpolator(new LogDecelerateInterpolator())
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .setUpdateListener(animation -> {
                         int alpha = (int) ((Float) animation.getAnimatedValue()
                                 * ScrimController.GRADIENT_SCRIM_ALPHA * 255);
@@ -1329,9 +1334,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                     .setInterpolator(new LogAccelerateInterpolator())
                     .setUpdateListener(animation -> {
                         float frac = animation.getAnimatedFraction();
-                        float alpha = frac *(ScrimController.GRADIENT_SCRIM_ALPHA_BUSY
-                                        - ScrimController.GRADIENT_SCRIM_ALPHA)
-                                + ScrimController.GRADIENT_SCRIM_ALPHA;
+                        float alpha = NotificationUtils.interpolate(
+                                ScrimController.GRADIENT_SCRIM_ALPHA, SHUTDOWN_SCRIM_ALPHA, frac);
                         mGradientDrawable.setAlpha((int) (alpha * 255));
                     })
                     .start();
