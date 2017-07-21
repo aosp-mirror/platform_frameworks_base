@@ -431,9 +431,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Vibrator pattern for a short vibration when tapping on a day/month/year date of a Calendar.
     long[] mCalendarDateVibePattern;
 
-    // Vibrator pattern for haptic feedback during boot when safe mode is disabled.
-    long[] mSafeModeDisabledVibePattern;
-
     // Vibrator pattern for haptic feedback during boot when safe mode is enabled.
     long[] mSafeModeEnabledVibePattern;
 
@@ -2076,8 +2073,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.array.config_longPressVibePattern);
         mCalendarDateVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_calendarDateVibePattern);
-        mSafeModeDisabledVibePattern = getLongIntArray(mContext.getResources(),
-                com.android.internal.R.array.config_safeModeDisabledVibePattern);
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
 
@@ -7226,9 +7221,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void setSafeMode(boolean safeMode) {
         mSafeMode = safeMode;
-        performHapticFeedbackLw(null, safeMode
-                ? HapticFeedbackConstants.SAFE_MODE_ENABLED
-                : HapticFeedbackConstants.SAFE_MODE_DISABLED, true);
+        if (safeMode) {
+            performHapticFeedbackLw(null, HapticFeedbackConstants.SAFE_MODE_ENABLED, true);
+        }
     }
 
     static long[] getLongIntArray(Resources r, int resid) {
@@ -7746,9 +7741,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             case HapticFeedbackConstants.CALENDAR_DATE:
                 pattern = mCalendarDateVibePattern;
-                break;
-            case HapticFeedbackConstants.SAFE_MODE_DISABLED:
-                pattern = mSafeModeDisabledVibePattern;
                 break;
             case HapticFeedbackConstants.SAFE_MODE_ENABLED:
                 pattern = mSafeModeEnabledVibePattern;

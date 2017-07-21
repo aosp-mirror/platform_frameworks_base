@@ -69,12 +69,7 @@ public class HapticFeedbackConstants {
     public static final int TEXT_HANDLE_MOVE = 8;
 
     /**
-     * This is a private constant.  Feel free to renumber as desired.
-     * @hide
-     */
-    public static final int SAFE_MODE_DISABLED = 10000;
-
-    /**
+     * The phone has booted with safe mode enabled.
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */
