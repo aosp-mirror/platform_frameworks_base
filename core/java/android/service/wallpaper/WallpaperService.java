@@ -547,12 +547,11 @@ public abstract class WallpaperService extends Service {
 
         /**
          * Notifies the engine that wallpaper colors changed significantly.
-         * This will trigger a {@link #onComputeWallpaperColors()} call.
-         * @hide
+         * This will trigger a {@link #onComputeColors()} call.
          */
-        public void invalidateColors() {
+        public void notifyColorsChanged() {
             try {
-                mConnection.onWallpaperColorsChanged(onComputeWallpaperColors());
+                mConnection.onWallpaperColorsChanged(onComputeColors());
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't invalidate wallpaper colors because " +
                         "wallpaper connection was lost", e);
@@ -560,19 +559,18 @@ public abstract class WallpaperService extends Service {
         }
 
         /**
-         * Notifies the system about what colors the wallpaper is using.
+         * Called by the system when it needs to know what colors the wallpaper is using.
          * You might return null if no color information is available at the moment. In that case
-         * you might want to call {@link #invalidateColors()} in a near future.
+         * you might want to call {@link #notifyColorsChanged()} in a near future.
          * <p>
-         * The simplest way of creating A {@link android.app.WallpaperColors} object is by using
+         * The simplest way of creating a {@link android.app.WallpaperColors} object is by using
          * {@link android.app.WallpaperColors#fromBitmap(Bitmap)} or
          * {@link android.app.WallpaperColors#fromDrawable(Drawable)}, but you can also specify
-         * your main colors and dark text support explicitly using one of the constructors.
+         * your main colors by constructing a {@link android.app.WallpaperColors} object manually.
          *
          * @return Wallpaper colors.
-         * @hide
          */
-        public @Nullable WallpaperColors onComputeWallpaperColors() {
+        public @Nullable WallpaperColors onComputeColors() {
             return null;
         }
 
@@ -1212,7 +1210,7 @@ public abstract class WallpaperService extends Service {
                     mEngine = engine;
                     mActiveEngines.add(engine);
                     engine.attach(this);
-                    engine.invalidateColors();
+                    engine.notifyColorsChanged();
                     return;
                 }
                 case DO_DETACH: {
