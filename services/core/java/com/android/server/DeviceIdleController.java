@@ -760,17 +760,15 @@ public class DeviceIdleController extends SystemService
         public long NOTIFICATION_WHITELIST_DURATION;
 
         private final ContentResolver mResolver;
-        private final boolean mHasWatch;
+        private final boolean mSmallBatteryDevice;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
         public Constants(Handler handler, ContentResolver resolver) {
             super(handler);
             mResolver = resolver;
-            mHasWatch = getContext().getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_WATCH);
-            mResolver.registerContentObserver(Settings.Global.getUriFor(
-                    mHasWatch ? Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH
-                              : Settings.Global.DEVICE_IDLE_CONSTANTS),
+            mSmallBatteryDevice = ActivityManager.isSmallBatteryDevice();
+            mResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.DEVICE_IDLE_CONSTANTS),
                     false, this);
             updateConstants();
         }
@@ -784,8 +782,7 @@ public class DeviceIdleController extends SystemService
             synchronized (DeviceIdleController.this) {
                 try {
                     mParser.setString(Settings.Global.getString(mResolver,
-                            mHasWatch ? Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH
-                                      : Settings.Global.DEVICE_IDLE_CONSTANTS));
+                            Settings.Global.DEVICE_IDLE_CONSTANTS));
                 } catch (IllegalArgumentException e) {
                     // Failed to parse the settings string, log this and move on
                     // with defaults.
@@ -815,7 +812,7 @@ public class DeviceIdleController extends SystemService
                 MIN_DEEP_MAINTENANCE_TIME = mParser.getLong(
                         KEY_MIN_DEEP_MAINTENANCE_TIME,
                         !COMPRESS_TIME ? 30 * 1000L : 5 * 1000L);
-                long inactiveTimeoutDefault = (mHasWatch ? 15 : 30) * 60 * 1000L;
+                long inactiveTimeoutDefault = (mSmallBatteryDevice ? 3 : 30) * 60 * 1000L;
                 INACTIVE_TIMEOUT = mParser.getLong(KEY_INACTIVE_TIMEOUT,
                         !COMPRESS_TIME ? inactiveTimeoutDefault : (inactiveTimeoutDefault / 10));
                 SENSING_TIMEOUT = mParser.getLong(KEY_SENSING_TIMEOUT,
@@ -825,7 +822,7 @@ public class DeviceIdleController extends SystemService
                 LOCATION_ACCURACY = mParser.getFloat(KEY_LOCATION_ACCURACY, 20);
                 MOTION_INACTIVE_TIMEOUT = mParser.getLong(KEY_MOTION_INACTIVE_TIMEOUT,
                         !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L);
-                long idleAfterInactiveTimeout = (mHasWatch ? 15 : 30) * 60 * 1000L;
+                long idleAfterInactiveTimeout = (mSmallBatteryDevice ? 3 : 30) * 60 * 1000L;
                 IDLE_AFTER_INACTIVE_TIMEOUT = mParser.getLong(KEY_IDLE_AFTER_INACTIVE_TIMEOUT,
                         !COMPRESS_TIME ? idleAfterInactiveTimeout
                                        : (idleAfterInactiveTimeout / 10));

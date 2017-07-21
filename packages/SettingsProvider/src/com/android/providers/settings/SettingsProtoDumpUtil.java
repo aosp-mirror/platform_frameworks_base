@@ -720,9 +720,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.DEVICE_IDLE_CONSTANTS,
                 GlobalSettingsProto.DEVICE_IDLE_CONSTANTS);
         dumpSetting(s, p,
-                Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH,
-                GlobalSettingsProto.DEVICE_IDLE_CONSTANTS_WATCH);
-        dumpSetting(s, p,
                 Settings.Global.APP_IDLE_CONSTANTS,
                 GlobalSettingsProto.APP_IDLE_CONSTANTS);
         dumpSetting(s, p,
