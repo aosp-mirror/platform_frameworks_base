@@ -257,5 +257,15 @@
                 <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".leanback.BrowseActivity"
+            android:theme="@style/Theme.Leanback.Browse"
+            android:label="Leanback/Browse Fragment" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
