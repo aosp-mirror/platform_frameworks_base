@@ -70,8 +70,10 @@ public abstract class VrListenerService extends Service {
 
     private final IVrListener.Stub mBinder = new IVrListener.Stub() {
         @Override
-        public void focusedActivityChanged(ComponentName component) {
-            mHandler.obtainMessage(MSG_ON_CURRENT_VR_ACTIVITY_CHANGED, component).sendToTarget();
+        public void focusedActivityChanged(
+                ComponentName component, boolean running2dInVr, int pid) {
+            mHandler.obtainMessage(MSG_ON_CURRENT_VR_ACTIVITY_CHANGED, running2dInVr ? 1 : 0,
+                    pid, component).sendToTarget();
         }
     };
 
@@ -84,7 +86,8 @@ public abstract class VrListenerService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_ON_CURRENT_VR_ACTIVITY_CHANGED: {
-                    VrListenerService.this.onCurrentVrActivityChanged((ComponentName) msg.obj);
+                    VrListenerService.this.onCurrentVrActivityChanged(
+                            (ComponentName) msg.obj, msg.arg1 == 1, msg.arg2);
                 } break;
             }
         }
@@ -117,6 +120,29 @@ public abstract class VrListenerService extends Service {
      */
     public void onCurrentVrActivityChanged(ComponentName component) {
         // Override to implement
+    }
+
+    /**
+     * An extended version of onCurrentVrActivityChanged
+     *
+     * <p>This will be called when this service is initially bound, but is not
+     * guaranteed to be called before onUnbind.  In general, this is intended to be used to
+     * determine when user focus has transitioned between two VR activities, or between a
+     * VR activity and a 2D activity. This should be overridden instead of the above
+     * onCurrentVrActivityChanged as that version is deprecated.</p>
+     *
+     * @param component the {@link ComponentName} of the VR activity or the 2D intent.
+     * @param running2dInVr true if the component is a 2D component.
+     * @param pid the process the component is running in.
+     *
+     * @see android.app.Activity#setVrModeEnabled
+     * @see android.R.attr#enableVrMode
+     * @hide
+     */
+    public void onCurrentVrActivityChanged(
+            ComponentName component, boolean running2dInVr, int pid) {
+        // Override to implement. Default to old behaviour of sending null for 2D.
+        onCurrentVrActivityChanged(running2dInVr ? null : component);
     }
 
     /**
