@@ -3165,12 +3165,6 @@
     <permission android:name="android.permission.MANAGE_NETWORK_POLICY"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows an application to manage fallback subscription plans.
-         Note that another app providing plans for an explicit HNI will always
-         take precidence over these fallback plans. @hide -->
-    <permission android:name="android.permission.MANAGE_FALLBACK_SUBSCRIPTION_PLANS"
-        android:protectionLevel="signature|privileged" />
-
     <!-- @SystemApi @hide @deprecated use UPDATE_DEVICE_STATS instead -->
     <permission android:name="android.permission.MODIFY_NETWORK_ACCOUNTING"
         android:protectionLevel="signature|privileged" />
