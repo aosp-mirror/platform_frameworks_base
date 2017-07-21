@@ -127,8 +127,8 @@ public abstract class Context {
      * File creation mode: allow all other applications to have read access to
      * the created file.
      * <p>
-     * As of {@link android.os.Build.VERSION_CODES#N} attempting to use this
-     * mode will throw a {@link SecurityException}.
+     * Starting from {@link android.os.Build.VERSION_CODES#N}, attempting to use this
+     * mode throws a {@link SecurityException}.
      *
      * @deprecated Creating world-readable files is very dangerous, and likely
      *             to cause security holes in applications. It is strongly
@@ -147,7 +147,7 @@ public abstract class Context {
      * File creation mode: allow all other applications to have write access to
      * the created file.
      * <p>
-     * As of {@link android.os.Build.VERSION_CODES#N} attempting to use this
+     * Starting from {@link android.os.Build.VERSION_CODES#N}, attempting to use this
      * mode will throw a {@link SecurityException}.
      *
      * @deprecated Creating world-writable files is very dangerous, and likely
@@ -1127,13 +1127,47 @@ public abstract class Context {
      * </ul>
      * <p>
      * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no permissions
-     * are required to read or write to the returned path; it's always
-     * accessible to the calling app. This only applies to paths generated for
-     * package name of the calling application. To access paths belonging to
-     * other packages,
-     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} and/or
-     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
+     * are required to read or write to the path that this method returns.
+     * However, starting from {@link android.os.Build.VERSION_CODES#M},
+     * to read the OBB expansion files, you must declare the
+     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission in the app manifest and ask for
+     * permission at runtime as follows:
+     * </p>
      * <p>
+     * {@code <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+     * android:maxSdkVersion="23" />}
+     * </p>
+     * <p>
+     * Starting from {@link android.os.Build.VERSION_CODES#N},
+     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+     * permission is not required, so don’t ask for this
+     * permission at runtime. To handle both cases, your app must first try to read the OBB file,
+     * and if it fails, you must request
+     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission at runtime.
+     * </p>
+     *
+     * <p>
+     * The following code snippet shows how to do this:
+     * </p>
+     *
+     * <pre>
+     * File obb = new File(obb_filename);
+     * boolean open_failed = false;
+     *
+     * try {
+     *     BufferedReader br = new BufferedReader(new FileReader(obb));
+     *     open_failed = false;
+     *     ReadObbFile(br);
+     * } catch (IOException e) {
+     *     open_failed = true;
+     * }
+     *
+     * if (open_failed) {
+     *     // request READ_EXTERNAL_STORAGE permission before reading OBB file
+     *     ReadObbFileWithPermission();
+     * }
+     * </pre>
+     *
      * On devices with multiple users (as described by {@link UserManager}),
      * multiple users may share the same OBB storage location. Applications
      * should ensure that multiple instances running under different users don't
