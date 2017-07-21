@@ -40,12 +40,15 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ద్వారా అందుబాటులో ఉంది"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"కనెక్ట్ చేయబడింది, ఇంటర్నెట్ లేదు"</string>
+    <!-- no translation found for wifi_ap_unable_to_handle_new_sta (5348824313514404541) -->
+    <skip />
     <string name="speed_label_very_slow" msgid="1867055264243608530">"చాలా నెమ్మది"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"నెమ్మది"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"సరే"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"మధ్యస్థం"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"వేగవంతం"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"చాలా వేగవంతం"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"డిస్‌కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"డిస్‌కనెక్ట్ చేస్తోంది..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"కనెక్ట్ చేస్తోంది..."</string>
@@ -101,6 +104,10 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi సిగ్నల్ రెండు బార్‌లు ఉంది."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi సిగ్నల్ మూడు బార్‌లు ఉంది."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wifi సిగ్నల్ పూర్తిగా ఉంది."</string>
+    <!-- no translation found for accessibility_wifi_security_type_none (1223747559986205423) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_security_type_secured (862921720418885331) -->
+    <skip />
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"తీసివేయబడిన అనువర్తనాలు"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"తీసివేయబడిన అనువర్తనాలు మరియు వినియోగదారులు"</string>
@@ -375,7 +382,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"అనుకూలం (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"సహాయం &amp; అభిప్రాయం"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"మెను"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"డెమో మోడ్‌లో ఫ్యాక్టరీ రీసెట్‌ను నిర్వహించడానికి పాస్‌వర్డ్‌ను నమోదు చేయండి"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"తదుపరి"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"పాస్‌వర్డ్ అవసరం"</string>
