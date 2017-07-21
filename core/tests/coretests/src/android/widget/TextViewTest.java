@@ -220,4 +220,33 @@ public class TextViewTest {
         assertTrue("Hyphenation must happen on TextView narrower than the word width",
                 hyphenationHappend);
     }
+
+    @Test
+    @UiThreadTest
+    public void testCopyShouldNotThrowException() throws Throwable {
+        mTextView = new TextView(mActivity);
+        mTextView.setTextIsSelectable(true);
+        mTextView.setText(createLongText());
+        mTextView.onTextContextMenuItem(TextView.ID_SELECT_ALL);
+        mTextView.onTextContextMenuItem(TextView.ID_COPY);
+    }
+
+    @Test
+    @UiThreadTest
+    public void testCutShouldNotThrowException() throws Throwable {
+        mTextView = new TextView(mActivity);
+        mTextView.setTextIsSelectable(true);
+        mTextView.setText(createLongText());
+        mTextView.onTextContextMenuItem(TextView.ID_SELECT_ALL);
+        mTextView.onTextContextMenuItem(TextView.ID_CUT);
+    }
+
+    private String createLongText() {
+        int size = 600 * 1000;
+        final StringBuilder builder = new StringBuilder(size);
+        for (int i = 0; i < size; i++) {
+            builder.append('a');
+        }
+        return builder.toString();
+    }
 }

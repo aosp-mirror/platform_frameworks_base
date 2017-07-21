@@ -22,6 +22,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_C
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
 
 import android.R;
+import android.annotation.CheckResult;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.FloatRange;
@@ -10329,10 +10330,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return isTextEditable() ? AUTOFILL_TYPE_TEXT : AUTOFILL_TYPE_NONE;
     }
 
+    /**
+     * Gets the {@link TextView}'s current text for AutoFill. The value is trimmed to 100K
+     * {@code char}s if longer.
+     *
+     * @return current text, {@code null} if the text is not editable
+     *
+     * @see View#getAutofillValue()
+     */
     @Override
     @Nullable
     public AutofillValue getAutofillValue() {
-        return isTextEditable() ? AutofillValue.forText(getText()) : null;
+        if (isTextEditable()) {
+            final CharSequence text = TextUtils.trimToParcelableSize(getText());
+            return AutofillValue.forText(text);
+        }
+        return null;
     }
 
     /** @hide */
@@ -10746,7 +10759,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Otherwise, return whatever text is being displayed.
-        return mTransformed;
+        return TextUtils.trimToParcelableSize(mTransformed);
     }
 
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
@@ -10831,13 +10844,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case ID_CUT:
-                setPrimaryClip(ClipData.newPlainText(null, getTransformedText(min, max)));
-                deleteText_internal(min, max);
+                final ClipData cutData = ClipData.newPlainText(null, getTransformedText(min, max));
+                if (setPrimaryClip(cutData)) {
+                    deleteText_internal(min, max);
+                } else {
+                    Toast.makeText(getContext(),
+                            com.android.internal.R.string.failed_to_copy_to_clipboard,
+                            Toast.LENGTH_SHORT).show();
+                }
                 return true;
 
             case ID_COPY:
-                setPrimaryClip(ClipData.newPlainText(null, getTransformedText(min, max)));
-                stopTextActionMode();
+                final ClipData copyData = ClipData.newPlainText(null, getTransformedText(min, max));
+                if (setPrimaryClip(copyData)) {
+                    stopTextActionMode();
+                } else {
+                    Toast.makeText(getContext(),
+                            com.android.internal.R.string.failed_to_copy_to_clipboard,
+                            Toast.LENGTH_SHORT).show();
+                }
                 return true;
 
             case ID_REPLACE:
@@ -11193,17 +11218,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
             sharingIntent.removeExtra(android.content.Intent.EXTRA_TEXT);
+            selectedText = TextUtils.trimToParcelableSize(selectedText);
             sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, selectedText);
             getContext().startActivity(Intent.createChooser(sharingIntent, null));
             Selection.setSelection((Spannable) mText, getSelectionEnd());
         }
     }
 
-    private void setPrimaryClip(ClipData clip) {
+    @CheckResult
+    private boolean setPrimaryClip(ClipData clip) {
         ClipboardManager clipboard =
                 (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-        clipboard.setPrimaryClip(clip);
+        try {
+            clipboard.setPrimaryClip(clip);
+        } catch (Throwable t) {
+            return false;
+        }
         sLastCutCopyOrTextChangedTime = SystemClock.uptimeMillis();
+        return true;
     }
 
     /**

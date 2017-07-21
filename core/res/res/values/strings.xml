@@ -2626,6 +2626,9 @@
     <!-- Item on EditText context menu. This action is used to cut selected the text into the clipboard. -->
     <string name="copy">Copy</string>
 
+    <!-- Error shown by TextView/EditText when cut/copy operation fails because text is too long to copy into the clipboard. -->
+    <string name="failed_to_copy_to_clipboard">Failed to copy to clipboard</string>
+
     <!-- Item on EditText context menu. This action is used to paste from the clipboard into the eidt field -->
     <string name="paste">Paste</string>
 

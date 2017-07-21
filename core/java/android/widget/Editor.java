@@ -6449,7 +6449,9 @@ public class Editor {
 
         private boolean fireIntent(Intent intent) {
             if (intent != null && Intent.ACTION_PROCESS_TEXT.equals(intent.getAction())) {
-                intent.putExtra(Intent.EXTRA_PROCESS_TEXT, mTextView.getSelectedText());
+                String selectedText = mTextView.getSelectedText();
+                selectedText = TextUtils.trimToParcelableSize(selectedText);
+                intent.putExtra(Intent.EXTRA_PROCESS_TEXT, selectedText);
                 mEditor.mPreserveSelection = true;
                 mTextView.startActivityForResult(intent, TextView.PROCESS_TEXT_REQUEST_CODE);
                 return true;
