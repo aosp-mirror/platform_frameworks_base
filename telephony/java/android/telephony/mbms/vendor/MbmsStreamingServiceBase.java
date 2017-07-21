@@ -33,17 +33,21 @@ public class MbmsStreamingServiceBase extends IMbmsStreamingService.Stub {
     /**
      * Initialize streaming service for this app and subId, registering the listener.
      *
-     * Exceptions should not be thrown through this method -- this method is called from within a
-     * {@link android.content.ServiceConnection} defined by the framework, so apps have no way of
-     * catching them. Call {@link IMbmsStreamingManagerCallback#error(int, String)} instead.
+     * May throw an {@link IllegalArgumentException} or an {@link IllegalStateException}, which
+     * will be intercepted and passed to the app as
+     * {@link android.telephony.mbms.MbmsException.InitializationErrors#ERROR_UNABLE_TO_INITIALIZE}
+     *
+     * May return any value from {@link android.telephony.mbms.MbmsException.InitializationErrors}
+     * or {@link MbmsException#SUCCESS}. Non-successful error codes will be passed to the app via
+     * {@link IMbmsStreamingManagerCallback#error(int, String)}.
      *
      * @param listener The callback to use to communicate with the app.
      * @param subscriptionId The subscription ID to use.
      */
     @Override
-    public void initialize(IMbmsStreamingManagerCallback listener, int subscriptionId)
+    public int initialize(IMbmsStreamingManagerCallback listener, int subscriptionId)
             throws RemoteException {
-        return;
+        return 0;
     }
 
     /**
