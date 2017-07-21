@@ -273,6 +273,9 @@
     <!-- Doze: the brightness value to use for the higher brightness AOD mode -->
     <integer name="config_doze_aod_brightness_high">27</integer>
 
+    <!-- Doze: the brightness value to use for the sunlight AOD mode -->
+    <integer name="config_doze_aod_brightness_sunlight">28</integer>
+
     <!-- Doze: whether the double tap sensor reports 2D touch coordinates -->
     <bool name="doze_double_tap_reports_touch_coordinates">false</bool>
 
