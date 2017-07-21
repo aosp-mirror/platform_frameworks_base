@@ -98,7 +98,7 @@ public class SysuiColorExtractor extends ColorExtractor {
      */
     @Override
     public GradientColors getColors(int which) {
-        return getColors(which, TYPE_NORMAL);
+        return getColors(which, TYPE_DARK);
     }
 
     /**
