@@ -427,8 +427,7 @@ public class RankingHelper implements RankingConfig {
                 record.setAuthoritativeRank(i);
                 final String groupKey = record.getGroupKey();
                 NotificationRecord existingProxy = mProxyByGroupTmp.get(groupKey);
-                if (existingProxy == null
-                        || record.getImportance() > existingProxy.getImportance()) {
+                if (existingProxy == null) {
                     mProxyByGroupTmp.put(groupKey, record);
                 }
             }
