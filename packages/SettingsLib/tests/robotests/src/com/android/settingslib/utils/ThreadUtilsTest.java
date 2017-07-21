@@ -16,14 +16,16 @@
 package com.android.settingslib.utils;
 
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
+
 import com.android.settingslib.TestConfig;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
@@ -56,4 +58,27 @@ public class ThreadUtilsTest {
         background.start();
         background.join();
     }
+
+    @Test
+    public void testPostOnMainThread_shouldRunOnMainTread() throws Exception {
+        TestRunnable cr = new TestRunnable();
+        ShadowLooper.pauseMainLooper();
+        ThreadUtils.postOnMainThread(cr);
+        assertThat(cr.called).isFalse();
+
+        ShadowLooper.runUiThreadTasks();
+        assertThat(cr.called).isTrue();
+        assertThat(cr.onUiThread).isTrue();
+    }
+
+    private static class TestRunnable implements Runnable {
+        volatile boolean called;
+        volatile boolean onUiThread;
+
+        public void run() {
+            this.called = true;
+            this.onUiThread = ThreadUtils.isMainThread();
+        }
+    }
+
 }
