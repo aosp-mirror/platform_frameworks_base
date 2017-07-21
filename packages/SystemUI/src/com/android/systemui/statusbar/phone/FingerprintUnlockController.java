@@ -285,7 +285,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
                 return MODE_ONLY_WAKE;
-            } else if (pulsingOrAod() && unlockingAllowed) {
+            } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
                 return MODE_WAKE_AND_UNLOCK_PULSING;
             } else if (unlockingAllowed || !mUnlockMethodCache.isMethodSecure()) {
                 return MODE_WAKE_AND_UNLOCK;

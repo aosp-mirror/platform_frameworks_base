@@ -25,7 +25,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,6 +119,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mKeyguardFadingOutInProgress;
     private boolean mAnimatingDozeUnlock;
     private ValueAnimator mKeyguardFadeoutAnimation;
+    /** Wake up from AOD transition is starting; need fully opaque front scrim */
+    private boolean mWakingUpFromAodStarting;
+    /** Wake up from AOD transition is in progress; need black tint */
+    private boolean mWakingUpFromAodInProgress;
+    /** Wake up from AOD transition is animating; need to reset when animation finishes */
+    private boolean mWakingUpFromAodAnimationRunning;
 
     public ScrimController(LightBarController lightBarController, ScrimView scrimBehind,
             ScrimView scrimInFront, View headsUpScrim) {
@@ -187,9 +192,32 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         scheduleUpdate();
     }
 
+    public void prepareWakeUpFromAod() {
+        mWakingUpFromAodInProgress = true;
+        mWakingUpFromAodStarting = true;
+        mAnimateChange = false;
+        scheduleUpdate();
+        onPreDraw();
+    }
+
+    public void wakeUpFromAod() {
+        if (mWakeAndUnlocking || mAnimateKeyguardFadingOut) {
+            // Wake and unlocking has a separate transition that must not be interfered with.
+            mWakingUpFromAodStarting = false;
+            return;
+        }
+        if (mWakingUpFromAodStarting) {
+            mWakingUpFromAodInProgress = true;
+            mWakingUpFromAodStarting = false;
+            mAnimateChange = true;
+            scheduleUpdate();
+        }
+    }
+
     public void setWakeAndUnlocking() {
         mWakeAndUnlocking = true;
         mAnimatingDozeUnlock = true;
+        mWakingUpFromAodStarting = false;
         scheduleUpdate();
     }
 
@@ -356,7 +384,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             setScrimBehindAlpha(mScrimBehindAlpha);
         } else {
             float fraction = Math.max(0, Math.min(mFraction, 1));
-            setScrimInFrontAlpha(0f);
+            if (mWakingUpFromAodStarting) {
+                setScrimInFrontAlpha(1f);
+            } else {
+                setScrimInFrontAlpha(0f);
+            }
             setScrimBehindAlpha(fraction
                     * (mScrimBehindAlphaKeyguard - mScrimBehindAlphaUnlocking)
                     + mScrimBehindAlphaUnlocking);
@@ -426,7 +458,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             scrimView.setViewAlpha(alpha);
 
             int dozeTint = Color.TRANSPARENT;
-            if (mAnimatingDozeUnlock || mDozing) {
+
+            boolean dozing = mAnimatingDozeUnlock || mDozing;
+            boolean frontScrimDozing = mWakingUpFromAodInProgress;
+            if (dozing || frontScrimDozing && scrim == mScrimInFront) {
                 dozeTint = Color.BLACK;
             }
             scrimView.setTint(dozeTint);
@@ -458,6 +493,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                     mKeyguardFadingOutInProgress = false;
                     mAnimatingDozeUnlock = false;
                 }
+                if (mWakingUpFromAodAnimationRunning) {
+                    mWakingUpFromAodAnimationRunning = false;
+                    mWakingUpFromAodInProgress = false;
+                }
                 scrim.setTag(TAG_KEY_ANIM, null);
                 scrim.setTag(TAG_KEY_ANIM_TARGET, null);
             }
@@ -466,6 +505,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         if (mAnimateKeyguardFadingOut) {
             mKeyguardFadingOutInProgress = true;
             mKeyguardFadeoutAnimation = anim;
+        }
+        if (mWakingUpFromAodInProgress) {
+            mWakingUpFromAodAnimationRunning = true;
         }
         if (mSkipFirstFrame) {
             anim.setCurrentPlayTime(16);
