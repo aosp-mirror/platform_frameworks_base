@@ -2992,14 +2992,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // Don't include wallpaper in bounds calculation
                 if (!w.mIsWallpaper && !mutableIncludeFullDisplay.value) {
                     if (includeDecor) {
-                        final TaskStack stack = w.getStack();
-                        if (stack != null) {
-                            stack.getBounds(frame);
-                        }
+                        final Task task = w.getTask();
+                        if (task != null) {
+                            task.getBounds(frame);
+                        } else {
 
-                        // We want to screenshot with the exact bounds of the surface of the app. Thus,
-                        // intersect it with the frame.
-                        frame.intersect(w.mFrame);
+                            // No task bounds? Too bad! Ain't no screenshot then.
+                            return true;
+                        }
                     } else {
                         final Rect wf = w.mFrame;
                         final Rect cr = w.mContentInsets;

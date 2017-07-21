@@ -2599,5 +2599,16 @@ public interface WindowManager extends ViewManager {
             encoder.addProperty("type", type);
             encoder.addProperty("flags", flags);
         }
+
+        /**
+         * @hide
+         * @return True if the layout parameters will cause the window to cover the full screen;
+         *         false otherwise.
+         */
+        public boolean isFullscreen() {
+            return x == 0 && y == 0
+                    && width == WindowManager.LayoutParams.MATCH_PARENT
+                    && height == WindowManager.LayoutParams.MATCH_PARENT;
+        }
     }
 }
