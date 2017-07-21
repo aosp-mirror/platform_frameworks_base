@@ -91,7 +91,8 @@ public class SuggestionParser {
 
     // Shared prefs keys for storing dismissed state.
     // Index into current dismissed state.
-    private static final String DISMISS_INDEX = "_dismiss_index";
+    @VisibleForTesting
+    static final String DISMISS_INDEX = "_dismiss_index";
     private static final String SETUP_TIME = "_setup_time";
     private static final String IS_DISMISSED = "_is_dismissed";
 
@@ -355,7 +356,8 @@ public class SuggestionParser {
         return elapsedTime > category.exclusiveExpireDaysInMillis;
     }
 
-    private boolean isDismissed(Tile suggestion, boolean isSmartSuggestionEnabled) {
+    @VisibleForTesting
+    boolean isDismissed(Tile suggestion, boolean isSmartSuggestionEnabled) {
         String dismissControl = getDismissControl(suggestion, isSmartSuggestionEnabled);
         if (dismissControl == null) {
             return false;
@@ -372,7 +374,11 @@ public class SuggestionParser {
             return false;
         }
         int index = mSharedPrefs.getInt(keyBase + DISMISS_INDEX, 0);
-        int currentDismiss = parseDismissString(dismissControl)[index];
+        int[] dismissRules = parseDismissString(dismissControl);
+        if (dismissRules.length <= index) {
+            return true;
+        }
+        int currentDismiss = dismissRules[index];
         long time = getEndTime(mSharedPrefs.getLong(keyBase + SETUP_TIME, 0), currentDismiss);
         if (System.currentTimeMillis() >= time) {
             // Dismiss timeout has passed, undismiss it.
