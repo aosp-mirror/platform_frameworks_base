@@ -39,10 +39,8 @@ minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* mini
             resolved.getItalic());
 
     /* Prepare minikin Paint */
-    // Note: it would be nice to handle fractional size values (it would improve smooth zoom
-    // behavior), but historically size has been treated as an int.
-    // TODO: explore whether to enable fractional sizes, possibly when linear text flag is set.
-    minikinPaint->size = (int)paint->getTextSize();
+    minikinPaint->size = paint->isLinearText() ?
+            paint->getTextSize() : static_cast<int>(paint->getTextSize());
     minikinPaint->scaleX = paint->getTextScaleX();
     minikinPaint->skewX = paint->getTextSkewX();
     minikinPaint->letterSpacing = paint->getLetterSpacing();
