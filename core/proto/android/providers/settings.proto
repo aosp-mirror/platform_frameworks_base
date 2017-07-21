@@ -315,7 +315,6 @@ message GlobalSettingsProto {
     SettingProto boot_count = 270;
     SettingProto safe_boot_disallowed = 271;
     SettingProto device_demo_mode = 272;
-    SettingProto retail_demo_mode_constants = 273;
     SettingProto database_downgrade_reason = 274;
     SettingProto contacts_database_wal_enabled = 275;
     SettingProto multi_sim_voice_call_subscription = 276;
