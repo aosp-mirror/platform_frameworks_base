@@ -202,6 +202,15 @@ public class AtomicFile {
     }
 
     /**
+     * @hide
+     * Checks if the original or backup file exists.
+     * @return whether the original or backup file exists.
+     */
+    public boolean exists() {
+        return mBaseName.exists() || mBackupName.exists();
+    }
+
+    /**
      * Gets the last modified time of the atomic file.
      * {@hide}
      *
