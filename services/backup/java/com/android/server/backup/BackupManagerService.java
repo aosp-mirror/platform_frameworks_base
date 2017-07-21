@@ -123,8 +123,8 @@ import com.android.server.EventLogTags;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
-
 import com.android.server.power.BatterySaverPolicy.ServiceType;
+
 import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -691,6 +691,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     final SparseArray<Operation> mCurrentOperations = new SparseArray<Operation>();
     final Object mCurrentOpLock = new Object();
     final Random mTokenGenerator = new Random();
+    final AtomicInteger mNextToken = new AtomicInteger();
 
     final SparseArray<AdbParams> mAdbBackupRestoreConfirmations = new SparseArray<AdbParams>();
 
@@ -763,15 +764,13 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     @GuardedBy("mQueueLock")
     ArrayList<FullBackupEntry> mFullBackupQueue;
 
-    // Utility: build a new random integer token
+    // Utility: build a new random integer token.  The low bits are the ordinal of the
+    // operation for near-time uniqueness, and the upper bits are random for app-
+    // side unpredictability.
     @Override
     public int generateRandomIntegerToken() {
-        int token;
-        do {
-            synchronized (mTokenGenerator) {
-                token = mTokenGenerator.nextInt();
-            }
-        } while (token < 0);
+        int token = mTokenGenerator.nextInt() & ~0xFF;
+        token |= (mNextToken.incrementAndGet() & 0xFF);
         return token;
     }
 
