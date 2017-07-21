@@ -27,6 +27,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -122,6 +123,7 @@ public class PipTouchHandler {
     private boolean mIsMinimized;
     private boolean mIsImeShowing;
     private int mImeHeight;
+    private int mImeOffset;
     private float mSavedSnapFraction = -1f;
     private boolean mSendingHoverAccessibilityEvents;
     private boolean mMovementWithinMinimize;
@@ -192,8 +194,11 @@ public class PipTouchHandler {
         };
         mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mMenuController,
                 mSnapAlgorithm, mFlingAnimationUtils);
-        mExpandedShortestEdgeSize = context.getResources().getDimensionPixelSize(
+
+        Resources res = context.getResources();
+        mExpandedShortestEdgeSize = res.getDimensionPixelSize(
                 R.dimen.pip_expanded_shortest_edge_size);
+        mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
 
         // Register the listener for input consumer touch events
         inputConsumerController.setTouchListener(this::handleTouchEvent);
@@ -265,7 +270,6 @@ public class PipTouchHandler {
         mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds, expandedMovementBounds,
                 mIsImeShowing ? mImeHeight : 0);
 
-
         // If this is from an IME adjustment, then we should move the PiP so that it is not occluded
         // by the IME
         if (fromImeAdjustement) {
@@ -278,18 +282,22 @@ public class PipTouchHandler {
                         ? expandedMovementBounds
                         : normalMovementBounds;
                 if (mIsImeShowing) {
-                    // IME visible
+                    // IME visible, apply the IME offset if the space allows for it
+                    final int imeOffset = toMovementBounds.bottom - Math.max(toMovementBounds.top,
+                            toMovementBounds.bottom - mImeOffset);
                     if (bounds.top == mMovementBounds.bottom) {
                         // If the PIP is currently resting on top of the IME, then adjust it with
-                        // the hiding IME
-                        bounds.offsetTo(bounds.left, toMovementBounds.bottom);
+                        // the showing IME
+                        bounds.offsetTo(bounds.left, toMovementBounds.bottom - imeOffset);
                     } else {
-                        bounds.offset(0, Math.min(0, toMovementBounds.bottom - bounds.top));
+                        bounds.offset(0, Math.min(0, toMovementBounds.bottom - imeOffset
+                                - bounds.top));
                     }
                 } else {
                     // IME hidden
-                    if (bounds.top == mMovementBounds.bottom) {
-                        // If the PIP is resting on top of the IME, then adjust it with the hiding IME
+                    if (bounds.top >= (mMovementBounds.bottom - mImeOffset)) {
+                        // If the PIP is resting on top of the IME, then adjust it with the hiding
+                        // IME
                         bounds.offsetTo(bounds.left, toMovementBounds.bottom);
                     }
                 }
