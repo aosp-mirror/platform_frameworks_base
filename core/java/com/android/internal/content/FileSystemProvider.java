@@ -39,7 +39,6 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
-import android.provider.MetadataReader;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -75,12 +74,9 @@ public abstract class FileSystemProvider extends DocumentsProvider {
     private Handler mHandler;
 
     private static final String MIMETYPE_PDF = "application/pdf";
-
     private static final String MIMETYPE_JPEG = "image/jpeg";
-
     private static final String MIMETYPE_JPG = "image/jpg";
-
-
+    private static final String MIMETYPE_OCTET_STREAM = "application/octet-stream";
 
     protected abstract File getFileForDocId(String docId, boolean visible)
             throws FileNotFoundException;
@@ -117,23 +113,32 @@ public abstract class FileSystemProvider extends DocumentsProvider {
     public @Nullable Bundle getDocumentMetadata(String documentId, @Nullable String[] tags)
             throws FileNotFoundException {
         File file = getFileForDocId(documentId);
-        if (!(file.exists() && file.isFile() && file.canRead())) {
+
+        if (!file.exists()) {
+            throw new FileNotFoundException("Can't find the file for documentId: " + documentId);
+        }
+
+        if (!file.isFile()) {
+            Log.w(TAG, "Can't stream non-regular file. Returning empty metadata.");
             return Bundle.EMPTY;
         }
-        String filePath = file.getAbsolutePath();
-        Bundle metadata = new Bundle();
-        if (getTypeForFile(file).equals(MIMETYPE_JPEG)
-                || getTypeForFile(file).equals(MIMETYPE_JPG)) {
-            FileInputStream stream = new FileInputStream(filePath);
-            try {
-                MetadataReader.getMetadata(metadata, stream, getTypeForFile(file), tags);
-                return metadata;
-            } catch (IOException e) {
-                Log.e(TAG, "An error occurred retrieving the metadata", e);
-            } finally {
-                IoUtils.closeQuietly(stream);
-            }
+
+        if (!file.canRead()) {
+            Log.w(TAG, "Can't stream non-readable file. Returning empty metadata.");
+            return Bundle.EMPTY;
         }
+
+        String filePath = file.getAbsolutePath();
+        FileInputStream stream = new FileInputStream(filePath);
+
+        try {
+            return getDocumentMetadataFromStream(stream, getTypeForFile(file), tags);
+        } catch (IOException e) {
+            Log.e(TAG, "An error occurred retrieving the metadata", e);
+        } finally {
+            IoUtils.closeQuietly(stream);
+        }
+
         return null;
     }
 
@@ -468,6 +473,10 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             flags |= Document.FLAG_SUPPORTS_THUMBNAIL;
         }
 
+        if (typeSupportsMetadata(mimeType)) {
+            flags |= Document.FLAG_SUPPORTS_METADATA;
+        }
+
         final RowBuilder row = result.newRow();
         row.add(Document.COLUMN_DOCUMENT_ID, docId);
         row.add(Document.COLUMN_DISPLAY_NAME, displayName);
@@ -493,6 +502,10 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         }
     }
 
+    protected boolean typeSupportsMetadata(String mimeType) {
+        return MIMETYPE_JPG.equals(mimeType) || MIMETYPE_JPEG.equals(mimeType);
+    }
+
     private static String getTypeForName(String name) {
         final int lastDot = name.lastIndexOf('.');
         if (lastDot >= 0) {
@@ -503,7 +516,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             }
         }
 
-        return "application/octet-stream";
+        return MIMETYPE_OCTET_STREAM;
     }
 
     protected final File getFileForDocId(String docId) throws FileNotFoundException {
