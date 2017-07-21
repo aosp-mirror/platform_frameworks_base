@@ -1578,10 +1578,18 @@
     <!-- ======================================= -->
     <eat-comment />
 
+    <!-- Network access -->
+    <permission-group android:name="android.permission-group.NETWORK"
+        android:icon="@drawable/perm_group_network"
+        android:label="@string/permgrouplab_network"
+        android:description="@string/permgroupdesc_network"
+        android:priority="900" />
+
     <!-- Allows applications to open network sockets.
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.INTERNET"
+        android:permissionGroup="android.permission-group.UNDEFINED"
         android:description="@string/permdesc_createNetworkSockets"
         android:label="@string/permlab_createNetworkSockets"
         android:protectionLevel="dangerous|instant" />
