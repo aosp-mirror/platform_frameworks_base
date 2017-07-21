@@ -686,7 +686,7 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getSystemCpuTimeUs(int which);
 
         /**
-         * Returns the approximate cpu time (in milliseconds) spent at a certain CPU speed for a
+         * Returns the approximate cpu time (in microseconds) spent at a certain CPU speed for a
          * given CPU cluster.
          * @param cluster the index of the CPU cluster.
          * @param step the index of the CPU speed. This is not the actual speed of the CPU.
