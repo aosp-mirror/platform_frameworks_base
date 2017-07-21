@@ -689,17 +689,11 @@ final class SettingsState {
 
     private void readStateSyncLocked() {
         FileInputStream in;
-        if (!mStatePersistFile.exists()) {
-            Slog.i(LOG_TAG, "No settings state " + mStatePersistFile);
-            addHistoricalOperationLocked(HISTORICAL_OPERATION_INITIALIZE, null);
-            return;
-        }
         try {
             in = new AtomicFile(mStatePersistFile).openRead();
         } catch (FileNotFoundException fnfe) {
-            String message = "No settings state " + mStatePersistFile;
-            Slog.wtf(LOG_TAG, message);
-            Slog.i(LOG_TAG, message);
+            Slog.i(LOG_TAG, "No settings state " + mStatePersistFile);
+            addHistoricalOperationLocked(HISTORICAL_OPERATION_INITIALIZE, null);
             return;
         }
         try {
@@ -713,6 +707,16 @@ final class SettingsState {
         } finally {
             IoUtils.closeQuietly(in);
         }
+    }
+
+    /**
+     * Uses AtomicFile to check if the file or its backup exists.
+     * @param file The file to check for existence
+     * @return whether the original or backup exist
+     */
+    public static boolean stateFileExists(File file) {
+        AtomicFile stateFile = new AtomicFile(file);
+        return stateFile.exists();
     }
 
     private void parseStateLocked(XmlPullParser parser)
