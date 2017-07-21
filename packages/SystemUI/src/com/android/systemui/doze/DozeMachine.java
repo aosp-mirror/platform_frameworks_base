@@ -91,6 +91,7 @@ public class DozeMachine {
                 case UNINITIALIZED:
                 case INITIALIZED:
                 case DOZE:
+                case DOZE_REQUEST_PULSE:
                 case DOZE_AOD_PAUSED:
                     return Display.STATE_OFF;
                 case DOZE_PULSING:
