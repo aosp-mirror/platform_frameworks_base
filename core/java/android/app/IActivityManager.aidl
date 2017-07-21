@@ -20,8 +20,6 @@ import android.app.ActivityManager;
 import android.app.ApplicationErrorReport;
 import android.app.ContentProviderHolder;
 import android.app.IApplicationThread;
-import android.app.IActivityContainer;
-import android.app.IActivityContainerCallback;
 import android.app.IActivityController;
 import android.app.IAppTask;
 import android.app.IInstrumentationWatcher;
@@ -355,8 +353,6 @@ interface IActivityManager {
     void killUid(int appId, int userId, in String reason);
     void setUserIsMonkey(boolean monkey);
     void hang(in IBinder who, boolean allowRestart);
-    IActivityContainer createVirtualActivityContainer(in IBinder parentActivityToken,
-            in IActivityContainerCallback callback);
     void moveTaskToStack(int taskId, int stackId, boolean toTop);
     /**
      * Resizes the input stack id to the given bounds.
@@ -436,7 +432,7 @@ interface IActivityManager {
 
     // Start of M transactions
     void notifyCleartextNetwork(int uid, in byte[] firstPacket);
-    IActivityContainer createStackOnDisplay(int displayId);
+    int createStackOnDisplay(int displayId);
     int getFocusedStackId();
     void setTaskResizeable(int taskId, int resizeableMode);
     boolean requestAssistContextExtras(int requestType, in IResultReceiver receiver,
