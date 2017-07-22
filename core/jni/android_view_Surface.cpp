@@ -537,6 +537,20 @@ static jint nativeAttachAndQueueBuffer(JNIEnv *env, jclass clazz, jlong nativeOb
     return err;
 }
 
+static jint nativeSetSharedBufferModeEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jboolean enabled) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    return ((ANativeWindow*) nativeObject)->perform(surface,
+            NATIVE_WINDOW_SET_SHARED_BUFFER_MODE, enabled);
+}
+
+static jint nativeSetAutoRefreshEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jboolean enabled) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    return ((ANativeWindow*) nativeObject)->perform(surface,
+            NATIVE_WINDOW_SET_AUTO_REFRESH, enabled);
+}
+
 namespace uirenderer {
 
 using namespace android::uirenderer::renderthread;
@@ -618,6 +632,8 @@ static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode },
     {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
     {"nativeAttachAndQueueBuffer", "(JLandroid/graphics/GraphicBuffer;)I", (void*)nativeAttachAndQueueBuffer},
+    {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
+    {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
 
     // HWUI context
     {"nHwuiCreate", "(JJ)J", (void*) hwui::create },
