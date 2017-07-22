@@ -1754,20 +1754,32 @@ public class GnssLocationProvider implements LocationProviderInterface {
     }
 
     /**
-     * called from native code - Gps measurements callback
+     * called from native code - GNSS measurements callback
      */
     private void reportMeasurementData(GnssMeasurementsEvent event) {
         if (!mItarSpeedLimitExceeded) {
-            mGnssMeasurementsProvider.onMeasurementsAvailable(event);
+            // send to handler to allow native to return quickly
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mGnssMeasurementsProvider.onMeasurementsAvailable(event);
+                }
+            });
         }
     }
 
     /**
-     * called from native code - GPS navigation message callback
+     * called from native code - GNSS navigation message callback
      */
     private void reportNavigationMessage(GnssNavigationMessage event) {
         if (!mItarSpeedLimitExceeded) {
-            mGnssNavigationMessageProvider.onNavigationMessageAvailable(event);
+            // send to handler to allow native to return quickly
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mGnssNavigationMessageProvider.onNavigationMessageAvailable(event);
+                }
+            });
         }
     }
 
