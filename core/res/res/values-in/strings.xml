@@ -258,22 +258,40 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Beralih ke Kantor"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontak"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"mengakses kontak"</string>
+    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
+    <skip />
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"mengakses lokasi perangkat ini"</string>
+    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"mengakses kalender"</string>
+    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
+    <skip />
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"mengirim dan melihat pesan SMS"</string>
+    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Penyimpanan"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"mengakses foto, media, dan file di perangkat"</string>
+    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"merekam audio"</string>
+    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"mengambil gambar dan merekam video"</string>
+    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telepon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"melakukan dan mengelola panggilan telepon"</string>
+    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
+    <skip />
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensor Tubuh"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"mengakses data sensor tentang tanda-tanda vital"</string>
+    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Mengambil konten jendela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Memeriksa konten jendela tempat Anda berinteraksi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Mengaktifkan Jelajahi dengan Sentuhan"</string>
