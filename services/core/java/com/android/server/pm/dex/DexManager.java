@@ -97,29 +97,55 @@ public class DexManager {
      * return as fast as possible.
      *
      * @param loadingAppInfo the package performing the load
-     * @param dexPaths the list of dex files being loaded
+     * @param classLoadersNames the names of the class loaders present in the loading chain. The
+     *    list encodes the class loader chain in the natural order. The first class loader has
+     *    the second one as its parent and so on. The dex files present in the class path of the
+     *    first class loader will be recorded in the usage file.
+     * @param classPaths the class paths corresponding to the class loaders names from
+     *     {@param classLoadersNames}. The the first element corresponds to the first class loader
+     *     and so on. A classpath is represented as a list of dex files separated by
+     *     {@code File.pathSeparator}.
+     *     The dex files found in the first class path will be recorded in the usage file.
      * @param loaderIsa the ISA of the app loading the dex files
      * @param loaderUserId the user id which runs the code loading the dex files
      */
-    public void notifyDexLoad(ApplicationInfo loadingAppInfo, List<String> dexPaths,
-            String loaderIsa, int loaderUserId) {
+    public void notifyDexLoad(ApplicationInfo loadingAppInfo, List<String> classLoadersNames,
+            List<String> classPaths, String loaderIsa, int loaderUserId) {
         try {
-            notifyDexLoadInternal(loadingAppInfo, dexPaths, loaderIsa, loaderUserId);
+            notifyDexLoadInternal(loadingAppInfo, classLoadersNames, classPaths, loaderIsa,
+                    loaderUserId);
         } catch (Exception e) {
             Slog.w(TAG, "Exception while notifying dex load for package " +
                     loadingAppInfo.packageName, e);
         }
     }
 
-    private void notifyDexLoadInternal(ApplicationInfo loadingAppInfo, List<String> dexPaths,
-            String loaderIsa, int loaderUserId) {
+    private void notifyDexLoadInternal(ApplicationInfo loadingAppInfo,
+            List<String> classLoaderNames, List<String> classPaths, String loaderIsa,
+            int loaderUserId) {
+        if (classLoaderNames.size() != classPaths.size()) {
+            Slog.wtf(TAG, "Bad call to noitfyDexLoad: args have different size");
+            return;
+        }
+        if (classLoaderNames.isEmpty()) {
+            Slog.wtf(TAG, "Bad call to notifyDexLoad: class loaders list is empty");
+            return;
+        }
         if (!PackageManagerServiceUtils.checkISA(loaderIsa)) {
-            Slog.w(TAG, "Loading dex files " + dexPaths + " in unsupported ISA: " +
+            Slog.w(TAG, "Loading dex files " + classPaths + " in unsupported ISA: " +
                     loaderIsa + "?");
             return;
         }
 
-        for (String dexPath : dexPaths) {
+        // The classpath is represented as a list of dex files separated by File.pathSeparator.
+        String[] dexPathsToRegister = classPaths.get(0).split(File.pathSeparator);
+
+        // Encode the class loader contexts for the dexPathsToRegister.
+        String[] classLoaderContexts = DexoptUtils.processContextForDexLoad(
+                classLoaderNames, classPaths);
+
+        int dexPathIndex = 0;
+        for (String dexPath : dexPathsToRegister) {
             // Find the owning package name.
             DexSearchResult searchResult = getDexPackage(loadingAppInfo, dexPath, loaderUserId);
 
@@ -147,24 +173,25 @@ public class DexManager {
                 // Record dex file usage. If the current usage is a new pattern (e.g. new secondary,
                 // or UsedBytOtherApps), record will return true and we trigger an async write
                 // to disk to make sure we don't loose the data in case of a reboot.
+
+                // A null classLoaderContexts means that there are unsupported class loaders in the
+                // chain.
+                String classLoaderContext = classLoaderContexts == null
+                        ? PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT
+                        : classLoaderContexts[dexPathIndex];
                 if (mPackageDexUsage.record(searchResult.mOwningPackageName,
                         dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
-                        loadingAppInfo.packageName)) {
+                        loadingAppInfo.packageName, classLoaderContext)) {
                     mPackageDexUsage.maybeWriteAsync();
                 }
             } else {
-                // This can happen in a few situations:
-                // - bogus dex loads
-                // - recent installs/uninstalls that we didn't detect.
-                // - new installed splits
                 // If we can't find the owner of the dex we simply do not track it. The impact is
                 // that the dex file will not be considered for offline optimizations.
-                // TODO(calin): add hooks for move/uninstall notifications to
-                // capture package moves or obsolete packages.
                 if (DEBUG) {
                     Slog.i(TAG, "Could not find owning package for dex file: " + dexPath);
                 }
             }
+            dexPathIndex++;
         }
     }
 
@@ -328,10 +355,8 @@ public class DexManager {
         for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
             String dexPath = entry.getKey();
             DexUseInfo dexUseInfo = entry.getValue();
-            if (options.isDexoptOnlySharedDex() && !dexUseInfo.isUsedByOtherApps()) {
-                continue;
-            }
-            PackageInfo pkg = null;
+
+            PackageInfo pkg;
             try {
                 pkg = mPackageManager.getPackageInfo(packageName, /*flags*/0,
                     dexUseInfo.getOwnerUserId());
@@ -350,8 +375,7 @@ public class DexManager {
             }
 
             int result = pdo.dexOptSecondaryDexPath(pkg.applicationInfo, dexPath,
-                    dexUseInfo.getLoaderIsas(), options.getCompilerFilter(),
-                    dexUseInfo.isUsedByOtherApps(), options.isDowngrade());
+                    dexUseInfo, options);
             success = success && (result != PackageDexOptimizer.DEX_OPT_FAILED);
         }
         return success;
@@ -434,6 +458,8 @@ public class DexManager {
         }
     }
 
+    // TODO(calin): questionable API in the presence of class loaders context. Needs amends as the
+    // compilation happening here will use a pessimistic context.
     public RegisterDexModuleResult registerDexModule(ApplicationInfo info, String dexPath,
             boolean isUsedByOtherApps, int userId) {
         // Find the owning package record.
@@ -452,12 +478,11 @@ public class DexManager {
 
         // We found the package. Now record the usage for all declared ISAs.
         boolean update = false;
-        Set<String> isas = new HashSet<>();
         for (String isa : getAppDexInstructionSets(info)) {
-            isas.add(isa);
             boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
                     dexPath, userId, isa, isUsedByOtherApps, /*primaryOrSplit*/ false,
-                    searchResult.mOwningPackageName);
+                    searchResult.mOwningPackageName,
+                    PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT);
             update |= newUpdate;
         }
         if (update) {
@@ -467,8 +492,13 @@ public class DexManager {
         // Try to optimize the package according to the install reason.
         String compilerFilter = PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
                 PackageManagerService.REASON_INSTALL);
-        int result = mPackageDexOptimizer.dexOptSecondaryDexPath(info, dexPath, isas,
-                compilerFilter, isUsedByOtherApps, /* downgrade */ false);
+        DexUseInfo dexUseInfo = mPackageDexUsage.getPackageUseInfo(searchResult.mOwningPackageName)
+                .getDexUseInfoMap().get(dexPath);
+
+        DexoptOptions options = new DexoptOptions(info.packageName, compilerFilter, /*flags*/0);
+
+        int result = mPackageDexOptimizer.dexOptSecondaryDexPath(info, dexPath, dexUseInfo,
+                options);
 
         // If we fail to optimize the package log an error but don't propagate the error
         // back to the app. The app cannot do much about it and the background job
