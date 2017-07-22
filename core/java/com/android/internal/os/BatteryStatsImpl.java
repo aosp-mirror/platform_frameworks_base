@@ -6616,8 +6616,11 @@ public class BatteryStatsImpl extends BatteryStats {
          * inactive so can be dropped.
          */
         @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public boolean reset() {
+        public boolean reset(long uptime, long realtime) {
             boolean active = false;
+
+            mOnBatteryBackgroundTimeBase.init(uptime, realtime);
+            mOnBatteryScreenOffBackgroundTimeBase.init(uptime, realtime);
 
             if (mWifiRunningTimer != null) {
                 active |= !mWifiRunningTimer.reset(false);
@@ -6805,11 +6808,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
             mLastStepUserTime = mLastStepSystemTime = 0;
             mCurStepUserTime = mCurStepSystemTime = 0;
-
-            mOnBatteryBackgroundTimeBase.reset(mBsi.mClocks.elapsedRealtime() * 1000,
-                    mBsi.mClocks.uptimeMillis() * 1000);
-            mOnBatteryScreenOffBackgroundTimeBase.reset(mBsi.mClocks.elapsedRealtime() * 1000,
-                    mBsi.mClocks.uptimeMillis() * 1000);
 
             if (!active) {
                 if (mWifiRunningTimer != null) {
@@ -9463,7 +9461,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mNumConnectivityChange = mLoadedNumConnectivityChange = mUnpluggedNumConnectivityChange = 0;
 
         for (int i=0; i<mUidStats.size(); i++) {
-            if (mUidStats.valueAt(i).reset()) {
+            if (mUidStats.valueAt(i).reset(uptimeMillis * 1000, elapsedRealtimeMillis * 1000)) {
                 mUidStats.remove(mUidStats.keyAt(i));
                 i--;
             }
