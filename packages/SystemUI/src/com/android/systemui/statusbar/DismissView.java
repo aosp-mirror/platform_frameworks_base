@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
@@ -44,6 +45,10 @@ public class DismissView extends StackScrollerDecorView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mDismissButton = (DismissViewButton) findContentView();
+    }
+
+    public void setTextColor(@ColorInt int color) {
+        mDismissButton.setTextColor(color);
     }
 
     public void setOnButtonClickListener(OnClickListener listener) {
