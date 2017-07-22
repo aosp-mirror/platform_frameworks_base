@@ -258,22 +258,40 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"ប្តូរទៅការងារ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ទំនាក់ទំនង"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ចូលប្រើទំនាក់ទំនងរបស់អ្នក"</string>
+    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
+    <skip />
     <string name="permgrouplab_location" msgid="7275582855722310164">"ទីតាំង"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ចូលដំណើរការទីតាំងរបស់ឧបករណ៍នេះ"</string>
+    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ប្រតិទិន"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
+    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
+    <skip />
     <string name="permgrouplab_sms" msgid="228308803364967808">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ផ្ញើ និងមើលសារ SMS"</string>
+    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ការ​ផ្ទុក"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ចូលដំណើការរូបភាព មេឌៀ និងឯកសារនៅលើឧបករណ៍របស់អ្នក"</string>
+    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="171539900250043464">"មីក្រូ​ហ្វូន"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ថតសំឡេង"</string>
+    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"កាមេរ៉ា"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ថតរូប និងថតវីដេអូ"</string>
+    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ទូរសព្ទ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
+    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
+    <skip />
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ឧបករណ៍ចាប់សញ្ញារាងកាយ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
+    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ទាញយក​មាតិកា​វិនដូ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ពិនិត្យ​មាតិកាវិនដូ​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>

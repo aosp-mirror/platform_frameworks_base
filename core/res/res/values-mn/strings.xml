@@ -258,22 +258,40 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"\"Ажлын\" руу шилжих"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Харилцагчдын хаяг"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"харилцагч руугаа хандах"</string>
+    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
+    <skip />
     <string name="permgrouplab_location" msgid="7275582855722310164">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
+    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Хуанли"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"Хуанли руу хандах"</string>
+    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
+    <skip />
     <string name="permgrouplab_sms" msgid="228308803364967808">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS мессежийг илгээх, харах"</string>
+    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Сан"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"Tөхөөрөмж дээрх зураг, медиа болон файлд хандалт хийх"</string>
+    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"дуу хураах"</string>
+    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камер"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"зураг авах, бичлэг хийх"</string>
+    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Утас"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"утасны дуудлага хийх, дуудлага удирдах"</string>
+    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
+    <skip />
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Биеийн мэдрэгч"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"таны биеийн байдлын талаарх мэдрэгч бүхий өгөгдөлд нэвтрэх"</string>
+    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Цонхны агуулгыг авах"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Таны харилцан үйлчлэх цонхны контентоос шалгах."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Хүрч танихыг асаах"</string>

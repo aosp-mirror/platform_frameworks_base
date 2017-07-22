@@ -258,22 +258,40 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"කාර්යාලය වෙත මාරු වන්න"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"සම්බන්ධතා"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ඔබේ සම්බන්ධතාවලට පිවිසෙන්න"</string>
+    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
+    <skip />
     <string name="permgrouplab_location" msgid="7275582855722310164">"ස්ථානය"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"මෙම උපාංගයේ ස්ථානයට ප්‍රවේශ කරන්න"</string>
+    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"දින දර්ශනය"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ඔබේ දින දර්ශනයට පිවිසෙන්න"</string>
+    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
+    <skip />
     <string name="permgrouplab_sms" msgid="228308803364967808">"කෙටි පණිවිඩ"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
+    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ආචයනය"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ඔබේ උපාංගයේ ඇති ඡායාරූප, මාධ්‍ය සහ ගොනුවලට පිවිසීම"</string>
+    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="171539900250043464">"මයික්‍රොෆෝනය"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ශ්‍රව්‍ය පටිගත කරන්න"</string>
+    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"කැමරාව"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"පින්තූර ගැනීම සහ වීඩියෝ පටිගත කිරීම"</string>
+    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"දුරකථනය"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"දුරකථන ඇමතුම් සිදු කිරීම සහ කළමනාකරණය කිරීම"</string>
+    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
+    <skip />
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ශරීර සංවේදක"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ඔබේ ජෛව ලක්ෂණ පිළිබඳ සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
+    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"කවුළු අන්න්තර්ගතය ලබාගන්න"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ඔබ අන්තර්ක්‍රියාකාරී වන කවුළුවේ අන්තර්ගතය පරීක්ෂා කරන්න."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ස්පර්ශයෙන් ගවේෂණය සක්‍රිය කරන්න"</string>

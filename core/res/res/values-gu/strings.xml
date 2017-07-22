@@ -258,22 +258,40 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"કાર્ય પર સ્વિચ કરો"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"સંપર્કો"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"તમારા સંપર્કોને ઍક્સેસ કરવાની"</string>
+    <!-- no translation found for permgrouprequest_contacts (1601591667800538208) -->
+    <skip />
     <string name="permgrouplab_location" msgid="7275582855722310164">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની"</string>
+    <!-- no translation found for permgrouprequest_location (8903573681261610809) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"કૅલેન્ડર"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
+    <!-- no translation found for permgrouprequest_calendar (6704529828699071445) -->
+    <skip />
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS સંદેશા મોકલવાની અને જોવાની"</string>
+    <!-- no translation found for permgrouprequest_sms (605618939583628306) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"સ્ટોરેજ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"તમારા ઉપકરણ પર ફોટા, મીડિયા અને ફાઇલો ઍક્સેસ કરવાની"</string>
+    <!-- no translation found for permgrouprequest_storage (7429669910547860218) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="171539900250043464">"માઇક્રોફોન"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ઑડિઓ રેકોર્ડ કરવાની"</string>
+    <!-- no translation found for permgrouprequest_microphone (8065941268709600606) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"કૅમેરો"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ચિત્રો લેવાની અને વિડિઓ રેકોર્ડ કરવાની"</string>
+    <!-- no translation found for permgrouprequest_camera (810824326507258410) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ફોન"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ફોન કૉલ કરો અને સંચાલિત કરો"</string>
+    <!-- no translation found for permgrouprequest_phone (7084161459732093690) -->
+    <skip />
     <string name="permgrouplab_sensors" msgid="416037179223226722">"બોડી સેન્સર્સ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"તમારા મહત્વપૂર્ણ ચિહ્નો વિશે સેન્સર ડેટા ઍક્સેસ કરો"</string>
+    <!-- no translation found for permgrouprequest_sensors (8631146669524259656) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"વિંડો સામગ્રી પુનર્પ્રાપ્ત કરો"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"તમે જેની સાથે ક્રિયાપ્રતિક્રિયા કરી રહ્યાં છો તે વિંડોની સામગ્રીની તપાસ કરો."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ટચ કરીને અન્વેષણ કરો સક્ષમ કરો"</string>
