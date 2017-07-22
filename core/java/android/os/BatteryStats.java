@@ -207,7 +207,7 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 22:
      *   - BLE scan result background count, BLE unoptimized scan time
      */
-    static final String CHECKIN_VERSION = "23";
+    static final String CHECKIN_VERSION = "24";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
