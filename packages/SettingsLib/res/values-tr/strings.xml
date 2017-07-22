@@ -40,12 +40,15 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s üzerinden bağlı"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s üzerinden kullanılabilir"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Bağlı, İnternet yok"</string>
+    <!-- no translation found for wifi_ap_unable_to_handle_new_sta (5348824313514404541) -->
+    <skip />
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Çok Yavaş"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Yavaş"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Tamam"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Orta"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Hızlı"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Çok Hızlı"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Bağlantı kesildi"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Bağlantı kesiliyor…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Bağlanıyor…"</string>
@@ -101,6 +104,10 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Kablosuz sinyal gücü iki çubuk."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Kablosuz sinyal gücü üç çubuk."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Kablosuz sinyal gücü tam."</string>
+    <!-- no translation found for accessibility_wifi_security_type_none (1223747559986205423) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_security_type_secured (862921720418885331) -->
+    <skip />
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Kaldırılan uygulamalar"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Kaldırılmış kullanıcılar ve uygulamalar"</string>

@@ -40,12 +40,15 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ಮೂಲಕ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ಮೂಲಕ ಲಭ್ಯವಿದೆ"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ, ಇಂಟರ್ನೆಟ್ ಇಲ್ಲ"</string>
+    <!-- no translation found for wifi_ap_unable_to_handle_new_sta (5348824313514404541) -->
+    <skip />
     <string name="speed_label_very_slow" msgid="1867055264243608530">"ತುಂಬಾ ನಿಧಾನವಾಗಿದೆ"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"ನಿಧಾನ"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ಸರಿ"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"ಮಧ್ಯಮ"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"ವೇಗ"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"ತುಂಬಾ ವೇಗವಾಗಿದೆ"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗುತ್ತಿದೆ..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"ಸಂಪರ್ಕಗೊಳಿಸಲಾಗುತ್ತಿದೆ..."</string>
@@ -101,6 +104,10 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"ವೈಫೈ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"ವೈಫೈ ಮೂರು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"ವೈಫೈ ಸಿಗ್ನಲ್‌‌ ಪೂರ್ತಿ ಇದೆ."</string>
+    <!-- no translation found for accessibility_wifi_security_type_none (1223747559986205423) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_security_type_secured (862921720418885331) -->
+    <skip />
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ತೆಗೆದುಹಾಕಲಾದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
