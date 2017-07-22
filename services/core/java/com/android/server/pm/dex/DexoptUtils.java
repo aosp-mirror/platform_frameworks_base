@@ -23,6 +23,8 @@ import android.util.SparseArray;
 import com.android.internal.os.ClassLoaderFactory;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class DexoptUtils {
@@ -229,7 +231,76 @@ public final class DexoptUtils {
      * dependencies {@see encodeClassLoader} separated by ';'.
      */
     private static String encodeClassLoaderChain(String cl1, String cl2) {
-        return cl1.isEmpty() ? cl2 : (cl1 + ";" + cl2);
+        if (cl1.isEmpty()) return cl2;
+        if (cl2.isEmpty()) return cl1;
+        return cl1 + ";" + cl2;
+    }
+
+    /**
+     * Compute the class loader context for the dex files present in the classpath of the first
+     * class loader from the given list (referred in the code as the {@code loadingClassLoader}).
+     * Each dex files gets its own class loader context in the returned array.
+     *
+     * Example:
+     *    If classLoadersNames = {"dalvik.system.DelegateLastClassLoader",
+     *    "dalvik.system.PathClassLoader"} and classPaths = {"foo.dex:bar.dex", "other.dex"}
+     *    The output will be
+     *    {"DLC[];PCL[other.dex]", "DLC[foo.dex];PCL[other.dex]"}
+     *    with "DLC[];PCL[other.dex]" being the context for "foo.dex"
+     *    and "DLC[foo.dex];PCL[other.dex]" the context for "bar.dex".
+     *
+     * If any of the class loaders names is unsupported the method will return null.
+     *
+     * The argument lists must be non empty and of the same size.
+     *
+     * @param classLoadersNames the names of the class loaders present in the loading chain. The
+     *    list encodes the class loader chain in the natural order. The first class loader has
+     *    the second one as its parent and so on.
+     * @param classPaths the class paths for the elements of {@param classLoadersNames}. The
+     *     the first element corresponds to the first class loader and so on. A classpath is
+     *     represented as a list of dex files separated by {@code File.pathSeparator}.
+     *     The return context will be for the dex files found in the first class path.
+     */
+    /*package*/ static String[] processContextForDexLoad(List<String> classLoadersNames,
+            List<String> classPaths) {
+        if (classLoadersNames.size() != classPaths.size()) {
+            throw new IllegalArgumentException(
+                    "The size of the class loader names and the dex paths do not match.");
+        }
+        if (classLoadersNames.isEmpty()) {
+            throw new IllegalArgumentException("Empty classLoadersNames");
+        }
+
+        // Compute the context for the parent class loaders.
+        String parentContext = "";
+        // We know that these lists are actually ArrayLists so getting the elements by index
+        // is fine (they come over binder). Even if something changes we expect the sizes to be
+        // very small and it shouldn't matter much.
+        for (int i = 1; i < classLoadersNames.size(); i++) {
+            if (!ClassLoaderFactory.isValidClassLoaderName(classLoadersNames.get(i))) {
+                return null;
+            }
+            String classpath = encodeClasspath(classPaths.get(i).split(File.pathSeparator));
+            parentContext = encodeClassLoaderChain(parentContext,
+                    encodeClassLoader(classpath, classLoadersNames.get(i)));
+        }
+
+        // Now compute the class loader context for each dex file from the first classpath.
+        String loadingClassLoader = classLoadersNames.get(0);
+        if (!ClassLoaderFactory.isValidClassLoaderName(loadingClassLoader)) {
+            return null;
+        }
+        String[] loadedDexPaths = classPaths.get(0).split(File.pathSeparator);
+        String[] loadedDexPathsContext = new String[loadedDexPaths.length];
+        String currentLoadedDexPathClasspath = "";
+        for (int i = 0; i < loadedDexPaths.length; i++) {
+            String dexPath = loadedDexPaths[i];
+            String currentContext = encodeClassLoader(
+                    currentLoadedDexPathClasspath, loadingClassLoader);
+            loadedDexPathsContext[i] = encodeClassLoaderChain(currentContext, parentContext);
+            currentLoadedDexPathClasspath = encodeClasspath(currentLoadedDexPathClasspath, dexPath);
+        }
+        return loadedDexPathsContext;
     }
 
     /**

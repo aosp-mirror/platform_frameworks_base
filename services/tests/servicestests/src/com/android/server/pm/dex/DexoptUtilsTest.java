@@ -17,6 +17,9 @@
 package com.android.server.pm.dex;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.content.pm.ApplicationInfo;
 import android.support.test.filters.SmallTest;
@@ -28,6 +31,11 @@ import dalvik.system.PathClassLoader;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -209,5 +217,69 @@ public class DexoptUtilsTest {
 
         assertEquals(1, contexts.length);
         assertEquals("DLC[]", contexts[0]);
+    }
+
+    @Test
+    public void testProcessContextForDexLoad() {
+        List<String> classLoaders = Arrays.asList(
+                DELEGATE_LAST_CLASS_LOADER_NAME,
+                PATH_CLASS_LOADER_NAME,
+                PATH_CLASS_LOADER_NAME);
+        List<String> classPaths = Arrays.asList(
+                String.join(File.pathSeparator, "foo.dex", "bar.dex"),
+                String.join(File.pathSeparator, "parent1.dex"),
+                String.join(File.pathSeparator, "parent2.dex", "parent3.dex"));
+        String[] context = DexoptUtils.processContextForDexLoad(classLoaders, classPaths);
+        assertNotNull(context);
+        assertEquals(2, context.length);
+        assertEquals("DLC[];PCL[parent1.dex];PCL[parent2.dex:parent3.dex]", context[0]);
+        assertEquals("DLC[foo.dex];PCL[parent1.dex];PCL[parent2.dex:parent3.dex]", context[1]);
+    }
+
+    @Test
+    public void testProcessContextForDexLoadSingleElement() {
+        List<String> classLoaders = Arrays.asList(PATH_CLASS_LOADER_NAME);
+        List<String> classPaths = Arrays.asList(
+                String.join(File.pathSeparator, "foo.dex", "bar.dex", "zoo.dex"));
+        String[] context = DexoptUtils.processContextForDexLoad(classLoaders, classPaths);
+        assertNotNull(context);
+        assertEquals(3, context.length);
+        assertEquals("PCL[]", context[0]);
+        assertEquals("PCL[foo.dex]", context[1]);
+        assertEquals("PCL[foo.dex:bar.dex]", context[2]);
+    }
+
+    @Test
+    public void testProcessContextForDexLoadUnsupported() {
+        List<String> classLoaders = Arrays.asList(
+                DELEGATE_LAST_CLASS_LOADER_NAME,
+                "unsupported.class.loader");
+        List<String> classPaths = Arrays.asList(
+                String.join(File.pathSeparator, "foo.dex", "bar.dex"),
+                String.join(File.pathSeparator, "parent1.dex"));
+        String[] context = DexoptUtils.processContextForDexLoad(classLoaders, classPaths);
+        assertNull(context);
+    }
+
+    @Test
+    public void testProcessContextForDexLoadIllegalCallEmptyList() {
+        boolean gotException = false;
+        try {
+            DexoptUtils.processContextForDexLoad(Collections.emptyList(), Collections.emptyList());
+        } catch (IllegalArgumentException ignore) {
+            gotException = true;
+        }
+        assertTrue(gotException);
+    }
+
+    @Test
+    public void testProcessContextForDexLoadIllegalCallDifferentSize() {
+        boolean gotException = false;
+        try {
+            DexoptUtils.processContextForDexLoad(Collections.emptyList(), Arrays.asList("a"));
+        } catch (IllegalArgumentException ignore) {
+            gotException = true;
+        }
+        assertTrue(gotException);
     }
 }
