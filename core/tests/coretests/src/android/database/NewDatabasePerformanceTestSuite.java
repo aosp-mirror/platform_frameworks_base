@@ -23,6 +23,7 @@ public class NewDatabasePerformanceTestSuite extends TestSuite {
         TestSuite suite =
           new TestSuite(NewDatabasePerformanceTestSuite.class.getName());
 
+        suite.addTestSuite(NewDatabasePerformanceTests.CreateTable100.class);
         suite.addTestSuite(NewDatabasePerformanceTests.Insert100.class);
         suite.addTestSuite(NewDatabasePerformanceTests.InsertIndexed100.class);
         suite.addTestSuite(NewDatabasePerformanceTests.Select100.class);
