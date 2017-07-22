@@ -23,10 +23,14 @@ import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import dalvik.system.DelegateLastClassLoader;
+import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +52,10 @@ import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class DexManagerTests {
+    private static final String PATH_CLASS_LOADER_NAME = PathClassLoader.class.getName();
+    private static final String DELEGATE_LAST_CLASS_LOADER_NAME =
+            DelegateLastClassLoader.class.getName();
+
     private DexManager mDexManager;
 
     private TestData mFooUser0;
@@ -55,6 +63,9 @@ public class DexManagerTests {
     private TestData mBarUser1;
     private TestData mInvalidIsa;
     private TestData mDoesNotExist;
+
+    private TestData mBarUser0UnsupportedClassLoader;
+    private TestData mBarUser0DelegateLastClassLoader;
 
     private int mUser0;
     private int mUser1;
@@ -68,11 +79,16 @@ public class DexManagerTests {
         String foo = "foo";
         String bar = "bar";
 
-        mFooUser0 = new TestData(foo, isa, mUser0);
-        mBarUser0 = new TestData(bar, isa, mUser0);
-        mBarUser1 = new TestData(bar, isa, mUser1);
+        mFooUser0 = new TestData(foo, isa, mUser0, PATH_CLASS_LOADER_NAME);
+        mBarUser0 = new TestData(bar, isa, mUser0, PATH_CLASS_LOADER_NAME);
+        mBarUser1 = new TestData(bar, isa, mUser1, PATH_CLASS_LOADER_NAME);
         mInvalidIsa = new TestData("INVALID", "INVALID_ISA", mUser0);
         mDoesNotExist = new TestData("DOES.NOT.EXIST", isa, mUser1);
+
+        mBarUser0UnsupportedClassLoader = new TestData(bar, isa, mUser0,
+                "unsupported.class_loader");
+        mBarUser0DelegateLastClassLoader = new TestData(bar, isa, mUser0,
+                DELEGATE_LAST_CLASS_LOADER_NAME);
 
         mDexManager = new DexManager(null, null, null, null);
 
@@ -373,8 +389,82 @@ public class DexManagerTests {
         assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
     }
 
+    @Test
+    public void testNotifyUnsupportedClassLoader() {
+        List<String> secondaries = mBarUser0UnsupportedClassLoader.getSecondaryDexPaths();
+        notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
+        // We expect that all the contexts are unsupported.
+        String[] expectedContexts =
+                Collections.nCopies(secondaries.size(),
+                        PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT).toArray(new String[0]);
+        assertSecondaryUse(mBarUser0UnsupportedClassLoader, pui, secondaries,
+                /*isUsedByOtherApps*/false, mUser0, expectedContexts);
+    }
+
+    @Test
+    public void testNotifyVariableClassLoader() {
+        // Record bar secondaries with the default PathClassLoader.
+        List<String> secondaries = mBarUser0.getSecondaryDexPaths();
+
+        notifyDexLoad(mBarUser0, secondaries, mUser0);
+        PackageUseInfo pui = getPackageUseInfo(mBarUser0);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
+        assertSecondaryUse(mFooUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0);
+
+        // Record bar secondaries again with a different class loader. This will change the context.
+        notifyDexLoad(mBarUser0DelegateLastClassLoader, secondaries, mUser0);
+
+        pui = getPackageUseInfo(mBarUser0);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
+        // We expect that all the contexts to be changed to variable now.
+        String[] expectedContexts =
+                Collections.nCopies(secondaries.size(),
+                        PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT).toArray(new String[0]);
+        assertSecondaryUse(mFooUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0,
+                expectedContexts);
+    }
+
+    @Test
+    public void testNotifyUnsupportedClassLoaderDoesNotChange() {
+        List<String> secondaries = mBarUser0UnsupportedClassLoader.getSecondaryDexPaths();
+        notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
+        assertNotNull(pui);
+        assertFalse(pui.isUsedByOtherApps());
+        assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
+        // We expect that all the contexts are unsupported.
+        String[] expectedContexts =
+                Collections.nCopies(secondaries.size(),
+                        PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT).toArray(new String[0]);
+        assertSecondaryUse(mBarUser0UnsupportedClassLoader, pui, secondaries,
+                /*isUsedByOtherApps*/false, mUser0, expectedContexts);
+
+        // Record bar secondaries again with a different class loader. This will change the context.
+        // However, because the context was already marked as unsupported we should not chage it.
+        notifyDexLoad(mBarUser0DelegateLastClassLoader, secondaries, mUser0);
+        pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
+        assertSecondaryUse(mBarUser0UnsupportedClassLoader, pui, secondaries,
+                /*isUsedByOtherApps*/false, mUser0, expectedContexts);
+
+    }
+
+
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
-            List<String> secondaries, boolean isUsedByOtherApps, int ownerUserId) {
+            List<String> secondaries, boolean isUsedByOtherApps, int ownerUserId,
+            String[] expectedContexts) {
+        assertNotNull(expectedContexts);
+        assertEquals(expectedContexts.length, secondaries.size());
+        int index = 0;
         for (String dex : secondaries) {
             DexUseInfo dui = pui.getDexUseInfoMap().get(dex);
             assertNotNull(dui);
@@ -382,11 +472,29 @@ public class DexManagerTests {
             assertEquals(ownerUserId, dui.getOwnerUserId());
             assertEquals(1, dui.getLoaderIsas().size());
             assertTrue(dui.getLoaderIsas().contains(testData.mLoaderIsa));
+            assertEquals(expectedContexts[index++], dui.getClassLoaderContext());
         }
+    }
+    private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
+            List<String> secondaries, boolean isUsedByOtherApps, int ownerUserId) {
+        String[] expectedContexts = DexoptUtils.processContextForDexLoad(
+                Arrays.asList(testData.mClassLoader),
+                Arrays.asList(String.join(File.pathSeparator, secondaries)));
+        assertSecondaryUse(testData, pui, secondaries, isUsedByOtherApps, ownerUserId,
+                expectedContexts);
     }
 
     private void notifyDexLoad(TestData testData, List<String> dexPaths, int loaderUserId) {
-        mDexManager.notifyDexLoad(testData.mPackageInfo.applicationInfo, dexPaths,
+        // By default, assume a single class loader in the chain.
+        // This makes writing tests much easier.
+        List<String> classLoaders = Arrays.asList(testData.mClassLoader);
+        List<String> classPaths = Arrays.asList(String.join(File.pathSeparator, dexPaths));
+        notifyDexLoad(testData, classLoaders, classPaths, loaderUserId);
+    }
+
+    private void notifyDexLoad(TestData testData, List<String> classLoader, List<String> classPaths,
+            int loaderUserId) {
+        mDexManager.notifyDexLoad(testData.mPackageInfo.applicationInfo, classLoader, classPaths,
                 testData.mLoaderIsa, loaderUserId);
     }
 
@@ -416,10 +524,16 @@ public class DexManagerTests {
     private static class TestData {
         private final PackageInfo mPackageInfo;
         private final String mLoaderIsa;
+        private final String mClassLoader;
 
-        private TestData(String  packageName, String loaderIsa, int userId) {
+        private TestData(String packageName, String loaderIsa, int userId, String classLoader) {
             mPackageInfo = getMockPackageInfo(packageName, userId);
             mLoaderIsa = loaderIsa;
+            mClassLoader = classLoader;
+        }
+
+        private TestData(String packageName, String loaderIsa, int userId) {
+            this(packageName, loaderIsa, userId, PATH_CLASS_LOADER_NAME);
         }
 
         private String getPackageName() {
