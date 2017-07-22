@@ -21,10 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"б"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"Кб"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"Мб"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"Гб"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"Тб"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"КБ"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"МБ"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"ТБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Пб"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> дн."</string>
@@ -1027,7 +1027,7 @@
     <string name="browse" msgid="6993590095938149861">"Веб-переглядач"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Закінчується пам’ять"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Деякі системні функції можуть не працювати"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 Мб вільного місця, і повторіть спробу."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 МБ вільного місця, і повторіть спробу."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> працює"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"Торкніться, щоб дізнатися більше або зупинити додаток."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
