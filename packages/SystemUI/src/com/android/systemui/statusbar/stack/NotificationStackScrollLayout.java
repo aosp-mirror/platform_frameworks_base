@@ -23,6 +23,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.annotation.ColorInt;
 import android.annotation.FloatRange;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -44,6 +45,7 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Property;
+import android.view.ContextThemeWrapper;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -61,6 +63,7 @@ import android.widget.ScrollView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.Utils;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -363,12 +366,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                     return object.getBackgroundFadeAmount();
                 }
             };
+    private boolean mUsingLightTheme;
     private boolean mQsExpanded;
     private boolean mForwardScrollable;
     private boolean mBackwardScrollable;
     private NotificationShelf mShelf;
     private int mMaxDisplayedNotifications = -1;
     private int mStatusBarHeight;
+    private int mMinInteractionHeight;
     private boolean mNoAmbient;
     private final Rect mClipRect = new Rect();
     private boolean mIsClipped;
@@ -517,6 +522,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 R.dimen.min_top_overscroll_to_qs);
         mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
         mBottomMargin = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
+        mMinInteractionHeight = res.getDimensionPixelSize(
+                R.dimen.notification_min_interaction_height);
     }
 
     public void setDrawBackgroundAsSrc(boolean asSrc) {
@@ -1079,7 +1086,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int count = getChildCount();
         for (int childIdx = 0; childIdx < count; childIdx++) {
             ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
-            if (slidingChild.getVisibility() == GONE
+            if (slidingChild.getVisibility() != VISIBLE
                     || slidingChild instanceof StackScrollerDecorView) {
                 continue;
             }
@@ -1093,7 +1100,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             int left = 0;
             int right = getWidth();
 
-            if (touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
+            if (bottom - top >= mMinInteractionHeight
+                    && touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
@@ -2005,6 +2013,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         mContentHeight = height + mTopPadding + mBottomMargin;
         updateScrollability();
+        clampScrollPosition();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
     }
 
@@ -3463,7 +3472,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
-        if (view instanceof ExpandableNotificationRow) {
+        if (view instanceof ExpandableNotificationRow && !onKeyguard()) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             if (row.isUserLocked() && row != getFirstChildNotGone()) {
                 if (row.isSummaryWithChildren()) {
@@ -3646,6 +3655,23 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         mTmpSortedChildren.clear();
+    }
+
+    /**
+     * Update colors of "dismiss" and "empty shade" views.
+     *
+     * @param lightTheme True if light theme should be used.
+     */
+    public void updateDecorViews(boolean lightTheme) {
+        if (lightTheme == mUsingLightTheme) {
+            return;
+        }
+        mUsingLightTheme = lightTheme;
+        Context context = new ContextThemeWrapper(mContext,
+                lightTheme ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI);
+        final int textColor = Utils.getColorAttr(context, R.attr.wallpaperTextColor);
+        mDismissView.setTextColor(textColor);
+        mEmptyShadeView.setTextColor(textColor);
     }
 
     public void goToFullShade(long delay) {
@@ -4344,10 +4370,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         @Override
         public void onDownUpdate(View currView, MotionEvent ev) {
             mTranslatingParentView = currView;
-            mCurrMenuRow = null;
             if (mCurrMenuRow != null) {
                 mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
             }
+            mCurrMenuRow = null;
             mHandler.removeCallbacks(mFalsingCheck);
 
             // Slide back any notifications that might be showing a menu
@@ -4358,6 +4384,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mCurrMenuRow = row.createMenu();
                 mCurrMenuRow.setSwipeActionHelper(NotificationSwipeHelper.this);
                 mCurrMenuRow.setMenuClickListener(NotificationStackScrollLayout.this);
+                mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
             }
         }
 

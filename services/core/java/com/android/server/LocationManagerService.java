@@ -243,8 +243,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private GnssLocationProvider.GnssSystemInfoProvider mGnssSystemInfoProvider;
 
-    private GnssLocationProvider.GnssBatchingProvider mGnssBatchingProvider;
     private GnssLocationProvider.GnssMetricsProvider mGnssMetricsProvider;
+
+    private GnssLocationProvider.GnssBatchingProvider mGnssBatchingProvider;
     private IBatchedLocationCallback mGnssBatchingCallback;
     private LinkedCallback mGnssBatchingDeathCallback;
     private boolean mGnssBatchingInProgress = false;

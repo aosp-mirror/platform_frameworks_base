@@ -832,6 +832,16 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     }
 
     @Test
+    public void testPostingGroupSuppressedDoesNotAffectRateLimiting() throws Exception {
+        NotificationRecord summary = getBeepyNotificationRecord("a", GROUP_ALERT_CHILDREN);
+        summary.getNotification().flags |= Notification.FLAG_GROUP_SUMMARY;
+
+        mService.buzzBeepBlinkLocked(summary);
+
+        verify(mUsageStats, never()).isAlertRateLimited(any());
+    }
+
+    @Test
     public void testCrossUserSoundMuted() throws Exception {
         final Notification n = new Builder(getContext(), "test")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon).build();

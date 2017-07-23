@@ -21,10 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;शीर्षक-रहित&gt;"</string>
@@ -516,10 +512,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"ऐप्स को नेटवर्क नीतियां प्रबंधित करने और ऐप्स-विशिष्‍ट नियमों को परिभाषित करने देता है."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"नेटवर्क उपयोग हिसाब बदलें"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ऐप्स  को यह संशोधित करने देता है कि ऐप्स की तुलना में नेटवर्क उपयोग का मूल्यांकन कैसे किया जाता है. सामान्‍य ऐप्स द्वारा उपयोग करने के लिए नहीं."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"नोटिफिकेशन तक पहुंचें"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"ऐप्स  को नोटिफिकेशन को प्राप्त करने, जांच करने, और साफ़ करने देता है, जिनमें अन्य ऐप्स  के द्वारा पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"नोटिफिकेशन श्रवणकर्ता सेवा से जुड़ें"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"धारक को नोटिफिकेशन श्रवणकर्ता सेवा के शीर्ष स्तरीय इंटरफ़ेस से जुड़ने देती है. सामान्य ऐप्स  के लिए कभी भी आवश्यक नहीं होनी चाहिए."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"नोटिफ़िकेशन तक पहुंचें"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"ऐप्स  को नोटिफ़िकेशन को प्राप्त करने, जांच करने, और साफ़ करने देता है, जिनमें अन्य ऐप्स  के द्वारा पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"नोटिफ़िकेशन श्रवणकर्ता सेवा से जुड़ें"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"धारक को नोटिफ़िकेशन श्रवणकर्ता सेवा के शीर्ष स्तरीय इंटरफ़ेस से जुड़ने देती है. सामान्य ऐप्स  के लिए कभी भी आवश्यक नहीं होनी चाहिए."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"किसी स्थिति प्रदाता सेवा से आबद्ध हों"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"धारक को किसी स्थिति प्रदाता सेवा के शीर्ष-स्तर के इंटरफ़ेस से आबद्ध होने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"भावी सेवा से आबद्ध करें"</string>
@@ -1072,13 +1068,13 @@
     <string name="volume_call" msgid="3941680041282788711">"कॉल के दौरान वॉल्‍यूम"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"ब्लूटूथ कॉल के दौरान वॉल्‍यूम"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"अलार्म वॉल्‍यूम"</string>
-    <string name="volume_notification" msgid="2422265656744276715">"नोटिफिकेशन वॉल्‍यूम"</string>
+    <string name="volume_notification" msgid="2422265656744276715">"नोटिफ़िकेशन वॉल्‍यूम"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"आवाज़"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ब्लूटूथ वॉल्‍यूम"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"रिंगटोन वॉल्‍यूम"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"कॉल वॉल्‍यूम"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"मीडिया वॉल्‍यूम"</string>
-    <string name="volume_icon_description_notification" msgid="7044986546477282274">"नोटिफिकेशन वॉल्‍यूम"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"नोटिफ़िकेशन वॉल्‍यूम"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"डिफ़ॉल्‍ट रिंगटोन"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"डिफ़ॉल्ट (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"कोई नहीं"</string>
@@ -1277,7 +1273,7 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"सरल उपयोग"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"वॉलपेपर"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वॉलपेपर बदलें"</string>
-    <string name="notification_listener_binding_label" msgid="2014162835481906429">"नोटिफिकेशन श्रवणकर्ता"</string>
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"नोटिफ़िकेशन श्रवणकर्ता"</string>
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR श्रोता"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"स्थिति प्रदाता"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"नोटिफ़िकेशन रैंकर सेवा"</string>
@@ -1691,7 +1687,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="5929663562028088222">"अवर्गीकृत"</string>
-    <string name="importance_from_user" msgid="7318955817386549931">"आपने इन नोटिफिकेशन का महत्व सेट किया है."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"आपने इन नोटिफ़िकेशन का महत्व सेट किया है."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"यह मौजूद व्यक्तियों के कारण महत्वपूर्ण है."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> को <xliff:g id="ACCOUNT">%2$s</xliff:g> के द्वारा एक नया उपयोगकर्ता बनाने दें?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> को <xliff:g id="ACCOUNT">%2$s</xliff:g> के द्वारा एक नया उपयोगकर्ता बनाने दें (इस खाते वाला एक उपयोगकर्ता पहले से मौजूद है) ?"</string>

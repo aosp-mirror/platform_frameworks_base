@@ -20,7 +20,6 @@ import android.app.RemoteAction;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
-import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.PinnedStackWindowListener;
 
@@ -33,9 +32,9 @@ import java.util.List;
 class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
         implements PinnedStackWindowListener {
 
-    PinnedActivityStack(ActivityContainer activityContainer,
-            RecentTasks recentTasks, boolean onTop) {
-        super(activityContainer, recentTasks, onTop);
+    PinnedActivityStack(ActivityStackSupervisor.ActivityDisplay display, int stackId,
+            ActivityStackSupervisor supervisor, RecentTasks recentTasks, boolean onTop) {
+        super(display, stackId, supervisor, recentTasks, onTop);
     }
 
     @Override

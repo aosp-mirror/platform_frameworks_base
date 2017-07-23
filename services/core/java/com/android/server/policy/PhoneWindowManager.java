@@ -3168,10 +3168,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void selectRotationAnimationLw(int anim[]) {
+        // If the screen is off or non-interactive, force a jumpcut.
+        final boolean forceJumpcut = !mScreenOnFully || !mAwake;
         if (PRINT_ANIM) Slog.i(TAG, "selectRotationAnimation mTopFullscreen="
                 + mTopFullscreenOpaqueWindowState + " rotationAnimation="
                 + (mTopFullscreenOpaqueWindowState == null ?
-                        "0" : mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation));
+                        "0" : mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation)
+                + " forceJumpcut=" + forceJumpcut);
+        if (forceJumpcut) {
+            anim[0] = R.anim.rotation_animation_jump_exit;
+            anim[1] = R.anim.rotation_animation_enter;
+            return;
+        }
         if (mTopFullscreenOpaqueWindowState != null) {
             int animationHint = mTopFullscreenOpaqueWindowState.getRotationAnimationHint();
             if (animationHint < 0 && mTopIsFullscreen) {
@@ -5409,7 +5417,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // represent should be hidden or if we should hide the lockscreen. For attached app
             // windows we defer the decision to the window it is attached to.
             if (appWindow && attached == null) {
-                if (isFullscreen(attrs) && StackId.normallyFullscreenWindows(stackId)) {
+                if (attrs.isFullscreen() && StackId.normallyFullscreenWindows(stackId)) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
                     mTopFullscreenOpaqueWindowState = win;
                     if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
@@ -5448,7 +5456,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // separately, because both the "real fullscreen" opaque window and the one for the docked
         // stack can control View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.
         if (mTopDockedOpaqueWindowState == null && affectsSystemUi && appWindow && attached == null
-                && isFullscreen(attrs) && stackId == DOCKED_STACK_ID) {
+                && attrs.isFullscreen() && stackId == DOCKED_STACK_ID) {
             mTopDockedOpaqueWindowState = win;
             if (mTopDockedOpaqueOrDimmingWindowState == null) {
                 mTopDockedOpaqueOrDimmingWindowState = win;
@@ -5471,12 +5479,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 win.showLw(false /* doAnimation */);
             }
         }
-    }
-
-    private boolean isFullscreen(WindowManager.LayoutParams attrs) {
-        return attrs.x == 0 && attrs.y == 0
-                && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
-                && attrs.height == WindowManager.LayoutParams.MATCH_PARENT;
     }
 
     /** {@inheritDoc} */
@@ -6616,6 +6618,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void finishedWakingUp() {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Finished waking up...");
+
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.onFinishedWakingUp();
+        }
     }
 
     private void wakeUpFromPowerKey(long eventTime) {
@@ -6724,6 +6730,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void screenTurningOff(ScreenOffListener screenOffListener) {
         mWindowManagerFuncs.screenTurningOff(screenOffListener);
+        synchronized (mLock) {
+            if (mKeyguardDelegate != null) {
+                mKeyguardDelegate.onScreenTurningOff();
+            }
+        }
     }
 
     private void reportScreenStateToVrManager(boolean isScreenOn) {
@@ -6820,8 +6831,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean isInteractive() {
-        return mAwake;
+    public boolean okToAnimate() {
+        return mAwake && !mGoingToSleep;
     }
 
     /** {@inheritDoc} */

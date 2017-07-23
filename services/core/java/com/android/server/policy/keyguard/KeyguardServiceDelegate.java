@@ -35,10 +35,12 @@ public class KeyguardServiceDelegate {
     private static final int SCREEN_STATE_OFF = 0;
     private static final int SCREEN_STATE_TURNING_ON = 1;
     private static final int SCREEN_STATE_ON = 2;
+    private static final int SCREEN_STATE_TURNING_OFF = 3;
 
     private static final int INTERACTIVE_STATE_SLEEP = 0;
-    private static final int INTERACTIVE_STATE_AWAKE = 1;
-    private static final int INTERACTIVE_STATE_GOING_TO_SLEEP = 2;
+    private static final int INTERACTIVE_STATE_WAKING = 1;
+    private static final int INTERACTIVE_STATE_AWAKE = 2;
+    private static final int INTERACTIVE_STATE_GOING_TO_SLEEP = 3;
 
     protected KeyguardServiceWrapper mKeyguardService;
     private final Context mContext;
@@ -164,8 +166,12 @@ public class KeyguardServiceDelegate {
                     mKeyguardService.setCurrentUser(mKeyguardState.currentUser);
                 }
                 // This is used to hide the scrim once keyguard displays.
-                if (mKeyguardState.interactiveState == INTERACTIVE_STATE_AWAKE) {
+                if (mKeyguardState.interactiveState == INTERACTIVE_STATE_AWAKE
+                        || mKeyguardState.interactiveState == INTERACTIVE_STATE_WAKING) {
                     mKeyguardService.onStartedWakingUp();
+                }
+                if (mKeyguardState.interactiveState == INTERACTIVE_STATE_AWAKE) {
+                    mKeyguardService.onFinishedWakingUp();
                 }
                 if (mKeyguardState.screenState == SCREEN_STATE_ON
                         || mKeyguardState.screenState == SCREEN_STATE_TURNING_ON) {
@@ -277,7 +283,23 @@ public class KeyguardServiceDelegate {
             if (DEBUG) Log.v(TAG, "onStartedWakingUp()");
             mKeyguardService.onStartedWakingUp();
         }
+        mKeyguardState.interactiveState = INTERACTIVE_STATE_WAKING;
+    }
+
+    public void onFinishedWakingUp() {
+        if (mKeyguardService != null) {
+            if (DEBUG) Log.v(TAG, "onFinishedWakingUp()");
+            mKeyguardService.onFinishedWakingUp();
+        }
         mKeyguardState.interactiveState = INTERACTIVE_STATE_AWAKE;
+    }
+
+    public void onScreenTurningOff() {
+        if (mKeyguardService != null) {
+            if (DEBUG) Log.v(TAG, "onScreenTurningOff()");
+            mKeyguardService.onScreenTurningOff();
+        }
+        mKeyguardState.screenState = SCREEN_STATE_TURNING_OFF;
     }
 
     public void onScreenTurnedOff() {

@@ -1694,10 +1694,10 @@ public class XmlUtils {
         return in.getAttributeValue(null, name);
     }
 
-    public static void writeStringAttribute(XmlSerializer out, String name, String value)
+    public static void writeStringAttribute(XmlSerializer out, String name, CharSequence value)
             throws IOException {
         if (value != null) {
-            out.attribute(null, name, value);
+            out.attribute(null, name, value.toString());
         }
     }
 

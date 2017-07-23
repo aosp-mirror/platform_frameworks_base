@@ -4538,22 +4538,10 @@
     <!-- The representation of a time duration when negative. An example is -1:14. This can be used with a countdown timer for example.-->
     <string name="negative_duration">\u2212<xliff:g id="time" example="1:14">%1$s</xliff:g></string>
 
-    <!-- Title of notification to start a new demo session when device is in retail mode [CHAR LIMIT=NONE] -->
-    <string name="reset_retail_demo_mode_title">Reset device?</string>
-    <!-- Text of notification to start a new demo session when device is in retail mode [CHAR LIMIT=NONE] -->
-    <string name="reset_retail_demo_mode_text">Tap to reset device</string>
     <!-- Text of dialog shown when starting a demo user for the first time [CHAR LIMIT=40] -->
     <string name="demo_starting_message">Starting demo\u2026</string>
     <!-- Text of dialog shown when starting a new demo user in retail demo mode [CHAR LIMIT=40] -->
     <string name="demo_restarting_message">Resetting device\u2026</string>
-    <!-- Title of the dialog shown when user inactivity times out in retail demo mode [CHAR LIMIT=40] -->
-    <string name="demo_user_inactivity_timeout_title">Reset device?</string>
-    <!-- Warning message shown when user inactivity times out in retail demo mode [CHAR LIMIT=none] -->
-    <string name="demo_user_inactivity_timeout_countdown">You\u2019ll lose any changes and the demo will start again in <xliff:g id="timeout" example="9">%1$s</xliff:g> seconds\u2026</string>
-    <!-- Text of button to allow user to abort countdown and continue current session in retail demo mode [CHAR LIMIT=40] -->
-    <string name="demo_user_inactivity_timeout_left_button">Cancel</string>
-    <!-- Text of button to allow user to abort countdown and immediately start another session in retail demo mode [CHAR LIMIT=40] -->
-    <string name="demo_user_inactivity_timeout_right_button">Reset now</string>
 
     <!-- Accessibilty string added to a widget that has been suspended [CHAR LIMIT=20] -->
     <string name="suspended_widget_accessibility">Disabled <xliff:g id="label" example="Calendar">%1$s</xliff:g></string>

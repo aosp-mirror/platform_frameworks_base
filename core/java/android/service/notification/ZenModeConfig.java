@@ -85,7 +85,7 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_SCREEN_ON = true;
 
     private static final int XML_VERSION = 2;
-    private static final String ZEN_TAG = "zen";
+    public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
     private static final String ALLOW_TAG = "allow";

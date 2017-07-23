@@ -26,6 +26,7 @@ import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.service.carrier.CarrierService;
 
 import com.android.ims.ImsReasonInfo;
 import com.android.internal.telephony.ICarrierConfigLoader;
@@ -260,6 +261,17 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING =
             "config_ims_package_override_string";
+
+    /**
+     * Override the package that will manage {@link SubscriptionPlan}
+     * information instead of the {@link CarrierService} that defines this
+     * value.
+     *
+     * @see SubscriptionManager#getSubscriptionPlans(int)
+     * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
+     */
+    public static final String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING =
+            "config_plans_package_override_string";
 
     /**
      * Override the platform's notion of a network operator being considered roaming.
@@ -1379,12 +1391,16 @@ public class CarrierConfigManager {
     /**
      * The day of the month (1-31) on which the data cycle rolls over.
      * <p>
-     * If the current month does not have this day, the cycle will roll over at the start of the
-     * next month.
+     * If the current month does not have this day, the cycle will roll over at
+     * the start of the next month.
      * <p>
-     * This setting may be still overridden by explicit user choice. By default, the platform value
-     * will be used.
+     * This setting may be still overridden by explicit user choice. By default,
+     * the platform value will be used.
+     *
+     * @deprecated replaced by
+     *             {@link SubscriptionManager#setSubscriptionPlans(int, java.util.List)}
      */
+    @Deprecated
     public static final String KEY_MONTHLY_DATA_CYCLE_DAY_INT =
             "monthly_data_cycle_day_int";
 
@@ -1395,6 +1411,7 @@ public class CarrierConfigManager {
      *
      * @hide
      */
+    @Deprecated
     public static final int DATA_CYCLE_USE_PLATFORM_DEFAULT = -1;
 
     /**
@@ -1408,6 +1425,7 @@ public class CarrierConfigManager {
      * default data limit, if one exists, will be disabled. A user selected data limit will not be
      * overridden.
      */
+    @Deprecated
     public static final int DATA_CYCLE_THRESHOLD_DISABLED = -2;
 
     /**
@@ -1420,7 +1438,11 @@ public class CarrierConfigManager {
      * <p>
      * This setting may be overridden by explicit user choice. By default, the platform value
      * will be used.
+     *
+     * @deprecated replaced by
+     *             {@link SubscriptionManager#setSubscriptionPlans(int, java.util.List)}
      */
+    @Deprecated
     public static final String KEY_DATA_WARNING_THRESHOLD_BYTES_LONG =
             "data_warning_threshold_bytes_long";
 
@@ -1434,7 +1456,11 @@ public class CarrierConfigManager {
      * <p>
      * This setting may be overridden by explicit user choice. By default, the platform value
      * will be used.
+     *
+     * @deprecated replaced by
+     *             {@link SubscriptionManager#setSubscriptionPlans(int, java.util.List)}
      */
+    @Deprecated
     public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG =
             "data_limit_threshold_bytes_long";
 
@@ -1863,6 +1889,15 @@ public class CarrierConfigManager {
             loader.updateConfigForPhoneId(phoneId, simState);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "Error updating config for phoneId=" + phoneId + ": " + ex.toString());
+        }
+    }
+
+    /** {@hide} */
+    public String getDefaultCarrierServicePackageName() {
+        try {
+            return getICarrierConfigLoader().getDefaultCarrierServicePackageName();
+        } catch (Throwable t) {
+            return null;
         }
     }
 

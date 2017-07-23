@@ -18,7 +18,6 @@ package com.android.server.net;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
-import static android.Manifest.permission.MANAGE_FALLBACK_SUBSCRIPTION_PLANS;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
@@ -28,7 +27,6 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
@@ -76,9 +74,11 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
+import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
+import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 
@@ -157,14 +157,15 @@ import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.Formatter;
-import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.Pair;
+import android.util.RecurrenceRule;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TrustedTime;
@@ -180,6 +181,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -192,7 +194,6 @@ import libcore.io.IoUtils;
 import com.google.android.collect.Lists;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
@@ -205,6 +206,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -257,7 +259,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_SWITCH_APP_ID = 8;
     private static final int VERSION_ADDED_NETWORK_ID = 9;
     private static final int VERSION_SWITCH_UID = 10;
-    private static final int VERSION_LATEST = VERSION_SWITCH_UID;
+    private static final int VERSION_ADDED_CYCLE = 11;
+    private static final int VERSION_LATEST = VERSION_ADDED_CYCLE;
 
     /**
      * Max items written to {@link #ProcStateSeqHistory}.
@@ -275,6 +278,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final String TAG_POLICY_LIST = "policy-list";
     private static final String TAG_NETWORK_POLICY = "network-policy";
+    private static final String TAG_SUBSCRIPTION_PLAN = "subscription-plan";
     private static final String TAG_UID_POLICY = "uid-policy";
     private static final String TAG_APP_POLICY = "app-policy";
     private static final String TAG_WHITELIST = "whitelist";
@@ -286,8 +290,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_NETWORK_TEMPLATE = "networkTemplate";
     private static final String ATTR_SUBSCRIBER_ID = "subscriberId";
     private static final String ATTR_NETWORK_ID = "networkId";
-    private static final String ATTR_CYCLE_DAY = "cycleDay";
-    private static final String ATTR_CYCLE_TIMEZONE = "cycleTimezone";
+    @Deprecated private static final String ATTR_CYCLE_DAY = "cycleDay";
+    @Deprecated private static final String ATTR_CYCLE_TIMEZONE = "cycleTimezone";
+    private static final String ATTR_CYCLE_START = "cycleStart";
+    private static final String ATTR_CYCLE_END = "cycleEnd";
+    private static final String ATTR_CYCLE_PERIOD = "cyclePeriod";
     private static final String ATTR_WARNING_BYTES = "warningBytes";
     private static final String ATTR_LIMIT_BYTES = "limitBytes";
     private static final String ATTR_LAST_SNOOZE = "lastSnooze";
@@ -298,6 +305,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_UID = "uid";
     private static final String ATTR_APP_ID = "appId";
     private static final String ATTR_POLICY = "policy";
+    private static final String ATTR_SUB_ID = "subId";
+    private static final String ATTR_TITLE = "title";
+    private static final String ATTR_SUMMARY = "summary";
+    private static final String ATTR_LIMIT_BEHAVIOR = "limitBehavior";
+    private static final String ATTR_USAGE_BYTES = "usageBytes";
+    private static final String ATTR_USAGE_TIME = "usageTime";
 
     private static final String ACTION_ALLOW_BACKGROUND =
             "com.android.server.net.action.ALLOW_BACKGROUND";
@@ -358,6 +371,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final ArrayMap<NetworkTemplate, NetworkPolicy> mNetworkPolicy = new ArrayMap<>();
     /** Currently active network rules for ifaces. */
     final ArrayMap<NetworkPolicy, String[]> mNetworkRules = new ArrayMap<>();
+
+    /** Defined subscription plans. */
+    final SparseArray<SubscriptionPlan[]> mSubscriptionPlans = new SparseArray<>();
 
     /** Defined UID policies. */
     @GuardedBy("mUidRulesFirstLock") final SparseIntArray mUidPolicy = new SparseIntArray();
@@ -998,7 +1014,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // cycle boundary to recompute notifications.
 
         // examine stats for each active policy
-        final long currentTime = currentTimeMillis();
         for (int i = mNetworkPolicy.size()-1; i >= 0; i--) {
             final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
             // ignore policies that aren't relevant to user
@@ -1273,20 +1288,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     continue;
                 }
 
-                final int cycleDay = getCycleDayFromCarrierConfig(config, policy.cycleDay);
+                final int currentCycleDay;
+                if (policy.cycleRule.isMonthly()) {
+                    currentCycleDay = policy.cycleRule.start.getDayOfMonth();
+                } else {
+                    currentCycleDay = NetworkPolicy.CYCLE_NONE;
+                }
+
+                final int cycleDay = getCycleDayFromCarrierConfig(config, currentCycleDay);
                 final long warningBytes = getWarningBytesFromCarrierConfig(config,
                         policy.warningBytes);
                 final long limitBytes = getLimitBytesFromCarrierConfig(config,
                         policy.limitBytes);
 
-                if (policy.cycleDay == cycleDay &&
+                if (currentCycleDay == cycleDay &&
                         policy.warningBytes == warningBytes &&
                         policy.limitBytes == limitBytes) {
                     continue;
                 }
 
                 policyUpdated = true;
-                policy.cycleDay = cycleDay;
+                policy.cycleRule = NetworkPolicy.buildRule(cycleDay, ZoneId.systemDefault());
                 policy.warningBytes = warningBytes;
                 policy.limitBytes = limitBytes;
 
@@ -1456,7 +1478,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // TODO: reset any policy-disabled networks when any policy is removed
         // completely, which is currently rare case.
 
-        final long currentTime = currentTimeMillis();
         for (int i = mNetworkPolicy.size()-1; i >= 0; i--) {
             final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
             // shortcut when policy has no limit
@@ -1573,7 +1594,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // apply each policy that we found ifaces for; compute remaining data
         // based on current cycle and historical stats, and push to kernel.
-        final long currentTime = currentTimeMillis();
         for (int i = mNetworkRules.size()-1; i >= 0; i--) {
             final NetworkPolicy policy = mNetworkRules.keyAt(i);
             final String[] ifaces = mNetworkRules.valueAt(i);
@@ -1721,20 +1741,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public NetworkPolicy buildDefaultMobilePolicy(int subId, String subscriberId) {
         PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
 
-        // assume usage cycle starts today
-        final Time time = new Time();
-        time.setToNow();
-
-        final String cycleTimezone = time.timezone;
-
-        final int cycleDay = getCycleDayFromCarrierConfig(config, time.monthDay);
+        final int cycleDay = getCycleDayFromCarrierConfig(config,
+                ZonedDateTime.now().getDayOfMonth());
         final long warningBytes = getWarningBytesFromCarrierConfig(config,
                 getPlatformDefaultWarningBytes());
         final long limitBytes = getLimitBytesFromCarrierConfig(config,
                 getPlatformDefaultLimitBytes());
 
         final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
-        final NetworkPolicy policy = new NetworkPolicy(template, cycleDay, cycleTimezone,
+        final RecurrenceRule cycleRule = NetworkPolicy.buildRule(cycleDay, ZoneId.systemDefault());
+        final NetworkPolicy policy = new NetworkPolicy(template, cycleRule,
                 warningBytes, limitBytes, SNOOZE_NEVER, SNOOZE_NEVER, true, true);
         return policy;
     }
@@ -1744,6 +1760,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // clear any existing policy and read from disk
         mNetworkPolicy.clear();
+        mSubscriptionPlans.clear();
         mUidPolicy.clear();
 
         FileInputStream fis = null;
@@ -1787,12 +1804,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         } else {
                             networkId = null;
                         }
-                        final int cycleDay = readIntAttribute(in, ATTR_CYCLE_DAY);
-                        final String cycleTimezone;
-                        if (version >= VERSION_ADDED_TIMEZONE) {
-                            cycleTimezone = in.getAttributeValue(null, ATTR_CYCLE_TIMEZONE);
+                        final RecurrenceRule cycleRule;
+                        if (version >= VERSION_ADDED_CYCLE) {
+                            final String start = readStringAttribute(in, ATTR_CYCLE_START);
+                            final String end = readStringAttribute(in, ATTR_CYCLE_END);
+                            final String period = readStringAttribute(in, ATTR_CYCLE_PERIOD);
+                            cycleRule = new RecurrenceRule(
+                                    RecurrenceRule.convertZonedDateTime(start),
+                                    RecurrenceRule.convertZonedDateTime(end),
+                                    RecurrenceRule.convertPeriod(period));
                         } else {
-                            cycleTimezone = Time.TIMEZONE_UTC;
+                            final int cycleDay = readIntAttribute(in, ATTR_CYCLE_DAY);
+                            final String cycleTimezone;
+                            if (version >= VERSION_ADDED_TIMEZONE) {
+                                cycleTimezone = in.getAttributeValue(null, ATTR_CYCLE_TIMEZONE);
+                            } else {
+                                cycleTimezone = "UTC";
+                            }
+                            cycleRule = NetworkPolicy.buildRule(cycleDay, ZoneId.of(cycleTimezone));
                         }
                         final long warningBytes = readLongAttribute(in, ATTR_WARNING_BYTES);
                         final long limitBytes = readLongAttribute(in, ATTR_LIMIT_BYTES);
@@ -1834,10 +1863,45 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final NetworkTemplate template = new NetworkTemplate(networkTemplate,
                                 subscriberId, networkId);
                         if (template.isPersistable()) {
-                            mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay,
-                                    cycleTimezone, warningBytes, limitBytes, lastWarningSnooze,
+                            mNetworkPolicy.put(template, new NetworkPolicy(template, cycleRule,
+                                    warningBytes, limitBytes, lastWarningSnooze,
                                     lastLimitSnooze, metered, inferred));
                         }
+
+                    } else if (TAG_SUBSCRIPTION_PLAN.equals(tag)) {
+                        final String start = readStringAttribute(in, ATTR_CYCLE_START);
+                        final String end = readStringAttribute(in, ATTR_CYCLE_END);
+                        final String period = readStringAttribute(in, ATTR_CYCLE_PERIOD);
+                        final SubscriptionPlan.Builder builder = new SubscriptionPlan.Builder(
+                                RecurrenceRule.convertZonedDateTime(start),
+                                RecurrenceRule.convertZonedDateTime(end),
+                                RecurrenceRule.convertPeriod(period));
+                        builder.setTitle(readStringAttribute(in, ATTR_TITLE));
+                        builder.setSummary(readStringAttribute(in, ATTR_SUMMARY));
+
+                        final long limitBytes = readLongAttribute(in, ATTR_LIMIT_BYTES,
+                                SubscriptionPlan.BYTES_UNKNOWN);
+                        final int limitBehavior = readIntAttribute(in, ATTR_LIMIT_BEHAVIOR,
+                                SubscriptionPlan.LIMIT_BEHAVIOR_UNKNOWN);
+                        if (limitBytes != SubscriptionPlan.BYTES_UNKNOWN
+                                && limitBehavior != SubscriptionPlan.LIMIT_BEHAVIOR_UNKNOWN) {
+                            builder.setDataLimit(limitBytes, limitBehavior);
+                        }
+
+                        final long usageBytes = readLongAttribute(in, ATTR_USAGE_BYTES,
+                                SubscriptionPlan.BYTES_UNKNOWN);
+                        final long usageTime = readLongAttribute(in, ATTR_USAGE_TIME,
+                                SubscriptionPlan.TIME_UNKNOWN);
+                        if (usageBytes != SubscriptionPlan.BYTES_UNKNOWN
+                                && usageTime != SubscriptionPlan.TIME_UNKNOWN) {
+                            builder.setDataUsage(usageBytes, usageTime);
+                        }
+
+                        final int subId = readIntAttribute(in, ATTR_SUB_ID);
+                        final SubscriptionPlan plan = builder.build();
+                        mSubscriptionPlans.put(subId, ArrayUtils.appendElement(
+                                SubscriptionPlan.class, mSubscriptionPlans.get(subId), plan));
+
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
                         final int policy = readIntAttribute(in, ATTR_POLICY);
@@ -1898,9 +1962,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (FileNotFoundException e) {
             // missing policy is okay, probably first boot
             upgradeDefaultBackgroundDataUL();
-        } catch (IOException e) {
-            Log.wtf(TAG, "problem reading network policy", e);
-        } catch (XmlPullParserException e) {
+        } catch (Exception e) {
             Log.wtf(TAG, "problem reading network policy", e);
         } finally {
             IoUtils.closeQuietly(fis);
@@ -1994,8 +2056,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (networkId != null) {
                     out.attribute(null, ATTR_NETWORK_ID, networkId);
                 }
-                writeIntAttribute(out, ATTR_CYCLE_DAY, policy.cycleDay);
-                out.attribute(null, ATTR_CYCLE_TIMEZONE, policy.cycleTimezone);
+                writeStringAttribute(out, ATTR_CYCLE_START,
+                        RecurrenceRule.convertZonedDateTime(policy.cycleRule.start));
+                writeStringAttribute(out, ATTR_CYCLE_END,
+                        RecurrenceRule.convertZonedDateTime(policy.cycleRule.end));
+                writeStringAttribute(out, ATTR_CYCLE_PERIOD,
+                        RecurrenceRule.convertPeriod(policy.cycleRule.period));
                 writeLongAttribute(out, ATTR_WARNING_BYTES, policy.warningBytes);
                 writeLongAttribute(out, ATTR_LIMIT_BYTES, policy.limitBytes);
                 writeLongAttribute(out, ATTR_LAST_WARNING_SNOOZE, policy.lastWarningSnooze);
@@ -2003,6 +2069,32 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 writeBooleanAttribute(out, ATTR_METERED, policy.metered);
                 writeBooleanAttribute(out, ATTR_INFERRED, policy.inferred);
                 out.endTag(null, TAG_NETWORK_POLICY);
+            }
+
+            // write all known subscription plans
+            for (int i = 0; i < mSubscriptionPlans.size(); i++) {
+                final int subId = mSubscriptionPlans.keyAt(i);
+                final SubscriptionPlan[] plans = mSubscriptionPlans.valueAt(i);
+                if (ArrayUtils.isEmpty(plans)) continue;
+
+                for (SubscriptionPlan plan : plans) {
+                    out.startTag(null, TAG_SUBSCRIPTION_PLAN);
+                    writeIntAttribute(out, ATTR_SUB_ID, subId);
+                    final RecurrenceRule cycleRule = plan.getCycleRule();
+                    writeStringAttribute(out, ATTR_CYCLE_START,
+                            RecurrenceRule.convertZonedDateTime(cycleRule.start));
+                    writeStringAttribute(out, ATTR_CYCLE_END,
+                            RecurrenceRule.convertZonedDateTime(cycleRule.end));
+                    writeStringAttribute(out, ATTR_CYCLE_PERIOD,
+                            RecurrenceRule.convertPeriod(cycleRule.period));
+                    writeStringAttribute(out, ATTR_TITLE, plan.getTitle());
+                    writeStringAttribute(out, ATTR_SUMMARY, plan.getSummary());
+                    writeLongAttribute(out, ATTR_LIMIT_BYTES, plan.getDataLimitBytes());
+                    writeIntAttribute(out, ATTR_LIMIT_BEHAVIOR, plan.getDataLimitBehavior());
+                    writeLongAttribute(out, ATTR_USAGE_BYTES, plan.getDataUsageBytes());
+                    writeLongAttribute(out, ATTR_USAGE_TIME, plan.getDataUsageTime());
+                    out.endTag(null, TAG_SUBSCRIPTION_PLAN);
+                }
             }
 
             // write all known uid policies
@@ -2506,27 +2598,35 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         final SubscriptionInfo si;
+        final PersistableBundle config;
         final long token = Binder.clearCallingIdentity();
         try {
             si = mContext.getSystemService(SubscriptionManager.class)
                     .getActiveSubscriptionInfo(subId);
+            config = mCarrierConfigManager.getConfigForSubId(subId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
 
-        // First check: does caller have carrier access?
+        // First check: is caller the CarrierService?
         if (si.isEmbedded() && si.canManageSubscription(mContext, callingPackage)) {
-            Slog.v(TAG, "Granting access because " + callingPackage + " is carrier");
             return;
         }
 
-        // Second check: was caller first to claim this HNI?
-        // TODO: extend to support external data sources
+        // Second check: has the CarrierService delegated access?
+        if (config != null) {
+            final String overridePackage = config
+                    .getString(CarrierConfigManager.KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING, null);
+            if (!TextUtils.isEmpty(overridePackage)
+                    && Objects.equals(overridePackage, callingPackage)) {
+                return;
+            }
+        }
 
-        // Final check: does caller have fallback permission?
-        if (mContext.checkCallingOrSelfPermission(
-                MANAGE_FALLBACK_SUBSCRIPTION_PLANS) == PERMISSION_GRANTED) {
-            Slog.v(TAG, "Granting access because " + callingPackage + " is fallback");
+        // Third check: is caller the fallback/default CarrierService?
+        final String defaultPackage = mCarrierConfigManager.getDefaultCarrierServicePackageName();
+        if (!TextUtils.isEmpty(defaultPackage)
+                && Objects.equals(defaultPackage, callingPackage)) {
             return;
         }
 
@@ -2538,11 +2638,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage) {
         enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
 
-        // TODO: extend to support external data sources
-        if (!"com.android.settings".equals(callingPackage)) {
-            throw new UnsupportedOperationException();
-        }
-
         final String fake = SystemProperties.get("fw.fake_plan");
         if (!TextUtils.isEmpty(fake)) {
             final List<SubscriptionPlan> plans = new ArrayList<>();
@@ -2550,7 +2645,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile")
-                        .setDataWarning(2 * TrafficStats.GB_IN_BYTES)
                         .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
                         .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
@@ -2562,7 +2656,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile is the carriers name who this plan belongs to")
                         .setSummary("Crazy unlimited bandwidth plan with incredibly long title "
                                 + "that should be cut off to prevent UI from looking terrible")
-                        .setDataWarning(2 * TrafficStats.GB_IN_BYTES)
                         .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
                         .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
@@ -2615,19 +2708,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return plans.toArray(new SubscriptionPlan[plans.size()]);
         }
 
-        final long token = Binder.clearCallingIdentity();
-        try {
-            final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-            final NetworkTemplate template = NetworkTemplate
-                    .buildTemplateMobileAll(tm.getSubscriberId(subId));
-            final NetworkPolicy policy = mNetworkPolicy.get(template);
-            if (policy != null) {
-                return new SubscriptionPlan[] { SubscriptionPlan.convert(policy) };
-            } else {
-                return new SubscriptionPlan[0];
+        synchronized (mUidRulesFirstLock) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                return mSubscriptionPlans.get(subId);
             }
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -2635,34 +2719,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public void setSubscriptionPlans(int subId, SubscriptionPlan[] plans, String callingPackage) {
         enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
 
-        // TODO: extend to support external data sources
-        if (!"com.android.settings".equals(callingPackage)) {
-            throw new UnsupportedOperationException();
+        for (SubscriptionPlan plan : plans) {
+            Preconditions.checkNotNull(plan);
         }
 
         final long token = Binder.clearCallingIdentity();
         try {
-            final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-            final NetworkTemplate template = NetworkTemplate
-                    .buildTemplateMobileAll(tm.getSubscriberId(subId));
-            if (ArrayUtils.isEmpty(plans)) {
-                mNetworkPolicy.remove(template);
-            } else {
-                final NetworkPolicy policy = SubscriptionPlan.convert(plans[0]);
-                policy.template = template;
-                mNetworkPolicy.put(template, policy);
+            maybeRefreshTrustedTime();
+            synchronized (mUidRulesFirstLock) {
+                synchronized (mNetworkPoliciesSecondLock) {
+                    mSubscriptionPlans.put(subId, plans);
+                    // TODO: update any implicit details from newly defined plans
+                    handleNetworkPoliciesUpdateAL(false);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    @Override
-    public String getSubscriptionPlanOwner(int subId) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-
-        // TODO: extend to support external data sources
-        return "com.android.settings";
     }
 
     @Override

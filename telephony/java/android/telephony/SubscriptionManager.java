@@ -18,8 +18,8 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -1542,7 +1542,20 @@ public class SubscriptionManager {
         return false;
     }
 
-    /** {@pending} */
+    /**
+     * Get the description of the billing relationship plan between a carrier
+     * and a specific subscriber.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges(int)}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this relationship applies to
+     */
     public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
         final INetworkPolicyManager npm = INetworkPolicyManager.Stub
                 .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
@@ -1554,24 +1567,29 @@ public class SubscriptionManager {
         }
     }
 
-    /** {@pending} */
+    /**
+     * Set the description of the billing relationship plan between a carrier
+     * and a specific subscriber.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges(int)}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this relationship applies to
+     * @param plans the list of plans. The first plan is always the primary and
+     *            most important plan. Any additional plans are secondary and
+     *            may not be displayed or used by decision making logic.
+     */
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
         final INetworkPolicyManager npm = INetworkPolicyManager.Stub
                 .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
         try {
             npm.setSubscriptionPlans(subId, plans.toArray(new SubscriptionPlan[plans.size()]),
                     mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    public String getSubscriptionPlanOwner(int subId) {
-        final INetworkPolicyManager npm = INetworkPolicyManager.Stub
-                .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
-        try {
-            return npm.getSubscriptionPlanOwner(subId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -71,7 +71,5 @@ interface INetworkPolicyManager {
     SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);
     void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, String callingPackage);
 
-    String getSubscriptionPlanOwner(int subId);
-
     void factoryReset(String subscriber);
 }

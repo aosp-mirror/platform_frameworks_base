@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:textColor="?attr/wallpaperTextColor"
         style="@style/widget_label"
-        android:letterSpacing="0.15"
+        android:letterSpacing="0.05"
         android:gravity="center"
         />
     <TextView android:id="@+id/alarm_status"
@@ -42,7 +42,7 @@
         android:drawableTint="?attr/wallpaperTextColorSecondary"
         android:drawableTintMode="src_in"
         android:textColor="?attr/wallpaperTextColorSecondary"
-        android:letterSpacing="0.15"
+        android:letterSpacing="0.05"
         style="@style/widget_label"
         android:layout_marginStart="6dp"
         android:gravity="center"
