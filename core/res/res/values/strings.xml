@@ -539,10 +539,7 @@
     <string name="notification_header_divider_symbol_with_spaces" translatable="false">" • "</string>
 
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
-    <string name="notification_hidden_text">Contents hidden</string>
-
-    <!-- Text shown in place of notification contents when the notification is hidden by policy on a secure lockscreen -->
-    <string name="notification_hidden_by_policy_text">Contents hidden by policy</string>
+    <string name="notification_hidden_text">New notification</string>
 
     <!-- Text shown when viewing channel settings for notifications related to the virtual keyboard -->
     <string name="notification_channel_virtual_keyboard">Virtual keyboard</string>
