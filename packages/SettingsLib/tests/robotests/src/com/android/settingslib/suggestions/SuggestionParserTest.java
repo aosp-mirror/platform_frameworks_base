@@ -16,6 +16,8 @@
 
 package com.android.settingslib.suggestions;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,8 +43,6 @@ import org.robolectric.res.builder.RobolectricPackageManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(SettingLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
@@ -188,6 +188,24 @@ public class SuggestionParserTest {
 
         assertThat(suggestions).hasSize(1);
         assertThat(sl.getSuggestionForCategory("category2")).hasSize(1);
+    }
+
+    @Test
+    public void isSuggestionDismissed_mismatchRule_shouldDismiss() {
+        final Tile suggestion = new Tile();
+        suggestion.metaData = new Bundle();
+        suggestion.metaData.putString(SuggestionParser.META_DATA_DISMISS_CONTROL, "1,2,3");
+        suggestion.intent = new Intent().setComponent(new ComponentName("pkg", "cls"));
+
+        // Dismiss suggestion when smart suggestion is not enabled.
+        mSuggestionParser.dismissSuggestion(suggestion, false /* isSmartSuggestionEnabled */);
+        final String suggestionKey = suggestion.intent.getComponent().flattenToShortString();
+        // And point to last rule in dismiss control
+        mPrefs.edit().putInt(suggestionKey + SuggestionParser.DISMISS_INDEX, 2).apply();
+
+        // Turn on smart suggestion, and check if suggestion is enabled.
+        assertThat(mSuggestionParser.isDismissed(suggestion, true /* isSmartSuggestionEnabled */))
+                .isTrue();
     }
 
     private void readAndDismissSuggestion(boolean isSmartSuggestionEnabled) {

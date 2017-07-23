@@ -203,7 +203,7 @@
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"रिंगर कंपन"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"रिंगर चालू"</string>
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Android सिस्टीम अद्यतन"</string>
-    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"अद्यतनित करण्यासाठी तयार करीत आहे…"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"अपडेट करण्याची तयारी करत आहे…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"अद्यतन पॅकेजची प्रक्रिया करीत आहे…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"रीस्टार्ट करीत आहे..."</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"फॅक्‍टरी डेटा रीसेट"</string>

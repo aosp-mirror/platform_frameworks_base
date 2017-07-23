@@ -3064,6 +3064,7 @@
   <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
   <java-symbol type="integer" name="config_inCallNotificationVolumeRelative" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
+  <java-symbol type="bool" name="config_displayTransitionOffAfterDoze" />
   <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
   <java-symbol type="string" name="config_headlineFontFamily" />
   <java-symbol type="string" name="config_headlineFontFamilyLight" />

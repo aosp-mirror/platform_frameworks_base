@@ -1862,6 +1862,11 @@
          states. -->
     <bool name="config_dozeAlwaysOnDisplayAvailable">false</bool>
 
+    <!-- Whether the display hardware requires we go to the off state before transitioning
+         out of any doze states. -->
+    <bool name="config_displayTransitionOffAfterDoze">false</bool>
+
+
     <!-- Power Management: Specifies whether to decouple the auto-suspend state of the
          device from the display on/off state.
 

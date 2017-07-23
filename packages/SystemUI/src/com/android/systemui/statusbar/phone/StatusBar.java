@@ -21,6 +21,9 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -975,9 +978,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
         Dependency.get(ConfigurationController.class).addCallback(this);
-
-        // Make sure that we're using the correct theme
-        onOverlayChanged();
     }
 
     protected void createIconController() {
@@ -990,6 +990,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final Context context = mContext;
         updateDisplaySize(); // populates mDisplayMetrics
         updateResources();
+        updateTheme();
 
         inflateStatusBarWindow(context);
         mStatusBarWindow.setService(this);
@@ -1197,7 +1198,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             });
         }
 
-
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         if (!pm.isScreenOn()) {
             mBroadcastReceiver.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
@@ -1302,14 +1302,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         reevaluateStyles();
     }
 
-    public void onOverlayChanged() {
+    private void reinflateViews() {
         reevaluateStyles();
 
         // Clock and bottom icons
         mNotificationPanel.onOverlayChanged();
-
+        // The status bar on the keyguard is a special layout.
+        mKeyguardStatusBar.onOverlayChanged();
         // Recreate Indication controller because internal references changed
-        // TODO: unregister callbacks before recreating
         mKeyguardIndicationController =
                 SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
                         mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
@@ -2857,17 +2857,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateTheme();
     }
 
-    public boolean isUsingDarkText() {
-        OverlayInfo themeInfo = null;
-        try {
-            themeInfo = mOverlayManager.getOverlayInfo("com.android.systemui.theme.lightwallpaper",
-                    mCurrentUserId);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        return themeInfo != null && themeInfo.isEnabled();
-    }
-
     public boolean isUsingDarkTheme() {
         OverlayInfo themeInfo = null;
         try {
@@ -4208,13 +4197,16 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private boolean updateIsKeyguard() {
+        boolean wakeAndUnlocking = mFingerprintUnlockController.getMode()
+                == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
+
         // For dozing, keyguard needs to be shown whenever the device is non-interactive. Otherwise
         // there's no surface we can show to the user. Note that the device goes fully interactive
         // late in the transition, so we also allow the device to start dozing once the screen has
         // turned off fully.
         boolean keyguardForDozing = mDozingRequested &&
                 (!mDeviceInteractive || isGoingToSleep() && (isScreenFullyOff() || mIsKeyguard));
-        boolean shouldBeKeyguard = mKeyguardRequested || keyguardForDozing;
+        boolean shouldBeKeyguard = (mKeyguardRequested || keyguardForDozing) && !wakeAndUnlocking;
         if (keyguardForDozing) {
             updatePanelExpansionForKeyguard();
         }
@@ -4256,7 +4248,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updatePanelExpansionForKeyguard() {
-        if (mState == StatusBarState.KEYGUARD) {
+        if (mState == StatusBarState.KEYGUARD && mFingerprintUnlockController.getMode()
+                != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK) {
             instantExpandNotificationsPanel();
         } else if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
             instantCollapseNotificationPanel();
@@ -4562,24 +4555,13 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Switches theme from light to dark and vice-versa.
      */
     private void updateTheme() {
+        final boolean inflated = mStackScroller != null;
 
-        int which;
-        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            which = WallpaperManager.FLAG_LOCK;
-        } else {
-            which = WallpaperManager.FLAG_SYSTEM;
-        }
-
-        // Gradient defines if text color should be light or dark.
-        final boolean useDarkText = mColorExtractor.getColors(which, true /* ignoreVisibility */)
-                .supportsDarkText();
-        // And wallpaper defines if QS should be light or dark.
+        // The system wallpaper defines if QS should be light or dark.
         WallpaperColors systemColors = mColorExtractor
                 .getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
         final boolean useDarkTheme = systemColors != null
                 && (systemColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0;
-
-        // Enable/disable dark UI.
         if (isUsingDarkTheme() != useDarkTheme) {
             try {
                 mOverlayManager.setEnabled("com.android.systemui.theme.dark",
@@ -4588,18 +4570,33 @@ public class StatusBar extends SystemUI implements DemoMode,
                 Log.w(TAG, "Can't change theme", e);
             }
         }
-        // Enable/disable dark text overlay.
-        if (isUsingDarkText() != useDarkText) {
-            try {
-                mOverlayManager.setEnabled("com.android.systemui.theme.lightwallpaper",
-                        useDarkText, mCurrentUserId);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Can't change theme", e);
+
+        // Lock wallpaper defines the color of the majority of the views, hence we'll use it
+        // to set our default theme.
+        final boolean lockDarkText = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, true
+                /* ignoreVisibility */).supportsDarkText();
+        final int themeResId = lockDarkText ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI;
+        if (mContext.getThemeResId() != themeResId) {
+            mContext.setTheme(themeResId);
+            if (inflated) {
+                reinflateViews();
             }
         }
 
-        // Make sure we have the correct navbar/statusbar colors.
-        mStatusBarWindowManager.setKeyguardDark(useDarkText);
+        if (inflated) {
+            int which;
+            if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
+                which = WallpaperManager.FLAG_LOCK;
+            } else {
+                which = WallpaperManager.FLAG_SYSTEM;
+            }
+            final boolean useDarkText = mColorExtractor.getColors(which,
+                    true /* ignoreVisibility */).supportsDarkText();
+            mStackScroller.updateDecorViews(useDarkText);
+
+            // Make sure we have the correct navbar/statusbar colors.
+            mStatusBarWindowManager.setKeyguardDark(useDarkText);
+        }
     }
 
     private void updateDozingState() {
@@ -5156,6 +5153,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onScreenTurningOn() {
             mFalsingManager.onScreenTurningOn();
             mNotificationPanel.onScreenTurningOn();
+
+            int wakefulness = mWakefulnessLifecycle.getWakefulness();
+            if (mDozing && (wakefulness == WAKEFULNESS_WAKING
+                    || wakefulness == WAKEFULNESS_ASLEEP) && !isPulsing()) {
+                mScrimController.prepareWakeUpFromAod();
+            }
+
             if (mLaunchCameraOnScreenTurningOn) {
                 mNotificationPanel.launchCamera(false, mLastCameraLaunchSource);
                 mLaunchCameraOnScreenTurningOn = false;
@@ -5164,13 +5168,18 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onScreenTurnedOn() {
+            mScrimController.wakeUpFromAod();
             mDozeScrimController.onScreenTurnedOn();
         }
 
         @Override
         public void onScreenTurnedOff() {
             mFalsingManager.onScreenOff();
-            updateIsKeyguard();
+            // If we pulse in from AOD, we turn the screen off first. However, updatingIsKeyguard
+            // in that case destroys the HeadsUpManager state, so don't do it in that case.
+            if (!isPulsing()) {
+                updateIsKeyguard();
+            }
         }
     };
 

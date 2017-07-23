@@ -1106,7 +1106,7 @@
       <item quantity="one">ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
       <item quantity="other">ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
     </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಿ"</string>
+    <string name="wifi_available_title" msgid="3817100557900599505">"ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
@@ -1431,7 +1431,7 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ವಯರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"ಪಾತ್ರ"</string>
-    <string name="media_route_chooser_title" msgid="1751618554539087622">"ಸಾಧನಕ್ಕೆ ಸಂಪರ್ಕಪಡಿಸಿ"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"ಸಾಧನಕ್ಕೆ ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ಸಾಧನಕ್ಕೆ ಬಿತ್ತರಿಸುವ ಪರದೆ"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ಸಾಧನಗಳನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>

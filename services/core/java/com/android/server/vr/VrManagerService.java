@@ -125,6 +125,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private boolean mVrModeAllowed;
     private boolean mVrModeEnabled;
     private boolean mPersistentVrModeEnabled;
+    private boolean mRunning2dInVr;
+    private int mVrAppProcessId;
     private EnabledComponentsObserver mComponentObserver;
     private ManagedApplicationService mCurrentVrService;
     private ComponentName mDefaultVrService;
@@ -174,7 +176,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 }
                 consumeAndApplyPendingStateLocked();
                 if (mBootsToVr && !mVrModeEnabled) {
-                  setVrMode(true, mDefaultVrService, 0, null);
+                  setVrMode(true, mDefaultVrService, 0, -1, null);
                 }
             } else {
                 // Disable persistent mode when VR mode isn't allowed, allows an escape hatch to
@@ -183,12 +185,12 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
                 // Set pending state to current state.
                 mPendingState = (mVrModeEnabled && mCurrentVrService != null)
-                    ? new VrState(mVrModeEnabled, mCurrentVrService.getComponent(),
-                        mCurrentVrService.getUserId(), mCurrentVrModeComponent)
+                    ? new VrState(mVrModeEnabled, mRunning2dInVr, mCurrentVrService.getComponent(),
+                        mCurrentVrService.getUserId(), mVrAppProcessId, mCurrentVrModeComponent)
                     : null;
 
                 // Unbind current VR service and do necessary callbacks.
-                updateCurrentVrServiceLocked(false, null, 0, null);
+                updateCurrentVrServiceLocked(false, false, null, 0, -1, null);
             }
         }
     }
@@ -270,26 +272,33 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     private static class VrState {
         final boolean enabled;
+        final boolean running2dInVr;
         final int userId;
+        final int processId;
         final ComponentName targetPackageName;
         final ComponentName callingPackage;
         final long timestamp;
         final boolean defaultPermissionsGranted;
 
-        VrState(boolean enabled, ComponentName targetPackageName, int userId,
-                ComponentName callingPackage) {
+
+        VrState(boolean enabled, boolean running2dInVr, ComponentName targetPackageName, int userId,
+                int processId, ComponentName callingPackage) {
             this.enabled = enabled;
+            this.running2dInVr = running2dInVr;
             this.userId = userId;
+            this.processId = processId;
             this.targetPackageName = targetPackageName;
             this.callingPackage = callingPackage;
             this.defaultPermissionsGranted = false;
             this.timestamp = System.currentTimeMillis();
         }
 
-        VrState(boolean enabled, ComponentName targetPackageName, int userId,
-            ComponentName callingPackage, boolean defaultPermissionsGranted) {
+        VrState(boolean enabled, boolean running2dInVr, ComponentName targetPackageName, int userId,
+            int processId, ComponentName callingPackage, boolean defaultPermissionsGranted) {
             this.enabled = enabled;
+            this.running2dInVr = running2dInVr;
             this.userId = userId;
+            this.processId = processId;
             this.targetPackageName = targetPackageName;
             this.callingPackage = callingPackage;
             this.defaultPermissionsGranted = defaultPermissionsGranted;
@@ -390,8 +399,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             }
 
             // There is an active service, update it if needed
-            updateCurrentVrServiceLocked(mVrModeEnabled, mCurrentVrService.getComponent(),
-                    mCurrentVrService.getUserId(), mCurrentVrModeComponent);
+            updateCurrentVrServiceLocked(mVrModeEnabled, mRunning2dInVr,
+                    mCurrentVrService.getComponent(), mCurrentVrService.getUserId(),
+                    mVrAppProcessId, mCurrentVrModeComponent);
         }
     }
 
@@ -527,9 +537,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      */
     private final class LocalService extends VrManagerInternal {
         @Override
-        public void setVrMode(boolean enabled, ComponentName packageName, int userId,
+        public void setVrMode(boolean enabled, ComponentName packageName, int userId, int processId,
                 ComponentName callingPackage) {
-            VrManagerService.this.setVrMode(enabled, packageName, userId, callingPackage);
+            VrManagerService.this.setVrMode(enabled, packageName, userId, processId, callingPackage);
         }
 
         @Override
@@ -704,14 +714,16 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      * Note: Must be called while holding {@code mLock}.
      *
      * @param enabled new state for VR mode.
+     * @param running2dInVr true if we have a top-level 2D intent.
      * @param component new component to be bound as a VR listener.
      * @param userId user owning the component to be bound.
-     * @param calling the component currently using VR mode.
+     * @param processId the process hosting the activity specified by calling.
+     * @param calling the component currently using VR mode or a 2D intent.
      *
      * @return {@code true} if the component/user combination specified is valid.
      */
-    private boolean updateCurrentVrServiceLocked(boolean enabled, @NonNull ComponentName component,
-            int userId, ComponentName calling) {
+    private boolean updateCurrentVrServiceLocked(boolean enabled, boolean running2dInVr,
+            @NonNull ComponentName component, int userId, int processId, ComponentName calling) {
 
         boolean sendUpdatedCaller = false;
         final long identity = Binder.clearCallingIdentity();
@@ -771,6 +783,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 sendUpdatedCaller = true;
             }
             mCurrentVrModeComponent = calling;
+            mRunning2dInVr = running2dInVr;
+            mVrAppProcessId = processId;
 
             if (mCurrentVrModeUser != userId) {
                 mCurrentVrModeUser = userId;
@@ -788,11 +802,13 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
             if (mCurrentVrService != null && sendUpdatedCaller) {
                 final ComponentName c = mCurrentVrModeComponent;
+                final boolean b = running2dInVr;
+                final int pid = processId;
                 mCurrentVrService.sendEvent(new PendingEvent() {
                     @Override
                     public void runEvent(IInterface service) throws RemoteException {
                         IVrListener l = (IVrListener) service;
-                        l.focusedActivityChanged(c);
+                        l.focusedActivityChanged(c, b, pid);
                     }
                 });
             }
@@ -1017,20 +1033,20 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      */
     private void consumeAndApplyPendingStateLocked(boolean disconnectIfNoPendingState) {
         if (mPendingState != null) {
-            updateCurrentVrServiceLocked(mPendingState.enabled,
-                    mPendingState.targetPackageName, mPendingState.userId,
+            updateCurrentVrServiceLocked(mPendingState.enabled, mPendingState.running2dInVr,
+                    mPendingState.targetPackageName, mPendingState.userId, mPendingState.processId,
                     mPendingState.callingPackage);
             mPendingState = null;
         } else if (disconnectIfNoPendingState) {
-            updateCurrentVrServiceLocked(false, null, 0, null);
+            updateCurrentVrServiceLocked(false, false, null, 0, -1, null);
         }
     }
 
     private void logStateLocked() {
         ComponentName currentBoundService = (mCurrentVrService == null) ? null :
             mCurrentVrService.getComponent();
-        VrState current = new VrState(mVrModeEnabled, currentBoundService, mCurrentVrModeUser,
-            mCurrentVrModeComponent, mWasDefaultGranted);
+        VrState current = new VrState(mVrModeEnabled, mRunning2dInVr, currentBoundService,
+            mCurrentVrModeUser, mVrAppProcessId, mCurrentVrModeComponent, mWasDefaultGranted);
         if (mLoggingDeque.size() == EVENT_LOG_SIZE) {
             mLoggingDeque.removeFirst();
         }
@@ -1074,27 +1090,24 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      * Implementation of VrManagerInternal calls.  These are callable from system services.
      */
     private void setVrMode(boolean enabled, @NonNull ComponentName targetPackageName,
-            int userId, @NonNull ComponentName callingPackage) {
+            int userId, int processId, @NonNull ComponentName callingPackage) {
 
         synchronized (mLock) {
             VrState pending;
             ComponentName targetListener;
-            ComponentName foregroundVrComponent;
 
             // If the device is in persistent VR mode, then calls to disable VR mode are ignored,
             // and the system default VR listener is used.
             boolean targetEnabledState = enabled || mPersistentVrModeEnabled;
-            if (!enabled && mPersistentVrModeEnabled) {
+            boolean running2dInVr = !enabled && mPersistentVrModeEnabled;
+            if (running2dInVr) {
                 targetListener = mDefaultVrService;
-
-                // Current foreground component isn't a VR one (in 2D app case)
-                foregroundVrComponent = null;
             } else {
                 targetListener = targetPackageName;
-                foregroundVrComponent = callingPackage;
             }
-            pending = new VrState(
-                    targetEnabledState, targetListener, userId, foregroundVrComponent);
+
+            pending = new VrState(targetEnabledState, running2dInVr, targetListener,
+                    userId, processId, callingPackage);
 
             if (!mVrModeAllowed) {
                 // We're not allowed to be in VR mode.  Make this state pending.  This will be
@@ -1119,8 +1132,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 mPendingState = null;
             }
 
-            updateCurrentVrServiceLocked(
-                    targetEnabledState, targetListener, userId, foregroundVrComponent);
+            updateCurrentVrServiceLocked(targetEnabledState, running2dInVr, targetListener,
+                    userId, processId, callingPackage);
         }
     }
 
@@ -1129,7 +1142,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             setPersistentModeAndNotifyListenersLocked(enabled);
             // Disabling persistent mode when not showing a VR should disable the overall vr mode.
             if (!enabled && mCurrentVrModeComponent == null) {
-                setVrMode(false, null, 0, null);
+                setVrMode(false, null, 0, -1, null);
             }
         }
     }

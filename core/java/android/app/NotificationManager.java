@@ -18,14 +18,12 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.Notification.Builder;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -33,7 +31,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -41,7 +38,6 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
-import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
@@ -419,12 +415,16 @@ public class NotificationManager {
      * Creates a notification channel that notifications can be posted to.
      *
      * This can also be used to restore a deleted channel and to update an existing channel's
-     * name and description.
+     * name, description, and/or importance.
      *
      * <p>The name and description should only be changed if the locale changes
      * or in response to the user renaming this channel. For example, if a user has a channel
      * named 'John Doe' that represents messages from a 'John Doe', and 'John Doe' changes his name
      * to 'John Smith,' the channel can be renamed to match.
+     *
+     * <p>The importance of an existing channel will only be changed if the new importance is lower
+     * than the current value and the user has not altered any settings on this channel.
+     *
      * All other fields are ignored for channels that already exist.
      *
      * @param channel  the channel to create.  Note that the created channel may differ from this

@@ -151,14 +151,27 @@ class TaskSnapshotSurface implements StartingSurface {
         final int currentOrientation;
         synchronized (service.mWindowMap) {
             final WindowState mainWindow = token.findMainWindow();
-            if (mainWindow == null) {
+            final Task task = token.getTask();
+            if (task == null) {
+                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for token="
+                        + token);
+                return null;
+            }
+            final AppWindowToken topFullscreenToken = token.getTask().getTopFullscreenAppToken();
+            if (topFullscreenToken == null) {
+                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find top fullscreen for task="
+                        + task);
+                return null;
+            }
+            final WindowState topFullscreenWindow = topFullscreenToken.findMainWindow();
+            if (mainWindow == null || topFullscreenWindow == null) {
                 Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for token="
                         + token);
                 return null;
             }
-            sysUiVis = mainWindow.getSystemUiVisibility();
-            windowFlags = mainWindow.getAttrs().flags;
-            windowPrivateFlags = mainWindow.getAttrs().privateFlags;
+            sysUiVis = topFullscreenWindow.getSystemUiVisibility();
+            windowFlags = topFullscreenWindow.getAttrs().flags;
+            windowPrivateFlags = topFullscreenWindow.getAttrs().privateFlags;
 
             layoutParams.dimAmount = mainWindow.getAttrs().dimAmount;
             layoutParams.type = TYPE_APPLICATION_STARTING;
@@ -172,22 +185,17 @@ class TaskSnapshotSurface implements StartingSurface {
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = LayoutParams.MATCH_PARENT;
             layoutParams.systemUiVisibility = sysUiVis;
-            final Task task = token.getTask();
-            if (task != null) {
-                layoutParams.setTitle(String.format(TITLE_FORMAT, task.mTaskId));
+            layoutParams.setTitle(String.format(TITLE_FORMAT, task.mTaskId));
 
-                final TaskDescription taskDescription = task.getTaskDescription();
-                if (taskDescription != null) {
-                    backgroundColor = taskDescription.getBackgroundColor();
-                    statusBarColor = taskDescription.getStatusBarColor();
-                    navigationBarColor = taskDescription.getNavigationBarColor();
-                }
-                taskBounds = new Rect();
-                task.getBounds(taskBounds);
-            } else {
-                taskBounds = null;
+            final TaskDescription taskDescription = task.getTaskDescription();
+            if (taskDescription != null) {
+                backgroundColor = taskDescription.getBackgroundColor();
+                statusBarColor = taskDescription.getStatusBarColor();
+                navigationBarColor = taskDescription.getNavigationBarColor();
             }
-            currentOrientation = mainWindow.getConfiguration().orientation;
+            taskBounds = new Rect();
+            task.getBounds(taskBounds);
+            currentOrientation = topFullscreenWindow.getConfiguration().orientation;
         }
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,

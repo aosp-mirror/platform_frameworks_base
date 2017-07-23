@@ -58,7 +58,7 @@ public class TaskPersisterTest extends AndroidTestCase {
     }
 
     public void testTaskIdsPersistence() {
-        SparseBooleanArray taskIdsOnFile = mTaskPersister.loadPersistedTaskIdsForUser(testUserId);
+        SparseBooleanArray taskIdsOnFile = new SparseBooleanArray();
         for (int i = 0; i < 100; i++) {
             taskIdsOnFile.put(getRandomTaskIdForUser(testUserId), true);
         }

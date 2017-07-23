@@ -165,6 +165,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // a stylish color fade animation instead.
     private boolean mColorFadeFadesConfig;
 
+    // True if we need to transition to the off state when coming out of a doze state.
+    // Some display hardware will show artifacts (flickers, etc) when transitioning from a doze
+    // to a fully on state. In order to hide these, we first transition to off to let the system
+    // animate the screen on as it normally would, which is a much smoother experience.
+    private boolean mTransitionOffAfterDozeConfig;
+
     // The pending power request.
     // Initially null until the first call to requestPowerState.
     // Guarded by mLock.
@@ -409,6 +415,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         mColorFadeFadesConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_animateScreenLights);
+
+        mTransitionOffAfterDozeConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_displayTransitionOffAfterDoze);
 
         if (!DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
             mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
@@ -877,6 +886,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private boolean setScreenState(int state) {
+        return setScreenState(state, false /*force*/);
+    }
+
+    private boolean setScreenState(int state, boolean force) {
         final boolean isOff = (state == Display.STATE_OFF);
         if (mPowerState.getScreenState() != state) {
 
@@ -887,9 +900,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_TURNING_OFF;
                     blockScreenOff();
                     mWindowManagerPolicy.screenTurningOff(mPendingScreenOffUnblocker);
-                    return false;
+                    if (force) {
+                        // If we're forcing the power state transition then immediately
+                        // unblock the screen off event. This keeps the lifecycle consistent,
+                        // so WindowManagerPolicy will always see screenTurningOff before
+                        // screenTurnedOff, but we don't actually block on them for the state
+                        // change.
+                        unblockScreenOff();
+                    } else {
+                        return false;
+                    }
                 } else if (mPendingScreenOffUnblocker != null) {
-
                     // Abort doing the state change until screen off is unblocked.
                     return false;
                 }
@@ -966,6 +987,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
             // If display state changed to on, proceed and stop the color fade and turn screen on.
             mPendingScreenOff = false;
+        }
+
+        if (mTransitionOffAfterDozeConfig &&
+                Display.isDozeState(mPowerState.getScreenState())
+                && !Display.isDozeState(target)) {
+            setScreenState(Display.STATE_OFF, true /*force*/);
+            // Skip the screen off animation and add a black surface to hide the
+            // contents of the screen. This will also trigger another power state update so that we
+            // end up converging on the target state.
+            mColorFadeOffAnimator.end();
+            return;
         }
 
         // If we were in the process of turning off the screen but didn't quite

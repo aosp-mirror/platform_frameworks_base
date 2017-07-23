@@ -473,6 +473,17 @@ public class WifiTrackerTest {
     }
 
     @Test
+    public void stopTracking_shouldNotClearExistingScores()
+            throws InterruptedException {
+        // Start the tracker and inject the initial scan results and then stop tracking
+        WifiTracker tracker =  createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
+        updateScoresAndWaitForAccessPointsChangedCallback(tracker);
+        tracker.stopTracking();
+
+        assertThat(mScoreCacheCaptor.getValue().getScoredNetwork(NETWORK_KEY_1)).isNotNull();
+    }
+
+    @Test
     public void scoreCacheUpdateScoresShouldTriggerOnAccessPointsChanged()
             throws InterruptedException {
         WifiTracker tracker = createMockedWifiTracker();
