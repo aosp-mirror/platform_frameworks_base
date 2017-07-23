@@ -1927,9 +1927,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             boolean sensitive = userPublic && needsRedaction;
             boolean deviceSensitive = devicePublic
                     && !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
-            if (sensitive) {
-                updatePublicContentView(ent, ent.notification);
-            }
             ent.row.setSensitive(sensitive, deviceSensitive);
             ent.row.setNeedsRedaction(needsRedaction);
             if (mGroupManager.isChildInGroupWithSummary(ent.row.getStatusBarNotification())) {
@@ -7204,24 +7201,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         setAreThereNotifications();
-    }
-
-    protected void updatePublicContentView(Entry entry,
-            StatusBarNotification sbn) {
-        final RemoteViews publicContentView = entry.cachedPublicContentView;
-        View inflatedView = entry.getPublicContentView();
-        if (entry.autoRedacted && publicContentView != null && inflatedView != null) {
-            final boolean disabledByPolicy =
-                    !adminAllowsUnredactedNotifications(entry.notification.getUserId());
-            String notificationHiddenText = mContext.getString(disabledByPolicy
-                    ? com.android.internal.R.string.notification_hidden_by_policy_text
-                    : com.android.internal.R.string.notification_hidden_text);
-            TextView titleView = (TextView) inflatedView.findViewById(android.R.id.title);
-            if (titleView != null
-                    && !titleView.getText().toString().equals(notificationHiddenText)) {
-                titleView.setText(notificationHiddenText);
-            }
-        }
     }
 
     protected void notifyHeadsUpScreenOff() {

@@ -4551,11 +4551,16 @@ public class Notification implements Parcelable
                     savedBundle.getBoolean(EXTRA_SHOW_CHRONOMETER));
             publicExtras.putBoolean(EXTRA_CHRONOMETER_COUNT_DOWN,
                     savedBundle.getBoolean(EXTRA_CHRONOMETER_COUNT_DOWN));
-            publicExtras.putCharSequence(EXTRA_TITLE,
-                    mContext.getString(com.android.internal.R.string.notification_hidden_text));
             mN.extras = publicExtras;
-            final RemoteViews view = ambient ? makeAmbientNotification()
-                    : applyStandardTemplate(getBaseLayoutResource());
+            RemoteViews view;
+            if (ambient) {
+                publicExtras.putCharSequence(EXTRA_TITLE,
+                        mContext.getString(com.android.internal.R.string.notification_hidden_text));
+                view = makeAmbientNotification();
+            } else{
+                view = makeNotificationHeader(false /* ambient */);
+                view.setBoolean(R.id.notification_header, "setExpandOnlyOnButton", true);
+            }
             mN.extras = savedBundle;
             mN.mLargeIcon = largeIcon;
             mN.largeIcon = largeIconLegacy;
