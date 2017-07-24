@@ -154,7 +154,7 @@ public class AccessibilityShortcutController {
             // Don't check if haptics are disabled, as we need to alert the user that their
             // way of interacting with the phone may change if they activate the shortcut
             long[] vibePattern = PhoneWindowManager.getLongIntArray(mContext.getResources(),
-                    R.array.config_safeModeDisabledVibePattern);
+                    R.array.config_longPressVibePattern);
             vibrator.vibrate(vibePattern, -1, VIBRATION_ATTRIBUTES);
         }
 
