@@ -303,10 +303,12 @@ public class UserManager {
     public static final String DISALLOW_DEBUGGING_FEATURES = "no_debugging_features";
 
     /**
-     * Specifies if a user is disallowed from configuring VPN.
-     * The default value is <code>false</code>.
-     * This restriction has an effect in a managed profile only from
-     * {@link android.os.Build.VERSION_CODES#M}
+     * Specifies if a user is disallowed from configuring a VPN. The default value is
+     * <code>false</code>. This restriction has an effect when set by device owners and, in Android
+     * 6.0 ({@linkplain android.os.Build.VERSION_CODES#M API level 23}) or higher, profile owners.
+     * <p>This restriction also prevents VPNs from starting. However, in Android 7.0
+     * ({@linkplain android.os.Build.VERSION_CODES#N API level 24}) or higher, the system does
+     * start always-on VPNs created by the device or profile owner.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
