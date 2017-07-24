@@ -54,7 +54,18 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     externalTexture.fTarget = GL_TEXTURE_EXTERNAL_OES;
     externalTexture.fID = sourceTexId;
 
-    GrBackendTexture backendTexture(imgWidth, imgHeight, kRGBA_8888_GrPixelConfig, externalTexture);
+    GrPixelConfig pixelConfig;
+    switch (bitmap->colorType()) {
+    case kRGBA_F16_SkColorType:
+        pixelConfig = kRGBA_half_GrPixelConfig;
+        break;
+    case kN32_SkColorType:
+    default:
+        pixelConfig = kRGBA_8888_GrPixelConfig;
+        break;
+    }
+
+    GrBackendTexture backendTexture(imgWidth, imgHeight, pixelConfig, externalTexture);
 
     CopyResult copyResult = CopyResult::UnknownError;
     sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), backendTexture,
