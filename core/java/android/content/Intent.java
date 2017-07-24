@@ -5587,6 +5587,16 @@ public class Intent implements Parcelable, Cloneable {
 
     // ---------------------------------------------------------------------
 
+    private static final int COPY_MODE_ALL = 0;
+    private static final int COPY_MODE_FILTER = 1;
+    private static final int COPY_MODE_HISTORY = 2;
+
+    /** @hide */
+    @IntDef(value = {COPY_MODE_ALL, COPY_MODE_FILTER, COPY_MODE_HISTORY})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CopyMode {}
+
+
     /**
      * Create an empty intent.
      */
@@ -5597,28 +5607,46 @@ public class Intent implements Parcelable, Cloneable {
      * Copy constructor.
      */
     public Intent(Intent o) {
+        this(o, COPY_MODE_ALL);
+    }
+
+    private Intent(Intent o, @CopyMode int copyMode) {
         this.mAction = o.mAction;
         this.mData = o.mData;
         this.mType = o.mType;
         this.mPackage = o.mPackage;
         this.mComponent = o.mComponent;
-        this.mFlags = o.mFlags;
-        this.mContentUserHint = o.mContentUserHint;
-        this.mLaunchToken = o.mLaunchToken;
+
         if (o.mCategories != null) {
-            this.mCategories = new ArraySet<String>(o.mCategories);
+            this.mCategories = new ArraySet<>(o.mCategories);
         }
-        if (o.mExtras != null) {
-            this.mExtras = new Bundle(o.mExtras);
-        }
-        if (o.mSourceBounds != null) {
-            this.mSourceBounds = new Rect(o.mSourceBounds);
-        }
-        if (o.mSelector != null) {
-            this.mSelector = new Intent(o.mSelector);
-        }
-        if (o.mClipData != null) {
-            this.mClipData = new ClipData(o.mClipData);
+
+        if (copyMode != COPY_MODE_FILTER) {
+            this.mFlags = o.mFlags;
+            this.mContentUserHint = o.mContentUserHint;
+            this.mLaunchToken = o.mLaunchToken;
+            if (o.mSourceBounds != null) {
+                this.mSourceBounds = new Rect(o.mSourceBounds);
+            }
+            if (o.mSelector != null) {
+                this.mSelector = new Intent(o.mSelector);
+            }
+
+            if (copyMode != COPY_MODE_HISTORY) {
+                if (o.mExtras != null) {
+                    this.mExtras = new Bundle(o.mExtras);
+                }
+                if (o.mClipData != null) {
+                    this.mClipData = new ClipData(o.mClipData);
+                }
+            } else {
+                if (o.mExtras != null && !o.mExtras.maybeIsEmpty()) {
+                    this.mExtras = Bundle.STRIPPED;
+                }
+
+                // Also set "stripped" clip data when we ever log mClipData in the (broadcast)
+                // history.
+            }
         }
     }
 
@@ -5627,23 +5655,12 @@ public class Intent implements Parcelable, Cloneable {
         return new Intent(this);
     }
 
-    private Intent(Intent o, boolean all) {
-        this.mAction = o.mAction;
-        this.mData = o.mData;
-        this.mType = o.mType;
-        this.mPackage = o.mPackage;
-        this.mComponent = o.mComponent;
-        if (o.mCategories != null) {
-            this.mCategories = new ArraySet<String>(o.mCategories);
-        }
-    }
-
     /**
      * Make a clone of only the parts of the Intent that are relevant for
      * filter matching: the action, data, type, component, and categories.
      */
     public @NonNull Intent cloneFilter() {
-        return new Intent(this, false);
+        return new Intent(this, COPY_MODE_FILTER);
     }
 
     /**
@@ -7392,6 +7409,29 @@ public class Intent implements Parcelable, Cloneable {
         if (mExtras != null) {
             mExtras = mExtras.filterValues();
         }
+    }
+
+    /**
+     * @return Whether {@link #maybeStripForHistory} will return an lightened intent or
+     * return itself as-is.
+     * @hide
+     */
+    public boolean canStripForHistory() {
+        return ((mExtras != null) && mExtras.isParcelled()) || (mClipData != null);
+    }
+
+    /**
+     * Call it when the system needs to keep an intent for logging purposes to remove fields
+     * that are not needed for logging.
+     * @hide
+     */
+    public Intent maybeStripForHistory() {
+        // TODO Scan and remove possibly heavy instances like Bitmaps from unparcelled extras?
+
+        if (!canStripForHistory()) {
+            return this;
+        }
+        return new Intent(this, COPY_MODE_HISTORY);
     }
 
     /**
