@@ -919,11 +919,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     private GraphicBuffer drawThumbnailTransitionBitmap(Task toTask,
             TaskViewTransform toTransform) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (toTransform != null && toTask.key != null) {
+        int width = (int) toTransform.rect.width();
+        int height = (int) toTransform.rect.height();
+        if (toTransform != null && toTask.key != null && width > 0 && height > 0) {
             synchronized (mHeaderBarLock) {
                 boolean disabledInSafeMode = !toTask.isSystemApp && ssp.isInSafeMode();
-                int width = (int) toTransform.rect.width();
-                int height = (int) toTransform.rect.height();
                 mHeaderBar.onTaskViewSizeChanged(width, height);
                 if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
                     return RecentsTransitionHelper.drawViewIntoGraphicBuffer(width, mTaskBarHeight,
