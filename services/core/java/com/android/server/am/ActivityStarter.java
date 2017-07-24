@@ -951,7 +951,7 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
-    void sendPowerHintForLaunchStartIfNeeded(boolean forceSend) {
+    void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
         boolean sendHint = forceSend;
 
         if (!sendHint) {
@@ -960,7 +960,7 @@ class ActivityStarter {
             final ActivityRecord resumedActivity = mSupervisor.getResumedActivityLocked();
             sendHint = resumedActivity == null
                 || resumedActivity.app == null
-                || !resumedActivity.app.equals(mStartActivity.app);
+                || !resumedActivity.app.equals(targetActivity.app);
         }
 
         if (sendHint && mService.mLocalPowerManager != null) {
@@ -1080,7 +1080,7 @@ class ActivityStarter {
                 }
             }
 
-            sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
+            sendPowerHintForLaunchStartIfNeeded(false /* forceSend */, reusedActivity);
 
             reusedActivity = setTargetStackAndMoveToFrontIfNeeded(reusedActivity);
 
@@ -1109,6 +1109,7 @@ class ActivityStarter {
                 if (outActivity != null && outActivity.length > 0) {
                     outActivity[0] = reusedActivity;
                 }
+
                 return START_TASK_TO_FRONT;
             }
         }
@@ -1200,7 +1201,7 @@ class ActivityStarter {
                 EventLogTags.AM_CREATE_ACTIVITY, mStartActivity, mStartActivity.getTask());
         mTargetStack.mLastPausedActivity = null;
 
-        sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
+        sendPowerHintForLaunchStartIfNeeded(false /* forceSend */, mStartActivity);
 
         mTargetStack.startActivityLocked(mStartActivity, topFocused, newTask, mKeepCurTransition,
                 mOptions);
@@ -1502,7 +1503,8 @@ class ActivityStarter {
             if (mLaunchSingleInstance) {
                 // There can be one and only one instance of single instance activity in the
                 // history, and it is always in its own unique task, so we do a special search.
-               intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info, false);
+               intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info,
+                       mStartActivity.isHomeActivity());
             } else if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                 // For the launch adjacent case we only want to put the activity in an existing
                 // task if the activity already exists in the history.
