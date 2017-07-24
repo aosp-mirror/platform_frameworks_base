@@ -163,12 +163,12 @@ import android.os.Looper;
  * // requesting audio focus
  * int res = mAudioManager.requestAudioFocus(mFocusRequest);
  * synchronized (mFocusLock) {
- *     if (res == AUDIOFOCUS_REQUEST_FAILED) {
+ *     if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
  *         mPlaybackDelayed = false;
- *     } else if (res == AUDIOFOCUS_REQUEST_GRANTED) {
+ *     } else if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
  *         mPlaybackDelayed = false;
  *         playbackNow();
- *     } else if (res == AUDIOFOCUS_REQUEST_DELAYED) {
+ *     } else if (res == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
  *        mPlaybackDelayed = true;
  *     }
  * }
