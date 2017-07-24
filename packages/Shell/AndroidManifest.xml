@@ -114,6 +114,7 @@
     <uses-permission android:name="android.permission.GET_APP_OPS_STATS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
+    <uses-permission android:name="android.permission.ACTIVITY_EMBEDDING" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="android.permission.MANAGE_AUTO_FILL" />
