@@ -1180,7 +1180,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
         return service.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
-                supportsResizeableMultiWindow());
+                supportsResizeableMultiWindow(), launchedFromPid, launchedFromUid, info);
     }
 
     /**
