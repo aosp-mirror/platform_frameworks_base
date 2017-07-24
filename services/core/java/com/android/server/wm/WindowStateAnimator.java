@@ -1604,21 +1604,33 @@ class WindowStateAnimator {
                         recoveringMemory);
             mSurfaceController.setLayer(mAnimLayer);
 
-            if (prepared && mLastHidden && mDrawState == HAS_DRAWN) {
-                if (showSurfaceRobustlyLocked()) {
-                    markPreservedSurfaceForDestroy();
-                    mAnimator.requestRemovalOfReplacedWindows(w);
-                    mLastHidden = false;
-                    if (mIsWallpaper) {
-                        w.dispatchWallpaperVisibility(true);
+            if (prepared && mDrawState == HAS_DRAWN) {
+                if (mLastHidden) {
+                    if (showSurfaceRobustlyLocked()) {
+                        markPreservedSurfaceForDestroy();
+                        mAnimator.requestRemovalOfReplacedWindows(w);
+                        mLastHidden = false;
+                        if (mIsWallpaper) {
+                            w.dispatchWallpaperVisibility(true);
+                        }
+                        // This draw means the difference between unique content and mirroring.
+                        // Run another pass through performLayout to set mHasContent in the
+                        // LogicalDisplay.
+                        mAnimator.setPendingLayoutChanges(w.getDisplayId(),
+                                WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
+                    } else {
+                        w.setOrientationChanging(false);
                     }
-                    // This draw means the difference between unique content and mirroring.
-                    // Run another pass through performLayout to set mHasContent in the
-                    // LogicalDisplay.
-                    mAnimator.setPendingLayoutChanges(w.getDisplayId(),
-                            WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
-                } else {
-                    w.setOrientationChanging(false);
+                }
+                // We process mTurnOnScreen even for windows which have already
+                // been shown, to handle cases where windows are not necessarily
+                // hidden while the screen is turning off.
+                // TODO(b/63773439): These cases should be eliminated, though we probably still
+                // want to process mTurnOnScreen in this way for clarity.
+                if (mWin.mTurnOnScreen) {
+                    if (DEBUG_VISIBILITY) Slog.v(TAG, "Show surface turning screen on: " + mWin);
+                    mWin.mTurnOnScreen = false;
+                    mAnimator.mBulkUpdateParams |= SET_TURN_ON_SCREEN;
                 }
             }
             if (hasSurface()) {
@@ -1730,11 +1742,6 @@ class WindowStateAnimator {
         if (!shown)
             return false;
 
-        if (mWin.mTurnOnScreen) {
-            if (DEBUG_VISIBILITY) Slog.v(TAG, "Show surface turning screen on: " + mWin);
-            mWin.mTurnOnScreen = false;
-            mAnimator.mBulkUpdateParams |= SET_TURN_ON_SCREEN;
-        }
         return true;
     }
 
