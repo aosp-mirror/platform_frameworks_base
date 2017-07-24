@@ -38,7 +38,7 @@ cc_library_shared {
         "libmediametrics",
         "libmediadrm",
         "libmidi",
-        "libskia",
+        "libhwui",
         "libui",
         "liblog",
         "libcutils",
