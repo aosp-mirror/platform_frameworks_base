@@ -968,15 +968,7 @@
         <item>30</item>
     </integer-array>
 
-    <!-- Vibrator pattern for feedback about booting with safe mode disabled -->
-    <integer-array name="config_safeModeDisabledVibePattern">
-        <item>0</item>
-        <item>1</item>
-        <item>20</item>
-        <item>21</item>
-    </integer-array>
-
-    <!-- Vibrator pattern for feedback about booting with safe mode disabled -->
+    <!-- Vibrator pattern for feedback about booting with safe mode enabled -->
     <integer-array name="config_safeModeEnabledVibePattern">
         <item>0</item>
         <item>1</item>
