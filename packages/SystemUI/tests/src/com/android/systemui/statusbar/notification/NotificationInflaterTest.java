@@ -55,7 +55,6 @@ import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@FlakyTest
 public class NotificationInflaterTest extends SysuiTestCase {
 
     private NotificationInflater mNotificationInflater;

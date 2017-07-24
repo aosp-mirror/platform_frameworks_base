@@ -12,7 +12,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.settingslib.net.DataUsageController;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -21,7 +20,6 @@ import org.junit.runner.RunWith;
 public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
     @Test
-    @Ignore("Flaky")
     public void test3gDataIcon() {
         setupDefaultSignal();
 
@@ -30,7 +28,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void test2gDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -41,7 +38,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testCdmaDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -52,7 +48,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testEdgeDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -63,7 +58,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testLteDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -74,7 +68,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testHspaDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -85,7 +78,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testWfcNoDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -95,7 +87,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void test4gDataIcon() {
         // Switch to showing 4g icon and re-initialize the NetworkController.
         mConfig.show4gForLte = true;
@@ -115,7 +106,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testDataDisabledIcon() {
         setupNetworkController();
         when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
@@ -128,7 +118,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testDataDisabledIcon_UserNotSetup() {
         setupNetworkController();
         when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
@@ -143,7 +132,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void test4gDataIconConfigChange() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -161,7 +149,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testDataChangeWithoutConnectionState() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -178,7 +165,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
     public void testDataActivity() {
         setupDefaultSignal();
 

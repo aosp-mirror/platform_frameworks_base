@@ -38,14 +38,12 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-@Ignore("failing")
 public class QSDetailTest extends SysuiTestCase {
 
     private MetricsLogger mMetricsLogger;
