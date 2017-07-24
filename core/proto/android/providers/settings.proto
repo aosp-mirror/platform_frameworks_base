@@ -146,7 +146,6 @@ message GlobalSettingsProto {
     SettingProto pdp_watchdog_trigger_packet_count = 101;
     SettingProto pdp_watchdog_error_poll_count = 102;
     SettingProto pdp_watchdog_max_pdp_reset_fail_count = 103;
-    SettingProto sampling_profiler_ms = 104;
     SettingProto setup_prepaid_data_service_url = 105;
     SettingProto setup_prepaid_detection_target_url = 106;
     SettingProto setup_prepaid_detection_redir_host = 107;
