@@ -21,12 +21,13 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.ActivityOptions.OnAnimationStartedListener;
+import android.app.WallpaperColors;
+import android.app.WallpaperManager;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -42,12 +43,12 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.colorextraction.drawable.GradientDrawable;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
@@ -82,6 +83,8 @@ import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.phone.ScrimController;
 
+import com.android.internal.colorextraction.drawable.GradientDrawable;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +93,7 @@ import java.util.List;
  * This view is the the top level layout that contains TaskStacks (which are laid out according
  * to their SpaceNode bounds.
  */
-public class RecentsView extends FrameLayout {
+public class RecentsView extends FrameLayout implements ColorExtractor.OnColorsChangedListener {
 
     private static final String TAG = "RecentsView";
 
@@ -104,9 +107,6 @@ public class RecentsView extends FrameLayout {
     private TaskStackView mTaskStackView;
     private TextView mStackActionButton;
     private TextView mEmptyView;
-    private final float mStackButtonShadowRadius;
-    private final PointF mStackButtonShadowDistance;
-    private final int mStackButtonShadowColor;
 
     private boolean mAwaitingFirstLayout = true;
     private boolean mLastTaskLaunchedWasFreeform;
@@ -117,6 +117,7 @@ public class RecentsView extends FrameLayout {
 
     private float mBusynessFactor;
     private GradientDrawable mBackgroundScrim;
+    private final SysuiColorExtractor mColorExtractor;
     private Animator mBackgroundScrimAnimator;
 
     private RecentsTransitionHelper mTransitionHelper;
@@ -147,51 +148,29 @@ public class RecentsView extends FrameLayout {
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
         mBackgroundScrim = new GradientDrawable(context);
         mBackgroundScrim.setCallback(this);
-
-        boolean usingDarkText = Color.luminance(
-                Utils.getColorAttr(mContext, R.attr.wallpaperTextColor)) < 0.5f;
+        mColorExtractor = Dependency.get(SysuiColorExtractor.class);
 
         LayoutInflater inflater = LayoutInflater.from(context);
+
         mEmptyView = (TextView) inflater.inflate(R.layout.recents_empty, this, false);
         addView(mEmptyView);
 
+        boolean usingDarkText =
+                Color.luminance(mEmptyView.getTextColors().getDefaultColor()) < 0.5f;
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            if (mStackActionButton != null) {
-                removeView(mStackActionButton);
-            }
             mStackActionButton = (TextView) inflater.inflate(R.layout.recents_stack_action_button,
                     this, false);
-            mStackActionButton.setOnClickListener(
-                    v -> EventBus.getDefault().send(new DismissAllTaskViewsEvent()));
-
-            mStackButtonShadowRadius = mStackActionButton.getShadowRadius();
-            mStackButtonShadowDistance = new PointF(mStackActionButton.getShadowDx(),
-                    mStackActionButton.getShadowDy());
-            mStackButtonShadowColor = mStackActionButton.getShadowColor();
-            addView(mStackActionButton);
-        }
-
-        reevaluateStyles();
-    }
-
-    public void reevaluateStyles() {
-        int textColor = Utils.getColorAttr(mContext, R.attr.wallpaperTextColor);
-        boolean usingDarkText = Color.luminance(textColor) < 0.5f;
-
-        mEmptyView.setTextColor(textColor);
-        mEmptyView.setCompoundDrawableTintList(new ColorStateList(new int[][]{
-                {android.R.attr.state_enabled}}, new int[]{textColor}));
-
-        if (mStackActionButton != null) {
-            mStackActionButton.setTextColor(textColor);
-            // Enable/disable shadow if text color is already dark.
+            mStackActionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    EventBus.getDefault().send(new DismissAllTaskViewsEvent());
+                }
+            });
+            // Disable black shadow if text color is already dark.
             if (usingDarkText) {
                 mStackActionButton.setShadowLayer(0, 0, 0, 0);
-            } else {
-                mStackActionButton.setShadowLayer(mStackButtonShadowRadius,
-                        mStackButtonShadowDistance.x, mStackButtonShadowDistance.y,
-                        mStackButtonShadowColor);
             }
+            addView(mStackActionButton);
         }
 
         // Let's also require dark status and nav bars if the text is dark
@@ -388,16 +367,6 @@ public class RecentsView extends FrameLayout {
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             mStackActionButton.bringToFront();
         }
-    }
-
-    /**
-     * Set the color of the scrim.
-     *
-     * @param scrimColors Colors to use.
-     * @param animated Interpolate colors if true.
-     */
-    public void setScrimColors(ColorExtractor.GradientColors scrimColors, boolean animated) {
-        mBackgroundScrim.setColors(scrimColors, animated);
     }
 
     @Override
@@ -918,5 +887,30 @@ public class RecentsView extends FrameLayout {
         if (mTaskStackView != null) {
             mTaskStackView.dump(innerPrefix, writer);
         }
+    }
+
+    @Override
+    public void onColorsChanged(ColorExtractor colorExtractor, int which) {
+        if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
+            // Recents doesn't care about the wallpaper being visible or not, it always
+            // wants to scrim with wallpaper colors
+            mBackgroundScrim.setColors(
+                    mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM,
+                            ColorExtractor.TYPE_DARK, true));
+        }
+    }
+
+    public void onStart() {
+        mColorExtractor.addOnColorsChangedListener(this);
+        // Getting system scrim colors ignoring wallpaper visibility since it should never be grey.
+        ColorExtractor.GradientColors systemColors = mColorExtractor.getColors(
+                ColorExtractor.TYPE_DARK, WallpaperManager.FLAG_SYSTEM, true);
+        // We don't want to interpolate colors because we're defining the initial state.
+        // Gradient should be set/ready when you open "Recents".
+        mBackgroundScrim.setColors(systemColors, false);
+    }
+
+    public void onStop() {
+        mColorExtractor.removeOnColorsChangedListener(this);
     }
 }
