@@ -37,6 +37,7 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
@@ -134,6 +135,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     static final String KEY_CONFIG = "key_config";
     static final String KEY_FQDN = "key_fqdn";
     static final String KEY_PROVIDER_FRIENDLY_NAME = "key_provider_friendly_name";
+    static final String KEY_IS_CARRIER_AP = "key_is_carrier_ap";
+    static final String KEY_CARRIER_AP_EAP_TYPE = "key_carrier_ap_eap_type";
+    static final String KEY_CARRIER_NAME = "key_carrier_name";
     static final AtomicInteger sLastId = new AtomicInteger(0);
 
     /**
@@ -191,6 +195,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private String mFqdn;
     private String mProviderFriendlyName;
 
+    private boolean mIsCarrierAp = false;
+    /**
+     * The EAP type {@link WifiEnterpriseConfig.Eap} associated with this AP if it is a carrier AP.
+     */
+    private int mCarrierApEapType = WifiEnterpriseConfig.Eap.NONE;
+    private String mCarrierName = null;
+
     public AccessPoint(Context context, Bundle savedState) {
         mContext = context;
         mConfig = savedState.getParcelable(KEY_CONFIG);
@@ -226,6 +237,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
         if (savedState.containsKey(KEY_PROVIDER_FRIENDLY_NAME)) {
             mProviderFriendlyName = savedState.getString(KEY_PROVIDER_FRIENDLY_NAME);
+        }
+        if (savedState.containsKey(KEY_IS_CARRIER_AP)) {
+            mIsCarrierAp = savedState.getBoolean(KEY_IS_CARRIER_AP);
+        }
+        if (savedState.containsKey(KEY_CARRIER_AP_EAP_TYPE)) {
+            mCarrierApEapType = savedState.getInt(KEY_CARRIER_AP_EAP_TYPE);
+        }
+        if (savedState.containsKey(KEY_CARRIER_NAME)) {
+            mCarrierName = savedState.getString(KEY_CARRIER_NAME);
         }
         update(mConfig, mInfo, mNetworkInfo);
         updateRssi();
@@ -283,6 +303,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         this.mId = that.mId;
         this.mSpeed = that.mSpeed;
         this.mIsScoredNetworkMetered = that.mIsScoredNetworkMetered;
+        this.mIsCarrierAp = that.mIsCarrierAp;
+        this.mCarrierApEapType = that.mCarrierApEapType;
+        this.mCarrierName = that.mCarrierName;
     }
 
     /**
@@ -658,6 +681,18 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return null;
     }
 
+    public boolean isCarrierAp() {
+        return mIsCarrierAp;
+    }
+
+    public int getCarrierApEapType() {
+        return mCarrierApEapType;
+    }
+
+    public String getCarrierName() {
+        return mCarrierName;
+    }
+
     public String getSavedNetworkSummary() {
         WifiConfiguration config = mConfig;
         if (config != null) {
@@ -700,6 +735,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
             // This is the active connection on passpoint
             summary.append(getSummary(mContext, getDetailedState(),
                     false, config.providerFriendlyName));
+        } else if (isActive() && config != null && getDetailedState() == DetailedState.CONNECTED
+                && mIsCarrierAp) {
+            summary.append(String.format(mContext.getString(R.string.connected_via_carrier), mCarrierName));
         } else if (isActive()) {
             // This is the active connection on non-passpoint network
             summary.append(getSummary(mContext, getDetailedState(),
@@ -733,6 +771,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         } else if (config != null && config.getNetworkSelectionStatus().isNotRecommended()) {
             summary.append(mContext.getString(R.string.wifi_disabled_by_recommendation_provider));
+        } else if (mIsCarrierAp) {
+            summary.append(String.format(mContext.getString(R.string.available_via_carrier), mCarrierName));
         } else if (!isReachable()) { // Wifi out of range
             summary.append(mContext.getString(R.string.wifi_not_in_range));
         } else { // In range, not disabled.
@@ -1022,6 +1062,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mScanResultCache.put(result.BSSID, result);
         updateRssi();
         mSeen = result.timestamp; // even if the timestamp is old it is still valid
+        mIsCarrierAp = result.isCarrierAp;
+        mCarrierApEapType = result.carrierApEapType;
+        mCarrierName = result.carrierName;
     }
 
     public void saveWifiState(Bundle savedState) {
@@ -1043,6 +1086,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (mProviderFriendlyName != null) {
             savedState.putString(KEY_PROVIDER_FRIENDLY_NAME, mProviderFriendlyName);
         }
+        savedState.putBoolean(KEY_IS_CARRIER_AP, mIsCarrierAp);
+        savedState.putInt(KEY_CARRIER_AP_EAP_TYPE, mCarrierApEapType);
+        savedState.putString(KEY_CARRIER_NAME, mCarrierName);
     }
 
     public void setListener(AccessPointListener listener) {
@@ -1070,6 +1116,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
             if (mAccessPointListener != null) {
                 mAccessPointListener.onAccessPointChanged(this);
             }
+
+            // The carrier info in the ScanResult is set by the platform based on the SSID and will
+            // always be the same for all matching scan results.
+            mIsCarrierAp = result.isCarrierAp;
+            mCarrierApEapType = result.carrierApEapType;
+            mCarrierName = result.carrierName;
 
             return true;
         }
