@@ -905,11 +905,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
         @Override
         public void onRemoteUpdate(Token token, String name, PlaybackInfo pi) {
-            if (!mRemoteStreams.containsKey(token)) {
-                mRemoteStreams.put(token, mNextStream);
-                if (D.BUG) Log.d(TAG, "onRemoteUpdate: " + name + " is stream " + mNextStream);
-                mNextStream++;
-            }
+            addStream(token, "onRemoteUpdate");
             final int stream = mRemoteStreams.get(token);
             boolean changed = mState.states.indexOfKey(stream) < 0;
             final StreamState ss = streamStateW(stream);
@@ -934,6 +930,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
         @Override
         public void onRemoteVolumeChanged(Token token, int flags) {
+            addStream(token, "onRemoteVolumeChanged");
             final int stream = mRemoteStreams.get(token);
             final boolean showUI = (flags & AudioManager.FLAG_SHOW_UI) != 0;
             boolean changed = updateActiveStreamW(stream);
@@ -950,6 +947,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
         @Override
         public void onRemoteRemoved(Token token) {
+            if (!mRemoteStreams.containsKey(token)) {
+                if (D.BUG) Log.d(TAG, "onRemoteRemoved: stream doesn't exist, "
+                        + "aborting remote removed for token:" +  token.toString());
+                return;
+            }
             final int stream = mRemoteStreams.get(token);
             mState.states.remove(stream);
             if (mState.activeStream == stream) {
@@ -974,6 +976,15 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 }
             }
             return null;
+        }
+
+        private void addStream(Token token, String triggeringMethod) {
+            if (!mRemoteStreams.containsKey(token)) {
+                mRemoteStreams.put(token, mNextStream);
+                if (D.BUG) Log.d(TAG, triggeringMethod + ": added stream " +  mNextStream
+                        + " from token + "+ token.toString());
+                mNextStream++;
+            }
         }
     }
 
