@@ -428,7 +428,8 @@ public class PackageDexOptimizer {
             boolean newProfile) {
         int dexoptNeeded;
         try {
-            dexoptNeeded = DexFile.getDexOptNeeded(path, isa, compilerFilter, newProfile);
+          dexoptNeeded = DexFile.getDexOptNeeded(path, isa, compilerFilter, newProfile,
+              false /* downgrade */);
         } catch (IOException ioe) {
             Slog.w(TAG, "IOException reading apk: " + path, ioe);
             return DEX_OPT_FAILED;
