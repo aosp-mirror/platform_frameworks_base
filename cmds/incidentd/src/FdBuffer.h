@@ -44,6 +44,16 @@ public:
     status_t read(int fd, int64_t timeoutMs);
 
     /**
+     * Read processed results by streaming data to a parsing process, e.g. incident helper.
+     * The parsing process provides IO fds which are 'toFd' and 'fromFd'. The function
+     * reads original data in 'fd' and writes to parsing process through 'toFd', then it reads
+     * and stores the processed data from 'fromFd' in memory for later usage.
+     * This function behaves in a streaming fashion in order to save memory usage.
+     * Returns NO_ERROR if there were no errors or if we timed out.
+     */
+    status_t readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs);
+
+    /**
      * Whether we timed out.
      */
     bool timedOut() { return mTimedOut; }
@@ -80,6 +90,20 @@ private:
     ssize_t mCurrentWritten;
     bool mTimedOut;
     bool mTruncated;
+};
+
+class Fpipe {
+public:
+    Fpipe() {}
+    bool close() { return !(::close(mFds[0]) || ::close(mFds[1])); }
+    ~Fpipe() { close(); }
+
+    inline status_t init() { return pipe(mFds); }
+    inline int readFd() const { return mFds[0]; }
+    inline int writeFd() const { return mFds[1]; }
+
+private:
+    int mFds[2];
 };
 
 

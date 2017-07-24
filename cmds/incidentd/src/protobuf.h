@@ -21,13 +21,14 @@
 
 /**
  * Write a varint into the buffer. Return the next position to write at.
- * There must be 10 bytes in the buffer. The same as EncodedBuffer.writeRawVarint32
+ * There must be 10 bytes in the buffer. The same as
+ * EncodedBuffer.writeRawVarint32
  */
 uint8_t* write_raw_varint(uint8_t* buf, uint32_t val);
 
 /**
- * Write a protobuf WIRE_TYPE_LENGTH_DELIMITED header. Return the next position to write at.
- * There must be 20 bytes in the buffer.
+ * Write a protobuf WIRE_TYPE_LENGTH_DELIMITED header. Return the next position
+ * to write at. There must be 20 bytes in the buffer.
  */
 uint8_t* write_length_delimited_tag_header(uint8_t* buf, uint32_t fieldId, size_t size);
 
@@ -36,5 +37,4 @@ enum {
     FIELD_ID_INCIDENT_HEADER = 1
 };
 
-#endif // PROTOBUF_H
-
+#endif  // PROTOBUF_H

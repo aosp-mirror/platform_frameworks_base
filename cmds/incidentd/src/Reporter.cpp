@@ -22,8 +22,8 @@
 #include "report_directory.h"
 #include "section_list.h"
 
-#include <private/android_filesystem_config.h>
 #include <android/os/DropBoxManager.h>
+#include <private/android_filesystem_config.h>
 #include <utils/SystemClock.h>
 
 #include <sys/types.h>
@@ -37,8 +37,8 @@
  */
 static const String8 INCIDENT_DIRECTORY("/data/incidents");
 
-static status_t
-write_all(int fd, uint8_t const* buf, size_t size)
+// ================================================================================
+static status_t write_all(int fd, uint8_t const* buf, size_t size)
 {
     while (size > 0) {
         ssize_t amt = ::write(fd, buf, size);

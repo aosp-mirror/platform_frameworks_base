@@ -39,6 +39,7 @@ cc_library {
             // runtime, as well as the only protos that are actually
             // needed by the device.
             srcs: [
+                "core/proto/android/os/kernelwake.proto",
                 "core/proto/android/service/graphicsstats.proto",
             ],
             shared: {
@@ -49,6 +50,7 @@ cc_library {
 }
 
 subdirs = [
+    "cmds/*",
     "core/jni",
     "libs/*",
     "media/*",
