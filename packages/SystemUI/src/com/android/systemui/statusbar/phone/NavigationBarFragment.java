@@ -544,7 +544,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     private boolean onLongPressRecents() {
         if (mRecents == null || !ActivityManager.supportsMultiWindow(getContext())
-                || !mDivider.getView().getSnapAlgorithm().isSplitScreenFeasible()) {
+                || !mDivider.getView().getSnapAlgorithm().isSplitScreenFeasible()
+                || Recents.getConfiguration().isLowRamDevice) {
             return false;
         }
 

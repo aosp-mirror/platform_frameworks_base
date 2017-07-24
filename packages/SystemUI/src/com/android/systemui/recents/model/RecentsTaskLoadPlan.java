@@ -37,6 +37,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.views.lowram.TaskStackLowRamLayoutAlgorithm;
 import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 
 import java.util.ArrayList;
@@ -163,9 +164,13 @@ public class RecentsTaskLoadPlan {
             boolean isStackTask;
             if (Recents.getConfiguration().isGridEnabled) {
                 // When grid layout is enabled, we only show the first
-                // TaskGridLayoutAlgorithm.MAX_LAYOUT_TASK_COUNT} tasks.
+                // TaskGridLayoutAlgorithm.MAX_LAYOUT_FROM_HOME_TASK_COUNT} tasks.
                 isStackTask = t.lastActiveTime >= lastStackActiveTime &&
                     i >= taskCount - TaskGridLayoutAlgorithm.MAX_LAYOUT_TASK_COUNT;
+            } else if (Recents.getConfiguration().isLowRamDevice) {
+                // Show a max of 3 items
+                isStackTask = t.lastActiveTime >= lastStackActiveTime &&
+                        i >= taskCount - TaskStackLowRamLayoutAlgorithm.MAX_LAYOUT_TASK_COUNT;
             } else {
                 isStackTask = isFreeformTask || !isHistoricalTask(t) ||
                     (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS));
