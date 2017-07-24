@@ -37,12 +37,14 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.TypedValue;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
@@ -375,7 +377,7 @@ public class CaptivePortalLoginActivity extends Activity {
                 return;
             }
             final URL url = makeURL(urlString);
-            Log.d(TAG, "onPageSarted: " + sanitizeURL(url));
+            Log.d(TAG, "onPageStarted: " + sanitizeURL(url));
             mHostname = host(url);
             // For internally generated pages, leave URL bar listing prior URL as this is the URL
             // the page refers to.
@@ -426,7 +428,7 @@ public class CaptivePortalLoginActivity extends Activity {
             final URL url = makeURL(error.getUrl());
             final String host = host(url);
             Log.d(TAG, String.format("SSL error: %s, url: %s, certificate: %s",
-                    error.getPrimaryError(), sanitizeURL(url), error.getCertificate()));
+                    sslErrorName(error), sanitizeURL(url), error.getCertificate()));
             if (url == null || !Objects.equals(host, mHostname)) {
                 // Ignore ssl errors for resources coming from a different hostname than the page
                 // that we are currently loading, and only cancel the request.
@@ -538,5 +540,19 @@ public class CaptivePortalLoginActivity extends Activity {
 
     private void logMetricsEvent(int event) {
         MetricsLogger.action(this, event, getPackageName());
+    }
+
+    private static final SparseArray<String> SSL_ERRORS = new SparseArray<>();
+    static {
+        SSL_ERRORS.put(SslError.SSL_NOTYETVALID,  "SSL_NOTYETVALID");
+        SSL_ERRORS.put(SslError.SSL_EXPIRED,      "SSL_EXPIRED");
+        SSL_ERRORS.put(SslError.SSL_IDMISMATCH,   "SSL_IDMISMATCH");
+        SSL_ERRORS.put(SslError.SSL_UNTRUSTED,    "SSL_UNTRUSTED");
+        SSL_ERRORS.put(SslError.SSL_DATE_INVALID, "SSL_DATE_INVALID");
+        SSL_ERRORS.put(SslError.SSL_INVALID,      "SSL_INVALID");
+    }
+
+    private static String sslErrorName(SslError error) {
+        return SSL_ERRORS.get(error.getPrimaryError(), "UNKNOWN");
     }
 }
